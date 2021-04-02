@@ -949,7 +949,6 @@ class Wangpenglei extends Backend
             }
         }
 
-        dump($item_order_number);
         //根据子单号查询条形码绑定关系
         $list = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price,c.purchase_total,purchase_num,c.purchase_freight')
             ->where(['item_order_number' => ['in', $item_order_number]])
@@ -958,7 +957,6 @@ class Wangpenglei extends Backend
             ->select();
         $list = collection($list)->toArray();
         dump($list);
-        dump($workcost);
         $allcost = 0;
         foreach ($list as $k => $v) {
             if ($v['purchase_freight'] > 0) {
@@ -966,7 +964,7 @@ class Wangpenglei extends Backend
             } else {
                 $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_price'];
             }
-
+            dump($purchase_price);
             $allcost += $purchase_price;
         }
         dump($allcost);
