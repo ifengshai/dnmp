@@ -741,6 +741,7 @@ class Item extends Backend
             $this->assign('AllTexture', $allTexture);
             $this->assign('AllNosePad', $allNosePad);
         }
+
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
         return $this->view->fetch();
