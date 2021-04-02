@@ -24,9 +24,9 @@ class RepurchaseAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getUserRepurchase(1);  //zeelool复购数据
+        /*$this->getUserRepurchase(1);  //zeelool复购数据
         $this->getUserRepurchase(2);  //voogueme复购数据
-        $this->getUserRepurchase(3);  //nihao复购数据
+        $this->getUserRepurchase(3);  //nihao复购数据*/
         $this->getOldNewUser(1);  //zeelool新老用户数据
         $this->getOldNewUser(2);  //voogueme新老用户数据
         $this->getOldNewUser(3);  //nihao新老用户数据
@@ -236,7 +236,7 @@ class RepurchaseAsynData extends Command
      * @date   2021/4/1 11:22:13
      */
     protected function getOldNewUser($site){
-        $allMonth = $this->getDateFromRange('2018-02-01','2021-03-01');
+        $allMonth = $this->getDateFromRange('2021-01-01','2021-03-01');
         $where['site'] = $site;
         $where['order_type'] = 1;
         $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
