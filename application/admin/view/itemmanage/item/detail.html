@@ -69,32 +69,32 @@
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('镜框高（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_height" data-rule="" class="form-control" name="row[frame_height]" type="number" value="{$row.frame_height}" disabled='disabled' >
+            <input id="frame_height" data-rule="" class="form-control" name="row[frame_height]" type="number" value="{$row['itemAttribute']['frame_height']}" disabled='disabled' >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="mirror_width" data-rule="" class="form-control" name="row[mirror_width]" type="number" value="{$row.mirror_width}" disabled='disabled' >
+            <input id="mirror_width" data-rule="" class="form-control" name="row[mirror_width]" type="number" value="{$row['itemAttribute']['mirror_width']}" disabled='disabled' >
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('桥（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-attribute-type" type="hidden" name="row[attribute_type]" value="1"/>
-            <input id="frame_bridge" data-rule="" class="form-control" name="row[frame_bridge]" type="number" value="{$row.frame_bridge}" disabled='disabled' >
+            <input id="frame_bridge" data-rule="" class="form-control" name="row[frame_bridge]" type="number" value="{$row['itemAttribute']['frame_bridge']}" disabled='disabled' >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('镜腿长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_temple_length" data-rule="" class="form-control"  name="row[frame_temple_length]" type="number" value="{$row.frame_temple_length}" disabled='disabled' >
+            <input id="frame_temple_length" data-rule="" class="form-control"  name="row[frame_temple_length]" type="number" value="{$row['itemAttribute']['frame_temple_length']}" disabled='disabled' >
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('镜架总长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_length" data-rule="" class="form-control" name="row[frame_length]" type="number" value="{$row.frame_length}" disabled='disabled' >
+            <input id="frame_length" data-rule="" class="form-control" name="row[frame_length]" type="number" value="{$row['itemAttribute']['frame_length']}" disabled='disabled' >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('重量（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_weight" data-rule="" class="form-control"  name="row[frame_weight]" type="number" value="{$row.frame_weight}"  disabled='disabled'>
+            <input id="frame_weight" data-rule="" class="form-control"  name="row[frame_weight]" type="number" value="{$row['itemAttribute']['frame_weight']}"  disabled='disabled'>
         </div>
     </div>
 
@@ -336,51 +336,52 @@
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="box_height" class="form-control" name="row[box_height]" type="number"  value="{$row.box_height}" disabled='disabled' >
+            <input id="box_height" class="form-control" name="row[box_height]" type="number"  value="{$row['itemAttribute']['box_height']}" disabled='disabled' >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="box_width" data-rule="" class="form-control" name="row[box_width]" type="number" value="{$row.box_width}" disabled='disabled' >
+            <input id="box_width" data-rule="" class="form-control" name="row[box_width]" type="number" value="{$row['itemAttribute']['box_width']}" disabled='disabled' >
         </div>
     </div>
     {elseif $row['category_id'] eq 34 /}
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="necklace_perimeter" data-rule="" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row.necklace_perimeter}" disabled='disabled'>
+            <input id="necklace_perimeter" data-rule="" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row['itemAttribute']['necklace_perimeter']}" disabled='disabled'>
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="necklace_chain" data-rule="" class="form-control" name="row[necklace_chain]" type="number" value="{$row.necklace_chain}" disabled='disabled' >
+            <input id="necklace_chain" data-rule="" class="form-control" name="row[necklace_chain]" type="number" value="{$row['itemAttribute']['necklace_chain']}" disabled='disabled' >
         </div>
     </div>
     {elseif $row['category_id'] eq 35 /}
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="earrings_height" data-rule="" class="form-control" name="row[earrings_height]" type="number" value="{$row.earrings_height}" disabled='disabled' >
+            <input id="earrings_height" data-rule="" class="form-control" name="row[earrings_height]" type="number" value="{$row['itemAttribute']['earrings_height']}" disabled='disabled' >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="earrings_width" data-rule="" class="form-control" name="row[earrings_width]" type="number" value="{$row.earrings_width}" disabled='disabled' >
+            <input id="earrings_width" data-rule="" class="form-control" name="row[earrings_width]" type="number" value="{$row['itemAttribute']['earrings_width']}" disabled='disabled' >
         </div>
     </div>
     {elseif $row['category_id'] eq 38 /}
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="eyeglasses_chain" data-rule="" class="form-control" name="row[eyeglasses_chain]" type="number" value="{$row.eyeglasses_chain}" disabled='disabled' >
+            <input id="eyeglasses_chain" data-rule="" class="form-control" name="row[eyeglasses_chain]" type="number" value="{$row['itemAttribute']['eyeglasses_chain']}" disabled='disabled' >
         </div>
     </div>
     {elseif $row['category_id'] eq 39 /}
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="necklace_perimeter" data-rule="" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row.necklace_perimeter}" disabled='disabled' >
+            <input id="necklace_perimeter" data-rule="" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row['itemAttribute']['necklace_perimeter']}" disabled='disabled' >
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="necklace_chain" data-rule="" class="form-control" name="row[necklace_chain]" type="number" value="{$row.necklace_chain}" disabled='disabled' >
+            <input id="necklace_chain" data-rule="" class="form-control" name="row[necklace_chain]" type="number" value="{$row['itemAttribute']['necklace_chain']
+            }" disabled='disabled' >
         </div>
     </div>
     {/if}
