@@ -897,13 +897,10 @@ class Wangpenglei extends Backend
         $params = [];
         foreach ($list as $k => $v) {
             $frame_cost = $this->order_frame_cost($v['order_number']);
-            $params[$k]['id'] = $v['id'];
-            $params[$k]['frame_cost'] = $frame_cost;
-
-            usleep(100000);
+            $finace_cost->where(['id' => $v['id']])->update(['frame_cost' => $frame_cost]);
             echo $v['id']."\n";
+            usleep(100000);
         }
-        $finace_cost->saveAll($params);
     }
 
     /**
