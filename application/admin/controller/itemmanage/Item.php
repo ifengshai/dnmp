@@ -1204,6 +1204,7 @@ class Item extends Backend
             $this->assign('AllShape', $allShape);
             $this->assign('AllTexture', $allTexture);
         }
+
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
         return $this->view->fetch();

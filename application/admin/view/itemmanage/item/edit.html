@@ -121,6 +121,18 @@
             </select>
         </div>
     </div>
+    {if $row['category_id'] eq 34}
+    <div class="form-group" id="item-stock">
+        <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="box_height" class="form-control" name="row[box_height]" type="number" value="" >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="box_width" data-rule="" class="form-control" name="row[box_width]" type="number" value="" >
+        </div>
+    </div>
+    {else}
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('镜框高（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -152,6 +164,7 @@
             <input id="frame_weight" data-rule="" class="form-control"  name="row[frame_weight]" type="number" value="" >
         </div>
     </div>
+    {/if}
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Weight')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -299,18 +312,7 @@
             </div>
 
         </div>
-        {if $row['category_id'] eq 32}
-            <div class="form-group" id="item-stock">
-                <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
-                <div class="col-xs-12 col-sm-3">
-                    <input id="box_height" class="form-control" name="row[box_height]" type="number" value="" >
-                </div>
-                <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
-                <div class="col-xs-12 col-sm-3">
-                    <input id="box_width" data-rule="" class="form-control" name="row[box_width]" type="number" value="" >
-                </div>
-            </div>
-        {elseif $row['category_id'] eq 34 /}
+        {if $row['category_id'] eq 34}
         <div class="form-group" id="item-stock">
             <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
             <div class="col-xs-12 col-sm-3">
