@@ -236,7 +236,6 @@ class RepurchaseAsynData extends Command
      * @date   2021/4/1 11:22:13
      */
     protected function getOldNewUser($site){
-        $today = date('Y-m-d');
         $allMonth = $this->getDateFromRange('2018-02-01','2021-03-01');
         $where['site'] = $site;
         $where['order_type'] = 1;
@@ -270,7 +269,7 @@ class RepurchaseAsynData extends Command
             $newUserCount = intval($userCount)-intval($oldUserCount);   //新用户数
             $oldUserRate = $userCount ? round($oldUserCount/$userCount*100,2) : 0; //老用户数占比
             //获取上个月的用户信息
-            $lastMonth = date("Y-m", strtotime("first day of -1 month", strtotime($today)));
+            $lastMonth = date("Y-m", strtotime("first day of -1 month", strtotime($v)));
             $lastData = Db::name('datacenter_supply_month_web')
                 ->where('day_date',$lastMonth)
                 ->where('site',$site)
@@ -287,6 +286,11 @@ class RepurchaseAsynData extends Command
                 //新用户环比变动
                 $newSequential = 100;
             }
+            //判断是否有当月数据
+            $isExist = Db::name('datacenter_supply_month_web')
+                ->where('day_date',$v)
+                ->where('site',$site)
+                ->value('id');
             $arr = array(
                 'usernum'=>$userCount,
                 'old_usernum'=>$oldUserCount,
@@ -294,11 +298,20 @@ class RepurchaseAsynData extends Command
                 'old_usernum_sequential'=>$oldSequential,
                 'new_usernum_sequential'=>$newSequential,
             );
-            Db::name('datacenter_supply_month_web')
-                ->where('id',$lastData['id'])
-                ->update($arr);
-            echo '站点：'.$site.' '.$lastData['day_date']." is ok"."\n";
-            usleep(10000);
+            if($isExist){
+                Db::name('datacenter_supply_month_web')
+                    ->where('id',$lastData['id'])
+                    ->update($arr);
+                echo '站点：'.$site.' '.$v." update is ok"."\n";
+                usleep(10000);
+            }else{
+                $arr['day_date'] = $v;
+                $arr['site'] = $site;
+                Db::name('datacenter_supply_month_web')
+                    ->insert($arr);
+                echo '站点：'.$site.' '.$v." is ok"."\n";
+                usleep(10000);
+            }
         }
     }
 }
