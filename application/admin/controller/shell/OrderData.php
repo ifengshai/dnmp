@@ -2092,7 +2092,7 @@ class OrderData extends Backend
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
             //$params[$k]['grand_total'] = $v['grand_total'];
-            $params[$k]['grand_total'] = $res[$v['entity_id']]['grand_total'];
+            $params[$k]['grand_total'] = $res[$v['entity_id']]['grand_total'] ?? 0;
             // $params[$k]['city'] = $res[$v['entity_id']]['city'];
             // $params[$k]['street'] = $res[$v['entity_id']]['street'];
             // $params[$k]['postcode'] = $res[$v['entity_id']]['postcode'];
