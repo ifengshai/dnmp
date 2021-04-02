@@ -30,19 +30,20 @@ class MonthWeb extends Model
     /**
      * 获取各站点的新老用户数据
      * @param $site  站点
-     * @param string $flag   标识：区别查询条数，传true查12条数据，即一年数据，默认查全部数据
+     * @param string $flag 标识：区别查询条数，传true查12条数据，即一年数据，默认查全部数据
      * @author mjj
      * @date   2021/4/2 14:14:14
      */
-    public function getOldNewUserData($site,$flag = false){
+    public function getOldNewUserData($site, $flag = false)
+    {
         $where['site'] = $site;
-        if($flag){
+        if ($flag) {
             $list = $this
                 ->where($where)
                 ->limit(12)
                 ->order('day_date desc')
                 ->select();
-        }else{
+        } else {
             $list = $this
                 ->where($where)
                 ->order('day_date desc')
