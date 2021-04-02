@@ -1356,6 +1356,7 @@ class Item extends Backend
                     $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
                     $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
                     $uploadItemArr['site'] = $v['platform_type'];
+                    $uploadItemArr['status'] = $v['outer_sku_status'];
                     $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
                     $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
                     //审核通过把SKU同步到有映射关系的平台
@@ -1566,6 +1567,7 @@ class Item extends Backend
                             $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
                             $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
                             $uploadItemArr['site'] = $v['platform_type'];
+                            $uploadItemArr['status'] = $v['outer_sku_status'];
                             $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
                             $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
                             //审核通过把SKU同步到有映射关系的平台
