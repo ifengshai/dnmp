@@ -296,8 +296,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     ]
                 ],
                 onLoadSuccess: function (value){
-                    if (value.label ==1){
+                    if (value.label ==1 || value.label ==2 || value.label ==3 ||value.label ==4 ){
                         table.bootstrapTable('hideColumn','responsible_id');
+                    }else{
+                        table.bootstrapTable('showColumn','responsible_id');
                     }
                 }
             });
