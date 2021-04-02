@@ -83,7 +83,9 @@ class DataMarket extends Backend
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('stock_overview', 'stock_measure_overview', 'stock_level_overview', 'stock_level_overview2', 'purchase_overview', 'logistics_completed_overview', 'magentoplatformarr', 'stock_age_overview', 'time_str1', 'time_str2', 'time_str3'));
+        $this->view->assign(compact('stock_overview', 'stock_measure_overview', 'stock_level_overview',
+            'stock_level_overview2', 'purchase_overview', 'logistics_completed_overview', 'magentoplatformarr',
+            'stock_age_overview', 'time_str1', 'time_str2', 'time_str3'));
         return $this->view->fetch();
     }
 
@@ -102,7 +104,8 @@ class DataMarket extends Backend
                 $end = date('Y-m');
             }
             $where['day_date'] = ['between', [$start, $end]];
-            $data = $this->supplymonth->where($where)->field('id,avg_stock,purchase_sales_rate,day_date')->order('day_date', 'asc')->select();
+            $data = $this->supplymonth->where($where)->field('id,avg_stock,purchase_sales_rate,day_date')->order('day_date',
+                'asc')->select();
             $json['xColumnName'] = array_column($data, 'day_date');
             $json['column'] = ['平均库存'];
             $json['columnData'] = [
@@ -138,7 +141,8 @@ class DataMarket extends Backend
                 $end = date('Y-m');
             }
             $where['day_date'] = ['between', [$start, $end]];
-            $data = $this->supplymonth->where($where)->field('id,avg_dull_stock,avg_rate,day_date')->order('day_date', 'asc')->select();
+            $data = $this->supplymonth->where($where)->field('id,avg_dull_stock,avg_rate,day_date')->order('day_date',
+                'asc')->select();
             $json['xColumnName'] = array_column($data, 'day_date');
             $json['column'] = ['平均呆滞库存'];
             $json['columnData'] = [
@@ -183,11 +187,13 @@ class DataMarket extends Backend
         //库存总数量
         $arr['stock_num'] = $this->model->where($where)->sum('stock');
         //呆滞库存占比
-        $arr['dull_stock_count_rate'] = $arr['stock_num'] ? round($dull_stock['stock'] / $arr['stock_num'] * 100, 0) : 0;
+        $arr['dull_stock_count_rate'] = $arr['stock_num'] ? round($dull_stock['stock'] / $arr['stock_num'] * 100,
+            0) : 0;
         //库存总金额
         $arr['stock_amount'] = $this->model->where($where)->sum('stock*purchase_price');
         //呆滞金额占比
-        $arr['dull_stock_total_rate'] = $arr['stock_amount'] ? round($dull_stock['total'] / $arr['stock_amount'] * 100, 0) : 0;
+        $arr['dull_stock_total_rate'] = $arr['stock_amount'] ? round($dull_stock['total'] / $arr['stock_amount'] * 100,
+            0) : 0;
         //库存单价
         $arr['stock_price'] = $arr['stock_num'] ? round($arr['stock_amount'] / $arr['stock_num'], 2) : 0;
         //在途库存数量
@@ -195,7 +201,8 @@ class DataMarket extends Backend
         //在途库存总金额
         $arr['onway_stock_amount'] = $this->model->where($where)->sum('on_way_stock*purchase_price');
         //在途库存单价
-        $arr['onway_stock_price'] = $arr['onway_stock_num'] ? round($arr['onway_stock_amount'] / $arr['onway_stock_num'], 2) : 0;
+        $arr['onway_stock_price'] = $arr['onway_stock_num'] ? round($arr['onway_stock_amount'] / $arr['onway_stock_num'],
+            2) : 0;
         //待入库数量
         $arr['wait_stock_num'] = $this->model->where($where)->sum('wait_instock_num');
         //待入库金额
@@ -210,8 +217,8 @@ class DataMarket extends Backend
         $start = date('Y-m-01 00:00:00', strtotime('-12 months'));
         $start = '2020-12-28 00:00:00';
         $end = date('Y-m-d 23:59:59', strtotime("last day of -1 month"));
-        $time_str = $start.' - '.$end;
-        $cache_data = Cache::get('Supplydatacenter_datamarket'.$time_str.md5(serialize('stock_measure_overview')));
+        $time_str = $start . ' - ' . $end;
+        $cache_data = Cache::get('Supplydatacenter_datamarket' . $time_str . md5(serialize('stock_measure_overview')));
         if ($cache_data) {
             return $cache_data;
         }
@@ -226,11 +233,24 @@ class DataMarket extends Backend
         $end = strtotime($createat[3]);
         $order_time_where['payment_time'] = ['between', [$start, $end]];  //修改
         $order_where['order_type'] = ['<>', 5];
-        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $order_where['status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered'
+            ]
+        ];
         //订单销售数量
-        $order_sales_num = $this->order->alias('o')->join('fa_order_item_option i', 'o.entity_id=i.order_id')->where($order_where)->where($order_time_where)->sum('i.qty');
+        $order_sales_num = $this->order->alias('o')->join('fa_order_item_option i',
+            'o.entity_id=i.order_id')->where($order_where)->where($order_time_where)->sum('i.qty');
         //出库单出库数量
-        $out_stock_num = $this->outstock->alias('o')->join('fa_out_stock_item i', 'o.id=i.out_stock_id')->where($where)->sum('out_stock_num');
+        $out_stock_num = $this->outstock->alias('o')->join('fa_out_stock_item i',
+            'o.id=i.out_stock_id')->where($where)->sum('out_stock_num');
         $stock_consume_num = $order_sales_num + $out_stock_num;
         //期初实时库存
         $start_stock_where = [];
@@ -261,8 +281,8 @@ class DataMarket extends Backend
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
             $start = date('Y-m-01');
             $end = date('Y-m-d 23:59:59');
-            $time_str = $start.' - '.$end;
-            $cache_data = Cache::get('Supplydatacenter_datamarket'.$order_platform.$time_str.md5(serialize('stock_measure_overview_platform')));
+            $time_str = $start . ' - ' . $end;
+            $cache_data = Cache::get('Supplydatacenter_datamarket' . $order_platform . $time_str . md5(serialize('stock_measure_overview_platform')));
             if (!$cache_data) {
                 /*
              * 虚拟仓库存周转率：时间段内所选站点虚拟仓库存消耗数量/[（该站点虚拟仓期初实时库存+该站点虚拟仓期末实时库存）/2]；
@@ -276,21 +296,36 @@ class DataMarket extends Backend
                 $end = strtotime($createat[3]);
                 $order_where['payment_time'] = ['between', [$start, $end]];  //修改
                 $order_where['order_type'] = ['<>', 5];
-                $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+                $order_where['status'] = [
+                    'in',
+                    [
+                        'free_processing',
+                        'processing',
+                        'complete',
+                        'paypal_reversed',
+                        'payment_review',
+                        'paypal_canceled_reversal',
+                        'delivered'
+                    ]
+                ];
                 $order_where['o.site'] = $order_platform;
                 //站点订单销售数量
-                $order_sales_num = $this->order->alias('o')->join('fa_order_item_option i', 'o.entity_id=i.order_id')->where($order_where)->sum('i.qty');
+                $order_sales_num = $this->order->alias('o')->join('fa_order_item_option i',
+                    'o.entity_id=i.order_id')->where($order_where)->sum('i.qty');
                 //站点出库单出库数量
-                $out_stock_num = $this->outstock->alias('o')->join('fa_out_stock_item i', 'o.id=i.out_stock_id')->where($where)->sum('out_stock_num');
+                $out_stock_num = $this->outstock->alias('o')->join('fa_out_stock_item i',
+                    'o.id=i.out_stock_id')->where($where)->sum('out_stock_num');
                 $stock_consume_num = $order_sales_num + $out_stock_num;
                 //站点虚拟仓期初实时库存
                 $start_stock_where = [];
                 $start_stock_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $createat[0] . "'")];
-                $start_stock = Db::table('fa_datacenter_day')->where($start_stock_where)->where('site', $order_platform)->value('virtual_stock');
+                $start_stock = Db::table('fa_datacenter_day')->where($start_stock_where)->where('site',
+                    $order_platform)->value('virtual_stock');
                 //站点虚拟仓期末实时库存
                 $end_stock_where = [];
                 $end_stock_where[] = ['exp', Db::raw("DATE_FORMAT(day_date, '%Y-%m-%d') = '" . $createat[3] . "'")];
-                $end_stock = Db::table('fa_datacenter_day')->where($end_stock_where)->where('site', $order_platform)->value('virtual_stock');
+                $end_stock = Db::table('fa_datacenter_day')->where($end_stock_where)->where('site',
+                    $order_platform)->value('virtual_stock');
                 $sum = $start_stock + $end_stock;
                 //虚拟仓库存周转率
                 $arr['virtual_turnover_rate'] = $sum ? round($stock_consume_num / ($sum / 2), 4) : 0;
@@ -313,19 +348,23 @@ class DataMarket extends Backend
                 $instock_where['platform_id'] = $order_platform;
                 $instock_where['status'] = 2;
                 //（所选时间包含的月份整月）所选站点月度虚拟仓入库数量
-                $instock_num = $this->instock->alias('o')->join('fa_in_stock_item i', 'o.id=i.in_stock_id', 'left')->where($instock_where)->where($time_where)->sum('i.in_stock_num');
+                $instock_num = $this->instock->alias('o')->join('fa_in_stock_item i', 'o.id=i.in_stock_id',
+                    'left')->where($instock_where)->where($time_where)->sum('i.in_stock_num');
                 //月度销售数量
-                $month_sales_num1 = $this->order->alias('o')->join('fa_order_item_option i', 'o.entity_id=i.order_id')->where($order_where)->sum('i.qty');
+                $month_sales_num1 = $this->order->alias('o')->join('fa_order_item_option i',
+                    'o.entity_id=i.order_id')->where($order_where)->sum('i.qty');
                 $month_sales_num2 = 0;
                 if (in_array($order_platform, [5, 8])) {
                     $outstock_where['platform_id'] = $order_platform;
                     $outstock_where['status'] = 2;
-                    $month_sales_num2 = $this->outstock->alias('o')->join('fa_out_stock_item i', 'o.id=i.out_stock_id', 'left')->where($time_where)->where($outstock_where)->sum('i.out_stock_num');
+                    $month_sales_num2 = $this->outstock->alias('o')->join('fa_out_stock_item i', 'o.id=i.out_stock_id',
+                        'left')->where($time_where)->where($outstock_where)->sum('i.out_stock_num');
                 }
                 $month_sales_num = $month_sales_num1 + $month_sales_num2;
                 //虚拟仓月度进销比
                 $arr['virtual_month_in_out_rate'] = $month_sales_num ? round($instock_num / $month_sales_num, 2) : 0;
-                Cache::set('Supplydatacenter_datamarket'.$order_platform.$time_str.md5(serialize('stock_measure_overview_platform')), $arr, 7200);
+                Cache::set('Supplydatacenter_datamarket' . $order_platform . $time_str . md5(serialize('stock_measure_overview_platform')),
+                    $arr, 7200);
             } else {
                 $arr = $cache_data;
             }
@@ -344,22 +383,22 @@ class DataMarket extends Backend
 
             $where['day_date'] = ['between', [$start, $end]];
             $where['site'] = $order_platform;
-            $data = $this->supplymonthweb->where($where)->field('id,virtual_stock,turnover_day,day_date')->order('day_date', 'asc')->select();
+            $data = $this->supplymonthweb->where($where)->field('id,virtual_stock,turnover_day,day_date')->order('day_date',
+                'asc')->select();
             $json['xColumnName'] = array_column($data, 'day_date');
             $json['column'] = ['虚拟仓库存、库存周转天数'];
             $json['columnData'] = [
                 [
-                    'type'     => 'bar',
-                    'barWidth' => '15%',
-                    'data'     => array_column($data, 'virtual_stock'),
-                    'name'     => '虚拟仓库存',
+                    'type' => 'bar',
+                    'data' => array_column($data, 'virtual_stock'),
+                    'name' => '虚拟仓库存',
                 ],
                 [
-                    'type'       => 'line',
-                    'data'       => array_column($data, 'turnover_day'),
-                    'name'       => '库存周转天数',
+                    'type' => 'line',
+                    'data' => array_column($data, 'turnover_day'),
+                    'name' => '库存周转天数',
                     'yAxisIndex' => 1,
-                    'smooth'     => true //平滑曲线
+                    'smooth' => true //平滑曲线
                 ],
             ];
 
@@ -370,7 +409,7 @@ class DataMarket extends Backend
     //库存分级概况
     public function stock_level_overview()
     {
-        $cache_data = Cache::get('Supplydatacenter_datamarket'.md5(serialize('stock_level_overview')));
+        $cache_data = Cache::get('Supplydatacenter_datamarket' . md5(serialize('stock_level_overview')));
         if ($cache_data) {
             return $cache_data;
         }
@@ -426,53 +465,62 @@ class DataMarket extends Backend
         $all_num = $arr['all_count'] = $arr['a1_count'] + $arr['a_count'] + $arr['b_count'] + $arr['c1_count'] + $arr['c_count'] + $arr['d_count'] + $arr['e_count'] + $arr['f_count'];   //合计SKU数量
         $all_stock_num = $arr['all_stock_num'] = $arr['a1_stock_num'] + $arr['a_stock_num'] + $arr['b_stock_num'] + $arr['c1_stock_num'] + $arr['c_stock_num'] + $arr['d_stock_num'] + $arr['e_stock_num'] + $arr['f_stock_num'];  //合计库存数量
         $arr['all_stock_price'] = $arr['a1_stock_price'] + $arr['a_stock_price'] + $arr['b_stock_price'] + $arr['c1_stock_price'] + $arr['c_stock_price'] + $arr['d_stock_price'] + $arr['e_stock_price'] + $arr['f_stock_price'];  //合计库存金额
-        $arr['all_dull_stock_rate'] = $arr['all_stock_num'] ? round($arr['all_dull_stock'] / $arr['all_stock_num'] * 100, 2) . '%' : 0;   //合计呆滞库存占比
+        $arr['all_dull_stock_rate'] = $arr['all_stock_num'] ? round($arr['all_dull_stock'] / $arr['all_stock_num'] * 100,
+                2) . '%' : 0;   //合计呆滞库存占比
         $arr['a1_percent'] = $all_num ? round($arr['a1_count'] / $all_num * 100, 2) . '%' : 0;
         $arr['a1_stock_percent'] = $all_stock_num ? round($arr['a1_stock_num'] / $all_stock_num * 100, 2) . '%' : 0;
         $arr['a1_dull_stock'] = $dull_stock[0]['stock'];   //呆滞库存
-        $arr['a1_dull_stock_rate'] = $arr['a1_stock_num'] ? round($arr['a1_dull_stock'] / $arr['a1_stock_num'] * 100, 2) . '%' : 0;
+        $arr['a1_dull_stock_rate'] = $arr['a1_stock_num'] ? round($arr['a1_dull_stock'] / $arr['a1_stock_num'] * 100,
+                2) . '%' : 0;
         $arr['a1_dull_total'] = $dull_stock[0]['total'];   //呆滞金额
 
         $arr['a_percent'] = $all_num ? round($arr['a_count'] / $all_num * 100, 2) . '%' : 0;
         $arr['a_stock_percent'] = $all_stock_num ? round($arr['a_stock_num'] / $all_stock_num * 100, 2) . '%' : 0;
         $arr['a_dull_stock'] = $dull_stock[1]['stock'];   //呆滞库存
-        $arr['a_dull_stock_rate'] = $arr['a_stock_num'] ? round($arr['a_dull_stock'] / $arr['a_stock_num'] * 100, 2) . '%' : 0;
+        $arr['a_dull_stock_rate'] = $arr['a_stock_num'] ? round($arr['a_dull_stock'] / $arr['a_stock_num'] * 100,
+                2) . '%' : 0;
         $arr['a_dull_total'] = $dull_stock[1]['total'];   //呆滞金额
 
         $arr['b_percent'] = $all_num ? round($arr['b_count'] / $all_num * 100, 2) . '%' : 0;
         $arr['b_stock_percent'] = $all_stock_num ? round($arr['b_stock_num'] / $all_stock_num * 100, 2) . '%' : 0;
         $arr['b_dull_stock'] = $dull_stock[2]['stock'];   //呆滞库存
-        $arr['b_dull_stock_rate'] = $arr['b_stock_num'] ? round($arr['b_dull_stock'] / $arr['b_stock_num'] * 100, 2) . '%' : 0;
+        $arr['b_dull_stock_rate'] = $arr['b_stock_num'] ? round($arr['b_dull_stock'] / $arr['b_stock_num'] * 100,
+                2) . '%' : 0;
         $arr['b_dull_total'] = $dull_stock[2]['total'];   //呆滞金额
 
         $arr['c1_percent'] = $all_num ? round($arr['c1_count'] / $all_num * 100, 2) . '%' : 0;
         $arr['c1_stock_percent'] = $all_stock_num ? round($arr['c1_stock_num'] / $all_stock_num * 100, 2) . '%' : 0;
         $arr['c1_dull_stock'] = $dull_stock[3]['stock'];   //呆滞库存
-        $arr['c1_dull_stock_rate'] = $arr['c1_stock_num'] ? round($arr['c1_dull_stock'] / $arr['c1_stock_num'] * 100, 2) . '%' : 0;
+        $arr['c1_dull_stock_rate'] = $arr['c1_stock_num'] ? round($arr['c1_dull_stock'] / $arr['c1_stock_num'] * 100,
+                2) . '%' : 0;
         $arr['c1_dull_total'] = $dull_stock[3]['total'];   //呆滞金额
 
         $arr['c_percent'] = $all_num ? round($arr['c_count'] / $all_num * 100, 2) . '%' : 0;
         $arr['c_stock_percent'] = $all_stock_num ? round($arr['c_stock_num'] / $all_stock_num * 100, 2) . '%' : 0;
         $arr['c_dull_stock'] = $dull_stock[4]['stock'];   //呆滞库存
-        $arr['c_dull_stock_rate'] = $arr['c_stock_num'] ? round($arr['c_dull_stock'] / $arr['c_stock_num'] * 100, 2) . '%' : 0;
+        $arr['c_dull_stock_rate'] = $arr['c_stock_num'] ? round($arr['c_dull_stock'] / $arr['c_stock_num'] * 100,
+                2) . '%' : 0;
         $arr['c_dull_total'] = $dull_stock[4]['total'];   //呆滞金额
 
         $arr['d_percent'] = $all_num ? round($arr['d_count'] / $all_num * 100, 2) . '%' : 0;
         $arr['d_stock_percent'] = $all_stock_num ? round($arr['d_stock_num'] / $all_stock_num * 100, 2) . '%' : 0;
         $arr['d_dull_stock'] = $dull_stock[5]['stock'];   //呆滞库存
-        $arr['d_dull_stock_rate'] = $arr['d_stock_num'] ? round($arr['d_dull_stock'] / $arr['d_stock_num'] * 100, 2) . '%' : 0;
+        $arr['d_dull_stock_rate'] = $arr['d_stock_num'] ? round($arr['d_dull_stock'] / $arr['d_stock_num'] * 100,
+                2) . '%' : 0;
         $arr['d_dull_total'] = $dull_stock[5]['total'];   //呆滞金额
 
         $arr['e_percent'] = $all_num ? round($arr['e_count'] / $all_num * 100, 2) . '%' : 0;
         $arr['e_stock_percent'] = $all_stock_num ? round($arr['e_stock_num'] / $all_stock_num * 100, 2) . '%' : 0;
         $arr['e_dull_stock'] = $dull_stock[6]['stock'];   //呆滞库存
-        $arr['e_dull_stock_rate'] = $arr['e_stock_num'] ? round($arr['e_dull_stock'] / $arr['e_stock_num'] * 100, 2) . '%' : 0;
+        $arr['e_dull_stock_rate'] = $arr['e_stock_num'] ? round($arr['e_dull_stock'] / $arr['e_stock_num'] * 100,
+                2) . '%' : 0;
         $arr['e_dull_total'] = $dull_stock[6]['total'];   //呆滞金额
 
         $arr['f_percent'] = $all_num ? round($arr['f_count'] / $all_num * 100, 2) . '%' : 0;
         $arr['f_stock_percent'] = $all_stock_num ? round($arr['f_stock_num'] / $all_stock_num * 100, 2) . '%' : 0;
         $arr['f_dull_stock'] = $dull_stock[7]['stock'];   //呆滞库存
-        $arr['f_dull_stock_rate'] = $arr['f_stock_num'] ? round($arr['f_dull_stock'] / $arr['f_stock_num'] * 100, 2) . '%' : 0;
+        $arr['f_dull_stock_rate'] = $arr['f_stock_num'] ? round($arr['f_dull_stock'] / $arr['f_stock_num'] * 100,
+                2) . '%' : 0;
         $arr['f_dull_total'] = $dull_stock[7]['total'];   //呆滞金额
         Cache::set('Supplydatacenter_datamarket' . md5(serialize('stock_level_overview')), $arr, 7200);
         return $arr;
@@ -535,13 +583,17 @@ class DataMarket extends Backend
         $stock4 = $stock_info[0]['d'];
         $stock5 = $stock - $stock1 - $stock2 - $stock3 - $stock4;
 
-        $total = $this->item->alias('i')->join('fa_purchase_order_item oi', 'i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o', 'o.id=i.purchase_id')->where($where)->where('in_stock_time is not null')->value('SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price');
+        $total = $this->item->alias('i')->join('fa_purchase_order_item oi',
+            'i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o',
+            'o.id=i.purchase_id')->where($where)->where('in_stock_time is not null')->value('SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price');
 
         $sql5 = $this->item->where($where)->where('in_stock_time is not null')->field('distinct sku')->buildSql();
         $arr_where = [];
         $arr_where[] = ['exp', Db::raw("i.sku in " . $sql5)];
 
-        $sql6 = $this->item->alias('i')->join('fa_purchase_order_item oi', 'i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o', 'o.id=i.purchase_id')->field('TIMESTAMPDIFF( MONTH, min(in_stock_time), now()) AS total,SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price')->where($where)->where($arr_where)->where('in_stock_time is not null')->group('i.sku')->buildSql();
+        $sql6 = $this->item->alias('i')->join('fa_purchase_order_item oi',
+            'i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o',
+            'o.id=i.purchase_id')->field('TIMESTAMPDIFF( MONTH, min(in_stock_time), now()) AS total,SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price')->where($where)->where($arr_where)->where('in_stock_time is not null')->group('i.sku')->buildSql();
 
         $total_info = $this->item->table([$sql6 => 't2'])->field('sum(IF( total>= 0 AND total< 4, price, 0 )) AS a,sum(IF( total>= 4 AND total< 7, price, 0 )) AS b,sum(IF( total>= 7 AND total< 10, price, 0 )) AS c,sum(IF( total>= 10 AND total< 13, price, 0 )) AS d')->select();
         $total1 = round($total_info[0]['a'], 2);
@@ -645,58 +697,95 @@ class DataMarket extends Backend
         $status_where['p.purchase_status'] = ['in', [2, 5, 6, 7, 8, 9, 10]];
         $arrive_where['p.purchase_status'] = 7;
         //采购总数
-        $arr['purchase_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');
-        $arr['purchase_num_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type', 1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');  //现货
-        $arr['purchase_num_now_rate'] = $arr['purchase_num'] ? round($arr['purchase_num_now'] / $arr['purchase_num'] * 100, 2) . '%' : '0%';   //现货比例
-        $arr['purchase_num_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type', 2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');  //大货
-        $arr['purchase_num_big_rate'] = $arr['purchase_num'] ? round($arr['purchase_num_big'] / $arr['purchase_num'] * 100, 2) . '%' : '0%';   //大货比例
+        $arr['purchase_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'],
+            'p.id=b.purchase_id')->sum('b.purchase_num');
+        $arr['purchase_num_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',
+            1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');  //现货
+        $arr['purchase_num_now_rate'] = $arr['purchase_num'] ? round($arr['purchase_num_now'] / $arr['purchase_num'] * 100,
+                2) . '%' : '0%';   //现货比例
+        $arr['purchase_num_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',
+            2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->sum('b.purchase_num');  //大货
+        $arr['purchase_num_big_rate'] = $arr['purchase_num'] ? round($arr['purchase_num_big'] / $arr['purchase_num'] * 100,
+                2) . '%' : '0%';   //大货比例
         //采购总金额
         $arr['purchase_amount'] = $this->purchase->alias('p')->where($where)->where($status_where)->sum('purchase_total');
-        $arr['purchase_amount_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type', 1)->sum('purchase_total');//现货
-        $arr['purchase_amount_now_rate'] = $arr['purchase_amount'] ? round($arr['purchase_amount_now'] / $arr['purchase_amount'] * 100, 2) . '%' : '0%';  //现货比例
-        $arr['purchase_amount_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type', 2)->sum('purchase_total');//大货
-        $arr['purchase_amount_big_rate'] = $arr['purchase_amount'] ? round($arr['purchase_amount_big'] / $arr['purchase_amount'] * 100, 2) . '%' : '0%';  //大货比例
+        $arr['purchase_amount_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',
+            1)->sum('purchase_total');//现货
+        $arr['purchase_amount_now_rate'] = $arr['purchase_amount'] ? round($arr['purchase_amount_now'] / $arr['purchase_amount'] * 100,
+                2) . '%' : '0%';  //现货比例
+        $arr['purchase_amount_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',
+            2)->sum('purchase_total');//大货
+        $arr['purchase_amount_big_rate'] = $arr['purchase_amount'] ? round($arr['purchase_amount_big'] / $arr['purchase_amount'] * 100,
+                2) . '%' : '0%';  //大货比例
         //采购总SKU数
-        $arr['purchase_sku_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);
-        $arr['purchase_sku_num_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type', 1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);  //现货
-        $arr['purchase_sku_num_now_rate'] = $arr['purchase_sku_num'] ? round($arr['purchase_sku_num_now'] / $arr['purchase_sku_num'] * 100, 2) . '%' : '0%';  //现货比例
-        $arr['purchase_sku_num_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type', 2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);  //大货
-        $arr['purchase_sku_num_big_rate'] = $arr['purchase_sku_num'] ? round($arr['purchase_sku_num_big'] / $arr['purchase_sku_num'] * 100, 2) . '%' : '0%';  //大货比例
+        $arr['purchase_sku_num'] = $this->purchase->alias('p')->where($where)->where($status_where)->join(['fa_purchase_order_item' => 'b'],
+            'p.id=b.purchase_id')->group('sku')->count(1);
+        $arr['purchase_sku_num_now'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',
+            1)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);  //现货
+        $arr['purchase_sku_num_now_rate'] = $arr['purchase_sku_num'] ? round($arr['purchase_sku_num_now'] / $arr['purchase_sku_num'] * 100,
+                2) . '%' : '0%';  //现货比例
+        $arr['purchase_sku_num_big'] = $this->purchase->alias('p')->where($where)->where($status_where)->where('p.type',
+            2)->join(['fa_purchase_order_item' => 'b'], 'p.id=b.purchase_id')->group('sku')->count(1);  //大货
+        $arr['purchase_sku_num_big_rate'] = $arr['purchase_sku_num'] ? round($arr['purchase_sku_num_big'] / $arr['purchase_sku_num'] * 100,
+                2) . '%' : '0%';  //大货比例
         //所选时间段内到货总批次
-        $sum_batch = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id', 'left')->where($where)->where($arrive_where)->count();
+        $sum_batch = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id',
+            'left')->where($where)->where($arrive_where)->count();
         //所选时间内到货的采购单延迟的批次
-        $delay_batch = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id', 'left')->join('fa_logistics_info l', 'p.id=l.purchase_id', 'left')->where($where)->where($arrive_where)->where('p.arrival_time<l.sign_time')->count();
+        $delay_batch = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id',
+            'left')->join('fa_logistics_info l', 'p.id=l.purchase_id',
+            'left')->where($where)->where($arrive_where)->where('p.arrival_time<l.sign_time')->count();
         //采购批次到货延时率
         $arr['purchase_delay_rate'] = $sum_batch ? round($delay_batch / $sum_batch * 100, 2) . '%' : 0;
         //所选时间段内现货到货总批次
-        $sum_batch_now = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id', 'left')->where($where)->where($arrive_where)->where('p.type', 1)->count();
+        $sum_batch_now = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id',
+            'left')->where($where)->where($arrive_where)->where('p.type', 1)->count();
         //所选时间内现货到货的采购单延迟的批次
-        $delay_batch_now = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id', 'left')->join('fa_logistics_info l', 'p.id=l.purchase_id', 'left')->where($where)->where($arrive_where)->where('p.type', 1)->where('p.arrival_time<l.sign_time')->count();
+        $delay_batch_now = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id',
+            'left')->join('fa_logistics_info l', 'p.id=l.purchase_id',
+            'left')->where($where)->where($arrive_where)->where('p.type',
+            1)->where('p.arrival_time<l.sign_time')->count();
         //采购批次到货延时率
         $arr['purchase_delay_rate_now'] = $sum_batch_now ? round($delay_batch_now / $sum_batch_now * 100, 2) . '%' : 0;
         //所选时间段内大货到货总批次
-        $sum_batch_big = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id', 'left')->where($where)->where($arrive_where)->where('p.type', 2)->count();
+        $sum_batch_big = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id',
+            'left')->where($where)->where($arrive_where)->where('p.type', 2)->count();
         //所选时间内大货到货的采购单延迟的批次
-        $delay_batch_big = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id', 'left')->join('fa_logistics_info l', 'p.id=l.purchase_id', 'left')->where($where)->where($arrive_where)->where('p.type', 2)->where('p.arrival_time<l.sign_time')->count();
+        $delay_batch_big = $this->purchase->alias('p')->join('fa_purchase_batch b', 'p.id=b.purchase_id',
+            'left')->join('fa_logistics_info l', 'p.id=l.purchase_id',
+            'left')->where($where)->where($arrive_where)->where('p.type',
+            2)->where('p.arrival_time<l.sign_time')->count();
         //采购批次到货延时率
         $arr['purchase_delay_rate_big'] = $sum_batch_big ? round($delay_batch_big / $sum_batch_big * 100, 2) . '%' : 0;
         //所选时间内到货的采购单合格率90%以上的批次
-        $qualified_num = $this->purchase->alias('p')->join('fa_check_order o', 'p.id = o.purchase_id', 'left')->join('fa_check_order_item i', 'o.id = i.check_id', 'left')->where($where)->where($arrive_where)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
+        $qualified_num = $this->purchase->alias('p')->join('fa_check_order o', 'p.id = o.purchase_id',
+            'left')->join('fa_check_order_item i', 'o.id = i.check_id',
+            'left')->where($where)->where($arrive_where)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
         //采购批次到货合格率
         $arr['purchase_qualified_rate'] = $sum_batch ? round($qualified_num / $sum_batch * 100, 2) . '%' : 0;
         //所选时间内现货到货的采购单合格率90%以上的批次
-        $qualified_num_now = $this->purchase->alias('p')->join('fa_check_order o', 'p.id = o.purchase_id', 'left')->join('fa_check_order_item i', 'o.id = i.check_id', 'left')->where($where)->where($arrive_where)->where('p.type', 1)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
+        $qualified_num_now = $this->purchase->alias('p')->join('fa_check_order o', 'p.id = o.purchase_id',
+            'left')->join('fa_check_order_item i', 'o.id = i.check_id',
+            'left')->where($where)->where($arrive_where)->where('p.type',
+            1)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
         //采购批次到货合格率
-        $arr['purchase_qualified_rate_now'] = $sum_batch_now ? round($qualified_num_now / $sum_batch_now * 100, 2) . '%' : 0;
+        $arr['purchase_qualified_rate_now'] = $sum_batch_now ? round($qualified_num_now / $sum_batch_now * 100,
+                2) . '%' : 0;
         //所选时间内大货到货的采购单合格率90%以上的批次
-        $qualified_num_big = $this->purchase->alias('p')->join('fa_check_order o', 'p.id = o.purchase_id', 'left')->join('fa_check_order_item i', 'o.id = i.check_id', 'left')->where($where)->where($arrive_where)->where('p.type', 2)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
+        $qualified_num_big = $this->purchase->alias('p')->join('fa_check_order o', 'p.id = o.purchase_id',
+            'left')->join('fa_check_order_item i', 'o.id = i.check_id',
+            'left')->where($where)->where($arrive_where)->where('p.type',
+            2)->group('p.id')->having('sum( quantity_num )/ sum( arrivals_num )>= 0.9')->count();
         //采购批次到货合格率
-        $arr['purchase_qualified_rate_big'] = $sum_batch_big ? round($qualified_num_big / $sum_batch_big * 100, 2) . '%' : 0;
+        $arr['purchase_qualified_rate_big'] = $sum_batch_big ? round($qualified_num_big / $sum_batch_big * 100,
+                2) . '%' : 0;
 
         //采购单价
         $arr['purchase_price'] = $arr['purchase_num'] ? round($arr['purchase_amount'] / $arr['purchase_num'], 2) : 0;
-        $arr['purchase_price_now'] = $arr['purchase_num_now'] ? round($arr['purchase_amount_now'] / $arr['purchase_num_now'], 2) : 0;  //现货
-        $arr['purchase_price_big'] = $arr['purchase_num_big'] ? round($arr['purchase_amount_big'] / $arr['purchase_num_big'], 2) : 0;//大货
+        $arr['purchase_price_now'] = $arr['purchase_num_now'] ? round($arr['purchase_amount_now'] / $arr['purchase_num_now'],
+            2) : 0;  //现货
+        $arr['purchase_price_big'] = $arr['purchase_num_big'] ? round($arr['purchase_amount_big'] / $arr['purchase_num_big'],
+            2) : 0;//大货
         Cache::set('Supplydatacenter_datamarket' . $time_str . md5(serialize('purchase_overview')), $arr, 7200);
         return $arr;
     }
@@ -741,16 +830,32 @@ class DataMarket extends Backend
                 $end = date('Y-m');
             }
             $where['day_date'] = ['between', [$start, $end]];
-            $data = $this->supplymonth->where($where)->field('id,purchase_num,purchase_sales_rate,day_date')->order('day_date', 'asc')->select();
+            $data = $this->supplymonth->where($where)->field('id,purchase_num,purchase_sales_rate,day_date')->order('day_date',
+                'asc')->select();
             $data = collection($data)->toArray();
             $arr['day_date'] = date('Y-m');
             $map['createtime'] = ['between', [date('Y-m-01') . ' 00:00:00', date('Y-m-t') . ' 23:59:59']];
             $map['is_del'] = 1;
             $map['purchase_status'] = ['in', [2, 5, 6, 7]];
-            $purchase_num = $this->purchase->alias('a')->where($map)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
+            $purchase_num = $this->purchase->alias('a')->where($map)->join(['fa_purchase_order_item' => 'b'],
+                'a.id=b.purchase_id')->sum('b.purchase_num');
             $arr['purchase_num'] = $purchase_num;
-            $map1['payment_time'] = ['between', [strtotime(date('Y-m-01') . ' 00:00:00'), strtotime(date('Y-m-t') . ' 23:59:59')]];
-            $map1['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+            $map1['payment_time'] = [
+                'between',
+                [strtotime(date('Y-m-01') . ' 00:00:00'), strtotime(date('Y-m-t') . ' 23:59:59')]
+            ];
+            $map1['status'] = [
+                'in',
+                [
+                    'free_processing',
+                    'processing',
+                    'complete',
+                    'paypal_reversed',
+                    'payment_review',
+                    'paypal_canceled_reversal',
+                    'delivered'
+                ]
+            ];
             $sales_num = $this->order->where($map1)->sum('total_qty_ordered');
             $arr['purchase_sales_rate'] = $sales_num != 0 ? round($purchase_num / $sales_num * 100, 2) : 0;
             $data[] = $arr;
@@ -845,7 +950,8 @@ class DataMarket extends Backend
                 $map['day_date'] = ['between', [$createat[0], $createat[3]]];
                 $order_info = Db::name('datacenter_day_order')->where($map)->select();
                 $arr = collection($order_info)->toArray();
-                Cache::set('Supplydatacenter_datamarket' . $time_str . md5(serialize('track_logistics_barline')), $arr, 7200);
+                Cache::set('Supplydatacenter_datamarket' . $time_str . md5(serialize('track_logistics_barline')), $arr,
+                    7200);
             } else {
                 $arr = $cache_data;
             }
@@ -916,7 +1022,8 @@ class DataMarket extends Backend
         $map[] = ['exp', Db::raw("check_time+3600*24*15<unix_timestamp(now())")];
         $arr['timeout_uncompleted_count'] = $this->process->where($where)->where($uncompleted_where)->where($map)->count();  //超时未妥投数量
         $arr['timeout_uncompleted_count'] = $arr['timeout_uncompleted_count'] ? $arr['timeout_uncompleted_count'] : 0;
-        Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('logistics_completed_overview')), $arr, 7200);
+        Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('logistics_completed_overview')), $arr,
+            7200);
         return $arr;
     }
 
@@ -934,7 +1041,10 @@ class DataMarket extends Backend
             $cache_data = Cache::get('Supplydatacenter_userdata' . $time_str . md5(serialize('comleted_time_rate')));
             if (!$cache_data) {
                 $createat = explode(' ', $time_str);
-                $where['delivery_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+                $where['delivery_time'] = [
+                    'between',
+                    [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]
+                ];
                 $where['node_type'] = 40;
                 //总的妥投订单数
                 $count = $this->orderNode->where($where)->count();
@@ -945,7 +1055,10 @@ class DataMarket extends Backend
 
                 $data4 = $count - $sign_count[0]['a'] - $sign_count[0]['b'] - $sign_count[0]['c'];
                 $data = array(
-                    $sign_count[0]['a'], $sign_count[0]['b'], $sign_count[0]['c'], $data4
+                    $sign_count[0]['a'],
+                    $sign_count[0]['b'],
+                    $sign_count[0]['c'],
+                    $data4
                 );
                 Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('comleted_time_rate')), $data, 7200);
             } else {
@@ -985,7 +1098,18 @@ class DataMarket extends Backend
         $where['p.delivery_time'] = ['between', [$start, $end]];
         $where['p.site'] = ['<>', 4];
 
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $where['o.status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered'
+            ]
+        ];
         $sql1 = $this->process->alias('p')
             ->join('fa_order o', 'p.increment_id = o.increment_id')
             ->field('p.delivery_time,p.order_prescription_type,o.payment_time,o.increment_id,o.status')
@@ -1103,7 +1227,8 @@ class DataMarket extends Backend
             }
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['status']);
-            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['created_at']));
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2),
+                date('Y-m-d H:i:s', $value['created_at']));
             switch ($value['site']) {
                 case 1:
                     $value['site'] = 'zeelool';
@@ -1195,14 +1320,14 @@ class DataMarket extends Backend
     public function timeout_orders()
     {
 
-        if ($_GET['time_str']){
-            $time = explode(' - ',$_GET['time_str']);
+        if ($_GET['time_str']) {
+            $time = explode(' - ', $_GET['time_str']);
             $startime = strtotime($time[0]);
             $endtime = strtotime($time[1]);
 
-        }else{
-            $startime  = strtotime('-7 day');
-            $endtime  = time();
+        } else {
+            $startime = strtotime('-7 day');
+            $endtime = time();
         }
 
 //        $where['o.payment_time'] = ['between',[$startime,$endtime]];
@@ -1224,28 +1349,38 @@ class DataMarket extends Backend
 //        $untimeout_count = $count1 + $count2 + $count3;
 //        dump($untimeout_count);die();
 
-        $map['o.payment_time'] = ['between',[$startime,$endtime]];
-        $cat['p.order_prescription_type'] = ['gt',0];
+        $map['o.payment_time'] = ['between', [$startime, $endtime]];
+        $cat['p.order_prescription_type'] = ['gt', 0];
         $deve_time_one[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 24")];
         $deve_time_two[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 72")];
         $deve_time_three[] = ['exp', Db::raw("( p.delivery_time - o.payment_time )/ 3600 > 168")];
-        $deve_time_one_type['p.order_prescription_type'] =1;
-        $deve_time_two_type['p.order_prescription_type'] =2;
-        $deve_time_three_type['p.order_prescription_type'] =3;
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','complete',  'delivered']];
+        $deve_time_one_type['p.order_prescription_type'] = 1;
+        $deve_time_two_type['p.order_prescription_type'] = 2;
+        $deve_time_three_type['p.order_prescription_type'] = 3;
+        $map['o.status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'complete',
+                'delivered'
+            ]
+        ];
         $table = Db::connect('database.db_mojing_order');
         $list1 = $table->table('fa_order_process')
             ->alias('p')
-            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->join('fa_order o', 'p.increment_id = o.increment_id')
             ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
             ->where($map)
-
             ->where($deve_time_one)
             ->where($deve_time_one_type)
             ->select();
         $list2 = $table->table('fa_order_process')
             ->alias('p')
-            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->join('fa_order o', 'p.increment_id = o.increment_id')
             ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
             ->where($map)
             ->where($deve_time_two)
@@ -1253,7 +1388,7 @@ class DataMarket extends Backend
             ->select();
         $list3 = $table->table('fa_order_process')
             ->alias('p')
-            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->join('fa_order o', 'p.increment_id = o.increment_id')
             ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
             ->where($map)
             ->where($deve_time_three)
@@ -1261,36 +1396,36 @@ class DataMarket extends Backend
             ->select();
         $list4 = $table->table('fa_order_process')
             ->alias('p')
-            ->join('fa_order o','p.increment_id = o.increment_id')
+            ->join('fa_order o', 'p.increment_id = o.increment_id')
             ->field('p.increment_id,o.created_at,o.status,p.order_prescription_type,o.payment_time,o.site,p.delivery_time')
             ->where($map)
             ->where($cat)
             ->where('p.delivery_time is NULL')
             ->select();
 
-        foreach ($list4 as $k=>$v){
+        foreach ($list4 as $k => $v) {
             $time = time();
-            if ($v['order_prescription_type'] ==1){
-                if (($time - $v['payment_time'])/3600 < 24){
+            if ($v['order_prescription_type'] == 1) {
+                if (($time - $v['payment_time']) / 3600 < 24) {
                     $ct[] = $k;
                     unset($list4[$k]);
                 }
             }
-            if ($v['order_prescription_type'] ==2){
-                if (($time - $v['payment_time']) /3600 < 72){
+            if ($v['order_prescription_type'] == 2) {
+                if (($time - $v['payment_time']) / 3600 < 72) {
                     $ct[] = $k;
                     unset($list4[$k]);
                 }
             }
-            if ($v['order_prescription_type'] ==3){
-                if (($time - $v['payment_time']) /3600 < 168){
+            if ($v['order_prescription_type'] == 3) {
+                if (($time - $v['payment_time']) / 3600 < 168) {
                     $ct[] = $k;
                     unset($list4[$k]);
                 }
             }
         }
 
-        $list = array_merge($list1, $list2, $list3,$list4);
+        $list = array_merge($list1, $list2, $list3, $list4);
 
         $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
@@ -1358,12 +1493,13 @@ class DataMarket extends Backend
                     $value['site'] = 'voogmechic';
                     break;
             }
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['payment_time']));
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2),
+                date('Y-m-d H:i:s', $value['payment_time']));
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['site']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['work']);
-            if ($value['delivery_time']){
+            if ($value['delivery_time']) {
                 $value['delivery_time'] = date('Y-m-d H:i:s', $value['delivery_time']);
-            }else{
+            } else {
                 $value['delivery_time'] = '暂无打印面单时间';
             }
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['delivery_time']);
