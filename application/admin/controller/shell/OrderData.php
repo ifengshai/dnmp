@@ -157,6 +157,7 @@ class OrderData extends Backend
                                     $params['status'] = $v['status'] ?: '';
                                     $params['store_id'] = $v['store_id'];
                                     $params['base_grand_total'] = $v['base_grand_total'];
+                                    $params['grand_total'] = $v['grand_total'];
                                     $params['total_item_count'] = $v['total_item_count'];
                                     $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['order_type'] = $v['order_type'];
@@ -205,7 +206,8 @@ class OrderData extends Backend
                                     $params['increment_id'] = $v['order_no'];
                                     $params['status'] = $v['order_status'] ?: '';
                                     $params['store_id'] = $v['source'];
-                                    $params['base_grand_total'] = $v['actual_amount_paid'];
+                                    $params['base_grand_total'] = $v['base_actual_amount_paid'];
+                                    $params['grand_total'] = $v['actual_amount_paid'];
                                     $params['total_qty_ordered'] = $v['goods_quantity'];
                                     $params['base_currency_code'] = $v['base_currency'];
                                     $params['order_currency_code'] = $v['now_currency'];
@@ -242,7 +244,8 @@ class OrderData extends Backend
                                     $params['increment_id'] = $v['order_no'];
                                     $params['status'] = $v['order_status'] ?: '';
                                     $params['store_id'] = $v['source'];
-                                    $params['base_grand_total'] = $v['actual_amount_paid'];
+                                    $params['base_grand_total'] = $v['base_actual_amount_paid'];
+                                    $params['grand_total'] = $v['actual_amount_paid'];
                                     $params['total_qty_ordered'] = $v['goods_quantity'];
                                     $params['base_currency_code'] = $v['base_currency'];
                                     $params['order_currency_code'] = $v['now_currency'];
@@ -289,6 +292,7 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     $params['base_grand_total'] = $v['base_grand_total'];
+                                    $params['grand_total'] = $v['grand_total'];
                                     $params['total_item_count'] = $v['total_item_count'];
                                     $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['increment_id'] = $v['increment_id'];
