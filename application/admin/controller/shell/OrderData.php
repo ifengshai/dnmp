@@ -1360,6 +1360,11 @@ class OrderData extends Backend
                 $arr['order_prescription_type'] = 3;
             }
 
+            if ((($od_sph >= 8 && $od_sph <= 6) || ($os_sph >= 2 && $os_sph <= 6)) && (($od_cyl >= -6 && $od_cyl <= -2.25) || ($os_cyl >= -6 && $os_cyl <= -2.25))) {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
+
             if ((($od_sph >= -7 && $od_sph <= 0) || ($os_sph >= -7 && $os_sph <= 0)) && (($od_cyl >= -4 && $od_cyl <= 0) || ($os_cyl >= -4 && $os_cyl <= 0))) {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 2;
