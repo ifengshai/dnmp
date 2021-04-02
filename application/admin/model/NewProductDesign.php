@@ -31,7 +31,7 @@ class NewProductDesign extends Model
     public function getTabList()
     {
         return [
-            ['name' => '代录尺寸', 'field' => 'label', 'value' => 1],
+            ['name' => '待录尺寸', 'field' => 'label', 'value' => 1],
             ['name' => '待拍摄', 'field' => 'label', 'value' => 2],
             ['name' => '拍摄中', 'field' => 'label', 'value' => 3],
             ['name' => '待分配', 'field' => 'label', 'value' => 4],
