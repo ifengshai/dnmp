@@ -1326,7 +1326,7 @@ class Item extends Backend
                     $itemAttributeDetail = $itemAttribute->where('item_id', $id)->find();
                     if ($row['category_id'] == 35) {
                         $attributeType = 4;//耳饰
-                    } elseif ($row['category_id'] || $row['category_id'] == 34) {
+                    } elseif ($row['category_id'] == 39 || $row['category_id'] == 34) {
                         $attributeType = 5;//项链/手链
                     } elseif ($row['category_id'] == 38) {
                         $attributeType = 6;//眼镜链
@@ -1535,7 +1535,7 @@ class Item extends Backend
                             $itemAttributeDetail = $itemAttribute->where('item_id', $val['id'])->find();
                             if ($row['category_id'] == 35) {
                                 $attributeType = 4;//耳饰
-                            } elseif ($row['category_id'] || $row['category_id'] == 34) {
+                            } elseif ($row['category_id'] == 39|| $row['category_id'] == 34) {
                                 $attributeType = 5;//项链/手链
                             } elseif ($row['category_id'] == 38) {
                                 $attributeType = 6;//眼镜链
