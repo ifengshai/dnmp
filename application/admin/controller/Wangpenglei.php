@@ -900,8 +900,6 @@ class Wangpenglei extends Backend
             $params[$k]['id'] = $v['id'];
             $params[$k]['frame_cost'] = $frame_cost;
         }
-        dump($params);
-        die;
         $finace_cost->saveAll($params);
     }
 
@@ -950,24 +948,24 @@ class Wangpenglei extends Backend
         }
 
         //根据子单号查询条形码绑定关系
-        $list = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price,c.purchase_total,purchase_num,c.purchase_freight')
+        $list = $product_barcode_item->alias('a')->field('a.purchase_id,purchase_price,actual_purchase_price,c.purchase_total,purchase_num,c.purchase_freight')
             ->where(['item_order_number' => ['in', $item_order_number]])
             ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
             ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
             ->select();
         $list = collection($list)->toArray();
-        dump($list);
         $allcost = 0;
+        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem();
         foreach ($list as $k => $v) {
             if ($v['purchase_freight'] > 0) {
-                $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : ($v['purchase_total'] / $v['purchase_num']);
+                //查询采购总数量
+                $purchase_num = $purchase_item->where(['purchase_id' => $v['purchase_id']])->sum('purchase_num');
+                $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : ($v['purchase_total'] / $purchase_num);
             } else {
                 $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_price'];
             }
-            dump($purchase_price);
             $allcost += $purchase_price;
         }
-        dump($allcost);
         return $allcost + $workcost;
     }
 }
