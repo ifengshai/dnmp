@@ -198,7 +198,7 @@ class Repurchase extends Command
         //复购率：复购用户数/客户数
         $repurchaseRate = $userNum ? round($orderCount/$userNum*100,2) : 0;
         //复购频次：复购客户订单数/复购客户数
-        $repurchaseNumRate = $orderCount ? round($orderNum/$orderCount*100,2) : 0;
+        $repurchaseNumRate = $orderCount ? round($orderNum/$orderCount,2) : 0;
          $arr = array(
              'usernum'=>$userNum,   //客户数
              'againbuy_usernum'=>$orderCount,   //复购客户数
