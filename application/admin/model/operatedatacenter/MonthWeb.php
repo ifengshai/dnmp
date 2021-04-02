@@ -28,12 +28,6 @@ class MonthWeb extends Model
     ];
 
     /**
-     *
-     * @param $type
-     * @author mjj
-     * @date   2021/4/2 14:10:00
-     */
-    /**
      * 获取各站点的新老用户数据
      * @param $site  站点
      * @param string $flag   标识：区别查询条数，传true查12条数据，即一年数据，默认查全部数据

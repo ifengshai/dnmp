@@ -28,12 +28,6 @@ class Repurchase extends Model
     ];
 
     /**
-     *
-     * @param $type
-     * @author mjj
-     * @date   2021/4/2 14:10:00
-     */
-    /**
      * 获取各站点的复购用户数据
      * @param $site  站点
      * @param $type   复购周期类型
