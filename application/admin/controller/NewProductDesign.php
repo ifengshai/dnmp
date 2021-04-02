@@ -166,6 +166,30 @@ class NewProductDesign extends Backend
 
         if ($this->request->post()){
            $data = $this->request->post();
+            if ($data['attributeType'] ==1){
+                empty($data['row']['frame_height'])&& $this->error('镜框高数值不能为空');
+                empty($data['row']['frame_width'])&& $this->error('镜框宽数值不能为空');
+                empty($data['row']['frame_bridge'])&& $this->error('桥数值不能为空');
+                empty($data['row']['frame_temple_length'])&& $this->error('镜腿长数值不能为空');
+                empty($data['row']['frame_height'])&& $this->error('镜架总长数值不能为空');
+                empty($data['row']['frame_weight'])&& $this->error('重量数值不能为空');
+                empty($data['row']['mirror_width'])&& $this->error('镜面宽数值不能为空');
+            }
+            if ($data['attributeType'] ==32){
+                empty($data['row']['box_height'])&& $this->error('高度数值不能为空');
+                empty($data['row']['box_width'])&& $this->error('宽度数值不能为空');
+            }
+            if ($data['attributeType'] ==35){
+                empty($data['row']['earrings_height'])&& $this->error('高度数值不能为空');
+                empty($data['row']['earrings_width'])&& $this->error('宽度数值不能为空');
+            }
+            if ($data['attributeType'] ==38){
+                empty($data['row']['eyeglasses_chain'])&& $this->error('周长数值不能为空');
+            }
+            if ($data['attributeType'] ==32 ||$data['attributeType'] ==39){
+                empty($data['row']['necklace_perimeter'])&& $this->error('周长数值不能为空');
+                empty($data['row']['necklace_chain'])&& $this->error('延长链数值不能为空');
+            }
             $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
             //标记打印状态
             $this->model->startTrans();
