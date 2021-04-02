@@ -294,7 +294,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         }
 
                     ]
-                ]
+                ],
+                onLoadSuccess: function (value){
+                    if (value.label ==1){
+                        table.bootstrapTable('hideColumn','responsible_id');
+                    }
+                }
             });
 
             $(table).data("operate-del", null);

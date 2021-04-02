@@ -163,7 +163,7 @@ class NewProductDesign extends Backend
     //录尺寸
     public function record_size($ids =null)
     {
-
+        $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
         if ($this->request->post()){
            $data = $this->request->post();
             if ($data['attributeType'] ==1){
@@ -216,7 +216,7 @@ class NewProductDesign extends Backend
                     $this->error('请输入正确的延长链数值');
                 }
             }
-            $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
+
             //标记打印状态
             $this->model->startTrans();
             $itemAttribute->startTrans();
@@ -255,9 +255,13 @@ class NewProductDesign extends Backend
         if (!in_array($attributeType,$compareValue)){
             $attributeType = true;
         }
+        //获取商品属性
+        $cat['item_id'] = $goodsId;
+        $item_attribute = $itemAttribute->where($cat)->find();
         $this->assign('attributeType',$attributeType);
         $this->assign('goodsId',$goodsId);
         $this->assign('ids',$ids);
+        $this->assign('item_attribute',$item_attribute);
         return $this->view->fetch();
     }
 
