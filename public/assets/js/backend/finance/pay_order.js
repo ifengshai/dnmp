@@ -24,11 +24,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         {checkbox: true},
                         {field: 'id', title: __('序号'), operate:false},
                         {field: 'pay_number', title: __('付款单号'),},
-                        {field: 'supplier_name', title: __('供应商名称')},
+                        {field: 'supplier_name', title: __('供应商名称') ,operate:false },
+                        {field: 'supplier_id', title: __('供应商名称') , visible:false, addClass: "selectpage", extend: "data-source='finance/pay_order/getSupplier' data-field='supplier_name' "},
                         {field: 'status', title: __('状态'),custom: { 1: 'danger', 2: 'success', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary' , 7: 'primary'}, searchList: { 1: '新建', 2: '待审核', 3: '待付款', 4: '待上传付款凭证', 5: '已完成',6:'已拒绝' ,7:'已取消'},formatter: Table.api.formatter.status},
                         {field: 'create_user', title: __('创建人')},
                         {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'pay_amount', title: __('付款金额'), operate: 'BETWEEN', visible:false},
                         {field: 'check_user', title: __('审批人')},
+                        {field: 'pay_amount', title: __('付款金额'),operate:false},
+                        {field: 'purchase_order_user', title: __('申请人'),visible:false,},
+                        {field: '1688_number', title: __('1688单号'),visible:false,},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
