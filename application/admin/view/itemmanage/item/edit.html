@@ -100,6 +100,8 @@
                         删除</a></td>
                 </tr>
 
+
+
             </table>
         </div>
     </div>
@@ -121,47 +123,53 @@
             </select>
         </div>
     </div>
-    {if $row['category_id'] eq 34}
+    {if $row['category_id'] eq 32}
     <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="box_height" class="form-control" name="row[box_height]" type="number" value="" >
+           <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[box_height]" type="number" value="{$row['itemAttribute']['box_height']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="box_width" data-rule="" class="form-control" name="row[box_width]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[box_width]" type="number" value="{$row['itemAttribute']['box_width']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
     </div>
     {else}
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('镜框高（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_height" data-rule="" class="form-control" name="row[frame_height]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="{$row['itemAttribute']['frame_height']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="mirror_width" data-rule="" class="form-control" name="row[mirror_width]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="{$row['itemAttribute']['mirror_width']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('桥（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-attribute-type" type="hidden" name="row[attribute_type]" value="1"/>
-            <input id="frame_bridge" data-rule="" class="form-control" name="row[frame_bridge]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="{$row['itemAttribute']['frame_bridge']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('镜腿长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_temple_length" data-rule="" class="form-control"  name="row[frame_temple_length]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_temple_length]" type="number" value="{$row['itemAttribute']['frame_temple_length']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
     </div>
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('镜架总长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_length" data-rule="" class="form-control" name="row[frame_length]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="{$row['itemAttribute']['frame_length']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('重量（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_weight" data-rule="" class="form-control"  name="row[frame_weight]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_weight]" type="number" value="{$row['itemAttribute']['frame_weight']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
     </div>
     {/if}
@@ -316,40 +324,47 @@
         <div class="form-group" id="item-stock">
             <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
             <div class="col-xs-12 col-sm-3">
-                <input id="necklace_perimeter" data-rule="" class="form-control" name="row[necklace_perimeter]" type="number" value="" >
+                <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row['itemAttribute']['necklace_perimeter']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
             </div>
             <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
             <div class="col-xs-12 col-sm-3">
-                <input id="necklace_chain" data-rule="" class="form-control" name="row[necklace_chain]" type="number" value="" >
+                <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[necklace_chain]" type="number" value="{$row['itemAttribute']['necklace_chain']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
             </div>
         </div>
         {elseif $row['category_id'] eq 35 /}
         <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="earrings_height" data-rule="" class="form-control" name="row[earrings_height]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[earrings_height]" type="number" value="{$row['itemAttribute']['earrings_height']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="earrings_width" data-rule="" class="form-control" name="row[earrings_width]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[earrings_width]" type="number" value="{$row['itemAttribute']['earrings_width']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
         </div>
         {elseif $row['category_id'] eq 38 /}
         <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="eyeglasses_chain" data-rule="" class="form-control" name="row[eyeglasses_chain]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[eyeglasses_chain]" type="number" value="{$row['itemAttribute']['eyeglasses_chain']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
         </div>
         {elseif $row['category_id'] eq 39 /}
         <div class="form-group" id="item-stock">
         <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="necklace_perimeter" data-rule="" class="form-control" name="row[necklace_perimeter]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row['itemAttribute']['necklace_perimeter']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="necklace_chain" data-rule="" class="form-control" name="row[necklace_chain]" type="number" value="" >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[necklace_chain]" type="number" value="{$row['itemAttribute']['necklace_chain']}" min="0.00" oninput="if(value < 0){Layer.alert('只能输入正整数！');value = 0.00}">
+
         </div>
         </div>
         {/if}

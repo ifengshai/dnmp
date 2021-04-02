@@ -624,6 +624,13 @@ class Item extends Backend
                                 $itemAttribute['accessory_color'] = $itemColor[$k];
                                 $itemAttribute['accessory_texture'] = $params['frame_texture'];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                $itemAttribute['necklace_perimeter'] = $params['necklace_perimeter'];
+                                $itemAttribute['necklace_chain'] = $params['necklace_chain'];
+                                $itemAttribute['earrings_height'] = $params['earrings_height'];
+                                $itemAttribute['earrings_width'] = $params['earrings_width'];
+                                $itemAttribute['eyeglasses_chain'] = $params['eyeglasses_chain'];
+
+
                                 $itemAttr = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
                             }
                             Db::commit();
@@ -647,6 +654,7 @@ class Item extends Backend
                         $this->error(__('No rows were updated'));
                     }
                 } else {
+
                     if (is_array($itemName) && !in_array("", $itemName)) {
                         Db::startTrans();
                         try {
@@ -678,6 +686,10 @@ class Item extends Backend
                                 $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
                                 $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                $itemAttribute['box_height'] = $params['box_height'];
+                                $itemAttribute['box_width'] = $params['box_width'];
+                                $itemAttribute['frame_weight'] = $params['frame_weight'];
+
                                 $itemAttr = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
                             }
                             Db::commit();
