@@ -891,14 +891,17 @@ class Wangpenglei extends Backend
      */
     public function getFinanceCost()
     {
+        ini_set('memory_limit', '1512M');
         $finace_cost = new \app\admin\model\finance\FinanceCost();
-        $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
-        $list = $finace_cost->where(['type' => 2, 'bill_type' => 8, 'payment_time' => ['>', 1613750400]])->where('order_number=300048161')->select();
+        $list = $finace_cost->where(['type' => 2, 'bill_type' => 8, 'payment_time' => ['>', 1613750400]])->select();
         $params = [];
         foreach ($list as $k => $v) {
             $frame_cost = $this->order_frame_cost($v['order_number']);
             $params[$k]['id'] = $v['id'];
             $params[$k]['frame_cost'] = $frame_cost;
+
+            usleep(100000);
+            echo $v['id']."\n";
         }
         $finace_cost->saveAll($params);
     }
