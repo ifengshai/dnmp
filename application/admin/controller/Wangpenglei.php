@@ -900,6 +900,8 @@ class Wangpenglei extends Backend
             $params[$k]['id'] = $v['id'];
             $params[$k]['frame_cost'] = $frame_cost;
         }
+        dump($params);
+        die;
         $finace_cost->saveAll($params);
     }
 
