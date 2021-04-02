@@ -294,7 +294,7 @@ class RepurchaseAsynData extends Command
                 'old_usernum_sequential'=>$oldSequential,
                 'new_usernum_sequential'=>$newSequential,
             );
-            Db::name('datacenter_supply_month')
+            Db::name('datacenter_supply_month_web')
                 ->where('id',$lastData['id'])
                 ->update($arr);
             echo '站点：'.$site.' '.$lastData['day_date']." is ok"."\n";
