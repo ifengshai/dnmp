@@ -236,7 +236,7 @@ class RepurchaseAsynData extends Command
      * @date   2021/4/1 11:22:13
      */
     protected function getOldNewUser($site){
-        $allMonth = $this->getDateFromRange('2021-01-01','2021-03-01');
+        $allMonth = $this->getDateFromRange('2020-12-01','2021-03-01');
         $where['site'] = $site;
         $where['order_type'] = 1;
         $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
@@ -300,7 +300,7 @@ class RepurchaseAsynData extends Command
             );
             if($isExist){
                 Db::name('datacenter_supply_month_web')
-                    ->where('id',$lastData['id'])
+                    ->where('id',$isExist)
                     ->update($arr);
                 echo '站点：'.$site.' '.$v." update is ok"."\n";
                 usleep(10000);
