@@ -123,7 +123,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.label ==0){
+                                        if (row.label ==0 || row.label ==7){
                                             return  true;
                                         }else{
                                             return  false;
