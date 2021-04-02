@@ -2053,6 +2053,7 @@ class OrderData extends Backend
         $this->order_data(9);
         $this->order_data(10);
         $this->order_data(11);
+        $this->order_data(12);
     }
 
     /**
