@@ -893,7 +893,7 @@ class Wangpenglei extends Backend
     {
         ini_set('memory_limit', '1512M');
         $finace_cost = new \app\admin\model\finance\FinanceCost();
-        $list = $finace_cost->where(['type' => 2, 'bill_type' => 8, 'payment_time' => ['>', 1613750400]])->select();
+        $list = $finace_cost->where(['type' => 2, 'bill_type' => 8, 'frame_cost' => 0, 'payment_time' => ['>', 1613750400]])->select();
         $params = [];
         foreach ($list as $k => $v) {
             $frame_cost = $this->order_frame_cost($v['order_number']);
@@ -970,22 +970,15 @@ class Wangpenglei extends Backend
         }
 
         //根据子单号查询条形码绑定关系
-        $list = $product_barcode_item->alias('a')->field('a.purchase_id,purchase_price,actual_purchase_price,c.purchase_total,purchase_num,c.purchase_freight')
+        $list = $product_barcode_item->alias('a')->field('a.sku,b.price')
             ->where(['item_order_number' => ['in', $item_order_number]])
-            ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
-            ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
+            ->join(['fa_in_stock_item' => 'b'], 'a.in_stock_id=b.id')
             ->select();
         $list = collection($list)->toArray();
         $allcost = 0;
         $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem();
         foreach ($list as $k => $v) {
-            if ($v['purchase_freight'] > 0) {
-                //查询采购总数量
-                $purchase_num = $purchase_item->where(['purchase_id' => $v['purchase_id']])->sum('purchase_num');
-                $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : ($v['purchase_total'] / $purchase_num);
-            } else {
-                $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_price'];
-            }
+            $purchase_price = $v['price'] > 0 ? $v['price'] : $v['price'];
             $allcost += $purchase_price;
         }
 
