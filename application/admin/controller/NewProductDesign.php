@@ -349,7 +349,7 @@ class NewProductDesign extends Backend
             $item->startTrans();
             $newProductDesign->startTrans();
             try {
-                $itemResult = $item->where('id', '=', $itemId)->update(['item_status' => $item_status]);
+//                $itemResult = $item->where('id', '=', $itemId)->update(['item_status' => $item_status]);
                 $imgArr = explode(',', $params['frame_images']);
                 foreach ($imgArr as $k => $v) {
                     $arr = explode("/", $v);
@@ -406,7 +406,7 @@ class NewProductDesign extends Backend
                 $newProductDesign->rollback();
                 $this->error($e->getMessage(), [], 408);
             }
-            if (($itemAttrResult !== false) && ($itemResult !== false) && ($data['type'] == 1) && ($newProductDesignResult !== false)){
+            if (($itemAttrResult !== false) && ($data['type'] == 1) && ($newProductDesignResult !== false)){
                 $this->success();
             } else {
                 $this->error(__('Failed to upload product picture, please try again'));
