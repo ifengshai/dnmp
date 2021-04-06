@@ -46,6 +46,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                       return true;
                                   }
                               },
+                                {
+                                    name: 'settleprint',
+                                    text: '打印',
+                                    title: __('打印'),
+                                    classname: 'btn btn-xs btn-warning btn-addtabs',
+                                    icon: 'fa fa-print',
+                                    url: 'finance/settle_order/settleprint',
+                                }
 
                                 ],
                             formatter: Table.api.formatter.operate
