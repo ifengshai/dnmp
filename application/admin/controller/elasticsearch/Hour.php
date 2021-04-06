@@ -16,7 +16,7 @@ class Hour extends BaseElasticsearch
     {
         $start = '2018020500';
         $end = '2021020531';
-        $this->getPurchaseSearch(1, $start, $end);
+        $this->getPurchaseSearch([1,2,3], $start, $end);
     }
 
     /**
@@ -29,8 +29,11 @@ class Hour extends BaseElasticsearch
      * @author crasphb
      * @date   2021/4/2 15:14
      */
-    public function getPurchaseSearch($start, $end)
+    public function getPurchaseSearch($site, $start, $end)
     {
+        if(!is_array($site)) {
+            $site = [$site];
+        }
         $params = [
             'index' => 'mojing_order',
             'body'  => [
@@ -46,11 +49,11 @@ class Hour extends BaseElasticsearch
                                 ],
                             ],
                             //in查询
-//                            [
-//                                'terms' => [
-//                                    'id' => [13,42]
-//                                ]
-//                            ]
+                            [
+                                'terms' => [
+                                    'site' => $site
+                                ]
+                            ]
                         ],
                     ],
                 ],
@@ -198,11 +201,25 @@ class Hour extends BaseElasticsearch
             ],
         ];
         $results = $this->esClient->search($params);
-        //dump($results);die;
-        file_put_contents('./b.json', json_encode($results));
-        die;
+        return $results['aggregations']['site']['buckets'];
+    }
 
-        return $results['aggregations']['hourSale']['buckets'];
+    public function formatData($site) {
+        $start = '2018020500';
+        $end = '2021020531';
+        $results = $this->getPurchaseSearch([1], $start, $end);
+        $siteDataKeyColumn = array_column($results,'key');
+        $siteData = $siteDataKeyColumn[$site];
+        //总销售额
+        $allDaySalesAmount = $siteData['allDaySalesAmount']['value'];
+        //总订单数
+        $allOrderCount = $siteData['doc_count'];
+        //总副数
+        $allQtyOrdered = $siteData['allQtyOrdered']['value'];
+        //客单价
+        $allAvgPrice = $siteData['allAvgPrice']['value'];
+        //分时销量
+        $hourSale = $siteData['hourSale']['buckets'];
     }
 
 }
