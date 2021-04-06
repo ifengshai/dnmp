@@ -1823,8 +1823,13 @@ class Distribution extends Backend
         $writer->save('php://output');
     }
 
-
-    public function batch_export_xls_copy()
+    /**
+     *  财务导出
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/6 18:28
+     */
+    public function batch_export_xls_account()
     {
         set_time_limit(0);
         ini_set('memory_limit', '2048M');
@@ -1888,13 +1893,18 @@ class Distribution extends Backend
             unset($filter['order_prescription_type']);
         }
 
+        //判断是否有id
+        if ($filter['ids']) {
+            $map['a.id'] = ['in', $filter['ids']];
+        }
+
         //工单状态
         $work_order_status_map = [1, 2, 3, 5];
         //工单类型
         $work_order_type = [1, 2];
         $this->request->get(['filter' => json_encode($filter)]);
 
-        [$where, $sort, $order, $offset, $limit] = $this->buildparams();
+        [$where] = $this->buildparams();
         //站点列表
         $siteList = [
             1  => 'Zeelool',
@@ -1962,16 +1972,18 @@ class Distribution extends Backend
             '订单支付时间',
             '审单时间',
         ];
-
-        $list = $this->model
+        $path = '/uploads/order/';
+        $fileName = '财务导出数据';
+        $i = 0;
+        $this->model
             ->alias('a')
             ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time,b.payment_method,d.check_time')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-            ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
+            ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
+            ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
             ->where($where)
             ->where($map)
-            ->chunk(1000, function ($list) use ($siteList, $lensList, $headList) {
-
+            ->chunk(1000, function ($list) use ($siteList, $lensList, $headList, &$i, $path, $fileName) {
                 //获取更改镜框最新信息
                 $changeSku = $this->_work_order_change_sku
                     ->alias('a')
@@ -2086,19 +2098,19 @@ class Distribution extends Backend
                     } else {
                         $value['check_time'] = date('Y-m-d H:i:s', $value['check_time']);
                     }
-                    $data[$value['increment_id']]['check_time'] = $value['check_time'];//订单金额
+                    $data[$value['increment_id']]['check_time'] = $value['check_time'];
                 }
 
                 $data = array_values($data);
-                $path = "/uploads/";
-                $fileName = '财务导出数据';
-
                 if ($i > 0) {
                     $headList = [];
                 }
                 $i++;
                 Excel::writeCsv($data, $headList, $path.$fileName);
             });
+        unset($i);
+        header('Location: https://mojing.nextmar.com'.$path.$fileName.'.csv');
+        die;
     }
 
 
