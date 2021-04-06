@@ -77,6 +77,9 @@ class NewProductDesign extends Backend
             if ($filter['label']) {
                 $map['status'] = $filter['label'];
             }
+            if ($filter['sku']) {
+                $map['sku'] = ['like','%'.$filter['sku'].'%'];
+            }
             unset($filter['label']);
             if ($filter['responsible_id']){
                 $whe_like['nickname'] = ['like','%'.$filter['responsible_id'].'%'];
@@ -88,6 +91,7 @@ class NewProductDesign extends Backend
                 }
             }
             unset($filter['responsible_id']);
+            unset($filter['sku']);
             $this->request->get(['filter' => json_encode($filter)]);
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
