@@ -655,8 +655,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             Form.events.datetimepicker($("form"));
         },
         detail: function () {
-            $('#plupload-upload_photos').hide();
-            $(".btn-trash").hide();
             Form.api.bindevent($("form[role=form]"));
         },
         images: function () {

@@ -267,7 +267,6 @@ class Excel
      */
     public static function writeCsv($data = array(), $headlist = array(), $fileName, $export = false)
     {
-
         if ($export) {
             header('Content-Type: application/vnd.ms-excel');
             header('Content-Disposition: attachment;filename="' . $fileName . '.csv"');

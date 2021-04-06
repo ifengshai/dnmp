@@ -788,7 +788,7 @@ class ScmQuality extends Scm
         }
         $res ? $this->success('取消成功', [], 200) : $this->error(__('取消失败'), [], 404);
     }
-    
+
     /**
      * 审核质检
      *

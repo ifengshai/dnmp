@@ -30,7 +30,6 @@ use FacebookAds\Http\RequestInterface;
 use FacebookAds\TypeChecker;
 use FacebookAds\Object\Fields\AdActivityFields;
 use FacebookAds\Object\Values\AdActivityCategoryValues;
-use FacebookAds\Object\Values\AdActivityDataSourceValues;
 use FacebookAds\Object\Values\AdActivityEventTypeValues;
 
 /**
@@ -55,7 +54,6 @@ class AdActivity extends AbstractObject {
     $ref_enums = array();
     $ref_enums['EventType'] = AdActivityEventTypeValues::getInstance()->getValues();
     $ref_enums['Category'] = AdActivityCategoryValues::getInstance()->getValues();
-    $ref_enums['DataSource'] = AdActivityDataSourceValues::getInstance()->getValues();
     return $ref_enums;
   }
 

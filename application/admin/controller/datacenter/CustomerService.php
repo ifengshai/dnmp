@@ -1010,8 +1010,8 @@ class CustomerService extends Backend
                     'start'     => $start,
                     'end'       => $end,
                     'platform'  => $platform,
-                    'one_time' =>$params['one_time'],
-                    'check'=>0,
+                    'one_time'  => $params['one_time'],
+                    'check'  => 0
                 ]);
             } elseif ($worklistOne && $worklistTwo) { //两个提交的数据
                 //取出总数
@@ -1042,10 +1042,9 @@ class CustomerService extends Backend
                     'startTwo'     => $startTwo,
                     'endTwo'       => $endTwo,
                     'platform'     => $platform,
-                    'check'=>1,
-                    'one_time' =>$params['one_time'],
-                    'two_time' =>$params['two_time']
-
+                    'one_time'  => $params['one_time'],
+                    'check'  => 1,
+                    'two_time'  => $params['two_time'],
                 ]);
             }
             $orderPlatformList = config('workorder.platform');
