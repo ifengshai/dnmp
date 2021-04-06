@@ -5,8 +5,37 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
-## v5.0.5
+## v8.0.1
 
+### Added
+- Added async support to Conversions API - Create event request promises by using EventRequestAsync.
+
+## v8.0.0
+
+### Changed
+- Graph API call upgrade to [v8.0](https://developers.facebook.com/docs/graph-api/changelog/version8.0)
+
+### Added
+- `delivery_category` field in custom_data section for Conversions API(formerly Serverside API).
+
+## v7.0.2
+### Added
+- Added support for data processing options in Serverside API. For more details see : https://developers.facebook.com/docs/marketing-apis/data-processing-options
+
+## v7.0.0
+### Changed
+- Graph API call upgrade to [v7.0](https://developers.facebook.com/docs/graph-api/changelog/version7.0)
+
+## v6.0.2
+### Added
+- Add support for custom properties in the Server-Side API
+
+## v6.0.0
+### Changed
+- Graph API call upgrade to [v6.0](https://developers.facebook.com/docs/graph-api/changelog/version6.0)
+
+## v5.0.5
+### Added
 - Server-side API added search_string to CustomData and fixed setLastName in UserData object.
 
 ## v5.0.3
@@ -44,7 +73,7 @@ All notable changes to this project will be documented in this file.
 
 ## v3.3.1
 ### Changed
-- Remove list of API call from Business SDK, any [these APIs](https://developers.facebook.com/docs/graph-api/changelog/4-30-2019-endpoint-deprecations) included in Business SDK will be deprecated.   
+- Remove list of API call from Business SDK, any [these APIs](https://developers.facebook.com/docs/graph-api/changelog/4-30-2019-endpoint-deprecations) included in Business SDK will be deprecated.
 
 ## v3.3.0
 ### Changed

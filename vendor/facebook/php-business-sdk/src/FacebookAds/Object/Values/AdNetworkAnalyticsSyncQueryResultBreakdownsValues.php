@@ -37,6 +37,8 @@ use FacebookAds\Enum\AbstractEnum;
  */
 class AdNetworkAnalyticsSyncQueryResultBreakdownsValues extends AbstractEnum {
 
+  const AD_SERVER_CAMPAIGN_ID = 'AD_SERVER_CAMPAIGN_ID';
+  const AD_SPACE = 'AD_SPACE';
   const AGE = 'AGE';
   const APP = 'APP';
   const CLICKED_VIEW_TAG = 'CLICKED_VIEW_TAG';
@@ -48,6 +50,8 @@ class AdNetworkAnalyticsSyncQueryResultBreakdownsValues extends AbstractEnum {
   const DISPLAY_FORMAT = 'DISPLAY_FORMAT';
   const FAIL_REASON = 'FAIL_REASON';
   const GENDER = 'GENDER';
+  const INSTANT_ARTICLE_ID = 'INSTANT_ARTICLE_ID';
+  const INSTANT_ARTICLE_PAGE_ID = 'INSTANT_ARTICLE_PAGE_ID';
   const PLACEMENT = 'PLACEMENT';
   const PLACEMENT_NAME = 'PLACEMENT_NAME';
   const PLATFORM = 'PLATFORM';

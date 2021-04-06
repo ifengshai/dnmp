@@ -240,6 +240,9 @@ class ItAppDemand extends Backend
                 $this->error('缺少重要参数');
             }
             $app_demand = $this->model->find($params['id']);
+            if ($app_demand->develop_finish_status == 0){
+                $this->error('开发还未完成，无法执行确认完成操作');
+            }
             $app_demand->update_time = date('Y-m-d H:i:s',time());
             $app_demand->test_finish_time = date('Y-m-d H:i:s',time());
             $app_demand->test_is_finish = 1;
@@ -267,6 +270,9 @@ class ItAppDemand extends Backend
                 $this->error('缺少重要参数');
             }
             $app_demand = $this->model->find($params['id']);
+            if ($app_demand->test_is_finish ==0){
+                $this->error('测试还未完成测试，无法执行确认完成操作');
+            }
             $app_demand->update_time = date('Y-m-d H:i:s',time());
             $app_demand->online_finish_time = date('Y-m-d H:i:s',time());
             $app_demand->online_status = 1;

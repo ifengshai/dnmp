@@ -64,7 +64,7 @@ class ZeeloolEsPrescriptionDetailHelper
 	public static function get_list_by_entity_ids($entity_id)
 	{
 		if ($entity_id) {
-			$querySql = "select sfoi.original_price,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
+			$querySql = "select sfoi.original_price,sfoi.item_id,sfoi.base_discount_amount,sfoi.base_row_total,sfo.increment_id,sfoi.product_options,sfoi.order_id,sfo.`status`,sfoi.sku,sfoi.qty_ordered,sfoi.name,sfo.created_at
 			from sales_flat_order_item sfoi
 			left join sales_flat_order sfo on sfoi.order_id=sfo.entity_id 
 			where sfo.entity_id in($entity_id)";
@@ -126,6 +126,18 @@ class ZeeloolEsPrescriptionDetailHelper
 			$items[$item_key]['base_row_total'] = $item_value['base_row_total'];
 			$items[$item_key]['original_price'] = $item_value['original_price'];
 			$product_options = unserialize($item_value['product_options']);
+
+            if ($product_options['info_buyRequest']['tmplens']['prescription_pic_checked'] === false &&
+                $product_options['info_buyRequest']['tmplens']['prescription_pic_id'] > 0){
+                $items[$item_key]['to_examine'] = true;
+            }else{
+                $items[$item_key]['to_examine'] = false;
+            }
+            if ($product_options['info_buyRequest']['tmplens']['prescription_pic_id'] > 0){
+                $items[$item_key]['prescription_image'] = Db::connect('database.db_zeelool_es')->table('oc_prescription_pic')->where('id',$product_options['info_buyRequest']['tmplens']['prescription_pic_id'])->value('pic');
+            }else{
+                $items[$item_key]['prescription_image'] = null;
+            }
 			// dump($product_options);
 			$final_params = array();
 
