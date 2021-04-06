@@ -268,6 +268,7 @@ class NewProductDesign extends Backend
     //更改状态
     public function change_status()
     {
+       $item = new  Item();
        $ids =  $this->request->get('ids');
        $status =  $this->request->get('status');
        empty($ids) && $this->error('缺少重要参数');
@@ -275,6 +276,12 @@ class NewProductDesign extends Backend
         $map['id'] = $ids;
         if ($status ==9){
             $status =6;
+        }
+        if ($status ==8){
+            $value = $this->model->get($ids);
+            $data['item_status']=1;
+            $change['sku'] = $value->sku;
+            $item->allowField(true)->isUpdate(true, $change)->save($data);
         }
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
