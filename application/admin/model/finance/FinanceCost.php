@@ -32,10 +32,23 @@ class FinanceCost extends Model
      */
     public function order_income($order_id = null)
     {
+
         $order = new \app\admin\model\order\order\NewOrder();
         $order_detail = $order->get($order_id); //查询订单信息
         if (!$order_detail) {
             return 0;
+        }
+
+        //判断如果有订单收入数据则不再插入
+        $count = $this->where([
+            'type'         => 1,
+            'bill_type'    => 1,
+            'order_number' => $order_detail['increment_id'],
+            'site'         => $order_detail['site'],
+        ])
+            ->count();
+        if ($count > 0) {
+            return false;
         }
         $params['type'] = 1;
         $params['bill_type'] = 1;
@@ -249,21 +262,36 @@ class FinanceCost extends Model
         if (!$order_detail) {
             return [];
         }
-        $params['type'] = 2;
-        $params['bill_type'] = 8;
-        $params['order_number'] = $order_detail['increment_id'];
-        $params['site'] = $order_detail['site'];
-        $params['order_type'] = $order_detail['order_type'];
-        $params['order_money'] = $order_detail['base_grand_total'];
-        $params['income_amount'] = $order_detail['base_grand_total'];
-        $params['order_currency_code'] = $order_detail['order_currency_code'];
-        $params['payment_time'] = $order_detail['payment_time'];
-        $params['payment_method'] = $order_detail['payment_method'];
+        //判断如果有订单收入数据则不再插入
+        $list = $this->where([
+            'type'         => 2,
+            'bill_type'    => 8,
+            'order_number' => $order_detail['increment_id'],
+            'site'         => $order_detail['site'],
+        ])
+            ->find();
         $params['frame_cost'] = $this->order_frame_cost($order_id, $order_detail['increment_id']);
         $params['lens_cost'] = $this->order_lens_cost($order_id, $order_detail['increment_id']);
-        $params['action_type'] = 1;
-        $params['createtime'] = time();
-        return $this->allowField(true)->save($params);
+        if ($list) {
+            return $this->where(['id' => $list->id])->update($params);
+        } else {
+            $params['type'] = 2;
+            $params['bill_type'] = 8;
+            $params['order_number'] = $order_detail['increment_id'];
+            $params['site'] = $order_detail['site'];
+            $params['order_type'] = $order_detail['order_type'];
+            $params['order_money'] = $order_detail['base_grand_total'];
+            $params['income_amount'] = $order_detail['base_grand_total'];
+            $params['order_currency_code'] = $order_detail['order_currency_code'];
+            $params['payment_time'] = $order_detail['payment_time'];
+            $params['payment_method'] = $order_detail['payment_method'];
+            $params['action_type'] = 1;
+            $params['createtime'] = time();
+
+            return $this->allowField(true)->save($params);
+        }
+
+
     }
 
     /**
