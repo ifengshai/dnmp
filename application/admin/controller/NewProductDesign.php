@@ -268,7 +268,7 @@ class NewProductDesign extends Backend
     //更改状态
     public function change_status()
     {
-        $item = new Item();
+       $item = new  Item();
        $ids =  $this->request->get('ids');
        $status =  $this->request->get('status');
        empty($ids) && $this->error('缺少重要参数');
