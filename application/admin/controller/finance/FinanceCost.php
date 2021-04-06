@@ -223,7 +223,7 @@ class FinanceCost extends Backend
         $i = 0;
         $this->model
             ->where($where)
-            ->chunk(1, function ($data) use ($siteList, $typeDocument, $orderType, $type, $headList, $saveName, $path, &$i) {
+            ->chunk(1000, function ($data) use ($siteList, $typeDocument, $orderType, $type, $headList, $saveName, $path, &$i) {
                 $params = [];
                 foreach ($data as $k => &$value) {
                     if ($value['action_type'] == 1) {
