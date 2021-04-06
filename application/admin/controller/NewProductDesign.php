@@ -120,7 +120,7 @@ class NewProductDesign extends Backend
                     $list[$key]['responsible_id'] = '暂无';
                 }
             }
-            $result = array("total" => $total,'label'=>$map['status']?$map['status']:0, "rows" => $list);
+            $result = array("total" => $total,"label"=>$map['status']?$map['status']:0, "rows" => $list);
 
             return json($result);
         }
@@ -209,10 +209,10 @@ class NewProductDesign extends Backend
                 }
             }
             if ($data['attributeType'] ==32 ||$data['attributeType'] ==39){
-                if($data['row']['box_height']<0.1){
+                if($data['row']['necklace_perimeter']<0.1){
                     $this->error('请输入正确的周长数值');
                 }
-                if($data['row']['box_width']<0.1){
+                if($data['row']['necklace_chain']<0.1){
                     $this->error('请输入正确的延长链数值');
                 }
             }
@@ -268,7 +268,6 @@ class NewProductDesign extends Backend
     //更改状态
     public function change_status()
     {
-       $item = new Item();
        $ids =  $this->request->get('ids');
        $status =  $this->request->get('status');
        empty($ids) && $this->error('缺少重要参数');
@@ -276,12 +275,6 @@ class NewProductDesign extends Backend
         $map['id'] = $ids;
         if ($status ==9){
             $status =6;
-        }
-        if ($status ==8){
-            $value = $this->model->get($ids);
-            $data['item_status']=1;
-            $change['sku'] = $value->sku;
-            $item->allowField(true)->isUpdate(true, $change)->save($data);
         }
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
@@ -316,7 +309,7 @@ class NewProductDesign extends Backend
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin'=>'b'],'a.uid=b.id')
-            ->where('a.group_id=72')
+            ->where('a.group_id=71')
             ->field('id,nickname')
             ->select();
         $this->assign('ids',$ids);
