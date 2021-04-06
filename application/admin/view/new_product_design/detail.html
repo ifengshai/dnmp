@@ -54,188 +54,114 @@
 </style>
 
 <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-    <div class="form-group" id="item-stock">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
+    <input type="hidden" name="goodsId" value="{$goodsId}">
+    <input type="hidden" name="ids" value="{$ids}">
+    {if $attributeType == 'true'}
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜框高（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            {:Form::select('row[category_id]', $categoryList, $row.category_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'disabled'=>'disabled'])}
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="{$row->frame_height}"  readonly>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-id" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$row.sku}" disabled='disabled'>
+            <input id="c-weight" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="{$row->mirror_width}" readonly >
         </div>
     </div>
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Procurement_type')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <select  id="c-procurement_type" data-rule="required" class="form-control selectpicker" name="row[procurement_type]"  disabled="disabled">
-                <option value="0">请选择</option>
-                <option value="1"{eq name="$row['itemAttribute']['procurement_type']" value="1"}selected{/eq}>线上采购</option>
-                <option value="2"{eq name="$row['itemAttribute']['procurement_type']" value="2"}selected{/eq}>线下采购</option>
-            </select>
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Procurement_origin')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <select  id="c-procurement_origin" data-rule="required" class="form-control selectpicker" name="row[procurement_origin]" disabled="disabled">
-                {foreach name="AllOrigin" item="vo"}
-                <option value="{$key}"{eq name="$row['itemAttribute']['procurement_origin']" value="$key"}selected{/eq}>{$vo}</option>
-                {/foreach}
-            </select>
-        </div>
-    </div>
-    <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_bridge')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="{$row['itemAttribute']['frame_bridge']}" disabled>
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Mirror_width')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="{$row['itemAttribute']['mirror_width']}" disabled>
-        </div>
-    </div>
-    <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_height')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('桥（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-attribute-type" type="hidden" name="row[attribute_type]" value="1"/>
-            <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="{$row['itemAttribute']['frame_height']}" disabled>
+            <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="{$row->frame_bridge}" readonly >
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_width')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜腿长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_width]" type="number" value="{$row['itemAttribute']['frame_width']}" disabled>
+            <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="{$row->frame_temple_length}" readonly >
         </div>
     </div>
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_length')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜架总长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="{$row['itemAttribute']['frame_length']}" disabled>
+            <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="{$row->frame_length}" readonly>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_temple_length')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('重量（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="{$row['itemAttribute']['frame_temple_length']}" disabled>
+            <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_weight]" type="number" value="{$row->frame_weight}" readonly >
         </div>
     </div>
+    <!--镜盒-->
+    {elseif $attributeType == '32'}
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Weight')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-weight" data-rule="required" class="form-control" name="row[weight]" type="number" value="{$row['itemAttribute']['frame_weight']}" disabled>
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[box_height]" type="number" value="{$row->box_height}" readonly >
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Glasses_type')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-glasses_type" data-rule="required" class="form-control selectpicker" name="row[glasses_type]" disabled>
-                {foreach name="AllGlassesType" item="vo"}
-                <option value="{$key}"{eq name="$row['itemAttribute']['glasses_type']" value="$key"}selected{/eq}>{$vo}</option>
-                {/foreach}
-            </select>
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[box_width]" type="number" value="{$row->box_width}"  readonly>
         </div>
     </div>
+    <!--手链-->
+    {elseif $attributeType == 34}
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Shape')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-shape" data-rule="required" class="form-control selectpicker" name="row[shape]" disabled>
-                {foreach name="AllShape" item="vo"}
-                <option value="{$key}"{eq name="$row['itemAttribute']['shape']" value="$key"}selected{/eq}>{$vo}</option>
-                {/foreach}
-            </select>
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row->necklace_perimeter}" readonly >
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_texture')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_texture" data-rule="required" class="form-control selectpicker" name="row[frame_texture]" disabled>
-                {foreach name="AllTexture" item="vo"}
-                <option value="{$key}" {eq name="$row['itemAttribute']['frame_texture']" value="$key"}selected{/eq}>{$vo}</option>
-                {/foreach}
-            </select>
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[necklace_chain]" type="number" value="{$row->necklace_chain}" readonly >
         </div>
     </div>
+    <!--耳饰-->
+    {elseif $attributeType == 35}
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_shape')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_shape" data-rule="required" class="form-control selectpicker" name="row[frame_shape]" disabled>
-                {foreach name="AllFrameShape" item="vo"}
-                <option value="{$key}"{eq name="$row['itemAttribute']['frame_shape']" value="$key"}selected{/eq}>{$vo}</option>
-                {/foreach}
-            </select>
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[earrings_height]" type="number" value="{$row->earrings_height}" readonly >
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_gender')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_gender" data-rule="required" class="form-control selectpicker" name="row[frame_gender]" disabled>
-                {foreach name="AllFrameGender" item="vo"}
-                <option value="{$key}"{eq name="$row['itemAttribute']['frame_gender']" value="$key"}selected{/eq}>{$vo}</option>
-                {/foreach}
-            </select>
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[earrings_width]" type="number" value="{$row->earrings_width}"  readonly>
         </div>
     </div>
+    <!--眼镜链-->
+    {elseif $attributeType == 38}
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_size')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_size" data-rule="required" class="form-control selectpicker" name="row[frame_size]" disabled>
-                {foreach name="AllFrameSize" item="vo"}
-                <option value="{$key}" {eq name="$row['itemAttribute']['frame_size']" value="$key"}selected{/eq}>{$vo}</option>
-                {/foreach}
-            </select>
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_type')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <select  id="c-Frame_type" data-rule="required" class="form-control selectpicker" name="row[frame_type]" disabled>
-                {foreach name="AllFrameType" item="vo"}
-                <option value="{$key}" {eq name="$row['itemAttribute']['frame_type']" value="$key"}selected{/eq}>{$vo}</option>
-                {/foreach}
-            </select>
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[eyeglasses_chain]" type="number" value="{$row->eyeglasses_chain}" readonly>
         </div>
     </div>
+    <!--项链-->
+    {elseif $attributeType == 39}
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_piece')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_piece" data-rule="required" class="form-control selectpicker" name="row[frame_piece]" disabled>
-                <option value="1" {eq name="$row['itemAttribute']['frame_piece']" value="1"}selected{/eq}>是</option>
-                <option value="2" {eq name="$row['itemAttribute']['frame_piece']" value="2"}selected{/eq}>否</option>
-            </select>
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row->necklace_perimeter}"  readonly>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_advance')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_is_advance" data-rule="required" class="form-control selectpicker" name="row[frame_is_advance]" disabled>
-                <option value="1" {eq name="$row['itemAttribute']['frame_is_advance']" value="1"}selected{/eq}>是</option>
-                <option value="2" {eq name="$row['itemAttribute']['frame_is_advance']" value="2"}selected{/eq}>否</option>
-            </select>
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[necklace_chain]" type="number" value="{$row->necklace_chain}" readonly >
         </div>
     </div>
+    {else}
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_temple_is_spring')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('伸展长度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_temple_is_spring" data-rule="required" class="form-control selectpicker" name="row[frame_temple_is_spring]" disabled>
-                <option value="1"{eq name="$row['itemAttribute']['frame_temple_is_spring']" value="1"}selected{/eq}>是</option>
-                <option value="2"{eq name="$row['itemAttribute']['frame_temple_is_spring']" value="2"}selected{/eq}>否</option>
-            </select>
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[silk_length]" type="number" value="{$row->silk_length}"  readonly>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_adjust_nose_pad')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('伸展宽度（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_is_adjust_nose_pad" data-rule="required" class="form-control selectpicker" name="row[frame_is_adjust_nose_pad]" disabled>
-                <option value="1"{eq name="$row['itemAttribute']['frame_is_adjust_nose_pad']" value="1"}selected{/eq}>是</option>
-                <option value="2"{eq name="$row['itemAttribute']['frame_is_adjust_nose_pad']" value="2"}selected{/eq}>否</option>
-            </select>
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[silk__width]" type="number" value="{$row->silk__width}" readonly >
         </div>
     </div>
+    {/if}
+    {if $img neq null}
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_is_recipe')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <select  id="c-frame_is_recipe" data-rule="required" class="form-control selectpicker" name="row[frame_is_recipe]" disabled>
-                <option value="1"{eq name="$row['itemAttribute']['frame_is_recipe']" value="1"}selected{/eq}>是</option>
-                <option value="2"{eq name="$row['itemAttribute']['frame_is_recipe']" value="2"}selected{/eq}>否</option>
-            </select>
-        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('图片')}:</label>
+        {volist name="img" id="ct"}
+        <img style="width: 25%;margin-top: 10px;margin-left: 15px"  data-tips-image src="{$ct}" alt="">
+        {/volist}
     </div>
-
-
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <div class="input-group">
-                <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[frame_images]" type="text" value="{$row['itemAttribute']['frame_images']}" disabled>
-                <!--                <div class="input-group-addon no-border no-padding">-->
-                <!--                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=itemmanage/item" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>-->
-                <!--                </div>-->
-                <span class="msg-box n-right" for="c-upload_photos"></span>
-            </div>
-            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
-        </div>
-    </div>
-    <input type='hidden' name="row[item_status]" id="status" value="1">
+    {/if}
 </form>

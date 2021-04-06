@@ -1,4 +1,30 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
+    function viewTable(table, value) {
+        //隐藏、显示搜索及按钮
+        $('#responsible_id').parents('.form-group').hide();
+        $('select[name="status"]').parents('.form-group').hide();
+        if (0 == value) {
+            $('select[name="status"]').parents('.form-group').show();
+            $table.bootstrapTable('hideColumn', 'responsible_id');
+
+        } else if (1 == value) {
+            $('select[name="status"]').parents('.form-group').show();
+        } else if (2 == value) {
+            $('select[name="status"]').parents('.form-group').show();
+        } else if (3 == value) {
+            $('select[name="status"]').parents('.form-group').show();
+        } else if (4 == value) {
+            $('select[name="status"]').parents('.form-group').show();
+        } else if (5 == value) {
+            $('#responsible_id').parents('.form-group').show();
+        } else if (6 == value) {
+            $('#responsible_id').parents('.form-group').show();
+        } else if (7 == value) {
+            $('#responsible_id').parents('.form-group').show();
+        }else{
+            $('select[name="status"]').parents('.form-group').show();
+        }
+    }
 
     var Controller = {
         index: function () {
@@ -46,7 +72,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('序号')},
+                        {field: 'id', title: __('序号'),operate: false},
                         {field: 'sku', title: __('Sku')},
 
                         {
@@ -91,13 +117,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: '',
                                     url: 'new_product_design/detail/id/{row.id}',
-                                    area: ['50%', '45%'],
+                                    area: ['80%', '65%'],
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.label ==0 || row.status ==1){
+                                        if (row.label ==0 || row.label ==7){
                                             return  true;
                                         }else{
                                             return  false;
@@ -242,7 +268,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     name: 'audit_refused',
                                     text:__('审核拒绝'),
                                     title:__('审核拒绝'),
-                                    classname: 'btn btn-xs btn-danger  btn-magic btn-dialog',
+                                    classname: 'btn btn-xs btn-danger  btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
                                     url: 'new_product_design/change_status?status=9',
                                     success: function (data, ret) {
@@ -268,15 +294,49 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         }
 
                     ]
-                ]
+                ],
+                onLoadSuccess: function (value){
+                    if (value.label ==1 || value.label ==2 || value.label ==3 ||value.label ==4 ){
+                        table.bootstrapTable('hideColumn','responsible_id');
+                    }else{
+                        table.bootstrapTable('showColumn','responsible_id');
+                    }
+                }
             });
 
             $(table).data("operate-del", null);
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+            //根据菜单隐藏或显示对应列及按钮
+            viewTable(table, Config.label);
+            //选项卡切换
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    params = queryParams(params);
+                    params.label = value;
+                    return params;
+                };
+                Config.label = value;
+
+                //根据菜单隐藏或显示对应列及按钮
+                viewTable(table, Config.label);
+
+                table.bootstrapTable('refresh', {});
+                return false;
+            });
         },
         add: function () {
+            Controller.api.bindevent();
+        },
+        allocate_personnel: function () {
+            Controller.api.bindevent();
+        },
+        record_size: function () {
             Controller.api.bindevent();
         },
         edit: function () {

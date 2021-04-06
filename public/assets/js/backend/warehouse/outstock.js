@@ -118,6 +118,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
+                                        return false;
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.status == 0) {
                                             return true;

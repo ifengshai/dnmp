@@ -624,6 +624,13 @@ class Item extends Backend
                                 $itemAttribute['accessory_color'] = $itemColor[$k];
                                 $itemAttribute['accessory_texture'] = $params['frame_texture'];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                $itemAttribute['necklace_perimeter'] = $params['necklace_perimeter'];
+                                $itemAttribute['necklace_chain'] = $params['necklace_chain'];
+                                $itemAttribute['earrings_height'] = $params['earrings_height'];
+                                $itemAttribute['earrings_width'] = $params['earrings_width'];
+                                $itemAttribute['eyeglasses_chain'] = $params['eyeglasses_chain'];
+
+
                                 $itemAttr = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
                             }
                             Db::commit();
@@ -647,6 +654,7 @@ class Item extends Backend
                         $this->error(__('No rows were updated'));
                     }
                 } else {
+
                     if (is_array($itemName) && !in_array("", $itemName)) {
                         Db::startTrans();
                         try {
@@ -678,6 +686,10 @@ class Item extends Backend
                                 $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
                                 $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                $itemAttribute['box_height'] = $params['box_height'];
+                                $itemAttribute['box_width'] = $params['box_width'];
+                                $itemAttribute['frame_weight'] = $params['frame_weight'];
+
                                 $itemAttr = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
                             }
                             Db::commit();
@@ -741,6 +753,7 @@ class Item extends Backend
             $this->assign('AllTexture', $allTexture);
             $this->assign('AllNosePad', $allNosePad);
         }
+
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -1203,6 +1216,7 @@ class Item extends Backend
             $this->assign('AllShape', $allShape);
             $this->assign('AllTexture', $allTexture);
         }
+
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
         return $this->view->fetch();
@@ -1318,7 +1332,7 @@ class Item extends Backend
                     throw new Exception('审核失败！！');
                 }
                 //查询同步的平台
-                $platformArr = $platform->where(['sku' => $row['sku'], 'is_upload' => 2])->select();
+                $platformArr = $platform->where(['sku' => $row['sku']])->where('platform_type','<>',4)->select();
                 $error_num = [];
                 $uploadItemArr = [];
                 foreach ($platformArr as $k => $v) {
@@ -1326,7 +1340,7 @@ class Item extends Backend
                     $itemAttributeDetail = $itemAttribute->where('item_id', $id)->find();
                     if ($row['category_id'] == 35) {
                         $attributeType = 4;//耳饰
-                    } elseif ($row['category_id'] || $row['category_id'] == 34) {
+                    } elseif ($row['category_id'] == 39 || $row['category_id'] == 34) {
                         $attributeType = 5;//项链/手链
                     } elseif ($row['category_id'] == 38) {
                         $attributeType = 6;//眼镜链
@@ -1355,7 +1369,9 @@ class Item extends Backend
                     $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
                     $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
                     $uploadItemArr['site'] = $v['platform_type'];
+                    $uploadItemArr['status'] = $v['outer_sku_status'];
                     $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
+                    $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
                     //审核通过把SKU同步到有映射关系的平台
                     if ($v['platform_type'] == 12) {
                         $uploadItemArr['skus'][0] = [
@@ -1528,14 +1544,14 @@ class Item extends Backend
                 try {
                     foreach ($row as $val) {
                         // $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
-                        $platformArr = $platform->where(['sku' => $val['sku'], 'is_upload' => 2])->select();
+                        $platformArr = $platform->where(['sku' => $val['sku']])->where('platform_type','<>',4)->select();
                         $uploadItemArr = [];
                         foreach ($platformArr as $k => $v) {
                             $itemAttribute = new ItemAttribute();
                             $itemAttributeDetail = $itemAttribute->where('item_id', $val['id'])->find();
                             if ($row['category_id'] == 35) {
                                 $attributeType = 4;//耳饰
-                            } elseif ($row['category_id'] || $row['category_id'] == 34) {
+                            } elseif ($row['category_id'] == 39|| $row['category_id'] == 34) {
                                 $attributeType = 5;//项链/手链
                             } elseif ($row['category_id'] == 38) {
                                 $attributeType = 6;//眼镜链
@@ -1564,7 +1580,9 @@ class Item extends Backend
                             $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
                             $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
                             $uploadItemArr['site'] = $v['platform_type'];
+                            $uploadItemArr['status'] = $v['outer_sku_status'];
                             $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
+                            $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
                             //审核通过把SKU同步到有映射关系的平台
                             if ($v['platform_type'] == 12) {
                                 $uploadItemArr['skus'][0] = [

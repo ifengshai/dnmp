@@ -5,8 +5,11 @@ namespace app\admin\controller;
 use app\admin\model\Admin;
 use app\admin\model\AuthGroup;
 use app\admin\model\AuthGroupAccess;
+use app\admin\model\DistributionLog;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
+use app\admin\model\itemmanage\ItemBrand;
+use app\admin\model\order\Order;
 use app\common\controller\Backend;
 use Aws\S3\S3Client;
 use think\Db;
@@ -32,7 +35,15 @@ class NewProductDesign extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\NewProductDesign;
+        $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        $this->category = new \app\admin\model\itemmanage\ItemCategory;
         $this->view->assign('getTabList', $this->model->getTabList());
+        $this->view->assign('categoryList', $this->category->categoryList());
+        $this->view->assign('brandList', (new ItemBrand())->getBrandList());
+        $this->view->assign('AllFrameColor', $this->itemAttribute->getFrameColor());
+        $this->view->assign('AllDecorationColor', $this->itemAttribute->getFrameColor(3));
+        $this->view->assign('AllProductSize', config('FRAME_SIZE'));
         $this->client = new S3Client([
             'version' => 'latest',
             'region' => 'us-west-2', # 可用区必须是这个
@@ -62,17 +73,30 @@ class NewProductDesign extends Backend
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
+
             if ($filter['label']) {
                 $map['status'] = $filter['label'];
             }
+            if ($filter['sku']) {
+                $map['sku'] = ['like','%'.$filter['sku'].'%'];
+            }
             unset($filter['label']);
+            if ($filter['responsible_id']){
+                $whe_like['nickname'] = ['like','%'.$filter['responsible_id'].'%'];
+                $responsible_id =  $admin->where($whe_like)->column('id');
+                if ($responsible_id){
+                    $map['responsible_id'] = ['in',$responsible_id];
+                }else{
+                    $map['responsible_id'] = ['eq','999999999'];
+                }
+            }
+            unset($filter['responsible_id']);
+            unset($filter['sku']);
             $this->request->get(['filter' => json_encode($filter)]);
-
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
@@ -86,12 +110,12 @@ class NewProductDesign extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             foreach ($list as $row) {
                 $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time']);
 
             }
             $list = collection($list)->toArray();
+
             foreach ($list as $key=>$item){
                 $list[$key]['label'] = $map['status']?$map['status']:0;
                 if ($item['responsible_id'] !==null){
@@ -100,7 +124,7 @@ class NewProductDesign extends Backend
                     $list[$key]['responsible_id'] = '暂无';
                 }
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = array("total" => $total,"label"=>$map['status']?$map['status']:0, "rows" => $list);
 
             return json($result);
         }
@@ -108,35 +132,120 @@ class NewProductDesign extends Backend
     }
 
 
-    public function detail()
+    public function detail($ids=null)
     {
+        $item = new Item();
+        $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
+        $value = $this->model->get($ids);
+        $where['sku'] = $value->sku;
+        $data = $item->where($where)
+            ->field('id,category_id')
+            ->find();
+        $attributeType = $data->category_id;
+        $goodsId = $data->id;
+        $compareValue = ['32','34','35','38','39'];
+        if (!in_array($attributeType,$compareValue)){
+            $attributeType = true;
+        }
+        $row =$itemAttribute->where('item_id',$goodsId)->find();
+        $img = explode(',',$row->frame_aws_imgs);
+        $net = 'https://mojing.s3-us-west-2.amazonaws.com/';
+        if (is_array($img)){
+            foreach ($img as $key=>$value){
+                $img[$key] = $net.$value;
+            }
+        }
 
+        $this->assign('attributeType',$attributeType);
+        $this->assign('goodsId',$goodsId);
+        $this->assign('ids',$ids);
+        $this->assign('row',$row);
+        $this->assign('img',$img);
         return $this->view->fetch();
     }
 
     //录尺寸
     public function record_size($ids =null)
     {
-
+        $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
         if ($this->request->post()){
            $data = $this->request->post();
-           //更新设计表
-            $map['id'] = $ids;
-            $data['status'] = 2;
-            $data['update_time']  = date("Y-m-d H:i:s", time());
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res){
-                //更新商品属性表
-                $whe['item_id'] = $data['goodsId'];
+            if ($data['attributeType'] ==1){
+                if ($data['row']['frame_height'] < 0.1){
+                    $this->error('请输入正确的镜框高数值');
+                }
+                if($data['row']['frame_bridge']<0.1){
+                    $this->error('请输入正确的桥数值');
+                }
+                if($data['row']['frame_temple_length']<0.1){
+                    $this->error('请输入正确的镜腿长数值');
+                }
+                if($data['row']['frame_length']<0.1){
+                    $this->error('请输入正确的镜架总长数值');
+                }
+                if($data['row']['frame_weight']<0.1){
+                    $this->error('请输入正确的重量数值');
+                }
+                if($data['row']['mirror_width']<0.1){
+                    $this->error('请输入正确的镜面宽数值');
+                }
 
-               $save_item =  ItemAttribute::update($data['row'],$whe);
-                dump($save_item);die();
-               if (!$save_item){
-                   $this->error('商品属性更新失败');
-               }
-               $this->success('操作成功');
             }
-            $this->error('选品数据更新失败');
+            if ($data['attributeType'] ==32){
+                if($data['row']['box_height']<0.1){
+                    $this->error('请输入正确的高度数值');
+                }
+                if($data['row']['box_width']<0.1){
+                    $this->error('请输入正确的宽度数值');
+                }
+            }
+            if ($data['attributeType'] ==35){
+                if($data['row']['earrings_height']<0.1){
+                    $this->error('请输入正确的高度数值');
+                }
+                if($data['row']['earrings_width']<0.1){
+                    $this->error('请输入正确的宽度数值');
+                }
+            }
+            if ($data['attributeType'] ==38){
+                if($data['row']['eyeglasses_chain']<0.1){
+                    $this->error('请输入正确的周长数值数值');
+                }
+            }
+            if ($data['attributeType'] ==34 ||$data['attributeType'] ==39){
+                if($data['row']['necklace_perimeter']<0.1){
+                    $this->error('请输入正确的周长数值');
+                }
+                if($data['row']['necklace_chain']<0.1){
+                    $this->error('请输入正确的延长链数值');
+                }
+            }
+
+            //标记打印状态
+            $this->model->startTrans();
+            $itemAttribute->startTrans();
+            try {
+                //更新设计表
+                $map['id'] = $ids;
+                $data['status'] = 2;
+                $data['update_time']  = date("Y-m-d H:i:s", time());
+                $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+                if ($res){
+                    //更新商品属性表
+                    $whe['item_id'] = $data['goodsId'];
+                    $itemAttribute->where($whe)->update($data['row']);
+                }
+                $this->model->commit();
+                $itemAttribute->commit();
+            } catch (PDOException $e) {
+                $this->model->rollback();
+                $itemAttribute->rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                $itemAttribute->rollback();
+                $this->error($e->getMessage());
+            }
+            $this->success('操作成功');
         }
         $item = new Item();
         $value = $this->model->get($ids);
@@ -150,20 +259,34 @@ class NewProductDesign extends Backend
         if (!in_array($attributeType,$compareValue)){
             $attributeType = true;
         }
+        //获取商品属性
+        $cat['item_id'] = $goodsId;
+        $item_attribute = $itemAttribute->where($cat)->find();
         $this->assign('attributeType',$attributeType);
         $this->assign('goodsId',$goodsId);
         $this->assign('ids',$ids);
+        $this->assign('item_attribute',$item_attribute);
         return $this->view->fetch();
     }
 
     //更改状态
     public function change_status()
     {
+       $item = new  Item();
        $ids =  $this->request->get('ids');
        $status =  $this->request->get('status');
        empty($ids) && $this->error('缺少重要参数');
        empty($status) && $this->error('数据异常');
         $map['id'] = $ids;
+        if ($status ==9){
+            $status =6;
+        }
+        if ($status ==8){
+            $value = $this->model->get($ids);
+            $data['item_status']=1;
+            $change['sku'] = $value->sku;
+            $item->allowField(true)->isUpdate(true, $change)->save($data);
+        }
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
@@ -197,7 +320,7 @@ class NewProductDesign extends Backend
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin'=>'b'],'a.uid=b.id')
-            ->where('a.group_id=71')
+            ->where('a.group_id=72')
             ->field('id,nickname')
             ->select();
         $this->assign('ids',$ids);
@@ -226,7 +349,7 @@ class NewProductDesign extends Backend
             $item->startTrans();
             $newProductDesign->startTrans();
             try {
-                $itemResult = $item->where('id', '=', $itemId)->update(['item_status' => $item_status]);
+//                $itemResult = $item->where('id', '=', $itemId)->update(['item_status' => $item_status]);
                 $imgArr = explode(',', $params['frame_images']);
                 foreach ($imgArr as $k => $v) {
                     $arr = explode("/", $v);
@@ -283,7 +406,7 @@ class NewProductDesign extends Backend
                 $newProductDesign->rollback();
                 $this->error($e->getMessage(), [], 408);
             }
-            if (($itemAttrResult !== false) && ($itemResult !== false) && ($data['type'] == 1) && ($newProductDesignResult !== false)){
+            if (($itemAttrResult !== false) && ($data['type'] == 1) && ($newProductDesignResult !== false)){
                 $this->success();
             } else {
                 $this->error(__('Failed to upload product picture, please try again'));

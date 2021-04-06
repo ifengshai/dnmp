@@ -45,8 +45,10 @@ class Distribution extends Backend
         'account_order_batch_export_xls',
         'add',
         'detail',
-        'operation_log'
+        'operation_log',
+        'batch_export_xls_copy'
     ];
+    protected  $noNeedLogin = ['batch_export_xls_copy'];
     /**
      * 子订单模型对象
      * @var object
@@ -741,6 +743,7 @@ class Distribution extends Backend
             ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
             ->where($where)
             ->where($map)
+            ->limit(20000)
             ->order($sort, $order)
             ->select();
 
@@ -1383,6 +1386,11 @@ class Distribution extends Backend
                 $map['b.order_type'] = ['in', $filter['order_type']];
                 unset($filter['order_type']);
             }
+            if ($filter['check_time']){
+                $check_time = explode(' - ',$filter['check_time']);
+                $map['d.check_time'] = ['between',[strtotime($check_time[0]),strtotime($check_time[1])]];
+                unset($filter['check_time']);
+            }
             if ($filter['distribution_status']) {
                 $map['a.distribution_status'] = ['in', $filter['distribution_status']];
                 unset($filter['distribution_status']);
@@ -1787,6 +1795,209 @@ class Distribution extends Backend
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
     }
+
+
+
+    public function batch_export_xls_copy()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        //根据传的标签切换状态
+        $map = [];
+        $map['d.check_time'] = ['between',['1614528000','1617206400']];
+
+
+        $list = $this->model
+            ->alias('a')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time,b.payment_method,d.check_time')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
+            ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
+            ->where($map)
+            ->limit(20000)
+            ->select();
+
+        $list = collection($list)->toArray();
+
+
+
+        //站点列表
+        $site_list = [
+            1 => 'Zeelool',
+            2 => 'Voogueme',
+            3 => 'Nihao',
+            4 => 'Meeloog',
+            5 => 'Wesee',
+            8 => 'Amazon',
+            9 => 'Zeelool_es',
+            10 => 'Zeelool_de',
+            11 => 'Zeelool_jp'
+        ];
+
+        //子单号状态
+        $distribution_status_list = [
+            1 => '待打印标签',
+            2 => '待配货',
+            3 => '待配镜片',
+            4 => '待加工',
+            5 => '待印logo',
+            6 => '待成品质检',
+            7 => '待合单',
+            8 => '合单中',
+            9 => '合单完成'
+        ];
+
+        //获取更改镜框最新信息
+        $change_sku = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type' => 1,
+                'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
+                'b.operation_type' => 1
+            ])
+            ->column('a.change_sku', 'a.item_order_number');
+
+        //获取更改镜片最新处方信息
+        $change_lens = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type' => 2,
+                'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
+                'b.operation_type' => 1
+            ])
+            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,a.web_lens_name', 'a.item_order_number');
+
+        if ($change_lens) {
+            foreach ($change_lens as $key => $val) {
+                if ($val['pd_l'] && $val['pd_r']) {
+                    $change_lens[$key]['pd'] = '';
+                    $change_lens[$key]['pdcheck'] = 'on';
+                } else {
+                    $change_lens[$key]['pd'] = $val['pd_r'] ?: $val['pd_l'];
+                    $change_lens[$key]['pdcheck'] = '';
+                }
+            }
+        }
+        //获取镜片编码及名称
+        $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
+        foreach ($list as $key => &$value) {
+
+            //更改镜框最新sku
+            if ($change_sku[$value['item_order_number']] && $value['site'] != 5) {
+                $value['sku'] = $change_sku[$value['item_order_number']];
+
+                $getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
+                $tmp_bridge = $getGlassInfo[0];
+            } else {
+                //过滤饰品站 批发站
+                if ($value['site'] != 12) {
+                    //查询镜框尺寸
+                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+                }
+            }
+
+            //更改镜片最新数据
+            if ($change_lens[$value['item_order_number']]) {
+                $value = array_merge($value, $change_lens[$value['item_order_number']]);
+            }
+            switch ($value['order_type']) {
+                case 1:
+                    $value['order_type'] = '普通订单';
+                    break;
+                case 2:
+                    $value['order_type'] = '批发';
+                    break;
+                case 3:
+                    $value['order_type'] = '网红';
+                    break;
+                case 4:
+                    $value['order_type'] = '补发';
+                    break;
+                case 5:
+                    $value['order_type'] = '补差价';
+                    break;
+                case 6:
+                    $value['order_type'] = '一件代发';
+                    break;
+            }
+
+            $data[$value['increment_id']]['id'] = $value['id']; //id
+            if (empty($value['created_at'])){
+                $value['created_at'] = '暂无';
+            }else{
+                $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+            }
+            $data[$value['increment_id']]['created_at'] = $value['created_at'];//日期
+            $data[$value['increment_id']]['increment_id'] = $value['increment_id'];//订单号
+            $data[$value['increment_id']]['site'] =$site_list[$value['site']];//站点
+            $data[$value['increment_id']]['order_type'] = $value['order_type'];//订单类型
+            $data[$value['increment_id']]['status'] = $value['status'];//订单状态
+            $data[$value['increment_id']]['item_order_number'] = $value['item_order_number'];//子单号
+            $data[$value['increment_id']]['sku'] = $value['sku'];//sku
+            $data[$value['increment_id']]['od_sph'] = $value['od_sph'];
+            $data[$value['increment_id']]['os_sph'] = $value['os_sph'];//sph
+            $data[$value['increment_id']]['od_cyl'] = $value['od_cyl'];//cyl
+            $data[$value['increment_id']]['os_cyl'] = $value['os_cyl'];
+            $data[$value['increment_id']]['od_axis'] = $value['od_axis'];//axis
+            $data[$value['increment_id']]['os_axis'] = $value['os_axis'];
+            $data[$value['increment_id']]['od_add'] = $value['od_add'];
+            $data[$value['increment_id']]['os_add'] = $value['os_add'];
+            if($value['pdcheck'] == 'on'){
+                $data[$value['increment_id']]['pd'] = $value['pd_r'].'/'.$value['pd_l'];
+            }else{
+                $data[$value['increment_id']]['pd'] = $value['pd'];
+            }
+
+            $data[$value['increment_id']]['lens_number'] = $lens_list[$value['lens_number']] ?: $value['web_lens_name'];//镜片
+            $data[$value['increment_id']]['lens_width'] = $tmp_bridge['lens_width'];//宽度
+            $data[$value['increment_id']]['lens_height'] = $tmp_bridge['lens_height'];//高度
+            $data[$value['increment_id']]['bridge'] = $tmp_bridge['bridge'];//宽度
+            $data[$value['increment_id']]['prescription_type'] = $value['prescription_type'];//处方类型
+
+            $data[$value['increment_id']]['od_pv'] = $value['od_pv'];//Prism
+            $data[$value['increment_id']]['os_pv'] = $value['os_pv'];
+
+            $data[$value['increment_id']]['od_bd'] = $value['od_bd'];//Direct
+            $data[$value['increment_id']]['os_bd'] = $value['os_bd'];
+
+            $data[$value['increment_id']]['od_pv_r'] = $value['od_pv_r'];//Prism
+            $data[$value['increment_id']]['os_pv_r'] = $value['os_pv_r'];
+
+            $data[$value['increment_id']]['od_bd_r'] = $value['od_bd_r'];//Direct
+            $data[$value['increment_id']]['os_bd_r'] = $value['os_bd_r'];
+            $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];//订单金额
+            $data[$value['increment_id']]['base_currency_code'] = $value['base_currency_code'];////原币种
+            $data[$value['increment_id']]['base_grand_totalz'] = $value['base_grand_total'];//原支付金额
+            $data[$value['increment_id']]['payment_method'] = $value['payment_method'];//支付方式
+
+            $data[$value['increment_id']]['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);//订单支付时间
+            if (empty($value['check_time'])){
+                $value['check_time'] = '暂无';
+            }else{
+                $value['check_time'] = date('Y-m-d H:i:s', $value['check_time']);
+            }
+            $data[$value['increment_id']]['check_time'] = $value['check_time'];//订单金额
+        }
+        $data = array_values($data);
+        $headlist = [
+            'ID', '日期','订单号','站点', '订单类型', '订单状态', '子单号',
+            'SKU', 'SPH-L', 'SPH-R', 'CYL-L', 'CYL-R',
+            'AXI-L', 'AXL-R', 'ADD-L', 'ADD-R', 'PD',
+            '镜片', '镜框宽度', '镜框高度', 'bridge',
+            '处方类型', 'Prism(out/in)-L', 'PrismOut-in-R', 'DirectOut-in-L', 'DirectOut-in-R',
+            'Prism-up-down-L', 'Prism-Up-down-R', 'Direct-Up-down-L', 'DirectUp-down-R', '订单金额',
+            '原币种', '原支付金额', '支付方式', '订单支付时间', '审单时间',
+        ];
+
+        $path = "/uploads/";
+        $fileName = '财务导出数据';
+        Excel::writeCsv($data, $headlist, $path . $fileName);
+
+
+    }
+
 
 
     /**
