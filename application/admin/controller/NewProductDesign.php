@@ -309,10 +309,9 @@ class NewProductDesign extends Backend
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin'=>'b'],'a.uid=b.id')
-            ->where('a.group_id=71')
+            ->where('a.group_id=72')
             ->field('id,nickname')
             ->select();
-        dump($auth_user);die();
         $this->assign('ids',$ids);
         $this->assign('auth_user',collection($auth_user)->toArray());
         return $this->view->fetch();
