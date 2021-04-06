@@ -312,6 +312,7 @@ class NewProductDesign extends Backend
             ->where('a.group_id=71')
             ->field('id,nickname')
             ->select();
+        dump($auth_user);die();
         $this->assign('ids',$ids);
         $this->assign('auth_user',collection($auth_user)->toArray());
         return $this->view->fetch();
