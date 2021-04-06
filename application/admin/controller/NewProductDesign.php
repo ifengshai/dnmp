@@ -187,12 +187,12 @@ class NewProductDesign extends Backend
                 }
 
             }
-            if ($data['attributeType'] ==34){
-                if($data['row']['necklace_perimeter']<0.1){
-                    $this->error('请输入正确的周长数值');
+            if ($data['attributeType'] ==32){
+                if($data['row']['box_height']<0.1){
+                    $this->error('请输入正确的高度数值');
                 }
-                if($data['row']['necklace_chain']<0.1){
-                    $this->error('请输入正确的延长链数值');
+                if($data['row']['box_width']<0.1){
+                    $this->error('请输入正确的宽度数值');
                 }
             }
             if ($data['attributeType'] ==35){
@@ -208,7 +208,7 @@ class NewProductDesign extends Backend
                     $this->error('请输入正确的周长数值数值');
                 }
             }
-            if ($data['attributeType'] ==32 ||$data['attributeType'] ==39){
+            if ($data['attributeType'] ==34 ||$data['attributeType'] ==39){
                 if($data['row']['necklace_perimeter']<0.1){
                     $this->error('请输入正确的周长数值');
                 }
