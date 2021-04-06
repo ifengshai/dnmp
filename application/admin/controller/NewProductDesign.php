@@ -180,7 +180,7 @@ class NewProductDesign extends Backend
                 if($data['row']['frame_temple_length']<0.1){
                     $this->error('请输入正确的镜腿长数值');
                 }
-                if($data['row']['frame_height']<0.1){
+                if($data['row']['frame_length']<0.1){
                     $this->error('请输入正确的镜架总长数值');
                 }
                 if($data['row']['frame_weight']<0.1){
