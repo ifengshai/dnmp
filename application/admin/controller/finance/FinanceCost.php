@@ -220,10 +220,14 @@ class FinanceCost extends Backend
             $saveName = '订单成本明细-成本'.date("YmdHis", time());
         }
 
+        $count = $this->model
+            ->where($where)
+            ->count();
+
         $i = 0;
         $this->model
             ->where($where)
-            ->chunk(1000, function ($data) use ($siteList, $typeDocument, $orderType, $type, $headList, $saveName, $path, &$i) {
+            ->chunk(1000, function ($data) use ($siteList, $typeDocument, $orderType, $type, $headList, $saveName, $path, &$i, $count) {
                 $params = [];
                 foreach ($data as $k => &$value) {
                     if ($value['action_type'] == 1) {
@@ -278,14 +282,13 @@ class FinanceCost extends Backend
                     $headList = [];
                 }
                 $i++;
-                Excel::writeCsv($params, $headList, $path.$saveName, false);
+                if ($i >= ($count / 1000)) {
+                    Excel::writeCsv($params, $headList, $path.$saveName, true);
+                } else {
+                    Excel::writeCsv($params, $headList, $path.$saveName, false);
+                }
             });
         unset($i);
-        $size = readfile('./.'.$path.$saveName.'.csv');
-        header("Accept-Length: ".$size);
-        header("Content-type:  application/octet-stream ");
-        header("Accept-Ranges:  bytes ");
-        header("Content-Disposition:  attachment;  filename= {$saveName}.csv");
         die;
     }
 
