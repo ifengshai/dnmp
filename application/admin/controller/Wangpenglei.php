@@ -913,12 +913,12 @@ class Wangpenglei extends Backend
     {
         ini_set('memory_limit', '1512M');
         $finace_cost = new \app\admin\model\finance\FinanceCost();
-        $list = $finace_cost->where(['type' => 2, 'bill_type' => 8, 'payment_time' => ['>', 1613750400]])->select();
+        $list = $finace_cost->where(['type' => 1, 'bill_type' => 1, 'payment_time' => ['>', 1613750400]])->select();
         $order = new \app\admin\model\order\order\NewOrder();
         $params = [];
         foreach ($list as $k => $v) {
             //查询订单支付金额
-            $grand_total = $order->where(['increment_id' => $v['order_number']])->value('grand_total');
+            $grand_total = $order->where(['increment_id' => $v['order_number'], 'site' => $v['site']])->value('grand_total');
             $finace_cost->where(['id' => $v['id']])->update(['income_amount' => $grand_total, 'order_money' => $grand_total]);
             echo $v['id']."\n";
             usleep(100000);
@@ -988,6 +988,7 @@ class Wangpenglei extends Backend
             }
             $allcost += $purchase_price;
         }
+
         return $allcost + $workcost;
     }
 }
