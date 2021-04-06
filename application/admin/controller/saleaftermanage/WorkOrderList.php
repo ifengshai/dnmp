@@ -1242,7 +1242,7 @@ class WorkOrderList extends Backend
 
                         //校验库存
                         if ($original_sku) {
-                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
+                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku),$platform_order);
                             !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
@@ -1947,7 +1947,7 @@ class WorkOrderList extends Backend
      * @param array $num 站点类型
      * @return array
      */
-    protected function skuIsStock($skus = [], $siteType, $num = [])
+    protected function skuIsStock($skus = [], $siteType, $num = [],$platform_order)
     {
         if (!array_filter($skus)) {
             return ['result' => false, 'msg' => 'SKU不能为空'];
@@ -1982,7 +1982,7 @@ class WorkOrderList extends Backend
                 /****************************end*****************************************/
             }
             //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
-            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => 11])->find();
+            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $siteType])->find();
             //判断是否开启预售
             if ($res['stock'] >= 0 && $res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
                 $stock = $res['stock'] + $res['presell_residue_num'];
@@ -1996,6 +1996,16 @@ class WorkOrderList extends Backend
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
                 return ['result' => false, 'msg' => $sku . '库存不足！！'];
+            }
+            //判断此sku是否在第三方平台
+            if ($siteType == 13 || $siteType == 14) {
+                $res = $this->model->httpRequest($work->work_platform, 'api/mojing/check_sku', ['sku' =>$sku,'platform_order' =>$platform_order], 'POST');
+                if (!$res) {
+                    return ['result' => false, 'msg' => $sku . '不存在！！'];
+                }
+                if ($res[$sku]) {
+                    return ['result' => false, 'msg' => $sku . '库存不足！！'];
+                }
             }
         }
         return ['result' => true, 'msg' => ''];
@@ -2030,7 +2040,6 @@ class WorkOrderList extends Backend
 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
@@ -2182,7 +2191,7 @@ class WorkOrderList extends Backend
 
                         //校验库存
                         if ($original_sku) {
-                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
+                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku),$platform_order);
                             !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
@@ -2349,7 +2358,7 @@ class WorkOrderList extends Backend
                             //更改镜框校验库存
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
                             $item['change_frame']['change_sku'] = trim($item['change_frame']['change_sku']);
-                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1],$platform_order);
                             !$back_data['result'] && $this->error($back_data['msg']);
                         } /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
                             //检测之前是否处理过更改镜片措施

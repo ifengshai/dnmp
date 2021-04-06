@@ -852,7 +852,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 } else if (str == '360' || str == '660'){
                     $('#work_platform').val(10);
                 } else if (str == '139' || str == '469'){
-                    $('#work_platform').val(13);
+                    $('#work_platform').val(11);
                 }
                 $('.selectpicker ').selectpicker('refresh');
 
@@ -3303,7 +3303,7 @@ function platform_order(){
         } else if (str == '360' || str == '660'){
             $('#work_platform').val(10);
         } else if (str == '139' || str == '469'){
-            $('#work_platform').val(13);
+            $('#work_platform').val(11);
         }
 
         var sitetype = $('#work_platform').val();
