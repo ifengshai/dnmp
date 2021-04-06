@@ -115,15 +115,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             grid: {
                                 left: '15%',
                             },
-                        },
-                        yAxis: [
-                            {
-                                type: 'value',
-                                axisLabel: {
-                                    formatter: '{value}'
+                            yAxis: [
+                                {
+                                    type: 'value',
+                                    axisLabel: {
+                                        formatter: '{value}'
+                                    }
                                 }
-                            }
-                        ],
+                            ],
+                        },
                     };
                     var options = {
                         type: 'post',
@@ -285,15 +285,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             grid: {
                                 left: '15%',
                             },
-                        },
-                        yAxis: [
-                            {
-                                type: 'value',
-                                axisLabel: {
-                                    formatter: '{value}'
+                            yAxis: [
+                                {
+                                    type: 'value',
+                                    axisLabel: {
+                                        formatter: '{value}'
+                                    }
                                 }
-                            }
-                        ],
+                            ],
+                        },
                     };
                     var options = {
                         type: 'post',
