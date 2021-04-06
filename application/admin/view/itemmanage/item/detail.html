@@ -65,10 +65,6 @@
             <input id="c-id" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$row.sku}" disabled='disabled'>
         </div>
     </div>
-
-
-
-
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Procurement_type')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -87,52 +83,37 @@
             </select>
         </div>
     </div>
-
-
-    {if $row['category_id'] eq 32}
-    <div class="form-group" id="item-stock">
-        <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="box_height" class="form-control" name="row[box_height]" type="number"  value="{$row['itemAttribute']['box_height']}" disabled='disabled' >
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="box_width" data-rule="" class="form-control" name="row[box_width]" type="number" value="{$row['itemAttribute']['box_width']}" disabled='disabled' >
-        </div>
-    </div>
-    {else}
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('镜框高（mm）')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_bridge')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_height" data-rule="" class="form-control" name="row[frame_height]" type="number" value="{$row['itemAttribute']['frame_height']}" disabled='disabled' >
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="{$row['itemAttribute']['frame_bridge']}" disabled>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Mirror_width')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="mirror_width" data-rule="" class="form-control" name="row[mirror_width]" type="number" value="{$row['itemAttribute']['mirror_width']}" disabled='disabled' >
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="{$row['itemAttribute']['mirror_width']}" disabled>
         </div>
     </div>
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('桥（mm）')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_height')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-attribute-type" type="hidden" name="row[attribute_type]" value="1"/>
-            <input id="frame_bridge" data-rule="" class="form-control" name="row[frame_bridge]" type="number" value="{$row['itemAttribute']['frame_bridge']}" disabled='disabled' >
+            <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="{$row['itemAttribute']['frame_height']}" disabled>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('镜腿长（mm）')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_width')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_temple_length" data-rule="" class="form-control"  name="row[frame_temple_length]" type="number" value="{$row['itemAttribute']['frame_temple_length']}" disabled='disabled' >
+            <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_width]" type="number" value="{$row['itemAttribute']['frame_width']}" disabled>
         </div>
     </div>
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('镜架总长（mm）')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_length')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_length" data-rule="" class="form-control" name="row[frame_length]" type="number" value="{$row['itemAttribute']['frame_length']}" disabled='disabled' >
+            <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="{$row['itemAttribute']['frame_length']}" disabled>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('重量（g）')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('Frame_temple_length')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="frame_weight" data-rule="" class="form-control"  name="row[frame_weight]" type="number" value="{$row['itemAttribute']['frame_weight']}"  disabled='disabled'>
+            <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="{$row['itemAttribute']['frame_temple_length']}" disabled>
         </div>
     </div>
-    {/if}
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Weight')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -288,13 +269,9 @@
         <div class="col-xs-12 col-sm-8">
             <div class="input-group">
                 <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[frame_images]" type="text" value="{$row['itemAttribute']['frame_images']}" disabled>
-                <div class="input-group-addon no-border no-padding">
-                    <span>
-                        <button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=itemmanage/item" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M">
-                            <i class="fa fa-upload"></i> 上传
-                        </button>
-                    </span>
-                </div>
+<!--                <div class="input-group-addon no-border no-padding">-->
+<!--                    <span><button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=itemmanage/item" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M"><i class="fa fa-upload"></i> 上传</button></span>-->
+<!--                </div>-->
                 <span class="msg-box n-right" for="c-upload_photos"></span>
             </div>
             <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
@@ -316,52 +293,6 @@
             <input id="c-id" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$row.sku}" disabled='disabled'>
         </div>
     </div>
-
-    {if $row['category_id'] eq 34}
-
-    <div class="form-group" id="item-stock">
-        <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="necklace_perimeter" data-rule="" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row['itemAttribute']['necklace_perimeter']}" disabled='disabled'>
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="necklace_chain" data-rule="" class="form-control" name="row[necklace_chain]" type="number" value="{$row['itemAttribute']['necklace_chain']}" disabled='disabled' >
-        </div>
-    </div>
-    {elseif $row['category_id'] eq 35 /}
-    <div class="form-group" id="item-stock">
-        <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="earrings_height" data-rule="" class="form-control" name="row[earrings_height]" type="number" value="{$row['itemAttribute']['earrings_height']}" disabled='disabled' >
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="earrings_width" data-rule="" class="form-control" name="row[earrings_width]" type="number" value="{$row['itemAttribute']['earrings_width']}" disabled='disabled' >
-        </div>
-    </div>
-    {elseif $row['category_id'] eq 38 /}
-    <div class="form-group" id="item-stock">
-        <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="eyeglasses_chain" data-rule="" class="form-control" name="row[eyeglasses_chain]" type="number" value="{$row['itemAttribute']['eyeglasses_chain']}" disabled='disabled' >
-        </div>
-    </div>
-    {elseif $row['category_id'] eq 39 /}
-    <div class="form-group" id="item-stock">
-        <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="necklace_perimeter" data-rule="" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row['itemAttribute']['necklace_perimeter']}" disabled='disabled' >
-        </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="necklace_chain" data-rule="" class="form-control" name="row[necklace_chain]" type="number" value="{$row['itemAttribute']['necklace_chain']
-            }" disabled='disabled' >
-        </div>
-    </div>
-    {/if}
-
-
     <div class='caigou ajax-add'>
         <p style="font-size: 16px;text-align: center;"><b>产品信息</b></p>
         <div style="margin-bottom:20px;">
@@ -407,7 +338,6 @@
             </table>
         </div>
     </div>
-
     <div class="form-group ajax-add">
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_texture')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -426,23 +356,6 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('Frame_remark')}:</label>
         <div class="col-xs-12 col-sm-8">
             <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[frame_remark]" cols="50">{$row['itemAttribute']['frame_remark']}</textarea>
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Upload_photos')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <div class="input-group">
-                <input id="c-upload_photos" data-rule="required" class="form-control" size="50" name="row[frame_images]" type="text" value="{$row['itemAttribute']['frame_images']}" disabled>
-                <div class="input-group-addon no-border no-padding">
-                    <span>
-                        <button type="button" id="plupload-upload_photos"   class="btn btn-danger plupload" data-input-id="c-upload_photos" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp" data-url="ajax/upload?dir=itemmanage/item" data-multiple="true" data-preview-id="p-upload_photos" data-maxsize="2M">
-                            <i class="fa fa-upload"></i> 上传
-                        </button>
-                    </span>
-                </div>
-                <span class="msg-box n-right" for="c-upload_photos"></span>
-            </div>
-            <ul class="row list-inline plupload-preview" id="p-upload_photos"></ul>
         </div>
     </div>
     <input type='hidden' name="row[item_status]" id="status" value="1">

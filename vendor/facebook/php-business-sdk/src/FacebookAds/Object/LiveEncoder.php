@@ -180,8 +180,6 @@ class LiveEncoder extends AbstractCrudObject {
       'input_video_interlace_mode' => 'string',
       'input_video_width' => 'unsigned int',
       'name' => 'string',
-      'needs_transcoder_restart' => 'bool',
-      'needs_transcoder_restart_reason' => 'list<string>',
       'status' => 'status_enum',
       'target_token' => 'string',
       'version' => 'string',

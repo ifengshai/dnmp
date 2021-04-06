@@ -16,7 +16,6 @@ use think\exception\PDOException;
 use think\exception\ValidateException;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use app\admin\model\StockLog;
-use Think\Log;
 
 /**
  * 入库单管理
@@ -482,7 +481,6 @@ class Instock extends Backend
 
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
-
         foreach ($row as $v) {
             if ($v['status'] !== 1) {
                 $this->error('只有待审核状态才能操作！！');
@@ -550,7 +548,6 @@ class Instock extends Backend
                         $is_purchase = 10;
                         //如果存在关联补货需求单id
                         if ($v['replenish_id']) {
-
                             //采购有比例入库
                             $change_type = 16;
                             //查询各站补货需求量占比
@@ -569,11 +566,8 @@ class Instock extends Backend
                             $should_arrivals_num = $check->where('check_id', $v['check_id'])->value('should_arrival_num');
 
                             foreach ($rate_arr as $key => $val) {
-
                                 //最后一个站点 剩余数量分给最后一个站
                                 if (($all_num - $key) == 1) {
-                                    Log::write("第一次");
-                                    Log::write($val);
                                     //当前sku映射关系详情
                                     $sku_platform = $platform->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->find();
                                     //如果站点是Z站 且虚拟仓库存为0
@@ -606,7 +600,6 @@ class Instock extends Backend
                                         'number_type' => 3,
                                     ]);
                                 } else {
-                                    Log::write("第二次");
                                     $num = round($v['in_stock_num'] * $val['rate']);
                                     $should_arrivals_num_plat = round($should_arrivals_num * $val['rate']);
                                     $stock_num -= $num;
@@ -966,6 +959,7 @@ class Instock extends Backend
         }
     }
 
+
     /**
      * post方式请求接口
      *
@@ -989,6 +983,7 @@ class Instock extends Backend
         curl_close($curl);
         return $content;
     }
+
 
 
     /**
@@ -1438,8 +1433,8 @@ class Instock extends Backend
                 case 'zeelool_es':
                     $out_label = 9;
                     break;
-                // case 'zeelool_jp':
-                //     $label = 1;
+                    // case 'zeelool_jp':
+                    //     $label = 1;
                 case 'zeelool_de':
                     $out_label = 10;
                     break;

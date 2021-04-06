@@ -37,6 +37,8 @@ use FacebookAds\Enum\AbstractEnum;
 
 class AdAccountActivityFields extends AbstractEnum {
 
+  const BILLING_ADDRESS_NEW = 'billing_address_new';
+  const BILLING_ADDRESS_OLD = 'billing_address_old';
   const CREATED_BY = 'created_by';
   const CREATED_TIME = 'created_time';
   const CREDIT_NEW = 'credit_new';
@@ -69,7 +71,9 @@ class AdAccountActivityFields extends AbstractEnum {
 
   public function getFieldTypes() {
     return array(
-      'created_by' => 'Profile',
+      'billing_address_new' => 'string',
+      'billing_address_old' => 'string',
+      'created_by' => 'string',
       'created_time' => 'datetime',
       'credit_new' => 'Object',
       'credit_old' => 'Object',
@@ -84,8 +88,8 @@ class AdAccountActivityFields extends AbstractEnum {
       'grace_period_time_new' => 'int',
       'grace_period_time_old' => 'int',
       'id' => 'string',
-      'manager_id_new' => 'Profile',
-      'manager_id_old' => 'Profile',
+      'manager_id_new' => 'string',
+      'manager_id_old' => 'string',
       'name_new' => 'string',
       'name_old' => 'string',
       'spend_cap_new' => 'Object',

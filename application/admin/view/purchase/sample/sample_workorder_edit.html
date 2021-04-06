@@ -67,7 +67,6 @@
             <td style="padding-top: 15px;">{$vo.sku}<input type="hidden" name="row[goods][{$k}][sku]" value="{$vo.sku}"></td>
             <td><input type="text" class="form-control" name="row[goods][{$k}][stock]" value="{$vo.stock}"></td>
             <td class="location">
-                <input type="hidden" class="form-control" name="row[goods][{$k}][warehouse]" value="{$vo.location}">
                 {$vo.location}
             </td>
             <td id="del"><a href="javascript:;" style="color:white !important;" onclick=del_add_tr({$k})> 删除 </a></td>
