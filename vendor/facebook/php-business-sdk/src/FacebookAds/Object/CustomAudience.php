@@ -185,29 +185,6 @@ class CustomAudience extends AbstractCrudObject {
     return $pending ? $request : $request->execute();
   }
 
-  public function getPrefills(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_GET,
-      '/prefills',
-      new CustomAudiencePrefillState(),
-      'EDGE',
-      CustomAudiencePrefillState::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
   public function getSessions(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
 
@@ -248,58 +225,6 @@ class CustomAudience extends AbstractCrudObject {
       new CustomAudiencesharedAccountInfo(),
       'EDGE',
       CustomAudiencesharedAccountInfo::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function deleteUpload(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'namespace' => 'string',
-      'payload' => 'Object',
-      'session' => 'Object',
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_DELETE,
-      '/upload',
-      new AbstractCrudObject(),
-      'EDGE',
-      array(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function createUpload(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'namespace' => 'string',
-      'payload' => 'Object',
-      'session' => 'Object',
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
-      '/upload',
-      new CustomAudience(),
-      'EDGE',
-      CustomAudience::getFieldsEnum()->getValues(),
       new TypeChecker($param_types, $enums)
     );
     $request->addParams($params);

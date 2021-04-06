@@ -29,7 +29,6 @@ use FacebookAds\Cursor;
 use FacebookAds\Http\RequestInterface;
 use FacebookAds\TypeChecker;
 use FacebookAds\Object\Fields\ProductItemFields;
-use FacebookAds\Object\Values\CommentCommentPrivacyValueValues;
 use FacebookAds\Object\Values\ProductItemAgeGroupValues;
 use FacebookAds\Object\Values\ProductItemAvailabilityValues;
 use FacebookAds\Object\Values\ProductItemCommerceTaxCategoryValues;
@@ -77,43 +76,6 @@ class ProductItem extends AbstractCrudObject {
     return $ref_enums;
   }
 
-
-  public function createComment(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'attachment_id' => 'string',
-      'attachment_share_url' => 'string',
-      'attachment_url' => 'string',
-      'comment_privacy_value' => 'comment_privacy_value_enum',
-      'facepile_mentioned_ids' => 'list<string>',
-      'feedback_source' => 'string',
-      'is_offline' => 'bool',
-      'message' => 'string',
-      'nectar_module' => 'string',
-      'object_id' => 'string',
-      'parent_comment_id' => 'Object',
-      'text' => 'string',
-      'tracking' => 'string',
-    );
-    $enums = array(
-      'comment_privacy_value_enum' => CommentCommentPrivacyValueValues::getInstance()->getValues(),
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
-      '/comments',
-      new Comment(),
-      'EDGE',
-      Comment::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
 
   public function getProductSets(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
@@ -200,6 +162,7 @@ class ProductItem extends AbstractCrudObject {
       'availability' => 'availability_enum',
       'brand' => 'string',
       'category' => 'string',
+      'category_specific_fields' => 'map',
       'checkout_url' => 'string',
       'color' => 'string',
       'commerce_tax_category' => 'commerce_tax_category_enum',
@@ -213,6 +176,7 @@ class ProductItem extends AbstractCrudObject {
       'custom_label_4' => 'string',
       'description' => 'string',
       'expiration_date' => 'string',
+      'fb_product_category' => 'string',
       'gender' => 'gender_enum',
       'gtin' => 'string',
       'image_url' => 'string',

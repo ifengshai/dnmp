@@ -543,7 +543,9 @@ class Notice extends Controller
                     $updateData['email_cc'] = join(',', $emailCcs);
                 }
             }
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt',json_encode($updateData)."\r\n",FILE_APPEND);
             Zendesk::update($updateData, ['id' => $zendesk->id]);
+            file_put_contents('/www/wwwroot/mojing_test/runtime/log/a.txt','2'."\r\n",FILE_APPEND);
             //写入附表
             //如果该ticket的分配时间不是今天，且修改后的状态是open或者new的话，则今天任务数-1（分担逻辑修改，改方法暂时不用）
 //            if (in_array(strtolower($ticket->status), ['open', 'new']) && strtotime($zendesk->assign_time) < strtotime(date('Y-m-d', time()))) {
@@ -936,6 +938,13 @@ class Notice extends Controller
      */
     public function setTickets()
     {
+        $create_time = Zendesk::where(['shell' => 1,'type'=>2,'id' => ['>',6965]])->order('id','desc')->limit(1)->value('create_time');
+        if($create_time){
+            $create_time = date('Y-m-d H:i:s',(strtotime($create_time) - 8*3600));
+            $create_time = str_replace(' ','T',$create_time).'Z';
+        }else{
+            $create_time = '2019-11-26T01:49:54Z';
+        }
         $search = [
             'type' => 'ticket',
             'order_by' => 'created_at',

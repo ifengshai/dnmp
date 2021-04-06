@@ -31,6 +31,7 @@ class Zendesk extends Backend
     protected $relationSearch = true;
     protected $noNeedLogin = ['asycTicketsUpdate','asycTicketsVooguemeUpdate','asycTicketsAll','asycTicketsAll2','asycTicketsAll3','asyncTicketHttps'];
     protected $noNeedRight=['zendesk_export','email_toload_more','order_toload_more'];
+
     /**
      * 无需鉴权的方法,但需要登录
      * @var array
@@ -653,12 +654,15 @@ class Zendesk extends Backend
         //array_unshift($templates, 'Apply Macro');
         //获取当前用户的最新5个的订单
         if($ticket->type == 1){
+            $site =1;
             $orderModel = new \app\admin\model\order\order\Zeelool;
             $customer_entity = Db::connect('database.db_zeelool');
         }elseif($ticket->type == 2){
+            $site =2;
             $orderModel = new \app\admin\model\order\order\Voogueme;
             $customer_entity = Db::connect('database.db_voogueme');
         }else{
+            $site =3;
             $orderModel = new \app\admin\model\order\order\Nihao;
             $is_vip = 0;
         }
@@ -672,26 +676,48 @@ class Zendesk extends Backend
         }
 
         $orders = $orderModel
+//            ->alias('ord')
+//            ->join(['fa_order_process=>pro'],'ord.id = pro.order_id')
             ->where('customer_email',$ticket->email)
             ->order('entity_id desc')
-            ->field('increment_id,created_at,order_currency_code,status')
+            ->field('increment_id,created_at,order_currency_code,status,entity_id')
             ->limit(5)
             ->select();
         $orders_count = $orderModel
             ->where('customer_email',$ticket->email)
             ->count();
         $orders = collection($orders)->toArray();
+        foreach ($orders as $key=>$item){
+            $orders[$key]['track_number'] = Db::connect('database.db_mojing_order')->table('fa_order_process')->where('entity_id',$item['entity_id'])->value('track_number');
+            //查询该订单下是否有工单
+            $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
+            $swhere = [];
+            $swhere['platform_order'] = ['eq', $item['increment_id']];
+            $swhere['work_platform'] = $site;
+            $swhere['work_status'] = ['not in', [0, 4, 6]];
+            $orders[$key]['workorder_list'] = $workorder->where($swhere)->select();
+        }
+//        foreach ($orders as $key=>$ite){
+//            $model =  Db::connect('database.db_mojing_order');
+//            $find_value = $model->table('fa_order')->where('increment_id',$ite['increment_id'])->select();
+//            dump($find_value);die();
+//        }
+
+//        dump(collection($orders)->toArray());die();
         $btn = input('btn',0);
 
         //查询魔晶账户
         // $admin = new \app\admin\model\Admin();
         // $username = $admin->where('status','normal')->column('nickname','id');
+        $order_platform =1;
+        $this->view->assign('order_platform', $order_platform);
 
         $this->view->assign(compact('tags', 'ticket', 'comments', 'tickets', 'recentTickets', 'templates','orders','btn'));
         $this->view->assign('rows', $row);
         $this->view->assign('is_vip', $is_vip);
         $this->view->assign('ids', $ids);
         $this->view->assign('status', $status);
+
         $this->view->assign('orders_countds', $orders_count);
         $this->view->assign('recentTickets_count', $recentTickets_count);
         // $this->view->assign('username', $username);
@@ -709,7 +735,7 @@ class Zendesk extends Backend
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function check_email($ids = null)
+    public function email_toview($ids = null)
     {
         $row = $this->model->get($ids);
         $status = input('param.status');
@@ -893,6 +919,34 @@ class Zendesk extends Backend
         $this->view->assign('orderUrl',config('zendesk.platform_url')[$data['type']]);
         return $this->view->fetch();
     }
+
+    /**
+     *
+     * 物流节点
+     */
+    public function logistics_node(){
+        $entity_id = input('param.entity_id');
+        $site = input('param.order_platform');
+
+
+        //获取订单信息对应的所有物流信息
+        $courier = Db::name('order_node_courier')
+            ->alias('a')
+            ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
+            ->where('a.order_id',$entity_id)->where('a.site',$site)
+            ->order('create_time desc')
+            ->field('a.content,a.create_time,a.site,a.track_number,b.shipment_data_type')
+            ->select();
+        $courier_one  = $courier[0];
+        unset($courier[0]);
+        $courier_two = array_values($courier);
+        $this->assign('courier_one',$courier_one);
+        $this->assign('courier_two',$courier_two);
+        return $this->view->fetch();
+    }
+
+
+
 
     public function order_detail($order_number = null)
     {

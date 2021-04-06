@@ -43,6 +43,7 @@ class GroupGroupTypeValues extends AbstractEnum {
   const COUPLE = 'COUPLE';
   const COWORKERS = 'COWORKERS';
   const CUSTOM = 'CUSTOM';
+  const DEALS = 'DEALS';
   const EPHEMERAL = 'EPHEMERAL';
   const EVENT_PLANNING = 'EVENT_PLANNING';
   const FAMILY = 'FAMILY';
@@ -77,11 +78,14 @@ class GroupGroupTypeValues extends AbstractEnum {
   const WORK_EPHEMERAL = 'WORK_EPHEMERAL';
   const WORK_FEEDBACK = 'WORK_FEEDBACK';
   const WORK_FOR_SALE = 'WORK_FOR_SALE';
+  const WORK_GARDEN = 'WORK_GARDEN';
   const WORK_LEARNING = 'WORK_LEARNING';
   const WORK_MENTORSHIP = 'WORK_MENTORSHIP';
   const WORK_MULTI_COMPANY = 'WORK_MULTI_COMPANY';
   const WORK_RECRUITING = 'WORK_RECRUITING';
+  const WORK_RESUME_REVIEW = 'WORK_RESUME_REVIEW';
   const WORK_SOCIAL = 'WORK_SOCIAL';
   const WORK_TEAM = 'WORK_TEAM';
   const WORK_TEAMWORK = 'WORK_TEAMWORK';
+  const WORK_VC_CALL = 'WORK_VC_CALL';
 }

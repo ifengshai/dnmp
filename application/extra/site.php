@@ -3,7 +3,7 @@
 return array (
   'beian' => '',
   'cdnurl' => '',
-  'version' => '1.0.27',
+  'version' => '1.0.29',
   'timezone' => 'Asia/Shanghai',
   'forbiddenip' => '',
   'languages' => 
@@ -37,5 +37,6 @@ return array (
   'operation_authority' => '1',
   'authority_content' => '',
   'pda_version' => '1.0.0',
-  'pda_download' => 'xxxxxxxx',
+  'pda_download' => '/uploads/20201112/e2132db3fae2e50e58c3e9d72eef7c17.apk',
+  'pda_md5' => 'e2132db3fae2e50e58c3e9d72eef7c17',
 );
