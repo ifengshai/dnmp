@@ -1332,7 +1332,7 @@ class Item extends Backend
                     throw new Exception('审核失败！！');
                 }
                 //查询同步的平台
-                $platformArr = $platform->where(['sku' => $row['sku']])->select();
+                $platformArr = $platform->where(['sku' => $row['sku']])->where('platform_type','<>',4)->select();
                 $error_num = [];
                 $uploadItemArr = [];
                 foreach ($platformArr as $k => $v) {
@@ -1544,7 +1544,7 @@ class Item extends Backend
                 try {
                     foreach ($row as $val) {
                         // $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
-                        $platformArr = $platform->where(['sku' => $val['sku']])->select();
+                        $platformArr = $platform->where(['sku' => $val['sku']])->where('platform_type','<>',4)->select();
                         $uploadItemArr = [];
                         foreach ($platformArr as $k => $v) {
                             $itemAttribute = new ItemAttribute();
