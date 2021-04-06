@@ -4,7 +4,6 @@ namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
 use fast\Excel;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class FinanceCost extends Backend
 {
@@ -131,7 +130,7 @@ class FinanceCost extends Backend
 
             !empty($filter['bill_type']) && $where['bill_type'] = ['in', $filter['bill_type']];
 
-            !empty($filter['order_number']) && $where['order_number'] = ['like', '%'.$filter['order_number'].'%'];
+            !empty($filter['order_number']) && $where['order_number'] = ['like', '%' . $filter['order_number'] . '%'];
 
             !empty($filter['site']) && $where['site'] = ['in', $filter['site']];
 
@@ -214,10 +213,10 @@ class FinanceCost extends Backend
         $path = '/uploads/financeCost/';
         if ($type == 1) {
             $headList = ['ID', '关联单据类型', '订单号', '站点', '订单类型', '订单金额', '收入金额', '币种', '是否结转', '增加/冲减', '订单支付时间', '支付方式', '创建时间'];
-            $saveName = '订单成本明细-收入'.date("YmdHis", time());
+            $saveName = '订单成本明细-收入' . date("YmdHis", time());
         } else {
             $headList = ['ID', '关联单据类型', '关联单号', '镜架成本', '镜片成本', '是否结转', '创建时间', '币种', '站点'];
-            $saveName = '订单成本明细-成本'.date("YmdHis", time());
+            $saveName = '订单成本明细-成本' . date("YmdHis", time());
         }
 
 
@@ -279,10 +278,10 @@ class FinanceCost extends Backend
                     $headList = [];
                 }
                 $i++;
-                Excel::writeCsv($params, $headList, $path.$saveName, false);
+                Excel::writeCsv($params, $headList, $path . $saveName, false);
             });
         unset($i);
-        header('Location: http://mj.com/'.$path . $saveName.'.csv');
+        header('Location: http://mj.com/' . $path . $saveName . '.csv');
         die;
     }
 
