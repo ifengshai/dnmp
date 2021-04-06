@@ -972,7 +972,7 @@ class Wangpenglei extends Backend
         //根据子单号查询条形码绑定关系
         $list = $product_barcode_item->alias('a')->field('a.sku,b.price')
             ->where(['item_order_number' => ['in', $item_order_number]])
-            ->join(['fa_in_stock_item' => 'b'], 'a.in_stock_id=b.id')
+            ->join(['fa_in_stock_item' => 'b'], 'a.in_stock_id=b.in_stock_id and a.sku=b.sku')
             ->select();
         $list = collection($list)->toArray();
         $allcost = 0;
