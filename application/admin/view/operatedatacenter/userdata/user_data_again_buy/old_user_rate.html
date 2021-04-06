@@ -111,17 +111,11 @@
                         style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;padding:10px;margin-left: 1px;">
                         <div class="col-lg-12">
                             <div style="float: left;width:48%;">
-                                <p
-                                    style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 400;font-size: 14px;'>
-                                    销售量</p>
                                 <div id="echart1" style="float: left;height:400px;width:100%;"></div>
                             </div>
 
                             <div style="float: left;width:48%;">
-                                <p
-                                    style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 400;font-size: 14px;'>
-                                    销售额</p>
-                                <div id="echart2" style="float: left;height:400px;width:100%;margin-left: 20px;">
+                                <div id="echart20" style="float: left;height:400px;width:100%;margin-left: 20px;">
                                 </div>
                             </div>
                         </div>
@@ -132,24 +126,24 @@
                         style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;margin-left: 1px;padding: 10px;">
                         <div class="col-xs-6 col-md-12">
                             <div>
-                                <table id="caigou-table" class="handle_table1" style="width:100%;">
+                                <table class="handle_table1" style="width:100%;">
                                     <tr>
                                         <td>日期（月）</td>
                                         <td>客户数</td>
-                                        <td>年复购客户数</td>
-                                        <td>年复购客户订单数</td>
-                                        <td>年复购率</td>
-                                        <td>年复购频次</td>
+                                        <td>老客户数</td>
+                                        <td>老客户占比</td>
+                                        <td>老客户环比变动</td>
+                                        <td>新客户环比变动</td>
                                     </tr>
                                     <tbody id="table_data">
-                                    {foreach name="data" item="vo" key="key"}
+                                    {foreach name="list" item="vo" key="key"}
                                     <tr>
-                                        <td>{$vo.hour_created}</td>
-                                        <td>{$vo.order_counter}</td>
-                                        <td>{$vo.orderitem_counter}</td>
-                                        <td>{$vo.hour_grand_total}</td>
-                                        <td>{$vo.grand_total_order_conversion}</td>
-                                        <td>{$vo.sessions}</td>
+                                        <td>{$vo.day_date}</td>
+                                        <td>{$vo.usernum}</td>
+                                        <td>{$vo.old_usernum}</td>
+                                        <td>{$vo.old_usernum_rate}%</td>
+                                        <td>{$vo.old_usernum_sequential}%</td>
+                                        <td>{$vo.new_usernum_sequential}%</td>
                                     </tr>
                                     {/foreach}
                                     </tbody>

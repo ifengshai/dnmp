@@ -216,6 +216,7 @@ class Repurchase extends Command
      */
     protected function getOldNewUser($site){
         $today = date('Y-m-d');
+        $nowMonth = date("Y-m", strtotime("first day of -1 month", strtotime($today)));
         $lastOneMonthStart = date("Y-m-01", strtotime("first day of -1 month", strtotime($today)));
         $lastOneMonthEnd = date("Y-m-d 23:59:59", strtotime("last day of -1 month", strtotime($today)));
         $lastOneMonthTimeStart = strtotime($lastOneMonthStart);
@@ -247,7 +248,7 @@ class Repurchase extends Command
         $newUserCount = intval($userCount)-intval($oldUserCount);   //新用户数
         $oldUserRate = $userCount ? round($oldUserCount/$userCount*100,2) : 0; //老用户数占比
         //获取上个月的用户信息
-        $lastMonth = date("Y-m", strtotime("first day of -1 month", strtotime($today)));
+        $lastMonth = date("Y-m", strtotime("first day of -1 month", strtotime($lastOneMonthStart)));
         $lastData = Db::name('datacenter_supply_month_web')
             ->where('day_date',$lastMonth)
             ->where('site',$site)
@@ -265,9 +266,10 @@ class Repurchase extends Command
             'new_usernum_sequential'=>$newSequential,
         );
         Db::name('datacenter_supply_month_web')
-            ->where('id',$lastData['id'])
+            ->where('day_date',$nowMonth)
+            ->where('site',$site)
             ->update($arr);
-        echo '站点：'.$site.' '.$lastData['day_date']." is ok"."\n";
+        echo '站点：'.$site.' '.$nowMonth." is ok"."\n";
         usleep(10000);
     }
 }
