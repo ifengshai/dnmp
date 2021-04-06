@@ -220,14 +220,11 @@ class FinanceCost extends Backend
             $saveName = '订单成本明细-成本'.date("YmdHis", time());
         }
 
-        $count = $this->model
-            ->where($where)
-            ->count();
 
         $i = 0;
         $this->model
             ->where($where)
-            ->chunk(1000, function ($data) use ($siteList, $typeDocument, $orderType, $type, $headList, $saveName, $path, &$i, $count) {
+            ->chunk(1000, function ($data) use ($siteList, $typeDocument, $orderType, $type, $headList, $saveName, $path, &$i) {
                 $params = [];
                 foreach ($data as $k => &$value) {
                     if ($value['action_type'] == 1) {
@@ -282,13 +279,10 @@ class FinanceCost extends Backend
                     $headList = [];
                 }
                 $i++;
-                if ($i >= ($count / 1000)) {
-                    Excel::writeCsv($params, $headList, $path.$saveName, true);
-                } else {
-                    Excel::writeCsv($params, $headList, $path.$saveName, false);
-                }
+                Excel::writeCsv($params, $headList, $path.$saveName, false);
             });
         unset($i);
+        header('Location: http://mj.com/'.$path . $saveName.'.csv');
         die;
     }
 
