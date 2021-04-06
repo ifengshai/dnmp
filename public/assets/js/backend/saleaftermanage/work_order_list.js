@@ -853,6 +853,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#work_platform').val(10);
                 } else if (str == '139' || str == '469'){
                     $('#work_platform').val(11);
+                }else if (str == '180'){
+                    $('#work_platform').val(13);
+                }else if (str == '900'){
+                    $('#work_platform').val(14);
                 }
                 $('.selectpicker ').selectpicker('refresh');
 
@@ -3323,7 +3327,12 @@ function platform_order(){
             $('#work_platform').val(10);
         } else if (str == '139' || str == '469'){
             $('#work_platform').val(11);
+        }else if (str == '180'){
+            $('#work_platform').val(13);
+        }else if (str == '900'){
+            $('#work_platform').val(14);
         }
+
 
         var sitetype = $('#work_platform').val();
         $('#c-order_sku').html('');
