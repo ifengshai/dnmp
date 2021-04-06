@@ -62,9 +62,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                     4: 'warning',
                                     5: 'purple',
                                     9: 'warning',
-                                    10: 'success'
+                                    10: 'success',
+                                    11: 'success',
                                 },
-                                searchList: {1: '普通订单', 2: '批发', 3: '网红单', 4: '补发', 5: '补差价', 9: 'vip订单', 10: '货到付款'},
+                                searchList: {
+                                    1: '普通订单',
+                                    2: '批发',
+                                    3: '网红单',
+                                    4: '补发',
+                                    5: '补差价',
+                                    9: 'vip订单',
+                                    10: '货到付款',
+                                    11: '便利店'
+                                },
                                 formatter: Table.api.formatter.status
                             },
                             {
