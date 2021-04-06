@@ -281,7 +281,7 @@ class FinanceCost extends Backend
                 Excel::writeCsv($params, $headList, $path . $saveName, false);
             });
         unset($i);
-        header('Location: http://mj.com/' . $path . $saveName . '.csv');
+        header('Location: https://mojing.nextmar.com' . $path . $saveName . '.csv');
         die;
     }
 
