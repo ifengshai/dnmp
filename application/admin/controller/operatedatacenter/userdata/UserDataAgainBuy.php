@@ -127,7 +127,7 @@ class UserDataAgainBuy extends Backend
         $site = input('order_platform');
 
         // 将中文标题转换编码，否则乱码
-        $field_arr = array(
+        $fieldArr = array(
             '日期（月）',
             '客户数',
             '年复购客户数',
@@ -135,11 +135,11 @@ class UserDataAgainBuy extends Backend
             '年复购率',
             '年复购频次'
         );
-        foreach ($field_arr as $i => $v) {
-            $field_arr[$i] = iconv('utf-8', 'GB18030', $v);
+        foreach ($fieldArr as $i => $v) {
+            $fieldArr[$i] = iconv('utf-8', 'GB18030', $v);
         }
         // 将标题名称通过fputcsv写到文件句柄
-        fputcsv($fp, $field_arr);
+        fputcsv($fp, $fieldArr);
         $list = $this->repurchase->getAgainData($site, 4);   //获取复购用户数据
         $list = collection($list)->toArray();
         //整理数据
@@ -281,7 +281,7 @@ class UserDataAgainBuy extends Backend
         $site = input('order_platform');
 
         // 将中文标题转换编码，否则乱码
-        $field_arr = array(
+        $fieldArr = array(
             '日期（月）',
             '客户数',
             '老客户数',
@@ -289,11 +289,11 @@ class UserDataAgainBuy extends Backend
             '老客户环比变动',
             '新客户环比变动'
         );
-        foreach ($field_arr as $i => $v) {
-            $field_arr[$i] = iconv('utf-8', 'GB18030', $v);
+        foreach ($fieldArr as $i => $v) {
+            $fieldArr[$i] = iconv('utf-8', 'GB18030', $v);
         }
         // 将标题名称通过fputcsv写到文件句柄
-        fputcsv($fp, $field_arr);
+        fputcsv($fp, $fieldArr);
         $list = $this->monthweb->getOldNewUserData($site);   //获取老用户数据
         $list = collection($list)->toArray();
         //整理数据
@@ -330,8 +330,8 @@ class UserDataAgainBuy extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $site = $params['order_platform'];
-            $repurchase_week = $params['repurchase_week'];
-            $data = $this->repurchase->getAgainData($site, $repurchase_week, true);
+            $repurchaseWeek = $params['repurchase_week'];
+            $data = $this->repurchase->getAgainData($site, $repurchaseWeek, true);
             $str = '';
             foreach ($data as $value) {
                 $str .= '<tr>';
@@ -369,11 +369,11 @@ class UserDataAgainBuy extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
-            $repurchase_week = $params['repurchase_week'];
-            $data = $this->repurchase->getAgainData($site, $repurchase_week, true);   //获取复购用户数据
+            $repurchaseWeek = $params['repurchase_week'];
+            $data = $this->repurchase->getAgainData($site, $repurchaseWeek, true);   //获取复购用户数据
             $data = collection($data)->toArray();
             array_multisort(array_column($data, 'day_date'), SORT_ASC, $data);
-            switch ($repurchase_week) {
+            switch ($repurchaseWeek) {
                 case 1:
                     $name = '一月期复购率';
                     break;
@@ -412,11 +412,11 @@ class UserDataAgainBuy extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
-            $repurchase_week = $params['repurchase_week'];
-            $data = $this->repurchase->getAgainData($site, $repurchase_week, true);   //获取复购用户数据
+            $repurchaseWeek = $params['repurchase_week'];
+            $data = $this->repurchase->getAgainData($site, $repurchaseWeek, true);   //获取复购用户数据
             $data = collection($data)->toArray();
             array_multisort(array_column($data, 'day_date'), SORT_ASC, $data);
-            switch ($repurchase_week) {
+            switch ($repurchaseWeek) {
                 case 1:
                     $name = '一月期复购频次';
                     break;
@@ -457,10 +457,10 @@ class UserDataAgainBuy extends Backend
         // 打开PHP文件句柄，php://output 表示直接输出到浏览器
         $fp = fopen('php://output', 'a');
         $site = input('order_platform');
-        $repurchase_week = input('repurchase_week');
+        $repurchaseWeek = input('repurchase_week');
 
         // 将中文标题转换编码，否则乱码
-        $field_arr = array(
+        $fieldArr = array(
             '日期（月）',
             '客户数',
             '年复购客户数',
@@ -468,12 +468,12 @@ class UserDataAgainBuy extends Backend
             '年复购率',
             '年复购频次'
         );
-        foreach ($field_arr as $i => $v) {
-            $field_arr[$i] = iconv('utf-8', 'GB18030', $v);
+        foreach ($fieldArr as $i => $v) {
+            $fieldArr[$i] = iconv('utf-8', 'GB18030', $v);
         }
         // 将标题名称通过fputcsv写到文件句柄
-        fputcsv($fp, $field_arr);
-        $list = $this->repurchase->getAgainData($site, $repurchase_week);   //获取复购用户数据
+        fputcsv($fp, $fieldArr);
+        $list = $this->repurchase->getAgainData($site, $repurchaseWeek);   //获取复购用户数据
         $list = collection($list)->toArray();
         //整理数据
         foreach ($list as &$val) {
