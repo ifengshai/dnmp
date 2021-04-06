@@ -317,11 +317,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                                     return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value+'%';
                                 }
                             },
-                            legend: { //图例配置
-                                padding: 5,
-                                top: '2%',
-                                data: ['年复购率']
-                            },
                             grid: {
                                 left: '15%',
                             },

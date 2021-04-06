@@ -373,12 +373,27 @@ class UserDataAgainBuy extends Backend
             $data = $this->repurchase->getAgainData($site, $repurchase_week, true);   //获取复购用户数据
             $data = collection($data)->toArray();
             array_multisort(array_column($data, 'day_date'), SORT_ASC, $data);
+            switch ($repurchase_week) {
+                case 1:
+                    $name = '一月期复购率';
+                    break;
+                case 2:
+                    $name = '三月期复购率';
+                    break;
+                case 3:
+                    $name = '半年期复购率';
+                    break;
+                case 4:
+                    $name = '一年期复购率';
+                    break;
+            }
             $json['xcolumnData'] = array_column($data, 'day_date');
+            $json['column'] = [$name];
             $json['columnData'] = [
                 [
                     'type' => 'line',
                     'data' => array_column($data, 'againbuy_rate'),
-                    'name' => '年复购率',
+                    'name' => $name,
                     'smooth' => true //平滑曲线
                 ],
             ];
@@ -401,12 +416,27 @@ class UserDataAgainBuy extends Backend
             $data = $this->repurchase->getAgainData($site, $repurchase_week, true);   //获取复购用户数据
             $data = collection($data)->toArray();
             array_multisort(array_column($data, 'day_date'), SORT_ASC, $data);
+            switch ($repurchase_week) {
+                case 1:
+                    $name = '一月期复购频次';
+                    break;
+                case 2:
+                    $name = '三月期复购频次';
+                    break;
+                case 3:
+                    $name = '半年期复购频次';
+                    break;
+                case 4:
+                    $name = '一年期复购频次';
+                    break;
+            }
             $json['xcolumnData'] = array_column($data, 'day_date');
+            $json['column'] = [$name];
             $json['columnData'] = [
                 [
                     'type' => 'line',
                     'data' => array_column($data, 'againbuy_num_rate'),
-                    'name' => '年复购频次',
+                    'name' => $name,
                     'smooth' => true //平滑曲线
                 ],
             ];
