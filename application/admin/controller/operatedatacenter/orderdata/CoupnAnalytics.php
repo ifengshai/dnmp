@@ -3,6 +3,7 @@
 namespace app\admin\controller\operatedatacenter\orderdata;
 
 use app\common\controller\Backend;
+use fast\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Controller;
 use think\Db;
@@ -35,7 +36,7 @@ class CoupnAnalytics extends Backend
             }
             if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
-                $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+                $map['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
                 unset($filter['time_str']);
                 $this->request->get(['filter' => json_encode($filter)]);
             } else {
@@ -56,12 +57,12 @@ class CoupnAnalytics extends Backend
                 $site = 1;
             }
             if ($filter['channel']) {
-                $map1['channel'] = ['=',$filter['channel']];
+                $map1['channel'] = ['=', $filter['channel']];
             } else {
                 $map1 = [];
             }
             if ($filter['name']) {
-                $map2['name'] = ['like','%'.$filter['name'].'%'];
+                $map2['name'] = ['like', '%'.$filter['name'].'%'];
             } else {
                 $map2 = [];
             }
@@ -112,7 +113,17 @@ class CoupnAnalytics extends Backend
             // dump($limit);
             // dump($list);die;
             //判断订单的某些条件
-            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+            $map['status'] = ['in',
+                [
+                    'free_processing',
+                    'processing',
+                    'complete',
+                    'paypal_reversed',
+                    'payment_review',
+                    'paypal_canceled_reversal',
+                    'delivered'
+                ]
+            ];
             $map['order_type'] = ['=', 1];
             $whole_order = $model->table('sales_flat_order')
                 ->where($map)
@@ -128,14 +139,16 @@ class CoupnAnalytics extends Backend
                     ->where($andWhere)
                     ->count();
                 //应用订单数量占比
-                $list[$k]['use_order_num_rate'] = $whole_order != 0 ? round($list[$k]['use_order_num'] / $whole_order, 4) * 100 . '%' : 0;
+                $list[$k]['use_order_num_rate'] = $whole_order != 0 ? round($list[$k]['use_order_num'] / $whole_order,
+                        4) * 100 .'%' : 0;
                 //应用订单金额
                 $list[$k]['use_order_total_price'] = $model->table('sales_flat_order')
                     ->where($map)
                     ->where($andWhere)
                     ->sum('base_grand_total');
                 //应用订单金额占比
-                $list[$k]['use_order_total_price_rate'] = $whole_order_price != 0 ? round($list[$k]['use_order_total_price'] / $whole_order_price, 4) * 100 . '%' : 0;
+                $list[$k]['use_order_total_price_rate'] = $whole_order_price != 0 ? round($list[$k]['use_order_total_price'] / $whole_order_price,
+                        4) * 100 .'%' : 0;
             }
             if (array_filter($list) > 0) {
 
@@ -168,7 +181,7 @@ class CoupnAnalytics extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','zeelool_de','zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -194,7 +207,7 @@ class CoupnAnalytics extends Backend
             } else {
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end = date('Y-m-d 23:59:59');
-                $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+                $seven_days = $start.' 00:00:00 - '.$end.' 00:00:00';
                 $createat = explode(' ', $seven_days);
             }
             switch ($site) {
@@ -222,8 +235,18 @@ class CoupnAnalytics extends Backend
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
             //判断订单的某些条件
-            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-            $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            $map['status'] = ['in',
+                [
+                    'free_processing',
+                    'processing',
+                    'complete',
+                    'paypal_reversed',
+                    'payment_review',
+                    'paypal_canceled_reversal',
+                    'delivered'
+                ]
+            ];
+            $map['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
             $map['order_type'] = ['=', 1];
             //coupon_code不能为空
             $map['coupon_code'] = ['neq', 'not null'];
@@ -310,7 +333,7 @@ class CoupnAnalytics extends Backend
             } else {
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end = date('Y-m-d 23:59:59');
-                $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+                $seven_days = $start.' 00:00:00 - '.$end.' 00:00:00';
                 $createat = explode(' ', $seven_days);
             }
             switch ($site) {
@@ -342,8 +365,18 @@ class CoupnAnalytics extends Backend
             }
 
             //判断订单的某些条件
-            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-            $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            $map['status'] = ['in',
+                [
+                    'free_processing',
+                    'processing',
+                    'complete',
+                    'paypal_reversed',
+                    'payment_review',
+                    'paypal_canceled_reversal',
+                    'delivered'
+                ]
+            ];
+            $map['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
             $map['order_type'] = ['=', 1];
             //coupon_code不能为空
             $map['coupon_code'] = ['neq', 'not null'];
@@ -352,8 +385,8 @@ class CoupnAnalytics extends Backend
             $maps = $map;
             $maps['coupon_code'] = null;
 
-            $tmp_time_start = $createat[0] . ' ' . $createat[1];
-            $tmp_time_end = $createat[3] . ' ' . $createat[4];
+            $tmp_time_start = $createat[0].' '.$createat[1];
+            $tmp_time_end = $createat[3].' '.$createat[4];
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             $tmpSql = " and sfo.created_at between '$tmp_time_start' and '$tmp_time_end' ";
             $order_coupon_querySql = "select sfo.coupon_rule_name,sfo.applied_rule_ids,count(*) counter,round(sum(sfo.base_grand_total),2) base_grand_total,round(sum(sfo.base_discount_amount),2) base_discount_amount 
@@ -372,9 +405,9 @@ class CoupnAnalytics extends Backend
             $arr = [];
             $total = $order_coupon_List;
             foreach ($total as $k => $v) {
-                if (empty($v['coupon_rule_name'])){
+                if (empty($v['coupon_rule_name'])) {
                     unset($total[$k]);
-                }else{
+                } else {
                     $total[$k]['applied_rule_ids'] = explode(',', $total[$k]['applied_rule_ids']);
                     foreach ($total[$k]['applied_rule_ids'] as $kk => $vv) {
                         //去除订单中多余的网站的固定优惠规则 只保留使用优惠券的优惠券的id
@@ -428,7 +461,7 @@ class CoupnAnalytics extends Backend
                 ],
             ];
 
-            $json['total'] =($plat->getOrderNum($seven_days,''))['order_num'];
+            $json['total'] = ($plat->getOrderNum($seven_days, ''))['order_num'];
             return json(['code' => 1, 'data' => $json]);
         }
     }
@@ -451,7 +484,7 @@ class CoupnAnalytics extends Backend
             } else {
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end = date('Y-m-d 23:59:59');
-                $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+                $seven_days = $start.' 00:00:00 - '.$end.' 00:00:00';
                 $createat = explode(' ', $seven_days);
             }
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
@@ -485,8 +518,18 @@ class CoupnAnalytics extends Backend
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
             //判断订单的某些条件
-            $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-            $map['created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            $map['status'] = ['in',
+                [
+                    'free_processing',
+                    'processing',
+                    'complete',
+                    'paypal_reversed',
+                    'payment_review',
+                    'paypal_canceled_reversal',
+                    'delivered'
+                ]
+            ];
+            $map['created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
             $map['order_type'] = ['=', 1];
             //coupon_code不能为空
             $map['coupon_code'] = ['neq', 'not null'];
@@ -535,30 +578,30 @@ class CoupnAnalytics extends Backend
             $json['columnData'] = [
                 [
                     'name' => '网站优惠券',
-                    'value' => round($num[1],2),
+                    'value' => round($num[1], 2),
                 ],
                 [
                     'name' => '主页优惠券',
-                    'value' => round($num[2],2),
+                    'value' => round($num[2], 2),
                 ],
                 [
                     'name' => '用户优惠券',
-                    'value' => round($num[3],2),
+                    'value' => round($num[3], 2),
                 ],
                 [
                     'name' => '渠道优惠券',
-                    'value' => round($num[4],2),
+                    'value' => round($num[4], 2),
                 ],
                 [
                     'name' => '客服优惠券',
-                    'value' => round($num[5],2),
+                    'value' => round($num[5], 2),
                 ],
                 [
                     'name' => '未使用优惠券',
                     'value' => $model->table('sales_flat_order')->where($maps)->sum('base_grand_total'),
                 ],
             ];
-            $json['total'] =($plat->getSalesTotalMoney($seven_days,''))['sales_total_money'];
+            $json['total'] = ($plat->getSalesTotalMoney($seven_days, ''))['sales_total_money'];
             return json(['code' => 1, 'data' => $json]);
         }
     }
@@ -575,7 +618,7 @@ class CoupnAnalytics extends Backend
 
         if ($time_str) {
             $createat = explode(' ', $time_str);
-            $map['p.created_at'] = ['between', [$createat[0], $createat[3] . ' 23:59:59']];
+            $map['p.created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         }
         if ($sku) {
             $map['p.sku'] = $sku;
@@ -586,15 +629,25 @@ class CoupnAnalytics extends Backend
         } elseif ($order_platform == 3) {
             $order_model = Db::connect('database.db_nihao');
             $field = 'p.id,o.increment_id,o.created_at,o.customer_email,p.prescription_type,p.frame_price,p.index_price';
-        } elseif($order_platform == 10){
+        } elseif ($order_platform == 10) {
             $order_model = Db::connect('database.db_zeelool_de');
-        } elseif($order_platform == 11){
+        } elseif ($order_platform == 11) {
             $order_model = Db::connect('database.db_zeelool_jp');
-        }else {
+        } else {
             $order_model = Db::connect('database.db_zeelool');
         }
         $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $map['o.status'] = ['in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered'
+            ]
+        ];
         $map['o.order_type'] = 1;
 
         $list = $order_model->table('sales_flat_order_item_prescription')
@@ -623,13 +676,13 @@ class CoupnAnalytics extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
         $spreadsheet->setActiveSheetIndex(0);
         foreach ($list as $k => $v) {
-            $spreadsheet->getActiveSheet()->setCellValue('A' . ($k * 1 + 2), $v['number']);
-            $spreadsheet->getActiveSheet()->setCellValue('B' . ($k * 1 + 2), $v['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue('C' . ($k * 1 + 2), $v['created_at']);
-            $spreadsheet->getActiveSheet()->setCellValue('D' . ($k * 1 + 2), $v['customer_email']);
-            $spreadsheet->getActiveSheet()->setCellValue('E' . ($k * 1 + 2), $v['prescription_type']);
-            $spreadsheet->getActiveSheet()->setCellValue('F' . ($k * 1 + 2), $v['coatiing_name']);
-            $spreadsheet->getActiveSheet()->setCellValue('G' . ($k * 1 + 2), $v['price']);
+            $spreadsheet->getActiveSheet()->setCellValue('A'.($k * 1 + 2), $v['number']);
+            $spreadsheet->getActiveSheet()->setCellValue('B'.($k * 1 + 2), $v['increment_id']);
+            $spreadsheet->getActiveSheet()->setCellValue('C'.($k * 1 + 2), $v['created_at']);
+            $spreadsheet->getActiveSheet()->setCellValue('D'.($k * 1 + 2), $v['customer_email']);
+            $spreadsheet->getActiveSheet()->setCellValue('E'.($k * 1 + 2), $v['prescription_type']);
+            $spreadsheet->getActiveSheet()->setCellValue('F'.($k * 1 + 2), $v['coatiing_name']);
+            $spreadsheet->getActiveSheet()->setCellValue('G'.($k * 1 + 2), $v['price']);
         }
         //设置边框
         $border = [
@@ -641,14 +694,14 @@ class CoupnAnalytics extends Backend
             ],
         ];
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $setBorder = 'A1:'.$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         $spreadsheet->setActiveSheetIndex(0);
         $format = 'xlsx';
-        $savename = '订单数据' . date("YmdHis", time());;
+        $savename = '订单数据'.date("YmdHis", time());;
 
         if ($format == 'xls') {
             //输出Excel03版本
@@ -660,11 +713,95 @@ class CoupnAnalytics extends Backend
             $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
         }
         //输出名称
-        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        header('Content-Disposition: attachment;filename="'.$savename.'.'.$format.'"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
+    }
+
+    public function export_coupon_analytics()
+    {
+        $map['created_at'] = ['between', ['2021-01-01 00:00:00', '2021-03-31 23:59:59']];
+        $site = 1;
+        switch ($site) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                $salesrule = Db::connect('database.db_zeelool_online');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                $salesrule = Db::connect('database.db_voogueme_online');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                $salesrule = Db::connect('database.db_nihao_online');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                $salesrule = Db::connect('database.db_zeelool_de_online');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
+                $salesrule = Db::connect('database.db_zeelool_jp_online');
+                break;
+        }
+        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        //所有的优惠券
+        $list = $salesrule->table('salesrule')
+            ->where('channel', '>', 0)
+            ->field('name,rule_id,channel')
+            ->select();
+        $list = collection($list)->toArray();
+        //判断订单的某些条件
+        $map['status'] = ['in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered'
+            ]
+        ];
+        $map['order_type'] = ['=', 1];
+        $whole_order = $model->table('sales_flat_order')
+            ->where($map)
+            ->count();
+        $whole_order_price = $model->table('sales_flat_order')
+            ->where($map)
+            ->sum('base_grand_total');
+        foreach ($list as $k => $v) {
+            $andWhere = "FIND_IN_SET({$v['rule_id']},applied_rule_ids)";
+            //应用订单数量
+            $list[$k]['use_order_num'] = $model->table('sales_flat_order')
+                ->where($map)
+                ->where($andWhere)
+                ->count();
+            //应用订单数量占比
+            $list[$k]['use_order_num_rate'] = $whole_order != 0 ? round($list[$k]['use_order_num'] / $whole_order,
+                    4) * 100 .'%' : 0;
+            //应用订单金额
+            $list[$k]['use_order_total_price'] = $model->table('sales_flat_order')
+                ->where($map)
+                ->where($andWhere)
+                ->sum('base_grand_total');
+            //应用订单金额占比
+            $list[$k]['use_order_total_price_rate'] = $whole_order_price != 0 ? round($list[$k]['use_order_total_price'] / $whole_order_price,
+                    4) * 100 .'%' : 0;
+        }
+        $headlist = [
+            '优惠券类型',  '优惠券名称', '应用订单数量',
+            '订单数量占比',  '订单金额', '订单金额占比'
+        ];
+        $path = "/uploads/";
+        $fileName = '优惠券分析1-3月份数据-T';
+        Excel::writeCsv($list, $headlist, $path . $fileName);
+        //获取当前域名
+        $request = Request::instance();
+        $domain = $request->domain();
+        header('Location: '.$domain.$path.$fileName.'.csv');
     }
 }
 
