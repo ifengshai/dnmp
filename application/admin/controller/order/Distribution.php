@@ -1980,7 +1980,9 @@ class Distribution extends Backend
 
         $this->model
             ->alias('a')
-            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time,b.payment_method,d.check_time')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,a.created_at,b.increment_id,
+            b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.grand_total
+            b.order_type,b.base_currency_code,b.payment_time,b.payment_method,d.check_time')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
@@ -2022,7 +2024,7 @@ class Distribution extends Backend
                 }
 
                 foreach ($list as $key => &$value) {
-
+                    dump($value);die();
                     //更改镜片最新数据
                     if ($changeLens[$value['item_order_number']]) {
                         $value = array_merge($value, $changeLens[$value['item_order_number']]);
@@ -2047,62 +2049,71 @@ class Distribution extends Backend
                             $value['order_type'] = '一件代发';
                             break;
                     }
+                    switch ($value['order_prescription_type']) {
+                        case 1:
+                            $value['order_prescription_type'] = '仅镜架';
+                            break;
+                        case 2:
+                            $value['order_prescription_type'] = '现货处方镜';
+                            break;
+                        case 3:
+                            $value['order_prescription_type'] = '定制处方镜';
+                            break;
+                    }
 
                     $data[$key]['id'] = $value['id']; //id
                     $data[$key]['increment_id'] = $value['increment_id'];//订单号
+                    $data[$key]['site'] = $siteList[$value['site']];//站点
+                    $data[$key]['order_type'] = $value['order_type'];//订单类型
+                    $data[$key]['status'] = $value['status'];//订单状态
+                    $data[$key]['grand_total'] = $value['grand_total'];//实际币种支付金额
+                    $data[$key]['payment_method'] = $value['payment_method'];//支付方式
+                    $data[$key]['order_currency_code'] = $value['order_currency_code'];//实际支付币种
+                    $data[$key]['item_order_number'] = $value['item_order_number'];//子单号
+                    $data[$key]['sku'] = $value['sku'];//sku
+                    $data[$key]['order_prescription_type'] = $value['order_prescription_type'];//加工类型
+                    $data[$key]['od_sph'] = $value['od_sph'];
+                    $data[$key]['os_sph'] = $value['os_sph'];
+                    $data[$key]['od_cyl'] = $value['od_cyl'];
+                    $data[$key]['os_cyl'] = $value['os_cyl'];
+                    $data[$key]['od_axis'] = $value['od_axis'];
+                    $data[$key]['os_axis'] = $value['os_axis'];
+                    $data[$key]['pd_r'] = $value['pd_r'];
+                    $data[$key]['pd_l'] = $value['pd_l'];
+                    $data[$key]['pd'] = $value['pd'];
+                    $data[$key]['od_add'] = $value['od_add'];
+                    $data[$key]['os_add'] = $value['os_add'];
+                    $data[$key]['od_pv'] = $value['od_pv'];
+                    $data[$key]['os_pv'] = $value['os_pv'];
+                    $data[$key]['od_pv_r'] = $value['od_pv_r'];
+                    $data[$key]['os_pv_r'] = $value['os_pv_r'];
+                    $data[$key]['od_bd'] = $value['od_bd'];
+                    $data[$key]['os_bd'] = $value['os_bd'];
+                    $data[$key]['od_bd_r'] = $value['od_bd_r'];
+                    $data[$key]['os_bd_r'] = $value['os_bd_r'];
+                    $data[$key]['prescription_type'] = $value['prescription_type'];//处方类型
+                    $data[$key]['index_name'] = $value['index_name'];//镜片名称
+                    $data[$key]['index_type'] = $value['index_type'];//镜片类型
                     if (empty($value['created_at'])) {
                         $value['created_at'] = '暂无';
                     } else {
-                        $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+                        $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']+28800);
                     }
-                    $data[$key]['created_at'] = $value['created_at'];//日期
+                    $data[$key]['created_at'] = $value['created_at'];//订单创建时间
 
-                    $data[$value['increment_id']]['site'] = $siteList[$value['site']];//站点
-                    $data[$value['increment_id']]['order_type'] = $value['order_type'];//订单类型
-                    $data[$value['increment_id']]['status'] = $value['status'];//订单状态
-                    $data[$value['increment_id']]['item_order_number'] = $value['item_order_number'];//子单号
-                    $data[$value['increment_id']]['sku'] = $changeSku[$value['item_order_number']] ?: $value['sku'];//sku
-                    $data[$value['increment_id']]['od_sph'] = $value['od_sph'];
-                    $data[$value['increment_id']]['os_sph'] = $value['os_sph'];//sph
-                    $data[$value['increment_id']]['od_cyl'] = $value['od_cyl'];//cyl
-                    $data[$value['increment_id']]['os_cyl'] = $value['os_cyl'];
-                    $data[$value['increment_id']]['od_axis'] = $value['od_axis'];//axis
-                    $data[$value['increment_id']]['os_axis'] = $value['os_axis'];
-                    $data[$value['increment_id']]['od_add'] = $value['od_add'];
-                    $data[$value['increment_id']]['os_add'] = $value['os_add'];
-                    if ($value['pdcheck'] == 'on') {
-                        $data[$value['increment_id']]['pd'] = $value['pd_r'].'/'.$value['pd_l'];
+                    if (empty($value['payment_time'])) {
+                        $value['payment_time'] = '暂无';
                     } else {
-                        $data[$value['increment_id']]['pd'] = $value['pd'];
+                        $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']+28800);
                     }
+                    $data[$key]['payment_time'] = $value['payment_time'];//支付时间
 
-                    $data[$value['increment_id']]['lens_number'] = $lensList[$value['lens_number']] ?: $value['web_lens_name'];//镜片
-
-                    $data[$value['increment_id']]['prescription_type'] = $value['prescription_type'];//处方类型
-
-                    $data[$value['increment_id']]['od_pv'] = $value['od_pv'];//Prism
-                    $data[$value['increment_id']]['os_pv'] = $value['os_pv'];
-
-                    $data[$value['increment_id']]['od_bd'] = $value['od_bd'];//Direct
-                    $data[$value['increment_id']]['os_bd'] = $value['os_bd'];
-
-                    $data[$value['increment_id']]['od_pv_r'] = $value['od_pv_r'];//Prism
-                    $data[$value['increment_id']]['os_pv_r'] = $value['os_pv_r'];
-
-                    $data[$value['increment_id']]['od_bd_r'] = $value['od_bd_r'];//Direct
-                    $data[$value['increment_id']]['os_bd_r'] = $value['os_bd_r'];
-                    $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];//订单金额
-                    $data[$value['increment_id']]['base_currency_code'] = $value['base_currency_code'];////原币种
-                    $data[$value['increment_id']]['base_grand_totalz'] = $value['base_grand_total'];//原支付金额
-                    $data[$value['increment_id']]['payment_method'] = $value['payment_method'];//支付方式
-
-                    $data[$value['increment_id']]['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);//订单支付时间
                     if (empty($value['check_time'])) {
                         $value['check_time'] = '暂无';
                     } else {
-                        $value['check_time'] = date('Y-m-d H:i:s', $value['check_time']);
+                        $value['check_time'] = date('Y-m-d H:i:s', $value['check_time']+28800);
                     }
-                    $data[$value['increment_id']]['check_time'] = $value['check_time'];
+                    $data[$key]['check_time'] = $value['check_time'];//支付时间
                 }
 
                 $data = array_values($data);
