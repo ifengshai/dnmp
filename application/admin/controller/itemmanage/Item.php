@@ -2430,7 +2430,7 @@ class Item extends Backend
             ->where($addWhere)
             ->where($where)
             ->select();
-        //分类列表	
+        //分类列表
         $categoryArr = $this->category->getItemCategoryList();
         $list = collection($list)->toArray();
         if (!$list) {

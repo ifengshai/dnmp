@@ -216,24 +216,39 @@ class Repurchase extends Command
      */
     protected function getOldNewUser($site){
         $today = date('Y-m-d');
+        $nowMonth = date("Y-m", strtotime("first day of -1 month", strtotime($today)));
         $lastOneMonthStart = date("Y-m-01", strtotime("first day of -1 month", strtotime($today)));
         $lastOneMonthEnd = date("Y-m-d 23:59:59", strtotime("last day of -1 month", strtotime($today)));
+        $lastOneMonthTimeStart = strtotime($lastOneMonthStart);
+        $lastOneMonthTimeEnd = strtotime($lastOneMonthEnd);
+        $where['site'] = $site;
+        $where['order_type'] = 1;
+        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $where1['payment_time'] = ['between',[$lastOneMonthTimeStart,$lastOneMonthTimeEnd]];
+        $sql1 = $this->order
+            ->where($where)
+            ->where($where1)
+            ->field('customer_email')
+            ->buildSql();
+        $where2 = [];
+        $where2[] = ['exp', Db::raw("customer_email in " . $sql1)];
+        $where3['payment_time'] = ['<',$lastOneMonthTimeStart];
+        $sql2 = $this->order
+            ->alias('t1')
+            ->field('count(*) as count')
+            ->where($where)
+            ->where($where2)
+            ->where($where3)
+            ->group('customer_email')
+            ->having('count(*)>= 1')
+            ->buildSql();
+        $oldUserCount = $this->order->table([$sql2=>'t2'])->value('count(*) as count');
         //获取用户邮箱及用户数
-        $user = $this->getUser($site,$lastOneMonthStart,$lastOneMonthEnd);
-        $userCount = $user['count'];  //用户数
-        $oldUserCount = 0;  //老用户数
-        $newUserCount = 0;   //新用户数
-        foreach($user['email'] as $key=>$value){
-            $count = $this->getOldUserBuyNum($site,$value['customer_email'],$lastOneMonthStart);
-            if($count>=1){
-                $oldUserCount++;
-            }else{
-                $newUserCount++;
-            }
-        }
+        $userCount = $this->getUser($site,$lastOneMonthStart,$lastOneMonthEnd);  //用户数
+        $newUserCount = intval($userCount)-intval($oldUserCount);   //新用户数
         $oldUserRate = $userCount ? round($oldUserCount/$userCount*100,2) : 0; //老用户数占比
         //获取上个月的用户信息
-        $lastMonth = date("Y-m", strtotime("first day of -1 month", strtotime($today)));
+        $lastMonth = date("Y-m", strtotime("first day of -1 month", strtotime($lastOneMonthStart)));
         $lastData = Db::name('datacenter_supply_month_web')
             ->where('day_date',$lastMonth)
             ->where('site',$site)
@@ -250,33 +265,11 @@ class Repurchase extends Command
             'old_usernum_sequential'=>$oldSequential,
             'new_usernum_sequential'=>$newSequential,
         );
-        Db::name('datacenter_supply_month')
-            ->where('id',$lastData['id'])
+        Db::name('datacenter_supply_month_web')
+            ->where('day_date',$nowMonth)
+            ->where('site',$site)
             ->update($arr);
-        echo '站点：'.$site.' '.$lastData['day_date']." is ok"."\n";
+        echo '站点：'.$site.' '.$nowMonth." is ok"."\n";
         usleep(10000);
     }
-    /**
-     * 获取用户过去时间段内的购买次数
-     * @param $site   站点
-     * @param $email   邮箱
-     * @param $limitDate   过去时间段的临界时间
-     * @return mixed
-     * @author mjj
-     * @date   2021/4/1 10:13:53
-     */
-    protected function getOldUserBuyNum($site,$email,$limitDate){
-        $limitTime = strtotime($limitDate);
-        $where['customer_email'] = $email;
-        $where['site'] = $site;
-        $where['order_type'] = 1;
-        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-        $where['payment_time'] = ['<',$limitTime];
-        //购买次数
-        $count = $this->order
-            ->where($where)
-            ->count();
-        return $count;
-    }
-
 }

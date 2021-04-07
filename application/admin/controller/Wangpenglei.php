@@ -882,4 +882,128 @@ class Wangpenglei extends Backend
         Excel::writeCsv($params, $headlist, '采购成本');
         die;
     }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/2 11:52
+     */
+    public function getFinanceCost()
+    {
+        ini_set('memory_limit', '1512M');
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $list = $finace_cost->where(['type' => 2, 'bill_type' => 8, 'frame_cost' => 0, 'payment_time' => ['>', 1613750400]])->select();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $frame_cost = $this->order_frame_cost($v['order_number']);
+            $finace_cost->where(['id' => $v['id']])->update(['frame_cost' => $frame_cost]);
+            echo $v['id']."\n";
+            usleep(100000);
+        }
+    }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/2 11:52
+     */
+    public function getOrderGrandTotal()
+    {
+        ini_set('memory_limit', '1512M');
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $list = $finace_cost->where(['bill_type' => 1, 'createtime' => ['>', 1614528000]])->select();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $params = [];
+        foreach ($list as $k => $v) {
+            //查询订单支付金额
+            $grand_total = $order->where(['increment_id' => $v['order_number'], 'site' => $v['site']])->value('grand_total');
+            $finace_cost->where(['id' => $v['id']])->update(['income_amount' => $grand_total, 'order_money' => $grand_total]);
+            echo $v['id']."\n";
+            usleep(100000);
+        }
+    }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/2 11:52
+     */
+    public function getOrderGrandTotalTwo()
+    {
+        ini_set('memory_limit', '1512M');
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $list = $finace_cost->where(['bill_type' => 8, 'createtime' => ['>', 1614528000]])->select();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $params = [];
+        foreach ($list as $k => $v) {
+            //查询订单支付金额
+            $grand_total = $order->where(['increment_id' => $v['order_number'], 'site' => $v['site']])->value('grand_total');
+            $finace_cost->where(['id' => $v['id']])->update(['income_amount' => $grand_total, 'order_money' => $grand_total]);
+            echo $v['id']."\n";
+            usleep(100000);
+        }
+    }
+
+    /**
+     * 订单镜架成本
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 18:20:45 
+     *
+     * @param [type] $order_id     订单id
+     * @param [type] $order_number 订单号
+     *
+     * @return void
+     */
+    protected function order_frame_cost($order_number = null)
+    {
+        $product_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        //查询订单子单号
+        $item_order_number = $order_item_process
+            ->alias('a')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->where(['increment_id' => $order_number])
+            ->column('item_order_number');
+
+        //判断是否有工单
+        $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
+
+        //查询更改类型为赠品
+        $goods_number = $worklist->alias('a')
+            ->join(['fa_work_order_change_sku' => 'b'], 'a.id=b.work_id')
+            ->where(['platform_order' => $order_number, 'work_status' => 6, 'change_type' => 4])
+            ->column('b.goods_number');
+        $workcost = 0;
+        if ($goods_number) {
+            //计算成本
+            $workdata = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price,c.purchase_total,purchase_num')
+                ->where(['code' => ['in', $goods_number]])
+                ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
+                ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
+                ->select();
+            foreach ($workdata as $k => $v) {
+                $workcost += $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_total'] / $v['purchase_num'];
+            }
+        }
+
+        //根据子单号查询条形码绑定关系
+        $list = $product_barcode_item->alias('a')->field('a.sku,b.price')
+            ->where(['item_order_number' => ['in', $item_order_number]])
+            ->join(['fa_in_stock_item' => 'b'], 'a.in_stock_id=b.in_stock_id and a.sku=b.sku')
+            ->select();
+        $list = collection($list)->toArray();
+        $allcost = 0;
+        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem();
+        foreach ($list as $k => $v) {
+            $purchase_price = $v['price'] > 0 ? $v['price'] : $v['price'];
+            $allcost += $purchase_price;
+        }
+
+        return $allcost + $workcost;
+    }
 }
