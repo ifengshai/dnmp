@@ -11,6 +11,7 @@ use think\Request;
 
 class CoupnAnalytics extends Backend
 {
+    protected $noNeedLogin = ['export_coupon_analytics'];
     /**
      * 优惠券明细列表
      *
@@ -720,6 +721,13 @@ class CoupnAnalytics extends Backend
         $writer->save('php://output');
     }
 
+    /**
+     * 导出优惠券数据
+     * Interface export_coupon_analytics
+     * @package app\admin\controller\operatedatacenter\orderdata
+     * @author jhh
+     * @date   2021/4/7 16:54:05
+     */
     public function export_coupon_analytics()
     {
         $map['created_at'] = ['between', ['2021-01-01 00:00:00', '2021-03-31 23:59:59']];
@@ -766,10 +774,10 @@ class CoupnAnalytics extends Backend
             ]
         ];
         $map['order_type'] = ['=', 1];
-        $whole_order = $model->table('sales_flat_order')
+        $wholeOrder = $model->table('sales_flat_order')
             ->where($map)
             ->count();
-        $whole_order_price = $model->table('sales_flat_order')
+        $wholeOrderPrice= $model->table('sales_flat_order')
             ->where($map)
             ->sum('base_grand_total');
         foreach ($list as $k => $v) {
@@ -780,7 +788,7 @@ class CoupnAnalytics extends Backend
                 ->where($andWhere)
                 ->count();
             //应用订单数量占比
-            $list[$k]['use_order_num_rate'] = $whole_order != 0 ? round($list[$k]['use_order_num'] / $whole_order,
+            $list[$k]['use_order_num_rate'] = $wholeOrder != 0 ? round($list[$k]['use_order_num'] / $wholeOrder,
                     4) * 100 .'%' : 0;
             //应用订单金额
             $list[$k]['use_order_total_price'] = $model->table('sales_flat_order')
@@ -788,7 +796,7 @@ class CoupnAnalytics extends Backend
                 ->where($andWhere)
                 ->sum('base_grand_total');
             //应用订单金额占比
-            $list[$k]['use_order_total_price_rate'] = $whole_order_price != 0 ? round($list[$k]['use_order_total_price'] / $whole_order_price,
+            $list[$k]['use_order_total_price_rate'] = $wholeOrderPrice != 0 ? round($list[$k]['use_order_total_price'] / $wholeOrderPrice,
                     4) * 100 .'%' : 0;
         }
         $headlist = [
