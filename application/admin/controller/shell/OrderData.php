@@ -2071,7 +2071,7 @@ class OrderData extends Backend
      */
     protected function order_data($site)
     {
-        $list = $this->order->where('grand_total < 1 and site = '.$site)->where(['status' => ['in', ['processing', 'complete', 'delivered']]])->where(['created_at' => ['>', '1609430400']])->limit(4000)->select();
+        $list = $this->order->where('grand_total < 1 and site = '.$site)->where(['status' => ['in', ['processing', 'complete', 'delivered']]])->where(['created_at' => ['>', '1599667200']])->limit(4000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
