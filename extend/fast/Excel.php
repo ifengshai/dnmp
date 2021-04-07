@@ -31,7 +31,7 @@ class Excel
      *                           array  bold        设置加粗样式，例如['A1', 'A2']
      *                           string savePath    保存路径，设置后则文件保存到服务器，不通过浏览器下载
      */
-    public static function exportExcel(array $datas, string $fileName = '', array $options = []): bool
+    public static function exportExcel(array $datas, string $fileName = null, array $options = []): bool
     {
         try {
             if (empty($datas)) {
@@ -283,7 +283,7 @@ class Excel
             $headlist[$key] = iconv('utf-8', 'gbk', $value);
         }
         //将数据通过fputcsv写到文件句柄
-        fputcsv($fp, $headlist);
+        $headlist ? fputcsv($fp, $headlist) : '';
 
         //计数器
         $num = 0;

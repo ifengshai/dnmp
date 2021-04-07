@@ -3,6 +3,7 @@
 namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
+use Mpdf\Mpdf;
 use think\Db;
 
 class SettleOrder extends Backend
@@ -100,4 +101,50 @@ class SettleOrder extends Backend
             $this->error('操作失败！！');
         }
     }
+
+
+    /**
+     * @param null $ids
+     * @throws \Mpdf\MpdfException
+     */
+    public function settleprint($ids = null)
+    {
+        //获取付款单信息
+        $ids = input('ids');
+        if (!$ids) {
+            $this->error(__('No Results were found'));
+        }
+        //主表数据
+        $statement = $this->statement->where('id',$ids)->find();
+        $supply = $this->supplier->where('id',$statement['supplier_id'])->field('supplier_name,recipient_name,opening_bank,bank_account,currency,period')->find();
+        $items = $this->statementitem->where('statement_id',$ids)->select();
+        $this->view->assign(compact('statement', 'supply', 'items'));
+        /***********end***************/
+
+        //去掉控制台
+        $this->view->engine->layout(false);
+
+        $dir = './pdftmp';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0777);
+        }
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4-L',
+            'orientation' => 'L'
+        ]);
+        $mpdf->autoScriptToLang = true;
+        $mpdf->autoLangToFont = true;
+        $mpdf->autoLangToFont = true;
+        $html =  $this->fetch('settleprint');
+
+        $mpdf->WriteHTML($html);
+
+        $mpdf->Output('pdf.pdf', 'I'); //D是下载
+        die;
+    }
+
+
+
 }

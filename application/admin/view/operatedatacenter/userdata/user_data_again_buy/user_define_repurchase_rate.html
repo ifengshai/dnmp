@@ -85,23 +85,27 @@
                 <form id="form" class="form-commonsearch form-horizontal" role="form" method="post">
                     <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
                         <div class="row">
-                            <div class="col-xs-12 col-sm-6 col-md-3">
+                            <div class="col-xs-12 col-sm-6">
                                 <div class="form-group">
-                                    <label class="control-label col-xs-4">平台</label>
-                                    <div class="col-xs-8">
-                                        <select id="order_platform" data-rule="required" class="form-control" name="order_platform">
+                                    <label class="control-label col-xs-2">平台</label>
+                                    <div class="col-xs-4">
+                                        <select id="order_platform" data-rule="required" class="form-control"
+                                                name="order_platform">
                                             {foreach name="magentoplatformarr" item="vo" key="key"}
-                                            <option value="{$vo.id}" {if condition="$vo.id == $web_site"}selected="selected"{/if}>{$vo.name}</option>
+                                            <option value="{$vo.id}" {if condition="$vo.id == $web_site"
+                                                    }selected="selected" {
+                                            /if}>{$vo.name}</option>
                                             {/foreach}
                                         </select>
                                     </div>
-                                    <label class="control-label col-xs-4">复购统计周期</label>
-                                    <div class="col-xs-8">
-                                        <select id="repurchase_week" data-rule="required" class="form-control" name="repurchase_week">
-                                            <option value="1" >一月期复购率</option>
-                                            <option value="2" >三月期复购率</option>
-                                            <option value="3" >半年期复购率</option>
-                                            <option value="4" >一年期复购率</option>
+                                    <label class="control-label col-xs-2">复购统计周期</label>
+                                    <div class="col-xs-4">
+                                        <select id="repurchase_week" data-rule="required" class="form-control"
+                                                name="repurchase_week">
+                                            <option value="1">一月期复购率</option>
+                                            <option value="2">三月期复购率</option>
+                                            <option value="3">半年期复购率</option>
+                                            <option value="4">一年期复购率</option>
                                         </select>
                                     </div>
                                 </div>
@@ -119,16 +123,10 @@
                         style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;padding:10px;margin-left: 1px;">
                         <div class="col-lg-12">
                             <div style="float: left;width:48%;">
-                                <p
-                                    style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 400;font-size: 14px;'>
-                                    销售量</p>
                                 <div id="echart1" style="float: left;height:400px;width:100%;"></div>
                             </div>
 
                             <div style="float: left;width:48%;">
-                                <p
-                                    style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 400;font-size: 14px;'>
-                                    销售额</p>
                                 <div id="echart2" style="float: left;height:400px;width:100%;margin-left: 20px;">
                                 </div>
                             </div>
@@ -140,24 +138,24 @@
                         style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;margin-left: 1px;padding: 10px;">
                         <div class="col-xs-6 col-md-12">
                             <div>
-                                <table id="caigou-table" class="handle_table1" style="width:100%;">
+                                <table class="handle_table1" style="width:100%;">
                                     <tr>
                                         <td>日期（月）</td>
                                         <td>客户数</td>
-                                        <td>年复购客户数</td>
-                                        <td>年复购客户订单数</td>
-                                        <td>年复购率</td>
-                                        <td>年复购频次</td>
+                                        <td>复购客户数</td>
+                                        <td>复购客户订单数</td>
+                                        <td>复购率</td>
+                                        <td>复购频次</td>
                                     </tr>
                                     <tbody id="table_data">
-                                    {foreach name="data" item="vo" key="key"}
+                                    {foreach name="list" item="vo" key="key"}
                                     <tr>
-                                        <td>{$vo.hour_created}</td>
-                                        <td>{$vo.order_counter}</td>
-                                        <td>{$vo.orderitem_counter}</td>
-                                        <td>{$vo.hour_grand_total}</td>
-                                        <td>{$vo.grand_total_order_conversion}</td>
-                                        <td>{$vo.sessions}</td>
+                                        <td>{$vo.day_date}</td>
+                                        <td>{$vo.usernum}</td>
+                                        <td>{$vo.againbuy_usernum}</td>
+                                        <td>{$vo.againbuy_usernum_ordernum}</td>
+                                        <td>{$vo.againbuy_rate}%</td>
+                                        <td>{$vo.againbuy_num_rate}</td>
                                     </tr>
                                     {/foreach}
                                     </tbody>

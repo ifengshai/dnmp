@@ -135,7 +135,7 @@ class NewProductDesign extends Backend
     public function detail($ids=null)
     {
         $item = new Item();
-        $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
+        $itemAttribute =new ItemAttribute();
         $value = $this->model->get($ids);
         $where['sku'] = $value->sku;
         $data = $item->where($where)
@@ -167,7 +167,7 @@ class NewProductDesign extends Backend
     //录尺寸
     public function record_size($ids =null)
     {
-        $itemAttribute = new \app\admin\model\itemmanage\ItemAttribute();
+        $itemAttribute = new ItemAttribute();
         if ($this->request->post()){
            $data = $this->request->post();
             if ($data['attributeType'] ==1){
@@ -320,7 +320,7 @@ class NewProductDesign extends Backend
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin'=>'b'],'a.uid=b.id')
-            ->where('a.group_id=72')
+            ->where('a.group_id=160')
             ->field('id,nickname')
             ->select();
         $this->assign('ids',$ids);
