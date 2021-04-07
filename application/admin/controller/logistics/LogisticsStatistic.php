@@ -9,6 +9,7 @@ use think\Cache;
 use think\Db;
 use think\Exception;
 use think\exception\ValidateException;
+use think\Request;
 
 class LogisticsStatistic extends Backend
 {
@@ -365,14 +366,28 @@ class LogisticsStatistic extends Backend
     }
 
 
-
+    /**
+     * 数据中心供应链分析-物流统计导出功能
+     * Interface export_not_shipped
+     * @package app\admin\controller\logistics
+     * @author jhh
+     * @date   2021/4/7 14:03:00
+     */
     public function export_not_shipped(){
+        $create_time = input('create_time');
+        $platform = input('platform');
+        $maps = [];
+        if ($platform != 10){
+            $map['site'] = $platform;
+            $maps['site'] = $platform;
+        }
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-        $map['delivery_time'] = ['between', ['2020-12-01 00:00:00', '2020-12-31 23:59:59']];
+        $createat = explode(' ', $create_time);
+        $map['delivery_time'] = ['between', [$createat[0], $createat[3]]];
         $map['node_type'] = ['neq',40];
 
-        $value_array = Db::table('fa_order_node')->where($map)->field('track_number,order_number,node_type')->select();
+        $value_array = Db::table('fa_order_node')->where($map)->field('track_number,order_number,node_type,create_time,delivery_time,shipment_last_msg')->select();
         $value_array = collection($value_array)->toArray();
         foreach ($value_array as $key=>$item){
             switch ($item['node_type']){
@@ -410,7 +425,9 @@ class LogisticsStatistic extends Backend
             $created_at = Db::connect('database.db_mojing_order')->table('fa_order')
                 ->alias('fao')
                 ->join(['fa_order_process'=>'ldo'],'fao.id= ldo.order_id')
-                ->where($where)->field('fao.increment_id,ldo.shipment_num,fao.created_at,fao.country_id,ldo.agent_way_title,ldo.track_number,ldo.exception_msg,ldo.package_no')
+                ->where($where)
+                ->where($maps)
+                ->field('fao.increment_id,ldo.shipment_num,fao.created_at,fao.country_id,ldo.agent_way_title,ldo.track_number,ldo.exception_msg,ldo.package_no')
                 ->select();
             $created_at = collection($created_at)->toArray();
             //下单时间
@@ -423,20 +440,22 @@ class LogisticsStatistic extends Backend
             $csv[$key]['node_type']  = $item['node_type'];
             $csv[$key]['shipment_num']  = $created_at[0]['shipment_num'];
             $csv[$key]['created_at']  = date('Y-m-d H:i:s',$created_at[0]['created_at']+28800);
-
+            $csv[$key]['delivery_time']  = $item['delivery_time'];
+            $csv[$key]['node_type']  = $item['node_type'];
+            $csv[$key]['shipment_last_msg']  = $item['shipment_last_msg'];
         }
         $headlist = [
            '国家',  '物流方式', '包裹号',
            '运单号',  '平台订单号', '异常信息',
-           '订单状态',  '头程单号',
+           '订单状态',  '头程单号','创建时间','发货时间','节点状态','最后一条记录信息'
         ];
         $path = "/uploads/";
         $fileName = '仓库需要导出的数据-T';
         Excel::writeCsv($csv, $headlist, $path . $fileName);
+        //获取当前域名
+        $request = Request::instance();
+        $domain = $request->domain();
+        header('Location: '.$domain.$path.$fileName.'.csv');
     }
-
-
-
-
 
 }
