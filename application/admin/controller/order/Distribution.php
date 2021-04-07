@@ -1936,11 +1936,12 @@ class Distribution extends Backend
         $lensList = $this->_lens_data->column('lens_name', 'lens_number');
 
         $headList = [
-            '订单ID',
+//            '订单ID',
             '订单号',
             '站点',
             '订单类型',
             '订单状态',
+            '子单号状态',
             '实际币种支付金额',
             '支付方式',
             '实际支付币种',
@@ -1966,6 +1967,9 @@ class Distribution extends Backend
             'os_bd',
             'od_bd_r',
             'os_bd_r',
+            '处方名称',
+            '镜片名称',
+            '镜片类型',
             '订单创建时间',
             '支付时间',
             '审单时间',
@@ -1980,37 +1984,39 @@ class Distribution extends Backend
 
         $this->model
             ->alias('a')
-            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,a.created_at,b.increment_id,
-            b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.grand_total
-            b.order_type,b.base_currency_code,b.payment_time,b.payment_method,d.check_time')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.increment_id,
+            b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.grand_total,
+            b.order_type,b.base_currency_code,b.payment_time,b.payment_method,b.order_currency_code,d.check_time,e.distribution_status')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
+            ->join(['fa_order_item_process' => 'e'], 'a.order_id=e.order_id')
             ->where($where)
             ->where($map)
             ->chunk(1000, function ($list) use ($siteList, $lensList, $headList, &$i, $path, $fileName) {
                 //获取更改镜框最新信息
                 $changeSku = $this->_work_order_change_sku
-                    ->alias('a')
-                    ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                    ->alias('f')
+                    ->join(['fa_work_order_measure' => 'g'], 'f.measure_id=g.id')
                     ->where([
-                        'a.change_type'       => 1,
-                        'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                        'b.operation_type'    => 1,
+                        'f.change_type'       => 1,
+                        'f.item_order_number' => ['in', array_column($list, 'item_order_number')],
+                        'g.operation_type'    => 1,
                     ])
-                    ->column('a.change_sku', 'a.item_order_number');
+                    ->column('f.change_sku', 'f.item_order_number');
 
                 //获取更改镜片最新处方信息
                 $changeLens = $this->_work_order_change_sku
-                    ->alias('a')
-                    ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                    ->alias('h')
+                    ->join(['fa_work_order_measure' => 'i'], 'h.measure_id=i.id')
                     ->where([
-                        'a.change_type'       => 2,
-                        'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                        'b.operation_type'    => 1,
+                        'h.change_type'       => 2,
+                        'h.item_order_number' => ['in', array_column($list, 'item_order_number')],
+                        'i.operation_type'    => 1,
                     ])
-                    ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,a.web_lens_name', 'a.item_order_number');
-
+                    ->column('h.od_sph,h.od_cyl,h.od_axis,h.od_add,h.pd_r,h.od_pv,h.od_bd,
+                    h.od_pv_r,h.od_bd_r,h.os_sph,h.os_cyl,h.os_axis,h.os_add,h.pd_l,
+                    h.os_pv,h.os_bd,h.os_pv_r,h.os_bd_r,h.lens_number,h.recipe_type as prescription_type,h.web_lens_name', 'h.item_order_number');
                 if ($changeLens) {
                     foreach ($changeLens as $key => $val) {
                         if ($val['pd_l'] && $val['pd_r']) {
@@ -2022,9 +2028,8 @@ class Distribution extends Backend
                         }
                     }
                 }
-
                 foreach ($list as $key => &$value) {
-                    dump($value);die();
+
                     //更改镜片最新数据
                     if ($changeLens[$value['item_order_number']]) {
                         $value = array_merge($value, $changeLens[$value['item_order_number']]);
@@ -2061,11 +2066,12 @@ class Distribution extends Backend
                             break;
                     }
 
-                    $data[$key]['id'] = $value['id']; //id
+//                    $data[$key]['id'] = $value['id']; //id
                     $data[$key]['increment_id'] = $value['increment_id'];//订单号
                     $data[$key]['site'] = $siteList[$value['site']];//站点
                     $data[$key]['order_type'] = $value['order_type'];//订单类型
                     $data[$key]['status'] = $value['status'];//订单状态
+                    $data[$key]['distribution_status'] = $value['distribution_status'];//订单状态
                     $data[$key]['grand_total'] = $value['grand_total'];//实际币种支付金额
                     $data[$key]['payment_method'] = $value['payment_method'];//支付方式
                     $data[$key]['order_currency_code'] = $value['order_currency_code'];//实际支付币种
@@ -2122,7 +2128,7 @@ class Distribution extends Backend
                 }
                 $i++;
                 Excel::writeCsv($data, $headList, $path.$fileName);
-            });
+            },'a.id');
         unset($i);
         //获取当前域名
         $request = Request::instance();
