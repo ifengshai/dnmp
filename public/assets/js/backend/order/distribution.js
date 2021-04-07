@@ -19,6 +19,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('.btn-batch-export-xls').removeClass('hide');
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
+            $('.btn-batch-export-account').removeClass('hide');
         } else if (1 == value) {
             $('#check_time').hide();
             $('.btn-batch-printed').removeClass('hide');
@@ -491,6 +492,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
                 }
                 window.open(Config.moduleurl + '/order/distribution/printing_batch_export_xls?' + params, '_blank');
+            });
+
+            //批量导出xls
+            $('.btn-batch-export-account').click(function () {
+                var ids = Table.api.selectedids(table);
+                var params = '';
+                if (ids.length > 0) {
+                    params = 'ids=' + ids;
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
+                }
+                window.open(Config.moduleurl + '/order/distribution/batch_export_xls_account?' + params, '_blank');
             });
 
             //批量打印
