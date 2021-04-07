@@ -33,6 +33,7 @@ use app\admin\model\warehouse\ProductBarCodeItem;
 use GuzzleHttp\Client;
 use app\admin\model\warehouse\Inventory;
 
+
 /**
  * 配货列表
  */
@@ -1935,12 +1936,14 @@ class Distribution extends Backend
         $lensList = $this->_lens_data->column('lens_name', 'lens_number');
 
         $headList = [
-            'ID',
-            '日期',
+            '订单ID',
             '订单号',
             '站点',
             '订单类型',
             '订单状态',
+            '实际币种支付金额',
+            '支付方式',
+            '实际支付币种',
             '子单号',
             'SKU',
             'SPH-L',
@@ -1975,6 +1978,11 @@ class Distribution extends Backend
         $path = '/uploads/order/';
         $fileName = '财务导出数据';
         $i = 0;
+        //非拆分订单
+        $map['d.is_split'] = 0;
+        //非重新下单
+        $map['d.is_repeat'] = 0;
+
         $this->model
             ->alias('a')
             ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time,b.payment_method,d.check_time')
@@ -2109,7 +2117,10 @@ class Distribution extends Backend
                 Excel::writeCsv($data, $headList, $path.$fileName);
             });
         unset($i);
-        header('Location: https://mojing.nextmar.com'.$path.$fileName.'.csv');
+        //获取当前域名
+        $request = Request::instance();
+        $domain = $request->domain();
+        header('Location: '.$domain.$path.$fileName.'.csv');
         die;
     }
 
