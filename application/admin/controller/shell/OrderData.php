@@ -2071,7 +2071,7 @@ class OrderData extends Backend
      */
     protected function order_data($site)
     {
-        $list = $this->order->where('grand_total < 1 and site = '.$site)->where(['created_at' => ['>', '1612108800']])->limit(4000)->select();
+        $list = $this->order->where('grand_total < 1 and site = '.$site)->where(['status' => ['in', ['processing', 'complete', 'delivered']]])->where(['created_at' => ['>', '1599667200']])->limit(4000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
@@ -2083,7 +2083,7 @@ class OrderData extends Backend
         } elseif ($site == 4) {
             $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
         } elseif ($site == 5) {
-            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
+            $res = Db::connect('database.db_weseeoptical')->table('orders')->where(['id' => ['in', $entity_id]])->column('actual_amount_paid', 'id');
         } elseif ($site == 9) {
             $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
         } elseif ($site == 10) {

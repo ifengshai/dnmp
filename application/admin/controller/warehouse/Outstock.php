@@ -26,6 +26,13 @@ class Outstock extends Backend
 {
 
     /**
+     * 取消权限验证
+     * @var string[]
+     * @author crasphb
+     * @date   2021/4/7 15:46
+     */
+    protected $noNeedRight = ['batch_export_xls'];
+    /**
      * Outstock模型对象
      * @var \app\admin\model\warehouse\Outstock
      */
@@ -73,7 +80,7 @@ class Outstock extends Backend
             }
 
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['outstocktype'])
                 ->where($where)
@@ -711,7 +718,7 @@ class Outstock extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['outstocktype'])
                 ->where(['status' => 2])
