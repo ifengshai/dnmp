@@ -2000,6 +2000,7 @@ class WorkOrderList extends Backend
             //判断此sku是否在第三方平台
             if ($siteType == 13 || $siteType == 14) {
                 $res = $this->model->httpRequest($work->work_platform, 'api/mojing/check_sku', ['sku' =>$sku,'platform_order' =>$platform_order], 'POST');
+                print_r($res);die;
                 if (empty($res[$sku])) {
                     return ['result' => false, 'msg' => $sku . '不存在！！'];
                 }
