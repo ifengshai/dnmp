@@ -1989,6 +1989,7 @@ class NewProduct extends Backend
                 ->where($where)
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
+                ->where('d.replenish_id<>0')
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
@@ -2003,6 +2004,7 @@ class NewProduct extends Backend
                 ->where($where)
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
+                ->where('d.replenish_id<>0')
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
