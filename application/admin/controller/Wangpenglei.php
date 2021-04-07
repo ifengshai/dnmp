@@ -913,7 +913,29 @@ class Wangpenglei extends Backend
     {
         ini_set('memory_limit', '1512M');
         $finace_cost = new \app\admin\model\finance\FinanceCost();
-        $list = $finace_cost->where(['bill_type' => ['in', [1, 8]], 'createtime' => ['>', 1614528000]])->where('payment_time is null')->select();
+        $list = $finace_cost->where(['bill_type' => 1, 'createtime' => ['>', 1614528000]])->select();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $params = [];
+        foreach ($list as $k => $v) {
+            //查询订单支付金额
+            $grand_total = $order->where(['increment_id' => $v['order_number'], 'site' => $v['site']])->value('grand_total');
+            $finace_cost->where(['id' => $v['id']])->update(['income_amount' => $grand_total, 'order_money' => $grand_total]);
+            echo $v['id']."\n";
+            usleep(100000);
+        }
+    }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/2 11:52
+     */
+    public function getOrderGrandTotalTwo()
+    {
+        ini_set('memory_limit', '1512M');
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $list = $finace_cost->where(['bill_type' => 8, 'createtime' => ['>', 1614528000]])->select();
         $order = new \app\admin\model\order\order\NewOrder();
         $params = [];
         foreach ($list as $k => $v) {
