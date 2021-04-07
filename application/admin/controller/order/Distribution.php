@@ -1946,33 +1946,28 @@ class Distribution extends Backend
             '实际支付币种',
             '子单号',
             'SKU',
-            'SPH-L',
-            'SPH-R',
-            'CYL-L',
-            'CYL-R',
-            'AXI-L',
-            'AXL-R',
-            'ADD-L',
-            'ADD-R',
-            'PD',
-            '镜片',
-            '镜框宽度',
-            '镜框高度',
-            'bridge',
-            '处方类型',
-            'Prism(out/in)-L',
-            'PrismOut-in-R',
-            'DirectOut-in-L',
-            'DirectOut-in-R',
-            'Prism-up-down-L',
-            'Prism-Up-down-R',
-            'Direct-Up-down-L',
-            'DirectUp-down-R',
-            '订单金额',
-            '原币种',
-            '原支付金额',
-            '支付方式',
-            '订单支付时间',
+            '加工类型',
+            'od_sph',
+            'os_sph',
+            'od_cyl',
+            'os_cyl',
+            'od_axis',
+            'os_axis',
+            'pd_r',
+            'pd_l',
+            'pd',
+            'od_add',
+            'os_add',
+            'od_pv',
+            'os_pv',
+            'od_pv_r',
+            'os_pv_r',
+            'od_bd',
+            'os_bd',
+            'od_bd_r',
+            'os_bd_r',
+            '订单创建时间',
+            '支付时间',
             '审单时间',
         ];
         $path = '/uploads/order/';
@@ -2053,14 +2048,15 @@ class Distribution extends Backend
                             break;
                     }
 
-                    $data[$value['increment_id']]['id'] = $value['id']; //id
+                    $data[$key]['id'] = $value['id']; //id
+                    $data[$key]['increment_id'] = $value['increment_id'];//订单号
                     if (empty($value['created_at'])) {
                         $value['created_at'] = '暂无';
                     } else {
                         $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
                     }
-                    $data[$value['increment_id']]['created_at'] = $value['created_at'];//日期
-                    $data[$value['increment_id']]['increment_id'] = $value['increment_id'];//订单号
+                    $data[$key]['created_at'] = $value['created_at'];//日期
+
                     $data[$value['increment_id']]['site'] = $siteList[$value['site']];//站点
                     $data[$value['increment_id']]['order_type'] = $value['order_type'];//订单类型
                     $data[$value['increment_id']]['status'] = $value['status'];//订单状态
