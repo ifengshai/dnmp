@@ -935,7 +935,7 @@ class Wangpenglei extends Backend
     {
         ini_set('memory_limit', '1512M');
         $finace_cost = new \app\admin\model\finance\FinanceCost();
-        $list = $finace_cost->where(['bill_type' => 8, 'createtime' => ['>', 1614528000]])->select();
+        $list = $finace_cost->where(['bill_type' => 8, 'income_amount' => 0, 'createtime' => ['>', 1614528000]])->select();
         $order = new \app\admin\model\order\order\NewOrder();
         $params = [];
         foreach ($list as $k => $v) {
