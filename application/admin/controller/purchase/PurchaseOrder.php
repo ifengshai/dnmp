@@ -2713,6 +2713,7 @@ class PurchaseOrder extends Backend
         Excel::writeCsv($data, $headlist, $path.$fileName);
     }
 
+    //所有的 仓库SKU、最近一次采购单中对应的大货/现货
     public function export_sku_many_type()
     {
         $purchase_order_item = Db::name('purchase_order_item')->order('id desc')->column('purchase_id,sku');
