@@ -1500,6 +1500,7 @@ class WorkOrderList extends Model
                         $postData['site'] = $siteType;
                         $postData['old_increment_id'] = self::where(['id' => $work_id])->value('platform_order');
                     }
+                    print_r(json_encode($postData));die;
                     $res = $this->httpRequest($siteType, $pathinfo, $postData, 'POST');
                     $increment_id = $res['increment_id'];
 
