@@ -1488,6 +1488,7 @@ class WorkOrderList extends Model
                 ];
                 if ($siteType == 13 || $siteType == 14) {
                     $postData['product'][$key]['lens_number'] = $prescriptions['lens_number'];
+                    $postData['region'] = $address['region'];
                 }
                 $measure_id = $changeSku['measure_id'];
             }
@@ -1500,7 +1501,6 @@ class WorkOrderList extends Model
                         $postData['site'] = $siteType;
                         $postData['old_increment_id'] = self::where(['id' => $work_id])->value('platform_order');
                     }
-                    print_r(json_encode($postData));die;
                     $res = $this->httpRequest($siteType, $pathinfo, $postData, 'POST');
                     $increment_id = $res['increment_id'];
 
