@@ -2735,7 +2735,7 @@ class PurchaseOrder extends Backend
         $data = array_values($data);
         $headlist = ['id', '类型','SKU'];
         $path = "/uploads/";
-        $fileName = '导出所有SKU对应的大货/现货数据';
+        $fileName = '导出所有SKU对应的大货现货数据';
 
         Excel::writeCsv($data, $headlist, $path.$fileName);
     }
