@@ -115,15 +115,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             grid: {
                                 left: '15%',
                             },
-                        },
-                        yAxis: [
-                            {
-                                type: 'value',
-                                axisLabel: {
-                                    formatter: '{value}'
+                            yAxis: [
+                                {
+                                    type: 'value',
+                                    axisLabel: {
+                                        formatter: '{value}'
+                                    }
                                 }
-                            }
-                        ],
+                            ],
+                        },
                     };
                     var options = {
                         type: 'post',
@@ -188,7 +188,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             legend: { //图例配置
                                 padding: 5,
                                 top: '2%',
-                                data: ['老用户占比']
+                                data: ['老客户占比']
                             },
                             grid: {
                                 left: '15%',
@@ -285,15 +285,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             grid: {
                                 left: '15%',
                             },
-                        },
-                        yAxis: [
-                            {
-                                type: 'value',
-                                axisLabel: {
-                                    formatter: '{value}'
+                            yAxis: [
+                                {
+                                    type: 'value',
+                                    axisLabel: {
+                                        formatter: '{value}'
+                                    }
                                 }
-                            }
-                        ],
+                            ],
+                        },
                     };
                     var options = {
                         type: 'post',

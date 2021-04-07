@@ -52,8 +52,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                 }, operate: 'IN',
                                 formatter: Table.api.formatter.status
                             },
-                            { field: 'order_type', title: __('订单类型'), custom: { 1: 'success', 2: 'orange', 3: 'danger', 4: 'warning', 5: 'purple', 9: 'warning' }, searchList: { 1: '普通订单', 2: '批发', 3: '网红单', 4: '补发', 5: '补差价', 9: 'vip订单' }, formatter: Table.api.formatter.status },
-                            { field: 'order_money', title: __('订单金额'), operate: false, formatter: Controller.api.float_format },
+                            {
+                                field: 'order_type',
+                                title: __('订单类型'),
+                                custom: {
+                                    1: 'success',
+                                    2: 'orange',
+                                    3: 'danger',
+                                    4: 'warning',
+                                    5: 'purple',
+                                    9: 'warning',
+                                    10: 'success',
+                                    11: 'success',
+                                },
+                                searchList: {
+                                    1: '普通订单',
+                                    2: '批发',
+                                    3: '网红单',
+                                    4: '补发',
+                                    5: '补差价',
+                                    9: 'vip订单',
+                                    10: '货到付款',
+                                    11: '便利店'
+                                },
+                                formatter: Table.api.formatter.status
+                            },
+                            {
+                                field: 'order_money',
+                                title: __('订单金额'),
+                                operate: false,
+                                formatter: Controller.api.float_format
+                            },
                             {
                                 field: 'income_amount',
                                 title: __('收入金额'),
@@ -131,9 +160,40 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                     sortName: 'id',
                     columns: [
                         [
-                            { field: 'id', title: 'ID', operate: false },
-                            { field: 'bill_type', title: __('关联单据类型'), custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary', 7: 'primary', 8: 'primary', 9: 'primary', 10: 'primary', 11: 'primary' }, searchList: { 1: '订单', 2: 'VIP订单', 3: '工单补差价', 4: '退货退款', 5: '订单取消', 6: '部分退款', 7: 'Vip退款', 8: '订单出库', 9: '出库单出库', 10: '订单冲减暂估', 11: '出库单冲减暂估' }, formatter: Table.api.formatter.status },
-                            { field: 'order_number', title: __('关联单号') },
+                            {checkbox: true,},
+                            {field: 'id', title: 'ID', operate: false},
+                            {
+                                field: 'bill_type',
+                                title: __('关联单据类型'),
+                                custom: {
+                                    1: 'success',
+                                    2: 'danger',
+                                    3: 'orange',
+                                    4: 'warning',
+                                    5: 'purple',
+                                    6: 'primary',
+                                    7: 'primary',
+                                    8: 'primary',
+                                    9: 'primary',
+                                    10: 'primary',
+                                    11: 'primary'
+                                },
+                                searchList: {
+                                    1: '订单',
+                                    2: 'VIP订单',
+                                    3: '工单补差价',
+                                    4: '退货退款',
+                                    5: '订单取消',
+                                    6: '部分退款',
+                                    7: 'Vip退款',
+                                    8: '订单出库',
+                                    9: '出库单出库',
+                                    10: '订单冲减暂估',
+                                    11: '出库单冲减暂估'
+                                },
+                                formatter: Table.api.formatter.status
+                            },
+                            {field: 'order_number', title: __('关联单号')},
                             {
                                 field: 'site', title: __('站点'), addClass: 'selectpicker', data: 'multiple',
                                 searchList: {
@@ -150,11 +210,39 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                 formatter: Table.api.formatter.status
                             },
                             {
-                                field: 'frame_cost', title: __('镜架成本'), operate: false, formatter: function (value, row, index) {
-                                    if (row.action_type == 2 && value && typeof(value)!="undefined") {
+                                field: 'order_type',
+                                title: __('订单类型'),
+                                custom: {
+                                    1: 'success',
+                                    2: 'orange',
+                                    3: 'danger',
+                                    4: 'warning',
+                                    5: 'purple',
+                                    9: 'warning',
+                                    10: 'success',
+                                    11: 'success',
+                                },
+                                searchList: {
+                                    1: '普通订单',
+                                    2: '批发',
+                                    3: '网红单',
+                                    4: '补发',
+                                    5: '补差价',
+                                    9: 'vip订单',
+                                    10: '货到付款',
+                                    11: '便利店'
+                                },
+                                formatter: Table.api.formatter.status
+                            },
+                            {
+                                field: 'frame_cost',
+                                title: __('镜架成本'),
+                                operate: false,
+                                formatter: function (value, row, index) {
+                                    if (row.action_type == 2 && value && typeof (value) != "undefined") {
                                         return '<b style = "color:red">-' + parseFloat(value).toFixed(2) + '</b>';
                                     } else {
-                                        if (value  && value!= null) {
+                                        if (value && value != null) {
                                             return parseFloat(value).toFixed(2);
                                         }
                                     }

@@ -1,0 +1,167 @@
+<style>
+    .caigou {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 70%;
+        margin-left: 13%;
+        margin-bottom: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 250px;
+    }
+</style>
+
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <input type="hidden" name="goodsId" value="{$goodsId}">
+    <input type="hidden" name="ids" value="{$ids}">
+    {if $attributeType == 'true'}
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜框高（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="{$row->frame_height}"  readonly>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-weight" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="{$row->mirror_width}" readonly >
+        </div>
+    </div>
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('桥（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-attribute-type" type="hidden" name="row[attribute_type]" value="1"/>
+            <input id="c-frame_height" data-rule="required" class="form-control" name="row[frame_bridge]" type="number" value="{$row->frame_bridge}" readonly >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜腿长（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_width" data-rule="required" class="form-control" step="0.01" name="row[frame_temple_length]" type="number" value="{$row->frame_temple_length}" readonly >
+        </div>
+    </div>
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜架总长（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_length" data-rule="required" class="form-control" name="row[frame_length]" type="number" value="{$row->frame_length}" readonly>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('重量（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_weight]" type="number" value="{$row->frame_weight}" readonly >
+        </div>
+    </div>
+    <!--镜盒-->
+    {elseif $attributeType == '32'}
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[box_height]" type="number" value="{$row->box_height}" readonly >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[box_width]" type="number" value="{$row->box_width}"  readonly>
+        </div>
+    </div>
+    <!--手链-->
+    {elseif $attributeType == 34}
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row->necklace_perimeter}" readonly >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[necklace_chain]" type="number" value="{$row->necklace_chain}" readonly >
+        </div>
+    </div>
+    <!--耳饰-->
+    {elseif $attributeType == 35}
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('高度（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[earrings_height]" type="number" value="{$row->earrings_height}" readonly >
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('宽度（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[earrings_width]" type="number" value="{$row->earrings_width}"  readonly>
+        </div>
+    </div>
+    <!--眼镜链-->
+    {elseif $attributeType == 38}
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[eyeglasses_chain]" type="number" value="{$row->eyeglasses_chain}" readonly>
+        </div>
+    </div>
+    <!--项链-->
+    {elseif $attributeType == 39}
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('周长（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[necklace_perimeter]" type="number" value="{$row->necklace_perimeter}"  readonly>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('延长链（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[necklace_chain]" type="number" value="{$row->necklace_chain}" readonly >
+        </div>
+    </div>
+    {else}
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('伸展长度（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[silk_length]" type="number" value="{$row->silk_length}"  readonly>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('伸展宽度（mm）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-mirror_width" data-rule="required" class="form-control" name="row[silk__width]" type="number" value="{$row->silk__width}" readonly >
+        </div>
+    </div>
+    {/if}
+    {if $img neq null}
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('图片')}:</label>
+        {volist name="img" id="ct"}
+        <img style="width: 25%;margin-top: 10px;margin-left: 15px"  data-tips-image src="{$ct}" alt="">
+        {/volist}
+    </div>
+    {/if}
+</form>
