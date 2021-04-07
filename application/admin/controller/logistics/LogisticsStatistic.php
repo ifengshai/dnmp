@@ -450,7 +450,7 @@ class LogisticsStatistic extends Backend
            '订单状态',  '头程单号','创建时间','发货时间','节点状态','最后一条记录信息'
         ];
         $path = "/uploads/";
-        $fileName = '仓库需要导出的数据-T';
+        $fileName = '物流统计数据-T'.$createat[0].'-'.$createat[3];
         Excel::writeCsv($csv, $headlist, $path . $fileName);
         //获取当前域名
         $request = Request::instance();
