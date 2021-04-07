@@ -858,6 +858,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }else if (str == '900'){
                     $('#work_platform').val(14);
                 }
+                if (str == '180' || str == '900') {
+                    $('#c-replenish_money').attr('disabled',true);
+                }else{
+                    $('#c-replenish_money').attr('disabled',false);
+                }
                 $('.selectpicker ').selectpicker('refresh');
 
             })
@@ -3331,6 +3336,12 @@ function platform_order(){
             $('#work_platform').val(13);
         }else if (str == '900'){
             $('#work_platform').val(14);
+        }
+
+        if (str == '180' || str == '900') {
+            $('#c-replenish_money').attr('disabled',true);
+        }else{
+            $('#c-replenish_money').attr('disabled',false);
         }
 
 
