@@ -994,6 +994,8 @@ class ScmWarehouse extends Scm
 
         //入库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
+        Log::write("入库库位详情");
+        Log::write($warehouse_area);
 
         /*****************限制如果有盘点单未结束不能操作配货完成*******************/
         //配货完成时判断
@@ -1002,6 +1004,7 @@ class ScmWarehouse extends Scm
         $count = $this->_inventory->alias('a')
             ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'], 'area_id' => $area_id])
             ->count();
+        Log::write($count);
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法入库提交'), [], 403);
         }
