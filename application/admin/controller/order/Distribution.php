@@ -2148,17 +2148,37 @@ class Distribution extends Backend
     public function tag_printed()
     {
 
-        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-        //拣货区盘点时不能操作
-        $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
-        if ($count > 0) {
-            $this->error(__('存在正在盘点的单据,暂无法审核'));
-        }
-        /****************************end*****************************************/
+//        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+//        //拣货区盘点时不能操作
+//        $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
+//        if ($count > 0) {
+//            $this->error(__('存在正在盘点的单据,暂无法审核'));
+//        }
+//        /****************************end*****************************************/
 
 
         $ids = input('id_params/a');
         !$ids && $this->error('请选择要标记的数据');
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $sku = $this->model->where(['id' => ['in', $ids]])->column('sku');
+        $whe_sku['platform_sku'] = ['in',$sku];
+        //转换sku
+        $item_platform_sku = new ItemPlatformSku();
+        $true_sku =  $item_platform_sku->where($whe_sku)->column('sku');
+        $whe['sku'] = ['in',$true_sku];
+        $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+
+        if (!empty($barcodedata)){
+            $count = $this->_inventory->alias('a')
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                ->count();
+
+            if ($count > 0) {
+                $this->error(__('存在正在盘点的单据,暂无法审核'));
+            }
+        }
+        /****************************end*****************************************/
 
         //检测子订单状态
         $where = [
