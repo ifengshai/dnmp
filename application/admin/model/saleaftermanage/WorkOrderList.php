@@ -726,6 +726,7 @@ class WorkOrderList extends Model
             'country'=>$changeAddress['country_id'],
             'region_id'=>$changeAddress['region_id'],
             'region'=>$changeAddress['region'],
+            'area'=>$changeAddress['area'],
             'city'=>$changeAddress['city'],
             'street'=>$changeAddress['street'],
             'postcode'=>$changeAddress['postcode'],
@@ -1491,6 +1492,7 @@ class WorkOrderList extends Model
                 if ($siteType == 13 || $siteType == 14) {
                     $postData['product'][$key]['lens_number'] = $prescriptions['lens_number'];
                     $postData['region'] = $address['region'];
+                    $postData['area'] = $address['area'];
                 }
                 $measure_id = $changeSku['measure_id'];
             }
