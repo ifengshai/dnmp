@@ -41,7 +41,7 @@ class Repurchase extends Command
     protected function getUserRepurchase($site){
         $today = date('Y-m-d');
         //获取前一个月时间
-        $lastOneMonthStart = date("Y-m-d 23:59:59", strtotime("first day of -1 month", strtotime($today)));
+        $lastOneMonthStart = date("Y-m-d", strtotime("first day of -1 month", strtotime($today)));
         $lastOneMonthEnd = date("Y-m-d 23:59:59", strtotime("last day of -1 month", strtotime($today)));
         #############################################   一月期复购率start  #########################################
         $oneMonthDate = date("Y-m", strtotime("-2 month", strtotime($today)));
