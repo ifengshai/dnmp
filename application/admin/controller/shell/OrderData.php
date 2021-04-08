@@ -45,7 +45,7 @@ class OrderData extends Backend
          * 对 中台生产的  用户信息 进行消费
          */
         // 设置将要消费消息的主题
-        $topic = 'mojing_order';
+        $topic = 'test';
         $host = '127.0.0.1:9092';
         $group_id = '0';
         $conf = new \RdKafka\Conf();
@@ -109,25 +109,27 @@ class OrderData extends Backend
                     case RD_KAFKA_RESP_ERR_NO_ERROR: //没有错误
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
+
+                        dump($payload);
                         $key = $message->key;
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志。
                         if ($payload) {
                             //根据库名判断站点
                             switch ($payload['database']) {
-                                case 'zeelool':
+                                case 'zeelool_test':
                                     $site = 1;
                                     break;
-                                case 'voogueme':
+                                case 'vuetest_voogueme':
                                     $site = 2;
                                     break;
-                                case 'nihao':
+                                case 'nihao_test':
                                     $site = 3;
                                     break;
                                 case 'meeloog':
                                     $site = 4;
                                     break;
-                                case 'wesee':
+                                case 'wesee_test':
                                     $site = 5;
                                     break;
                                 case 'zeelool_es':
@@ -139,17 +141,37 @@ class OrderData extends Backend
                                 case 'zeelool_jp':
                                     $site = 11;
                                     break;
-                                case 'morefun':
-                                    $site = 5;
-                                    break;
                                 case 'voogueme_acc':
                                     $site = 12;
+                                    break;
+                                case 'morefun':
+                                    $site = 5;
                                     break;
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
                                 $order_params = [];
                                 foreach ($payload['data'] as $k => $v) {
+
+
+                                    $order_ids = $this->order->where('site='.$site.' and increment_id='.$v['increment_id'])->value('id');
+                                    $order_ids2 = $this->order->where('site='.$site.' and entity_id='.$v['entity_id'])->value('id');
+                                    if ($order_ids) {
+                                        $this->order->where('site='.$site.' and increment_id='.$v['increment_id'])->delete();
+                                        $this->orderprocess->where('site='.$site.' and increment_id='.$v['increment_id'])->delete();
+
+                                        //删除子订单表
+                                        $this->orderitemoption->where('site='.$site.' and order_id='.$order_ids)->delete();
+                                        $this->orderitemprocess->where('site='.$site.' and order_id='.$order_ids)->delete();
+
+                                    }
+
+                                    if ($order_ids2) {
+                                        $this->orderprocess->where('site='.$site.' and entity_id='.$v['entity_id'])->delete();
+                                        $this->order->where('site='.$site.' and entity_id='.$v['entity_id'])->delete();
+                                        $this->orderitemoption->where('site='.$site.' and order_id='.$order_ids2)->delete();
+                                        $this->orderitemprocess->where('site='.$site.' and order_id='.$order_ids2)->delete();
+                                    }
                                     $params = [];
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
@@ -157,7 +179,6 @@ class OrderData extends Backend
                                     $params['status'] = $v['status'] ?: '';
                                     $params['store_id'] = $v['store_id'];
                                     $params['base_grand_total'] = $v['base_grand_total'];
-                                    $params['grand_total'] = $v['grand_total'];
                                     $params['total_item_count'] = $v['total_item_count'];
                                     $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['order_type'] = $v['order_type'];
@@ -174,7 +195,7 @@ class OrderData extends Backend
                                     $params['customer_email'] = $v['customer_email'];
                                     $params['customer_firstname'] = $v['customer_firstname'];
                                     $params['customer_lastname'] = $v['customer_lastname'];
-                                    $params['taxno'] = $v['cpf'];
+                                    $params['taxno'] = $v['taxno'];
                                     $params['base_to_order_rate'] = $v['base_to_order_rate'];
                                     $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
@@ -182,9 +203,9 @@ class OrderData extends Backend
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
-                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+                                        $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
-
+                                    $params['payment_time'] = $params['payment_time'] < 0 ? 0 : $params['payment_time'];
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     $order_params[$k]['site'] = $site;
@@ -206,8 +227,7 @@ class OrderData extends Backend
                                     $params['increment_id'] = $v['order_no'];
                                     $params['status'] = $v['order_status'] ?: '';
                                     $params['store_id'] = $v['source'];
-                                    $params['base_grand_total'] = $v['base_actual_amount_paid'];
-                                    $params['grand_total'] = $v['actual_amount_paid'];
+                                    $params['base_grand_total'] = $v['actual_amount_paid'];
                                     $params['total_qty_ordered'] = $v['goods_quantity'];
                                     $params['base_currency_code'] = $v['base_currency'];
                                     $params['order_currency_code'] = $v['now_currency'];
@@ -244,8 +264,7 @@ class OrderData extends Backend
                                     $params['increment_id'] = $v['order_no'];
                                     $params['status'] = $v['order_status'] ?: '';
                                     $params['store_id'] = $v['source'];
-                                    $params['base_grand_total'] = $v['base_actual_amount_paid'];
-                                    $params['grand_total'] = $v['actual_amount_paid'];
+                                    $params['base_grand_total'] = $v['actual_amount_paid'];
                                     $params['total_qty_ordered'] = $v['goods_quantity'];
                                     $params['base_currency_code'] = $v['base_currency'];
                                     $params['order_currency_code'] = $v['now_currency'];
@@ -292,7 +311,6 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     $params['base_grand_total'] = $v['base_grand_total'];
-                                    $params['grand_total'] = $v['grand_total'];
                                     $params['total_item_count'] = $v['total_item_count'];
                                     $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['increment_id'] = $v['increment_id'];
@@ -308,16 +326,16 @@ class OrderData extends Backend
                                     $params['customer_email'] = $v['customer_email'];
                                     $params['customer_firstname'] = $v['customer_firstname'];
                                     $params['customer_lastname'] = $v['customer_lastname'];
-                                    $params['taxno'] = $v['cpf'];
+                                    $params['taxno'] = $v['taxno'];
                                     $params['base_to_order_rate'] = $v['base_to_order_rate'];
                                     $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     if (isset($v['payment_time'])) {
-                                        $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+                                        $params['payment_time'] = (int)strtotime($v['payment_time']) + 28800;
                                     }
-
+                                    $params['payment_time'] = $params['payment_time'] < 0 ? 0 : $params['payment_time'];
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                 }
                             }
@@ -327,6 +345,7 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     if ($v['address_type'] == 'shipping') {
+
                                         $params['country_id'] = $v['country_id'];
                                         $params['region'] = $v['region'];
                                         $params['region_id'] = $v['region_id'];
@@ -400,6 +419,7 @@ class OrderData extends Backend
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
+
                                         $this->orderitemprocess->insertAll($data);
                                     }
                                 }
@@ -642,7 +662,6 @@ class OrderData extends Backend
         //判断加工类型
         $result = $this->set_processing_type($arr);
         $arr = array_merge($arr, $result);
-
         return $arr;
     }
 
@@ -912,7 +931,6 @@ class OrderData extends Backend
         //判断加工类型
         $result = $this->set_processing_type($arr);
         $arr = array_merge($arr, $result);
-
         return $arr;
     }
 
@@ -997,7 +1015,6 @@ class OrderData extends Backend
         //判断加工类型
         $result = $this->set_processing_type($arr);
         $arr = array_merge($arr, $result);
-
         return $arr;
     }
 
@@ -1181,7 +1198,6 @@ class OrderData extends Backend
         //判断加工类型
         $result = $this->set_processing_type($arr);
         $arr = array_merge($arr, $result);
-
         return $arr;
     }
 
@@ -1272,7 +1288,6 @@ class OrderData extends Backend
         //判断加工类型
         $result = $this->set_processing_type($arr);
         $arr = array_merge($arr, $result);
-
         return $arr;
     }
 
@@ -1317,7 +1332,6 @@ class OrderData extends Backend
         //判断加工类型
         $result = $this->set_processing_type($arr);
         $arr = array_merge($arr, $result);
-
         return $arr;
     }
 
@@ -1340,10 +1354,6 @@ class OrderData extends Backend
             $arr['order_prescription_type'] = 3;
             $arr['is_custom_lens'] = 1;
         }
-        $od_sph = (float)urldecode($params['od_sph']);
-        $os_sph = (float)urldecode($params['os_sph']);
-        $od_cyl = (float)urldecode($params['od_cyl']);
-        $os_cyl = (float)urldecode($params['os_cyl']);
 
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
@@ -1355,29 +1365,7 @@ class OrderData extends Backend
              * 1.61非球面绿膜 定制片
              * SPH:0.00～-8.00 CYL:-4.25～-6.00
              */
-            if ((($od_sph >= -8 && $od_sph <= 0) || ($os_sph >= -8 && $os_sph <= 0)) && (($od_cyl >= -6 && $od_cyl <= -4.25) || ($os_cyl >= -6 && $os_cyl <= -4.25))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-
-            if ((($od_sph >= 8 && $od_sph <= 6) || ($os_sph >= 2 && $os_sph <= 6)) && (($od_cyl >= -6 && $od_cyl <= -2.25) || ($os_cyl >= -6 && $os_cyl <= -2.25))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-
-            if ((($od_sph >= -7 && $od_sph <= 0) || ($os_sph >= -7 && $os_sph <= 0)) && (($od_cyl >= -4 && $od_cyl <= 0) || ($os_cyl >= -4 && $os_cyl <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 2;
-            }
-            if ((($od_sph >= -10 && $od_sph <= -7.25) || ($os_sph >= -10 && $os_sph <= -7.25)) && (($od_cyl >= -4 && $od_cyl <= 0) || ($os_cyl >= -4 && $os_cyl <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-            if ((($od_sph >= 0 && $od_sph <= 4) || ($os_sph >= 0 && $os_sph <= 4)) && (($od_cyl >= -2 && $od_cyl <= 0) || ($os_cyl >= -2 && $os_cyl <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 2;
-            }
-            if ((($od_sph >= 4.25 && $od_sph <= 6) || ($os_sph >= 4.25 && $os_sph <= 6)) && (($od_cyl >= -6 && $od_cyl <= 0) || ($os_cyl >= -6 && $os_cyl <= 0))) {
+            if ((((float)urldecode($params['od_sph']) >= -8 && (float)urldecode($params['od_sph']) <= 0) || ((float)urldecode($params['os_sph']) >= -8 && (float)urldecode($params['os_sph']) <= 0)) && (((float)urldecode($params['od_cyl']) >= -6 && (float)urldecode($params['od_cyl']) <= -4.25) || ((float)urldecode($params['os_cyl']) >= -6 && (float)urldecode($params['os_cyl']) <= -4.25))) {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
             }
@@ -1388,9 +1376,9 @@ class OrderData extends Backend
              * 1.67非球面绿膜 现片
              * SPH:-3.00～-12.00 CYL:0.00～-2.00（不含-0.25）
              */
-            if ((($od_sph >= -12 && $od_sph <= -3) || ($os_sph >= -12 && $os_sph <= -3)) && (($od_cyl >= -2 && $od_cyl < -0.5 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= -0.5 && $od_cyl != -0.25))) {
+            if ((((float)urldecode($params['od_sph']) >= -12 && (float)urldecode($params['od_sph']) <= -3) || ((float)urldecode($params['os_sph']) >= -12 && (float)urldecode($params['os_sph']) <= -3)) && (((float)urldecode($params['od_cyl']) >= -2 && (float)urldecode($params['od_cyl']) < 0 && (float)urldecode($params['od_cyl']) != -0.25) || ((float)urldecode($params['os_cyl']) >= -2 && (float)urldecode($params['os_cyl']) <= 0 && (float)urldecode($params['od_cyl']) != -0.25))) {
                 $arr['order_prescription_type'] = 2;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
+            } elseif ((float)urldecode($params['od_sph']) == 0 && (float)urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1403,10 +1391,10 @@ class OrderData extends Backend
              * 1.71非球面绿膜 现片
              * SPH:0.00～-15.00 CYL:0.00～-2.00（不含-0.25）
              */
-            if ((($od_sph >= -15 && $od_sph <= 0) || ($os_sph >= -15 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= 0 && $od_cyl != -0.25))) {
-                $arr['order_prescription_type'] = 3;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
-                $arr['order_prescription_type'] = 3;
+            if ((((float)urldecode($params['od_sph']) >= -15 && (float)urldecode($params['od_sph']) <= 0) || ((float)urldecode($params['os_sph']) >= -15 && (float)urldecode($params['os_sph']) <= 0)) && (((float)urldecode($params['od_cyl']) >= -2 && (float)urldecode($params['od_cyl']) <= 0 && (float)urldecode($params['od_cyl']) != -0.25) || ((float)urldecode($params['os_cyl']) >= -2 && (float)urldecode($params['os_cyl']) <= 0 && (float)urldecode($params['od_cyl']) != -0.25))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float)urldecode($params['od_sph']) == 0 && (float)urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1418,10 +1406,10 @@ class OrderData extends Backend
              * 1.74非球面绿膜 现片
              * SPH:-3.00～-13.00 CYL:0.00～-2.00（不含-0.25）
              */
-            if ((($od_sph >= -13 && $od_sph <= -3) || ($os_sph >= -13 && $os_sph <= -3)) && (($od_cyl >= -2 && $od_cyl <= 0 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= 0 && $od_cyl != -0.25))) {
-                $arr['order_prescription_type'] = 3;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
-                $arr['order_prescription_type'] = 3;
+            if ((((float)urldecode($params['od_sph']) >= -13 && (float)urldecode($params['od_sph']) <= -3) || ((float)urldecode($params['os_sph']) >= -13 && (float)urldecode($params['os_sph']) <= -3)) && (((float)urldecode($params['od_cyl']) >= -2 && (float)urldecode($params['od_cyl']) <= 0 && (float)urldecode($params['od_cyl']) != -0.25) || ((float)urldecode($params['os_cyl']) >= -2 && (float)urldecode($params['os_cyl']) <= 0 && (float)urldecode($params['od_cyl']) != -0.25))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float)urldecode($params['od_sph']) == 0 && (float)urldecode($params['os_sph']) == 0) {
+                $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
@@ -1435,11 +1423,11 @@ class OrderData extends Backend
              * SPH:0.00～-8.00 CYL:-2.25～-4.00
              * SPH:0.00～+6.00 CYL:0.00～-2.00
              */
-            if ((($od_sph >= -7 && $od_sph <= 0) || ($os_sph >= -7 && $os_sph <= 0)) && (($od_cyl >= -4 && $od_cyl <= 0) || ($os_cyl >= -4 && $os_cyl <= 0))) {
+            if ((((float)urldecode($params['od_sph']) >= -8 && (float)urldecode($params['od_sph']) <= 0) || ((float)urldecode($params['os_sph']) >= -8 && (float)urldecode($params['os_sph']) <= 0)) && (((float)urldecode($params['od_cyl']) >= -4 && (float)urldecode($params['od_cyl']) <= 0) || ((float)urldecode($params['os_cyl']) >= -4 && (float)urldecode($params['os_cyl']) <= 0))) {
                 $arr['order_prescription_type'] = 2;
-            } elseif ((($od_sph >= 0 && $od_sph <= 4) || ($os_sph >= 0 && $os_sph <= 4)) && (($od_cyl >= -2 && $od_cyl <= 0) || ($os_cyl >= -2 && $os_cyl <= 0))) {
+            } elseif ((((float)urldecode($params['od_sph']) >= 0 && (float)urldecode($params['od_sph']) <= 6) || ((float)urldecode($params['os_sph']) >= 0 && (float)urldecode($params['os_sph']) <= 6)) && (((float)urldecode($params['od_cyl']) >= -2 && (float)urldecode($params['od_cyl']) <= 0) || ((float)urldecode($params['os_cyl']) >= -2 && (float)urldecode($params['os_cyl']) <= 0))) {
                 $arr['order_prescription_type'] = 2;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
+            } elseif ((float)urldecode($params['od_sph']) == 0 && (float)urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1452,9 +1440,9 @@ class OrderData extends Backend
              * 1.57变色 现片 1.71变色灰
              * SPH:0.00～-3.00 CYL:0.00～-2.00
              */
-            if ((($od_sph >= -12 && $od_sph <= 0) || ($os_sph >= -12 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= 0 && $od_cyl != -0.25))) {
-                $arr['order_prescription_type'] = 3;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
+            if ((((float)urldecode($params['od_sph']) >= -12 && (float)urldecode($params['od_sph']) <= 0) || ((float)urldecode($params['os_sph']) >= -12 && (float)urldecode($params['os_sph']) <= 0)) && (((float)urldecode($params['od_cyl']) >= -2 && (float)urldecode($params['od_cyl']) <= 0 && (float)urldecode($params['od_cyl']) != -0.25) || ((float)urldecode($params['os_cyl']) >= -2 && (float)urldecode($params['os_cyl']) <= 0 && (float)urldecode($params['od_cyl']) != -0.25))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float)urldecode($params['od_sph']) == 0 && (float)urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1467,9 +1455,9 @@ class OrderData extends Backend
              * 1.71防蓝光 现片
              * SPH:0.00～-12.00 CYL:0.00～-2.00（不含-0.25）
              */
-            if ((($od_sph >= -3 && $od_sph <= 0) || ($os_sph >= -3 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0) || ($os_cyl >= -2 && $os_cyl <= 0))) {
-                $arr['order_prescription_type'] = 3;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
+            if ((((float)urldecode($params['od_sph']) >= -3 && (float)urldecode($params['od_sph']) <= 0) || ((float)urldecode($params['os_sph']) >= -3 && (float)urldecode($params['os_sph']) <= 0)) && (((float)urldecode($params['od_cyl']) >= -2 && (float)urldecode($params['od_cyl']) <= 0) || ((float)urldecode($params['os_cyl']) >= -2 && (float)urldecode($params['os_cyl']) <= 0))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float)urldecode($params['od_sph']) == 0 && (float)urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1478,24 +1466,19 @@ class OrderData extends Backend
         }
 
 
-        if ($params['lens_number'] == '23302000' || $params['lens_number'] == '23303000' || $params['lens_number'] == '23302001') {
+        if ($params['lens_number'] == '23302000' || $params['lens_number'] == '23303000' || $params['lens_number'] == '23302001' || $params['lens_number'] == '23303001') {
             /**
              * 1.61变色灰 现片
              * SPH:0.00～-8.00 CYL:0.00～-2.00
              */
-            if ((($od_sph >= -5 && $od_sph <= 0) || ($os_sph >= -5 && $os_sph <= 0)) && (($od_cyl >= -1.5 && $od_cyl <= 0) || ($os_cyl >= -1.5 && $os_cyl <= 0))) {
+            if ((((float)urldecode($params['od_sph']) >= -8 && (float)urldecode($params['od_sph']) <= 0) || ((float)urldecode($params['os_sph']) >= -8 && (float)urldecode($params['os_sph']) <= 0)) && (((float)urldecode($params['od_cyl']) >= -2 && (float)urldecode($params['od_cyl']) <= 0) || ((float)urldecode($params['os_cyl']) >= -2 && (float)urldecode($params['os_cyl']) <= 0))) {
                 $arr['order_prescription_type'] = 2;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
+            } elseif ((float)urldecode($params['od_sph']) == 0 && (float)urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
             }
-        }
-        if ($params['lens_number'] == '23303001') {
-
-            $arr['is_custom_lens'] = 1;
-            $arr['order_prescription_type'] = 3;
         }
 
         if ($params['lens_number'] == '23304000' || $params['lens_number'] == '23306000' || $params['lens_number'] == '23305000') {
@@ -1503,9 +1486,9 @@ class OrderData extends Backend
              * 1.61变色蓝 现片
              * SPH:0.00～-8.00 CYL:0.00～-2.00
              */
-            if ((($od_sph >= -8 && $od_sph <= 0) || ($os_sph >= -8 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0.5) || ($os_cyl >= -2 && $os_cyl <= 0.5))) {
-                $arr['order_prescription_type'] = 3;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
+            if ((((float)urldecode($params['od_sph']) >= -8 && (float)urldecode($params['od_sph']) <= 0) || ((float)urldecode($params['os_sph']) >= -8 && (float)urldecode($params['os_sph']) <= 0)) && (((float)urldecode($params['od_cyl']) >= -2 && (float)urldecode($params['od_cyl']) <= 0.5) || ((float)urldecode($params['os_cyl']) >= -2 && (float)urldecode($params['os_cyl']) <= 0.5))) {
+                $arr['order_prescription_type'] = 2;
+            } elseif ((float)urldecode($params['od_sph']) == 0 && (float)urldecode($params['os_sph']) == 0) {
                 $arr['order_prescription_type'] = 2;
             } else {
                 $arr['is_custom_lens'] = 1;
@@ -1520,6 +1503,7 @@ class OrderData extends Backend
 
         return $arr;
     }
+
 
 
     /**
@@ -1550,7 +1534,7 @@ class OrderData extends Backend
                 }
 
                 $item_params[$key]['item_order_number'] = $res->increment_id.'-'.$str;
-                $item_params[$key]['order_id'] = $res->id;
+                $item_params[$key]['order_id'] = $res->id ?: 0;
             }
             //更新数据
             if ($item_params) {
@@ -1568,10 +1552,10 @@ class OrderData extends Backend
      * 批量更新order表主键
      *
      * @Description
-     * @return void
      * @todo 计划任务 10分钟一次
      * @author wpl
      * @since 2020/10/28 17:58:46 
+     * @return void
      */
     public function set_order_id()
     {
@@ -1582,13 +1566,11 @@ class OrderData extends Backend
         foreach ($list as $k => $v) {
             $order_id = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->value('id');
             $params[$k]['id'] = $v['id'];
-            $params[$k]['order_id'] = $order_id;
+            $params[$k]['order_id'] = $order_id ?: 0;
             echo $v['id']."\n";
         }
         //更新数据
-        if ($params) {
-            $this->orderitemoption->saveAll($params);
-        }
+        if ($params) $this->orderitemoption->saveAll($params);
         echo "ok";
     }
 
@@ -1617,6 +1599,7 @@ class OrderData extends Backend
     }
 
 
+
     /**
      * 批发站 匹配到s，r结尾的sku
      *
@@ -1640,109 +1623,6 @@ class OrderData extends Backend
 
 
 
-    #######################################生成波次单################################################
-
-    /**
-     * 创建波次单
-     *
-     * @Description
-     * @author wpl
-     * @since 2021/03/23 17:47:29 
-     * @return void
-     */
-    public function create_wave_order()
-    {
-        ini_set('memory_limit', '1024M');
-        /**
-         *
-         * 生成规则
-         * 1）按业务模式：品牌独立站、第三方平台店铺
-         * 2）按时间段
-         * 第一波次：00:00-2:59:59
-         * 第二波次：3：00-5:59:59
-         * 第三波次：6:00-8:59:59
-         * 第四波次：9:00-11:59:59
-         * 第五波次：12:00-14:59:59
-         * 第六波次：15:00-17:59:59
-         * 第七波次：18:00-20:59:59
-         * 第八波次：21:00-23:59:59
-         *
-         */
-        //查询今天的订单
-        // $where['a.created_at'] = ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]];
-        $where['b.is_print'] = 0;
-        $where['b.wave_order_id'] = 0;
-        $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-        $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,a.updated_at,entity_id,a.site')
-            ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
-            ->order('id desc')
-            ->select();
-        $list = collection($list)->toArray();
-        //第三方站点id
-        $third_site = [13, 14];
-        $waveorder = new \app\admin\model\order\order\WaveOrder();
-        $itemplaform = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $storesku = new \app\admin\model\warehouse\StockHouse();
-        foreach ($list as $k => $v) {
-            //判断波次类型
-            $type = 0;
-            if (in_array($v['site'], $third_site)) {
-                $type = 2;
-            } else {
-                $type = 1;
-            }
-            $time = $v['updated_at'] > 28800 ? $v['updated_at'] : $v['created_at'];
-            //判断波次时间段
-            if (strtotime(date('Y-m-d 00:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 02:59:59', $time))) {
-                $wave_time_type = 1;
-            } elseif (strtotime(date('Y-m-d 03:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 05:59:59', $time))) {
-                $wave_time_type = 2;
-            } elseif (strtotime(date('Y-m-d 06:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 08:59:59', $time))) {
-                $wave_time_type = 3;
-            } elseif (strtotime(date('Y-m-d 09:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 11:59:59', $time))) {
-                $wave_time_type = 4;
-            } elseif (strtotime(date('Y-m-d 12:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 14:59:59', $time))) {
-                $wave_time_type = 5;
-            } elseif (strtotime(date('Y-m-d 15:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 17:59:59', $time))) {
-                $wave_time_type = 6;
-            } elseif (strtotime(date('Y-m-d 18:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 20:59:59', $time))) {
-                $wave_time_type = 7;
-            } elseif (strtotime(date('Y-m-d 21:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 23:59:59', $time))) {
-                $wave_time_type = 8;
-            }
-
-            $id = $waveorder
-                ->where([
-                    'type'           => $type,
-                    'wave_time_type' => $wave_time_type,
-                    'order_date'     => ['between', [strtotime(date('Y-m-d 00:00:00', $time)), strtotime(date('Y-m-d 23:59:59', $time))]],
-                ])
-                ->value('id');
-            if (!$id) {
-                $params = [];
-                $params['wave_order_number'] = 'BC'.date('YmdHis').rand(100, 999).rand(100, 999);
-                $params['type'] = $type;
-                $params['wave_time_type'] = $wave_time_type;
-                $params['order_date'] = $time;
-                $params['createtime'] = time();
-                $id = $waveorder->insertGetId($params);
-            }
-            //转换平台SKU
-            $sku = $itemplaform->getTrueSku($v['sku'], $v['site']);
-            //根据sku查询库位排序
-            $storesku = new \app\admin\model\warehouse\StockSku();
-            $where = [];
-            $where['b.area_id'] = 3;//默认拣货区
-            $where['b.status'] = 1;//启用状态
-            $where['a.is_del'] = 1;//正常状态
-            $location_data = $storesku->alias('a')->where($where)->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->find();
-            $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' => $location_data['picking_sort']]);
-        }
-    }
-
-    ########################################end##############################################
-
-
     ################################################处理旧数据脚本##########################################################################
 
 
@@ -1752,9 +1632,7 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2021/01/19 09:37:37 
-     *
      * @param [type] $site
-     *
      * @return void
      */
     public function wesee_old_order_paymethod()
@@ -1782,9 +1660,7 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2021/01/19 09:37:37 
-     *
      * @param [type] $site
-     *
      * @return void
      */
     public function wesee_old_order()
@@ -1830,9 +1706,7 @@ class OrderData extends Backend
             usleep(10000);
         }
         //插入订单处理表
-        if ($order_params) {
-            $this->orderprocess->saveAll($order_params);
-        }
+        if ($order_params) $this->orderprocess->saveAll($order_params);
         echo "ok";
     }
 
@@ -1841,9 +1715,9 @@ class OrderData extends Backend
      * 地址处理
      *
      * @Description
-     * @return void
-     * @since 2020/11/02 18:31:12
      * @author wpl
+     * @since 2020/11/02 18:31:12
+     * @return void
      */
     public function wesee_order_address_data()
     {
@@ -1875,9 +1749,9 @@ class OrderData extends Backend
      * 地址处理
      *
      * @Description
-     * @return void
-     * @since 2020/11/02 18:31:12
      * @author wpl
+     * @since 2020/11/02 18:31:12
+     * @return void
      */
     public function wesee_order_item_data()
     {
@@ -1951,7 +1825,7 @@ class OrderData extends Backend
             $params['customer_email'] = $v['customer_email'];
             $params['customer_firstname'] = $v['customer_firstname'];
             $params['customer_lastname'] = $v['customer_lastname'];
-            $params['taxno'] = $v['cpf'];
+            $params['taxno'] = $v['taxno'];
             $params['base_to_order_rate'] = $v['base_to_order_rate'];
             $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
             $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
@@ -1972,9 +1846,7 @@ class OrderData extends Backend
             usleep(10000);
         }
         //插入订单处理表
-        if ($order_params) {
-            $this->orderprocess->saveAll($order_params);
-        }
+        if ($order_params) $this->orderprocess->saveAll($order_params);
         echo "ok";
     }
 
@@ -2005,9 +1877,9 @@ class OrderData extends Backend
      * 地址处理
      *
      * @Description
-     * @return void
-     * @since 2020/11/02 18:31:12
      * @author wpl
+     * @since 2020/11/02 18:31:12
+     * @return void
      */
     protected function order_address_data($site)
     {
@@ -2053,51 +1925,48 @@ class OrderData extends Backend
         $this->order_data(1);
         $this->order_data(2);
         $this->order_data(3);
-        $this->order_data(4);
+        // $this->order_data(4);
         $this->order_data(5);
         $this->order_data(9);
         $this->order_data(10);
         $this->order_data(11);
-        $this->order_data(12);
     }
 
     /**
      * 地址处理
      *
      * @Description
-     * @return void
-     * @since 2020/11/02 18:31:12
      * @author wpl
+     * @since 2020/11/02 18:31:12
+     * @return void
      */
     protected function order_data($site)
     {
-        $list = $this->order->where('grand_total < 1 and site = '.$site)->where(['status' => ['in', ['processing', 'complete', 'delivered']]])->where(['created_at' => ['>', '1599667200']])->limit(4000)->select();
+        $list = $this->order->where('payment_time is null and site = '.$site)->limit(3000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 3) {
-            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 4) {
-            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
+            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 5) {
-            $res = Db::connect('database.db_weseeoptical')->table('orders')->where(['id' => ['in', $entity_id]])->column('actual_amount_paid', 'id');
+            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 9) {
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 10) {
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         } elseif ($site == 11) {
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
-        } elseif ($site == 12) {
-            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            //$params[$k]['grand_total'] = $v['grand_total'];
-            $params[$k]['grand_total'] = $res[$v['entity_id']] ?? 0;
+            $params[$k]['payment_time'] = strtotime($res[$v['entity_id']]) + 28800;
+            // $params[$k]['region'] = $res[$v['entity_id']]['region'];
             // $params[$k]['city'] = $res[$v['entity_id']]['city'];
             // $params[$k]['street'] = $res[$v['entity_id']]['street'];
             // $params[$k]['postcode'] = $res[$v['entity_id']]['postcode'];
@@ -2227,9 +2096,9 @@ class OrderData extends Backend
      * 支付方式处理
      *
      * @Description
-     * @return void
-     * @since 2020/11/02 18:31:12
      * @author wpl
+     * @since 2020/11/02 18:31:12
+     * @return void
      */
     protected function order_payment_data($site)
     {
@@ -2272,9 +2141,9 @@ class OrderData extends Backend
      * 支付方式处理
      *
      * @Description
-     * @return void
-     * @since 2020/11/02 18:31:12
      * @author wpl
+     * @since 2020/11/02 18:31:12
+     * @return void
      */
     public function order_product_id_data()
     {
@@ -2396,6 +2265,7 @@ class OrderData extends Backend
 
         $this->orderitemprocess->saveAll($option_params);
         echo "ok";
+
 
 
         echo "ok";
