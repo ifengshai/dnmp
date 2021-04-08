@@ -63,7 +63,7 @@ class RepurchaseAsynData extends Command
             $nowMonthStart = $v . '-01';
             $nowMonthEnd = date('Y-m-t 23:59:59', strtotime($v));
             //用户购买行为的开始时间
-            $oneMonthStart = date("Y-m-d 23:59:59", strtotime("first day of +1 month", strtotime($nowMonthStart)));
+            $oneMonthStart = date("Y-m-d", strtotime("first day of +1 month", strtotime($nowMonthStart)));
             #############################################   一月期复购率start    #######################################
             //未来一个月的结束时间
             $oneMonthEnd = date("Y-m-d 23:59:59", strtotime("last day of +1 month", strtotime($nowMonthStart)));
