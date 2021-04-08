@@ -1165,6 +1165,7 @@ class Wangpenglei extends Backend
 
         dump($cost);
         dump($work_cost);
+        dump($cost + $work_cost);
         die;
     }
 }
