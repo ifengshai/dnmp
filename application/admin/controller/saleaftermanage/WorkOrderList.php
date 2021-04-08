@@ -4071,7 +4071,8 @@ EOF;
             $arr[$k]['platform_type'] = $v['platform_type'];
         }
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-
+print_r(array_filter($arr));
+print_r($arr);die;
         //根据平台sku转sku
         $notEnough = [];
         foreach (array_filter($arr) as $v) {
