@@ -4074,7 +4074,7 @@ EOF;
         }
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
 
-
+print_r($arr);die;
         //根据平台sku转sku
         $notEnough = [];
         foreach (array_filter($arr) as $v) {
