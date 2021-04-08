@@ -209,6 +209,11 @@ class FinanceCost extends Backend
             5 => '补差价',
 
             9 => 'vip订单',
+
+            10 => '货到付款',
+
+            11 => '便利店支付',
+
         ];
 
         $path = '/uploads/financeCost/';
