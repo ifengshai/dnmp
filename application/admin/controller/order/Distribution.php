@@ -9,6 +9,7 @@ use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\warehouse\Outstock;
 use app\admin\model\warehouse\OutStockItem;
 use app\common\controller\Backend;
+use app\enum\OrderType;
 use fast\Excel;
 use Monolog\Handler\IFTTTHandler;
 use think\Request;
@@ -848,26 +849,32 @@ class Distribution extends Backend
             //订单类型
             switch ($value['order_type']) {
 
-                case 1:
+                case OrderType::REGULAR_ORDER:
                     $list[$key]['order_type'] = '普通订单';
                     break;
-                case 2:
+                case OrderType::WHOLESALE_ORDER:
                     $list[$key]['order_type'] = '批发单';
                     break;
-                case 3:
+                case OrderType::SOCIAL_ORDER:
                     $list[$key]['order_type'] = '网红单';
                     break;
-                case 4:
+                case OrderType::REPLACEMENT_ORDER:
                     $list[$key]['order_type'] = '补发单';
                     break;
-                case 5:
+                case OrderType::DIFFERENCE_ORDER:
                     $list[$key]['order_type'] = '补差价';
                     break;
-                case 6:
+                case OrderType::PAYROLL_ORDER:
                     $list[$key]['order_type'] = '一件代发';
                     break;
-                case 10:
+                case OrderType::VIP_ORDER:
+                    $list[$key]['order_type'] = 'vip订单';
+                    break;
+                case OrderType::CASH_DELIVERY_ORDER:
                     $list[$key]['order_type'] = '货到付款';
+                    break;
+                case OrderType::CONVENIENCE_ORDER:
+                    $list[$key]['order_type'] = '便利店支付';
                     break;
                 default:
                     break;
@@ -1635,23 +1642,34 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($num), $value['increment_id']); //订单号
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($num), $site_list[$value['site']]); //站点
             switch ($value['order_type']) {
-                case 1:
+                case OrderType::REGULAR_ORDER:
                     $value['order_type'] = '普通订单';
                     break;
-                case 2:
-                    $value['order_type'] = '批发';
+                case OrderType::WHOLESALE_ORDER:
+                    $value['order_type'] = '批发单';
                     break;
-                case 3:
-                    $value['order_type'] = '网红';
+                case OrderType::SOCIAL_ORDER:
+                    $value['order_type'] = '网红单';
                     break;
-                case 4:
-                    $value['order_type'] = '补发';
+                case OrderType::REPLACEMENT_ORDER:
+                    $value['order_type'] = '补发单';
                     break;
-                case 5:
+                case OrderType::DIFFERENCE_ORDER:
                     $value['order_type'] = '补差价';
                     break;
-                case 6:
+                case OrderType::PAYROLL_ORDER:
                     $value['order_type'] = '一件代发';
+                    break;
+                case OrderType::VIP_ORDER:
+                    $value['order_type'] = 'vip订单';
+                    break;
+                case OrderType::CASH_DELIVERY_ORDER:
+                    $value['order_type'] = '货到付款';
+                    break;
+                case OrderType::CONVENIENCE_ORDER:
+                    $value['order_type'] = '便利店支付';
+                    break;
+                default:
                     break;
             }
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($num), $value['order_type']); //订单类型
@@ -2037,23 +2055,34 @@ class Distribution extends Backend
                         $value = array_merge($value, $changeLens[$value['item_order_number']]);
                     }
                     switch ($value['order_type']) {
-                        case 1:
+                        case OrderType::REGULAR_ORDER:
                             $value['order_type'] = '普通订单';
                             break;
-                        case 2:
-                            $value['order_type'] = '批发';
+                        case OrderType::WHOLESALE_ORDER:
+                            $value['order_type'] = '批发单';
                             break;
-                        case 3:
-                            $value['order_type'] = '网红';
+                        case OrderType::SOCIAL_ORDER:
+                            $value['order_type'] = '网红单';
                             break;
-                        case 4:
-                            $value['order_type'] = '补发';
+                        case OrderType::REPLACEMENT_ORDER:
+                            $value['order_type'] = '补发单';
                             break;
-                        case 5:
+                        case OrderType::DIFFERENCE_ORDER:
                             $value['order_type'] = '补差价';
                             break;
-                        case 6:
+                        case OrderType::PAYROLL_ORDER:
                             $value['order_type'] = '一件代发';
+                            break;
+                        case OrderType::VIP_ORDER:
+                            $value['order_type'] = 'vip订单';
+                            break;
+                        case OrderType::CASH_DELIVERY_ORDER:
+                            $value['order_type'] = '货到付款';
+                            break;
+                        case OrderType::CONVENIENCE_ORDER:
+                            $value['order_type'] = '便利店支付';
+                            break;
+                        default:
                             break;
                     }
                     switch ($value['order_prescription_type']) {
@@ -2363,23 +2392,34 @@ class Distribution extends Backend
                     $value = array_merge($value, $changeLens[$value['item_order_number']]);
                 }
                 switch ($value['order_type']) {
-                    case 1:
+                    case OrderType::REGULAR_ORDER:
                         $value['order_type'] = '普通订单';
                         break;
-                    case 2:
-                        $value['order_type'] = '批发';
+                    case OrderType::WHOLESALE_ORDER:
+                        $value['order_type'] = '批发单';
                         break;
-                    case 3:
-                        $value['order_type'] = '网红';
+                    case OrderType::SOCIAL_ORDER:
+                        $value['order_type'] = '网红单';
                         break;
-                    case 4:
-                        $value['order_type'] = '补发';
+                    case OrderType::REPLACEMENT_ORDER:
+                        $value['order_type'] = '补发单';
                         break;
-                    case 5:
+                    case OrderType::DIFFERENCE_ORDER:
                         $value['order_type'] = '补差价';
                         break;
-                    case 6:
+                    case OrderType::PAYROLL_ORDER:
                         $value['order_type'] = '一件代发';
+                        break;
+                    case OrderType::VIP_ORDER:
+                        $value['order_type'] = 'vip订单';
+                        break;
+                    case OrderType::CASH_DELIVERY_ORDER:
+                        $value['order_type'] = '货到付款';
+                        break;
+                    case OrderType::CONVENIENCE_ORDER:
+                        $value['order_type'] = '便利店支付';
+                        break;
+                    default:
                         break;
                 }
                 switch ($value['order_prescription_type']) {
