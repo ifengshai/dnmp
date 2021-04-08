@@ -45,7 +45,7 @@ class PurchaseOrder extends Backend
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
      */
-    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback'];
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback','export_sku_many_type'];
 
     /**
      * 无需鉴权的方法,但需要登录
@@ -2720,15 +2720,14 @@ class PurchaseOrder extends Backend
         $purchase_order_item = array_unique($purchase_order_item);
         $data = [];
         foreach ($purchase_order_item as $key => $item) {
-            $where['id'] = ['eq', $key];
-            $whe['purchase_id'] = ['eq', $key];
-
-            $val = Db::name('purchase_order')->where($where)->value('type');
+            $where['b.sku'] = ['eq', $item];
+            $where['a.type'] = 2;
+            $count = Db::name('purchase_order')->alias('a')->join(['fa_purchase_order_item' => 'b'],'a.id=b.purchase_id')->where($where)->count();
             $data[$key]['id'] = $key;
-            if ($val == 1) {
-                $data[$key]['type'] = '现货';
-            } else {
+            if ($count > 0) {
                 $data[$key]['type'] = '大货';
+            } else {
+                $data[$key]['type'] = '现货';
             }
             $data[$key]['sku'] = $item;
         }

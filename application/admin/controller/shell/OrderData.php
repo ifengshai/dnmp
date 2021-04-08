@@ -1622,6 +1622,108 @@ class OrderData extends Backend
     }
 
 
+    #######################################生成波次单################################################
+
+    /**
+     * 创建波次单
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/03/23 17:47:29 
+     * @return void
+     */
+    public function create_wave_order()
+    {
+        ini_set('memory_limit', '1024M');
+        /**
+         *
+         * 生成规则
+         * 1）按业务模式：品牌独立站、第三方平台店铺
+         * 2）按时间段
+         * 第一波次：00:00-2:59:59
+         * 第二波次：3：00-5:59:59
+         * 第三波次：6:00-8:59:59
+         * 第四波次：9:00-11:59:59
+         * 第五波次：12:00-14:59:59
+         * 第六波次：15:00-17:59:59
+         * 第七波次：18:00-20:59:59
+         * 第八波次：21:00-23:59:59
+         *
+         */
+        //查询今天的订单
+        // $where['a.created_at'] = ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]];
+        $where['b.is_print'] = 0;
+        $where['b.wave_order_id'] = 0;
+        $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+        $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,a.updated_at,entity_id,a.site')
+            ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
+            ->order('id desc')
+            ->select();
+        $list = collection($list)->toArray();
+        //第三方站点id
+        $third_site = [13, 14];
+        $waveorder = new \app\admin\model\order\order\WaveOrder();
+        $itemplaform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $storesku = new \app\admin\model\warehouse\StockHouse();
+        foreach ($list as $k => $v) {
+            //判断波次类型
+            $type = 0;
+            if (in_array($v['site'], $third_site)) {
+                $type = 2;
+            } else {
+                $type = 1;
+            }
+            $time = $v['updated_at'] > 28800 ? $v['updated_at'] : $v['created_at'];
+            //判断波次时间段
+            if (strtotime(date('Y-m-d 00:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 02:59:59', $time))) {
+                $wave_time_type = 1;
+            } elseif (strtotime(date('Y-m-d 03:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 05:59:59', $time))) {
+                $wave_time_type = 2;
+            } elseif (strtotime(date('Y-m-d 06:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 08:59:59', $time))) {
+                $wave_time_type = 3;
+            } elseif (strtotime(date('Y-m-d 09:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 11:59:59', $time))) {
+                $wave_time_type = 4;
+            } elseif (strtotime(date('Y-m-d 12:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 14:59:59', $time))) {
+                $wave_time_type = 5;
+            } elseif (strtotime(date('Y-m-d 15:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 17:59:59', $time))) {
+                $wave_time_type = 6;
+            } elseif (strtotime(date('Y-m-d 18:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 20:59:59', $time))) {
+                $wave_time_type = 7;
+            } elseif (strtotime(date('Y-m-d 21:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 23:59:59', $time))) {
+                $wave_time_type = 8;
+            }
+
+            $id = $waveorder
+                ->where([
+                    'type'           => $type,
+                    'wave_time_type' => $wave_time_type,
+                    'order_date'     => ['between', [strtotime(date('Y-m-d 00:00:00', $time)), strtotime(date('Y-m-d 23:59:59', $time))]],
+                ])
+                ->value('id');
+            if (!$id) {
+                $params = [];
+                $params['wave_order_number'] = 'BC'.date('YmdHis').rand(100, 999).rand(100, 999);
+                $params['type'] = $type;
+                $params['wave_time_type'] = $wave_time_type;
+                $params['order_date'] = $time;
+                $params['createtime'] = time();
+                $id = $waveorder->insertGetId($params);
+            }
+            //转换平台SKU
+            $sku = $itemplaform->getTrueSku($v['sku'], $v['site']);
+            //根据sku查询库位排序
+            $storesku = new \app\admin\model\warehouse\StockSku();
+            $where = [];
+            $where['b.area_id'] = 3;//默认拣货区
+            $where['b.status'] = 1;//启用状态
+            $where['a.is_del'] = 1;//正常状态
+            $location_data = $storesku->alias('a')->where($where)->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->find();
+            $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' => $location_data['picking_sort']]);
+        }
+    }
+
+    ########################################end##############################################
+
 
     ################################################处理旧数据脚本##########################################################################
 
@@ -2265,7 +2367,6 @@ class OrderData extends Backend
 
         $this->orderitemprocess->saveAll($option_params);
         echo "ok";
-
 
 
         echo "ok";
