@@ -1568,9 +1568,12 @@ class ScmWarehouse extends Scm
         //拣货区盘点时不能操作
         //查询条形码库区库位
         $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->column('location_code');
+        Log::write("输出库区库位");
+        Log::write($barcodedata);
         $count = $this->_inventory->alias('a')
             ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
             ->count();
+        Log::write($count);
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
         }
