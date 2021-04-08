@@ -48,6 +48,7 @@ class Distribution extends Backend
         'detail',
         'operation_log',
         'batch_export_xls_copy',
+        'batch_export_xls_account',
     ];
     protected $noNeedLogin = ['batch_export_xls_copy'];
     /**
@@ -1975,7 +1976,7 @@ class Distribution extends Backend
             '审单时间',
         ];
         $path = '/uploads/order/';
-        $fileName = '财务导出数据';
+        $fileName = '财务导出数据'.time();
         $i = 0;
         //非拆分订单
         $map['d.is_split'] = 0;
@@ -2028,6 +2029,7 @@ class Distribution extends Backend
                         }
                     }
                 }
+                $data = [];
                 foreach ($list as $key => &$value) {
 
                     //更改镜片最新数据
