@@ -2254,6 +2254,7 @@ class Distribution extends Backend
             '站点',
             '订单类型',
             '订单状态',
+            '子单状态',
             '实际币种支付金额',
             '支付方式',
             '实际支付币种',
@@ -2393,7 +2394,7 @@ class Distribution extends Backend
                 $data[$key]['site'] = $siteList[$value['site']];//站点
                 $data[$key]['order_type'] = $value['order_type'];//订单类型
                 $data[$key]['status'] = $value['status'];//订单状态
-                //$data[$key]['distribution_status'] = $value['distribution_status'];//子单状态
+                $data[$key]['distribution_status'] = $distributionStatusList[$value['distribution_status']];//子单状态
                 $data[$key]['grand_total'] = $value['grand_total'];//实际币种支付金额
                 $data[$key]['payment_method'] = $value['payment_method'];//支付方式
                 $data[$key]['order_currency_code'] = $value['order_currency_code'];//实际支付币种
