@@ -120,12 +120,18 @@ class PurchasePay extends Backend
                 //查询待审核人
                 $userid = Db::name('finance_purchase_workflow_records')->where(['finance_purchase_id'=> $v['id'], 'audit_status' => 0])->value('assignee_id');
                 $list[$k]['check_user_nickname'] = $userlist[$userid];
-
-                $purchase_data = Db::name('purchase_order')->where(['id' => $v['purchase_id']])->find();
-                $list[$k]['1688_number'] = $purchase_data['1688_number'];
-                $list[$k]['purchase_num'] = Db::name('purchase_order_item')->where(['purchase_id' => $v['purchase_id']])->value('purchase_num');
-                $list[$k]['purchase_name'] = $purchase_data['purchase_name'];
-                $list[$k]['purchase_number'] = $purchase_data['purchase_number'];
+                if ($v['pay_type'] == 3){
+                    $list[$k]['1688_number'] = '';
+                    $list[$k]['purchase_num'] = '';
+                    $list[$k]['purchase_name'] = '';
+                    $list[$k]['purchase_number'] = '';
+                }else{
+                    $purchase_data = Db::name('purchase_order')->where(['id' => $v['purchase_id']])->find();
+                    $list[$k]['1688_number'] = $purchase_data['1688_number'];
+                    $list[$k]['purchase_num'] = Db::name('purchase_order_item')->where(['purchase_id' => $v['purchase_id']])->value('purchase_num');
+                    $list[$k]['purchase_name'] = $purchase_data['purchase_name'];
+                    $list[$k]['purchase_number'] = $purchase_data['purchase_number'];
+                }
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
