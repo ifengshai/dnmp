@@ -24,12 +24,12 @@ class RepurchaseAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        /*$this->getUserRepurchase(1);  //zeelool复购数据
+        $this->getUserRepurchase(1);  //zeelool复购数据
         $this->getUserRepurchase(2);  //voogueme复购数据
-        $this->getUserRepurchase(3);  //nihao复购数据*/
-        $this->getOldNewUser(1);  //zeelool新老用户数据
+        $this->getUserRepurchase(3);  //nihao复购数据
+        /*$this->getOldNewUser(1);  //zeelool新老用户数据
         $this->getOldNewUser(2);  //voogueme新老用户数据
-        $this->getOldNewUser(3);  //nihao新老用户数据
+        $this->getOldNewUser(3);  //nihao新老用户数据*/
         $output->writeln("All is ok");
     }
 
@@ -57,21 +57,24 @@ class RepurchaseAsynData extends Command
      */
     protected function getUserRepurchase($site){
         $today = date('Y-m-d');
-        $allMonth = $this->getDateFromRange('2018-01-01','2021-01-01');
-        foreach ($allMonth as $v){
+        $allMonth = $this->getDateFromRange('2018-01-01', '2021-04-01');
+        foreach ($allMonth as $v) {
             //获取当前月份的开始时间和结束时间
-            $nowMonthStart = $v.'-01';
-            $nowMonthEnd = date('Y-m-t 23:59:59',strtotime($v));
+            $nowMonthStart = $v . '-01';
+            $nowMonthEnd = date('Y-m-t 23:59:59', strtotime($v));
+            //用户购买行为的开始时间
+            $oneMonthStart = date("Y-m-d", strtotime("first day of +1 month", strtotime($nowMonthStart)));
             #############################################   一月期复购率start    #######################################
             //未来一个月的结束时间
             $oneMonthEnd = date("Y-m-d 23:59:59", strtotime("last day of +1 month", strtotime($nowMonthStart)));
-            if($today > $oneMonthEnd){
-                $repurchaseDataOne = $this->getRepurchaseUserNum($site,$nowMonthStart,$nowMonthEnd,$oneMonthEnd);
+            if ($today > $oneMonthEnd) {
+                $repurchaseDataOne = $this->getRepurchaseUserNum($site, $nowMonthStart, $nowMonthEnd, $oneMonthStart,
+                    $oneMonthEnd);
                 //一月期复购率
                 $oneMonthArr = array(
-                    'site'=>$site,  //站点
-                    'type'=>1,   //复购周期：1：一月
-                    'day_date'=>$v,  //时间
+                    'site' => $site,  //站点
+                    'type' => 1,   //复购周期：1：一月
+                    'day_date' => $v,  //时间
                     'usernum'=>$repurchaseDataOne['usernum'],  //客户数
                     'againbuy_usernum'=>$repurchaseDataOne['againbuy_usernum'],  //复购用户数
                     'againbuy_usernum_ordernum'=>$repurchaseDataOne['againbuy_usernum_ordernum'],  //复购用户订单数
@@ -86,7 +89,8 @@ class RepurchaseAsynData extends Command
             //未来三个月的结束时间
             $threeMonthEnd = date("Y-m-d 23:59:59", strtotime("last day of +3 month", strtotime($nowMonthStart)));
             if($today>$threeMonthEnd){
-                $repurchaseDataThree = $this->getRepurchaseUserNum($site,$nowMonthStart,$nowMonthEnd,$threeMonthEnd);
+                $repurchaseDataThree = $this->getRepurchaseUserNum($site, $nowMonthStart, $nowMonthEnd, $oneMonthStart,
+                    $threeMonthEnd);
                 //三月期复购率
                 $threeMonthArr = array(
                     'site'=>$site,  //站点
@@ -106,7 +110,8 @@ class RepurchaseAsynData extends Command
             //未来半年的结束时间
             $halfYearEnd = date("Y-m-d 23:59:59", strtotime("last day of +6 month", strtotime($nowMonthStart)));
             if($today>$halfYearEnd){
-                $repurchaseDataSix = $this->getRepurchaseUserNum($site,$nowMonthStart,$nowMonthEnd,$halfYearEnd);
+                $repurchaseDataSix = $this->getRepurchaseUserNum($site, $nowMonthStart, $nowMonthEnd, $oneMonthStart,
+                    $halfYearEnd);
                 //半年期复购率
                 $halfYearArr = array(
                     'site'=>$site,  //站点
@@ -127,7 +132,8 @@ class RepurchaseAsynData extends Command
             //未来一年的结束时间
             $onefYearEnd = date("Y-m-d 23:59:59", strtotime("last day of +12 month", strtotime($nowMonthStart)));
             if($today>$onefYearEnd){
-                $repurchaseDataThirteen = $this->getRepurchaseUserNum($site,$nowMonthStart,$nowMonthEnd,$onefYearEnd);
+                $repurchaseDataThirteen = $this->getRepurchaseUserNum($site, $nowMonthStart, $nowMonthEnd,
+                    $oneMonthStart, $onefYearEnd);
                 //一年期复购率
                 $oneYearArr = array(
                     'site'=>$site,  //站点
@@ -179,21 +185,35 @@ class RepurchaseAsynData extends Command
     /**
      * 获取时间段内复购数据
      * @param $site   站点
-     * @param $startDate1   用户所在开始时间、用户行为开始时间
+     * @param $startDate1   用户所在开始时间
      * @param $endDate1    用户所在结束时间
+     * @param $startDate2    用户行为开始时间
      * @param $endDate2     用户行为结束时间
      * @return array
      * @author mjj
      * @date   2021/4/1 09:58:28
      */
-    protected function getRepurchaseUserNum($site,$startDate1,$endDate1,$endDate2){
+    protected function getRepurchaseUserNum($site, $startDate1, $endDate1, $startDate2, $endDate2)
+    {
         $startTime1 = strtotime($startDate1);
         $endTime1 = strtotime($endDate1);
+        $startTime2 = strtotime($startDate2);
         $endTime2 = strtotime($endDate2);
         $where['site'] = $site;
         $where['order_type'] = 1;
-        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-        $where1['payment_time'] = ['between',[$startTime1,$endTime1]];
+        $where['status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered'
+            ]
+        ];
+        $where1['payment_time'] = ['between', [$startTime1, $endTime1]];
         $sql1 = $this->order
             ->where($where)
             ->where($where1)
@@ -201,7 +221,7 @@ class RepurchaseAsynData extends Command
             ->buildSql();
         $where2 = [];
         $where2[] = ['exp', Db::raw("customer_email in " . $sql1)];
-        $where3['payment_time'] = ['between',[$startTime1,$endTime2]];
+        $where3['payment_time'] = ['between', [$startTime2, $endTime2]];
         $sql2 = $this->order
             ->alias('t1')
             ->field('customer_email,count(*) as count')
@@ -209,7 +229,7 @@ class RepurchaseAsynData extends Command
             ->where($where2)
             ->where($where3)
             ->group('customer_email')
-            ->having('count(*)> 1')
+            ->having('count(*)>= 1')
             ->buildSql();
         $userOrderInfo = $this->order->table([$sql2=>'t2'])->field('count(*) as count,sum(count) as num')->select();
         $orderCount = $userOrderInfo[0]['count'] ? $userOrderInfo[0]['count'] : 0;//复购客户数
