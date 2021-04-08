@@ -2306,7 +2306,7 @@ class Distribution extends Backend
             ->where($where)
             ->where($map)
             ->count();
-        for ($i = 0; $i < ceil($count / 20000); $i++) {
+        for ($i = 0; $i < ceil($count / 50000); $i++) {
             $list = $this->model
                 ->alias('a')
                 ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.increment_id,
@@ -2317,7 +2317,7 @@ class Distribution extends Backend
                 ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
                 ->where($where)
                 ->where($map)
-                ->page($i + 1, 20000)
+                ->page($i + 1, 50000)
                 ->order('a.created_at desc')
                 ->select();
             $list = collection($list)->toArray();
