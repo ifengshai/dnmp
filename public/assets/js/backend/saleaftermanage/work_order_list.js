@@ -860,8 +860,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 if (str == '180' || str == '900') {
                     $('#c-replenish_money').attr('disabled',true);
+                    $('.step10').find('input').attr('disabled',true);
+                    $('.step9').find('input').attr('disabled',true);
+                    $('.step2').find('input').attr('disabled',true);
+                    $('#c-area').attr('disabled',false);
+                    $('#c-area1').attr('disabled',false);
                 }else{
                     $('#c-replenish_money').attr('disabled',false);
+                    $('.step10').find('input').attr('disabled',false);
+                    $('.step9').find('input').attr('disabled',false);
+                    $('.step2').find('input').attr('disabled',false);
+                    $('#c-area').attr('disabled',true);
+                    $('#c-area1').attr('disabled',true);
                 }
                 $('.selectpicker ').selectpicker('refresh');
 
@@ -3321,8 +3331,18 @@ function platform_order(){
 
         if (str == '180' || str == '900') {
             $('#c-replenish_money').attr('disabled',true);
+            $('.step10').find('input').attr('disabled',true);
+            $('.step9').find('input').attr('disabled',true);
+            $('.step2').find('input').attr('disabled',true);
+            $('#c-area').attr('disabled',false);
+            $('#c-area1').attr('disabled',false);
         }else{
             $('#c-replenish_money').attr('disabled',false);
+            $('.step10').find('input').attr('disabled',false);
+            $('.step9').find('input').attr('disabled',false);
+            $('.step2').find('input').attr('disabled',false);
+            $('#c-area').attr('disabled',true);
+            $('#c-area1').attr('disabled',true);
         }
 
 
