@@ -130,7 +130,7 @@ class RepurchaseAsynData extends Command
             #############################################  一年期复购率start #########################################
 
             //未来一年的结束时间
-            $onefYearEnd = date("Y-m-d 23:59:59", strtotime("last day of +13 month", strtotime($nowMonthStart)));
+            $onefYearEnd = date("Y-m-d 23:59:59", strtotime("last day of +12 month", strtotime($nowMonthStart)));
             if($today>$onefYearEnd){
                 $repurchaseDataThirteen = $this->getRepurchaseUserNum($site, $nowMonthStart, $nowMonthEnd,
                     $oneMonthStart, $onefYearEnd);
