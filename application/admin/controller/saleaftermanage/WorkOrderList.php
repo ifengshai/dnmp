@@ -4084,7 +4084,7 @@ EOF;
         foreach (array_filter($arr) as $v) {
             //转换sku
             $sku = trim($v['original_sku']);
-            if ($siteType == 13 || $siteType == 14) {
+            if ($v['platform_type'] == 13 || $v['platform_type'] == 14) {
                 $itemPlatFormSkuWhere = ['platform_sku' => $sku, 'platform_type' => $v['platform_type']];
             }else{
                 $itemPlatFormSkuWhere = ['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $v['platform_type']];
