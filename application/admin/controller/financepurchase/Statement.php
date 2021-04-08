@@ -508,227 +508,313 @@ class Statement extends Backend
                     $status = 6;
                 } else {
                     //结算单金额为负的时候 对账要进行成本计算操作
-                    $statement_items = Db::name('finance_statement_item')->where('statement_id', $v['id'])->select();
-                    foreach ($statement_items as $kk => $vv) {
+                    $statementItems = Db::name('finance_statement_item')
+                        ->where('statement_id', $v['id'])
+                        ->select();
+                    foreach ($statementItems as $kk => $vv) {
                         if ($vv['purchase_batch'] > 0) {
                             //有批次判断所有的批次是否都已结算 都已结算的话计算采购成本
-                            $all_batch = Db::name('purchase_batch')->where('purchase_id', $vv['purchase_id'])->count();
+                            $allBatch = Db::name('purchase_batch')
+                                ->where('purchase_id', $vv['purchase_id'])
+                                ->count();
                             //结算单子表里有几条结算数据
-                            $all_items = Db::name('finance_statement_item')->where('purchase_id', $vv['purchase_id'])->select();
-                            $instock_total = array_sum(array_column($all_items, 'instock_total'));
-                            $deduction_total = array_sum(array_column($all_items, 'deduction_total'));
-                            $instock_num = array_sum(array_column($all_items, 'instock_num'));
-                            if ($all_batch == count($all_items)) {
-                                $actual_purchase_price = round(($instock_total - $deduction_total + $all_items[0]['freight']) / $instock_num ,2);
+                            $allItems = Db::name('finance_statement_item')
+                                ->where('purchase_id', $vv['purchase_id'])
+                                ->select();
+                            $instock_total = array_sum(array_column($allItems, 'instock_total'));
+                            $deduction_total = array_sum(array_column($allItems, 'deduction_total'));
+                            $instock_num = array_sum(array_column($allItems, 'instock_num'));
+                            if ($allBatch == count($allItems)) {
+                                /**************************************计算采购成本start**********************************/
+                                $actualPurchasePrice = round(($instock_total - $deduction_total + $allItems[0]['freight']) / $instock_num ,2);
                                 //更新采购单成本
-                                Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->update(['actual_purchase_price'=>$actual_purchase_price]);
-                                //入库总数量
-                                $count = $this->instockItem->alias('i')->join('fa_in_stock s','i.in_stock_id=s.id')->join('fa_check_order c','s.check_id=c.id')->where('c.purchase_id',$vv['purchase_id'])->sum('i.in_stock_num');
-                                $purchase_order = $this->purchase_item->alias('i')->join('fa_purchase_order o','i.purchase_id=o.id')->where('i.purchase_id',$vv['purchase_id'])->field('round(o.purchase_total/purchase_num,2) purchase_price,actual_purchase_price,i.sku')->find();
+                                Db::name('purchase_order_item')
+                                    ->where('purchase_id',$vv['purchase_id'])
+                                    ->update(['actual_purchase_price'=>$actualPurchasePrice]);
+                                /**************************************计算采购成本end**********************************/
+                                /**************************************计算成本冲减start****************************************/
+                                $purchaseOrder = $this->purchase_item
+                                    ->alias('i')
+                                    ->join('fa_purchase_order o','i.purchase_id=o.id')
+                                    ->where('i.purchase_id',$vv['purchase_id'])
+                                    ->field('purchase_price,actual_purchase_price,i.sku')
+                                    ->find();
                                 //实际采购成本和预估成本不一致，冲减差值
-                                if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
+                                if($purchaseOrder['purchase_price'] != $purchaseOrder['actual_purchase_price']){
                                     //计算订单出库数量
-                                    $out_count1 = $this->item->where('purchase_id',$vv['purchase_id'])->where('item_order_number','<>','')->where('sku',$purchase_order['sku'])->where('library_status',2)->count();
+                                    $outCount1 = $this->item
+                                        ->where('purchase_id',$vv['purchase_id'])
+                                        ->where('item_order_number','<>','')
+                                        ->where('sku',$purchaseOrder['sku'])
+                                        ->where('library_status',2)
+                                        ->count();
                                     //计算出库数量
-                                    $out_count2 = $this->outstockItem->alias('i')->join('fa_out_stock s','s.id=i.out_stock_id','left')->where('s.purchase_id',$vv['purchase_id'])->where('status',2)->where('i.sku',$purchase_order['sku'])->sum('out_stock_num');
-                                    $out_count = $out_count1+$out_count2;
+                                    $outCount2 = $this->outstockItem
+                                        ->alias('i')
+                                        ->join('fa_out_stock s','s.id=i.out_stock_id','left')
+                                        ->where('s.purchase_id',$vv['purchase_id'])
+                                        ->where('status',2)
+                                        ->where('i.sku',$purchaseOrder['sku'])
+                                        ->sum('out_stock_num');
+                                    $outCount = $outCount1+$outCount2;
                                     $result['purchase_id'] = $vv['purchase_id'];
                                     $result['create_time'] = time();
                                     //误差数量
-                                    $result['count'] = $count-$out_count;
+                                    $result['count'] = $outCount;
                                     //误差单价
-                                    $result['price'] = round($purchase_order['actual_purchase_price']-$purchase_order['purchase_price'],2);
+                                    $result['price'] = round($purchaseOrder['actual_purchase_price']-$purchaseOrder['purchase_price'],2);
                                     //误差总金额
                                     $result['total'] = round($result['count']*$result['price'],2);
-                                    Db::name('finance_cost_error')->insert($result);
+                                    Db::name('finance_cost_error')
+                                        ->insert($result);
                                     /**************************************计算成本冲减end****************************************/
                                     /**************************************成本核算start****************************************/
-                                    if($out_count1 != 0){
+                                    if($outCount1 != 0){
                                         //订单出库
-                                        $order = $this->item->where('purchase_id',$vv['purchase_id'])->where('item_order_number','<>','')->where('sku',$purchase_order['sku'])->where('library_status',2)->select();
+                                        $order = $this->item
+                                            ->where('purchase_id',$vv['purchase_id'])
+                                            ->where('item_order_number','<>','')
+                                            ->where('sku',$purchaseOrder['sku'])
+                                            ->where('library_status',2)
+                                            ->select();
                                         $result1 = array();
                                         foreach ($order as $kk1=>$vv1){
                                             //拆分订单号
-                                            $order_number = explode('-',$vv1['item_order_number']);
-                                            $order_number = $order_number[0];
-                                            if(isset($result1[$order_number])){
-                                                $result1[$order_number] += 1;
+                                            $orderNumber = explode('-',$vv1['item_order_number']);
+                                            $orderNumber = $orderNumber[0];
+                                            if(isset($result1[$orderNumber])){
+                                                $result1[$orderNumber] += 1;
                                             }else{
-                                                $result1[$order_number] = 1;
+                                                $result1[$orderNumber] = 1;
                                             }
                                         }
                                         foreach ($result1 as $rr1=>$ss1){
                                             //获取成本核算中的订单数据
-                                            $cost_order_info = $this->financecost->where(['order_number' => $rr1, 'type' => 2,'bill_type'=>8])->find();
+                                            $costOrderInfo = $this->financecost
+                                                ->where(['order_number' => $rr1, 'type' => 2,'bill_type'=>8])
+                                                ->order('id desc')
+                                                ->find();
                                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                                             $arr1['type'] = 2;   //类型：成本
                                             $arr1['bill_type'] = 10;    //单据类型：暂估结算金额
-                                            $arr1['frame_cost'] = round($ss1*$purchase_order['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
+                                            $arr1['frame_cost'] = $costOrderInfo['frame_cost'];    //镜架成本：原订单金额
                                             $arr1['order_number'] = $rr1;  //订单号
-                                            $arr1['site'] = $cost_order_info['site'];  //站点
-                                            $arr1['order_type'] = $cost_order_info['order_type'];  //订单类型
-                                            $arr1['order_money'] = $cost_order_info['order_money'];  //订单金额
-                                            $arr1['income_amount'] = $cost_order_info['income_amount'];  //收入金额
+                                            $arr1['site'] = $costOrderInfo['site'];  //站点
+                                            $arr1['order_type'] = $costOrderInfo['order_type'];  //订单类型
+                                            $arr1['order_money'] = $costOrderInfo['order_money'];  //订单金额
+                                            $arr1['income_amount'] = $costOrderInfo['income_amount'];  //收入金额
                                             $arr1['action_type'] = 2;  //动作类型：冲减
-                                            $arr1['order_currency_code'] = $cost_order_info['order_currency_code'];  //币种
-                                            $arr1['is_carry_forward'] = $cost_order_info['is_carry_forward'];  //是否结转
-                                            $arr1['payment_time'] = $cost_order_info['payment_time'];  //订单支付时间
-                                            $arr1['payment_method'] = $cost_order_info['payment_method'];  //订单支付方式
+                                            $arr1['order_currency_code'] = $costOrderInfo['order_currency_code'];  //币种
+                                            $arr1['is_carry_forward'] = $costOrderInfo['is_carry_forward'];  //是否结转
+                                            $arr1['payment_time'] = $costOrderInfo['payment_time'];  //订单支付时间
+                                            $arr1['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                             $arr1['createtime'] = time();  //创建时间
-                                            $arr1['cycle_id'] = $cost_order_info['cycle_id'];  //关联周期结转单id
-                                            Db::name('finance_cost')->insert($arr1);
+                                            $arr1['cycle_id'] = $costOrderInfo['cycle_id'];  //关联周期结转单id
+                                            Db::name('finance_cost')
+                                                ->insert($arr1);
                                             //增加成本核算记录
                                             $arr2['type'] = 2;   //类型：成本
                                             $arr2['bill_type'] = 8;    //单据类型：实际结算金额
-                                            $arr2['frame_cost'] = round($ss1*$purchase_order['actual_purchase_price'],2);    //镜架成本：剩余实际单价*剩余数量
+                                            $arr2['frame_cost'] = round($costOrderInfo['frame_cost'] + $ss1 * ($purchaseOrder['actual_purchase_price'] - $purchaseOrder['purchase_price']), 2);    //镜架成本：（实际单价-预估）*数量+原订单金额
                                             $arr2['order_number'] = $rr1;  //订单号
-                                            $arr2['site'] = $cost_order_info['site'];  //站点
-                                            $arr2['order_type'] = $cost_order_info['order_type'];  //订单类型
-                                            $arr2['order_money'] = $cost_order_info['order_money'];  //订单金额
-                                            $arr2['income_amount'] = $cost_order_info['income_amount'];  //收入金额
+                                            $arr2['site'] = $costOrderInfo['site'];  //站点
+                                            $arr2['order_type'] = $costOrderInfo['order_type'];  //订单类型
+                                            $arr2['order_money'] = $costOrderInfo['order_money'];  //订单金额
+                                            $arr2['income_amount'] = $costOrderInfo['income_amount'];  //收入金额
                                             $arr2['action_type'] = 1;  //动作类型：增加
-                                            $arr2['order_currency_code'] = $cost_order_info['order_currency_code'];  //币种
-                                            $arr2['is_carry_forward'] = $cost_order_info['is_carry_forward'];  //是否结转
-                                            $arr2['payment_time'] = $cost_order_info['payment_time'];  //订单支付时间
-                                            $arr2['payment_method'] = $cost_order_info['payment_method'];  //订单支付方式
+                                            $arr2['order_currency_code'] = $costOrderInfo['order_currency_code'];  //币种
+                                            $arr2['is_carry_forward'] = $costOrderInfo['is_carry_forward'];  //是否结转
+                                            $arr2['payment_time'] = $costOrderInfo['payment_time'];  //订单支付时间
+                                            $arr2['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                             $arr2['createtime'] = time();  //创建时间
-                                            $arr2['cycle_id'] = $cost_order_info['cycle_id'];  //关联周期结转单id
-                                            Db::name('finance_cost')->insert($arr2);
+                                            $arr2['cycle_id'] = $costOrderInfo['cycle_id'];  //关联周期结转单id
+                                            Db::name('finance_cost')
+                                                ->insert($arr2);
                                         }
                                     }
-                                    if($out_count2 != 0){
+                                    if($outCount2 != 0){
                                         //出库单出库
-                                        $outorder = $this->outstockItem->alias('i')->join('fa_out_stock s','s.id=i.out_stock_id','left')->where('s.purchase_id',$vv['purchase_id'])->where('status',2)->where('i.sku',$purchase_order['sku'])->group('s.out_stock_number')->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')->select();
-                                        foreach ($outorder as $rr2=>$ss2){
+                                        $outOrder = $this->outstockItem
+                                            ->alias('i')
+                                            ->join('fa_out_stock s','s.id=i.out_stock_id','left')
+                                            ->where('s.purchase_id',$vv['purchase_id'])
+                                            ->where('status',2)
+                                            ->where('i.sku',$purchaseOrder['sku'])
+                                            ->group('s.out_stock_number')
+                                            ->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')
+                                            ->select();
+                                        foreach ($outOrder as $rr2=>$ss2){
                                             //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                                             $arr3['type'] = 2;   //类型：成本
                                             $arr3['bill_type'] = 11;    //单据类型：暂估结算金额
-                                            $arr3['frame_cost'] = round($ss2['count']*$purchase_order['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
+                                            $arr3['frame_cost'] = round($ss2['count']*$purchaseOrder['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
                                             $arr3['order_number'] = $ss2['out_stock_number'];  //出库单号
                                             $arr3['out_stock_id'] = $ss2['id'];  //出库单id
                                             $arr3['action_type'] = 2;  //动作类型：冲减
                                             $arr3['order_currency_code'] = 'CNY';  //币种
                                             $arr3['createtime'] = time();  //创建时间
-                                            Db::name('finance_cost')->insert($arr3);
+                                            Db::name('finance_cost')
+                                                ->insert($arr3);
                                             //增加成本核算记录
                                             $arr4['type'] = 2;   //类型：成本
                                             $arr4['bill_type'] = 9;    //单据类型：实际结算金额
-                                            $arr4['frame_cost'] = round($ss2['count']*$purchase_order['actual_purchase_price'],2);    //镜架成本：剩余实际单价*剩余数量
+                                            $arr4['frame_cost'] = round($ss2['count']*$purchaseOrder['actual_purchase_price'],2);    //镜架成本：剩余实际单价*剩余数量
                                             $arr4['order_number'] = $ss2['out_stock_number'];  //出库单号
                                             $arr4['out_stock_id'] = $ss2['id'];  //出库单id
                                             $arr4['action_type'] = 1;  //动作类型：增加
                                             $arr4['order_currency_code'] = 'CNY';  //币种
                                             $arr4['createtime'] = time();  //创建时间
-                                            Db::name('finance_cost')->insert($arr4);
+                                            Db::name('finance_cost')
+                                                ->insert($arr4);
                                         }
                                     }
                                     /**************************************成本核算end****************************************/
                                 }
                             }
                         } else {
-
-                            //无批次直接计算采购成本
-                            $actual_purchase_price = round(($vv['instock_total'] - $vv['deduction_total'] + $vv['freight']) / $vv['instock_num'],2);
+                            /**************************************计算采购成本start**********************************/
+                            //无批次直接计算采购成本 （所有批次入库数量乘以采购单价（入库金额） - 扣款金额 + 运费）/ 入库数量
+                            $actualPurchasePrice = round(($vv['instock_total'] - $vv['deduction_total'] + $vv['freight']) / $vv['instock_num'],2);
                             //更新采购单成本
-                            Db::name('purchase_order_item')->where('purchase_id',$vv['purchase_id'])->update(['actual_purchase_price'=>$actual_purchase_price]);
+                            Db::name('purchase_order_item')
+                                ->where('purchase_id',$vv['purchase_id'])
+                                ->update(['actual_purchase_price'=>$actualPurchasePrice]);
+                            /**************************************计算采购成本end**********************************/
+                            /**************************************计算成本冲减start****************************************/
                             //入库总数量
-                            $count = $this->instockItem->alias('i')->join('fa_in_stock s','i.in_stock_id=s.id')->join('fa_check_order c','s.check_id=c.id')->where('c.purchase_id',$vv['purchase_id'])->sum('i.in_stock_num');
-                            $purchase_order = $this->purchase_item->alias('i')->join('fa_purchase_order o','i.purchase_id=o.id')->where('i.purchase_id',$vv['purchase_id'])->field('round(o.purchase_total/purchase_num,2) purchase_price,actual_purchase_price,i.sku')->find();
+                            $purchaseOrder = $this->purchase_item
+                                ->alias('i')
+                                ->join('fa_purchase_order o','i.purchase_id=o.id')
+                                ->where('i.purchase_id',$vv['purchase_id'])
+                                ->field('purchase_price,actual_purchase_price,i.sku')
+                                ->find();
                             //实际采购成本和预估成本不一致，冲减差值
-                            if($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']){
+                            if($purchaseOrder['purchase_price'] != $purchaseOrder['actual_purchase_price']){
                                 //计算订单出库数量
-                                $out_count1 = $this->item->where('purchase_id',$vv['purchase_id'])->where('item_order_number','<>','')->where('sku',$purchase_order['sku'])->where('library_status',2)->count();
+                                $outCount1 = $this->item
+                                    ->where('purchase_id', $v)
+                                    ->where('item_order_number', '<>', '')
+                                    ->where('sku', $purchaseOrder['sku'])
+                                    ->where('library_status', 2)
+                                    ->count();
                                 //计算出库数量
-                                $out_count2 = $this->outstockItem->alias('i')->join('fa_out_stock s','s.id=i.out_stock_id','left')->where('s.purchase_id',$vv['purchase_id'])->where('status',2)->where('i.sku',$purchase_order['sku'])->sum('out_stock_num');
-                                $out_count = $out_count1+$out_count2;
+                                $outCount2 = $this->outstockItem
+                                    ->alias('i')
+                                    ->join('fa_out_stock s', 's.id=i.out_stock_id', 'left')
+                                    ->where('s.purchase_id', $v)
+                                    ->where('status', 2)
+                                    ->where('i.sku', $purchaseOrder['sku'])
+                                    ->sum('out_stock_num');
+                                $outCount = $outCount1+$outCount2;
                                 $result['purchase_id'] = $vv['purchase_id'];
                                 $result['create_time'] = time();
                                 //误差数量
-                                $result['count'] = $count-$out_count;
+                                $result['count'] = $outCount;
                                 //误差单价
-                                $result['price'] = round($purchase_order['actual_purchase_price']-$purchase_order['purchase_price'],2);
+                                $result['price'] = round($purchaseOrder['actual_purchase_price']-$purchaseOrder['purchase_price'],2);
                                 //误差总金额
                                 $result['total'] = round($result['count']*$result['price'],2);
-                                Db::name('finance_cost_error')->insert($result);
+                                Db::name('finance_cost_error')
+                                    ->insert($result);
                                 /**************************************计算成本冲减end****************************************/
                                 /**************************************成本核算start****************************************/
-                                if($out_count1 != 0){
+                                if($outCount1 != 0){
                                     //订单出库
-                                    $order = $this->item->where('purchase_id',$vv['purchase_id'])->where('item_order_number','<>','')->where('sku',$purchase_order['sku'])->where('library_status',2)->select();
+                                    $order = $this->item
+                                        ->where('purchase_id',$vv['purchase_id'])
+                                        ->where('item_order_number','<>','')
+                                        ->where('sku',$purchaseOrder['sku'])
+                                        ->where('library_status',2)
+                                        ->select();
                                     $result1 = array();
                                     foreach ($order as $kk1=>$vv1){
                                         //拆分订单号
-                                        $order_number = explode('-',$vv1['item_order_number']);
-                                        $order_number = $order_number[0];
-                                        if(isset($result1[$order_number])){
-                                            $result1[$order_number] += 1;
+                                        $orderNumber = explode('-',$vv1['item_order_number']);
+                                        $orderNumber = $orderNumber[0];
+                                        if(isset($result1[$orderNumber])){
+                                            $result1[$orderNumber] += 1;
                                         }else{
-                                            $result1[$order_number] = 1;
+                                            $result1[$orderNumber] = 1;
                                         }
                                     }
                                     foreach ($result1 as $rr1=>$ss1){
                                         //获取成本核算中的订单数据
-                                        $cost_order_info = $this->financecost->where(['order_number' => $rr1, 'type' => 2,'bill_type'=>8])->find();
+                                        $costOrderInfo = $this->financecost
+                                            ->where(['order_number' => $rr1, 'type' => 2,'bill_type'=>8])
+                                            ->order('id desc')
+                                            ->find();
                                         //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                                         $arr1['type'] = 2;   //类型：成本
                                         $arr1['bill_type'] = 10;    //单据类型：暂估结算金额
-                                        $arr1['frame_cost'] = round($ss1*$purchase_order['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
+                                        $arr1['frame_cost'] = $costOrderInfo['frame_cost'];    //镜架成本：剩余预估单价*剩余数量//镜架成本：原订单金额2021.4.8修改逻辑
                                         $arr1['order_number'] = $rr1;  //订单号
-                                        $arr1['site'] = $cost_order_info['site'];  //站点
-                                        $arr1['order_type'] = $cost_order_info['order_type'];  //订单类型
-                                        $arr1['order_money'] = $cost_order_info['order_money'];  //订单金额
-                                        $arr1['income_amount'] = $cost_order_info['income_amount'];  //收入金额
+                                        $arr1['site'] = $costOrderInfo['site'];  //站点
+                                        $arr1['order_type'] = $costOrderInfo['order_type'];  //订单类型
+                                        $arr1['order_money'] = $costOrderInfo['order_money'];  //订单金额
+                                        $arr1['income_amount'] = $costOrderInfo['income_amount'];  //收入金额
                                         $arr1['action_type'] = 2;  //动作类型：冲减
-                                        $arr1['order_currency_code'] = $cost_order_info['order_currency_code'];  //币种
-                                        $arr1['is_carry_forward'] = $cost_order_info['is_carry_forward'];  //是否结转
-                                        $arr1['payment_time'] = $cost_order_info['payment_time'];  //订单支付时间
-                                        $arr1['payment_method'] = $cost_order_info['payment_method'];  //订单支付方式
+                                        $arr1['order_currency_code'] = $costOrderInfo['order_currency_code'];  //币种
+                                        $arr1['is_carry_forward'] = $costOrderInfo['is_carry_forward'];  //是否结转
+                                        $arr1['payment_time'] = $costOrderInfo['payment_time'];  //订单支付时间
+                                        $arr1['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                         $arr1['createtime'] = time();  //创建时间
-                                        $arr1['cycle_id'] = $cost_order_info['cycle_id'];  //关联周期结转单id
-                                        Db::name('finance_cost')->insert($arr1);
+                                        $arr1['cycle_id'] = $costOrderInfo['cycle_id'];  //关联周期结转单id
+                                        Db::name('finance_cost')
+                                            ->insert($arr1);
                                         //增加成本核算记录
                                         $arr2['type'] = 2;   //类型：成本
                                         $arr2['bill_type'] = 8;    //单据类型：实际结算金额
-                                        $arr2['frame_cost'] = round($ss1*$purchase_order['actual_purchase_price'],2);    //镜架成本：剩余实际单价*剩余数量
+                                        $arr2['frame_cost'] = round($costOrderInfo['frame_cost'] + $ss1 * ($purchaseOrder['actual_purchase_price'] - $purchaseOrder['purchase_price']), 2);    //镜架成本：剩余实际单价*剩余数量//镜架成本：（实际单价-预估）*数量+原订单金额2021.4.8修改逻辑
                                         $arr2['order_number'] = $rr1;  //订单号
-                                        $arr2['site'] = $cost_order_info['site'];  //站点
-                                        $arr2['order_type'] = $cost_order_info['order_type'];  //订单类型
-                                        $arr2['order_money'] = $cost_order_info['order_money'];  //订单金额
-                                        $arr2['income_amount'] = $cost_order_info['income_amount'];  //收入金额
+                                        $arr2['site'] = $costOrderInfo['site'];  //站点
+                                        $arr2['order_type'] = $costOrderInfo['order_type'];  //订单类型
+                                        $arr2['order_money'] = $costOrderInfo['order_money'];  //订单金额
+                                        $arr2['income_amount'] = $costOrderInfo['income_amount'];  //收入金额
                                         $arr2['action_type'] = 1;  //动作类型：增加
-                                        $arr2['order_currency_code'] = $cost_order_info['order_currency_code'];  //币种
-                                        $arr2['is_carry_forward'] = $cost_order_info['is_carry_forward'];  //是否结转
-                                        $arr2['payment_time'] = $cost_order_info['payment_time'];  //订单支付时间
-                                        $arr2['payment_method'] = $cost_order_info['payment_method'];  //订单支付方式
+                                        $arr2['order_currency_code'] = $costOrderInfo['order_currency_code'];  //币种
+                                        $arr2['is_carry_forward'] = $costOrderInfo['is_carry_forward'];  //是否结转
+                                        $arr2['payment_time'] = $costOrderInfo['payment_time'];  //订单支付时间
+                                        $arr2['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                         $arr2['createtime'] = time();  //创建时间
-                                        $arr2['cycle_id'] = $cost_order_info['cycle_id'];  //关联周期结转单id
-                                        Db::name('finance_cost')->insert($arr2);
+                                        $arr2['cycle_id'] = $costOrderInfo['cycle_id'];  //关联周期结转单id
+                                        Db::name('finance_cost')
+                                            ->insert($arr2);
                                     }
                                 }
-                                if($out_count2 != 0){
+                                if($outCount2 != 0){
                                     //出库单出库
-                                    $outorder = $this->outstockItem->alias('i')->join('fa_out_stock s','s.id=i.out_stock_id','left')->where('s.purchase_id',$vv['purchase_id'])->where('status',2)->where('i.sku',$purchase_order['sku'])->group('s.out_stock_number')->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')->select();
-                                    foreach ($outorder as $rr2=>$ss2){
+                                    $outOrder = $this->outstockItem
+                                        ->alias('i')
+                                        ->join('fa_out_stock s','s.id=i.out_stock_id','left')
+                                        ->where('s.purchase_id',$vv['purchase_id'])
+                                        ->where('status',2)
+                                        ->where('i.sku',$purchaseOrder['sku'])
+                                        ->group('s.out_stock_number')
+                                        ->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')
+                                        ->select();
+                                    foreach ($outOrder as $rr2=>$ss2){
                                         //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                                         $arr3['type'] = 2;   //类型：成本
                                         $arr3['bill_type'] = 11;    //单据类型：暂估结算金额
-                                        $arr3['frame_cost'] = round($ss2['count']*$purchase_order['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
+                                        $arr3['frame_cost'] = round($ss2['count']*$purchaseOrder['purchase_price'],2);    //镜架成本：剩余预估单价*剩余数量
                                         $arr3['order_number'] = $ss2['out_stock_number'];  //出库单号
                                         $arr3['out_stock_id'] = $ss2['id'];  //出库单id
                                         $arr3['action_type'] = 2;  //动作类型：冲减
                                         $arr3['order_currency_code'] = 'CNY';  //币种
                                         $arr3['createtime'] = time();  //创建时间
-                                        Db::name('finance_cost')->insert($arr3);
+                                        Db::name('finance_cost')
+                                            ->insert($arr3);
                                         //增加成本核算记录
                                         $arr4['type'] = 2;   //类型：成本
                                         $arr4['bill_type'] = 9;    //单据类型：实际结算金额
-                                        $arr4['frame_cost'] = round($ss2['count']*$purchase_order['actual_purchase_price'],2);    //镜架成本：剩余实际单价*剩余数量
+                                        $arr4['frame_cost'] = round($ss2['count']*$purchaseOrder['actual_purchase_price'],2);    //镜架成本：剩余实际单价*剩余数量
                                         $arr4['order_number'] = $ss2['out_stock_number'];  //出库单号
                                         $arr4['out_stock_id'] = $ss2['id'];  //出库单id
                                         $arr4['action_type'] = 1;  //动作类型：增加
                                         $arr4['order_currency_code'] = 'CNY';  //币种
                                         $arr4['createtime'] = time();  //创建时间
-                                        Db::name('finance_cost')->insert($arr4);
+                                        Db::name('finance_cost')
+                                            ->insert($arr4);
                                     }
                                 }
                                 /**************************************成本核算end****************************************/
@@ -738,12 +824,9 @@ class Statement extends Backend
                     //结算金额为负的话 要计算采购单成本 （所有批次入库数量乘以采购单价 - 扣款金额 ）/ 入库数量
                     $status = 4;
                 }
-                // die;
                 //更新主表状态
                 Db::name('finance_statement')->where('id', $v['id'])->update(['status' => $status]);
             }
-            // die;
-
             Db::commit();
         } catch (ValidateException $e) {
             Db::rollback();
@@ -822,7 +905,7 @@ class Statement extends Backend
                 }
                 //采购单物流单详情
                 $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time,createtime')->find();
-                
+
                 if(!empty($row['collect_time'])){
                     $list[$k]['period'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
                 }else{
