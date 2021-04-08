@@ -187,7 +187,7 @@ class PurchasePay extends Backend
                     }
                     $insert['status'] = $params['status'];
                     $insert['remark'] = $params['remark'];
-                    $insert['purchase_id'] = $insert['pay_type'] == 3 ? 0:$params['purchase_id'];
+                    $insert['purchase_id'] = $params['purchase_id'];
                     $insert['1688_number'] = $params['1688_number'];
                     $insert['supplier_id'] = $params['supplier_id'];
                     $insert['order_number'] = $params['order_number'];
