@@ -4071,13 +4071,12 @@ EOF;
             $arr[$k]['platform_type'] = $v['platform_type'];
         }
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-print_r(array_filter($arr));
-print_r($arr);die;
         //根据平台sku转sku
         $notEnough = [];
         foreach (array_filter($arr) as $v) {
             //转换sku
             $sku = trim($v['original_sku']);
+            echo $sku;echo $v['platform_type'];
             //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
             $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $v['platform_type']])->find();
             print_r($res);
