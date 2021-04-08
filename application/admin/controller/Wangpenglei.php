@@ -1018,8 +1018,8 @@ class Wangpenglei extends Backend
      */
     public function order_lens_cost()
     {
-        $order_id = 1219606;
-        $order_number = 100207929;
+        $order_id = 1388996;
+        $order_number = 100232168;
         //判断是否有工单
         $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
         $workchangesku = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
