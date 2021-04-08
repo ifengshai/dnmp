@@ -1381,19 +1381,19 @@ class Item extends Backend
                         $uploadItemArr['sku'] = $v['platform_sku'];
                         $uploadItemArr['site'] = $v['platform_type'];
                     } elseif ($uploadItemArr['site'] == 13) {
-                        $params['sku_info'] = implode(',', $uploadItemArr['skus']);
+                        $params['sku_info'] = $v['platform_sku'];
                         $params['platform_type'] = 1;
-                        $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
-                        $third_res = json_decode($third_res, true);
+                        $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                        $thirdRes = json_decode($thirdRes, true);
                     } elseif ($uploadItemArr['site'] == 14) {
-                        $params['sku_info'] = implode(',', $uploadItemArr['skus']);
+                        $params['sku_info'] = $v['platform_sku'];
                         $params['platform_type'] = 2;
-                        $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
-                        $third_res = json_decode($third_res, true);
+                        $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                        $thirdRes = json_decode($thirdRes, true);
                     } else {
-                        $soap_res = Soap::createProduct($uploadItemArr);
+                        $soapRes = Soap::createProduct($uploadItemArr);
                     }
-                    if ($soap_res || $third_res['code'] == 1) {
+                    if ($soapRes || $thirdRes['code'] == 1) {
                         $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
                     } else {
                         $error_num[] = $v['platform_type'];
@@ -1592,19 +1592,19 @@ class Item extends Backend
                                 $uploadItemArr['sku'] = $v['platform_sku'];
                                 $uploadItemArr['site'] = $v['platform_type'];
                             } elseif ($uploadItemArr['site'] == 13) {
-                                $params['sku_info'] = implode(',', $uploadItemArr['skus']);
+                                $params['sku_info'] = $v['platform_sku'];
                                 $params['platform_type'] = 1;
-                                $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
-                                $third_res = json_decode($third_res, true);
+                                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                                $thirdRes = json_decode($thirdRes, true);
                             } elseif ($uploadItemArr['site'] == 14) {
-                                $params['sku_info'] = implode(',', $uploadItemArr['skus']);
+                                $params['sku_info'] = $v['platform_sku'];
                                 $params['platform_type'] = 2;
-                                $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
-                                $third_res = json_decode($third_res, true);
+                                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                                $thirdRes = json_decode($thirdRes, true);
                             } else {
-                                $soap_res = Soap::createProduct($uploadItemArr);
+                                $soapRes = Soap::createProduct($uploadItemArr);
                             }
-                            if ($soap_res || $third_res['code'] == 1) {
+                            if ($soapRes || $thirdRes['code'] == 1) {
                                 $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
                             } else {
                                 $error_num[] = $v['platform_type'];

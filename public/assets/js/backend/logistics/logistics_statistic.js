@@ -90,7 +90,19 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 });
 
             });
-
+            $(document).on('click','#export',function(){
+                var create_time = $('#workload_time').val();
+                var platform    = $('#order_platform_workload').val();
+                if (!create_time) {
+                    Toastr.error('请先选择时间范围');
+                    return false;
+                }
+                if (platform <= 0) {
+                    Toastr.error('请先选择站点');
+                    return false;
+                }
+                window.location.href=Config.moduleurl+'/logistics/logistics_statistic/export_not_shipped?create_time='+create_time+'&platform='+platform;
+            });
             //点击提交
             $(document).on('click','#workload-btn',function(){
                 var create_time = $('#workload_time').val();
