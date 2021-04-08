@@ -4074,7 +4074,6 @@ EOF;
         }
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
 
-print_r($arr);die;
         //根据平台sku转sku
         $notEnough = [];
         foreach (array_filter($arr) as $v) {
@@ -4082,6 +4081,7 @@ print_r($arr);die;
             $sku = trim($v['original_sku']);
             //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
             $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $v['platform_type']])->find();
+            print_r($res);
             //判断是否开启预售
             if ($res['stock'] >= 0 && $res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
                 $stock = $res['stock'] + $res['presell_residue_num'];
@@ -4090,7 +4090,7 @@ print_r($arr);die;
             } else {
                 $stock = $res['stock'];
             }
-
+            print_r($stock);die;
             //判断可用库存
             if ($stock < $v['original_number']) {
                 //判断没库存情况下 是否开启预售 并且预售时间是否满足 并且预售数量是否足够
