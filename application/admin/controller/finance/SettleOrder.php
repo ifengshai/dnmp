@@ -32,13 +32,13 @@ class SettleOrder extends Backend
             $map['status'] = ['in',[4,6]];
             if ($filter['supplier_name']) {
                  //供应商名称
-                $supply_id = Db::name('supplier')->where('supplier_name',$filter['supplier_name'])->value('id');
-                $map['supplier_id'] = $supply_id ? $supply_id : 0;
+                $supplyId = Db::name('supplier')->where('supplier_name',$filter['supplier_name'])->value('id');
+                $map['supplier_id'] = $supplyId ? $supplyId : 0;
             }
             if ($filter['purchase_person']) {
                 //采购负责人
-                $supply_id = Db::name('supplier')->where('purchase_person',$filter['purchase_person'])->value('id');
-                $map['supplier_id'] = $supply_id ? $supply_id : 0;
+                $supplyId = Db::name('supplier')->where('purchase_person',$filter['purchase_person'])->value('id');
+                $map['supplier_id'] = $supplyId ? $supplyId : 0;
             }
             unset($filter['supplier_name']);
             unset($filter['purchase_person']);
