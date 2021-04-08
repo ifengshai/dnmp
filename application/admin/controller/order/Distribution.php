@@ -2176,7 +2176,7 @@ class Distribution extends Backend
         //审单时间
         if ($filter['check_time']) {
             $check_time = explode(' - ', $filter['check_time']);
-            $map['c.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
+            $map['d.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
             unset($filter['check_time']);
         }
 
@@ -2295,16 +2295,18 @@ class Distribution extends Backend
         $map['d.is_split'] = 0;
         //非重新下单
         $map['d.is_repeat'] = 0;
-
         $count = $this->model
             ->alias('a')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.increment_id,
+            b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.grand_total,
+            b.order_type,b.base_currency_code,b.payment_time,b.payment_method,b.order_currency_code,d.check_time,a.distribution_status')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
             ->where($where)
             ->where($map)
             ->count();
-        for ($i = 0; $i < ceil($count / 1000); $i++) {
+        for ($i = 0; $i < ceil($count / 5000); $i++) {
             $list = $this->model
                 ->alias('a')
                 ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.increment_id,
@@ -2315,7 +2317,7 @@ class Distribution extends Backend
                 ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
                 ->where($where)
                 ->where($map)
-                ->page($i + 1, 1000)
+                ->page($i + 1, 5000)
                 ->order('a.created_at desc')
                 ->select();
             $list = collection($list)->toArray();
