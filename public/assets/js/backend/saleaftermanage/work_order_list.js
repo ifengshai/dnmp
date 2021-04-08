@@ -940,6 +940,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     }
                                     $('#c-region1').val(data.address.region);
                                     $('#c-city').val(data.address.city);
+                                    $('#c-area').val(data.address.area);
                                     $('#c-street').val(data.address.street);
                                     $('#c-postcode').val(data.address.postcode);
                                     $('#c-taxno').val(data.address.taxno);
@@ -963,6 +964,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('#c-region').val(address.region_id);
                                 $('#c-region1').val(address.region);
                                 $('#c-city').val(address.city);
+                                $('#c-area').val(address.area);
                                 $('#c-street').val(address.street);
                                 $('#c-postcode').val(address.postcode);
                                 $('#c-taxno').val(address.taxno);
@@ -1671,6 +1673,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         }
                                         $('#c-region1').val(data.address.region);
                                         $('#c-city').val(data.address.city);
+                                        $('#c-area').val(data.address.area);
                                         $('#c-street').val(data.address.street);
                                         $('#c-postcode').val(data.address.postcode);
                                         $('#c-taxno').val(data.address.taxno);
@@ -1698,6 +1701,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-region').val(address.region_id);
                                     $('#c-region1').val(address.region);
                                     $('#c-city').val(address.city);
+                                    $('#c-area').val(address.area);
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
                                     $('#c-taxno').val(address.taxno);
@@ -2443,6 +2447,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-region').val(real_address.region_id);
                                     $('#c-region1').val(real_address.region);
                                     $('#c-city').val(real_address.city);
+                                    $('#c-area').val(real_address.area);
                                     $('#c-street').val(real_address.street);
                                     $('#c-postcode').val(real_address.postcode);
                                     $('#c-taxno').val(real_address.taxno);
@@ -2470,6 +2475,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                             $('#c-region').val(data.address.region_id);
                                             $('#c-region1').val(data.address.region);
                                             $('#c-city').val(data.address.city);
+                                            $('#c-area').val(data.address.area);
                                             $('#c-street').val(data.address.street);
                                             $('#c-postcode').val(data.address.postcode);
                                             $('#c-taxno').val(data.address.taxno);
@@ -2494,6 +2500,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-region').val(address.region_id);
                                     $('#c-region1').val(address.region);
                                     $('#c-city').val(address.city);
+                                    $('#c-area').val(address.area);
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
                                     $('#c-taxno').val(address.taxno);
@@ -3186,6 +3193,7 @@ function changeOrderAddress(){
                     }
                     $('#c-region12').val(data.address.region);
                     $('#c-city1').val(data.address.city);
+                    $('#c-area1').val(data.address.area);
                     $('#c-street1').val(data.address.street);
                     $('#c-postcode1').val(data.address.postcode);
                     $('#c-taxno1').val(data.address.taxno);
@@ -3208,6 +3216,7 @@ function changeOrderAddress(){
                 $('#c-region12').val(address.region);
                 $('#c-region2').val(address.region_id);
                 $('#c-city1').val(address.city);
+                $('#c-area1').val(address.area)
                 $('#c-street1').val(address.street);
                 $('#c-postcode1').val(address.postcode);
                 $('#c-taxno1').val(address.taxno);
