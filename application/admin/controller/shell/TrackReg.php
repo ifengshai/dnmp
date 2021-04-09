@@ -27,28 +27,69 @@ class TrackReg extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
+    public function site_reg()
+    {
+        $this->reg_shipment('database.db_zeelool', 1);
+        $this->reg_shipment('database.db_voogueme', 2);
+        $this->reg_shipment('database.db_nihao', 3);
+        $this->reg_shipment('database.db_meeloog', 4);
+        $this->reg_shipment('database.db_zeelool_es', 9);
+        $this->reg_shipment('database.db_zeelool_de', 10);
+        $this->reg_shipment('database.db_zeelool_jp', 11);
+    }
 
     /**
      * 批量 注册物流
      * 每天跑一次，查找遗漏注册的物流单号，进行注册操作
      */
-    public function reg_shipment()
+    public function reg_shipment($site_str, $site_type)
     {
-        $order_shipment = $this->ordernode->where(['shipment_type' => 'TNT'])->select();
-        $shipment_reg = [];
+        $order_shipment = Db::connect($site_str)
+            ->table('sales_flat_shipment_track')->alias('a')
+            ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')
+            ->field('a.entity_id,a.order_id,a.track_number,a.title,a.updated_at,a.created_at,b.increment_id')
+            ->where('a.created_at', '>=', '2020-03-31 00:00:00')
+            ->where('a.handle', '=', '0')
+            ->group('a.order_id')
+            ->select();
         foreach ($order_shipment as $k => $v) {
-            $title = $v['shipment_type'];
+            $title = strtolower(str_replace(' ', '-', $v['title']));
+            //根据物流单号查询发货物流渠道
+            // $shipment_data_type = Db::connect('database.db_delivery')->table('ld_deliver_order')->where(['track_number' => $v['track_number'], 'increment_id' => $v['increment_id']])->value('agent_way_title');
+
             $carrier = $this->getCarrier($title);
             $shipment_reg[$k]['number'] = $v['track_number'];
             $shipment_reg[$k]['carrier'] = $carrier['carrierId'];
             $shipment_reg[$k]['order_id'] = $v['order_id'];
-            $shipment_reg[$k]['site'] = $v['site'];
-        }
 
+
+            // $list[$k]['order_node'] = 2;
+            // $list[$k]['node_type'] = 7; //出库
+            // $list[$k]['create_time'] = $v['created_at'];
+            // $list[$k]['site'] = $site_type;
+            // $list[$k]['order_id'] = $v['order_id'];
+            // $list[$k]['order_number'] = $v['increment_id'];
+            // $list[$k]['shipment_type'] = $v['title'];
+            // $list[$k]['shipment_data_type'] = $shipment_data_type;
+            // $list[$k]['track_number'] = $v['track_number'];
+            // $list[$k]['content'] = 'Leave warehouse, Waiting for being picked up.';
+
+            // $data['order_node'] = 2;
+            // $data['node_type'] = 7;
+            // $data['update_time'] = $v['created_at'];
+            // $data['shipment_type'] = $v['title'];
+            // $data['shipment_data_type'] = $shipment_data_type;
+            // $data['track_number'] = $v['track_number'];
+            // $data['delivery_time'] = $v['created_at'];
+            // Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $site_type])->update($data);
+        }
+        // if ($list) {
+        //     $this->ordernodedetail->saveAll($list);
+        // }
         if ($shipment_reg) {
             $order_group = array_chunk($shipment_reg, 40);
             $trackingConnector = new TrackingConnector($this->apiKey);
-            $order_ids = array();
+            $order_ids = [];
             foreach ($order_group as $key => $val) {
                 $aa = $trackingConnector->registerMulti($val);
 
@@ -3178,7 +3219,7 @@ class TrackReg extends Backend
 
 
 
-     /**
+    /**
      * 处理待入库数量 - 计划任务
      */
     public function process_wait_stock()
