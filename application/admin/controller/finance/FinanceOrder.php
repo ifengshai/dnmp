@@ -374,7 +374,6 @@ class FinanceOrder extends Backend
                 $i++;
                 Excel::writeCsv($params, $headList, $saveName, false);
             });
-        echo $this->finance_cost->getLastSql();die;
         //获取当前域名
         $request = Request::instance();
         $domain = $request->domain();
