@@ -89,7 +89,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         { field: 'wait_instock_num_before', title: __('待入库变动前'), operate: false },
                         { field: 'wait_instock_num_change', title: __('待入库变化量'), operate: false },
                         { field: 'create_person', title: __('创建人'), operate: false },
-                        { field: 'create_time', title: __('创建时间'), operate: false },
+                        {field: 'create_time', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
 
                     ]
                 ]
