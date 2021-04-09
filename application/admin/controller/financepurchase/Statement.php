@@ -533,6 +533,12 @@ class Statement extends Backend
                                     ->update(['actual_purchase_price'=>$actualPurchasePrice]);
                                 /**************************************计算采购成本end**********************************/
                                 /**************************************计算成本冲减start****************************************/
+                                $count = $this->instockItem
+                                    ->alias('i')
+                                    ->join('fa_in_stock s','i.in_stock_id=s.id')
+                                    ->join('fa_check_order c','s.check_id=c.id')
+                                    ->where('c.purchase_id',$vv['purchase_id'])
+                                    ->sum('i.in_stock_num');
                                 $purchaseOrder = $this->purchase_item
                                     ->alias('i')
                                     ->join('fa_purchase_order o','i.purchase_id=o.id')
@@ -560,7 +566,7 @@ class Statement extends Backend
                                     $result['purchase_id'] = $vv['purchase_id'];
                                     $result['create_time'] = time();
                                     //误差数量
-                                    $result['count'] = $outCount;
+                                    $result['count'] = $count-$outCount;
                                     //误差单价
                                     $result['price'] = round($purchaseOrder['actual_purchase_price']-$purchaseOrder['purchase_price'],2);
                                     //误差总金额
@@ -681,6 +687,12 @@ class Statement extends Backend
                                 ->update(['actual_purchase_price'=>$actualPurchasePrice]);
                             /**************************************计算采购成本end**********************************/
                             /**************************************计算成本冲减start****************************************/
+                            $count = $this->instockItem
+                                ->alias('i')
+                                ->join('fa_in_stock s','i.in_stock_id=s.id')
+                                ->join('fa_check_order c','s.check_id=c.id')
+                                ->where('c.purchase_id',$vv['purchase_id'])
+                                ->sum('i.in_stock_num');
                             //入库总数量
                             $purchaseOrder = $this->purchase_item
                                 ->alias('i')
@@ -709,7 +721,7 @@ class Statement extends Backend
                                 $result['purchase_id'] = $vv['purchase_id'];
                                 $result['create_time'] = time();
                                 //误差数量
-                                $result['count'] = $outCount;
+                                $result['count'] = $count-$outCount;
                                 //误差单价
                                 $result['price'] = round($purchaseOrder['actual_purchase_price']-$purchaseOrder['purchase_price'],2);
                                 //误差总金额
