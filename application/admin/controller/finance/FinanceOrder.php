@@ -307,7 +307,7 @@ class FinanceOrder extends Backend
             ->where(['a.bill_type' => ['neq', 11]])
             ->where($map)
             ->alias('a')
-            ->join(['logistics_delivery.ld_delivery_order_finance'=>'b'],'b.increment_id=a.order_number')
+            ->join(['logistics_delivery.ld_delivery_order_finance'=>'b'],'b.increment_id=a.order_number','left')
             ->group('a.order_number')
             ->count();
         $page = ceil($allCount / 15000);
@@ -319,7 +319,7 @@ class FinanceOrder extends Backend
                 ->where(['a.bill_type' => ['neq', 11]])
                 ->where($map)
                 ->alias('a')
-                ->join(['logistics_delivery.ld_delivery_order_finance'=>'b'],'b.increment_id=a.order_number')
+                ->join(['logistics_delivery.ld_delivery_order_finance'=>'b'],'b.increment_id=a.order_number','left')
                 ->group('a.order_number')
                 ->select();
             $list = collection($list)->toArray();
