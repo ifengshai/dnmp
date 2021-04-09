@@ -24,12 +24,13 @@ class RepurchaseAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getUserRepurchase(1);  //zeelool复购数据
+        /*$this->getUserRepurchase(1);  //zeelool复购数据
         $this->getUserRepurchase(2);  //voogueme复购数据
         $this->getUserRepurchase(3);  //nihao复购数据
-        /*$this->getOldNewUser(1);  //zeelool新老用户数据
+        $this->getOldNewUser(1);  //zeelool新老用户数据
         $this->getOldNewUser(2);  //voogueme新老用户数据
         $this->getOldNewUser(3);  //nihao新老用户数据*/
+        $this->getOldNewUserUpdate();  //更新环比数据
         $output->writeln("All is ok");
     }
 
@@ -256,7 +257,7 @@ class RepurchaseAsynData extends Command
      * @date   2021/4/1 11:22:13
      */
     protected function getOldNewUser($site){
-        $allMonth = $this->getDateFromRange('2020-12-01','2021-03-01');
+        $allMonth = $this->getDateFromRange('2018-12-01', '2021-03-01');
         $where['site'] = $site;
         $where['order_type'] = 1;
         $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
@@ -318,13 +319,13 @@ class RepurchaseAsynData extends Command
                 'old_usernum_sequential'=>$oldSequential,
                 'new_usernum_sequential'=>$newSequential,
             );
-            if($isExist){
+            if ($isExist) {
                 Db::name('datacenter_supply_month_web')
-                    ->where('id',$isExist)
+                    ->where('id', $isExist)
                     ->update($arr);
                 echo '站点：'.$site.' '.$v." update is ok"."\n";
                 usleep(10000);
-            }else{
+            } else {
                 $arr['day_date'] = $v;
                 $arr['site'] = $site;
                 Db::name('datacenter_supply_month_web')
@@ -332,6 +333,44 @@ class RepurchaseAsynData extends Command
                 echo '站点：'.$site.' '.$v." is ok"."\n";
                 usleep(10000);
             }
+        }
+    }
+
+    /**
+     * 更新用户新老数据
+     *
+     * @param $site
+     *
+     * @author mjj
+     * @date   2021/4/1 11:22:13
+     */
+    protected function getOldNewUserUpdate()
+    {
+        $list = Db::name('datacenter_supply_month_web')->order('id asc')->select();
+        foreach ($list as $v) {
+            //获取上个月的用户信息
+            $lastMonth = date("Y-m", strtotime("first day of -1 month", strtotime($v['day_date'])));
+            $lastData = Db::name('datacenter_supply_month_web')
+                ->where('day_date', $lastMonth)
+                ->where('site', $v['site'])
+                ->find();
+            //老客户环比变动
+            $oldSequential = $lastData['old_usernum'] ? round(($v['old_usernum'] / $lastData['old_usernum'] - 1) * 100,
+                2) : 0;
+            //新用户环比变动
+            $newUserCount = $v['usernum'] - $v['old_usernum'];
+            $lastMonthNewUser = $lastData['usernum'] - $lastData['old_usernum'];
+            $newSequential = $lastMonthNewUser ? round(($newUserCount / $lastMonthNewUser - 1) * 100, 2) : 0;
+            //判断是否有当月数据
+            $arr = [
+                'old_usernum_sequential' => $oldSequential,
+                'new_usernum_sequential' => $newSequential,
+            ];
+            Db::name('datacenter_supply_month_web')
+                ->where('id', $v['id'])
+                ->update($arr);
+            echo $v['id'].'站点：'.$v['site'].' '.$v['day_date']." update is ok"."\n";
+            usleep(10000);
         }
     }
 }
