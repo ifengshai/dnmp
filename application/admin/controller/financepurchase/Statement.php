@@ -703,7 +703,7 @@ class Statement extends Backend
                             if($purchaseOrder['purchase_price'] != $purchaseOrder['actual_purchase_price']){
                                 //计算订单出库数量
                                 $outCount1 = $this->item
-                                    ->where('purchase_id', $v)
+                                    ->where('purchase_id', $vv['purchase_id'])
                                     ->where('item_order_number', '<>', '')
                                     ->where('sku', $purchaseOrder['sku'])
                                     ->where('library_status', 2)
@@ -712,7 +712,7 @@ class Statement extends Backend
                                 $outCount2 = $this->outstockItem
                                     ->alias('i')
                                     ->join('fa_out_stock s', 's.id=i.out_stock_id', 'left')
-                                    ->where('s.purchase_id', $v)
+                                    ->where('s.purchase_id', $vv['purchase_id'])
                                     ->where('status', 2)
                                     ->where('i.sku', $purchaseOrder['sku'])
                                     ->sum('out_stock_num');
