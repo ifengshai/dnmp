@@ -465,6 +465,7 @@ class Distribution extends Backend
                             ->where('distribution_node', 4)->value('create_time');
                         }
                 }
+
                 //待合单
                 if ($label == 7) {
                     if ($item['order_prescription_type'] == 1) {
