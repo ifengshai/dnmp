@@ -100,10 +100,11 @@ class Item extends Backend
                 }
                 $list[$k]['brand_id'] = $brandArr[$v['brand_id']];
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -139,10 +140,11 @@ class Item extends Backend
                 }
                 $list[$k]['brand_id'] = $brandArr[$v['brand_id']];
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -360,6 +362,7 @@ class Item extends Backend
 
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
         return $this->view->fetch();
     }
 
@@ -577,6 +580,7 @@ class Item extends Backend
 
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
         return $this->view->fetch();
     }
 
@@ -756,6 +760,7 @@ class Item extends Backend
 
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
 
@@ -818,6 +823,7 @@ class Item extends Backend
             } else {
                 $data = $this->fetch('attribute');
             }
+
             return $this->success('ok', '', $data);
         } else {
             return $this->error(__('404 Not Found'));
@@ -834,6 +840,7 @@ class Item extends Backend
             if (!$data) {
                 return $this->error('现在没有采购城市,请去添加', '', 'error', 0);
             }
+
             return $this->success('', '', $data, 0);
         } else {
             return $this->error(__('404 Not Found'));
@@ -851,6 +858,7 @@ class Item extends Backend
             if (!$result) {
                 return $this->error('商品SKU不存在，请重新尝试');
             }
+
             return $this->success('', '', $result, 0);
         } else {
             $this->error('404 not found');
@@ -887,6 +895,7 @@ class Item extends Backend
             } else {
                 $data = $this->fetch('attribute');
             }
+
             return $this->success('ok', '', $row);
         } else {
             return $this->error(__('404 Not Found'));
@@ -1001,7 +1010,7 @@ class Item extends Backend
             }
 
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
@@ -1018,6 +1027,7 @@ class Item extends Backend
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
         $this->assign('magentoplatformarr', $magentoplatformarr);
+
         return $this->view->fetch();
     }
 
@@ -1219,6 +1229,7 @@ class Item extends Backend
 
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
 
@@ -1246,6 +1257,7 @@ class Item extends Backend
             }
         }
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
 
@@ -1259,6 +1271,7 @@ class Item extends Backend
             if (!$json) {
                 $json = [0 => '请添加商品分类'];
             }
+
             return json($json);
         } else {
             $this->error('404 Not found');
@@ -1275,6 +1288,7 @@ class Item extends Backend
             if (!$json) {
                 $json = [0 => '请添加商品分类'];
             }
+
             return json($json);
         } else {
             $this->error('404 Not found');
@@ -1332,8 +1346,8 @@ class Item extends Backend
                     throw new Exception('审核失败！！');
                 }
                 //查询同步的平台
-                $platformArr = $platform->where(['sku' => $row['sku']])->where('platform_type','<>',4)->select();
-                $error_num = [];
+                $platformArr = $platform->where(['sku' => $row['sku']])->where('platform_type', '<>', 4)->select();
+                $errorNum = [];
                 $uploadItemArr = [];
                 foreach ($platformArr as $k => $v) {
                     $itemAttribute = new ItemAttribute();
@@ -1375,28 +1389,28 @@ class Item extends Backend
                     //审核通过把SKU同步到有映射关系的平台
                     if ($v['platform_type'] == 12) {
                         $uploadItemArr['skus'][0] = [
-                            'sku' => $v['platform_sku'],
-                            'type' => $row['category_id'] == 53 ? 1 : 2
+                            'sku'  => $v['platform_sku'],
+                            'type' => $row['category_id'] == 53 ? 1 : 2,
                         ];
                         $uploadItemArr['sku'] = $v['platform_sku'];
                         $uploadItemArr['site'] = $v['platform_type'];
                     } elseif ($uploadItemArr['site'] == 13) {
-                        $params['sku_info'] = implode(',', $uploadItemArr['skus']);
+                        $params['sku_info'] = $v['platform_sku'];
                         $params['platform_type'] = 1;
-                        $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
-                        $third_res = json_decode($third_res, true);
+                        $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                        $thirdRes = json_decode($thirdRes, true);
                     } elseif ($uploadItemArr['site'] == 14) {
-                        $params['sku_info'] = implode(',', $uploadItemArr['skus']);
+                        $params['sku_info'] = $v['platform_sku'];
                         $params['platform_type'] = 2;
-                        $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
-                        $third_res = json_decode($third_res, true);
+                        $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                        $thirdRes = json_decode($thirdRes, true);
                     } else {
-                        $soap_res = Soap::createProduct($uploadItemArr);
+                        $soapRes = Soap::createProduct($uploadItemArr);
                     }
-                    if ($soap_res || $third_res['code'] == 1) {
+                    if ($soapRes || $thirdRes['code'] == 1) {
                         $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
                     } else {
-                        $error_num[] = $v['platform_type'];
+                        $errorNum[] = $v['platform_type'];
                     }
                 }
                 Db::commit();
@@ -1536,22 +1550,21 @@ class Item extends Backend
             $data['check_time'] = date("Y-m-d H:i:s", time());
             //查询同步的平台
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res !== false) {
+
                 Db::startTrans();
                 $this->model->startTrans();
                 $platform->startTrans();
                 try {
+                    $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
                     foreach ($row as $val) {
-                        // $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
-                        $platformArr = $platform->where(['sku' => $val['sku']])->where('platform_type','<>',4)->select();
+                        $platformArr = $platform->where(['sku' => $val['sku']])->where('platform_type', '<>', 4)->select();
                         $uploadItemArr = [];
                         foreach ($platformArr as $k => $v) {
                             $itemAttribute = new ItemAttribute();
                             $itemAttributeDetail = $itemAttribute->where('item_id', $val['id'])->find();
                             if ($row['category_id'] == 35) {
                                 $attributeType = 4;//耳饰
-                            } elseif ($row['category_id'] == 39|| $row['category_id'] == 34) {
+                            } elseif ($row['category_id'] == 39 || $row['category_id'] == 34) {
                                 $attributeType = 5;//项链/手链
                             } elseif ($row['category_id'] == 38) {
                                 $attributeType = 6;//眼镜链
@@ -1586,28 +1599,28 @@ class Item extends Backend
                             //审核通过把SKU同步到有映射关系的平台
                             if ($v['platform_type'] == 12) {
                                 $uploadItemArr['skus'][0] = [
-                                    'sku' => $v['platform_sku'],
-                                    'type' => $row['category_id'] == 53 ? 1 : 2
+                                    'sku'  => $v['platform_sku'],
+                                    'type' => $row['category_id'] == 53 ? 1 : 2,
                                 ];
                                 $uploadItemArr['sku'] = $v['platform_sku'];
                                 $uploadItemArr['site'] = $v['platform_type'];
                             } elseif ($uploadItemArr['site'] == 13) {
-                                $params['sku_info'] = implode(',', $uploadItemArr['skus']);
+                                $params['sku_info'] = $v['platform_sku'];
                                 $params['platform_type'] = 1;
-                                $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
-                                $third_res = json_decode($third_res, true);
+                                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                                $thirdRes = json_decode($thirdRes, true);
                             } elseif ($uploadItemArr['site'] == 14) {
-                                $params['sku_info'] = implode(',', $uploadItemArr['skus']);
+                                $params['sku_info'] = $v['platform_sku'];
                                 $params['platform_type'] = 2;
-                                $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
-                                $third_res = json_decode($third_res, true);
+                                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                                $thirdRes = json_decode($thirdRes, true);
                             } else {
-                                $soap_res = Soap::createProduct($uploadItemArr);
+                                $soapRes = Soap::createProduct($uploadItemArr);
                             }
-                            if ($soap_res || $third_res['code'] == 1) {
-                                $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+                            if ($soapRes || $thirdRes['code'] == 1) {
+                                $platform->where(['sku' => $val['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
                             } else {
-                                $error_num[] = $v['platform_type'];
+                                $errorNum[] = $v['platform_type'];
                             }
                         }
                     }
@@ -1631,9 +1644,6 @@ class Item extends Backend
                     $this->error($e->getMessage());
                 }
                 $this->success('审核成功');
-            } else {
-                $this->error('审核失败');
-            }
         } else {
             $this->error('404 Not found');
         }
@@ -1758,6 +1768,7 @@ class Item extends Backend
             if ($result['available_stock'] < $change_number) {
                 return $this->error('镜架可用数量大于可用库存数量,无法更改镜架');
             }
+
             return $this->success();
         } else {
             $this->error('404 Not found');
@@ -2185,10 +2196,11 @@ class Item extends Backend
                 }
                 $list[$k]['brand_id'] = $brandArr[$v['brand_id']];
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -2262,6 +2274,7 @@ class Item extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
         return $this->view->fetch();
     }
 
@@ -2394,6 +2407,7 @@ class Item extends Backend
             }
         } else {
             $this->view->assign('row', $row);
+
             return $this->view->fetch();
         }
     }
@@ -2412,6 +2426,7 @@ class Item extends Backend
         if ($result) {
             $this->view->assign('result', $result);
         }
+
         return $this->view->fetch();
     }
 
@@ -2516,7 +2531,7 @@ class Item extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
