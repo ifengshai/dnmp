@@ -1959,7 +1959,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
 
-                $('#order_item_numbers').val(order_item_numbers);
                 //删除一行镜片数据
                 $(document).on('click', '.btn-del-lens', function () {
                     $(this).parent().parent().remove();
