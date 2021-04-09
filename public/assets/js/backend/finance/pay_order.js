@@ -79,6 +79,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                                 extend: 'data-area = \'["50%","40%"]\'',
                                 // confirm: '确定要付款吗',       
                                 callback: function (data) {
+                                    layer.load();
                                 },
                                 visible: function (row) {
                                     if (row.status == 3) {
