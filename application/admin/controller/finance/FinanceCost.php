@@ -150,6 +150,7 @@ class FinanceCost extends Backend
 
         }
 
+        
         //站点列表
         $siteList = [
             1 => 'Zeelool',
@@ -208,7 +209,14 @@ class FinanceCost extends Backend
 
             5 => '补差价',
 
+            6 => '一件代发',
+
             9 => 'vip订单',
+
+            10 => '货到付款',
+
+            11 => '便利店支付',
+
         ];
 
         $path = '/uploads/financeCost/';

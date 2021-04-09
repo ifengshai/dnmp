@@ -25,8 +25,8 @@ class FinanceCost extends Model
      * @Description
      * @author gyh
      * @param $order_id 订单id
-              $bill_type 单据类型(对应不同业务节点)
-              $action_type 动作类型：1增加；2冲减；默认1增加
+     * $bill_type 单据类型(对应不同业务节点)
+     * $action_type 动作类型：1增加；2冲减；默认1增加
      * @since 2021/01/14 19:42:14 
      * @return void
      */
@@ -78,12 +78,12 @@ class FinanceCost extends Model
     {
         $work_order_list = new \app\admin\model\saleaftermanage\WorkOrderList();
         $change_sku = $work_order_list //查询补价，退件，退款的工单
-            ->alias('a')
+        ->alias('a')
             ->join(['fa_work_order_measure' => 'b'], 'a.id=b.work_id')
             ->where([
-                'a.platform_order' => $order_detail['increment_id'],
-                'b.measure_choose_id' => ['in', [2,11,8]],
-                'b.operation_type' => 1
+                'a.platform_order'    => $order_detail['increment_id'],
+                'b.measure_choose_id' => ['in', [2, 11, 8]],
+                'b.operation_type'    => 1,
             ])
             ->select();
         $change_sku = collection($change_sku)->toArray();
@@ -93,9 +93,9 @@ class FinanceCost extends Model
                 switch ($value['measure_choose_id']) {
                     case 2: //退款措施
                         //if ($value['refund_money'] < $order_detail['base_grand_total']) { //判断是否是部分退款
-                            $bill_type = 6; //部分退款
-                            $action_type = 2; //冲减
-                            $income_amount = $value['refund_money']; //收入金额(退款金额)
+                        $bill_type = 6; //部分退款
+                        $action_type = 2; //冲减
+                        $income_amount = $value['refund_money']; //收入金额(退款金额)
                         /*} else if ($value['refund_money'] == $order_detail['base_grand_total']) {
                             $bill_type = 4; //退货退款
                             $action_type = 2; //冲减
@@ -116,11 +116,11 @@ class FinanceCost extends Model
                         break;
                 }
                 if ($bill_type == 3) {
-                    $finance_cost = $this->where(['bill_type'=>$bill_type,'action_type'=>$action_type,'order_number'=>$order_detail['increment_id'],'income_amount'=>$income_amount])->find();
-                }else{
+                    $finance_cost = $this->where(['bill_type' => $bill_type, 'action_type' => $action_type, 'order_number' => $order_detail['increment_id'], 'income_amount' => $income_amount])->find();
+                } else {
                     $finance_cost = [];
                 }
-                
+
                 if (!empty($bill_type) && empty($finance_cost)) { //有工单单据需要核算-增加核算数据
                     $params['type'] = 1;
                     $params['bill_type'] = $bill_type; //单据类型
@@ -205,7 +205,7 @@ class FinanceCost extends Model
      * @author gyh
      * @param $work_id 订单id
      */
-    public function return_order_subtract($work_id = null,$bill_type)
+    public function return_order_subtract($work_id = null, $bill_type)
     {
         $WorkOrderList = new \app\admin\model\saleaftermanage\WorkOrderList;
         $work_order_info = $WorkOrderList->get($work_id); //获取工单信息
@@ -232,7 +232,7 @@ class FinanceCost extends Model
         $params['action_type'] = $action_type; //动作类型：1增加；2冲减；
         $params['work_id'] = $work_id; //工单id
         $params['createtime'] = time();
-        $finance_cost = $this->where(['bill_type'=>$bill_type,'action_type'=>$action_type,'order_number'=>$order_detail['increment_id'],'income_amount'=>$income_amount])->find();
+        $finance_cost = $this->where(['bill_type' => $bill_type, 'action_type' => $action_type, 'order_number' => $order_detail['increment_id'], 'income_amount' => $income_amount])->find();
         //补差价审单没完成不写入收入核算，审单的时候写入
         $flag = 1;
         if ($bill_type == 3) {
@@ -300,8 +300,10 @@ class FinanceCost extends Model
      * @Description
      * @author wpl
      * @since 2021/01/19 18:20:45 
+     *
      * @param [type] $order_id     订单id
      * @param [type] $order_number 订单号
+     *
      * @return void
      */
     protected function order_frame_cost($order_id = null, $order_number = null)
@@ -323,7 +325,7 @@ class FinanceCost extends Model
         if ($goods_number) {
             //计算成本
             $workdata = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price,c.purchase_total,purchase_num')
-                ->where(['code' => ['in', $goods_number]])
+                ->where(['code' => ['in', $goods_number], 'is_loss_report_out' => 0])
                 ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
                 ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
                 ->select();
@@ -334,7 +336,7 @@ class FinanceCost extends Model
 
         //根据子单号查询条形码绑定关系
         $list = $product_barcode_item->alias('a')->field('a.purchase_id,purchase_price,actual_purchase_price,c.purchase_total,purchase_num,c.purchase_freight')
-            ->where(['item_order_number' => ['in', $item_order_number]])
+            ->where(['item_order_number' => ['in', $item_order_number], 'is_loss_report_out' => 0])
             ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
             ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
             ->select();
@@ -348,9 +350,10 @@ class FinanceCost extends Model
             } else {
                 $purchase_price = $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_price'];
             }
-            
+
             $allcost += $purchase_price;
         }
+
         return $allcost + $workcost;
     }
 
@@ -388,50 +391,50 @@ class FinanceCost extends Model
                     $od_temp_cost = 0;
                     $os_temp_cost = 0;
                     //判断子单右眼是否已判断
-                    if (!in_array('od' . '-' . $val['lens_number'], $data)) {
+                    if (!in_array('od'.'-'.$val['lens_number'], $data)) {
                         if ($v['od_cyl'] == '-0.25') {
                             //右眼
-                            if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] == (float)$val['cyl_end'] && (float)$v['od_cyl'] == (float)$val['cyl_end'])) {
                                 $work_cost += $val['price'];
                                 $od_temp_cost += $val['price'];
-                            } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                            } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
                                 $work_cost += $val['price'];
                                 $od_temp_cost += $val['price'];
                             }
                         } else {
                             //右眼
-                            if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
                                 $work_cost += $val['price'];
                                 $od_temp_cost += $val['price'];
                             }
                         }
                         if ($od_temp_cost > 0) {
-                            $data[] = 'od' . '-' . $v['lens_number'];
+                            $data[] = 'od'.'-'.$v['lens_number'];
                         }
                     }
 
                     //判断子单左眼是否已判断
-                    if (!in_array('os' . '-' . $val['lens_number'], $data)) {
+                    if (!in_array('os'.'-'.$val['lens_number'], $data)) {
 
                         if ($v['os_cyl'] == '-0.25') {
                             //左眼
-                            if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_end'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] == (float)$val['cyl_end'] && (float)$v['os_cyl'] == (float)$val['cyl_end'])) {
                                 $work_cost += $val['price'];
                                 $os_temp_cost += $val['price'];
-                            } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                            } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
                                 $work_cost += $val['price'];
                                 $os_temp_cost += $val['price'];
                             }
                         } else {
                             //左眼
-                            if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
                                 $work_cost += $val['price'];
                                 $os_temp_cost += $val['price'];
                             }
                         }
 
                         if ($os_temp_cost > 0) {
-                            $data[] = 'os' . '-' . $v['lens_number'];
+                            $data[] = 'os'.'-'.$v['lens_number'];
                         }
                     }
                 }
@@ -459,50 +462,50 @@ class FinanceCost extends Model
                 $od_temp_cost = 0;
                 $os_temp_cost = 0;
                 //判断子单右眼是否已判断
-                if (!in_array('od' . '-' . $val['lens_number'], $data)) {
+                if (!in_array('od'.'-'.$val['lens_number'], $data)) {
                     if ($v['od_cyl'] == '-0.25') {
                         //右眼
-                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] == (float) $val['cyl_end'] && (float) $v['od_cyl'] == (float) $val['cyl_end'])) {
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] == (float)$val['cyl_end'] && (float)$v['od_cyl'] == (float)$val['cyl_end'])) {
                             $cost += $val['price'];
                             $od_temp_cost += $val['price'];
-                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
                             $cost += $val['price'];
                             $od_temp_cost += $val['price'];
                         }
                     } else {
                         //右眼
-                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['od_sph'] >= (float) $val['sph_start'] && (float) $v['od_sph'] <= (float) $val['sph_end']) && ((float) $v['od_cyl'] >= (float) $val['cyl_start'] && (float) $v['od_cyl'] <= (float) $val['cyl_end'])) {
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
                             $cost += $val['price'];
                             $od_temp_cost += $val['price'];
                         }
                     }
                     if ($od_temp_cost > 0) {
-                        $data[] = 'od' . '-' . $v['lens_number'];
+                        $data[] = 'od'.'-'.$v['lens_number'];
                     }
                 }
 
                 //判断子单左眼是否已判断
-                if (!in_array('os' . '-' . $val['lens_number'], $data)) {
+                if (!in_array('os'.'-'.$val['lens_number'], $data)) {
 
                     if ($v['os_cyl'] == '-0.25') {
                         //左眼
-                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] == (float) $val['cyl_end'] && (float) $v['os_cyl'] == (float) $val['cyl_end'])) {
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] == (float)$val['cyl_end'] && (float)$v['os_cyl'] == (float)$val['cyl_end'])) {
                             $cost += $val['price'];
                             $os_temp_cost += $val['price'];
-                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
                             $cost += $val['price'];
                             $os_temp_cost += $val['price'];
                         }
                     } else {
                         //左眼
-                        if ($v['lens_number'] == $val['lens_number'] && ((float) $v['os_sph'] >= (float) $val['sph_start'] && (float) $v['os_sph'] <= (float) $val['sph_end']) && ((float) $v['os_cyl'] >= (float) $val['cyl_start'] && (float) $v['os_cyl'] <= (float) $val['cyl_end'])) {
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
                             $cost += $val['price'];
                             $os_temp_cost += $val['price'];
                         }
                     }
 
                     if ($os_temp_cost > 0) {
-                        $data[] = 'os' . '-' . $v['lens_number'];
+                        $data[] = 'os'.'-'.$v['lens_number'];
                     }
                 }
             }
@@ -529,6 +532,7 @@ class FinanceCost extends Model
         $params['action_type'] = 1;
         $params['order_currency_code'] = 'cny';
         $params['createtime'] = time();
+
         return $this->allowField(true)->save($params);
     }
 
@@ -538,8 +542,10 @@ class FinanceCost extends Model
      * @Description
      * @author wpl
      * @since 2021/01/19 18:20:45 
+     *
      * @param [type] $order_id     订单id
      * @param [type] $order_number 订单号
+     *
      * @return void
      */
     protected function outstock_frame_cost($out_stock_id = null)
@@ -560,6 +566,7 @@ class FinanceCost extends Model
                 $allcost += $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_price'];
             }
         }
+
         return $allcost;
     }
 }

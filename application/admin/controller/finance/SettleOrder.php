@@ -29,16 +29,16 @@ class SettleOrder extends Backend
             }
             $filter = json_decode($this->request->get('filter'), true);
             $map['wait_statement_total'] = ['<', 0];
-            $map['status'] = 4;
+            $map['status'] = ['in',[4,6]];
             if ($filter['supplier_name']) {
                  //供应商名称
-                $supply_id = Db::name('supplier')->where('supplier_name',$filter['supplier_name'])->value('id');
-                $map['supplier_id'] = $supply_id ? $supply_id : 0;
+                $supplyId = Db::name('supplier')->where('supplier_name',$filter['supplier_name'])->value('id');
+                $map['supplier_id'] = $supplyId ? $supplyId : 0;
             }
             if ($filter['purchase_person']) {
                 //采购负责人
-                $supply_id = Db::name('supplier')->where('purchase_person',$filter['purchase_person'])->value('id');
-                $map['supplier_id'] = $supply_id ? $supply_id : 0;
+                $supplyId = Db::name('supplier')->where('purchase_person',$filter['purchase_person'])->value('id');
+                $map['supplier_id'] = $supplyId ? $supplyId : 0;
             }
             unset($filter['supplier_name']);
             unset($filter['purchase_person']);
@@ -94,6 +94,12 @@ class SettleOrder extends Backend
             $this->error('缺少参数！！');
         }
         $map['id'] = ['in', $ids];
+        $financeStatement = $this->statement->where($map)->select();
+        foreach ($financeStatement as $k=>$v){
+            if ($v['status'] != 4){
+                $this->error($v['statement_number'].'已确认！！请勿重复操作');
+            }
+        }
         $row = $this->statement->where($map)->update(['status'=>6]);
         if ($row !== false) {
             $this->success('操作成功！！');

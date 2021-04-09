@@ -1046,7 +1046,7 @@ class WorkOrderList extends Backend
                 }
 
                 $platform_order = trim($params['platform_order']);//订单号
-                $measure_choose_id = $params['measure_choose_id'] ? array_unique(array_filter($params['measure_choose_id'])) : [];//措施ID数组
+                $measureChooseId = $params['measure_choose_id'] ? array_unique(array_filter($params['measure_choose_id'])) : [];//措施ID数组
                 $work_type = $params['work_type'];//工单类型：1客服 2仓库
                 $item_order_info = $params['item_order_info'];//子订单措施
                 $order_sku = $params['order_sku'] ? implode(',', $params['order_sku']) : '';//sku列表
@@ -1090,11 +1090,17 @@ class WorkOrderList extends Backend
                         1 == $check_status
                         &&
                         (
-                            in_array(3, $measure_choose_id)
+                            in_array(3, $measureChooseId)
                             ||
                             $flag
                         )
                         && $this->error("已审单，不能创建工单");
+                    }else{
+                        (
+                            in_array(3, $measureChooseId)
+                            ||
+                            $flag
+                        ) && $this->error("不能创建子单工单");
                     }
 
                     //指定问题类型校验sku下拉框是否勾选
@@ -1108,7 +1114,7 @@ class WorkOrderList extends Backend
                         !empty($is_warehouse) && $this->error("当前账号不能创建客服工单");
 
                         //校验工单措施
-                        empty($measure_choose_id) && empty($item_order_info) && $this->error("请选择实施措施");
+                        empty($measureChooseId) && empty($item_order_info) && $this->error("请选择实施措施");
 
                         $params['problem_type_content'] = $workOrderConfigValue['customer_problem_type'][$params['problem_type_id']];
                     } else {
@@ -1122,7 +1128,7 @@ class WorkOrderList extends Backend
                     }
                 } else {
                     //校验工单措施
-                    empty($measure_choose_id) && empty($item_order_info) && $this->error("请选择实施措施");
+                    empty($measureChooseId) && empty($item_order_info) && $this->error("请选择实施措施");
 
                     //工单是否存在
                     $row = $this->model->get($ids);
@@ -1136,7 +1142,7 @@ class WorkOrderList extends Backend
                 $all_choose_ids = [];
 
                 //检测主订单措施
-                if (!empty($measure_choose_id)) {
+                if (!empty($measureChooseId)) {
                     /**
                      * 审核判断条件
                      * 1、退款金额大于30 经理审核
@@ -1147,7 +1153,7 @@ class WorkOrderList extends Backend
                      */
 
                     //主单取消
-                    if (in_array(3, $measure_choose_id)) {
+                    if (in_array(3, $measureChooseId)) {
                         $_new_order = new NewOrder();
                         $order_id = $_new_order
                             ->where('increment_id', $params['platform_order'])
@@ -1181,10 +1187,10 @@ class WorkOrderList extends Backend
                     }
 
 
-                    $all_choose_ids = $measure_choose_id;
+                    $all_choose_ids = $measureChooseId;
 
                     //校验退款、vip退款
-                    if (array_intersect([2, 15], $measure_choose_id)) {
+                    if (array_intersect([2, 15], $measureChooseId)) {
                         !$params['refund_money'] && $this->error("退款金额不能为空");
                         $params['is_refund'] = 1;
                     } else {
@@ -1192,12 +1198,12 @@ class WorkOrderList extends Backend
                     }
 
                     //校验赠品、补发库存
-                    if (array_intersect([6, 7], $measure_choose_id)) {
+                    if (array_intersect([6, 7], $measureChooseId)) {
                         $original_sku = [];
 
 
                         //赠品
-                        if (in_array(6, $measure_choose_id)) {
+                        if (in_array(6, $measureChooseId)) {
                             $gift_sku = $params['gift']['original_sku'];
                             !$gift_sku && $this->error("赠品sku不能为空");
 
@@ -1218,7 +1224,7 @@ class WorkOrderList extends Backend
                         }
 
                         //补发
-                        if (in_array(7, $measure_choose_id)) {
+                        if (in_array(7, $measureChooseId)) {
                             !$params['address']['shipping_type'] && $this->error("请选择Shipping Method");
 
                             $replacement_sku = $params['replacement']['original_sku'];
@@ -1248,14 +1254,14 @@ class WorkOrderList extends Backend
                     }
 
                     //校验补价措施
-                    if (in_array(8, $measure_choose_id)) {
+                    if (in_array(8, $measureChooseId)) {
                         !$params['replenish_money'] && $this->error("补差价金额不能为空");
                     } else {
                         unset($params['replenish_money']);
                     }
 
                     //校验优惠券措施
-                    if (in_array(9, $measure_choose_id)) {
+                    if (in_array(9, $measureChooseId)) {
                         !$params['coupon_id'] && !$params['need_coupon_id'] && $this->error("请选择优惠券");
 
                         //不需要审核的优惠券
@@ -1286,7 +1292,7 @@ class WorkOrderList extends Backend
                     }
 
                     //判断是否选择积分措施
-                    if (in_array(10, $measure_choose_id)) {
+                    if (in_array(10, $measureChooseId)) {
                         (!$params['integral'] || !is_numeric($params['integral']))
                         && $this->error("积分必须是数字");
                     } else {
@@ -1294,7 +1300,7 @@ class WorkOrderList extends Backend
                     }
 
                     //判断是否选择退件措施
-                    if (in_array(11, $measure_choose_id)) {
+                    if (in_array(11, $measureChooseId)) {
                         !$params['refund_logistics_num'] && $this->error("退回物流单号不能为空");
                     } else {
                         unset($params['refund_logistics_num']);
@@ -1540,9 +1546,9 @@ class WorkOrderList extends Backend
                     }
 
                     //仓库工单判断未处理异常，有则绑定异常
-                    if ($params['order_item_numbers'] || in_array(3, $measure_choose_id)) {
+                    if ($params['order_item_numbers'] || in_array(3, $measureChooseId)) {
                         //主单取消：绑定该订单下所有子单异常
-                        if (in_array(3, $measure_choose_id)) {
+                        if (in_array(3, $measureChooseId)) {
                             $item_process_where['b.increment_id'] = $platform_order;
                             $type = 16;
                         } else {
@@ -1626,8 +1632,8 @@ class WorkOrderList extends Backend
                     }
 
                     //创建主订单措施、承接人数据
-                    if (!empty($measure_choose_id)) {
-                        foreach ($measure_choose_id as $v) {
+                    if (!empty($measureChooseId)) {
+                        foreach ($measureChooseId as $v) {
                             //根据措施读取承接组、承接人 默认是客服问题组配置,是否审核之后自动完成
                             $appoint_ids = $params['order_recept']['appoint_ids'][$v];
                             $appoint_users = $params['order_recept']['appoint_users'][$v];
