@@ -300,84 +300,92 @@ class FinanceOrder extends Backend
         //查询物流成本
         $model = Db::connect('database.db_delivery');
         [$where] = $this->buildparams();
-        $i = 0;
         $saveName = '/uploads/财务订单报表' . date('YmdHis');
-        $this->finance_cost->field('sum(if ((action_type=1 and type=2),frame_cost,0)) as frame_cost_z,sum(if ((action_type=1 and type=2),lens_cost,0)) as lens_cost_z,sum(if ((action_type=2 and type=2),frame_cost,0)) as frame_cost_j,sum(if ((action_type=2 and type=2),lens_cost,0)) as lens_cost_j,sum(if ((action_type=1 and type=1),income_amount,0)) as income_amount_zs
+        $allCount = $this->finance_cost->field('sum(if ((action_type=1 and type=2),frame_cost,0)) as frame_cost_z,sum(if ((action_type=1 and type=2),lens_cost,0)) as lens_cost_z,sum(if ((action_type=2 and type=2),frame_cost,0)) as frame_cost_j,sum(if ((action_type=2 and type=2),lens_cost,0)) as lens_cost_j,sum(if ((action_type=1 and type=1),income_amount,0)) as income_amount_zs
 ,sum(if ((action_type=2 and type=1),lens_cost,0)) as lens_cost_js,id,order_number,site,order_type,order_money,order_currency_code,payment_time,createtime')
             ->where($where)
             ->where(['bill_type' => ['neq', 9]])
             ->where(['bill_type' => ['neq', 11]])
             ->where($map)
             ->group('order_number')
-            ->chunk('10000',function($list) use ($headList,&$i,$model,$saveName) {
-                $list = collection($list)->toArray();
-                $order_number = array_column($list, 'order_number');
+            ->count();
+        $page = ceil($allCount / 15000);
+        for($i = 0;$i<=$page;$i++){
+            $list = $this->finance_cost->field('sum(if ((action_type=1 and type=2),frame_cost,0)) as frame_cost_z,sum(if ((action_type=1 and type=2),lens_cost,0)) as lens_cost_z,sum(if ((action_type=2 and type=2),frame_cost,0)) as frame_cost_j,sum(if ((action_type=2 and type=2),lens_cost,0)) as lens_cost_j,sum(if ((action_type=1 and type=1),income_amount,0)) as income_amount_zs
+,sum(if ((action_type=2 and type=1),lens_cost,0)) as lens_cost_js,id,order_number,site,order_type,order_money,order_currency_code,payment_time,createtime')
+                ->where($where)
+                ->where(['bill_type' => ['neq', 9]])
+                ->where(['bill_type' => ['neq', 11]])
+                ->where($map)
+                ->group('order_number')
+                ->select();
+            $list = collection($list)->toArray();
+            $order_number = array_column($list, 'order_number');
 
-                $fi_actual_payment_fee = $model->table('ld_delivery_order_finance')->where(['increment_id' =>  ['in', $order_number]])->column('fi_actual_payment_fee', 'increment_id');
-                $params = [];
-                foreach ($list as $key => $value) {
-                    $params[$key]['order_number'] = $value['order_number'];
-                    if ($value['site'] == 1) {
-                        $site = 'Zeelool';
-                    } elseif ($value['site'] == 2) {
-                        $site = 'Voogueme';
-                    } elseif ($value['site'] == 3) {
-                        $site = 'Nihao';
-                    } elseif ($value['site'] == 4) {
-                        $site = 'Meeloog';
-                    } elseif ($value['site'] == 5) {
-                        $site = 'Wesee';
-                    } elseif ($value['site'] == 8) {
-                        $site = 'Amazon';
-                    } elseif ($value['site'] == 9) {
-                        $site = 'Zeelool_es';
-                    } elseif ($value['site'] == 10) {
-                        $site = 'Zeelool_de';
-                    } elseif ($value['site'] == 11) {
-                        $site = 'Zeelool_jp';
-                    }
-                    $params[$key]['site'] = $site;
-                    if ($value['order_type'] == 1) {
-                        $order_type = '普通订单';
-                    } elseif ($value['order_type'] == 2) {
-                        $order_type = '批发';
-                    } elseif ($value['order_type'] == 3) {
-                        $order_type = '网红单';
-                    } elseif ($value['order_type'] == 4) {
-                        $order_type = '补发单';
-                    } elseif ($value['order_type'] == 9) {
-                        $order_type = 'vip订单';
-                    }
-                    $params[$key]['order_type'] = $order_type;
-                    $params[$key]['order_money'] = $value['order_money'];
-                    //收入
-                    $list_zs_income_amount = $value['income_amount_zs'];
-                    $list_js_income_amount = $value['lens_cost_js'];
-                    $params[$key]['income_amount'] = $list_zs_income_amount - $list_js_income_amount;
-                    $params[$key]['order_currency_code'] = $value['order_currency_code'];
-                    $list_z_frame = $value['frame_cost_z'];
-                    $list_z_lens = $value['lens_cost_z'];
-                    $list_j_frame = $value['frame_cost_j'];
-                    $list_j_lens = $value['lens_cost_j'];
-                    $params[$key]['frame_cost'] = $list_z_frame - $list_j_frame;
-                    $params[$key]['lens_cost'] = $list_z_lens - $list_j_lens;
-
-                    //物流成本
-                    $params[$key]['fi_actual_payment_fee'] = $fi_actual_payment_fee[$value['order_number']];
-                    $params[$key]['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
-                    $params[$key]['createtime'] = date('Y-m-d H:i:s', $value['createtime']);
+            $fi_actual_payment_fee = $model->table('ld_delivery_order_finance')->where(['increment_id' =>  ['in', $order_number]])->column('fi_actual_payment_fee', 'increment_id');
+            $params = [];
+            foreach ($list as $key => $value) {
+                $params[$key]['order_number'] = $value['order_number'];
+                if ($value['site'] == 1) {
+                    $site = 'Zeelool';
+                } elseif ($value['site'] == 2) {
+                    $site = 'Voogueme';
+                } elseif ($value['site'] == 3) {
+                    $site = 'Nihao';
+                } elseif ($value['site'] == 4) {
+                    $site = 'Meeloog';
+                } elseif ($value['site'] == 5) {
+                    $site = 'Wesee';
+                } elseif ($value['site'] == 8) {
+                    $site = 'Amazon';
+                } elseif ($value['site'] == 9) {
+                    $site = 'Zeelool_es';
+                } elseif ($value['site'] == 10) {
+                    $site = 'Zeelool_de';
+                } elseif ($value['site'] == 11) {
+                    $site = 'Zeelool_jp';
                 }
-
-                if ($i > 0) {
-                    $headList = [];
+                $params[$key]['site'] = $site;
+                if ($value['order_type'] == 1) {
+                    $order_type = '普通订单';
+                } elseif ($value['order_type'] == 2) {
+                    $order_type = '批发';
+                } elseif ($value['order_type'] == 3) {
+                    $order_type = '网红单';
+                } elseif ($value['order_type'] == 4) {
+                    $order_type = '补发单';
+                } elseif ($value['order_type'] == 9) {
+                    $order_type = 'vip订单';
                 }
-                $i++;
-                Excel::writeCsv($params, $headList, $saveName, false);
-            });
+                $params[$key]['order_type'] = $order_type;
+                $params[$key]['order_money'] = $value['order_money'];
+                //收入
+                $list_zs_income_amount = $value['income_amount_zs'];
+                $list_js_income_amount = $value['lens_cost_js'];
+                $params[$key]['income_amount'] = $list_zs_income_amount - $list_js_income_amount;
+                $params[$key]['order_currency_code'] = $value['order_currency_code'];
+                $list_z_frame = $value['frame_cost_z'];
+                $list_z_lens = $value['lens_cost_z'];
+                $list_j_frame = $value['frame_cost_j'];
+                $list_j_lens = $value['lens_cost_j'];
+                $params[$key]['frame_cost'] = $list_z_frame - $list_j_frame;
+                $params[$key]['lens_cost'] = $list_z_lens - $list_j_lens;
+
+                //物流成本
+                $params[$key]['fi_actual_payment_fee'] = $fi_actual_payment_fee[$value['order_number']];
+                $params[$key]['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
+                $params[$key]['createtime'] = date('Y-m-d H:i:s', $value['createtime']);
+            }
+
+            if ($i > 0) {
+                $headList = [];
+            }
+            $i++;
+            Excel::writeCsv($params, $headList, $saveName, false);
+        }
         //获取当前域名
         $request = Request::instance();
         $domain = $request->domain();
-        unset($i);
         header('Location: '.$domain.$saveName.'.csv');
         die;
     }
