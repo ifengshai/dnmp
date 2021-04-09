@@ -35,6 +35,7 @@ class LocationInventory extends Backend
      * @var array
      */
     protected $noNeedRight = ['print_label,batch_export_xls'];
+    protected $noNeedLogin = ['batch_export_xls'];
 
     public function _initialize()
     {
