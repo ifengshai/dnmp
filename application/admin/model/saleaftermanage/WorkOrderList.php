@@ -2219,7 +2219,9 @@ class WorkOrderList extends Model
         } elseif (5 == $measuerInfo) {//补发
             $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
             $param['action'] = 1;
-        } else {
+        } elseif (18 == $measuerInfo){//子单取消第三方增加库存
+            $param['action'] = 0;
+        }else {
             return false;
         }
         if ($workOrderList->work_platform == 13 || $workOrderList->work_platform == 14) {
