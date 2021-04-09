@@ -308,7 +308,7 @@ class FinanceOrder extends Backend
             ->where(['bill_type' => ['neq', 11]])
             ->where($map)
             ->group('order_number')
-            ->chunk('50000',function($list) use ($headList,&$i,$model,$saveName) {
+            ->chunk('10000',function($list) use ($headList,&$i,$model,$saveName) {
                 $list = collection($list)->toArray();
                 $order_number = array_column($list, 'order_number');
                 //查询成本
