@@ -11,6 +11,19 @@ use think\Request;
 
 class UserDataAgainBuy extends Backend
 {
+    //增加权限设置，需要登录，无需设置权限
+    protected $noNeedRight = [
+        'year_again_buy_rate_line',
+        'year_again_buy_num_line',
+        'year_again_buy_export',
+        'old_user_rate_line',
+        'new_old_user_rate_line',
+        'old_user_export',
+        'user_define_repurchase_rate_line',
+        'user_define_repurchase_num_line',
+        'user_define_repurchase_rate_export'
+    ];
+
     public function _initialize()
     {
         parent::_initialize();
