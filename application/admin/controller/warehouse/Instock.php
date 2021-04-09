@@ -1032,6 +1032,11 @@ class Instock extends Backend
         $data['status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res) {
+            //取消入库单得时候解除条形码绑定关系 更新入库单id  条形码所在库位 条形码所在库位库区id 库位id
+            $_product_bar_code_item = new ProductBarCodeItem();
+            $_product_bar_code_item
+                ->where(['in_stock_id' => ['eq', $ids]])
+                ->update(['in_stock_id' => 0,'location_code'=>'','location_id'=>'0','location_code_id'=>'0']);
             //如果取消入库单 则 去掉质检单已入库标记
             $check = new \app\admin\model\warehouse\Check;
             $check->allowField(true)->save(['is_stock' => 0], ['id' => $row['check_id']]);
