@@ -434,6 +434,35 @@ class TrackReg extends Backend
         Excel::writeCsv($data, $header, $filename);
     }
 
+//导出1-3月份所有SKU的销量数据
+    public function export_get_days_num_copy()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $startime = '2021-01-01 00:00:00';
+        $endtime = '2021-03-31 23:59:59';
+        //获取所有符合条件的sku
+        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
+        //获取对应供应商关系
+        foreach ($list as $key => $value) {
+            $data[$key]['sku'] = $value; //sku
+            $whe['true_sku'] = ['eq', $value];
+            $data[$key]['grade'] = Db::name('product_grade')->where($whe)->value('grade');//等级
+
+        }
+        foreach ($data as $k => $v) {
+            //7天日均销量
+            $where['createtime'] = ['between',[$startime,$endtime]];
+            $where['sku'] = $v['sku'];
+            $sales = $skuSalesNum->where($where)->order('createtime desc')->fetchSql(true)->column('sales_num');
+            $data[$k]['sales'] = array_sum($sales);
+        }
+
+        $header = ['SKU',  '等级', '销量'];
+        $filename = '1-3月份所有SKU的销量数据';
+        Excel::writeCsv($data, $header, $filename);
+    }
 
     /**
      * 每天9点 根据销量计算产品分级
