@@ -467,7 +467,7 @@ class Distribution extends Backend
                 }
                 //待合单
                 if ($label == 7) {
-                    if ($order_prescription_type == 1) {
+                    if ($item['order_prescription_type'] == 1) {
                         $distributionNode = 2;
                     }else{
                         $distributionNode = 6;
