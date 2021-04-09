@@ -374,6 +374,7 @@ class FinanceOrder extends Backend
                 $i++;
                 Excel::writeCsv($params, $headList, $saveName, false);
             });
+        echo $i;
         //获取当前域名
         $request = Request::instance();
         $domain = $request->domain();
