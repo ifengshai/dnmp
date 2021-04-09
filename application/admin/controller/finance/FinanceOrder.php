@@ -286,7 +286,7 @@ class FinanceOrder extends Backend
     public function batch_export_xls()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '2048M');
         $ids = input('ids');
         if ($ids) {
             $ids = explode(',', $ids);
@@ -308,7 +308,7 @@ class FinanceOrder extends Backend
             ->where(['bill_type' => ['neq', 11]])
             ->where($map)
             ->group('order_number')
-            ->chunk(function($list) use ($headList,&$i,$model,$saveName) {
+            ->chunk('50000',function($list) use ($headList,&$i,$model,$saveName) {
                 $list = collection($list)->toArray();
                 $order_number = array_column($list, 'order_number');
                 //查询成本
