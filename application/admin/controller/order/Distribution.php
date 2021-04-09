@@ -441,27 +441,27 @@ class Distribution extends Backend
                 }*/
                 //待配货
                 if ($label == 2) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 2)->value('create_time');
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 1)->value('create_time');
                 }
                 //待配镜片
                 if ($label == 3) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 3)->value('create_time');
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 2)->value('create_time');
                 }
                 //待加工
                 if ($label == 4) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 4)->value('create_time');
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 3)->value('create_time');
                 }
                 //待印logo
                 if ($label == 5) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 5)->value('create_time');
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 4)->value('create_time');
                 }
                 //待成品质检
                 if ($label == 6) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 6)->value('create_time');
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 5)->value('create_time');
                 }
                 //待合单
                 if ($label == 7) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 7)->value('create_time');
+                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 6)->value('create_time');
                 }
             }
 
