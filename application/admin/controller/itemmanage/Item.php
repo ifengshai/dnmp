@@ -1690,7 +1690,7 @@ class Item extends Backend
                         }
                         if ($soapRes || $thirdRes['code'] == 1) {
                             $platform->where([
-                                'sku' => $row['sku'],
+                                'sku' => $val['sku'],
                                 'platform_type' => $v['platform_type']
                             ])->update(['is_upload' => 1]);
                         } else {
