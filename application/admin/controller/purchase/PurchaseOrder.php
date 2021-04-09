@@ -187,10 +187,10 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
-                    foreach (array_filter($sku) as $k => $v){
+                    foreach (array_filter($sku) as $k => $v) {
                         $item = new \app\admin\model\itemmanage\Item();
-                        $itemDetail = $item->where('sku',$v)->find();
-                        if (!$itemDetail){
+                        $itemDetail = $item->where('sku', $v)->find();
+                        if (!$itemDetail) {
                             $this->error('提报的商品不存在');
                         }
                     }
@@ -211,7 +211,7 @@ class PurchaseOrder extends Backend
                         $arr = [];
                         foreach ($arrivalNum as $k => $v) {
                             foreach ($v as $key => $val) {
-                                if (empty($val) || !is_numeric($val)){
+                                if (empty($val) || !is_numeric($val)) {
                                     $this->error('分批到货数量不能为空且不能为非数字');
                                 }
                                 $arr[$key] += $val;
@@ -345,7 +345,7 @@ class PurchaseOrder extends Backend
         $this->assign('contract_data', $contractData);
 
         //生成采购编号
-        $purchaseNumber= 'PO'.date('YmdHis').rand(100, 999).rand(100, 999);
+        $purchaseNumber = 'PO'.date('YmdHis').rand(100, 999).rand(100, 999);
         $this->assign('purchase_number', $purchaseNumber);
         $this->assignconfig('newdatetime', date('Y-m-d H:i:s'));
 
@@ -473,10 +473,10 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
-                    foreach (array_filter($sku) as $k => $v){
+                    foreach (array_filter($sku) as $k => $v) {
                         $item = new \app\admin\model\itemmanage\Item();
-                        $itemDetail = $item->where('sku',$v)->find();
-                        if (!$itemDetail){
+                        $itemDetail = $item->where('sku', $v)->find();
+                        if (!$itemDetail) {
                             $this->error('提报的商品不存在');
                         }
                     }
