@@ -453,7 +453,7 @@ class PayOrder extends Backend
                         $result['purchase_id'] = $v;
                         $result['create_time'] = time();
                         //误差数量
-                        $result['count'] = $outCount;
+                        $result['count'] = $count - $outCount;
                         //误差单价
                         $result['price'] = round($purchaseOrder['actual_purchase_price'] - $purchaseOrder['purchase_price'],
                             2);
