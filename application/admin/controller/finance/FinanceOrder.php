@@ -310,7 +310,7 @@ class FinanceOrder extends Backend
             ->group('order_number')
             ->count();
         $page = ceil($allCount / 15000);
-        for($i = 0;$i<=$page;$i++){
+        for($i = 0;$i<$page;$i++){
             $list = $this->finance_cost->field('sum(if ((action_type=1 and type=2),frame_cost,0)) as frame_cost_z,sum(if ((action_type=1 and type=2),lens_cost,0)) as lens_cost_z,sum(if ((action_type=2 and type=2),frame_cost,0)) as frame_cost_j,sum(if ((action_type=2 and type=2),lens_cost,0)) as lens_cost_j,sum(if ((action_type=1 and type=1),income_amount,0)) as income_amount_zs
 ,sum(if ((action_type=2 and type=1),lens_cost,0)) as lens_cost_js,id,order_number,site,order_type,order_money,order_currency_code,payment_time,createtime')
                 ->where($where)
