@@ -139,7 +139,6 @@ class LocationInventory extends Backend
             ->alias('fss')
             ->join(['fa_store_house' => 'fsh'], 'fss.store_id=fsh.id')
             ->field("fss.sku,fsh.area_id,fsh.coding")
-            ->limit(1)
             ->select();
         $list = collection($list)->toArray();
 
