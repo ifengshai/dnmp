@@ -53,6 +53,14 @@ class NewProductDesign extends Backend
                 'secret' => 'JDdEcIL5ViLh8PMm/fXRlWOiQyhk0J19AgJ2Xw2W',
             ],
         ]);
+
+        $this->assignconfig('record_size', $this->auth->check('NewProductDesign/record_size'));//录尺寸
+        $this->assignconfig('allocate_personnel', $this->auth->check('NewProductDesign/allocate_personnel'));//分配人员信息
+        $this->assignconfig('shooting', $this->auth->check('NewProductDesign/shooting')); //拍摄开始 拍摄完成
+        $this->assignconfig('making', $this->auth->check('NewProductDesign/making')); //开始制作
+        $this->assignconfig('reviewTheOperation', $this->auth->check('NewProductDesign/reviewTheOperation')); //审核操作
+        $this->assignconfig('add_img', $this->auth->check('NewProductDesign/add_img')); //审核操作
+
     }
 
     /**
@@ -67,6 +75,7 @@ class NewProductDesign extends Backend
      */
     public function index()
     {
+
         $admin = new Admin();
         //当前是否为关联查询
         $this->relationSearch = false;
@@ -125,18 +134,18 @@ class NewProductDesign extends Backend
                     $list[$key]['responsible_id'] = '暂无';
                 }
             }
+            //获取当前用户id
+
+
             $result = array("total" => $total,"label"=>$map['status']?$map['status']:0, "rows" => $list);
 
             return json($result);
         }
         return $this->view->fetch();
     }
-
-
     public function detail($ids=null)
     {
         $item = new Item();
-        $auth = new Auth();
         $itemAttribute =new ItemAttribute();
         $value = $this->model->get($ids);
         $where['sku'] = $value->sku;
@@ -157,7 +166,6 @@ class NewProductDesign extends Backend
                 $img[$key] = $net.$value;
             }
         }
-
         $this->assign('attributeType',$attributeType);
         $this->assign('goodsId',$goodsId);
         $this->assign('ids',$ids);
@@ -165,7 +173,6 @@ class NewProductDesign extends Backend
         $this->assign('img',$img);
         return $this->view->fetch();
     }
-
     //录尺寸
     public function record_size($ids =null)
     {
@@ -222,8 +229,6 @@ class NewProductDesign extends Backend
                     $this->error('请输入正确的延长链数值');
                 }
             }
-
-            //标记打印状态
             $this->model->startTrans();
             $itemAttribute->startTrans();
             try {
@@ -270,15 +275,63 @@ class NewProductDesign extends Backend
         $this->assign('item_attribute',$item_attribute);
         return $this->view->fetch();
     }
+    //产品要求  状态更改需要拆分为多个方法-用于权限限制
+    //拍摄-（开始拍摄、拍摄完成）、分配-（分配）、制作-（开始制作）、上传-（上传图片）、审核（审核通过、审核拒绝）
 
-    //更改状态
-    public function change_status()
-    {
-       $item = new  Item();
-       $ids =  $this->request->get('ids');
-       $status =  $this->request->get('status');
-       empty($ids) && $this->error('缺少重要参数');
-       empty($status) && $this->error('数据异常');
+
+    /**
+     * @author zjw
+     * @date   2021/4/9 13:55
+     * 选品设计拍摄开始 -- 完成--按钮
+     */
+    public function shooting(){
+        $ids =  $this->request->get('ids');
+        $status =  $this->request->get('status');
+        empty($ids) && $this->error('缺少重要参数');
+        empty($status) && $this->error('数据异常');
+        $map['id'] = $ids;
+        $data['status'] = $status;
+        $data['update_time']  = date("Y-m-d H:i:s", time());
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res){
+            $this->success('操作成功');
+        }else{
+            $this->error('操作失败');
+        }
+    }
+
+    /**
+     * @author zjw
+     * @date   2021/4/9 14:04
+     * 开始制作
+     */
+    public function making(){
+        $ids =  $this->request->get('ids');
+        $status =  $this->request->get('status');
+        empty($ids) && $this->error('缺少重要参数');
+        empty($status) && $this->error('数据异常');
+        $map['id'] = $ids;
+        $data['status'] = $status;
+        $data['update_time']  = date("Y-m-d H:i:s", time());
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res){
+            $this->success('人员分配成功');
+        }else{
+            $this->error('人员分配失败');
+        }
+    }
+
+    /**
+     * @author zjw
+     * @date   2021/4/9 14:11
+     * 审核操作
+     */
+    public function reviewTheOperation(){
+        $item = new  Item();
+        $ids =  $this->request->get('ids');
+        $status =  $this->request->get('status');
+        empty($ids) && $this->error('缺少重要参数');
+        empty($status) && $this->error('数据异常');
         $map['id'] = $ids;
         if ($status ==9){
             $status =6;
@@ -289,28 +342,6 @@ class NewProductDesign extends Backend
             $change['sku'] = $value->sku;
             $item->allowField(true)->isUpdate(true, $change)->save($data);
         }
-        $data['status'] = $status;
-        $data['update_time']  = date("Y-m-d H:i:s", time());
-        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-        if ($res){
-            $this->success('操作成功');
-        }else{
-            $this->error('操作失败');
-        }
-    }
-    //产品要求  状态更改需要拆分为多个方法-用于权限限制
-    //拍摄-（开始拍摄、拍摄完成）、分配-（分配）、制作-（开始制作）、上传-（上传图片）、审核（审核通过、审核拒绝）
-    /**
-     * @author zjw
-     * @date   2021/4/9 13:55
-     * 选品设计拍摄按钮
-     */
-    public function shooting(){
-        $ids =  $this->request->get('ids');
-        $status =  $this->request->get('status');
-        empty($ids) && $this->error('缺少重要参数');
-        empty($status) && $this->error('数据异常');
-        $map['id'] = $ids;
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);

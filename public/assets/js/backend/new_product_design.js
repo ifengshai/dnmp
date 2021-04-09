@@ -136,7 +136,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('开始拍摄'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'new_product_design/change_status?status=3',
+                                    url: 'new_product_design/shooting?status=3',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -161,7 +161,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('拍摄完成'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'new_product_design/change_status?status=4',
+                                    url: 'new_product_design/shooting?status=4',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -204,7 +204,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title: __('开始制作'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'new_product_design/change_status?status=6',
+                                    url: 'new_product_design/making?status=6',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -246,7 +246,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title:__('审核通过'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'new_product_design/change_status?status=8',
+                                    url: 'new_product_design/reviewTheOperation?status=8',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -270,7 +270,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title:__('审核拒绝'),
                                     classname: 'btn btn-xs btn-danger  btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'new_product_design/change_status?status=9',
+                                    url: 'new_product_design/reviewTheOperation?status=9',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -290,7 +290,62 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 },
 
 
-                            ], formatter: Table.api.formatter.operate
+                            ],
+                            // formatter: Table.api.formatter.operate
+
+                            formatter: function (value, row, index) { //隐藏自定义的视频按钮
+                                var that = $.extend({}, this);
+                                var table = $(that.table).clone(true);
+                                //权限判断
+                                if(Config.record_size != true){ //通过Config.chapter 获取后台存的chapter
+                                    console.log('没有录尺寸权限');
+                                    $(table).data("operate-video", null);
+                                    that.table = table;
+                                }else{
+                                    console.log('有录尺寸权限');
+                                }
+                                if(Config.shooting != true){
+                                    console.log('没有拍摄权限');
+                                    $(table).data("operate-start_shooting", null);
+                                    $(table).data("operate-shot_over", null);
+                                    that.table = table;
+                                }else{
+                                    console.log('有拍摄权限');
+                                }
+                                if(Config.allocate_personnel != true){
+                                    console.log('没有分配权限');
+                                    $(table).data("operate-tarted_making", null);
+                                    that.table = table;
+                                }else{
+                                    console.log('有分配权限');
+                                }
+                                if(Config.making != true){
+                                    console.log('没有修图权限');
+                                    $(table).data("operate-tarted_making", null);
+                                    that.table = table;
+                                }else{
+                                    console.log('有修图权限');
+                                }
+                                if(Config.add_img != true){
+                                    console.log('没有上传图片的权限');
+                                    $(table).data("operate-upload_pictures", null);
+                                    that.table = table;
+                                }else{
+                                    console.log('有上传图片的权限');
+                                }
+                                if(Config.reviewTheOperation != true){ //通过Config.chapter 获取后台存的chapter
+                                    console.log('没有审核操作权限');
+                                    $(table).data("operate-approved", null);
+                                    $(table).data("audit_refused-approved", null);
+                                    that.table = table;
+                                }else{
+                                    console.log('有审核操作权限');
+                                }
+
+
+
+                                return Table.api.formatter.operate.call(that, value, row, index);
+                            }
                         }
 
                     ]
