@@ -11,6 +11,7 @@ use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemBrand;
 use app\admin\model\order\Order;
 use app\common\controller\Backend;
+use app\common\model\Auth;
 use Aws\S3\S3Client;
 use think\Db;
 use think\Exception;
@@ -135,6 +136,7 @@ class NewProductDesign extends Backend
     public function detail($ids=null)
     {
         $item = new Item();
+        $auth = new Auth();
         $itemAttribute =new ItemAttribute();
         $value = $this->model->get($ids);
         $where['sku'] = $value->sku;
@@ -295,8 +297,30 @@ class NewProductDesign extends Backend
         }else{
             $this->error('操作失败');
         }
-
     }
+    //产品要求  状态更改需要拆分为多个方法-用于权限限制
+    //拍摄-（开始拍摄、拍摄完成）、分配-（分配）、制作-（开始制作）、上传-（上传图片）、审核（审核通过、审核拒绝）
+    /**
+     * @author zjw
+     * @date   2021/4/9 13:55
+     * 选品设计拍摄按钮
+     */
+    public function shooting(){
+        $ids =  $this->request->get('ids');
+        $status =  $this->request->get('status');
+        empty($ids) && $this->error('缺少重要参数');
+        empty($status) && $this->error('数据异常');
+        $map['id'] = $ids;
+        $data['status'] = $status;
+        $data['update_time']  = date("Y-m-d H:i:s", time());
+        $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($res){
+            $this->success('操作成功');
+        }else{
+            $this->error('操作失败');
+        }
+    }
+
 
     //分配人员
     public function allocate_personnel($ids = null)
