@@ -4,10 +4,12 @@ namespace app\admin\controller\warehouse;
 
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
+use fast\Excel;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -118,5 +120,43 @@ class LocationInventory extends Backend
         return $this->view->fetch();
     }
 
+
+    /**
+     * 导出功能,临时功能,跑完脚本删除
+     * Interface batch_export_xls
+     * @package app\admin\controller\warehouse
+     * @author  fzg
+     * @date    2021/4/9 16:34
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        //根据传的标签切换对应站点数据库
+        $maps['area_id'] = 1;
+        $list = $this->model
+            ->alias('fss')
+            ->join(['fa_store_house' => 'fsh'], 'fss.store_id=fsh.id')
+            ->field("fss.sku,fsh.area_id,fsh.coding")
+            ->limit(1)
+            ->select();
+        $list = collection($list)->toArray();
+
+        $productbarcodeitem = new ProductBarCodeItem();
+        //查询商品SKU
+        $item = new \app\admin\model\itemmanage\Item();
+        $arr = $item->where('is_del', 1)->column('name,is_open,distribution_occupy_stock,stock', 'sku');
+        foreach ($list as $k => $row) {
+            $list[$k]['name'] = $arr[$row['sku']]['name'];
+            //在库 子单号为空 库位号 库区id都一致的库存作为此库位的库存
+            $list[$k]['stock'] = $productbarcodeitem
+                ->where(['location_id'=>$row['area_id'],'location_code'=>$row['coding'],'library_status'=>1,'item_order_number'=>'','sku'=>$row['sku']])
+                ->count();
+            $list[$k]['stock_number'] = $arr[$row['sku']]['stock']-$arr[$row['sku']]['distribution_occupy_stock'];
+        }
+        $header = ['sku', 'area_id', 'coding', 'name', 'stock','stock_number'];
+        $filename = '库存库区数量导出';
+        Excel::writeCsv($list, $header, $filename);
+    }
 
 }
