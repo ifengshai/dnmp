@@ -89,7 +89,7 @@ class TrackReg extends Backend
         if ($shipment_reg) {
             $order_group = array_chunk($shipment_reg, 40);
             $trackingConnector = new TrackingConnector($this->apiKey);
-            $order_ids = array();
+            $order_ids = [];
             foreach ($order_group as $key => $val) {
                 $aa = $trackingConnector->registerMulti($val);
 
@@ -169,18 +169,22 @@ class TrackReg extends Backend
         } elseif (stripos($title, 'cod') !== false) {
             $carrierId = 'cod';
             $title = 'COD';
+        } elseif (stripos($title, 'tnt') !== false) {
+            $carrierId = 'tnt';
+            $title = 'TNT';
         }
 
         $carrier = [
-            'dhl' => '100001',
+            'dhl'       => '100001',
             'chinapost' => '03011',
-            'chinaems' => '03013',
-            'cpc' =>  '03041',
-            'fedex' => '100003',
-            'usps' => '21051',
-            'yanwen' => '190012',
-            'sua' => '190111',
-            'cod' => '100040'
+            'chinaems'  => '03013',
+            'cpc'       => '03041',
+            'fedex'     => '100003',
+            'usps'      => '21051',
+            'yanwen'    => '190012',
+            'sua'       => '190111',
+            'cod'       => '100040',
+            'tnt'       => '100004',
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
@@ -3215,7 +3219,7 @@ class TrackReg extends Backend
 
 
 
-     /**
+    /**
      * 处理待入库数量 - 计划任务
      */
     public function process_wait_stock()
