@@ -1993,6 +1993,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#item_input-hidden').html('');
                         if (2 != Config.work_type) {
                             $('#order_item_numbers').val('');
+                        }else{
+                            var item_order_sku_arr = $('.item_order_selectpicker').val();//子单号
+                            var item_order_sku = [];
+                            if (item_order_sku_arr) {
+                                for (var i = item_order_sku_arr.length - 1; i >= 0; i--) {
+                                   $split = item_order_sku_arr[i].split("/");
+                                   item_order_sku[i] = $split[0];
+                                }
+                                var order_item_numbers = item_order_sku.join(',');
+                                $('#order_item_numbers').val(order_item_numbers);
+                            }else{
+                                $('#order_item_numbers').val('');
+                            }
                         }
     
                     }
