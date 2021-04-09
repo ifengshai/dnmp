@@ -294,10 +294,11 @@ class FinanceOrder extends Backend
             foreach ($ids as $key => $value) {
                 $order_number[] = $this->finance_cost->where(['id' => $value])->value('order_number');
             }
-            $map['a.order_number'] = ['in', $order_number];
+            $map['order_number'] = ['in', $order_number];
         }
         $headList = ['订单号', '站点', '订单类型', '支付金额', '订单总金额', '币种', '镜架成本', '镜片成本', '物流成本', '支付时间', '创建时间'];
         //查询物流成本
+        $model = Db::connect('database.db_delivery');
         [$where] = $this->buildparams();
         $saveName = '/uploads/财务订单报表' . date('YmdHis');
         $allCount = $this->finance_cost->field('sum(if ((action_type=1 and type=2),frame_cost,0)) as frame_cost_z,sum(if ((action_type=1 and type=2),lens_cost,0)) as lens_cost_z,sum(if ((action_type=2 and type=2),frame_cost,0)) as frame_cost_j,sum(if ((action_type=2 and type=2),lens_cost,0)) as lens_cost_j,sum(if ((action_type=1 and type=1),income_amount,0)) as income_amount_zs
@@ -307,7 +308,7 @@ class FinanceOrder extends Backend
             ->where(['a.bill_type' => ['neq', 11]])
             ->where($map)
             ->alias('a')
-            ->join(['logistics_delivery.ld_delivery_order_finance'=>'b'],'b.increment_id=a.order_number','left')
+            ->join('logistics_delivery.ld_delivery_order_finance on b.increment_id=a.order_number')
             ->group('a.order_number')
             ->count();
         $page = ceil($allCount / 15000);
@@ -318,12 +319,12 @@ class FinanceOrder extends Backend
                 ->where(['a.bill_type' => ['neq', 9]])
                 ->where(['a.bill_type' => ['neq', 11]])
                 ->where($map)
-                ->alias('a')
-                ->join(['logistics_delivery.ld_delivery_order_finance'=>'b'],'b.increment_id=a.order_number','left')
                 ->group('a.order_number')
                 ->select();
             $list = collection($list)->toArray();
             $order_number = array_column($list, 'order_number');
+
+            $fi_actual_payment_fee = $model->table('ld_delivery_order_finance')->where(['increment_id' =>  ['in', $order_number]])->column('fi_actual_payment_fee', 'increment_id');
             $params = [];
             foreach ($list as $key => $value) {
                 $params[$key]['order_number'] = $value['order_number'];
@@ -373,7 +374,7 @@ class FinanceOrder extends Backend
                 $params[$key]['lens_cost'] = $list_z_lens - $list_j_lens;
 
                 //物流成本
-                $params[$key]['fi_actual_payment_fee'] = $value['fi_actual_payment_fee'];
+                $params[$key]['fi_actual_payment_fee'] = $fi_actual_payment_fee[$value['order_number']];
                 $params[$key]['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
                 $params[$key]['createtime'] = date('Y-m-d H:i:s', $value['createtime']);
             }
