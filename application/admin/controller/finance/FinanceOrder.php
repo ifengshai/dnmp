@@ -302,7 +302,7 @@ class FinanceOrder extends Backend
         [$where] = $this->buildparams();
         $i = 0;
         $saveName = '财务订单报表' . date('YmdHis');
-        $this->finance_cost->field('order_number,site,order_type,order_money,order_currency_code,payment_time,createtime')
+        $this->finance_cost->field('id,order_number,site,order_type,order_money,order_currency_code,payment_time,createtime')
             ->where($where)
             ->where(['bill_type' => ['neq', 9]])
             ->where(['bill_type' => ['neq', 11]])
