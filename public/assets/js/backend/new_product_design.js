@@ -336,7 +336,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 if(Config.reviewTheOperation != true){ //通过Config.chapter 获取后台存的chapter
                                     console.log('没有审核操作权限');
                                     $(table).data("operate-approved", null);
-                                    $(table).data("audit_refused-approved", null);
+                                    $(table).data("audit-audit_refused", null);
                                     that.table = table;
                                 }else{
                                     console.log('有审核操作权限');
