@@ -455,7 +455,7 @@ class TrackReg extends Backend
             //7天日均销量
             $where['createtime'] = ['between',[$startime,$endtime]];
             $where['sku'] = $v['sku'];
-            $sales = $skuSalesNum->where($where)->order('createtime desc')->fetchSql(true)->column('sales_num');
+            $sales = $skuSalesNum->where($where)->order('createtime desc')->column('sales_num');
             $data[$k]['sales'] = array_sum($sales);
         }
 
