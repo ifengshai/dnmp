@@ -302,40 +302,16 @@ class FinanceOrder extends Backend
         [$where] = $this->buildparams();
         $i = 0;
         $saveName = '/uploads/财务订单报表' . date('YmdHis');
-        $this->finance_cost->field('id,order_number,site,order_type,order_money,order_currency_code,payment_time,createtime')
+        $this->finance_cost->field('sum(if ((action_type=1 and type=2),frame_cost,0)) as frame_cost_z,sum(if ((action_type=1 and type=2),lens_cost,0)) as lens_cost_z,sum(if ((action_type=2 and type=2),frame_cost,0)) as frame_cost_j,sum(if ((action_type=2 and type=2),lens_cost,0)) as lens_cost_j,sum(if ((action_type=1 and type=1),income_amount,0)) as income_amount_zs
+,sum(if ((action_type=2 and type=1),lens_cost,0)) as lens_cost_js,id,order_number,site,order_type,order_money,order_currency_code,payment_time,createtime')
             ->where($where)
             ->where(['bill_type' => ['neq', 9]])
             ->where(['bill_type' => ['neq', 11]])
             ->where($map)
             ->group('order_number')
-            ->chunk('15000',function($list) use ($headList,&$i,$model,$saveName) {
+            ->chunk('10000',function($list) use ($headList,&$i,$model,$saveName) {
                 $list = collection($list)->toArray();
                 $order_number = array_column($list, 'order_number');
-                //查询成本
-                $list_z = $this->finance_cost
-                    ->where(['order_number' => ['in', $order_number], 'action_type' => 1, 'type' => 2])
-                    ->group('order_number')
-                    ->column('sum(frame_cost) as frame_cost,sum(lens_cost) as lens_cost', 'order_number');
-
-                //查询成本
-                $list_j = $this->finance_cost
-                    ->where(['order_number' => ['in', $order_number], 'action_type' => 2, 'type' => 2])
-                    ->group('order_number')
-                    ->column('sum(frame_cost) as frame_cost,sum(lens_cost) as lens_cost', 'order_number');
-
-
-                //查询收入
-                $list_zs = $this->finance_cost
-                    ->where(['order_number' => ['in', $order_number], 'action_type' => 1, 'type' => 1])
-                    ->group('order_number')
-                    ->column('sum(income_amount) as income_amount', 'order_number');
-
-                //查询收入
-                $list_js = $this->finance_cost
-                    ->where(['order_number' => ['in', $order_number], 'action_type' => 2, 'type' => 1])
-                    ->group('order_number')
-                    ->column('sum(income_amount) as income_amount', 'order_number');
-
 
                 $fi_actual_payment_fee = $model->table('ld_delivery_order_finance')->where(['increment_id' =>  ['in', $order_number]])->column('fi_actual_payment_fee', 'increment_id');
                 $params = [];
@@ -375,14 +351,14 @@ class FinanceOrder extends Backend
                     $params[$key]['order_type'] = $order_type;
                     $params[$key]['order_money'] = $value['order_money'];
                     //收入
-                    $list_zs_income_amount = $list_zs[$value['order_number']];
-                    $list_js_income_amount = $list_js[$value['order_number']];
+                    $list_zs_income_amount = $value['income_amount_zs'];
+                    $list_js_income_amount = $value['lens_cost_js'];
                     $params[$key]['income_amount'] = $list_zs_income_amount - $list_js_income_amount;
                     $params[$key]['order_currency_code'] = $value['order_currency_code'];
-                    $list_z_frame = $list_z[$value['order_number']]['frame_cost'];
-                    $list_z_lens = $list_z[$value['order_number']]['lens_cost'];
-                    $list_j_frame = $list_j[$value['order_number']]['frame_cost'];
-                    $list_j_lens = $list_j[$value['order_number']]['lens_cost'];
+                    $list_z_frame = $value['frame_cost_z'];
+                    $list_z_lens = $value['lens_cost_z'];
+                    $list_j_frame = $value['frame_cost_j'];
+                    $list_j_lens = $value['lens_cost_j'];
                     $params[$key]['frame_cost'] = $list_z_frame - $list_j_frame;
                     $params[$key]['lens_cost'] = $list_z_lens - $list_j_lens;
 
@@ -398,7 +374,7 @@ class FinanceOrder extends Backend
                 $i++;
                 Excel::writeCsv($params, $headList, $saveName, false);
             });
-        echo $this->finance_cost->getLastSql();die;
+        //echo $this->finance_cost->getLastSql();die;
         //获取当前域名
         $request = Request::instance();
         $domain = $request->domain();
