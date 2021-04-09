@@ -95,7 +95,7 @@ class FinanceOrder extends Backend
     public function batch_export_xls_bak()
     {
         set_time_limit(0);
-        ini_set('memory_limit', '2048M');
+        ini_set('memory_limit', '512M');
         $ids = input('ids');
         if ($ids) {
             $ids = explode(',', $ids);
