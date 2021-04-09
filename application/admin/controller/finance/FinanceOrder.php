@@ -308,7 +308,7 @@ class FinanceOrder extends Backend
             ->where(['bill_type' => ['neq', 11]])
             ->where($map)
             ->group('order_number')
-            ->chunk('20000',function($list) use ($headList,&$i,$model,$saveName) {
+            ->chunk('15000',function($list) use ($headList,&$i,$model,$saveName) {
                 $list = collection($list)->toArray();
                 $order_number = array_column($list, 'order_number');
                 //查询成本
@@ -398,6 +398,7 @@ class FinanceOrder extends Backend
                 $i++;
                 Excel::writeCsv($params, $headList, $saveName, false);
             });
+        echo $this->finance_cost->getLastSql();die;
         //获取当前域名
         $request = Request::instance();
         $domain = $request->domain();
