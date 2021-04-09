@@ -459,12 +459,16 @@ class Distribution extends Backend
                 //待成品质检
                 if ($label == 6) {
                     $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])
-                        ->where(['distribution_node', ['in',[4,5]]])->value('create_time');
+                        ->where('distribution_node', 5)->value('create_time');
+                        if (!$list[$key]['created_at']) {
+                            $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])
+                            ->where('distribution_node', 4)->value('create_time');
+                        }
                 }
                 //待合单
                 if ($label == 7) {
                     if ($order_prescription_type == 1) {
-                        $distributionNode = 1;
+                        $distributionNode = 2;
                     }else{
                         $distributionNode = 6;
                     }
