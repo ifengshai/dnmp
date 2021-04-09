@@ -56,7 +56,7 @@ class ProductBarCode extends Backend
                 return $this->selectpage();
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->order($sort, $order)
@@ -70,13 +70,14 @@ class ProductBarCode extends Backend
             $list = collection($list)->toArray();
 
             foreach ($list as $k => $val) {
-                $list[$k]['range'] = $val['start'] . '-' . $val['end'];
+                $list[$k]['range'] = $val['start'].'-'.$val['end'];
             }
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -99,7 +100,7 @@ class ProductBarCode extends Backend
                     //是否采用模型验证
                     if ($this->modelValidate) {
                         $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name.'.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
@@ -121,7 +122,7 @@ class ProductBarCode extends Backend
 
                     $data = [];
                     for ($i = 1; $i <= $number; $i++) {
-                        $code = substr(date('Ymd'), 2) . sprintf("%09d", $s_num + $i);
+                        $code = substr(date('Ymd'), 2).sprintf("%09d", $s_num + $i);
                         $data[] = ['code' => $code, 'barcode_id' => $barcode_id, 'create_person' => session('admin.nickname'), 'create_time' => date('Y-m-d H:i:s')];
                     }
                     $this->item->allowField(true)->saveAll($data);
@@ -193,19 +194,19 @@ EOF;
         $file_content = '';
         foreach ($list as $value) {
             //检测文件夹
-            $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "product" . DS . "bar_code";
+            $dir = ROOT_PATH."public".DS."uploads".DS."product".DS."bar_code";
             !file_exists($dir) && mkdir($dir, 0777, true);
 
             //生成条形码
-            $fileName = ROOT_PATH . "public" . DS . "uploads" . DS . "product" . DS . "bar_code" . DS . $value['code'] . ".png";
+            $fileName = ROOT_PATH."public".DS."uploads".DS."product".DS."bar_code".DS.$value['code'].".png";
             $this->generate_barcode($value['code'], $fileName);
 
             //拼接条形码
             $img_url = "/uploads/product/bar_code/{$value['code']}.png";
             $file_content .= "<div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
-            <img src='" . $img_url . "' style='width:36mm'></div>";
+            <img src='".$img_url."' style='width:36mm'></div>";
         }
-        echo $file_header . $file_content;
+        echo $file_header.$file_content;
     }
 
     /**
@@ -224,7 +225,7 @@ EOF;
 
         // $code = '';
         // 加载字体大小
-        $font = new \BCGFontFile(EXTEND_PATH . '/BCode/font/Arial.ttf', 20);
+        $font = new \BCGFontFile(EXTEND_PATH.'/BCode/font/Arial.ttf', 20);
         //颜色条形码
         $color_black = new \BCGColor(0, 0, 0);
         $color_white = new \BCGColor(255, 255, 255);
@@ -278,13 +279,13 @@ EOF;
             $_purchase_order = new \app\admin\model\purchase\PurchaseOrder;
             //检测采购单号
             if ($filter['purchase_number']) {
-                $purchase_ids = $_purchase_order->where(['purchase_number' => ['like', '%' . $filter['purchase_number'] . '%']])->column('id');
+                $purchase_ids = $_purchase_order->where(['purchase_number' => ['like', '%'.$filter['purchase_number'].'%']])->column('id');
                 $map['purchase_id'] = ['in', $purchase_ids];
                 unset($filter['purchase_number']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            $map['purchase_id'] = ['neq',0];
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $map['purchase_id'] = ['neq', 0];
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->item
                 ->where($where)
                 ->where($map)
@@ -301,7 +302,7 @@ EOF;
 
             //获取采购单数据
             $purchase_list = $_purchase_order
-                ->where(['purchase_status' => ['in', [2, 5, 6, 7, 9, 10]]])
+                ->where(['purchase_status' => ['in', [2, 5, 6, 7, 8, 9, 10]]])
                 ->column('purchase_number', 'id');
 
             foreach ($list as $k => $val) {
@@ -314,10 +315,11 @@ EOF;
                 $list[$k]['check_time'] = $in_stock_time;
             }
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 }

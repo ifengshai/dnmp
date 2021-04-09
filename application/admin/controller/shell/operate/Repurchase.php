@@ -41,13 +41,15 @@ class Repurchase extends Command
     protected function getUserRepurchase($site){
         $today = date('Y-m-d');
         //获取前一个月时间
+        $lastOneMonthStart = date("Y-m-d", strtotime("first day of -1 month", strtotime($today)));
         $lastOneMonthEnd = date("Y-m-d 23:59:59", strtotime("last day of -1 month", strtotime($today)));
         #############################################   一月期复购率start  #########################################
         $oneMonthDate = date("Y-m", strtotime("-2 month", strtotime($today)));
         //获取前两个月时间
         $lastTwoMonthStart = date("Y-m-01", strtotime("-2 month", strtotime($today)));
         $lastTwoMonthEnd = date("Y-m-t 23:59:59", strtotime("-2 month", strtotime($today)));
-        $repurchaseDataOne = $this->getRepurchaseUserNum($site,$lastTwoMonthStart,$lastTwoMonthEnd,$lastOneMonthEnd);
+        $repurchaseDataOne = $this->getRepurchaseUserNum($site, $lastTwoMonthStart, $lastTwoMonthEnd,
+            $lastOneMonthStart, $lastOneMonthEnd);
         //一月期复购率
         $oneMonthArr = array(
             'site'=>$site,  //站点
@@ -65,9 +67,11 @@ class Repurchase extends Command
         #############################################   三月期复购率start  #########################################
         $threeMonthDate = date("Y-m", strtotime("-4 month", strtotime($today)));
         //获取前四个月时间
+        $lastThreeMonthStart = date("Y-m-01", strtotime("-3 month", strtotime($today)));
         $lastFourMonthStart = date("Y-m-01", strtotime("-4 month", strtotime($today)));
         $lastFourMonthEnd = date("Y-m-t 23:59:59", strtotime("-4 month", strtotime($today)));
-        $repurchaseDataThree = $this->getRepurchaseUserNum($site,$lastFourMonthStart,$lastFourMonthEnd,$lastOneMonthEnd);
+        $repurchaseDataThree = $this->getRepurchaseUserNum($site, $lastFourMonthStart, $lastFourMonthEnd,
+            $lastThreeMonthStart, $lastOneMonthEnd);
         //三月期复购率
         $threeMonthArr = array(
             'site'=>$site,  //站点
@@ -85,9 +89,11 @@ class Repurchase extends Command
         #############################################   半年期复购率start  #########################################
         $halfYearDate = date("Y-m", strtotime("-7 month", strtotime($today)));
         //获取前七个月时间
+        $lastSixMonthStart = date("Y-m-01", strtotime("-6 month", strtotime($today)));
         $lastSevenMonthStart = date("Y-m-01", strtotime("-7 month", strtotime($today)));
         $lastSevenMonthEnd = date("Y-m-t 23:59:59", strtotime("-7 month", strtotime($today)));
-        $repurchaseDataSix = $this->getRepurchaseUserNum($site,$lastSevenMonthStart,$lastSevenMonthEnd,$lastOneMonthEnd);
+        $repurchaseDataSix = $this->getRepurchaseUserNum($site, $lastSevenMonthStart, $lastSevenMonthEnd,
+            $lastSixMonthStart, $lastOneMonthEnd);
         //半年期复购率
         $halfYearArr = array(
             'site'=>$site,  //站点
@@ -105,9 +111,11 @@ class Repurchase extends Command
         #############################################  一年期复购率start #########################################
         $oneYearDate = date("Y-m", strtotime("-13 month", strtotime($today)));
         //获取前十三个月时间
+        $lastTwelveMonthStart = date("Y-m-01", strtotime("-12 month", strtotime($today)));
         $lastThirteenMonthStart = date("Y-m-01", strtotime("-13 month", strtotime($today)));
         $lastThirteenMonthEnd = date("Y-m-t 23:59:59", strtotime("-13 month", strtotime($today)));
-        $repurchaseDataThirteen = $this->getRepurchaseUserNum($site,$lastThirteenMonthStart,$lastThirteenMonthEnd,$lastOneMonthEnd);
+        $repurchaseDataThirteen = $this->getRepurchaseUserNum($site, $lastThirteenMonthStart, $lastThirteenMonthEnd,
+            $lastTwelveMonthStart, $lastOneMonthEnd);
         //一年期复购率
         $oneYearArr = array(
             'site'=>$site,  //站点
@@ -157,21 +165,35 @@ class Repurchase extends Command
     /**
      * 获取时间段内复购数据
      * @param $site   站点
-     * @param $startDate1   用户所在开始时间、用户行为开始时间
+     * @param $startDate1   用户所在开始时间
      * @param $endDate1    用户所在结束时间
+     * @param $startDate2    用户行为开始时间
      * @param $endDate2     用户行为结束时间
      * @return array
      * @author mjj
      * @date   2021/4/1 09:58:28
      */
-    protected function getRepurchaseUserNum($site,$startDate1,$endDate1,$endDate2){
+    protected function getRepurchaseUserNum($site, $startDate1, $endDate1, $startDate2, $endDate2)
+    {
         $startTime1 = strtotime($startDate1);
+        $startTime2 = strtotime($startDate2);
         $endTime1 = strtotime($endDate1);
         $endTime2 = strtotime($endDate2);
         $where['site'] = $site;
         $where['order_type'] = 1;
-        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-        $where1['payment_time'] = ['between',[$startTime1,$endTime1]];
+        $where['status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered'
+            ]
+        ];
+        $where1['payment_time'] = ['between', [$startTime1, $endTime1]];
         $sql1 = $this->order
             ->where($where)
             ->where($where1)
@@ -180,7 +202,7 @@ class Repurchase extends Command
 
         $where2 = [];
         $where2[] = ['exp', Db::raw("customer_email in " . $sql1)];
-        $where3['payment_time'] = ['between',[$startTime1,$endTime2]];
+        $where3['payment_time'] = ['between', [$startTime2, $endTime2]];
         $sql2 = $this->order
             ->alias('t1')
             ->field('customer_email,count(*) as count')
@@ -188,7 +210,7 @@ class Repurchase extends Command
             ->where($where2)
             ->where($where3)
             ->group('customer_email')
-            ->having('count(*)> 1')
+            ->having('count(*)>= 1')
             ->buildSql();
         $userOrderInfo = $this->order->table([$sql2=>'t2'])->field('count(*) as count,sum(count) as num')->select();
         $orderCount = $userOrderInfo[0]['count'] ? $userOrderInfo[0]['count'] : 0;//复购客户数
@@ -216,24 +238,39 @@ class Repurchase extends Command
      */
     protected function getOldNewUser($site){
         $today = date('Y-m-d');
+        $nowMonth = date("Y-m", strtotime("first day of -1 month", strtotime($today)));
         $lastOneMonthStart = date("Y-m-01", strtotime("first day of -1 month", strtotime($today)));
         $lastOneMonthEnd = date("Y-m-d 23:59:59", strtotime("last day of -1 month", strtotime($today)));
+        $lastOneMonthTimeStart = strtotime($lastOneMonthStart);
+        $lastOneMonthTimeEnd = strtotime($lastOneMonthEnd);
+        $where['site'] = $site;
+        $where['order_type'] = 1;
+        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $where1['payment_time'] = ['between',[$lastOneMonthTimeStart,$lastOneMonthTimeEnd]];
+        $sql1 = $this->order
+            ->where($where)
+            ->where($where1)
+            ->field('customer_email')
+            ->buildSql();
+        $where2 = [];
+        $where2[] = ['exp', Db::raw("customer_email in " . $sql1)];
+        $where3['payment_time'] = ['<',$lastOneMonthTimeStart];
+        $sql2 = $this->order
+            ->alias('t1')
+            ->field('count(*) as count')
+            ->where($where)
+            ->where($where2)
+            ->where($where3)
+            ->group('customer_email')
+            ->having('count(*)>= 1')
+            ->buildSql();
+        $oldUserCount = $this->order->table([$sql2=>'t2'])->value('count(*) as count');
         //获取用户邮箱及用户数
-        $user = $this->getUser($site,$lastOneMonthStart,$lastOneMonthEnd);
-        $userCount = $user['count'];  //用户数
-        $oldUserCount = 0;  //老用户数
-        $newUserCount = 0;   //新用户数
-        foreach($user['email'] as $key=>$value){
-            $count = $this->getOldUserBuyNum($site,$value['customer_email'],$lastOneMonthStart);
-            if($count>=1){
-                $oldUserCount++;
-            }else{
-                $newUserCount++;
-            }
-        }
+        $userCount = $this->getUser($site,$lastOneMonthStart,$lastOneMonthEnd);  //用户数
+        $newUserCount = intval($userCount)-intval($oldUserCount);   //新用户数
         $oldUserRate = $userCount ? round($oldUserCount/$userCount*100,2) : 0; //老用户数占比
         //获取上个月的用户信息
-        $lastMonth = date("Y-m", strtotime("first day of -1 month", strtotime($today)));
+        $lastMonth = date("Y-m", strtotime("first day of -1 month", strtotime($lastOneMonthStart)));
         $lastData = Db::name('datacenter_supply_month_web')
             ->where('day_date',$lastMonth)
             ->where('site',$site)
@@ -250,33 +287,11 @@ class Repurchase extends Command
             'old_usernum_sequential'=>$oldSequential,
             'new_usernum_sequential'=>$newSequential,
         );
-        Db::name('datacenter_supply_month')
-            ->where('id',$lastData['id'])
+        Db::name('datacenter_supply_month_web')
+            ->where('day_date',$nowMonth)
+            ->where('site',$site)
             ->update($arr);
-        echo '站点：'.$site.' '.$lastData['day_date']." is ok"."\n";
+        echo '站点：'.$site.' '.$nowMonth." is ok"."\n";
         usleep(10000);
     }
-    /**
-     * 获取用户过去时间段内的购买次数
-     * @param $site   站点
-     * @param $email   邮箱
-     * @param $limitDate   过去时间段的临界时间
-     * @return mixed
-     * @author mjj
-     * @date   2021/4/1 10:13:53
-     */
-    protected function getOldUserBuyNum($site,$email,$limitDate){
-        $limitTime = strtotime($limitDate);
-        $where['customer_email'] = $email;
-        $where['site'] = $site;
-        $where['order_type'] = 1;
-        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-        $where['payment_time'] = ['<',$limitTime];
-        //购买次数
-        $count = $this->order
-            ->where($where)
-            ->count();
-        return $count;
-    }
-
 }

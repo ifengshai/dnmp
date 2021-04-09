@@ -1983,14 +1983,14 @@ class NewProduct extends Backend
             $total = $this->model->alias('a')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id', 'left')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
-                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
+                // ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
+                ->join(['fa_purchase_order_item' => 'e'], 'a.sku=e.sku', 'left')
+                ->join(['fa_purchase_order' => 'd'], 'e.purchase_id = d.id and b.id = d.replenish_id','left')
                 ->where($where)
                 ->where('is_show', 0)
-                // ->where(['d.purchase_status' => ['in', [0, 1, 2, 5, 6, 7, 9, 10]]])
                 ->where('a.replenish_id<>0')
+                ->where('d.replenish_id<>0')
                 ->where($map)
-                // ->group('d.id')
-                // ->group('a.sku')
                 ->order($sort, $order)
                 ->count();
 
@@ -1999,19 +1999,16 @@ class NewProduct extends Backend
                 ->field('a.sku,a.type,a.create_time,a.replenish_num,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id,(c.distribute_num) as distribute_count')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id', 'left')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
-                ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
+                ->join(['fa_purchase_order_item' => 'e'], 'a.sku=e.sku', 'left')
+                ->join(['fa_purchase_order' => 'd'], 'e.purchase_id = d.id and b.id = d.replenish_id','left')
                 ->where($where)
                 ->where('is_show', 0)
-                // ->where(['d.purchase_status' => ['in', [0, 1, 2, 5, 6, 7, 9, 10]]])
                 ->where('a.replenish_id<>0')
+                ->where('d.replenish_id<>0')
                 ->where($map)
-                // ->group('d.id')
-                // ->group('a.sku')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                // ->getLastSql();
                 ->select();
-            // dump($this->model->getLastSql());die;
             $list = collection($list)->toArray();
 
             // //根据采购单id 查询质检单

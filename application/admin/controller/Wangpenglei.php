@@ -882,4 +882,290 @@ class Wangpenglei extends Backend
         Excel::writeCsv($params, $headlist, '采购成本');
         die;
     }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/2 11:52
+     */
+    public function getFinanceCost()
+    {
+        ini_set('memory_limit', '1512M');
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $list = $finace_cost->where(['type' => 2, 'bill_type' => 8, 'frame_cost' => 0, 'createtime' => ['>', 1614528000]])->select();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $frame_cost = $this->order_frame_cost($v['order_number']);
+            $finace_cost->where(['id' => $v['id']])->update(['frame_cost' => $frame_cost]);
+            echo $v['id']."\n";
+            usleep(100000);
+        }
+    }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/2 11:52
+     */
+    public function getOrderGrandTotal()
+    {
+        ini_set('memory_limit', '1512M');
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $list = $finace_cost->where(['bill_type' => 1, 'income_amount' => 0, 'createtime' => ['>', 1614528000]])->select();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $params = [];
+        foreach ($list as $k => $v) {
+            //查询订单支付金额
+            $grand_total = $order->where(['increment_id' => $v['order_number'], 'site' => $v['site']])->value('grand_total');
+            $finace_cost->where(['id' => $v['id']])->update(['income_amount' => $grand_total, 'order_money' => $grand_total]);
+            echo $v['id']."\n";
+            usleep(100000);
+        }
+    }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since: 2021/4/2 11:52
+     */
+    public function getOrderGrandTotalTwo()
+    {
+        ini_set('memory_limit', '1512M');
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $list = $finace_cost->where(['bill_type' => 8, 'income_amount' => 0, 'createtime' => ['>', 1614528000]])->select();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $params = [];
+        foreach ($list as $k => $v) {
+            //查询订单支付金额
+            $grand_total = $order->where(['increment_id' => $v['order_number'], 'site' => $v['site']])->value('grand_total');
+            $finace_cost->where(['id' => $v['id']])->update(['income_amount' => $grand_total, 'order_money' => $grand_total]);
+            echo $v['id']."\n";
+            usleep(100000);
+        }
+    }
+
+    /**
+     * 订单镜架成本
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 18:20:45 
+     *
+     * @param [type] $order_id     订单id
+     * @param [type] $order_number 订单号
+     *
+     * @return void
+     */
+    protected function order_frame_cost($order_number = null)
+    {
+        $product_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        //查询订单子单号
+        $item_order_number = $order_item_process
+            ->alias('a')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->where(['increment_id' => $order_number])
+            ->column('item_order_number');
+
+        //判断是否有工单
+        $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
+
+        //查询更改类型为赠品
+        $goods_number = $worklist->alias('a')
+            ->join(['fa_work_order_change_sku' => 'b'], 'a.id=b.work_id')
+            ->where(['platform_order' => $order_number, 'work_status' => 6, 'change_type' => 4])
+            ->column('b.goods_number');
+        $workcost = 0;
+        if ($goods_number) {
+            //计算成本
+            $workdata = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price,c.purchase_total,purchase_num')
+                ->where(['code' => ['in', $goods_number]])
+                ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
+                ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
+                ->select();
+            foreach ($workdata as $k => $v) {
+                $workcost += $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_total'] / $v['purchase_num'];
+            }
+        }
+
+        //根据子单号查询条形码绑定关系
+        $list = $product_barcode_item->alias('a')->field('a.sku,b.price')
+            ->where(['item_order_number' => ['in', $item_order_number]])
+            ->join(['fa_in_stock_item' => 'b'], 'a.in_stock_id=b.in_stock_id and a.sku=b.sku')
+            ->select();
+        $list = collection($list)->toArray();
+        $allcost = 0;
+        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem();
+        foreach ($list as $k => $v) {
+            $purchase_price = $v['price'] > 0 ? $v['price'] : $v['price'];
+            $allcost += $purchase_price;
+        }
+
+        return $allcost + $workcost;
+    }
+
+
+    /**
+     * 镜片成本测试
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 16:31:21 
+     * @return void
+     */
+    public function order_lens_cost()
+    {
+        $order_id = 1388996;
+        $order_number = 100232168;
+        //判断是否有工单
+        $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $workchangesku = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
+        $work_id = $worklist->where(['platform_order' => $order_number, 'work_status' => 6])->order('id desc')->value('id');
+        //查询更改类型为更改镜片
+        $work_data = $workchangesku->where(['work_id' => $work_id, 'change_type' => 2])
+            ->field('od_sph,os_sph,od_cyl,os_cyl,os_add,od_add,lens_number,item_order_number')
+            ->select();
+        $work_data = collection($work_data)->toArray();
+        //工单计算镜片成本
+        if ($work_data) {
+            $where['item_order_number'] = ['not in', array_column($work_data, 'item_order_number')];
+            $lens_number = array_column($work_data, 'lens_number');
+            //查询镜片编码对应价格
+            $lens_price = new \app\admin\model\lens\LensPrice();
+            $lens_list = $lens_price->where(['lens_number' => ['in', $lens_number]])->order('price asc')->select();
+            $work_cost = 0;
+            foreach ($work_data as $k => $v) {
+                $data = [];
+                foreach ($lens_list as $key => $val) {
+                    $od_temp_cost = 0;
+                    $os_temp_cost = 0;
+                    //判断子单右眼是否已判断
+                    if (!in_array('od'.'-'.$val['lens_number'], $data)) {
+                        if ($v['od_cyl'] == '-0.25') {
+                            //右眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] == (float)$val['cyl_end'] && (float)$v['od_cyl'] == (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $od_temp_cost += $val['price'];
+                            } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $od_temp_cost += $val['price'];
+                            }
+                        } else {
+                            //右眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $od_temp_cost += $val['price'];
+                            }
+                        }
+                        if ($od_temp_cost > 0) {
+                            $data[] = 'od'.'-'.$v['lens_number'];
+                        }
+                    }
+
+                    //判断子单左眼是否已判断
+                    if (!in_array('os'.'-'.$val['lens_number'], $data)) {
+
+                        if ($v['os_cyl'] == '-0.25') {
+                            //左眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] == (float)$val['cyl_end'] && (float)$v['os_cyl'] == (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $os_temp_cost += $val['price'];
+                            } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $os_temp_cost += $val['price'];
+                            }
+                        } else {
+                            //左眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $os_temp_cost += $val['price'];
+                            }
+                        }
+
+                        if ($os_temp_cost > 0) {
+                            $data[] = 'os'.'-'.$v['lens_number'];
+                        }
+                    }
+                }
+            }
+        }
+
+        //查询处方数据
+        $order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $order_prescription = $order_item_process->alias('a')->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number')
+            ->where(['a.order_id' => $order_id, 'distribution_status' => 9])
+            ->where($where)
+            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+            ->select();
+
+        $order_prescription = collection($order_prescription)->toArray();
+        $lens_number = array_column($order_prescription, 'lens_number');
+        //查询镜片编码对应价格
+        $lens_price = new \app\admin\model\lens\LensPrice();
+        $lens_list = $lens_price->where(['lens_number' => ['in', $lens_number]])->order('price asc')->select();
+        $cost = 0;
+
+        foreach ($order_prescription as $k => $v) {
+            $data = [];
+            foreach ($lens_list as $key => $val) {
+                $od_temp_cost = 0;
+                $os_temp_cost = 0;
+                //判断子单右眼是否已判断
+                if (!in_array('od'.'-'.$val['lens_number'], $data)) {
+                    if ($v['od_cyl'] == '-0.25') {
+                        //右眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] == (float)$val['cyl_end'] && (float)$v['od_cyl'] == (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        }
+                    } else {
+                        //右眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        }
+                    }
+                    if ($od_temp_cost > 0) {
+                        $data[] = 'od'.'-'.$v['lens_number'];
+                    }
+                }
+
+                //判断子单左眼是否已判断
+                if (!in_array('os'.'-'.$val['lens_number'], $data)) {
+
+                    if ($v['os_cyl'] == '-0.25') {
+                        //左眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] == (float)$val['cyl_end'] && (float)$v['os_cyl'] == (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        }
+                    } else {
+                        //左眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        }
+                    }
+
+                    if ($os_temp_cost > 0) {
+                        $data[] = 'os'.'-'.$v['lens_number'];
+                    }
+                }
+            }
+        }
+
+        dump($cost);
+        dump($work_cost);
+        dump($cost + $work_cost);
+        die;
+    }
 }

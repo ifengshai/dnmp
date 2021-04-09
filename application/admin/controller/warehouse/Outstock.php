@@ -26,6 +26,13 @@ class Outstock extends Backend
 {
 
     /**
+     * 取消权限验证
+     * @var string[]
+     * @author crasphb
+     * @date   2021/4/7 15:46
+     */
+    protected $noNeedRight = ['batch_export_xls'];
+    /**
      * Outstock模型对象
      * @var \app\admin\model\warehouse\Outstock
      */
@@ -73,7 +80,7 @@ class Outstock extends Backend
             }
 
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['outstocktype'])
                 ->where($where)
@@ -711,7 +718,7 @@ class Outstock extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['outstocktype'])
                 ->where(['status' => 2])
@@ -1078,9 +1085,9 @@ class Outstock extends Backend
             $database_data = array_column($selectlist, 'code');
             foreach ($data as $check_k => $check_v) {
                 if (!in_array($check_v[2], $database_data)) {
-//                    $msg['code']=$check_v[2];
-//                    $msg['msg']='条码不存在';
-//                    array_push($result_msg,$msg);
+                    /*$msg['code']=$check_v[2];
+                    $msg['msg']='条码不存在';
+                    array_push($result_msg,$msg);*/
                     $this->error('条码[' . $check_v[2] . ']不存在');
                 }
             }
@@ -1105,6 +1112,28 @@ class Outstock extends Backend
                 $insert_out_stoce[$un_key][$v['code']] = $v['id'];
 
                 $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;
+
+                /*if ($v['library_status'] == 2) {
+                    $msg['code']=$v['code'];
+                    $msg['msg']='条码已出库';
+                    array_push($result_msg,$msg);
+                } elseif ($v['out_stock_id']) {
+                    $msg['code']=$v['code'];
+                    $msg['msg']='条码已存在出库单,请检查出库单' . $v['out_stock_id'];
+                    array_push($result_msg,$msg);
+                } elseif (!$v['location_id']) {
+                    $msg['code']=$v['code'];
+                    $msg['msg']='条码未绑定库区';
+                    array_push($result_msg,$msg);
+                } elseif (!$v['location_code_id']) {
+                    $msg['code']=$v['code'];
+                    $msg['msg']='条码未绑定库位';
+                    array_push($result_msg,$msg);
+                }else{
+                    $un_key = $v['location_id'] . $v['location_code_id'];
+                    $insert_out_stoce[$un_key][$v['code']] = $v['id'];
+                    $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;
+                }*/
 
             }
             $out_plat = $data[0][1];
@@ -1201,7 +1230,7 @@ class Outstock extends Backend
         if ($result_msg){
         $savename = '/uploads/批量出库剩余数据' . date("YmdHis", time());
         $this->writeCsv($result_msg,array('code','msg'),$savename,false);
-        return json(['msg' => "uploads",'code'=>1,'url' => "http://".$_SERVER['HTTP_HOST']."/".$savename.".csv"]);
+        return json(['msg' => "uploads",'code'=>1,'url' => "https://".$_SERVER['HTTP_HOST']."/".$savename.".csv"]);
         }else{
             $this->success("导入成功");
         }

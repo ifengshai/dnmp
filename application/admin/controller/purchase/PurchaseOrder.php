@@ -45,7 +45,7 @@ class PurchaseOrder extends Backend
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
      */
-    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback'];
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback','export_sku_many_type'];
 
     /**
      * 无需鉴权的方法,但需要登录
@@ -2712,4 +2712,32 @@ class PurchaseOrder extends Backend
 
         Excel::writeCsv($data, $headlist, $path.$fileName);
     }
+
+    //所有的 仓库SKU、最近一次采购单中对应的大货/现货
+    public function export_sku_many_type()
+    {
+        $purchase_order_item = Db::name('purchase_order_item')->order('id desc')->column('purchase_id,sku');
+        $purchase_order_item = array_unique($purchase_order_item);
+        $data = [];
+        foreach ($purchase_order_item as $key => $item) {
+            $where['b.sku'] = ['eq', $item];
+            $where['a.type'] = 2;
+            $count = Db::name('purchase_order')->alias('a')->join(['fa_purchase_order_item' => 'b'],'a.id=b.purchase_id')->where($where)->count();
+            $data[$key]['id'] = $key;
+            if ($count > 0) {
+                $data[$key]['type'] = '大货';
+            } else {
+                $data[$key]['type'] = '现货';
+            }
+            $data[$key]['sku'] = $item;
+        }
+        $data = array_values($data);
+        $headlist = ['id', '类型','SKU'];
+        $path = "/uploads/";
+        $fileName = '导出所有SKU对应的大货现货数据';
+
+        Excel::writeCsv($data, $headlist, $path.$fileName);
+    }
+
+
 }
