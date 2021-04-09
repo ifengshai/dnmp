@@ -3481,9 +3481,12 @@ class WorkOrderList extends Backend
                                     if (empty($bar_code_info)) {
                                         $this->error("序号为".$i."的，赠品条形码不存在");
                                     }
-                                    if ($bar_code_info['library_status'] == 2) {
-                                        $this->error("序号为".$i."的sku(".$change_sku.")，在库状态为否");
+                                    if ($row['work_platform'] != 13 || $row['work_platform'] != 14) {
+                                        if ($bar_code_info['library_status'] == 2 && ) {
+                                            $this->error("序号为".$i."的sku(".$change_sku.")，在库状态为否");
+                                        }
                                     }
+                                    
                                     if ($bar_code_info['sku'] != $platform_info_sku) {
                                         $this->error("序号为".$i."的sku(".$change_sku.")，条形码所绑定的sku与赠品sku不一致");
                                     }
