@@ -138,9 +138,13 @@ class PurchaseOrder extends Backend
     public function add($ids = null)
     {
         if ($ids) {
-            $replenish_list_detail = Db::name('new_product_replenish_list')->where('id', $ids)->find();
-            $supplier_detail = Db::name('supplier')->where('id', $replenish_list_detail['supplier_id'])->find();
-            $this->assign('supplier_detail', $supplier_detail);
+            $replenishListDetail = Db::name('new_product_replenish_list')
+                ->where('id', $ids)
+                ->find();
+            $supplierDetail = Db::name('supplier')
+                ->where('id', $replenishListDetail['supplier_id'])
+                ->find();
+            $this->assign('supplier_detail', $supplierDetail);
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -171,6 +175,9 @@ class PurchaseOrder extends Backend
                 }
                 $result = false;
                 Db::startTrans();
+                $this->model->startTrans();
+                $this->purchase_order_item->startTrans();
+                $this->batch_item->startTrans();
                 try {
                     //是否采用模型验证
                     if ($this->modelValidate) {
@@ -180,6 +187,13 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    foreach (array_filter($sku) as $k => $v) {
+                        $item = new \app\admin\model\itemmanage\Item();
+                        $itemDetail = $item->where('sku', $v)->find();
+                        if (!$itemDetail) {
+                            $this->error('提报的商品不存在');
+                        }
+                    }
                     $num = $this->request->post("purchase_num/a");
                     //执行过滤空值
                     array_walk($sku, 'trim_value');
@@ -190,13 +204,16 @@ class PurchaseOrder extends Backend
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $params['purchase_name'] = trim($params['purchase_name']);
 
-                    $batch_sku = $this->request->post("batch_sku/a");
-                    $arrival_num = $this->request->post("arrival_num/a");
-                    if ($arrival_num) {
+                    $batchSku = $this->request->post("batch_sku/a");
+                    $arrivalNum = $this->request->post("arrival_num/a");
+                    if ($arrivalNum) {
                         //现在分批到货数量必须等于采购数量
                         $arr = [];
-                        foreach ($arrival_num as $k => $v) {
+                        foreach ($arrivalNum as $k => $v) {
                             foreach ($v as $key => $val) {
+                                if (empty($val) || !is_numeric($val)) {
+                                    $this->error('分批到货数量不能为空且不能为非数字');
+                                }
                                 $arr[$key] += $val;
                             }
                         }
@@ -210,66 +227,77 @@ class PurchaseOrder extends Backend
 
                     //添加采购单商品信息
                     if ($result !== false) {
-                        $product_name = $this->request->post("product_name/a");
-                        $supplier_sku = $this->request->post("supplier_sku/a");
+                        $productName = $this->request->post("product_name/a");
+                        $supplierSku = $this->request->post("supplier_sku/a");
 
                         $price = $this->request->post("purchase_price/a");
                         $total = $this->request->post("purchase_total/a");
-                        $replenish_list_id = $this->request->post("replenish_list_id/a");
+                        $replenishListId = $this->request->post("replenish_list_id/a");
 
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
-                            $data[$k]['supplier_sku'] = trim($supplier_sku[$k]);
-                            $data[$k]['product_name'] = $product_name[$k];
+                            $data[$k]['supplier_sku'] = trim($supplierSku[$k]);
+                            $data[$k]['product_name'] = $productName[$k];
                             $data[$k]['purchase_num'] = $num[$k];
                             $data[$k]['purchase_price'] = $price[$k];
                             $data[$k]['purchase_total'] = $total[$k];
                             $data[$k]['purchase_id'] = $this->model->id;
-                            $data[$k]['replenish_list_id'] = $replenish_list_id[$k];
+                            $data[$k]['replenish_list_id'] = $replenishListId[$k];
                             $data[$k]['purchase_order_number'] = $params['purchase_number'];
                         }
                         //批量添加
                         $this->purchase_order_item->saveAll($data);
 
                         //添加分批数据
-                        $batch_arrival_time = $this->request->post("batch_arrival_time/a");
-                        $batch_sku = $this->request->post("batch_sku/a");
-                        $arrival_num = $this->request->post("arrival_num/a");
+                        $batchArrivalTime = $this->request->post("batch_arrival_time/a");
+                        $batchSku = $this->request->post("batch_sku/a");
+                        $arrivalNum = $this->request->post("arrival_num/a");
                         //判断是否有分批数据
-                        if ($batch_arrival_time && count($batch_arrival_time) > 0) {
+                        if ($batchArrivalTime && count($batchArrivalTime) > 0) {
                             $i = 0;
-                            foreach (array_filter($batch_arrival_time) as $k => $v) {
-                                $batch_data['purchase_id'] = $this->model->id;
-                                $batch_data['arrival_time'] = $v;
-                                $batch_data['batch'] = $i + 1;
-                                $batch_data['create_person'] = session('admin.nickname');
-                                $batch_data['create_time'] = date('Y-m-d H:i:s');
-                                $batch_id = $this->batch->insertGetId($batch_data);
+                            foreach (array_filter($batchArrivalTime) as $k => $v) {
+                                $batchData['purchase_id'] = $this->model->id;
+                                $batchData['arrival_time'] = $v;
+                                $batchData['batch'] = $i + 1;
+                                $batchData['create_person'] = session('admin.nickname');
+                                $batchData['create_time'] = date('Y-m-d H:i:s');
+                                $batchId = $this->batch->insertGetId($batchData);
                                 $i++;
                                 $list = [];
-                                foreach ($batch_sku[$k] as $key => $val) {
+                                foreach ($batchSku[$k] as $key => $val) {
                                     if (!$val) {
                                         continue;
                                     }
                                     $list[$key]['sku'] = $val;
-                                    $list[$key]['arrival_num'] = $arrival_num[$k][$key];
-                                    $list[$key]['purchase_batch_id'] = $batch_id;
+                                    $list[$key]['arrival_num'] = $arrivalNum[$k][$key];
+                                    $list[$key]['purchase_batch_id'] = $batchId;
                                 }
                                 $this->batch_item->saveAll($list);
                             }
                         }
                     }
-
+                    $this->model->commit();
+                    $this->purchase_order_item->commit();
+                    $this->batch_item->commit();
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
+                    $this->model->rollback();
+                    $this->purchase_order_item->rollback();
+                    $this->batch_item->rollback();
                     $this->error($e->getMessage());
                 } catch (PDOException $e) {
                     Db::rollback();
+                    $this->model->rollback();
+                    $this->purchase_order_item->rollback();
+                    $this->batch_item->rollback();
                     $this->error($e->getMessage());
                 } catch (Exception $e) {
                     Db::rollback();
+                    $this->model->rollback();
+                    $this->purchase_order_item->rollback();
+                    $this->batch_item->rollback();
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {
@@ -280,30 +308,8 @@ class PurchaseOrder extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
-
-        // //查询新品数据
-        // $new_product_ids = $this->request->get('new_product_ids');
-        // if ($new_product_ids) {
-        //     //查询所选择的数据
-        //     $where['new_product.id'] = ['in', $new_product_ids];
-        //     $row = (new NewProduct())->where($where)->with(['newproductattribute'])->select();
-        //     $row = collection($row)->toArray();
-        //     foreach ($row as $v) {
-        //         if ($v['item_status'] != 1) {
-        //             $this->error(__('只有待选品状态能够创建！！'), url('new_product/index'));
-        //         }
-        //     }
-
-        //     //提取供应商id
-        //     $supplier = array_unique(array_column($row, 'supplier_id'));
-        //     if (count($supplier) > 1) {
-        //         $this->error(__('必须选择相同的供应商！！'), url('new_product/index'));
-        //     }
-        //     $this->assign('row', $row);
-        //     $this->assign('is_new_product', 1);
-        // }
-
         $label = input('label');
+        //从补货需求单处理页面进来的采购单
         if ($label == 'replenish') {
             $ids = $ids ? $ids : input('ids');
             $this->list = new \app\admin\model\purchase\NewProductReplenishList;
@@ -320,11 +326,11 @@ class PurchaseOrder extends Backend
                 //查询供应商SKU
                 $v['supplier_sku'] = $supplier->getSupplierSkuData($v['sku'], $v['supplier_id']);
             }
-            $new_old = $item->where('sku', $list[0]['sku'])->value('is_new');
+            $newOld = $item->where('sku', $list[0]['sku'])->value('is_new');
             if (count(array_unique(array_column($list, 'supplier_id'))) > 1) {
                 $this->error('必须选择相同的供应商！！');
             }
-            $this->assign('new_old', $new_old);
+            $this->assign('new_old', $newOld);
             $this->assign('list', $list);
         }
 
@@ -335,12 +341,12 @@ class PurchaseOrder extends Backend
 
         //查询合同
         $contract = new \app\admin\model\purchase\Contract;
-        $contract_data = $contract->getContractData();
-        $this->assign('contract_data', $contract_data);
+        $contractData = $contract->getContractData();
+        $this->assign('contract_data', $contractData);
 
         //生成采购编号
-        $purchase_number = 'PO'.date('YmdHis').rand(100, 999).rand(100, 999);
-        $this->assign('purchase_number', $purchase_number);
+        $purchaseNumber = 'PO'.date('YmdHis').rand(100, 999).rand(100, 999);
+        $this->assign('purchase_number', $purchaseNumber);
         $this->assignconfig('newdatetime', date('Y-m-d H:i:s'));
 
         return $this->view->fetch();
@@ -455,6 +461,9 @@ class PurchaseOrder extends Backend
                 }
                 $result = false;
                 Db::startTrans();
+                $this->model->startTrans();
+                $this->purchase_order_item->startTrans();
+                $this->batch_item->startTrans();
                 try {
                     //是否采用模型验证
                     if ($this->modelValidate) {
@@ -464,6 +473,13 @@ class PurchaseOrder extends Backend
                     }
 
                     $sku = $this->request->post("sku/a");
+                    foreach (array_filter($sku) as $k => $v) {
+                        $item = new \app\admin\model\itemmanage\Item();
+                        $itemDetail = $item->where('sku', $v)->find();
+                        if (!$itemDetail) {
+                            $this->error('提报的商品不存在');
+                        }
+                    }
                     $num = $this->request->post("purchase_num/a");
                     //执行过滤空值
                     array_walk($sku, 'trim_value');
@@ -471,11 +487,11 @@ class PurchaseOrder extends Backend
                         $this->error('sku不能为空！！');
                     }
 
-                    $arrival_num = $this->request->post("arrival_num/a");
-                    if ($arrival_num) {
+                    $arrivalNum = $this->request->post("arrival_num/a");
+                    if ($arrivalNum) {
                         //现在分批到货数量必须等于采购数量
                         $arr = [];
-                        foreach ($arrival_num as $k => $v) {
+                        foreach ($arrivalNum as $k => $v) {
                             foreach ($v as $key => $val) {
                                 $arr[$key] += $val;
                             }
@@ -491,23 +507,23 @@ class PurchaseOrder extends Backend
 
                     //添加合同产品
                     if ($result !== false) {
-                        $product_name = $this->request->post("product_name/a");
-                        $supplier_sku = $this->request->post("supplier_sku/a");
+                        $productName = $this->request->post("product_name/a");
+                        $supplierSku = $this->request->post("supplier_sku/a");
 
                         $price = $this->request->post("purchase_price/a");
                         $total = $this->request->post("purchase_total/a");
-                        $item_id = $this->request->post("item_id/a");
+                        $itemId = $this->request->post("item_id/a");
 
                         $data = [];
                         foreach (array_filter($sku) as $k => $v) {
                             $data[$k]['sku'] = $v;
-                            $data[$k]['supplier_sku'] = trim($supplier_sku[$k]);
-                            $data[$k]['product_name'] = $product_name[$k];
+                            $data[$k]['supplier_sku'] = trim($supplierSku[$k]);
+                            $data[$k]['product_name'] = $productName[$k];
                             $data[$k]['purchase_num'] = $num[$k];
                             $data[$k]['purchase_price'] = $price[$k];
                             $data[$k]['purchase_total'] = $total[$k];
-                            if (@$item_id[$k]) {
-                                $data[$k]['id'] = $item_id[$k];
+                            if (@$itemId[$k]) {
+                                $data[$k]['id'] = $itemId[$k];
                             } else {
                                 $data[$k]['purchase_id'] = $ids;
                             }
@@ -516,45 +532,45 @@ class PurchaseOrder extends Backend
                         $this->purchase_order_item->allowField(true)->saveAll($data);
 
                         //添加分批数据
-                        $batch_arrival_time = $this->request->post("batch_arrival_time/a");
+                        $batchArrivalTime = $this->request->post("batch_arrival_time/a");
 
-                        $batch_id = $this->request->post("batch_id/a");
-                        $batch_sku = $this->request->post("batch_sku/a") ?: [];
-                        $batch_item_id = $this->request->post("batch_item_id/a");
+                        $batchId = $this->request->post("batch_id/a");
+                        $batchSku = $this->request->post("batch_sku/a") ?: [];
+                        $batchItemId = $this->request->post("batch_item_id/a");
 
                         //判断是否有分批数据
-                        if ($batch_arrival_time && count($batch_arrival_time) > 0) {
-                            $batch_sku = $batch_sku ? array_values($batch_sku) : [];
+                        if ($batchArrivalTime && count($batchArrivalTime) > 0) {
+                            $batchSku = $batchSku ? array_values($batchSku) : [];
                             $i = 0;
-                            foreach (array_filter($batch_arrival_time) as $k => $v) {
+                            foreach (array_filter($batchArrivalTime) as $k => $v) {
                                 //判断是否存在id 如果存在则为编辑
-                                $batch_data = [];
-                                if ($batch_id[$k]) {
-                                    $batch_data['arrival_time'] = $v;
-                                    $this->batch->where(['id' => $batch_id[$k]])->update($batch_data);
+                                $batchData = [];
+                                if ($batchId[$k]) {
+                                    $batchData['arrival_time'] = $v;
+                                    $this->batch->where(['id' => $batchId[$k]])->update($batchData);
                                 } else {
-                                    $batch_data['purchase_id'] = $ids;
-                                    $batch_data['arrival_time'] = $v;
-                                    $batch_data['batch'] = $i + 1;
-                                    $batch_data['create_person'] = session('admin.nickname');
-                                    $batch_data['create_time'] = date('Y-m-d H:i:s');
+                                    $batchData['purchase_id'] = $ids;
+                                    $batchData['arrival_time'] = $v;
+                                    $batchData['batch'] = $i + 1;
+                                    $batchData['create_person'] = session('admin.nickname');
+                                    $batchData['create_time'] = date('Y-m-d H:i:s');
 
-                                    $batch_get_id = $this->batch->insertGetId($batch_data);
+                                    $batchGetId = $this->batch->insertGetId($batchData);
                                 }
                                 $i++;
                                 $list = [];
-                                $arrival_num = $arrival_num ? array_values($arrival_num) : []; //数组默认首位下标不是0 需要转一下
-                                foreach ($batch_sku[$k] as $key => $val) {
-                                    if (!$val || !$arrival_num[$k][$key]) {
+                                $arrivalNum = $arrivalNum ? array_values($arrivalNum) : []; //数组默认首位下标不是0 需要转一下
+                                foreach ($batchSku[$k] as $key => $val) {
+                                    if (!$val || !$arrivalNum[$k][$key]) {
                                         continue;
                                     }
-                                    if ($batch_item_id[$k][$key]) {
-                                        $list[$key]['id'] = $batch_item_id[$k][$key];
+                                    if ($batchItemId[$k][$key]) {
+                                        $list[$key]['id'] = $batchItemId[$k][$key];
                                     } else {
-                                        $list[$key]['purchase_batch_id'] = $batch_get_id;
+                                        $list[$key]['purchase_batch_id'] = $batchGetId;
                                         $list[$key]['sku'] = $val;
                                     }
-                                    $list[$key]['arrival_num'] = $arrival_num[$k][$key];
+                                    $list[$key]['arrival_num'] = $arrivalNum[$k][$key];
                                 }
                                 $this->batch_item->allowField(true)->saveAll($list);
                             }
@@ -562,14 +578,26 @@ class PurchaseOrder extends Backend
                     }
 
                     Db::commit();
+                    $this->model->commit();
+                    $this->purchase_order_item->commit();
+                    $this->batch_item->commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
+                    $this->model->rollback();
+                    $this->purchase_order_item->rollback();
+                    $this->batch_item->rollback();
                     $this->error($e->getMessage());
                 } catch (PDOException $e) {
                     Db::rollback();
+                    $this->model->rollback();
+                    $this->purchase_order_item->rollback();
+                    $this->batch_item->rollback();
                     $this->error($e->getMessage());
                 } catch (Exception $e) {
                     Db::rollback();
+                    $this->model->rollback();
+                    $this->purchase_order_item->rollback();
+                    $this->batch_item->rollback();
                     $this->error($e->getMessage());
                 }
                 if ($result !== false) {

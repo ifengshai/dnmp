@@ -10,7 +10,6 @@ use app\admin\model\warehouse\Outstock;
 use app\admin\model\warehouse\OutStockItem;
 use app\common\controller\Backend;
 use fast\Excel;
-use Monolog\Handler\IFTTTHandler;
 use think\Request;
 use think\exception\PDOException;
 use think\Exception;
@@ -148,6 +147,8 @@ class Distribution extends Backend
      * @access protected
      */
     protected $_product_bar_code_item = null;
+
+    protected $_wave_order;
 
     public function _initialize()
     {
@@ -2464,7 +2465,6 @@ class Distribution extends Backend
         die;
     }
 
-
     /**
      * 标记已打印
      * @Description
@@ -2474,16 +2474,6 @@ class Distribution extends Backend
      */
     public function tag_printed()
     {
-
-        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-//        //拣货区盘点时不能操作
-//        $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
-//        if ($count > 0) {
-//            $this->error(__('存在正在盘点的单据,暂无法审核'));
-//        }
-        /****************************end*****************************************/
-
-
         $ids = input('id_params/a');
         !$ids && $this->error('请选择要标记的数据');
         //拣货区盘点时不能操作
@@ -2524,33 +2514,31 @@ class Distribution extends Backend
             foreach ($distribution_value as $key => $value) {
                 $value['item_order_number'] = substr($value['item_order_number'], 0, strpos($value['item_order_number'], '-'));
                 Order::rulesto_adjust($value['magento_order_id'], $value['item_order_number'], $value['site'], 2, 2);
-                $wave_order_id = $value['wave_order_id'];
             }
+            $wave_order_id = array_unique(array_column($distribution_value, 'wave_order_id'));
             //标记状态
             $this->model->where(['id' => ['in', $ids]])->update(['distribution_status' => 2, 'is_print' => 1]);
 
-            //添加波次单打印状态为已打印
-            $count = $this->model->alias('a')
-                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-                ->where(['wave_order_id' => $wave_order_id, 'is_print' => 0, 'distribution_status' => ['<>', 0]])
-                ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']]])
-                ->count();
-            if ($count > 0) {
-                $status = 1;
-            } elseif ($count == 0) {
-                $status = 2;
+            foreach ($wave_order_id as $v) {
+                //添加波次单打印状态为已打印
+                $count = $this->model->alias('a')
+                    ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                    ->where(['wave_order_id' => $v, 'is_print' => 0, 'distribution_status' => ['<>', 0]])
+                    ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']]])
+                    ->count();
+                if ($count > 0) {
+                    $status = 1;
+                } elseif ($count == 0) {
+                    $status = 2;
+                }
+                $this->_wave_order->where(['id' => $v])->update(['status' => $status]);
             }
-            $this->_wave_order->where(['id' => $wave_order_id])->update(['status' => $status]);
-
             //记录配货日志
             $admin = (object)session('admin');
             DistributionLog::record($admin, $ids, 1, '标记打印完成');
 
             $this->model->commit();
-        } catch (PDOException $e) {
-            $this->model->rollback();
-            $this->error($e->getMessage());
-        } catch (Exception $e) {
+        } catch (PDOException | Exception $e) {
             $this->model->rollback();
             $this->error($e->getMessage());
         }
@@ -2567,19 +2555,32 @@ class Distribution extends Backend
      */
     public function batch_print_label()
     {
-        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-        //拣货区盘点时不能操作
-        $count = $this->_inventory->alias('a')->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3])->count();
-        if ($count > 0) {
-            $this->error(__('存在正在盘点的单据,暂无法审核'));
-        }
-        /****************************end*****************************************/
-
         //禁用默认模板
         $this->view->engine->layout(false);
         ob_start();
         $ids = input('ids');
         !$ids && $this->error('缺少参数', url('index?ref=addtabs'));
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $sku = $this->model->where(['id' => ['in', $ids]])->column('sku');
+        $wheSku['platform_sku'] = ['in', $sku];
+        //转换sku
+        $itemPlatformSku = new ItemPlatformSku();
+        $trueSku = $itemPlatformSku->where($wheSku)->column('sku');
+        $whe['sku'] = ['in', $trueSku];
+        $barcodeData = $this->_product_bar_code_item->where($whe)->column('location_code');
+        if (!empty($barcodeData)) {
+            $count = $this->_inventory->alias('a')
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
+                ->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodeData], 'area_id' => '3'])
+                ->count();
+            if ($count > 0) {
+                $this->error(__('存在正在盘点的单据,暂无法审核'));
+            }
+        }
+        /****************************end*****************************************/
 
         //获取子订单列表
         $list = $this->model
@@ -2590,13 +2591,10 @@ class Distribution extends Backend
             ->order('a.picking_sort asc')
             ->select();
         $list = collection($list)->toArray();
-        $order_ids = array_column($list, 'order_id');
-
-        //查询sku映射表
-        // $item_res = $this->_item_platform_sku->cache(3600)->where(['platform_sku' => ['in', array_unique($sku_arr)]])->column('sku', 'platform_sku');
+        $orderIds = array_column($list, 'order_id');
 
         //获取订单数据
-        $order_list = $this->_new_order->where(['id' => ['in', array_unique($order_ids)]])->column('total_qty_ordered,increment_id', 'id');
+        $order_list = $this->_new_order->where(['id' => ['in', array_unique($orderIds)]])->column('total_qty_ordered,increment_id', 'id');
 
         //查询产品货位号
         $cargo_number = $this->_stock_house->alias('a')->where(['status' => 1, 'b.is_del' => 1, 'a.type' => 1, 'a.area_id' => 3])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');

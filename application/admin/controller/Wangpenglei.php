@@ -1168,4 +1168,30 @@ class Wangpenglei extends Backend
         dump($cost + $work_cost);
         die;
     }
+
+    /**
+     * 处理波次单数据
+     * @author wpl
+     * @date   2021/4/9 14:35
+     */
+    public function process_wave_data()
+    {
+        $wave = new \app\admin\model\order\order\WaveOrder();
+        $orderItem = new \app\admin\model\order\order\NewOrderItemProcess();
+        $list = $wave->where(['status' => 1])->select();
+        foreach ($list as $k => $v) {
+            //添加波次单打印状态为已打印
+            $count = $orderItem->alias('a')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->where(['wave_order_id' => $v['id'], 'is_print' => 0, 'distribution_status' => ['<>', 0]])
+                ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']]])
+                ->count();
+            if ($count > 0) {
+                $status = 1;
+            } elseif ($count == 0) {
+                $status = 2;
+            }
+            $wave->where(['id' => $v['id']])->update(['status' => $status]);
+        }
+    }
 }
