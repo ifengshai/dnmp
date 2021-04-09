@@ -50,6 +50,12 @@ class GoodsStockLog extends Backend
                 unset($filter['order_number']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
+            if ($filter['create_time']){
+                $create_time = explode(' - ',$filter['create_time']);
+                $map['create_time'] = ['between',[strtotime($create_time[0]),strtotime($create_time[1])]];
+                unset($filter['order_number']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($map)
