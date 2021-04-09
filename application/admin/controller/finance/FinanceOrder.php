@@ -302,24 +302,22 @@ class FinanceOrder extends Backend
         [$where] = $this->buildparams();
         $saveName = '/uploads/财务订单报表' . date('YmdHis');
         $allCount = $this->finance_cost->field('sum(if ((action_type=1 and type=2),frame_cost,0)) as frame_cost_z,sum(if ((action_type=1 and type=2),lens_cost,0)) as lens_cost_z,sum(if ((action_type=2 and type=2),frame_cost,0)) as frame_cost_j,sum(if ((action_type=2 and type=2),lens_cost,0)) as lens_cost_j,sum(if ((action_type=1 and type=1),income_amount,0)) as income_amount_zs
-,sum(if ((action_type=2 and type=1),lens_cost,0)) as lens_cost_js,a.id,a.order_number,a.site,a.order_type,a.order_money,a.order_currency_code,a.payment_time,a.createtime,b.fi_actual_payment_fee')
+,sum(if ((action_type=2 and type=1),lens_cost,0)) as lens_cost_js,id,order_number,site,order_type,order_money,order_currency_code,payment_time,createtime')
             ->where($where)
-            ->where(['a.bill_type' => ['neq', 9]])
-            ->where(['a.bill_type' => ['neq', 11]])
+            ->where(['bill_type' => ['neq', 9]])
+            ->where(['bill_type' => ['neq', 11]])
             ->where($map)
-            ->alias('a')
-            ->join('logistics_delivery.ld_delivery_order_finance on b.increment_id=a.order_number')
-            ->group('a.order_number')
+            ->group('order_number')
             ->count();
         $page = ceil($allCount / 15000);
         for($i = 0;$i<$page;$i++){
             $list = $this->finance_cost->field('sum(if ((action_type=1 and type=2),frame_cost,0)) as frame_cost_z,sum(if ((action_type=1 and type=2),lens_cost,0)) as lens_cost_z,sum(if ((action_type=2 and type=2),frame_cost,0)) as frame_cost_j,sum(if ((action_type=2 and type=2),lens_cost,0)) as lens_cost_j,sum(if ((action_type=1 and type=1),income_amount,0)) as income_amount_zs
-,sum(if ((action_type=2 and type=1),lens_cost,0)) as lens_cost_js,a.id,a.order_number,a.site,a.order_type,a.order_money,a.order_currency_code,a.payment_time,a.createtime,b.fi_actual_payment_fee')
+,sum(if ((action_type=2 and type=1),lens_cost,0)) as lens_cost_js,id,order_number,site,order_type,order_money,order_currency_code,payment_time,createtime')
                 ->where($where)
-                ->where(['a.bill_type' => ['neq', 9]])
-                ->where(['a.bill_type' => ['neq', 11]])
+                ->where(['bill_type' => ['neq', 9]])
+                ->where(['bill_type' => ['neq', 11]])
                 ->where($map)
-                ->group('a.order_number')
+                ->group('order_number')
                 ->select();
             $list = collection($list)->toArray();
             $order_number = array_column($list, 'order_number');
