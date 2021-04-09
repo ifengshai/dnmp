@@ -35,6 +35,7 @@ class LocationInventory extends Backend
      * @var array
      */
     protected $noNeedRight = ['print_label,batch_export_xls'];
+    protected $noNeedLogin = ['batch_export_xls'];
 
     public function _initialize()
     {
@@ -138,7 +139,6 @@ class LocationInventory extends Backend
             ->alias('fss')
             ->join(['fa_store_house' => 'fsh'], 'fss.store_id=fsh.id')
             ->field("fss.sku,fsh.area_id,fsh.coding")
-            ->limit(1)
             ->select();
         $list = collection($list)->toArray();
 
