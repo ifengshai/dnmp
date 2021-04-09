@@ -34,7 +34,7 @@ class LocationInventory extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['print_label'];
+    protected $noNeedRight = ['print_label,batch_export_xls'];
 
     public function _initialize()
     {
