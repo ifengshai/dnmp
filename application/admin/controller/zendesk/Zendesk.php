@@ -1450,10 +1450,11 @@ DOC;
      */
     public function asyncTicketHttps()
     {
-        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
+        $params = input('type');
+        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate($params);
 
         //判断是否存在
-        $nowTicketsIds = $this->model->where("type",1)->column('ticket_id');
+        $nowTicketsIds = $this->model->where("type", 1)->column('ticket_id');
 
         //求交集的更新
 
