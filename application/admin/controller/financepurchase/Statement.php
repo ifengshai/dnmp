@@ -701,7 +701,7 @@ class Statement extends Backend
                                 ->field('round(o.purchase_total/purchase_num,2) purchase_price,actual_purchase_price,i.sku')
                                 ->find();
                             //实际采购成本和预估成本不一致，冲减差值
-                            if($purchaseOrder['purchase_price'] != $purchaseOrder['actual_purchase_price']){
+                            if($purchaseOrder['purchase_price'] != $actualPurchasePrice){
                                 //计算订单出库数量
                                 $outCount1 = $this->item
                                     ->where('purchase_id', $vv['purchase_id'])
@@ -723,7 +723,7 @@ class Statement extends Backend
                                 //误差数量
                                 $result['count'] = $count-$outCount;
                                 //误差单价
-                                $result['price'] = round($purchaseOrder['actual_purchase_price']-$purchaseOrder['purchase_price'],2);
+                                $result['price'] = round($actualPurchasePrice-$purchaseOrder['purchase_price'],2);
                                 //误差总金额
                                 $result['total'] = round($result['count']*$result['price'],2);
                                 Db::name('finance_cost_error')
@@ -784,8 +784,8 @@ class Statement extends Backend
                                         //增加成本核算记录
                                         $arr2['type'] = 2;   //类型：成本
                                         $arr2['bill_type'] = 8;    //单据类型：实际结算金额
-                                        $arr2['frame_cost'] = round($costOrderInfo['frame_cost'] + $ss1 * ($purchaseOrder['actual_purchase_price'] - $purchaseOrder['purchase_price']), 2);    //镜架成本：剩余实际单价*剩余数量//镜架成本：（实际单价-预估）*数量+原订单金额2021.4.8修改逻辑
-                                        Log::write($costOrderInfo['frame_cost'].'/'.$ss1.'/'.$purchaseOrder['actual_purchase_price'].'/'.$purchaseOrder['purchase_price']);
+                                        $arr2['frame_cost'] = round($costOrderInfo['frame_cost'] + $ss1 * ($actualPurchasePrice - $purchaseOrder['purchase_price']), 2);    //镜架成本：剩余实际单价*剩余数量//镜架成本：（实际单价-预估）*数量+原订单金额2021.4.8修改逻辑
+                                        Log::write($costOrderInfo['frame_cost'].'/'.$ss1.'/'.$actualPurchasePrice.'/'.$purchaseOrder['purchase_price']);
                                         $arr2['order_number'] = $rr1;  //订单号
                                         $arr2['site'] = $costOrderInfo['site'];  //站点
                                         $arr2['order_type'] = $costOrderInfo['order_type'];  //订单类型
@@ -829,7 +829,7 @@ class Statement extends Backend
                                         //增加成本核算记录
                                         $arr4['type'] = 2;   //类型：成本
                                         $arr4['bill_type'] = 9;    //单据类型：实际结算金额
-                                        $arr4['frame_cost'] = round($ss2['count']*$purchaseOrder['actual_purchase_price'],2);    //镜架成本：剩余实际单价*剩余数量
+                                        $arr4['frame_cost'] = round($ss2['count']*$actualPurchasePrice,2);    //镜架成本：剩余实际单价*剩余数量
                                         $arr4['order_number'] = $ss2['out_stock_number'];  //出库单号
                                         $arr4['out_stock_id'] = $ss2['id'];  //出库单id
                                         $arr4['action_type'] = 1;  //动作类型：增加
