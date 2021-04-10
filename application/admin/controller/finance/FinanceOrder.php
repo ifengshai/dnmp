@@ -324,7 +324,7 @@ class FinanceOrder extends Backend
             ->with('DeliveryOrderFinance')
             ->group('a.order_number')
             ->count();
-        $page = ceil($allCount / 15000);
+        $page = ceil($allCount / 25000);
         for($i = 0;$i<$page;$i++){
             $list = $this->finance_cost->alias('a')->field('sum(if ((action_type=1 and type=2),frame_cost,0)) as frame_cost_z,sum(if ((action_type=1 and type=2),lens_cost,0)) as lens_cost_z,sum(if ((action_type=2 and type=2),frame_cost,0)) as frame_cost_j,sum(if ((action_type=2 and type=2),lens_cost,0)) as lens_cost_j,sum(if ((action_type=1 and type=1),income_amount,0)) as income_amount_zs
 ,sum(if ((action_type=2 and type=1),lens_cost,0)) as lens_cost_js,a.id,a.order_number,a.site,a.order_type,a.order_money,a.order_currency_code,a.payment_time,a.createtime')
