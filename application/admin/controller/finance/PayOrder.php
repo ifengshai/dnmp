@@ -403,7 +403,7 @@ class PayOrder extends Backend
                         ->alias('i')
                         ->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')
                         ->where($map)
-                        ->where('i.pay_type', 'in', ['1,2'])
+                        ->where('i.pay_type', 'in', [1, 2])
                         ->value('pay_grand_total');  //首付金额
                     $total2 = $this->payorder_item
                         ->alias('i')
@@ -420,27 +420,6 @@ class PayOrder extends Backend
                         ->where('c.purchase_id', $v)
                         ->sum('i.in_stock_num');
                     $data['actual_purchase_price'] = $count ? round($total / $count, 2) : 0;
-                    if ($v == 11550) {
-                        $total1 = $this->payorder_item
-                            ->alias('i')
-                            ->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')
-                            ->where($map)
-                            ->where('i.pay_type', 'in', ['1,2'])
-                            ->field('pay_grand_total')
-                            ->select(false);  //首付金额
-                        dump($total1);
-                        $total2 = $this->payorder_item
-                            ->alias('i')
-                            ->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')
-                            ->where($map)
-                            ->where('i.pay_type', 3)
-                            ->field('sum(wait_statement_total)')->select(false);
-                        dump($total2);
-                        dump($total);
-                        dump($data['actual_purchase_price']);
-                        dump($count);
-                        exit;
-                    }
                     $this->purchase_item
                         ->where('purchase_id', $v)
                         ->update($data);
