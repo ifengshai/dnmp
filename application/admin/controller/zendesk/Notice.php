@@ -1279,7 +1279,7 @@ class Notice extends Controller
      * @throws \Zendesk\API\Exceptions\MissingParametersException
      * @throws \Zendesk\API\Exceptions\RouteException
      */
-    public function asyncUpdate($type)
+    public function asyncUpdate()
     {
 
         $params = 'type:ticket updated_at>=2021-03-09T04:00:00Z updated_at<=2021-03-09T23:59:59Z order_by:updated_at sort:asc';
