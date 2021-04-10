@@ -21,7 +21,7 @@ use think\Model;
  */
 class DeliveryOrderFinance extends Model
 {
-//数据库
+    //数据库
     protected $connection = 'database.db_delivery';
 
 

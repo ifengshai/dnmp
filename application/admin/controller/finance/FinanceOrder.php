@@ -315,17 +315,13 @@ class FinanceOrder extends Backend
             $where['a.createtime'] = ['between', [strtotime($createtime[0]),strtotime($createtime[1])]];
         }
         $headList = ['订单号', '站点', '订单类型', '支付金额', '订单总金额', '币种', '镜架成本', '镜片成本', '物流成本', '支付时间', '创建时间'];
-        //查询物流成本
-        $model = Db::connect('database.db_delivery');
         $saveName = '/uploads/财务订单报表' . date('YmdHis');
         $allCount = $this->finance_cost->alias('a')->field('sum(if ((action_type=1 and type=2),frame_cost,0)) as frame_cost_z,sum(if ((action_type=1 and type=2),lens_cost,0)) as lens_cost_z,sum(if ((action_type=2 and type=2),frame_cost,0)) as frame_cost_j,sum(if ((action_type=2 and type=2),lens_cost,0)) as lens_cost_j,sum(if ((action_type=1 and type=1),income_amount,0)) as income_amount_zs
 ,sum(if ((action_type=2 and type=1),lens_cost,0)) as lens_cost_js,a.id,a.order_number,a.site,a.order_type,a.order_money,a.order_currency_code,a.payment_time,a.createtime')
             ->where($where)
             ->where(['a.bill_type' => ['not in', '9,11']])
             ->where($map)
-            ->with(['DeliveryOrderFinance' => function($query) {
-                $query->field('fi_actual_payment_fee');
-            }])
+            ->with('DeliveryOrderFinance')
             ->group('a.order_number')
             ->count();
         $page = ceil($allCount / 15000);
@@ -335,12 +331,9 @@ class FinanceOrder extends Backend
                 ->where($where)
                 ->where(['a.bill_type' => ['not in', '9,11']])
                 ->where($map)
-                ->with(['DeliveryOrderFinance' => function($query) {
-                    $query->field('fi_actual_payment_fee');
-                }])
+                ->with('DeliveryOrderFinance')
                 ->group('a.order_number')
                 ->select();
-
             $list = collection($list)->toArray();
 
             $params = [];
