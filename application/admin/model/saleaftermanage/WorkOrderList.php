@@ -2244,7 +2244,7 @@ class WorkOrderList extends Model
                 file_put_contents('/www/wwwroot/mojing/runtime/log/a.log',$param,FILE_APPEND);
                  if (1 == $measuerInfo) {
                     $ChangeFrameParam = [];
-                    $ChangeFrameParam['increment_id'] = $work->platform_order;
+                    $ChangeFrameParam['increment_id'] = $workOrderList['platform_order'];
                     $ChangeFrameParam['sku'] = $value['original_sku'];
                     $ChangeFrameParam['qty'] = $value['original_number'];
                     $ChangeFrameParam['action'] = 0;
