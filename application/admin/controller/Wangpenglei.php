@@ -159,7 +159,7 @@ class Wangpenglei extends Backend
 
         foreach ($skus as $k => $v) {
             $list[$k]['sku'] = $v['sku'];
-            $list[$k]['real_time_qty'] = $productbarcodeitem
+            $list[$k]['stock'] = $productbarcodeitem
                 ->where(['library_status' => 1, 'item_order_number' => '', 'sku' => $v['sku']])
                 ->where('location_code_id','>',0)
                 ->count();
