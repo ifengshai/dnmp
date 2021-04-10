@@ -342,7 +342,6 @@ class FinanceOrder extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            $order_number = array_column($list, 'order_number');
 
             $params = [];
             foreach ($list as $key => $value) {
