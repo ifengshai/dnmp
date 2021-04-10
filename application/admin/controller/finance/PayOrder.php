@@ -403,7 +403,7 @@ class PayOrder extends Backend
                         ->alias('i')
                         ->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')
                         ->where($map)
-                        ->where('i.pay_type', 1)
+                        ->where('i.pay_type', 'in', [1, 2])
                         ->value('pay_grand_total');  //首付金额
                     $total2 = $this->payorder_item
                         ->alias('i')
@@ -430,8 +430,9 @@ class PayOrder extends Backend
                         ->alias('i')
                         ->join('fa_purchase_order o', 'i.purchase_id=o.id')
                         ->where('i.purchase_id', $v)
-                        ->field('purchase_price,actual_purchase_price,i.sku')
+                        ->field('round(o.purchase_total/purchase_num,2) purchase_price,actual_purchase_price,i.sku')
                         ->find();
+
                     //实际采购成本和预估成本不一致，冲减差值
                     if ($purchaseOrder['purchase_price'] != $purchaseOrder['actual_purchase_price']) {
                         //计算订单出库数量

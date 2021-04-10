@@ -869,7 +869,7 @@ class ThirdApi extends Api
      * @param $title
      * @return mixed|string
      */
-    public function getCarrier($title)
+    protected function getCarrier($title)
     {
         $carrierId = '';
         if (stripos($title, 'post') !== false) {
@@ -893,15 +893,28 @@ class ThirdApi extends Api
         } elseif (stripos($title, 'cpc') !== false) {
             $carrierId = 'cpc';
             $title = 'Canada Post';
+        } elseif (stripos($title, 'sua') !== false) {
+            $carrierId = 'sua';
+            $title = 'SUA';
+        } elseif (stripos($title, 'cod') !== false) {
+            $carrierId = 'cod';
+            $title = 'COD';
+        } elseif (stripos($title, 'tnt') !== false) {
+            $carrierId = 'tnt';
+            $title = 'TNT';
         }
+
         $carrier = [
-            'dhl' => '100001',
+            'dhl'       => '100001',
             'chinapost' => '03011',
-            'chinaems' => '03013',
-            'cpc' =>  '03041',
-            'fedex' => '100003',
-            'usps' => '21051',
-            'yanwen' => '190012'
+            'chinaems'  => '03013',
+            'cpc'       => '03041',
+            'fedex'     => '100003',
+            'usps'      => '21051',
+            'yanwen'    => '190012',
+            'sua'       => '190111',
+            'cod'       => '100040',
+            'tnt'       => '100004',
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
