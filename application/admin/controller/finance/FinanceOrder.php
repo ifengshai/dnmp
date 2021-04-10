@@ -384,7 +384,7 @@ class FinanceOrder extends Backend
                 $params[$key]['lens_cost'] = $list_z_lens - $list_j_lens;
 
                 //物流成本
-                $params[$key]['fi_actual_payment_fee'] = $value['delivery_order_finance']['fi_actual_payment_fee'];
+                $params[$key]['fi_actual_payment_fee'] = $value['fi_actual_payment_fee'];
                 $params[$key]['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
                 $params[$key]['createtime'] = date('Y-m-d H:i:s', $value['createtime']);
             }

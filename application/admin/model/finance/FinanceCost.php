@@ -28,7 +28,7 @@ class FinanceCost extends Model
      */
     public function DeliveryOrderFinance()
     {
-        return $this->hasOne(DeliveryOrderFinance::class,'increment_id','order_number');
+        return $this->hasOne(DeliveryOrderFinance::class,'increment_id','order_number')->bind('fi_actual_payment_fee');
     }
 
     /**
