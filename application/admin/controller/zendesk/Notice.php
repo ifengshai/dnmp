@@ -1282,7 +1282,8 @@ class Notice extends Controller
     public function asyncUpdate()
     {
 
-        $params = 'type:ticket updated_at>=2021-03-09T04:00:00Z updated_at<=2021-03-09T23:59:59Z order_by:updated_at sort:asc';
+        //$params = 'type:ticket updated_at>=2021-03-10T00:00:00Z updated_at<=2021-03-10T04:59:59Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2021-03-10T05:00:00Z updated_at<=2021-03-10T23:59:59Z order_by:updated_at sort:asc';
         //$params = 'type:ticket updated_at>=2021-03-10T00:00:00Z updated_at<=2021-03-10T03:59:59Z order_by:updated_at sort:asc';
         //$params = 'type:ticket updated_at>=2021-03-10T04:00:00Z updated_at<=2021-03-10T23:59:59Z order_by:updated_at sort:asc';
 
