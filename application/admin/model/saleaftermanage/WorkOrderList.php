@@ -2241,6 +2241,7 @@ class WorkOrderList extends Model
 
                 }
                 $this->httpRequest($work->work_platform, 'api/mojing/stock_change', $param, 'POST');//第三方平台库存
+                file_put_contents('/www/wwwroot/mojing/runtime/log/a.log',$param,FILE_APPEND);
                  if (1 == $measuerInfo) {
                     $ChangeFrameParam = [];
                     $ChangeFrameParam['increment_id'] = $work->platform_order;
