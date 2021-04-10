@@ -280,8 +280,8 @@ class FinanceCost extends Model
             $params['order_number'] = $order_detail['increment_id'];
             $params['site'] = $order_detail['site'];
             $params['order_type'] = $order_detail['order_type'];
-            $params['order_money'] = $order_detail['base_grand_total'];
-            $params['income_amount'] = $order_detail['base_grand_total'];
+            $params['order_money'] = $order_detail['grand_total'];
+            $params['income_amount'] = $order_detail['grand_total'];
             $params['order_currency_code'] = $order_detail['order_currency_code'];
             $params['payment_time'] = $order_detail['payment_time'];
             $params['payment_method'] = $order_detail['payment_method'];
