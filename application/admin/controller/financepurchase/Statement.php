@@ -16,6 +16,7 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use think\Hook;
+use think\Log;
 use think\Request;
 
 class Statement extends Backend
@@ -729,6 +730,9 @@ class Statement extends Backend
                                     ->insert($result);
                                 /**************************************计算成本冲减end****************************************/
                                 /**************************************成本核算start****************************************/
+                                Log::write('======采购单成本日志输出=======');
+                                Log::write($vv['purchase_id'].'采购单id实际成本'.$actualPurchasePrice.'预估成本'.$purchaseOrder['purchase_price']);
+                                Log::write('订单出库'.$outCount1.'入库总数量'.$count);
                                 if($outCount1 != 0){
                                     //订单出库
                                     $order = $this->item
@@ -737,6 +741,7 @@ class Statement extends Backend
                                         ->where('sku',$purchaseOrder['sku'])
                                         ->where('library_status',2)
                                         ->select();
+
                                     $result1 = array();
                                     foreach ($order as $kk1=>$vv1){
                                         //拆分订单号
@@ -748,12 +753,14 @@ class Statement extends Backend
                                             $result1[$orderNumber] = 1;
                                         }
                                     }
+                                    Log::write('订单'.$result1);
                                     foreach ($result1 as $rr1=>$ss1){
                                         //获取成本核算中的订单数据
                                         $costOrderInfo = $this->financecost
                                             ->where(['order_number' => $rr1, 'type' => 2,'bill_type'=>8])
                                             ->order('id desc')
                                             ->find();
+                                        Log::write('成本核算数据'.$costOrderInfo);
                                         //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                                         $arr1['type'] = 2;   //类型：成本
                                         $arr1['bill_type'] = 10;    //单据类型：暂估结算金额
@@ -770,6 +777,7 @@ class Statement extends Backend
                                         $arr1['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                         $arr1['createtime'] = time();  //创建时间
                                         $arr1['cycle_id'] = $costOrderInfo['cycle_id'];  //关联周期结转单id
+                                        Log::write('冲减类型为10'.$arr1);
                                         Db::name('finance_cost')
                                             ->insert($arr1);
                                         //增加成本核算记录
@@ -788,6 +796,7 @@ class Statement extends Backend
                                         $arr2['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                         $arr2['createtime'] = time();  //创建时间
                                         $arr2['cycle_id'] = $costOrderInfo['cycle_id'];  //关联周期结转单id
+                                        Log::write('冲减类型为8'.$arr2);
                                         Db::name('finance_cost')
                                             ->insert($arr2);
                                     }
