@@ -420,6 +420,12 @@ class PayOrder extends Backend
                         ->where('c.purchase_id', $v)
                         ->sum('i.in_stock_num');
                     $data['actual_purchase_price'] = $count ? round($total / $count, 2) : 0;
+                    if ($v == 11550) {
+                        dump($total);
+                        dump($data['actual_purchase_price']);
+                        dump($count);
+                        exit;
+                    }
                     $this->purchase_item
                         ->where('purchase_id', $v)
                         ->update($data);
