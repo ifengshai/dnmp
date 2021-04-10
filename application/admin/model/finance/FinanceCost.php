@@ -2,6 +2,7 @@
 
 namespace app\admin\model\finance;
 
+use app\admin\model\DeliveryOrderFinance;
 use think\Db;
 use think\Model;
 
@@ -18,6 +19,17 @@ class FinanceCost extends Model
 
     // 追加属性
     protected $append = [];
+
+    /**
+     * 发货系统关联表
+     * @return \think\model\relation\HasOne
+     * @author crasphb
+     * @date   2021/4/10 18:32
+     */
+    public function DeliveryOrderFinance()
+    {
+        return $this->hasOne(DeliveryOrderFinance::class,'increment_id','order_number');
+    }
 
     /**
      * 审单成功-核算订单收入
