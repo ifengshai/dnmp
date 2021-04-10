@@ -113,13 +113,17 @@ class Soap
                 return false;
                 break;
         }
+        file_put_contents('/www/wwwroot/mojing/runtime/log/goods.log', serialize($params)."\r\n", FILE_APPEND);
+
 
         $client = new Client(['verify' => false]);
         unset($params['site']);
-        $response = $client->request('POST', $url, array('form_params' => $params));
+        $response = $client->request('POST', $url, ['form_params' => $params]);
         $body = $response->getBody();
-        $stringBody = (string) $body;
+        $stringBody = (string)$body;
         $res = json_decode($stringBody, true);
+
+        file_put_contents('/www/wwwroot/mojing/runtime/log/goods.log', serialize($res)."\r\n", FILE_APPEND);
         if ($res === null) {
             return false;
         }
