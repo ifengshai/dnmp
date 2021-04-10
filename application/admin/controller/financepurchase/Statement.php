@@ -755,6 +755,7 @@ class Statement extends Backend
                                         }
                                     }
                                     Log::write('订单'.$result1);
+                                    Log::write($result1);
                                     foreach ($result1 as $rr1=>$ss1){
                                         //获取成本核算中的订单数据
                                         $costOrderInfo = $this->financecost
@@ -785,6 +786,7 @@ class Statement extends Backend
                                         $arr2['type'] = 2;   //类型：成本
                                         $arr2['bill_type'] = 8;    //单据类型：实际结算金额
                                         $arr2['frame_cost'] = round($costOrderInfo['frame_cost'] + $ss1 * ($purchaseOrder['actual_purchase_price'] - $purchaseOrder['purchase_price']), 2);    //镜架成本：剩余实际单价*剩余数量//镜架成本：（实际单价-预估）*数量+原订单金额2021.4.8修改逻辑
+                                        Log::write($costOrderInfo['frame_cost'].'/'.$ss1.'/'.$purchaseOrder['actual_purchase_price'].'/'.$purchaseOrder['purchase_price']);
                                         $arr2['order_number'] = $rr1;  //订单号
                                         $arr2['site'] = $costOrderInfo['site'];  //站点
                                         $arr2['order_type'] = $costOrderInfo['order_type'];  //订单类型
