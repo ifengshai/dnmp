@@ -122,9 +122,7 @@ class Soap
         $client = new Client(['verify' => false]);
         unset($params['site']);
 
-        $guzzle = $client->getClient(); //You'll want to pull the Guzzle client out of Goutte to inherit its defaults
-        $guzzle->setDefaultOption('verify', false); //Set the certificate at @mtdowling recommends
-        $client->setClient($guzzle); //Tell Goutte to use your modified Guzzle client
+        $client->setDefaultOption('verify', false); //Set the certificate at @mtdowling recommends
 
         $response = $client->request('POST', $url, ['form_params' => $params]);
 
