@@ -2219,22 +2219,35 @@ class WorkOrderList extends Model
         } elseif (5 == $measuerInfo) {//补发
             $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
             $param['action'] = 1;
-        } elseif (18 == $measuerInfo){//子单取消第三方增加库存
-            $param['action'] = 0;
-        }else {
+        } else {
             return false;
         }
-        if ($workOrderList->work_platform == 13 || $workOrderList->work_platform == 14) {
+        if ($workOrderList['work_platform'] == 13 || $workOrderList['work_platform'] == 14) {
             foreach ($result as $key => $value) {
-                $param['increment_id'] = $work->platform_order;
-                $param['sku'] = $value['change_sku'];
-                $param['qty'] = $value['change_number'];
+                $param['increment_id'] = $workOrderList['platform_order'];
+                
+                if (1 == $measuerInfo) {
+                    $param['sku'] = $value['change_sku'];
+                    $param['qty'] = $value['change_number'];
+                } elseif(3 == $measuerInfo){
+                    $param['sku'] = $value['original_sku'];
+                    $param['qty'] = $value['original_number'];
+
+                }elseif(4 == $measuerInfo){
+                    $param['sku'] = $value['change_sku'];
+                    $param['qty'] = $value['change_number'];
+
+                }elseif(5 == $measuerInfo){
+                    $param['sku'] = $value['change_sku'];
+                    $param['qty'] = $value['change_number'];
+
+                }
                 $this->httpRequest($work->work_platform, 'api/mojing/stock_change', $param, 'POST');//第三方平台库存
                  if (1 == $measuerInfo) {
                     $ChangeFrameParam = [];
                     $ChangeFrameParam['increment_id'] = $work->platform_order;
                     $ChangeFrameParam['sku'] = $value['original_sku'];
-                    $ChangeFrameParam['qty'] = $value['change_number'];
+                    $ChangeFrameParam['qty'] = $value['original_number'];
                     $ChangeFrameParam['action'] = 0;
                     $this->httpRequest($work->work_platform, 'api/mojing/stock_change', $ChangeFrameParam, 'POST');//第三方平台库存
                 }
