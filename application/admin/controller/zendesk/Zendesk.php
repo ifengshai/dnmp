@@ -1450,8 +1450,7 @@ DOC;
      */
     public function asyncTicketHttps()
     {
-        $params = input('type');
-        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate($params);
+        $ticketIds = (new Notice(request(), ['type' => 'zeelool']))->asyncUpdate();
 
         //判断是否存在
         $nowTicketsIds = $this->model->where("type", 1)->column('ticket_id');
