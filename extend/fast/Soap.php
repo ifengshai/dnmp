@@ -122,8 +122,6 @@ class Soap
         $client = new Client(['verify' => false]);
         unset($params['site']);
 
-        $client->setDefaultOption('verify', false); //Set the certificate at @mtdowling recommends
-
         $response = $client->request('POST', $url, ['form_params' => $params]);
 
         file_put_contents('/www/wwwroot/mojing/runtime/log/goods.log', serialize($response)."\r\n", FILE_APPEND);
