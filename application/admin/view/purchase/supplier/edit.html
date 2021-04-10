@@ -88,7 +88,7 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Supplier_type')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('主营类目')}:</label>
         <div class="col-xs-12 col-sm-8">
             <select class="selectpicker form-control" name="row[supplier_type]">
                 <option value="2" {:$row['supplier_type']==2 ? 'selected' : '' }>镜架</option>
@@ -99,7 +99,15 @@
             </select>
         </div>
     </div>
-
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('供应商类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select class="selectpicker form-control" name="row[supplier_type_pattern]">
+                <option value="2" {:$row['supplier_type_pattern']==2 ? 'selected' : '' }>贸易</option>
+                <option value="1" {:$row['supplier_type_pattern']==1 ? 'selected' : '' }>工厂</option>
+            </select>
+        </div>
+    </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('采购负责人')}:</label>
         <div class="col-xs-12 col-sm-8">
