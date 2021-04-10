@@ -250,35 +250,51 @@ class PayOrder extends Backend
         $imgs = array_filter(explode(',', $pay_order['invoice']));
         //获取付款单子单结算信息
         $settle = $this->payorder_item->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.id as purchase_ids')
             ->where(['a.pay_id' => $id, 'a.pay_type' => 3])
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
             ->select();
         $total1 = 0;
+        $total3 = 0;
         $count1 = 0;
         foreach ($settle as $k => $v) {
+            if ($v['purchase_batch_id'] > 0){
+                $instockDetail = Db::name('check_order')
+                    ->alias('a')
+                    ->join(['in_stock' => 'b'], 'b.check_id = a.id')
+                    ->join(['in_stock_item' => 'c'], 'c.in_stock_id = b.id')
+                    ->where('a.batch_id',$v['purchase_batch_id'])
+                    ->find();
+                $settle[$k]['batch_instock_num'] = $instockDetail['in_stock_num'];
+            }else{
+                $settle[$k]['batch_instock_num'] = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_ids'])->value('instock_num');
+            }
             $total1 += $v['wait_statement_total'];
+            $total3 += $settle[$k]['batch_instock_num'];
             $count1++;
         }
         //获取付款单子单预付信息
         $prepay = $this->payorder_item
             ->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,c.purchase_num')
             ->where(['pay_id' => $id])
             ->where('a.pay_type', '<>', 3)
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
+            ->join(['fa_purchase_order_item' => 'c'], 'c.purchase_id=b.id')
             ->select();
         $total2 = 0;
         $count2 = 0;
+        $count3 = 0;
         foreach ($prepay as $k1 => $v1) {
             $pay_rate = $v1['pay_rate'] * 100;
             $prepay[$k1]['pay_rate'] = $pay_rate;
             $total2 += $v1['pay_grand_total'];
+            $count3 += $v1['purchase_num'];
             $count2++;
         }
         $total = $total1 + $total2;
         $supplier = $this->supplier->where('id', $pay_order['supply_id'])->field('id,supplier_name,remark,currency,period,opening_bank,bank_account,recipient_name')->find();
-        $this->view->assign(compact('pay_order', 'supplier', 'settle', 'prepay', 'total1', 'total2', 'total', 'count1', 'count2', 'imgs'));
+        $this->view->assign(compact('pay_order', 'supplier', 'settle', 'prepay', 'total1', 'total2', 'total', 'count1', 'count2', 'imgs','count3','total3'));
         return $this->view->fetch();
     }
     /*
