@@ -288,7 +288,7 @@ class FinanceCost extends Model
             $params['action_type'] = 1;
             $params['createtime'] = time();
 
-            return $this->allowField(true)->save($params);
+            return $this->insert($params);
         }
 
 
