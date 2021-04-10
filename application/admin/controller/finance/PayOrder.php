@@ -403,7 +403,7 @@ class PayOrder extends Backend
                         ->alias('i')
                         ->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')
                         ->where($map)
-                        ->where('i.pay_type', 1)
+                        ->where('i.pay_type', 'in', ['1,2'])
                         ->value('pay_grand_total');  //首付金额
                     $total2 = $this->payorder_item
                         ->alias('i')
