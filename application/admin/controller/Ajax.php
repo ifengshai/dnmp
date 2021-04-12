@@ -135,7 +135,9 @@ class Ajax extends Backend
             $attachment = model("attachment");
             $attachment->data(array_filter($params));
             $attachment->save();
-            \think\Hook::listen("upload_after", $attachment);
+            $result = \think\Hook::listen("upload_after", $attachment);
+            //上传s3失败
+            if(isset($result[0]['code']) && $result[0]['code'] == 0) $this->error($result[0]['msg']);
             $this->success(__('Upload successful'), null, [
                 'url' => $uploadDir . $splInfo->getSaveName()
             ]);
