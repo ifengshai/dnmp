@@ -118,7 +118,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     url: 'new_product_design/detail',
                                     area: ['80%', '65%'],
                                     visible: function (row) {
-                                        return  true;
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.label ==0 || row.label ==7){
                                             return  true;
@@ -262,7 +261,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
-                                    name: 'audit_refused',
+                                    name: 'review_the_operation',
                                     text:__('审核拒绝'),
                                     title:__('审核拒绝'),
                                     classname: 'btn btn-xs btn-danger  btn-magic btn-ajax',
@@ -278,7 +277,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.status ==7 && row.label !==0){
+
+                                        if (row.status ==7 && row.label !==0 || Config.reviewTheOperation == true) {
                                             return  true;
                                         }else{
                                             return false;
@@ -313,9 +313,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     $(table).data("operate-upload_pictures", null);
                                     that.table = table;
                                 }
-                                if(Config.reviewTheOperation != true){ //通过Config.chapter 获取后台存的chapter
+                                if(Config.review_the_operation != true){ //通过Config.chapter 获取后台存的chapter
                                     $(table).data("operate-approved", null);
-                                    $(table).data("audit-audit_refused", null);
+                                    that.table = table;
+                                }
+                                if(Config.review_the_operation != true){ //通过Config.chapter 获取后台存的chapter
+                                    $(table).data("operate-review_the_operation", null);
                                     that.table = table;
                                 }
                                 return Table.api.formatter.operate.call(that, value, row, index);
