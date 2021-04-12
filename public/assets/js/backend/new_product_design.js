@@ -299,8 +299,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     $(table).data("operate-edit", null);
                                     that.table = table;
                                 }
-                                if(Config.record_size != true){ //通过Config.chapter 获取后台存的chapter
-                                    $(table).data("operate-video", null);
+                                if(Config.record_size != true){ //录尺寸
+                                    $(table).data("operate-edit_recipient", null);
                                     that.table = table;
                                 }
                                 if(Config.shooting != true){

@@ -54,13 +54,13 @@ class NewProductDesign extends Backend
             ],
         ]);
 
-        $this->assignconfig('record_size', $this->auth->check('NewProductDesign/record_size'));//录尺寸
-        $this->assignconfig('allocate_personnel', $this->auth->check('NewProductDesign/allocate_personnel'));//分配人员信息
-        $this->assignconfig('shooting', $this->auth->check('NewProductDesign/shooting')); //拍摄开始 拍摄完成
-        $this->assignconfig('making', $this->auth->check('NewProductDesign/making')); //开始制作
-        $this->assignconfig('reviewTheOperation', $this->auth->check('NewProductDesign/reviewTheOperation')); //审核操作
-        $this->assignconfig('add_img', $this->auth->check('NewProductDesign/add_img')); //图片上传操作
-        $this->assignconfig('edit', $this->auth->check('NewProductDesign/detail')); //查看详情
+        $this->assignconfig('record_size', $this->auth->check('new_product_design/record_size'));//录尺寸
+        $this->assignconfig('allocate_personnel', $this->auth->check('new_product_design/allocate_personnel'));//分配人员信息
+        $this->assignconfig('shooting', $this->auth->check('new_product_design/shooting')); //拍摄开始 拍摄完成
+        $this->assignconfig('making', $this->auth->check('new_product_design/making')); //开始制作
+        $this->assignconfig('reviewTheOperation', $this->auth->check('new_product_design/reviewTheOperation')); //审核操作
+        $this->assignconfig('add_img', $this->auth->check('new_product_design/add_img')); //图片上传操作
+        $this->assignconfig('edit', $this->auth->check('new_product_design/detail')); //查看详情
 
     }
 
@@ -76,7 +76,6 @@ class NewProductDesign extends Backend
      */
     public function index()
     {
-
         $admin = new Admin();
         //当前是否为关联查询
         $this->relationSearch = false;
