@@ -315,9 +315,9 @@ class NewProductDesign extends Backend
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res){
-            $this->success('人员分配成功');
+            $this->success('操作成功');
         }else{
-            $this->error('人员分配失败');
+            $this->error('操作失败');
         }
     }
 
