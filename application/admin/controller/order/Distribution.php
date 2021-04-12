@@ -180,6 +180,7 @@ class Distribution extends Backend
      */
     public function index()
     {
+        ini_set('memory_limit', '512M');
         $label = $this->request->get('label', 0);
         //设置过滤方法
         $this->request->filter(['strip_tags']);
