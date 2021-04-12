@@ -112,6 +112,7 @@
                                     <th>SKU</th>
                                     <th>商品分类</th>
                                     <th>采购单金额</th>
+                                    <th>采购数量</th>
                                     <th>预付款比例</th>
                                     <th>预付款金额</th>
                                 </tr>
@@ -124,12 +125,13 @@
                                     <td>{$v.purchase_name}</td>
                                     <td>{$v.category_name}</td>
                                     <td>{$v.purchase_total}</td>
+                                    <td>{$v.purchase_num}</td>
                                     <td>{$v.pay_rate}%</td>
                                     <td>{$v.pay_grand_total}</td>
                                 </tr>
                                 {/foreach}
                                 <tr>
-                                    <td colspan="8" style="text-align: right;">预付款金额合计：</td>
+                                    <td colspan="9" style="text-align: right;">采购数量合计：{$count3} 预付款金额合计：</td>
                                     <td>{$total2}</td>
                                 </tr>
                               
@@ -145,6 +147,7 @@
                                     <th>采购批次ID</th>
                                     <th>已支付金额</th>
                                     <th>批次入库金额</th>
+                                    <th>批次入库数量</th>
                                     <th>扣款</th>
                                     <th>扣款原因</th>
                                     <th>总待结算金额</th>
@@ -156,6 +159,7 @@
                                     <td>{$v.purchase_batch_id}</td>
                                     <td>{$v.now_before_total}</td>
                                     <td>{$v.instock_total}</td>
+                                    <td>{$v.batch_instock_num}</td>
                                     <td>{$v.deduction_total}</td>
                                     <td>{$v.deduction_reason}</td>
                                     <td>{$v.wait_statement_total}</td>
@@ -163,7 +167,7 @@
                                 {/foreach}
                                
                                 <tr>
-                                    <td colspan="7" style="text-align: right;">待结算金额合计：</td>
+                                    <td colspan="8" style="text-align: right;">批次入库数量合计：{$total3}待结算金额合计：</td>
                                     <td>{$total1}</td>
                                 </tr>
                                
