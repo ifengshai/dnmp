@@ -31,53 +31,12 @@ class AsyncEs extends BaseElasticsearch
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
                 },$value);
-                $date = $value['payment_time'] ?: $value['created_at'];
-                $this->addToEs('mojing_order',array_merge($value,$this->formatDate($date)));
+                $mergeData = $value['payment_time'] ?: $value['created_at'];
+                $this->esService->addToEs('mojing_order',$value,$mergeData);
             },collection($newOrder)->toArray());
         });
 
     }
 
-    /**
-     * 格式化时间字段，方便后续查询聚合
-     *
-     * @param $date
-     *
-     * @return array
-     * @author crasphb
-     * @date   2021/4/1 15:21
-     */
-    public function formatDate($date)
-    {
-        return [
-            'year' => date('Y',$date),
-            'month' => date('m',$date),
-            'month_date' => date('Ym',$date),
-            'day' => date('d',$date),
-            'day_date' => date('Ymd',$date),
-            'hour' => date('H',$date),
-            'hour_date' => date('YmdH',$date),
-        ];
-    }
 
-    /**
-     * 添加数据
-     *
-     * @param $indexName
-     * @param $view
-     *
-     * @return mixed
-     * @author crasphb
-     * @date   2021/4/1 15:20
-     */
-    public function addToEs($indexName,$view)
-    {
-        $params = [
-            'index' => $indexName,
-            'type' => '_doc',
-            'id' => $view['id'],
-            'body' => $view
-        ];
-        return $this->esClient->index($params);
-    }
 }

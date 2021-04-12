@@ -16,7 +16,10 @@ class Hour extends BaseElasticsearch
     {
         $start = '2018020500';
         $end = '2021020531';
-        $this->getPurchaseSearch([1,2,3], $start, $end);
+        $pruchaseData = $this->getPurchaseSearch([1, 2, 3], $start, $end);
+
+        return $this->esFormatData->formatPurchaseData($pruchaseData);
+
     }
 
     /**
@@ -31,7 +34,7 @@ class Hour extends BaseElasticsearch
      */
     public function getPurchaseSearch($site, $start, $end)
     {
-        if(!is_array($site)) {
+        if (!is_array($site)) {
             $site = [$site];
         }
         $params = [
@@ -51,9 +54,9 @@ class Hour extends BaseElasticsearch
                             //in查询
                             [
                                 'terms' => [
-                                    'site' => $site
-                                ]
-                            ]
+                                    'site' => $site,
+                                ],
+                            ],
                         ],
                     ],
                 ],
@@ -200,26 +203,9 @@ class Hour extends BaseElasticsearch
                 ],
             ],
         ];
-        $results = $this->esClient->search($params);
-        return $results['aggregations']['site']['buckets'];
+
+        return $this->esService->search($params);
     }
 
-    public function formatData($site) {
-        $start = '2018020500';
-        $end = '2021020531';
-        $results = $this->getPurchaseSearch([1], $start, $end);
-        $siteDataKeyColumn = array_column($results,'key');
-        $siteData = $siteDataKeyColumn[$site];
-        //总销售额
-        $allDaySalesAmount = $siteData['allDaySalesAmount']['value'];
-        //总订单数
-        $allOrderCount = $siteData['doc_count'];
-        //总副数
-        $allQtyOrdered = $siteData['allQtyOrdered']['value'];
-        //客单价
-        $allAvgPrice = $siteData['allAvgPrice']['value'];
-        //分时销量
-        $hourSale = $siteData['hourSale']['buckets'];
-    }
 
 }

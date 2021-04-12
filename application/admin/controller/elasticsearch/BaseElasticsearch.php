@@ -8,43 +8,18 @@
 namespace app\admin\controller\elasticsearch;
 
 use app\common\controller\Backend;
+use app\service\elasticsearch\EsFormatData;
+use app\service\elasticsearch\EsService;
 use Elasticsearch\ClientBuilder;
 use think\Request;
 
 class BaseElasticsearch extends Backend
 {
-    public $commonProperties = [
-        'created_at' => [
-            'type' => 'date',
-        ],
-        'updated_at' => [
-            'type' => 'date',
-        ],
-        'year'       => [
-            'type' => 'keyword',
-        ],
-        'month'      => [
-            'type' => 'keyword',
-        ],
-        'month_date' => [
-            'type' => 'date',
-        ],
-        'day'        => [
-            'type' => 'keyword',
-        ],
-        'day_date'   => [
-            'type' => 'date',
-        ],
-        'hour'       => [
-            'type' => 'keyword',
-        ],
-        'hour_date'  => [
-            'type' => 'date',
-        ],
-    ];
 
+
+    public $esService = null;
+    public $esFormatData = null;
     protected $esClient;
-
     protected $noNeedLogin = ['*'];
 
     public function __construct(Request $request = null)
@@ -57,6 +32,8 @@ class BaseElasticsearch extends Backend
         ];
         //获取es的实例
         $this->esClient = ClientBuilder::create()->setHosts($params)->build();
+        $this->esService = new EsService($this->esClient);
+        $this->esFormatData = new EsFormatData();
     }
 
     /**
@@ -68,165 +45,126 @@ class BaseElasticsearch extends Backend
     public function createOrderIndex()
     {
         $selfProperties = [
-            'id' => [
+            'id'                      => [
                 'type' => 'integer',
             ],
-            'site' => [
+            'site'                    => [
                 'type' => 'integer',
             ],
-            'increment_id'       => [
+            'increment_id'            => [
                 'type' => 'keyword',
             ],
-            'status'  => [
+            'status'                  => [
                 'type' => 'keyword',
             ],
-            'store_id'      => [
+            'store_id'                => [
                 'type' => 'integer',
             ],
-            'base_grand_total' => [
-                'type' => 'scaled_float',
-                'scaling_factor' => 10000
+            'base_grand_total'        => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 10000,
             ],
-            'total_qty_ordered'        => [
+            'total_qty_ordered'       => [
                 'type' => 'integer',
             ],
-            'total_item_count'   => [
+            'total_item_count'        => [
                 'type' => 'integer',
             ],
-            'order_type'       => [
+            'order_type'              => [
                 'type' => 'integer',
             ],
-            'order_prescription_type'  => [
+            'order_prescription_type' => [
                 'type' => 'integer',
             ],
             'base_currency_code'      => [
                 'type' => 'keyword',
             ],
-            'shipping_method' => [
+            'shipping_method'         => [
                 'type' => 'keyword',
             ],
-            'shipping_title'        => [
+            'shipping_title'          => [
                 'type' => 'keyword',
             ],
-            'country_id'   => [
+            'country_id'              => [
                 'type' => 'keyword',
             ],
-            'region'       => [
+            'region'                  => [
                 'type' => 'keyword',
             ],
-            'region_id'  => [
+            'region_id'               => [
                 'type' => 'keyword',
             ],
-            'city'      => [
+            'city'                    => [
                 'type' => 'keyword',
             ],
-            'street' => [
+            'street'                  => [
                 'type' => 'keyword',
             ],
-            'postcode'        => [
+            'postcode'                => [
                 'type' => 'keyword',
             ],
-            'telephone'   => [
+            'telephone'               => [
                 'type' => 'keyword',
             ],
-            'customer_email'       => [
+            'customer_email'          => [
                 'type' => 'keyword',
             ],
-            'customer_firstname'  => [
+            'customer_firstname'      => [
                 'type' => 'keyword',
             ],
-            'taxno'   => [
+            'taxno'                   => [
                 'type' => 'keyword',
             ],
-            'base_to_order_rate'       => [
+            'base_to_order_rate'      => [
                 'type' => 'keyword',
             ],
-            'payment_method'  => [
+            'payment_method'          => [
                 'type' => 'keyword',
             ],
-            'mw_rewardpoint_discount'   => [
-                'type' => 'scaled_float',
-                'scaling_factor' => 10000
+            'mw_rewardpoint_discount' => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 10000,
             ],
-            'last_trans_id'       => [
+            'last_trans_id'           => [
                 'type' => 'keyword',
             ],
-            'mw_rewardpoint'  => [
-                'type' => 'scaled_float',
-                'scaling_factor' => 10000
+            'mw_rewardpoint'          => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 10000,
             ],
-            'base_shipping_amount'   => [
-                'type' => 'scaled_float',
-                'scaling_factor' => 10000
+            'base_shipping_amount'    => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 10000,
             ],
-            'payment_time'       => [
+            'payment_time'            => [
                 'type' => 'date',
             ],
-            'order_currency_code'  => [
+            'order_currency_code'     => [
                 'type' => 'keyword',
             ],
-            'firstname'   => [
+            'firstname'               => [
                 'type' => 'keyword',
             ],
-            'lastname'       => [
+            'lastname'                => [
                 'type' => 'keyword',
             ],
-            'area'  => [
+            'area'                    => [
                 'type' => 'keyword',
             ],
         ];
-        $properties = array_merge($selfProperties, $this->commonProperties);
-        $this->createIndex('mojing_order', $properties);
-    }
 
-    /**
-     * 创建索引
-     *
-     * @param string $indexName 索引名称
-     * @param array  $properties mapping数组
-     *
-     * @return array|mixed
-     * @author crasphb
-     * @date   2021/4/1 14:14
-     */
-    public function createIndex(string $indexName = '', array $properties = [])
-    {
-        $params = [
-            'index' => $indexName,
-            'body'  => [
-                'settings' => [
-                    'number_of_shards'   => 3,
-                    'number_of_replicas' => 5,
-                ],
-                'mappings' => [
-                    '_source'    => [
-                        'enabled' => true,
-                    ],
-                    'properties' => $properties,
-                ],
-            ],
-        ];
-        try {
-            return $this->esClient->indices()->create($params);
-        } catch (\Exception $e) {
-            $msg = $e->getMessage();
-            $msg = json_decode($msg, true);
-
-            return $msg;
-        }
+        $this->esService->createOrderIndex('mojing_order', $selfProperties);
     }
 
     /**
      * 删除索引
-     * @param $indexName
      *
      * @return array
      * @author crasphb
      * @date   2021/4/1 15:23
      */
-    public function deleteIndex() {
-        $indexName = 'mojing_order';
-        $params = ['index' => $indexName];
-        return $this->esClient->indices()->delete($params);
+    public function deleteIndex()
+    {
+        return $this->esService->deleteIndex('mojing_order');
     }
 }
