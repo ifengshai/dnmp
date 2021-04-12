@@ -34,6 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'new_product_design/index' + location.search,
                     add_url: 'new_product_design/add',
                     edit_url: 'new_product_design/edit',
+                    detail_url: 'new_product_design/detail',
                     del_url: 'new_product_design/del',
                     multi_url: 'new_product_design/multi',
                     table: 'new_product_design',
@@ -110,18 +111,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
-                                    name: 'edit',
+                                    name: 'detail',
                                     text:'查看详情',
                                     title:__('查看详情'),
-
                                     classname: 'btn btn-xs btn-primary btn-dialog',
-                                    icon: '',
-                                    url: 'new_product_design/detail/id/{row.id}',
+                                    url: 'new_product_design/detail',
                                     area: ['80%', '65%'],
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
                                     visible: function (row) {
+                                        return  true;
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.label ==0 || row.label ==7){
                                             return  true;
@@ -289,16 +286,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                             ],
-                            // formatter: Table.api.formatter.operate
+                             // formatter: Table.api.formatter.operate
 
                             formatter: function (value, row, index) { //隐藏自定义的视频按钮
                                 var that = $.extend({}, this);
                                 var table = $(that.table).clone(true);
                                 //权限判断
-                                if(Config.edit != true){ //通过Config.chapter 获取后台存的chapter
-                                    $(table).data("operate-edit", null);
-                                    that.table = table;
-                                }
                                 if(Config.record_size != true){ //录尺寸
                                     $(table).data("operate-edit_recipient", null);
                                     that.table = table;
