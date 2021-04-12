@@ -17,7 +17,7 @@ class Hour extends BaseElasticsearch
         $start = '2018020500';
         $end = '2021020531';
         $pruchaseData = $this->getPurchaseSearch([1, 2, 3], $start, $end);
-
+        file_put_contents('./b.json',json_encode($pruchaseData));die;
         return $this->esFormatData->formatPurchaseData($pruchaseData);
 
     }

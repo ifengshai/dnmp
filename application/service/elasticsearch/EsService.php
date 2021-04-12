@@ -9,6 +9,7 @@
 namespace app\service\elasticsearch;
 
 
+use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 
 class EsService
@@ -44,7 +45,7 @@ class EsService
     ];
     protected $esClient = null;
 
-    public function __construct(ClientBuilder $esClient)
+    public function __construct( Client $esClient)
     {
         $this->esClient = $esClient;
     }
@@ -139,7 +140,7 @@ class EsService
     {
         $results = $this->esClient->search($params);
 
-        return $results['aggregations'];
+        return $results;
     }
 
     /**
