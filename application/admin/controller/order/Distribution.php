@@ -1871,10 +1871,12 @@ class Distribution extends Backend
             unset($filter['status']);
         }
 
-        //审单时间
+        //审单通过时间
         if ($filter['check_time']) {
             $check_time = explode(' - ', $filter['check_time']);
-            $map['c.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
+            $map['d.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
+            //审单通过
+            $map['d.check_status'] = 1;
             unset($filter['check_time']);
         }
 
@@ -1993,8 +1995,7 @@ class Distribution extends Backend
         $map['d.is_split'] = 0;
         //非重新下单
         $map['d.is_repeat'] = 0;
-        //审单通过
-        $map['d.check_status'] = 1;
+
 
         $this->model
             ->alias('a')
