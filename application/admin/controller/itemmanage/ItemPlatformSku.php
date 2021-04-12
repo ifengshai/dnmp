@@ -32,6 +32,8 @@ class ItemPlatformSku extends Backend
     protected $platform = null;
     protected $relationSearch = true;
 
+    protected $noNeedRight = ['batch_export_xls'];
+
     public function _initialize()
     {
         parent::_initialize();
