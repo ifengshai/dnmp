@@ -2564,8 +2564,6 @@ class ScmWarehouse extends Scm
     public function inventory_examine()
     {
         $data = input('param.');
-        Log::write("===========输出所传参数====================");
-        Log::write($data);
         $do_type = $this->request->request('do_type');
 
         $inventory_id = $this->request->request("inventory_id");
@@ -2597,8 +2595,6 @@ class ScmWarehouse extends Scm
         (new StockLog())->startTrans();
         try {
             $res = $this->_inventory->allowField(true)->isUpdate(true, ['id' => $inventory_id])->save($data);
-            Log::write("====输出审核盘点单001======");
-            Log::write($res);
             //审核通过 生成出、入库单 并同步库存
             if ($data['check_status'] == 2) {
                 $infos = $this->_inventory_item->where(['inventory_id' => $inventory_id])
@@ -2606,14 +2602,7 @@ class ScmWarehouse extends Scm
                     ->select();
                 $infos = collection($infos)->toArray();
                 $sku_code = [];
-                Log::write("====输出审核盘点单======");
-                Log::write($infos);
                 foreach ($infos as $k => $v) {
-                    Log::write($v);
-                    //如果误差为0则跳过
-//                    if ($v['error_qty'] == 0) {
-//                        continue;
-//                    }
                     //同步对应SKU库存 更新商品表商品总库存 总库存
                     $item_map['sku'] = $v['sku'];
                     $item_map['is_del'] = 1;
@@ -2753,37 +2742,24 @@ class ScmWarehouse extends Scm
                     if ($v['sku_agg']) {
                         $codes = array_unique(array_column(unserialize($v['sku_agg']), 'code'));
                     }
-
-                    Log::write("输出误差数");
-                    Log::write($v['error_qty']);
                     if ($v['error_qty'] > 0) {
-
                         $other_message_count = $this->_product_bar_code_item
                             ->where(['code' => ['in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
                             ->where("item_order_number=''")
                             ->count();
-                        Log::write("输出查询的数字");
-                        Log::write($other_message_count);
                         //生成入库单
                         $info[$k]['sku'] = $v['sku'];
-//                        $info[$k]['in_stock_num'] = abs($v['error_qty']);
                         $info[$k]['in_stock_num'] = count($codes) - $other_message_count;
                         $info[$k]['no_stock_num'] = abs($v['error_qty']);
-                        Log::write("===入库单内容==");
-                        Log::write($info);
                         $other_message = $this->_product_bar_code_item
                             ->where(['code' => ['not in', $codes], 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'library_status' => 1, 'sku' => $v['sku']])
                             ->where("item_order_number=''")
                             ->count();
-                        Log::write("===输出条数==");
-                        Log::write($other_message);
-                        Log::write($codes);
                         if ($other_message > 0) {
                             $list[$k]['sku'] = $v['sku'];
                             $list[$k]['out_stock_num'] = $other_message;
                         }
-                        Log::write("输出出库单信息");
-                        Log::write($list);
+
                         //通过sku 查询应该包含的数据
                         //比对数据，将没有的设置成出库
                         //新增的这些设置为入库
@@ -2896,13 +2872,6 @@ class ScmWarehouse extends Scm
                 }
             }
 
-            // else {
-            //     //审核拒绝 解除条形码绑定的盘点单号
-            //     $code_clear = [
-            //         'inventory_id' => 0
-            //     ];
-            //     $this->_product_bar_code_item->where(['inventory_id' => $inventory_id])->update($code_clear);
-            // }
             $this->_item->commit();
             $this->_in_stock->commit();
             $this->_out_stock->commit();

@@ -297,53 +297,36 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 var that = $.extend({}, this);
                                 var table = $(that.table).clone(true);
                                 //权限判断
+                                if(Config.edit != true){ //通过Config.chapter 获取后台存的chapter
+                                    $(table).data("operate-edit", null);
+                                    that.table = table;
+                                }
                                 if(Config.record_size != true){ //通过Config.chapter 获取后台存的chapter
-                                    console.log('没有录尺寸权限');
                                     $(table).data("operate-video", null);
                                     that.table = table;
-                                }else{
-                                    console.log('有录尺寸权限');
                                 }
                                 if(Config.shooting != true){
-                                    console.log('没有拍摄权限');
                                     $(table).data("operate-start_shooting", null);
                                     $(table).data("operate-shot_over", null);
                                     that.table = table;
-                                }else{
-                                    console.log('有拍摄权限');
                                 }
                                 if(Config.allocate_personnel != true){
-                                    console.log('没有分配权限');
-                                    $(table).data("operate-tarted_making", null);
+                                    $(table).data("operate-distr_user", null);
                                     that.table = table;
-                                }else{
-                                    console.log('有分配权限');
                                 }
                                 if(Config.making != true){
-                                    console.log('没有修图权限');
                                     $(table).data("operate-tarted_making", null);
                                     that.table = table;
-                                }else{
-                                    console.log('有修图权限');
                                 }
                                 if(Config.add_img != true){
-                                    console.log('没有上传图片的权限');
                                     $(table).data("operate-upload_pictures", null);
                                     that.table = table;
-                                }else{
-                                    console.log('有上传图片的权限');
                                 }
                                 if(Config.reviewTheOperation != true){ //通过Config.chapter 获取后台存的chapter
-                                    console.log('没有审核操作权限');
                                     $(table).data("operate-approved", null);
                                     $(table).data("audit-audit_refused", null);
                                     that.table = table;
-                                }else{
-                                    console.log('有审核操作权限');
                                 }
-
-
-
                                 return Table.api.formatter.operate.call(that, value, row, index);
                             }
                         }
@@ -391,10 +374,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         allocate_personnel: function () {
             Controller.api.bindevent();
         },
+        shooting: function () {
+            Controller.api.bindevent();
+        },
+        making: function () {
+            Controller.api.bindevent();
+        },
         record_size: function () {
             Controller.api.bindevent();
         },
         edit: function () {
+            Controller.api.bindevent();
+        },
+        reviewTheOperation: function () {
             Controller.api.bindevent();
         },
         add_img: function () {
