@@ -223,7 +223,7 @@ class FinanceCost extends Backend
             $headList = ['ID', '关联单据类型', '订单号', '站点', '订单类型', '订单金额', '收入金额', '币种', '是否结转', '订单支付时间', '支付方式', '创建时间'];
             $saveName = '订单成本明细-收入'.date("YmdHis", time());
         } else {
-            $headList = ['ID', '关联单据类型', '关联单号', '镜架成本', '镜片成本', '是否结转', '创建时间', '币种', '站点'];
+            $headList = ['ID', '关联单据类型', '关联单号', '镜架成本', '镜片成本', '是否结转', '创建时间', '币种', '站点', '订单类型'];
             $saveName = '订单成本明细-成本' . date("YmdHis", time());
         }
 
@@ -272,6 +272,7 @@ class FinanceCost extends Backend
                         $params[$k]['createtime'] = $value['createtime'];
                         $params[$k]['order_currency_code'] = $value['order_currency_code'];
                         $params[$k]['site'] = $siteList[$value['site']];
+                        $params[$k]['order_type'] = $orderType[$value['order_type']];
                     }
                 }
                 if ($i > 0) {
