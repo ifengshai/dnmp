@@ -2826,9 +2826,10 @@ class WorkOrderList extends Model
             $_new_order_process
                 ->where(['order_id' => $order_id])
                 ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time(),'store_house_id' => 0]);
-            
-            //释放合单库位占用数量    
-            $_stock_house->where(['id' => $store_house_id])->update(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => null]);
+            if ($store_house_id) {
+                //释放合单库位占用数量    
+                $_stock_house->where(['id' => $store_house_id])->update(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => null]);
+            }
         }
         $this->clear_house_id($item_order_number);//清理掉定制片暂存库位
     }
