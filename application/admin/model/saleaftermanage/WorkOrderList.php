@@ -921,8 +921,11 @@ class WorkOrderList extends Model
                     !$recipe_type && exception('请选择处方类型');
 
                     //获取镜片、镀膜等名称
-                    $lensCoatName = $this->getLensCoatingName($platform_type, $lensId, $coatingId, $colorId, $recipe_type);
-
+                    if ($work['work_platform'] == 13 || $work['work_platform'] == 14) {
+                        $lensCoatName = [];
+                    }else{
+                        $lensCoatName = $this->getLensCoatingName($platform_type, $lensId, $coatingId, $colorId, $recipe_type);
+                    }
                     //镜片、镀膜序列化信息
                     $prescriptionOption = [
                         'prescription_type' => $recipe_type,
