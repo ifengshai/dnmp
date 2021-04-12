@@ -18,13 +18,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                showColumns: false,
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('序号'),operate:false},
+                        {field: 'id', title: __('序号'), operate: false},
                         {field: 'order_number', title: __('付款申请单号')},
-                        {field: '1688_number', title: __('1688单号'), operate:'like'},
-                        {field: 'supplier_name', title: __('供应商名称'),operate:'like'},
+                        {field: '1688_number', title: __('1688单号'), operate: 'like'},
+                        {field: 'supplier_name', title: __('供应商名称'), operate: 'like'},
                         {
                             field: 'category_id', title: __('商品分类'),
                             searchList: $.getJSON('finance/wait_pay/getCategoryName'),
