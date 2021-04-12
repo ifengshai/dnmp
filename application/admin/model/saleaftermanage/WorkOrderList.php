@@ -1504,7 +1504,6 @@ class WorkOrderList extends Model
                         $pathinfo = 'api/mojing/reissue_order';//第三方平台补发接口
                         $postData['site'] = $siteType;
                         $postData['old_increment_id'] = self::where(['id' => $work_id])->value('platform_order');
-                        echo json_encode($postData);
                     }
                     $res = $this->httpRequest($siteType, $pathinfo, $postData, 'POST');
                     $increment_id = $res['increment_id'];
