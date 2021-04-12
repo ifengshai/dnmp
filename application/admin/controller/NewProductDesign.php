@@ -60,6 +60,7 @@ class NewProductDesign extends Backend
         $this->assignconfig('making', $this->auth->check('NewProductDesign/making')); //开始制作
         $this->assignconfig('reviewTheOperation', $this->auth->check('NewProductDesign/reviewTheOperation')); //审核操作
         $this->assignconfig('add_img', $this->auth->check('NewProductDesign/add_img')); //图片上传操作
+        $this->assignconfig('edit', $this->auth->check('NewProductDesign/detail')); //查看详情
 
     }
 
