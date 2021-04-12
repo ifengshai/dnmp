@@ -2229,12 +2229,12 @@ class NewProduct extends Backend
             empty($data) && $this->error('表格数据为空！');
 
             //获取表格中sku集合
-            $sku_arr = [];
+            $skuArr = [];
             foreach ($data as $k => $v) {
                 //获取sku
                 $sku = trim($v[0]);
                 empty($sku) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行SKU为空！'));
-                $sku_arr[] = $sku;
+                $skuArr[] = $sku;
             }
 
             //获取池子中现有数据
@@ -2243,27 +2243,27 @@ class NewProduct extends Backend
                 ->where('is_show', 1)
                 ->field('type,sku')
                 ->select();
-            $mapping_arr = array_column(collection($list)->toArray(), 'type', 'sku');
+            $mappingArr = array_column(collection($list)->toArray(), 'type', 'sku');
 
             //获取站点sku列表
             $list = $_platform
                 ->where('platform_type', $label)
-                ->where(['sku' => ['in', $sku_arr]])
+                ->where(['sku' => ['in', $skuArr]])
                 ->field('sku')
                 ->select();
-            $platform_arr = array_column(collection($list)->toArray(), 'sku');
+            $platformArr = array_column(collection($list)->toArray(), 'sku');
 
             //获取sku所属分类列表
             $list = $_item
-                ->where(['sku' => ['in', $sku_arr]])
+                ->where(['sku' => ['in', $skuArr]])
                 ->where('is_del', 1)
                 ->where('is_open', 1)
                 ->field('sku,category_id')
                 ->select();
-            $category_arr = array_column(collection($list)->toArray(), 'category_id', 'sku');
+            $categoryArr = array_column(collection($list)->toArray(), 'category_id', 'sku');
 
             //类型
-            $type_arr = ['月度计划' => 1, '周度计划' => 2];
+            $typeArr = ['月度计划' => 1, '周度计划' => 2, '日度计划' => 3];
 
             //批量导入
             $params = [];
@@ -2275,32 +2275,32 @@ class NewProduct extends Backend
                 isset($params[$sku]) && $this->error(__('导入失败,商品 ' . $sku . ' 重复！'));
 
                 //获取类型
-                $type_name = trim($v[1]);
-                !isset($type_arr[$type_name]) && $this->error('导入失败,商品 ' . $sku . ' 类型错误！');
+                $typeName = trim($v[1]);
+                !isset($typeArr[$typeName]) && $this->error('导入失败,商品 ' . $sku . ' 类型错误！');
 
                 //校验池子中商品是否有相同sku
-                // isset($mapping_arr[$sku]) && $mapping_arr[$sku] == $type_arr[$type_name] && $this->error(__('导入失败,商品 '.$sku.' 已在补货列表中！'));
+                // isset($mappingArr[$sku]) && $mappingArr[$sku] == $typeArr[$typeName] && $this->error(__('导入失败,商品 '.$sku.' 已在补货列表中！'));
                 //有重复数据的时候以导入的数据为准，覆盖掉系统中重复的数据，没有重复的数据还留在系统中
-                isset($mapping_arr[$sku]) && $mapping_arr[$sku] == $type_arr[$type_name] && $this->model->where(['website_type' => $label, 'sku' => $sku, 'type' => $type_arr[$type_name]])->delete();
+                isset($mappingArr[$sku]) && $mappingArr[$sku] == $typeArr[$typeName] && $this->model->where(['website_type' => $label, 'sku' => $sku, 'type' => $typeArr[$typeName]])->delete();
 
                 //校验商品是否存在
-                !in_array($sku, $platform_arr) && $this->error(__('导入失败,商品 ' . $sku . ' 不存在！'));
+                !in_array($sku, $platformArr) && $this->error(__('导入失败,商品 ' . $sku . ' 不存在！'));
 
                 //获取商品分类
-                $category_id = isset($category_arr[$sku]) ? $category_arr[$sku] : 0;
+                $categoryId = isset($categoryArr[$sku]) ? $categoryArr[$sku] : 0;
 
                 //获取补货量
-                $replenish_num = (int)$v[2];
-                empty($replenish_num) && $this->error(__('导入失败,商品 ' . $sku . ' 补货数量不能为空！'));
+                $replenishNum = (int)$v[2];
+                empty($replenishNum) && $this->error(__('导入失败,商品 ' . $sku . ' 补货数量不能为空！'));
 
                 $params[$sku] = [
                     'website_type' => $label,
                     'sku' => $sku,
                     'create_time' => date('Y-m-d H:i:s'),
                     'create_person' => session('admin.nickname'),
-                    'replenish_num' => $replenish_num,
-                    'type' => $type_arr[$type_name],
-                    'category_id' => $category_id,
+                    'replenish_num' => $replenishNum,
+                    'type' => $typeArr[$typeName],
+                    'category_id' => $categoryId,
                 ];
             }
 

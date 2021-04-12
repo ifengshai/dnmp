@@ -179,6 +179,7 @@ class Distribution extends Backend
      */
     public function index()
     {
+        ini_set('memory_limit', '512M');
         $label = $this->request->get('label', 0);
         //设置过滤方法
         $this->request->filter(['strip_tags']);
@@ -466,6 +467,7 @@ class Distribution extends Backend
                             ->where('distribution_node', 4)->value('create_time');
                         }
                 }
+
                 //待合单
                 if ($label == 7) {
                     if ($item['order_prescription_type'] == 1) {
@@ -2158,7 +2160,7 @@ class Distribution extends Backend
      * @author: wpl
      * @since: 2021/4/6 18:28
      */
-    public function batch_export_xls_account()
+    public function batch_export_xls_account($ids = null)
     {
         set_time_limit(0);
         ini_set('memory_limit', '2048M');
@@ -2173,7 +2175,9 @@ class Distribution extends Backend
                 $map['a.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
             }
         }
-
+        if($ids) {
+            $map['a.id'] = ['in',$ids];
+        }
         //默认展示订单状态
         if ($filter) {
             if ($filter['status']) {
@@ -2296,7 +2300,6 @@ class Distribution extends Backend
             'os_bd_r',
             '处方名称',
             '镜片名称',
-            '镜片类型',
             '订单创建时间',
             '支付时间',
             '审单时间',
@@ -2330,6 +2333,7 @@ class Distribution extends Backend
                 ->page($i + 1, 1000)
                 ->order('a.created_at desc')
                 ->select();
+
             $list = collection($list)->toArray();
             //获取更改镜框最新信息
             $changeSku = $this->_work_order_change_sku
@@ -2439,29 +2443,27 @@ class Distribution extends Backend
                 if (empty($value['created_at'])) {
                     $value['created_at'] = '暂无';
                 } else {
-                    $value['created_at'] = date('Y-m-d H:i:s', $value['created_at'] + 28800);
+                    $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
                 }
                 $data[$key]['created_at'] = $value['created_at'];//订单创建时间
 
                 if (empty($value['payment_time'])) {
                     $value['payment_time'] = '暂无';
                 } else {
-                    $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time'] + 28800);
+                    $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
                 }
                 $data[$key]['payment_time'] = $value['payment_time'];//支付时间
-
                 if (empty($value['check_time'])) {
                     $value['check_time'] = '暂无';
                 } else {
-                    $value['check_time'] = date('Y-m-d H:i:s', $value['check_time'] + 28800);
+                    $value['check_time'] = date('Y-m-d H:i:s', $value['check_time']);
                 }
                 $data[$key]['check_time'] = $value['check_time'];//审单时间
             }
             if ($i > 0) {
                 $headList = [];
             }
-
-            Excel::writeCsv($data, $headList, $path.$fileName);
+            Excel::writeCsv($data, $headList, $path . $fileName);
         }
         //获取当前域名
         $request = Request::instance();
