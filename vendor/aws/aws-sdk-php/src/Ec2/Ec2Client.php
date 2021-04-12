@@ -768,8 +768,6 @@ use Aws\PresignUrlMiddleware;
  * @method \GuzzleHttp\Promise\Promise getEbsDefaultKmsKeyIdAsync(array $args = []) (supported in versions 2016-11-15)
  * @method \Aws\Result getEbsEncryptionByDefault(array $args = []) (supported in versions 2016-11-15)
  * @method \GuzzleHttp\Promise\Promise getEbsEncryptionByDefaultAsync(array $args = []) (supported in versions 2016-11-15)
- * @method \Aws\Result getFlowLogsIntegrationTemplate(array $args = []) (supported in versions 2016-11-15)
- * @method \GuzzleHttp\Promise\Promise getFlowLogsIntegrationTemplateAsync(array $args = []) (supported in versions 2016-11-15)
  * @method \Aws\Result getGroupsForCapacityReservation(array $args = []) (supported in versions 2016-11-15)
  * @method \GuzzleHttp\Promise\Promise getGroupsForCapacityReservationAsync(array $args = []) (supported in versions 2016-11-15)
  * @method \Aws\Result getLaunchTemplateData(array $args = []) (supported in versions 2016-11-15)
