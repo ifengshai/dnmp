@@ -2243,7 +2243,7 @@ class WorkOrderList extends Model
 
                 }
                 $res = $this->httpRequest($workOrderList->work_platform, 'api/mojing/stock_change', $param, 'POST');//第三方平台库存
-                file_put_contents('/www/wwwroot/mojing/runtime/log/a.log',$param,FILE_APPEND);
+                //file_put_contents('/www/wwwroot/mojing/runtime/log/a.log',$param,FILE_APPEND);
                  if (1 == $measuerInfo) {
                     $ChangeFrameParam = [];
                     $ChangeFrameParam['increment_id'] = $workOrderList['platform_order'];
@@ -2251,7 +2251,7 @@ class WorkOrderList extends Model
                     $ChangeFrameParam['qty'] = $value['original_number'];
                     $ChangeFrameParam['action'] = 0;
                     $ress = $this->httpRequest($workOrderList->work_platform, 'api/mojing/stock_change', $ChangeFrameParam, 'POST');//第三方平台库存
-                    file_put_contents('/www/wwwroot/mojing/runtime/log/a.log',$ChangeFrameParam,FILE_APPEND);
+                    //file_put_contents('/www/wwwroot/mojing/runtime/log/a.log',$ChangeFrameParam,FILE_APPEND);
                 }
             }
             
