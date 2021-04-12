@@ -2484,20 +2484,20 @@ class Distribution extends Backend
                 if (empty($value['created_at'])) {
                     $value['created_at'] = '暂无';
                 } else {
-                    $value['created_at'] = date('Y-m-d H:i:s', $value['created_at'] + 28800);
+                    $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
                 }
                 $data[$key]['created_at'] = $value['created_at'];//订单创建时间
 
                 if (empty($value['payment_time'])) {
                     $value['payment_time'] = '暂无';
                 } else {
-                    $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time'] + 28800);
+                    $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
                 }
                 $data[$key]['payment_time'] = $value['payment_time'];//支付时间
                 if (empty($value['check_time'])) {
                     $value['check_time'] = '暂无';
                 } else {
-                    $value['check_time'] = date('Y-m-d H:i:s', $value['check_time'] + 28800);
+                    $value['check_time'] = date('Y-m-d H:i:s', $value['check_time']);
                 }
                 $data[$key]['check_time'] = $value['check_time'];//审单时间
             }
