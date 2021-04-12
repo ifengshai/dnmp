@@ -224,8 +224,11 @@ class Distribution extends Backend
                 $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                 unset($filter['status']);
             }
+
+            //审单通过时间
             if ($filter['check_time']) {
                 $check_time = explode(' - ', $filter['check_time']);
+                $map['c.check_status'] = 1;
                 $map['c.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
                 unset($filter['check_time']);
             }
@@ -1947,7 +1950,6 @@ class Distribution extends Backend
         $lensList = $this->_lens_data->column('lens_name', 'lens_number');
 
         $headList = [
-//            '订单ID',
             '订单号',
             '站点',
             '订单类型',
@@ -1980,18 +1982,19 @@ class Distribution extends Backend
             'os_bd_r',
             '处方名称',
             '镜片名称',
-            '镜片类型',
             '订单创建时间',
             '支付时间',
-            '审单时间',
+            '审单通过时间',
         ];
         $path = '/uploads/order/';
-        $fileName = '财务导出数据' . time();
+        $fileName = '财务导出数据'.time();
         $i = 0;
         //非拆分订单
         $map['d.is_split'] = 0;
         //非重新下单
         $map['d.is_repeat'] = 0;
+        //审单通过
+        $map['d.check_status'] = 1;
 
         $this->model
             ->alias('a')
@@ -2004,15 +2007,15 @@ class Distribution extends Backend
             ->join(['fa_order_item_process' => 'e'], 'a.order_id=e.order_id')
             ->where($where)
             ->where($map)
-            ->chunk(1000, function ($list) use ($siteList, $lensList, $headList, &$i, $path, $fileName) {
+            ->chunk(10000, function ($list) use ($siteList, $lensList, $headList, &$i, $path, $fileName) {
                 //获取更改镜框最新信息
                 $changeSku = $this->_work_order_change_sku
                     ->alias('f')
                     ->join(['fa_work_order_measure' => 'g'], 'f.measure_id=g.id')
                     ->where([
-                        'f.change_type' => 1,
+                        'f.change_type'       => 1,
                         'f.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                        'g.operation_type' => 1,
+                        'g.operation_type'    => 1,
                     ])
                     ->column('f.change_sku', 'f.item_order_number');
 
@@ -2089,7 +2092,6 @@ class Distribution extends Backend
                             break;
                     }
 
-//                    $data[$key]['id'] = $value['id']; //id
                     $data[$key]['increment_id'] = $value['increment_id'];//订单号
                     $data[$key]['site'] = $siteList[$value['site']];//站点
                     $data[$key]['order_type'] = $value['order_type'];//订单类型
@@ -2099,7 +2101,7 @@ class Distribution extends Backend
                     $data[$key]['payment_method'] = $value['payment_method'];//支付方式
                     $data[$key]['order_currency_code'] = $value['order_currency_code'];//实际支付币种
                     $data[$key]['item_order_number'] = $value['item_order_number'];//子单号
-                    $data[$key]['sku'] = $value['sku'];//sku
+                    $data[$key]['sku'] = $changeSku[$value['item_order_number']] ?: $value['sku'];//sku
                     $data[$key]['order_prescription_type'] = $value['order_prescription_type'];//加工类型
                     $data[$key]['od_sph'] = $value['od_sph'];
                     $data[$key]['os_sph'] = $value['os_sph'];
@@ -2121,8 +2123,7 @@ class Distribution extends Backend
                     $data[$key]['od_bd_r'] = $value['od_bd_r'];
                     $data[$key]['os_bd_r'] = $value['os_bd_r'];
                     $data[$key]['prescription_type'] = $value['prescription_type'];//处方类型
-                    $data[$key]['index_name'] = $value['index_name'];//镜片名称
-                    $data[$key]['index_type'] = $value['index_type'];//镜片类型
+                    $data[$key]['web_lens_name'] = $lensList[$value['item_order_number']] ?: $value['web_lens_name'];//镜片名称
                     if (empty($value['created_at'])) {
                         $value['created_at'] = '暂无';
                     } else {
