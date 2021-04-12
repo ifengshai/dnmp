@@ -312,7 +312,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 }
                                 if(Config.allocate_personnel != true){
                                     console.log('没有分配权限');
-                                    $(table).data("operate-tarted_making", null);
+                                    $(table).data("operate-distr_user", null);
                                     that.table = table;
                                 }else{
                                     console.log('有分配权限');
@@ -339,9 +339,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 }else{
                                     console.log('有审核操作权限');
                                 }
-
-
-
                                 return Table.api.formatter.operate.call(that, value, row, index);
                             }
                         }
@@ -389,10 +386,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         allocate_personnel: function () {
             Controller.api.bindevent();
         },
+        shooting: function () {
+            Controller.api.bindevent();
+        },
+        making: function () {
+            Controller.api.bindevent();
+        },
         record_size: function () {
             Controller.api.bindevent();
         },
         edit: function () {
+            Controller.api.bindevent();
+        },
+        reviewTheOperation: function () {
             Controller.api.bindevent();
         },
         add_img: function () {
