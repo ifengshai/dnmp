@@ -324,7 +324,7 @@ class NewProductDesign extends Backend
      * @date   2021/4/9 14:11
      * 审核操作
      */
-    public function reviewTheOperation(){
+    public function review_the_operation(){
         $item = new  Item();
         $ids =  $this->request->get('ids');
         $status =  $this->request->get('status');
