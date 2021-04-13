@@ -9,6 +9,7 @@ use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\warehouse\Outstock;
 use app\admin\model\warehouse\OutStockItem;
 use app\common\controller\Backend;
+use app\enum\OrderType;
 use fast\Excel;
 use think\Request;
 use think\exception\PDOException;
@@ -179,7 +180,6 @@ class Distribution extends Backend
      */
     public function index()
     {
-        ini_set('memory_limit', '512M');
         $label = $this->request->get('label', 0);
         //设置过滤方法
         $this->request->filter(['strip_tags']);
@@ -224,8 +224,11 @@ class Distribution extends Backend
                 $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
                 unset($filter['status']);
             }
+
+            //审单通过时间
             if ($filter['check_time']) {
                 $check_time = explode(' - ', $filter['check_time']);
+                $map['c.check_status'] = 1;
                 $map['c.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
                 unset($filter['check_time']);
             }
@@ -270,9 +273,9 @@ class Distribution extends Backend
                             ->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')
                             ->where([
                                 'a.shelf_number' => ['in', $filter['shelf_number']],
-                                'a.type'         => 1,
-                                'a.status'       => 1,
-                                'b.is_del'       => 1,
+                                'a.type' => 1,
+                                'a.status' => 1,
+                                'b.is_del' => 1,
                             ])
                             ->order('a.coding')
                             ->column('b.sku');
@@ -297,8 +300,8 @@ class Distribution extends Backend
                 }
                 $stock_house_id = $this->_stock_house
                     ->where([
-                        'coding' => ['like', $filter['stock_house_num'].'%'],
-                        'type'   => $house_type,
+                        'coding' => ['like', $filter['stock_house_num'] . '%'],
+                        'type' => $house_type,
                     ])
                     ->column('id');
                 //查询合单库位号
@@ -316,7 +319,7 @@ class Distribution extends Backend
 
             //筛选订单号
             if ($filter['increment_id']) {
-                $map['b.increment_id'] = ['like', $filter['increment_id'].'%'];
+                $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
                 unset($filter['increment_id']);
             }
 
@@ -326,7 +329,7 @@ class Distribution extends Backend
                 if (count($ex_fil_arr) > 1) {
                     $map['a.item_order_number'] = ['in', $ex_fil_arr];
                 } else {
-                    $map['a.item_order_number'] = ['like', $filter['item_order_number'].'%'];
+                    $map['a.item_order_number'] = ['like', $filter['item_order_number'] . '%'];
                 }
 
                 unset($filter['item_order_number']);
@@ -364,18 +367,10 @@ class Distribution extends Backend
             }
             $this->request->get(['filter' => json_encode($filter)]);
 
-            // if (8 == $label || 1 == $label || 0 == $label) {
-            //     //查询子单的主单是否也含有工单
-
-            //     // if (!empty($platform_order)) {
-            //     //     $order_id = $this->_new_order_process->where(['increment_id' => ['in', $platform_order]])->group('order_id')->column('order_id');
-            //     //     $item_order_numbers = $this->model->where(['order_id' => ['in', $order_id]])->order('created_at', 'desc')->group('item_order_number')->column('item_order_number');
-            //     // }
-            // }
 
             $platform_order = $this->_work_order_list->where([
                 'work_status' => ['in', $work_order_status_map],
-                'work_type'   => ['in', $work_order_type],
+                'work_type' => ['in', $work_order_type],
             ])->group('platform_order')->column('platform_order');
 
             if (8 == $label) {
@@ -388,7 +383,7 @@ class Distribution extends Backend
                         $map['b.increment_id'] = ['not in', $platform_order];
                     } else {
                         $whereOr = [
-                            'a.id'           => ['in', $item_process_ids],
+                            'a.id' => ['in', $item_process_ids],
                             'b.increment_id' => ['in', $platform_order],
                         ];
                     }
@@ -437,10 +432,7 @@ class Distribution extends Backend
                 $list[$key]['total_qty_ordered'] = $this->model
                     ->where(['order_id' => $list[$key]['order_id'], 'distribution_status' => ['neq', 0]])
                     ->count();
-                //待打印标签时间
-                /*if ($label == 2) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 1)->value('create_time');
-                }*/
+
                 //待配货
                 if ($label == 2) {
                     $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 1)->value('create_time');
@@ -457,7 +449,6 @@ class Distribution extends Backend
                 if ($label == 5) {
                     $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 4)->value('create_time');
                 }
-
                 //待成品质检
                 if ($label == 6) {
                     $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])
@@ -519,24 +510,15 @@ class Distribution extends Backend
 
                 //判断是否显示工单按钮
                 $list[$key]['task_info'] = in_array($value['increment_id'], $platform_order) ? 1 : 0;
-                /*if (8 == $label || 1 == $label || 0 == $label) {
-                    //查询子单的主单是否也含有工单
-                    if ($handle_abnormal == 0 && $list[$key]['task_info'] == 0) {
-                        $platform_order = $this->_new_order_process->where(['order_id' => $list[$key]['order_id']])->value('increment_id');
-                        $work_order_list_task = $this->_work_order_list->where(['work_status' => ['in',[1,2,3,5]],'platform_order' =>$platform_order])->find();
-                        if (!empty($work_order_list_task)) {
-                            $list[$key]['task_info'] = 1;
-                        } 
-                    }
-                }*/
+
                 //获取工单更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
                     ->alias('a')
                     ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                     ->where([
-                        'a.change_type'       => 1,
+                        'a.change_type' => 1,
                         'a.item_order_number' => $value['item_order_number'],
-                        'b.operation_type'    => 1,
+                        'b.operation_type' => 1,
                     ])
                     ->order('a.id', 'desc')
                     ->limit(1)
@@ -580,7 +562,7 @@ class Distribution extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             //查询子订单
             if ($filter['item_order_number']) {
-                $smap['item_order_number'] = ['like', $filter['item_order_number'].'%'];
+                $smap['item_order_number'] = ['like', $filter['item_order_number'] . '%'];
                 $wave_order_id = $this->_new_order_item_process->where($smap)->value('wave_order_id');
                 $map['id'] = $wave_order_id;
                 unset($filter['item_order_number']);
@@ -671,7 +653,7 @@ class Distribution extends Backend
             $work_order_type = [1, 2];
             $platform_order = $this->_work_order_list->where([
                 'work_status' => ['in', $work_order_status_map],
-                'work_type'   => ['in', $work_order_type],
+                'work_type' => ['in', $work_order_type],
             ])->group('platform_order')->column('platform_order');
 
             //波次单id
@@ -721,9 +703,9 @@ class Distribution extends Backend
                     ->alias('a')
                     ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                     ->where([
-                        'a.change_type'       => 1,
+                        'a.change_type' => 1,
                         'a.item_order_number' => $value['item_order_number'],
-                        'b.operation_type'    => 1,
+                        'b.operation_type' => 1,
                     ])
                     ->order('a.id', 'desc')
                     ->limit(1)
@@ -783,9 +765,9 @@ class Distribution extends Backend
             ->alias('a')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
-                'a.change_type'       => 1,
+                'a.change_type' => 1,
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                'b.operation_type'    => 1,
+                'b.operation_type' => 1,
             ])
             ->order('a.id', 'desc')
             ->group('a.item_order_number')
@@ -862,26 +844,32 @@ class Distribution extends Backend
             //订单类型
             switch ($value['order_type']) {
 
-                case 1:
+                case OrderType::REGULAR_ORDER:
                     $list[$key]['order_type'] = '普通订单';
                     break;
-                case 2:
+                case OrderType::WHOLESALE_ORDER:
                     $list[$key]['order_type'] = '批发单';
                     break;
-                case 3:
+                case OrderType::SOCIAL_ORDER:
                     $list[$key]['order_type'] = '网红单';
                     break;
-                case 4:
+                case OrderType::REPLACEMENT_ORDER:
                     $list[$key]['order_type'] = '补发单';
                     break;
-                case 5:
+                case OrderType::DIFFERENCE_ORDER:
                     $list[$key]['order_type'] = '补差价';
                     break;
-                case 6:
+                case OrderType::PAYROLL_ORDER:
                     $list[$key]['order_type'] = '一件代发';
                     break;
-                case 10:
+                case OrderType::VIP_ORDER:
+                    $list[$key]['order_type'] = 'vip订单';
+                    break;
+                case OrderType::CASH_DELIVERY_ORDER:
                     $list[$key]['order_type'] = '货到付款';
+                    break;
+                case OrderType::CONVENIENCE_ORDER:
+                    $list[$key]['order_type'] = '便利店支付';
                     break;
                 default:
                     break;
@@ -954,7 +942,7 @@ class Distribution extends Backend
 
         $path = "/uploads/";
         $fileName = 'Zeelool站配货列表十二月份数据';
-        Excel::writeCsv($csv, $headlist, $path.$fileName);
+        Excel::writeCsv($csv, $headlist, $path . $fileName);
     }
 
 
@@ -980,7 +968,7 @@ class Distribution extends Backend
 
         if (!$filter) {
             $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
-            $WhereSql .= " and a.created_at between ".strtotime('-3 month')." and ".time();
+            $WhereSql .= " and a.created_at between " . strtotime('-3 month') . " and " . time();
         } else {
             if ($filter['a.created_at']) {
                 $time = explode(' - ', $filter['a.created_at']);
@@ -1017,7 +1005,7 @@ class Distribution extends Backend
         };
 
         if ($filter['increment_id']) {
-            $map['b.increment_id'] = ['like', $filter['increment_id'].'%'];
+            $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
             $map['b.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'paypal_canceled_reversal']];
             unset($filter['increment_id']);
         }
@@ -1101,10 +1089,10 @@ class Distribution extends Backend
             ->setCellValue("C1", "数量")
             ->setCellValue("D1", "仓库实时库存");
         foreach ($data as $key => $value) {
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("A".($key * 1 + 2), $value['sku']['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $spreadsheet->getActiveSheet()->setCellValue("B".($key * 1 + 2), $value['location']);
-            $spreadsheet->getActiveSheet()->setCellValue("C".($key * 1 + 2), $value['number']);
-            $spreadsheet->getActiveSheet()->setCellValue("D".($key * 1 + 2), $value['sku']['real_time_qty']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['sku']['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['location']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['number']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']['real_time_qty']);
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
@@ -1117,21 +1105,21 @@ class Distribution extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
 
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
-        $setBorder = 'A1:'.$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow();
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:D'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:D' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        $savename = '配货列表待打印数据'.date("YmdHis", time());
+        $savename = '配货列表待打印数据' . date("YmdHis", time());
 
         if ($format == 'xls') {
             //输出Excel03版本
@@ -1144,7 +1132,7 @@ class Distribution extends Backend
         }
 
         //输出名称
-        header('Content-Disposition: attachment;filename="'.$savename.'.'.$format.'"');
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
@@ -1177,9 +1165,9 @@ class Distribution extends Backend
             ->alias('a')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
-                'a.change_type'       => 1,
+                'a.change_type' => 1,
                 'a.item_order_number' => $row->item_order_number,
-                'b.operation_type'    => 1,
+                'b.operation_type' => 1,
             ])
             ->order('a.id', 'desc')
             ->value('a.change_sku');
@@ -1193,9 +1181,9 @@ class Distribution extends Backend
             ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,prescription_option')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
-                'a.change_type'       => 2,
+                'a.change_type' => 2,
                 'a.item_order_number' => $row->item_order_number,
-                'b.operation_type'    => 1,
+                'b.operation_type' => 1,
             ])
             ->order('a.id', 'desc')
             ->find();
@@ -1395,7 +1383,7 @@ class Distribution extends Backend
 
                 //筛选库位号
                 if ($filter['stock_house_num']) {
-                    $stock_house_where['coding'] = ['like', $filter['stock_house_num'].'%'];
+                    $stock_house_where['coding'] = ['like', $filter['stock_house_num'] . '%'];
                     if (8 == $label) {
                         $stock_house_where['type'] = ['>', 2];
                     } else {
@@ -1445,7 +1433,7 @@ class Distribution extends Backend
             }
 
             if ($filter['sku']) {
-                $map['a.sku'] = ['like', '%'.$filter['sku'].'%'];
+                $map['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
                 unset($filter['sku']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
@@ -1506,13 +1494,13 @@ class Distribution extends Backend
 
         //站点列表
         $site_list = [
-            1  => 'Zeelool',
-            2  => 'Voogueme',
-            3  => 'Nihao',
-            4  => 'Meeloog',
-            5  => 'Wesee',
-            8  => 'Amazon',
-            9  => 'Zeelool_es',
+            1 => 'Zeelool',
+            2 => 'Voogueme',
+            3 => 'Nihao',
+            4 => 'Meeloog',
+            5 => 'Wesee',
+            8 => 'Amazon',
+            9 => 'Zeelool_es',
             10 => 'Zeelool_de',
             11 => 'Zeelool_jp',
         ];
@@ -1535,9 +1523,9 @@ class Distribution extends Backend
             ->alias('a')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
-                'a.change_type'       => 1,
+                'a.change_type' => 1,
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                'b.operation_type'    => 1,
+                'b.operation_type' => 1,
             ])
             ->column('a.change_sku', 'a.item_order_number');
 
@@ -1546,9 +1534,9 @@ class Distribution extends Backend
             ->alias('a')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
-                'a.change_type'       => 2,
+                'a.change_type' => 2,
                 'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                'b.operation_type'    => 1,
+                'b.operation_type' => 1,
             ])
             ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,a.web_lens_name', 'a.item_order_number');
 
@@ -1644,64 +1632,75 @@ class Distribution extends Backend
             //网站SKU转换仓库SKU
             $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
 
-            $spreadsheet->getActiveSheet()->setCellValue("A".($num), $value['id']); //id
-            $spreadsheet->getActiveSheet()->setCellValue("B".($num), date('Y-m-d', $value['created_at'])); //日期
-            $spreadsheet->getActiveSheet()->setCellValue("C".($num), $value['increment_id']); //订单号
-            $spreadsheet->getActiveSheet()->setCellValue("D".($num), $site_list[$value['site']]); //站点
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($num), $value['id']); //id
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($num), date('Y-m-d', $value['created_at'])); //日期
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($num), $value['increment_id']); //订单号
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($num), $site_list[$value['site']]); //站点
             switch ($value['order_type']) {
-                case 1:
+                case OrderType::REGULAR_ORDER:
                     $value['order_type'] = '普通订单';
                     break;
-                case 2:
-                    $value['order_type'] = '批发';
+                case OrderType::WHOLESALE_ORDER:
+                    $value['order_type'] = '批发单';
                     break;
-                case 3:
-                    $value['order_type'] = '网红';
+                case OrderType::SOCIAL_ORDER:
+                    $value['order_type'] = '网红单';
                     break;
-                case 4:
-                    $value['order_type'] = '补发';
+                case OrderType::REPLACEMENT_ORDER:
+                    $value['order_type'] = '补发单';
                     break;
-                case 5:
+                case OrderType::DIFFERENCE_ORDER:
                     $value['order_type'] = '补差价';
                     break;
-                case 6:
+                case OrderType::PAYROLL_ORDER:
                     $value['order_type'] = '一件代发';
                     break;
+                case OrderType::VIP_ORDER:
+                    $value['order_type'] = 'vip订单';
+                    break;
+                case OrderType::CASH_DELIVERY_ORDER:
+                    $value['order_type'] = '货到付款';
+                    break;
+                case OrderType::CONVENIENCE_ORDER:
+                    $value['order_type'] = '便利店支付';
+                    break;
+                default:
+                    break;
             }
-            $spreadsheet->getActiveSheet()->setCellValue("E".($num), $value['order_type']); //订单类型
-            $spreadsheet->getActiveSheet()->setCellValue("F".($num), $value['status']); //订单状态
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($num), $value['order_type']); //订单类型
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($num), $value['status']); //订单状态
             foreach ($value['item_order'] as $k => $v) {
                 $v['od_sph'] = isset($v['od_sph']) ? urldecode($v['od_sph']) : '';
                 $v['os_sph'] = isset($v['os_sph']) ? urldecode($v['os_sph']) : '';
                 $v['od_cyl'] = isset($v['od_cyl']) ? urldecode($v['od_cyl']) : '';
                 $v['os_cyl'] = isset($v['os_cyl']) ? urldecode($v['os_cyl']) : '';
                 $cat += 2;
-                $spreadsheet->getActiveSheet()->setCellValue("G".($cat), $v['item_order_number']); //子单号
-                $spreadsheet->getActiveSheet()->setCellValue("H".($cat), $v['sku']); //sku
-                $spreadsheet->getActiveSheet()->setCellValue("I".($cat), '右眼'); //眼球
-                $spreadsheet->getActiveSheet()->setCellValue("I".($cat + 1), '左眼'); //眼球
-                $spreadsheet->getActiveSheet()->setCellValue("J".($cat), (float)$v['od_sph'] > 0 ? ' +'.number_format($v['od_sph'] * 1, 2) : ' '.$v['od_sph']); //SPH
-                $spreadsheet->getActiveSheet()->setCellValue("J".($cat + 1), (float)$v['os_sph'] > 0 ? ' +'.number_format($v['os_sph'] * 1, 2) : ' '.$v['os_sph']); //SPH
-                $spreadsheet->getActiveSheet()->setCellValue("K".($cat), (float)$v['od_cyl'] > 0 ? ' +'.number_format($v['od_cyl'] * 1, 2) : ' '.$v['od_cyl']); //CYL
-                $spreadsheet->getActiveSheet()->setCellValue("K".($cat + 1), (float)$v['os_cyl'] > 0 ? ' +'.number_format($v['os_cyl'] * 1, 2) : ' '.$v['os_cyl']); //CYL
-                $spreadsheet->getActiveSheet()->setCellValue("L".($cat), $v['od_axis']); //AXI
-                $spreadsheet->getActiveSheet()->setCellValue("L".($cat + 1), $v['os_axis']); //AXI
+                $spreadsheet->getActiveSheet()->setCellValue("G" . ($cat), $v['item_order_number']); //子单号
+                $spreadsheet->getActiveSheet()->setCellValue("H" . ($cat), $v['sku']); //sku
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($cat), '右眼'); //眼球
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($cat + 1), '左眼'); //眼球
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($cat), (float)$v['od_sph'] > 0 ? ' +' . number_format($v['od_sph'] * 1, 2) : ' ' . $v['od_sph']); //SPH
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($cat + 1), (float)$v['os_sph'] > 0 ? ' +' . number_format($v['os_sph'] * 1, 2) : ' ' . $v['os_sph']); //SPH
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($cat), (float)$v['od_cyl'] > 0 ? ' +' . number_format($v['od_cyl'] * 1, 2) : ' ' . $v['od_cyl']); //CYL
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($cat + 1), (float)$v['os_cyl'] > 0 ? ' +' . number_format($v['os_cyl'] * 1, 2) : ' ' . $v['os_cyl']); //CYL
+                $spreadsheet->getActiveSheet()->setCellValue("L" . ($cat), $v['od_axis']); //AXI
+                $spreadsheet->getActiveSheet()->setCellValue("L" . ($cat + 1), $v['os_axis']); //AXI
                 $v['os_add'] = urldecode($v['os_add']);
                 $v['od_add'] = urldecode($v['od_add']);
 
                 if ($v['os_add'] && $v['od_add'] && (float)($v['os_add']) * 1 != 0 && (float)($v['od_add']) * 1 != 0) {
-                    $spreadsheet->getActiveSheet()->setCellValue("M".($cat), $v['od_add']); //ADD
-                    $spreadsheet->getActiveSheet()->setCellValue("M".($cat + 1), $v['os_add']); //ADD
+                    $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat), $v['od_add']); //ADD
+                    $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat + 1), $v['os_add']); //ADD
                 } else {
 
                     if ($v['os_add'] && (float)$v['os_add'] * 1 != 0) {
                         //数值在上一行合并有效，数值在下一行合并后为空
-                        $spreadsheet->getActiveSheet()->setCellValue("M".($cat), $v['os_add']);
-                        $spreadsheet->getActiveSheet()->mergeCells("M".($cat).":M".($cat + 1));
+                        $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat), $v['os_add']);
+                        $spreadsheet->getActiveSheet()->mergeCells("M" . ($cat) . ":M" . ($cat + 1));
                     } else {
                         //数值在上一行合并有效，数值在下一行合并后为空
-                        $spreadsheet->getActiveSheet()->setCellValue("M".($cat), $v['od_add']);
-                        $spreadsheet->getActiveSheet()->mergeCells("M".($cat).":M".($cat + 1));
+                        $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat), $v['od_add']);
+                        $spreadsheet->getActiveSheet()->mergeCells("M" . ($cat) . ":M" . ($cat + 1));
                     }
                 }
 
@@ -1712,72 +1711,72 @@ class Distribution extends Backend
 
 
                 if ($v['pdcheck'] == 'on') {
-                    $spreadsheet->getActiveSheet()->setCellValue("N".($cat), $v['pd_r']); //单PD
-                    $spreadsheet->getActiveSheet()->setCellValue("N".($cat + 1), $v['pd_l']); //单PD
+                    $spreadsheet->getActiveSheet()->setCellValue("N" . ($cat), $v['pd_r']); //单PD
+                    $spreadsheet->getActiveSheet()->setCellValue("N" . ($cat + 1), $v['pd_l']); //单PD
                 } else {
-                    $spreadsheet->getActiveSheet()->setCellValue("N".($cat), $v['pd']); //PD
-                    $spreadsheet->getActiveSheet()->mergeCells("N".($cat).":N".($cat + 1)); //PD
+                    $spreadsheet->getActiveSheet()->setCellValue("N" . ($cat), $v['pd']); //PD
+                    $spreadsheet->getActiveSheet()->mergeCells("N" . ($cat) . ":N" . ($cat + 1)); //PD
                 }
 
                 $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
-                $spreadsheet->getActiveSheet()->setCellValue("O".($cat), $lens_name); //镜片
-                $spreadsheet->getActiveSheet()->setCellValue("P".($cat), $v['lens_width']); //镜框宽度
-                $spreadsheet->getActiveSheet()->setCellValue("Q".($cat), $v['lens_height']); //镜框高度
-                $spreadsheet->getActiveSheet()->setCellValue("R".($cat), $v['bridge']); //bridge
-                $spreadsheet->getActiveSheet()->setCellValue("S".($cat), $v['prescription_type']); //处方类型
+                $spreadsheet->getActiveSheet()->setCellValue("O" . ($cat), $lens_name); //镜片
+                $spreadsheet->getActiveSheet()->setCellValue("P" . ($cat), $v['lens_width']); //镜框宽度
+                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($cat), $v['lens_height']); //镜框高度
+                $spreadsheet->getActiveSheet()->setCellValue("R" . ($cat), $v['bridge']); //bridge
+                $spreadsheet->getActiveSheet()->setCellValue("S" . ($cat), $v['prescription_type']); //处方类型
 
-                $spreadsheet->getActiveSheet()->setCellValue("T".($cat), isset($v['od_pv']) ? $v['od_pv'] : ''); //Prism
-                $spreadsheet->getActiveSheet()->setCellValue("T".($cat + 1), isset($v['os_pv']) ? $v['os_pv'] : ''); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat), isset($v['od_pv']) ? $v['od_pv'] : ''); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat + 1), isset($v['os_pv']) ? $v['os_pv'] : ''); //Prism
 
-                $spreadsheet->getActiveSheet()->setCellValue("U".($cat), isset($v['od_bd']) ? $v['od_bd'] : ''); //Direct
-                $spreadsheet->getActiveSheet()->setCellValue("U".($cat + 1), isset($v['os_bd']) ? $v['os_bd'] : ''); //Direct
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($cat), isset($v['od_bd']) ? $v['od_bd'] : ''); //Direct
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($cat + 1), isset($v['os_bd']) ? $v['os_bd'] : ''); //Direct
 
-                $spreadsheet->getActiveSheet()->setCellValue("V".($cat), isset($v['od_pv_r']) ? $v['od_pv_r'] : ''); //Prism
-                $spreadsheet->getActiveSheet()->setCellValue("V".($cat + 1), isset($v['os_pv_r']) ? $v['os_pv_r'] : ''); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("V" . ($cat), isset($v['od_pv_r']) ? $v['od_pv_r'] : ''); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("V" . ($cat + 1), isset($v['os_pv_r']) ? $v['os_pv_r'] : ''); //Prism
 
-                $spreadsheet->getActiveSheet()->setCellValue("W".($cat), isset($v['od_bd_r']) ? $v['od_bd_r'] : ''); //Direct
-                $spreadsheet->getActiveSheet()->setCellValue("W".($cat + 1), isset($v['os_bd_r']) ? $v['os_bd_r'] : ''); //Direct
+                $spreadsheet->getActiveSheet()->setCellValue("W" . ($cat), isset($v['od_bd_r']) ? $v['od_bd_r'] : ''); //Direct
+                $spreadsheet->getActiveSheet()->setCellValue("W" . ($cat + 1), isset($v['os_bd_r']) ? $v['os_bd_r'] : ''); //Direct
                 //单元格合并
-                $spreadsheet->getActiveSheet()->mergeCells("G".($cat).":G".($cat + 1));
-                $spreadsheet->getActiveSheet()->mergeCells("H".($cat).":H".($cat + 1));
-                $spreadsheet->getActiveSheet()->mergeCells("O".($cat).":O".($cat + 1));
-                $spreadsheet->getActiveSheet()->mergeCells("P".($cat).":P".($cat + 1));
-                $spreadsheet->getActiveSheet()->mergeCells("Q".($cat).":Q".($cat + 1));
-                $spreadsheet->getActiveSheet()->mergeCells("R".($cat).":R".($cat + 1));
-                $spreadsheet->getActiveSheet()->mergeCells("S".($cat).":S".($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("G" . ($cat) . ":G" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("H" . ($cat) . ":H" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("O" . ($cat) . ":O" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("P" . ($cat) . ":P" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("Q" . ($cat) . ":Q" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("R" . ($cat) . ":R" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("S" . ($cat) . ":S" . ($cat + 1));
             }
 
 
-            $spreadsheet->getActiveSheet()->setCellValue("X".($num), $value['base_grand_total']); //订单金额
-            $spreadsheet->getActiveSheet()->setCellValue("Y".($num), $value['base_currency_code']); //原币种
-            $spreadsheet->getActiveSheet()->setCellValue("Z".($num), $value['base_grand_total']); //原支付金额
-            $spreadsheet->getActiveSheet()->setCellValue("AA".($num), $value['payment_method']); //支付方式
-            $spreadsheet->getActiveSheet()->setCellValue("AB".($num), date('Y-m-d H:i:s', $value['payment_time'])); //订单支付时间
+            $spreadsheet->getActiveSheet()->setCellValue("X" . ($num), $value['base_grand_total']); //订单金额
+            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($num), $value['base_currency_code']); //原币种
+            $spreadsheet->getActiveSheet()->setCellValue("Z" . ($num), $value['base_grand_total']); //原支付金额
+            $spreadsheet->getActiveSheet()->setCellValue("AA" . ($num), $value['payment_method']); //支付方式
+            $spreadsheet->getActiveSheet()->setCellValue("AB" . ($num), date('Y-m-d H:i:s', $value['payment_time'])); //订单支付时间
             if (empty($value['check_time'])) {
                 $value['check_time'] = '暂无';
             } else {
                 $value['check_time'] = date('Y-m-d H:i:s', $value['check_time']);
             }
-            $spreadsheet->getActiveSheet()->setCellValue("AC".($num), $value['check_time']); //审单时间
+            $spreadsheet->getActiveSheet()->setCellValue("AC" . ($num), $value['check_time']); //审单时间
 
             //合并单元格
 
-            $spreadsheet->getActiveSheet()->mergeCells("A".($num).":A".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("B".($num).":B".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("C".($num).":C".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("D".($num).":D".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("E".($num).":E".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("F".($num).":F".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("G".($num).":G".($num + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("H".($num).":H".($num + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("A" . ($num) . ":A" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("B" . ($num) . ":B" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("C" . ($num) . ":C" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("D" . ($num) . ":D" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("E" . ($num) . ":E" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("F" . ($num) . ":F" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("G" . ($num) . ":G" . ($num + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("H" . ($num) . ":H" . ($num + 1));
 
 
-            $spreadsheet->getActiveSheet()->mergeCells("X".($num).":X".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("Y".($num).":Y".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("Z".($num).":Z".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("AA".($num).":AA".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("AB".($num).":AB".($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("AC".($num).":AC".($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("X" . ($num) . ":X" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("Y" . ($num) . ":Y" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("Z" . ($num) . ":Z" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("AA" . ($num) . ":AA" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("AB" . ($num) . ":AB" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("AC" . ($num) . ":AC" . ($cat + 1));
         }
 
         //设置宽度
@@ -1814,343 +1813,29 @@ class Distribution extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
 
 
-        $setBorder = 'A1:'.$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow();
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AC'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->getActiveSheet()->getStyle('A1:AC'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AC' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AC' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
         $spreadsheet->setActiveSheetIndex(0);
 
-        $save_name = '配货列表'.date("YmdHis", time());
+        $save_name = '配货列表' . date("YmdHis", time());
         //输出07Excel版本
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         //输出名称
-        header('Content-Disposition: attachment;filename="'.$save_name.'.xlsx"');
+        header('Content-Disposition: attachment;filename="' . $save_name . '.xlsx"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
-    }
-
-    /**
-     *  财务导出
-     * @Description
-     * @author: wpl
-     * @since: 2021/4/6 18:28
-     */
-    public function batch_export_xls_account_bak()
-    {
-        set_time_limit(0);
-        ini_set('memory_limit', '2048M');
-        //根据传的标签切换状态
-        $filter = json_decode($this->request->get('filter'), true);
-        //默认展示3个月内的数据
-        if (!$filter) {
-            $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
-        } else {
-            if ($filter['a.created_at']) {
-                $time = explode(' - ', $filter['a.created_at']);
-                $map['a.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
-            }
-        }
-
-        //默认展示订单状态
-        if ($filter) {
-            if ($filter['status']) {
-                $map['b.status'] = ['in', $filter['status']];
-            }
-            unset($filter['status']);
-        } else {
-            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-            unset($filter['status']);
-        }
-
-        //审单时间
-        if ($filter['check_time']) {
-            $check_time = explode(' - ', $filter['check_time']);
-            $map['c.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
-            unset($filter['check_time']);
-        }
-
-        //筛选订单号
-        if ($filter['increment_id']) {
-            $map['b.increment_id'] = ['like', $filter['increment_id'].'%'];
-            unset($filter['increment_id']);
-        }
-
-        //筛选子单号
-        if ($filter['item_order_number']) {
-            $ex_fil_arr = explode(' ', $filter['item_order_number']);
-            if (count($ex_fil_arr) > 1) {
-                $map['a.item_order_number'] = ['in', $ex_fil_arr];
-            } else {
-                $map['a.item_order_number'] = ['like', $filter['item_order_number'].'%'];
-            }
-
-            unset($filter['item_order_number']);
-        }
-
-        //筛选站点
-        if ($filter['site']) {
-            $map['a.site'] = ['in', $filter['site']];
-            unset($filter['site']);
-        }
-
-        //加工类型筛选
-        if (isset($filter['order_prescription_type'])) {
-            $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
-            unset($filter['order_prescription_type']);
-        }
-
-        //判断是否有id
-        if ($filter['ids']) {
-            $map['a.id'] = ['in', $filter['ids']];
-        }
-
-        //工单状态
-        $work_order_status_map = [1, 2, 3, 5];
-        //工单类型
-        $work_order_type = [1, 2];
-        $this->request->get(['filter' => json_encode($filter)]);
-
-        [$where] = $this->buildparams();
-        //站点列表
-        $siteList = [
-            1  => 'Zeelool',
-            2  => 'Voogueme',
-            3  => 'Nihao',
-            4  => 'Meeloog',
-            5  => 'Wesee',
-            8  => 'Amazon',
-            9  => 'Zeelool_es',
-            10 => 'Zeelool_de',
-            11 => 'Zeelool_jp',
-        ];
-
-        //子单号状态
-        $distributionStatusList = [
-            1 => '待打印标签',
-            2 => '待配货',
-            3 => '待配镜片',
-            4 => '待加工',
-            5 => '待印logo',
-            6 => '待成品质检',
-            7 => '待合单',
-            8 => '合单中',
-            9 => '合单完成',
-        ];
-
-        //获取镜片编码及名称
-        $lensList = $this->_lens_data->column('lens_name', 'lens_number');
-
-        $headList = [
-//            '订单ID',
-            '订单号',
-            '站点',
-            '订单类型',
-            '订单状态',
-            '子单号状态',
-            '实际币种支付金额',
-            '支付方式',
-            '实际支付币种',
-            '子单号',
-            'SKU',
-            '加工类型',
-            'od_sph',
-            'os_sph',
-            'od_cyl',
-            'os_cyl',
-            'od_axis',
-            'os_axis',
-            'pd_r',
-            'pd_l',
-            'pd',
-            'od_add',
-            'os_add',
-            'od_pv',
-            'os_pv',
-            'od_pv_r',
-            'os_pv_r',
-            'od_bd',
-            'os_bd',
-            'od_bd_r',
-            'os_bd_r',
-            '处方名称',
-            '镜片名称',
-            '镜片类型',
-            '订单创建时间',
-            '支付时间',
-            '审单时间',
-        ];
-        $path = '/uploads/order/';
-        $fileName = '财务导出数据'.time();
-        $i = 0;
-        //非拆分订单
-        $map['d.is_split'] = 0;
-        //非重新下单
-        $map['d.is_repeat'] = 0;
-
-        $this->model
-            ->alias('a')
-            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.increment_id,
-            b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.grand_total,
-            b.order_type,b.base_currency_code,b.payment_time,b.payment_method,b.order_currency_code,d.check_time,e.distribution_status')
-            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-            ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
-            ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
-            ->join(['fa_order_item_process' => 'e'], 'a.order_id=e.order_id')
-            ->where($where)
-            ->where($map)
-            ->chunk(1000, function ($list) use ($siteList, $lensList, $headList, &$i, $path, $fileName) {
-                //获取更改镜框最新信息
-                $changeSku = $this->_work_order_change_sku
-                    ->alias('f')
-                    ->join(['fa_work_order_measure' => 'g'], 'f.measure_id=g.id')
-                    ->where([
-                        'f.change_type'       => 1,
-                        'f.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                        'g.operation_type'    => 1,
-                    ])
-                    ->column('f.change_sku', 'f.item_order_number');
-
-                //获取更改镜片最新处方信息
-                $changeLens = $this->_work_order_change_sku
-                    ->alias('h')
-                    ->join(['fa_work_order_measure' => 'i'], 'h.measure_id=i.id')
-                    ->where([
-                        'h.change_type'       => 2,
-                        'h.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                        'i.operation_type'    => 1,
-                    ])
-                    ->column('h.od_sph,h.od_cyl,h.od_axis,h.od_add,h.pd_r,h.od_pv,h.od_bd,
-                    h.od_pv_r,h.od_bd_r,h.os_sph,h.os_cyl,h.os_axis,h.os_add,h.pd_l,
-                    h.os_pv,h.os_bd,h.os_pv_r,h.os_bd_r,h.lens_number,h.recipe_type as prescription_type,h.web_lens_name', 'h.item_order_number');
-                if ($changeLens) {
-                    foreach ($changeLens as $key => $val) {
-                        if ($val['pd_l'] && $val['pd_r']) {
-                            $changeLens[$key]['pd'] = '';
-                            $changeLens[$key]['pdcheck'] = 'on';
-                        } else {
-                            $changeLens[$key]['pd'] = $val['pd_r'] ?: $val['pd_l'];
-                            $changeLens[$key]['pdcheck'] = '';
-                        }
-                    }
-                }
-                $data = [];
-                foreach ($list as $key => &$value) {
-
-                    //更改镜片最新数据
-                    if ($changeLens[$value['item_order_number']]) {
-                        $value = array_merge($value, $changeLens[$value['item_order_number']]);
-                    }
-                    switch ($value['order_type']) {
-                        case 1:
-                            $value['order_type'] = '普通订单';
-                            break;
-                        case 2:
-                            $value['order_type'] = '批发';
-                            break;
-                        case 3:
-                            $value['order_type'] = '网红';
-                            break;
-                        case 4:
-                            $value['order_type'] = '补发';
-                            break;
-                        case 5:
-                            $value['order_type'] = '补差价';
-                            break;
-                        case 6:
-                            $value['order_type'] = '一件代发';
-                            break;
-                    }
-                    switch ($value['order_prescription_type']) {
-                        case 1:
-                            $value['order_prescription_type'] = '仅镜架';
-                            break;
-                        case 2:
-                            $value['order_prescription_type'] = '现货处方镜';
-                            break;
-                        case 3:
-                            $value['order_prescription_type'] = '定制处方镜';
-                            break;
-                    }
-
-//                    $data[$key]['id'] = $value['id']; //id
-                    $data[$key]['increment_id'] = $value['increment_id'];//订单号
-                    $data[$key]['site'] = $siteList[$value['site']];//站点
-                    $data[$key]['order_type'] = $value['order_type'];//订单类型
-                    $data[$key]['status'] = $value['status'];//订单状态
-                    $data[$key]['distribution_status'] = $value['distribution_status'];//订单状态
-                    $data[$key]['grand_total'] = $value['grand_total'];//实际币种支付金额
-                    $data[$key]['payment_method'] = $value['payment_method'];//支付方式
-                    $data[$key]['order_currency_code'] = $value['order_currency_code'];//实际支付币种
-                    $data[$key]['item_order_number'] = $value['item_order_number'];//子单号
-                    $data[$key]['sku'] = $value['sku'];//sku
-                    $data[$key]['order_prescription_type'] = $value['order_prescription_type'];//加工类型
-                    $data[$key]['od_sph'] = $value['od_sph'];
-                    $data[$key]['os_sph'] = $value['os_sph'];
-                    $data[$key]['od_cyl'] = $value['od_cyl'];
-                    $data[$key]['os_cyl'] = $value['os_cyl'];
-                    $data[$key]['od_axis'] = $value['od_axis'];
-                    $data[$key]['os_axis'] = $value['os_axis'];
-                    $data[$key]['pd_r'] = $value['pd_r'];
-                    $data[$key]['pd_l'] = $value['pd_l'];
-                    $data[$key]['pd'] = $value['pd'];
-                    $data[$key]['od_add'] = $value['od_add'];
-                    $data[$key]['os_add'] = $value['os_add'];
-                    $data[$key]['od_pv'] = $value['od_pv'];
-                    $data[$key]['os_pv'] = $value['os_pv'];
-                    $data[$key]['od_pv_r'] = $value['od_pv_r'];
-                    $data[$key]['os_pv_r'] = $value['os_pv_r'];
-                    $data[$key]['od_bd'] = $value['od_bd'];
-                    $data[$key]['os_bd'] = $value['os_bd'];
-                    $data[$key]['od_bd_r'] = $value['od_bd_r'];
-                    $data[$key]['os_bd_r'] = $value['os_bd_r'];
-                    $data[$key]['prescription_type'] = $value['prescription_type'];//处方类型
-                    $data[$key]['index_name'] = $value['index_name'];//镜片名称
-                    $data[$key]['index_type'] = $value['index_type'];//镜片类型
-                    if (empty($value['created_at'])) {
-                        $value['created_at'] = '暂无';
-                    } else {
-                        $value['created_at'] = date('Y-m-d H:i:s', $value['created_at'] + 28800);
-                    }
-                    $data[$key]['created_at'] = $value['created_at'];//订单创建时间
-
-                    if (empty($value['payment_time'])) {
-                        $value['payment_time'] = '暂无';
-                    } else {
-                        $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time'] + 28800);
-                    }
-                    $data[$key]['payment_time'] = $value['payment_time'];//支付时间
-
-                    if (empty($value['check_time'])) {
-                        $value['check_time'] = '暂无';
-                    } else {
-                        $value['check_time'] = date('Y-m-d H:i:s', $value['check_time'] + 28800);
-                    }
-                    $data[$key]['check_time'] = $value['check_time'];//支付时间
-                }
-
-                $data = array_values($data);
-                if ($i > 0) {
-                    $headList = [];
-                }
-                $i++;
-                Excel::writeCsv($data, $headList, $path.$fileName);
-            }, 'a.id');
-        unset($i);
-        //获取当前域名
-        $request = Request::instance();
-        $domain = $request->domain();
-        header('Location: '.$domain.$path.$fileName.'.csv');
-        die;
     }
 
 
@@ -2192,13 +1877,15 @@ class Distribution extends Backend
         //审单时间
         if ($filter['check_time']) {
             $check_time = explode(' - ', $filter['check_time']);
-            $map['c.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
+            $map['d.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
+            //审单通过时间
+            $map['d.check_status'] = 1;
             unset($filter['check_time']);
         }
 
         //筛选订单号
         if ($filter['increment_id']) {
-            $map['b.increment_id'] = ['like', $filter['increment_id'].'%'];
+            $map['b.increment_id'] = ['like', $filter['increment_id'] . '%'];
             unset($filter['increment_id']);
         }
 
@@ -2208,7 +1895,7 @@ class Distribution extends Backend
             if (count($ex_fil_arr) > 1) {
                 $map['a.item_order_number'] = ['in', $ex_fil_arr];
             } else {
-                $map['a.item_order_number'] = ['like', $filter['item_order_number'].'%'];
+                $map['a.item_order_number'] = ['like', $filter['item_order_number'] . '%'];
             }
 
             unset($filter['item_order_number']);
@@ -2240,13 +1927,13 @@ class Distribution extends Backend
         [$where] = $this->buildparams();
         //站点列表
         $siteList = [
-            1  => 'Zeelool',
-            2  => 'Voogueme',
-            3  => 'Nihao',
-            4  => 'Meeloog',
-            5  => 'Wesee',
-            8  => 'Amazon',
-            9  => 'Zeelool_es',
+            1 => 'Zeelool',
+            2 => 'Voogueme',
+            3 => 'Nihao',
+            4 => 'Meeloog',
+            5 => 'Wesee',
+            8 => 'Amazon',
+            9 => 'Zeelool_es',
             10 => 'Zeelool_de',
             11 => 'Zeelool_jp',
         ];
@@ -2302,10 +1989,10 @@ class Distribution extends Backend
             '镜片名称',
             '订单创建时间',
             '支付时间',
-            '审单时间',
+            '审单通过时间',
         ];
         $path = '/uploads/order/';
-        $fileName = '财务导出数据'.time();
+        $fileName = '财务导出数据' . time();
         //非拆分订单
         $map['d.is_split'] = 0;
         //非重新下单
@@ -2313,13 +2000,16 @@ class Distribution extends Backend
 
         $count = $this->model
             ->alias('a')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.increment_id,
+            b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.grand_total,
+            b.order_type,b.base_currency_code,b.payment_time,b.payment_method,b.order_currency_code,d.check_time,a.distribution_status,d.check_status')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
             ->where($where)
             ->where($map)
             ->count();
-        for ($i = 0; $i < ceil($count / 1000); $i++) {
+        for ($i = 0; $i < ceil($count / 50000); $i++) {
             $list = $this->model
                 ->alias('a')
                 ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.increment_id,
@@ -2330,7 +2020,7 @@ class Distribution extends Backend
                 ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
                 ->where($where)
                 ->where($map)
-                ->page($i + 1, 1000)
+                ->page($i + 1, 50000)
                 ->order('a.created_at desc')
                 ->select();
 
@@ -2340,9 +2030,9 @@ class Distribution extends Backend
                 ->alias('f')
                 ->join(['fa_work_order_measure' => 'g'], 'f.measure_id=g.id')
                 ->where([
-                    'f.change_type'       => 1,
+                    'f.change_type' => 1,
                     'f.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                    'g.operation_type'    => 1,
+                    'g.operation_type' => 1,
                 ])
                 ->column('f.change_sku', 'f.item_order_number');
 
@@ -2351,9 +2041,9 @@ class Distribution extends Backend
                 ->alias('h')
                 ->join(['fa_work_order_measure' => 'i'], 'h.measure_id=i.id')
                 ->where([
-                    'h.change_type'       => 2,
+                    'h.change_type' => 2,
                     'h.item_order_number' => ['in', array_column($list, 'item_order_number')],
-                    'i.operation_type'    => 1,
+                    'i.operation_type' => 1,
                 ])
                 ->column('h.od_sph,h.od_cyl,h.od_axis,h.od_add,h.pd_r,h.od_pv,h.od_bd,
                     h.od_pv_r,h.od_bd_r,h.os_sph,h.os_cyl,h.os_axis,h.os_add,h.pd_l,
@@ -2377,23 +2067,34 @@ class Distribution extends Backend
                     $value = array_merge($value, $changeLens[$value['item_order_number']]);
                 }
                 switch ($value['order_type']) {
-                    case 1:
+                    case OrderType::REGULAR_ORDER:
                         $value['order_type'] = '普通订单';
                         break;
-                    case 2:
-                        $value['order_type'] = '批发';
+                    case OrderType::WHOLESALE_ORDER:
+                        $value['order_type'] = '批发单';
                         break;
-                    case 3:
-                        $value['order_type'] = '网红';
+                    case OrderType::SOCIAL_ORDER:
+                        $value['order_type'] = '网红单';
                         break;
-                    case 4:
-                        $value['order_type'] = '补发';
+                    case OrderType::REPLACEMENT_ORDER:
+                        $value['order_type'] = '补发单';
                         break;
-                    case 5:
+                    case OrderType::DIFFERENCE_ORDER:
                         $value['order_type'] = '补差价';
                         break;
-                    case 6:
+                    case OrderType::PAYROLL_ORDER:
                         $value['order_type'] = '一件代发';
+                        break;
+                    case OrderType::VIP_ORDER:
+                        $value['order_type'] = 'vip订单';
+                        break;
+                    case OrderType::CASH_DELIVERY_ORDER:
+                        $value['order_type'] = '货到付款';
+                        break;
+                    case OrderType::CONVENIENCE_ORDER:
+                        $value['order_type'] = '便利店支付';
+                        break;
+                    default:
                         break;
                 }
                 switch ($value['order_prescription_type']) {
@@ -2453,10 +2154,10 @@ class Distribution extends Backend
                     $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
                 }
                 $data[$key]['payment_time'] = $value['payment_time'];//支付时间
-                if (empty($value['check_time'])) {
-                    $value['check_time'] = '暂无';
-                } else {
+                if ($value['check_status'] == 1) {
                     $value['check_time'] = date('Y-m-d H:i:s', $value['check_time']);
+                } else {
+                    $value['check_time'] = '暂无';
                 }
                 $data[$key]['check_time'] = $value['check_time'];//审单时间
             }
@@ -2468,7 +2169,7 @@ class Distribution extends Backend
         //获取当前域名
         $request = Request::instance();
         $domain = $request->domain();
-        header('Location: '.$domain.$path.$fileName.'.csv');
+        header('Location: ' . $domain . $path . $fileName . '.csv');
         die;
     }
 
@@ -2483,26 +2184,29 @@ class Distribution extends Backend
     {
         $ids = input('id_params/a');
         !$ids && $this->error('请选择要标记的数据');
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
         //拣货区盘点时不能操作
         //查询条形码库区库位
         $sku = $this->model->where(['id' => ['in', $ids]])->column('sku');
-        $whe_sku['platform_sku'] = ['in',$sku];
+        $wheSku['platform_sku'] = ['in', $sku];
         //转换sku
-        $item_platform_sku = new ItemPlatformSku();
-        $true_sku =  $item_platform_sku->where($whe_sku)->column('sku');
-        $whe['sku'] = ['in',$true_sku];
-        $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-
-        if (!empty($barcodedata)){
+        $itemPlatformSku = new ItemPlatformSku();
+        $trueSku = $itemPlatformSku->where($wheSku)->column('sku');
+        $whe['sku'] = ['in', $trueSku];
+        $whe['library_status'] = 1;
+        $barcodeData = $this->_product_bar_code_item->where($whe)->column('location_code');
+        if (!empty($barcodeData)) {
             $count = $this->_inventory->alias('a')
-                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => '3'])
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
+                ->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodeData], 'area_id' => '3'])
                 ->count();
-
             if ($count > 0) {
                 $this->error(__('存在正在盘点的单据,暂无法审核'));
             }
         }
         /****************************end*****************************************/
+
 
         //检测子订单状态
         $where = [
@@ -2577,6 +2281,7 @@ class Distribution extends Backend
         $itemPlatformSku = new ItemPlatformSku();
         $trueSku = $itemPlatformSku->where($wheSku)->column('sku');
         $whe['sku'] = ['in', $trueSku];
+        $whe['library_status'] = 1;
         $barcodeData = $this->_product_bar_code_item->where($whe)->column('location_code');
         if (!empty($barcodeData)) {
             $count = $this->_inventory->alias('a')
@@ -2716,7 +2421,7 @@ class Distribution extends Backend
 
         // $code = '';
         // 加载字体大小
-        $font = new \BCGFontFile(EXTEND_PATH.'/BCode/font/Arial.ttf', 18);
+        $font = new \BCGFontFile(EXTEND_PATH . '/BCode/font/Arial.ttf', 18);
         //颜色条形码
         $color_black = new \BCGColor(0, 0, 0);
         $color_white = new \BCGColor(255, 255, 255);
@@ -2810,7 +2515,7 @@ class Distribution extends Backend
             ->where([
                 'a.operation_type' => 0,
                 'b.platform_order' => ['in', $increment_ids],
-                'b.work_status'    => ['in', [1, 2, 3, 5]],
+                'b.work_status' => ['in', [1, 2, 3, 5]],
             ])
             ->select();
         if ($check_work_order) {
@@ -2820,7 +2525,7 @@ class Distribution extends Backend
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
 
-                && $this->error('子单号：'.$val['item_order_number'].'有工单未处理');
+                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
                 if ($val['measure_choose_id'] == 21) {
                     $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
                 }
@@ -2832,12 +2537,12 @@ class Distribution extends Backend
             ->alias('a')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
-                'a.change_type'       => 3,
+                'a.change_type' => 3,
                 'a.item_order_number' => ['in', $item_order_numbers],
-                'b.operation_type'    => 1,
+                'b.operation_type' => 1,
             ])
             ->value('a.item_order_number');
-        $check_cancel_order && $this->error('子单号：'.$check_cancel_order.' 已取消');
+        $check_cancel_order && $this->error('子单号：' . $check_cancel_order . ' 已取消');
 
         //获取订单购买总数
         $total_list = $this->_new_order
@@ -2907,18 +2612,18 @@ class Distribution extends Backend
 
                     //记录库存日志
                     $this->_stock_log->setData([
-                        'type'                      => 2,
-                        'site'                      => $value['site'],
-                        'modular'                   => 2,
-                        'change_type'               => 4,
-                        'source'                    => 1,
-                        'sku'                       => $true_sku,
-                        'number_type'               => 2,
-                        'order_number'              => $value['item_order_number'],
+                        'type' => 2,
+                        'site' => $value['site'],
+                        'modular' => 2,
+                        'change_type' => 4,
+                        'source' => 1,
+                        'sku' => $true_sku,
+                        'number_type' => 2,
+                        'order_number' => $value['item_order_number'],
                         'distribution_stock_before' => $item_before['distribution_occupy_stock'],
                         'distribution_stock_change' => 1,
-                        'create_person'             => session('admin.nickname'),
-                        'create_time'               => time(),
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => time(),
                     ]);
                 } elseif (3 == $check_status) {
                     //配镜片完成
@@ -2972,7 +2677,7 @@ class Distribution extends Backend
 
                 $this->model->where(['id' => $value['id']])->update(['distribution_status' => $save_status]);
                 //操作成功记录
-                DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status].'完成');
+                DistributionLog::record($admin, $value['id'], $check_status, $status_arr[$check_status] . '完成');
                 //节点记录
                 //将订单号截取处理
                 $value['item_order_number'] = substr($value['item_order_number'], 0, strpos($value['item_order_number'], '-'));
@@ -3053,7 +2758,7 @@ class Distribution extends Backend
             ->where([
                 'a.operation_type' => 0,
                 'b.platform_order' => ['in', $increment_ids],
-                'b.work_status'    => ['in', [1, 2, 3, 5]],
+                'b.work_status' => ['in', [1, 2, 3, 5]],
             ])
             ->select();
         if ($check_work_order) {
@@ -3062,7 +2767,7 @@ class Distribution extends Backend
                     ||
                     in_array($val['item_order_number'], $item_order_numbers) //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
-                && $this->error('子单号：'.$val['item_order_number'].'有工单未处理');
+                && $this->error('子单号：' . $val['item_order_number'] . '有工单未处理');
             }
         }
 
@@ -3071,12 +2776,12 @@ class Distribution extends Backend
             ->alias('a')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
-                'a.change_type'       => 3,
+                'a.change_type' => 3,
                 'a.item_order_number' => ['in', $item_order_numbers],
-                'b.operation_type'    => 1,
+                'b.operation_type' => 1,
             ])
             ->value('a.item_order_number');
-        $check_cancel_order && $this->error('子单号：'.$check_cancel_order.' 已取消');
+        $check_cancel_order && $this->error('子单号：' . $check_cancel_order . ' 已取消');
 
         //状态
         $status_arr = [
@@ -3144,7 +2849,7 @@ class Distribution extends Backend
                         ->update();
 
                     //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
-                    $outstock['out_stock_number'] = 'OUT'.date('YmdHis').rand(100, 999).rand(100, 999);
+                    $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                     $outstock['type_id'] = 2;
                     $outstock['remark'] = 'PDA质检拒绝：镜架报损自动生成出库单';
                     $outstock['status'] = 2;
@@ -3177,24 +2882,24 @@ class Distribution extends Backend
 
                     //记录库存日志
                     $this->_stock_log->setData([
-                        'type'                      => 2,
-                        'site'                      => $value['site'],
-                        'modular'                   => 3,
-                        'change_type'               => 5,
-                        'source'                    => 2,
-                        'sku'                       => $true_sku,
-                        'number_type'               => 2,
-                        'order_number'              => $value['item_order_number'],
-                        'available_stock_before'    => $stock_arr['available_stock'],
-                        'available_stock_change'    => -1,
+                        'type' => 2,
+                        'site' => $value['site'],
+                        'modular' => 3,
+                        'change_type' => 5,
+                        'source' => 2,
+                        'sku' => $true_sku,
+                        'number_type' => 2,
+                        'order_number' => $value['item_order_number'],
+                        'available_stock_before' => $stock_arr['available_stock'],
+                        'available_stock_change' => -1,
                         'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                         'distribution_stock_change' => -1,
-                        'stock_before'              => $stock_arr['stock'],
-                        'stock_change'              => -1,
-                        'fictitious_before'         => $platform_info['stock'],
-                        'fictitious_change'         => -1,
-                        'create_person'             => session('admin.nickname'),
-                        'create_time'               => time(),
+                        'stock_before' => $stock_arr['stock'],
+                        'stock_change' => -1,
+                        'fictitious_before' => $platform_info['stock'],
+                        'fictitious_change' => -1,
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => time(),
                     ]);
                 }
             }
@@ -3289,15 +2994,15 @@ class Distribution extends Backend
 
         //异常原因列表
         $abnormal_arr = [
-            1  => '配货缺货',
-            2  => '商品条码贴错',
-            3  => '核实处方',
-            4  => '镜片缺货',
-            5  => '镜片重做',
-            6  => '定制片超时',
-            7  => '不可加工',
-            8  => '镜架加工报损',
-            9  => '镜片加工报损',
+            1 => '配货缺货',
+            2 => '商品条码贴错',
+            3 => '核实处方',
+            4 => '镜片缺货',
+            5 => '镜片重做',
+            6 => '定制片超时',
+            7 => '不可加工',
+            8 => '镜架加工报损',
+            9 => '镜片加工报损',
             10 => 'logo不可加工',
             11 => '镜架印logo报损',
             12 => '合单缺货',
@@ -3355,7 +3060,7 @@ class Distribution extends Backend
                 //子订单状态回滚
                 $save_data = [
                     'distribution_status' => $status, //配货状态
-                    'abnormal_house_id'   => 0 //异常库位ID
+                    'abnormal_house_id' => 0 //异常库位ID
                 ];
 
                 //如果回退到待加工步骤之前，清空定制片库位ID及定制片处理状态
@@ -3385,7 +3090,7 @@ class Distribution extends Backend
                 $this->_distribution_abnormal->where(['id' => $abnormal_info['id']])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
 
                 //配货操作内容
-                $remark = '处理异常：'.$abnormal_arr[$abnormal_info['type']].',当前节点：'.$status_arr[$item_info['distribution_status']].',返回节点：'.$status_arr[$status];
+                $remark = '处理异常：' . $abnormal_arr[$abnormal_info['type']] . ',当前节点：' . $status_arr[$item_info['distribution_status']] . ',返回节点：' . $status_arr[$status];
 
                 //回滚至待配货扣减可用库存、虚拟仓库存、配货占用、总库存
                 if (2 == $status) {
@@ -3394,9 +3099,9 @@ class Distribution extends Backend
                         ->alias('a')
                         ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                         ->where([
-                            'a.change_type'       => 1,
+                            'a.change_type' => 1,
                             'a.item_order_number' => $item_info['item_order_number'],
-                            'b.operation_type'    => 1,
+                            'b.operation_type' => 1,
                         ])
                         ->order('a.id', 'desc')
                         ->limit(1)
@@ -3432,7 +3137,7 @@ class Distribution extends Backend
                         ->update();
 
                     //扣减总库存自动生成一条出库单 审核通过 分类为成品质检报损
-                    $outstock['out_stock_number'] = 'OUT'.date('YmdHis').rand(100, 999).rand(100, 999);
+                    $outstock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                     //加工报损
                     $outstock['type_id'] = 4;
                     $outstock['remark'] = '回滚至待配货自动生成出库单';
@@ -3459,24 +3164,24 @@ class Distribution extends Backend
 
                     //记录库存日志
                     $this->_stock_log->setData([
-                        'type'                      => 2,
-                        'site'                      => $item_info['site'],
-                        'modular'                   => 5,
-                        'change_type'               => 4 == $item_info['distribution_status'] ? 8 : 9,
-                        'source'                    => 1,
-                        'sku'                       => $true_sku,
-                        'number_type'               => 2,
-                        'order_number'              => $item_info['item_order_number'],
-                        'available_stock_before'    => $stock_arr['available_stock'],
-                        'available_stock_change'    => -1,
+                        'type' => 2,
+                        'site' => $item_info['site'],
+                        'modular' => 5,
+                        'change_type' => 4 == $item_info['distribution_status'] ? 8 : 9,
+                        'source' => 1,
+                        'sku' => $true_sku,
+                        'number_type' => 2,
+                        'order_number' => $item_info['item_order_number'],
+                        'available_stock_before' => $stock_arr['available_stock'],
+                        'available_stock_change' => -1,
                         'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                         'distribution_stock_change' => -1,
-                        'stock_before'              => $stock_arr['stock'],
-                        'stock_change'              => -1,
-                        'fictitious_before'         => $platform_info['stock'],
-                        'fictitious_change'         => -1,
-                        'create_person'             => session('admin.nickname'),
-                        'create_time'               => time(),
+                        'stock_before' => $stock_arr['stock'],
+                        'stock_change' => -1,
+                        'fictitious_before' => $platform_info['stock'],
+                        'fictitious_change' => -1,
+                        'create_person' => session('admin.nickname'),
+                        'create_time' => time(),
                     ]);
 
                     $remark .= ',扣减可用库存、虚拟仓库存、配货占用库存、总库存';
@@ -3582,7 +3287,7 @@ class Distribution extends Backend
             //检测是否有未处理工单
             $check_work_order = $this->_work_order_list
                 ->where([
-                    'work_status'    => ['in', [1, 2, 3, 5]],
+                    'work_status' => ['in', [1, 2, 3, 5]],
                     'platform_order' => $order_id[0],
                 ])
                 ->value('id');
@@ -3594,11 +3299,11 @@ class Distribution extends Backend
         $request = Request::instance();
         $url_domain = $request->domain();
         $url_root = $request->root();
-        $url = $url_domain.$url_root;
+        $url = $url_domain . $url_root;
         if ($ids) {
-            $url = $url.'/saleaftermanage/work_order_list/add?order_number='.$order_id[0].'&order_item_numbers='.implode(',', $item_process_numbers);
+            $url = $url . '/saleaftermanage/work_order_list/add?order_number=' . $order_id[0] . '&order_item_numbers=' . implode(',', $item_process_numbers);
         } else {
-            $url = $url.'/saleaftermanage/work_order_list/add';
+            $url = $url . '/saleaftermanage/work_order_list/add';
         }
         //http://www.mojing.cn/admin_1biSSnWyfW.php/saleaftermanage/work_order_list/add?order_number=859063&order_item_numbers=430224120-03,430224120-04
         $this->success('跳转!', '', ['url' => $url], 200);
@@ -3608,37 +3313,37 @@ class Distribution extends Backend
     {
         //站点列表
         $site_arr = [
-            1  => [
+            1 => [
                 'name' => 'zeelool',
-                'obj'  => new \app\admin\model\order\printlabel\Zeelool,
+                'obj' => new \app\admin\model\order\printlabel\Zeelool,
             ],
-            2  => [
+            2 => [
                 'name' => 'voogueme',
-                'obj'  => new \app\admin\model\order\printlabel\Voogueme,
+                'obj' => new \app\admin\model\order\printlabel\Voogueme,
             ],
-            3  => [
+            3 => [
                 'name' => 'nihao',
-                'obj'  => new \app\admin\model\order\printlabel\Nihao,
+                'obj' => new \app\admin\model\order\printlabel\Nihao,
             ],
-            4  => [
+            4 => [
                 'name' => 'weseeoptical',
-                'obj'  => new \app\admin\model\order\printlabel\Weseeoptical,
+                'obj' => new \app\admin\model\order\printlabel\Weseeoptical,
             ],
-            5  => [
+            5 => [
                 'name' => 'meeloog',
-                'obj'  => new \app\admin\model\order\printlabel\Meeloog,
+                'obj' => new \app\admin\model\order\printlabel\Meeloog,
             ],
-            9  => [
+            9 => [
                 'name' => 'zeelool_es',
-                'obj'  => new \app\admin\model\order\printlabel\ZeeloolEs,
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolEs,
             ],
             10 => [
                 'name' => 'zeelool_de',
-                'obj'  => new \app\admin\model\order\printlabel\ZeeloolDe,
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolDe,
             ],
             11 => [
                 'name' => 'zeelool_jp',
-                'obj'  => new \app\admin\model\order\printlabel\ZeeloolJp,
+                'obj' => new \app\admin\model\order\printlabel\ZeeloolJp,
             ],
         ];
 
@@ -3681,12 +3386,12 @@ class Distribution extends Backend
             $spreadsheet->setActiveSheetIndex(0);
             $num = 0;
             foreach ($list as $k => $v) {
-                $spreadsheet->getActiveSheet()->setCellValue('A'.($num * 1 + 2), $v['entity_id']);
-                $spreadsheet->getActiveSheet()->setCellValue('B'.($num * 1 + 2), $v['increment_id']);
-                $spreadsheet->getActiveSheet()->setCellValue('C'.($num * 1 + 2), $v['custom_is_delivery_new'] == 1 ? '是' : '否');
-                $spreadsheet->getActiveSheet()->setCellValue('D'.($num * 1 + 2), $v['custom_match_delivery_person_new']);
-                $spreadsheet->getActiveSheet()->setCellValue('E'.($num * 1 + 2), $v['custom_print_label_new'] == 1 ? '是' : '否');
-                $spreadsheet->getActiveSheet()->setCellValue('F'.($num * 1 + 2), $v['custom_print_label_person_new']);
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['entity_id']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['increment_id']);
+                $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['custom_is_delivery_new'] == 1 ? '是' : '否');
+                $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['custom_match_delivery_person_new']);
+                $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['custom_print_label_new'] == 1 ? '是' : '否');
+                $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['custom_print_label_person_new']);
                 $num += 1;
             }
             //设置边框
@@ -3694,14 +3399,14 @@ class Distribution extends Backend
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                        'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                        'color' => ['argb' => 'FF000000'], // 设置border颜色
                     ],
                 ],
             ];
             $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-            $setBorder = 'A1:'.$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow();
+            $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
             $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
-            $spreadsheet->getActiveSheet()->getStyle('A1:Q'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             $spreadsheet->setActiveSheetIndex(0);
             $format = 'xlsx';
             $savename = '配货未质检已打印标签数据';
@@ -3715,7 +3420,7 @@ class Distribution extends Backend
                 $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
             }
             //输出名称
-            header('Content-Disposition: attachment;filename="'.$savename.'.'.$format.'"');
+            header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
             //禁止缓存
             header('Cache-Control: max-age=0');
             $writer = new $class($spreadsheet);
@@ -3774,10 +3479,10 @@ class Distribution extends Backend
                 //绑定异常子单号
                 $abnormal_data = [
                     'item_process_id' => $item_process_id,
-                    'type'            => $type,
-                    'status'          => 1,
-                    'create_time'     => time(),
-                    'create_person'   => $this->auth->nickname,
+                    'type' => $type,
+                    'status' => 1,
+                    'create_time' => time(),
+                    'create_person' => $this->auth->nickname,
                 ];
                 if ($status) {
                     $abnormal_data['remark'] = $status;
@@ -3819,11 +3524,11 @@ class Distribution extends Backend
                 ->field('id,site,sku,distribution_status,abnormal_house_id,temporary_house_id,item_order_number')
                 ->where(['id' => $ids[$key]])
                 ->find();
-            empty($item_info) && $this->error('子订单'.$item_info['item_order_number'].'不存在');
-            empty($item_info['abnormal_house_id']) && $this->error('子订单'.$item_info['item_order_number'].'没有异常存在');
+            empty($item_info) && $this->error('子订单' . $item_info['item_order_number'] . '不存在');
+            empty($item_info['abnormal_house_id']) && $this->error('子订单' . $item_info['item_order_number'] . '没有异常存在');
             //检测工单
-            $work_order_list = $this->_work_order_list->where(['order_item_numbers' => ['like', $item_info['item_order_number'].'%'], 'work_status' => ['in', [1, 2, 3, 5]]])->find();
-            !empty($work_order_list) && $this->error('子订单'.$item_info['item_order_number'].'存在未完成的工单');
+            $work_order_list = $this->_work_order_list->where(['order_item_numbers' => ['like', $item_info['item_order_number'] . '%'], 'work_status' => ['in', [1, 2, 3, 5]]])->find();
+            !empty($work_order_list) && $this->error('子订单' . $item_info['item_order_number'] . '存在未完成的工单');
             $abnormal_house_id[] = $item_info['abnormal_house_id'];
             //配货日志
             DistributionLog::record($this->auth, $ids[$key], 10, "子单号{$item_info['item_order_number']}，异常取消");
@@ -3851,8 +3556,8 @@ class Distribution extends Backend
      *
      * @param $siteType
      * @param $pathinfo
-     * @param  array  $params
-     * @param  string  $method
+     * @param array $params
+     * @param string $method
      *
      * @return bool
      * @throws \Exception
@@ -3888,7 +3593,7 @@ class Distribution extends Backend
                 return false;
                 break;
         }
-        $url = $url.$pathinfo;
+        $url = $url . $pathinfo;
 
         $client = new Client(['verify' => false]);
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
@@ -3960,9 +3665,9 @@ class Distribution extends Backend
             } else {
                 $value['order_prescription_type'] = '定制处方镜';
             }
-            $spreadsheet->getActiveSheet()->setCellValue("A".($key * 1 + 2), date('Y-m-d H:i:s', $value['created_at'])); //子单创建时间
-            $spreadsheet->getActiveSheet()->setCellValue("B".($key * 1 + 2), $value['item_order_number']); //子单号
-            $spreadsheet->getActiveSheet()->setCellValue("C".($key * 1 + 2), $value['order_prescription_type']); //处方类型
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['created_at'])); //子单创建时间
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['item_order_number']); //子单号
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['order_prescription_type']); //处方类型
             switch ($value['distribution_status']) {
                 case 0:
                     $value['distribution_status'] = '取消';
@@ -4024,22 +3729,22 @@ class Distribution extends Backend
                     $value['site'] = 'voogmechic';
                     break;
             }
-            $spreadsheet->getActiveSheet()->setCellValue("D".($key * 1 + 2), $value['distribution_status']);
-            $spreadsheet->getActiveSheet()->setCellValue("E".($key * 1 + 2), '配镜片完成');
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['distribution_status']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), '配镜片完成');
 
             if (!empty($value['mesage'])) {
                 foreach ($value['mesage'] as $k => $v) {
-                    $bt[] = $v['create_person'].','.date('Y-m-d H:i:s', $v['create_time']);
+                    $bt[] = $v['create_person'] . ',' . date('Y-m-d H:i:s', $v['create_time']);
                 }
                 $bt = implode(';', $bt);
             } else {
                 $bt = '暂无数据';
             }
-            $spreadsheet->getActiveSheet()->setCellValue("F".($key * 1 + 2), $bt);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $bt);
             unset($bt);
-            $spreadsheet->getActiveSheet()->setCellValue("G".($key * 1 + 2), $value['increment_id']);
-            $spreadsheet->getActiveSheet()->setCellValue("H".($key * 1 + 2), $value['site']);
-            $spreadsheet->getActiveSheet()->setCellValue("I".($key * 1 + 2), date('Y-m-d H:i:s', $value['check_time']));
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['increment_id']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['site']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), date('Y-m-d H:i:s', $value['check_time']));
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
@@ -4056,7 +3761,7 @@ class Distribution extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -4064,14 +3769,14 @@ class Distribution extends Backend
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
 
-        $setBorder = 'A1:'.$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow();
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:I'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:I' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        $savename = '数据查询'.date("YmdHis", time());;
+        $savename = '数据查询' . date("YmdHis", time());;
 
         if ($format == 'xls') {
             //输出Excel03版本
@@ -4084,7 +3789,7 @@ class Distribution extends Backend
         }
 
         //输出名称
-        header('Content-Disposition: attachment;filename="'.$savename.'.'.$format.'"');
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
