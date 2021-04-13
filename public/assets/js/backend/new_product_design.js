@@ -242,7 +242,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title:__('审核通过'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'new_product_design/reviewTheOperation?status=8',
+                                    url: 'new_product_design/review_the_operation?status=8',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -266,7 +266,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title:__('审核拒绝'),
                                     classname: 'btn btn-xs btn-danger  btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'new_product_design/reviewTheOperation?status=9',
+                                    url: 'new_product_design/review_the_operation?status=9',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
