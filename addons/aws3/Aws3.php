@@ -70,7 +70,7 @@ class Aws3 extends Addons
             'savekey'   => $config['savekey'],
             'maxsize'   => $config['maxsize'],
             'mimetype'  => $config['mimetype'],
-            'cdnurl'  => $config['cdnurl'],
+            'cdnurl'    => $config['cdnurl'],
         ];
     }
 
@@ -86,6 +86,7 @@ class Aws3 extends Addons
     {
         $sourceFile = '.' . $attachment['url'];
         $fileName = substr($attachment['url'], 1);
+
         return $this->s3Upload($fileName, $sourceFile);
     }
 
@@ -112,21 +113,22 @@ class Aws3 extends Addons
         ]);
         $fileNameEnd = array_pop(explode('.', $fileName));
         //非图片类型不上传到s3
-        if (!in_array($fileNameEnd,['csv', 'xls', 'xlsx'])){
-            try {
-                $this->s3Client->putObject([
-                    'Bucket' => $this->config['bucket'],
-                    'Key'    => $fileName,
-                    'SourceFile'   => $sourceFile,
-                    'ACL'    => 'public-read',
-                ]);
-            } catch (\Aws\S3\Exception\S3Exception $e) {
-                return ['code' => 0, 'msg' => $e->getMessage()];
-            }
-        //删除原文件
-        @unlink($sourceFile);
+        try {
+            $this->s3Client->putObject([
+                'Bucket'     => $this->config['bucket'],
+                'Key'        => $fileName,
+                'SourceFile' => $sourceFile,
+                'ACL'        => 'public-read',
+            ]);
+        } catch (\Aws\S3\Exception\S3Exception $e) {
+            return ['code' => 0, 'msg' => $e->getMessage()];
         }
+        if (in_array($fileNameEnd, ['gif', 'jpeg', 'png', 'jpg', 'bmp', 'apk'])) {
+            //删除原文件
+            @unlink($sourceFile);
+        }
+
         //上传文件
-        return ['code' => 1, 'msg' => '上传成功','url' => $this->config['s3_url'] . $fileName];
+        return ['code' => 1, 'msg' => '上传成功', 'url' => $this->config['s3_url'] . $fileName];
     }
 }
