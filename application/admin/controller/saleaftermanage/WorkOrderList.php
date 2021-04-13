@@ -1348,6 +1348,7 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             Log::write($barcodedata);
                             if (!empty($barcodedata)) {
