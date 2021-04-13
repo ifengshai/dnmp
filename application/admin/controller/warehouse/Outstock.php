@@ -615,7 +615,7 @@ class Outstock extends Backend
                     $_product_bar_code_item
                         ->allowField(true)
                         ->isUpdate(true, ['out_stock_id' => ['in', $ids]])
-                        ->save(['out_stock_id' => 0]);
+                        ->save(['out_stock_id' => 0,'location_code'=>'','location_id'=>'0','location_code_id'=>'0']);
                 }
 
                 Db::commit();

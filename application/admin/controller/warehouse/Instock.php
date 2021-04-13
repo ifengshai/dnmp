@@ -918,7 +918,7 @@ class Instock extends Backend
                 $_product_bar_code_item = new ProductBarCodeItem();
                 $_product_bar_code_item
                     ->where(['in_stock_id' => ['in', $ids]])
-                    ->update(['in_stock_id' => 0]);
+                    ->update(['in_stock_id' => 0,'location_code'=>'','location_id'=>'0','location_code_id'=>'0']);
             }
 
             $this->model->commit();
