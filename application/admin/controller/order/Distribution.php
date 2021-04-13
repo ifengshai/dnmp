@@ -1989,7 +1989,7 @@ class Distribution extends Backend
             '镜片名称',
             '订单创建时间',
             '支付时间',
-            '审单时间',
+            '审单通过时间',
         ];
         $path = '/uploads/order/';
         $fileName = '财务导出数据' . time();
@@ -2002,7 +2002,7 @@ class Distribution extends Backend
             ->alias('a')
             ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.increment_id,
             b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.grand_total,
-            b.order_type,b.base_currency_code,b.payment_time,b.payment_method,b.order_currency_code,d.check_time,a.distribution_status')
+            b.order_type,b.base_currency_code,b.payment_time,b.payment_method,b.order_currency_code,d.check_time,a.distribution_status,d.check_status')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
@@ -2154,10 +2154,10 @@ class Distribution extends Backend
                     $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
                 }
                 $data[$key]['payment_time'] = $value['payment_time'];//支付时间
-                if (empty($value['check_time'])) {
-                    $value['check_time'] = '暂无';
-                } else {
+                if ($value['check_status'] == 1) {
                     $value['check_time'] = date('Y-m-d H:i:s', $value['check_time']);
+                } else {
+                    $value['check_time'] = '暂无';
                 }
                 $data[$key]['check_time'] = $value['check_time'];//审单时间
             }
