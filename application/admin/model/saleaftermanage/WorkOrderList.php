@@ -2758,10 +2758,10 @@ class WorkOrderList extends Model
         $_new_order_process = new NewOrderProcess();
         $_new_order_item_process = new NewOrderItemProcess();
         $all_item_order_number = $_new_order_process->alias('a')//所有子单
-        $flag = 0;
             ->where('a.increment_id', $increment_id)
             ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
             ->column('b.item_order_number');
+        $flag = 0;
         $item_order_number_diff = array_diff($all_item_order_number,$item_order_number);//其余子单
         if (!empty($item_order_number_diff)) {
             foreach ($item_order_number_diff as $key => $value) {
