@@ -31,7 +31,7 @@ class NewProductDesign extends Backend
      * @var \app\admin\model\NewProductDesign
      */
     protected $model = null;
-
+    protected $noNeedRight = ['detail'];
     public function _initialize()
     {
         parent::_initialize();
@@ -54,14 +54,12 @@ class NewProductDesign extends Backend
             ],
         ]);
 
-        $this->assignconfig('record_size', $this->auth->check('NewProductDesign/record_size'));//录尺寸
-        $this->assignconfig('allocate_personnel', $this->auth->check('NewProductDesign/allocate_personnel'));//分配人员信息
-        $this->assignconfig('shooting', $this->auth->check('NewProductDesign/shooting')); //拍摄开始 拍摄完成
-        $this->assignconfig('making', $this->auth->check('NewProductDesign/making')); //开始制作
-        $this->assignconfig('reviewTheOperation', $this->auth->check('NewProductDesign/reviewTheOperation')); //审核操作
-        $this->assignconfig('add_img', $this->auth->check('NewProductDesign/add_img')); //图片上传操作
-        $this->assignconfig('edit', $this->auth->check('NewProductDesign/detail')); //查看详情
-
+        $this->assignconfig('record_size', $this->auth->check('new_product_design/record_size'));//录尺寸
+        $this->assignconfig('allocate_personnel', $this->auth->check('new_product_design/allocate_personnel'));//分配人员信息
+        $this->assignconfig('shooting', $this->auth->check('new_product_design/shooting')); //拍摄开始 拍摄完成
+        $this->assignconfig('making', $this->auth->check('new_product_design/making')); //开始制作
+        $this->assignconfig('review_the_operation', $this->auth->check('new_product_design/review_the_operation')); //审核操作
+        $this->assignconfig('add_img', $this->auth->check('new_product_design/add_img')); //图片上传操作
     }
 
     /**
@@ -76,7 +74,6 @@ class NewProductDesign extends Backend
      */
     public function index()
     {
-
         $admin = new Admin();
         //当前是否为关联查询
         $this->relationSearch = false;
@@ -316,9 +313,9 @@ class NewProductDesign extends Backend
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res){
-            $this->success('人员分配成功');
+            $this->success('操作成功');
         }else{
-            $this->error('人员分配失败');
+            $this->error('操作失败');
         }
     }
 
@@ -327,7 +324,7 @@ class NewProductDesign extends Backend
      * @date   2021/4/9 14:11
      * 审核操作
      */
-    public function reviewTheOperation(){
+    public function review_the_operation(){
         $item = new  Item();
         $ids =  $this->request->get('ids');
         $status =  $this->request->get('status');
@@ -385,8 +382,8 @@ class NewProductDesign extends Backend
 
     }
 
-    //上传图片
-    public function add_img()
+    //上传图片 弃用
+    public function add_img_old()
     {
         $item = new \app\admin\model\itemmanage\Item;
         $itemAttribute = new ItemAttribute();
@@ -471,6 +468,52 @@ class NewProductDesign extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
-
+    public function add_img()
+    {
+        $item = new \app\admin\model\itemmanage\Item;
+        $itemAttribute = new ItemAttribute();
+        $newProductDesign = new \app\admin\model\NewProductDesign();
+        $newProductDesignDetail = $newProductDesign->where('id', input('ids'))->find();
+        $itemId = $item->where('sku', $newProductDesignDetail['sku'])->value('id');
+        $row = $item->get($itemId, 'itemAttribute');
+        if ($this->request->isAjax()) {
+            $params = $this->request->post("row/a");
+            $itemAttrData['frame_images'] = $params['frame_images'];
+            $itemAttrData['create_frame_images_time'] = date("Y-m-d H:i:s", time());
+            $itemAttribute->startTrans();
+            $item->startTrans();
+            $newProductDesign->startTrans();
+            try {
+                $itemAttrData['frame_aws_imgs'] = $params['frame_images'];
+                $itemAttrResult = $itemAttribute->where('item_id', '=', $itemId)->update($itemAttrData);
+                $newProductDesignResult = $newProductDesign->where('id', '=', input('ids'))->update(['status'=>7,'update_time'=>date("Y-m-d H:i:s", time())]);
+                $itemAttribute->commit();
+                $item->commit();
+                $newProductDesign->commit();
+            }  catch (ValidateException $e) {
+                $itemAttribute->rollback();
+                $item->rollback();
+                $newProductDesign->rollback();
+                $this->error($e->getMessage(), [], 406);
+            } catch (PDOException $e) {
+                $itemAttribute->rollback();
+                $item->rollback();
+                $newProductDesign->rollback();
+                $this->error($e->getMessage(), [], 407);
+            } catch (Exception $e) {
+                $itemAttribute->rollback();
+                $item->rollback();
+                $newProductDesign->rollback();
+                $this->error($e->getMessage(), [], 408);
+            }
+            if (($itemAttrResult !== false)  && ($newProductDesignResult !== false)){
+                $this->success();
+            } else {
+                $this->error(__('Failed to upload product picture, please try again'));
+            }
+        }
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
 
 }
