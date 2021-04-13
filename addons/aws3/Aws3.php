@@ -112,7 +112,7 @@ class Aws3 extends Addons
         ]);
         $fileNameEnd = array_pop(explode('.', $fileName));
         //非图片类型不上传到s3
-        if (in_array($fileNameEnd,['gif', 'jpeg', 'png', 'jpg', 'bmp'])){
+        if (in_array($fileNameEnd,['gif', 'jpeg', 'png', 'jpg', 'bmp','apk'])){
             try {
                 $this->s3Client->putObject([
                     'Bucket' => $this->config['bucket'],
