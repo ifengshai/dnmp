@@ -2929,10 +2929,19 @@ class WorkOrderList extends Backend
             $key = $siteType . '_get_lens';
             $data = Cache::get($key);
             if (!$data) {
-                $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
+                if ($siteType == 13 || $siteType == 14) {
+                    $data = $this->model->httpRequest($siteType, 'api/mojing/lens_data',['prescriptionType'=>$prescriptionType], 'POST');
+                }else{
+                    $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
+                }
                 Cache::set($key, $data, 3600 * 24);
             }
-            $lensType = $data['lens_list'][$prescriptionType] ?: [];
+            if ($siteType == 13 || $siteType == 14) {
+                $lensType = $data;
+            }else{
+                $lensType = $data['lens_list'][$prescriptionType] ?: [];
+            }
+            
             $this->success('操作成功！！', '', $lensType);
         } else {
             $this->error('404 not found');
