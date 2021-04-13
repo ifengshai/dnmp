@@ -2756,6 +2756,7 @@ class WorkOrderList extends Model
         $_new_order_process = new NewOrderProcess();
         $_new_order_item_process = new NewOrderItemProcess();
         $all_item_order_number = $_new_order_process->alias('a')//所有子单
+        $flag = 0;
             ->where('a.increment_id', $increment_id)
             ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
             ->column('b.item_order_number');
@@ -2766,11 +2767,12 @@ class WorkOrderList extends Model
                 if ($distribution_status == 9) {//合单完成的改成合单中
                     $_new_order_item_process->where(['item_order_number' => $value])->update(['distribution_status' => 8]);
                     $_new_order_process->where(['increment_id' => $increment_id])->update(['combine_status' => 0, 'combine_time' => null]);
+                    $flag = 1;
                 }
             }
             $store_house_id = $_new_order_process->where(['increment_id' => $increment_id])->value('store_house_id');//库位号
             $order_id = $_new_order_process->where(['increment_id' => $increment_id])->value('order_id');//order_id
-            if (!$store_house_id) {//没有库位号分配库位号
+            if (!$store_house_id  && $flag) {//没有库位号分配库位号
                 $_stock_house = new StockHouse();
                 $fictitious_time = time();
                 $store_house_info = $_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]])->find();
