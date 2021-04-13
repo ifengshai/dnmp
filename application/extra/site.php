@@ -37,6 +37,6 @@ return array (
   'operation_authority' => '1',
   'authority_content' => '',
   'pda_version' => '1.0.0',
-  'pda_download' => '/uploads/20210413/a43085b2259dd642eb768ad90ddcbf06.apk',
-  'pda_md5' => 'a43085b2259dd642eb768ad90ddcbf06',
+  'pda_download' => '/uploads/20210413/99cecc731f32465fefb690f62a3641c6.apk',
+  'pda_md5' => '99cecc731f32465fefb690f62a3641c6',
 );
