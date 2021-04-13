@@ -1130,6 +1130,7 @@ class ScmWarehouse extends Scm
                                 $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
                                 $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                                 $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
+                                $save_code_data['library_status'] = 1; //在库状态
                                 $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                             }
                         } else {
@@ -1216,6 +1217,7 @@ class ScmWarehouse extends Scm
                                     $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
                                     $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                                     $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
+                                    $save_code_data['library_status'] = 1; //在库状态为1
                                     $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                                 }
                             } else {
