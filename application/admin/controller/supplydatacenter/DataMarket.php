@@ -1052,15 +1052,15 @@ class DataMarket extends Backend
 
                 $sql2 = $this->orderNode->alias('t1')->field('TIMESTAMPDIFF(DAY,delivery_time,signing_time) AS total')->where($where)->group('order_number')->buildSql();
 
-                $sign_count = $this->orderNode->table([$sql2 => 't2'])->field('sum( IF ( total >= 10 and total<15, 1, 0 ) ) AS c,sum( IF ( total >= 7 and total<10, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<7, 1, 0 ) ) AS a')->select();
-                $sign_count[0]['a'] = $sign_count[0]['a'] ? $sign_count[0]['a'] : 0;
-                $sign_count[0]['b'] = $sign_count[0]['b'] ? $sign_count[0]['b'] : 0;
-                $sign_count[0]['c'] = $sign_count[0]['c'] ? $sign_count[0]['c'] : 0;
-                $data4 = $count - $sign_count[0]['a'] - $sign_count[0]['b'] - $sign_count[0]['c'];
+                $signCount = $this->orderNode->table([$sql2 => 't2'])->field('sum( IF ( total >= 10 and total<15, 1, 0 ) ) AS c,sum( IF ( total >= 7 and total<10, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<7, 1, 0 ) ) AS a')->select();
+                $signCount[0]['a'] = $signCount[0]['a'] ? $signCount[0]['a'] : 0;
+                $signCount[0]['b'] = $signCount[0]['b'] ? $signCount[0]['b'] : 0;
+                $signCount[0]['c'] = $signCount[0]['c'] ? $signCount[0]['c'] : 0;
+                $data4 = $count - $signCount[0]['a'] - $signCount[0]['b'] - $signCount[0]['c'];
                 $data = array(
-                    $sign_count[0]['a'],
-                    $sign_count[0]['b'],
-                    $sign_count[0]['c'],
+                    $signCount[0]['a'],
+                    $signCount[0]['b'],
+                    $signCount[0]['c'],
                     $data4
                 );
                 Cache::set('Supplydatacenter_userdata' . $time_str . md5(serialize('comleted_time_rate')), $data, 7200);
