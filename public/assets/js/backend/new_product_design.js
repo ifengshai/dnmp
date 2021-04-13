@@ -33,7 +33,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 extend: {
                     index_url: 'new_product_design/index' + location.search,
                     add_url: 'new_product_design/add',
-                    edit_url: 'new_product_design/edit',
                     detail_url: 'new_product_design/detail',
                     del_url: 'new_product_design/del',
                     multi_url: 'new_product_design/multi',
@@ -377,9 +376,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         record_size: function () {
             Controller.api.bindevent();
         },
-        edit: function () {
-            Controller.api.bindevent();
-        },
+
         reviewTheOperation: function () {
             Controller.api.bindevent();
         },
