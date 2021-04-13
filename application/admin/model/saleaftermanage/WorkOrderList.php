@@ -2221,7 +2221,6 @@ class WorkOrderList extends Model
             $param['action'] = 1;
         } elseif (5 == $measuerInfo) {//补发
             $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
-            $param['action'] = 1;
         } else {
             return false;
         }
@@ -2240,13 +2239,10 @@ class WorkOrderList extends Model
                     $param['sku'] = $value['change_sku'];
                     $param['qty'] = $value['change_number'];
 
-                }elseif(5 == $measuerInfo){
-                    $param['sku'] = $value['change_sku'];
-                    $param['qty'] = $value['change_number'];
-
+                }elseif(5 == $measuerInfo){//补发不扣第三方库存
+                    return false;
                 }
                 $res = $this->httpRequest($workOrderList->work_platform, 'api/mojing/stock_change', $param, 'POST');//第三方平台库存
-                //file_put_contents('/www/wwwroot/mojing/runtime/log/a.log',$param,FILE_APPEND);
                  if (1 == $measuerInfo) {
                     $ChangeFrameParam = [];
                     $ChangeFrameParam['increment_id'] = $workOrderList['platform_order'];
@@ -2254,7 +2250,6 @@ class WorkOrderList extends Model
                     $ChangeFrameParam['qty'] = $value['original_number'];
                     $ChangeFrameParam['action'] = 0;
                     $ress = $this->httpRequest($workOrderList->work_platform, 'api/mojing/stock_change', $ChangeFrameParam, 'POST');//第三方平台库存
-                    //file_put_contents('/www/wwwroot/mojing/runtime/log/a.log',$ChangeFrameParam,FILE_APPEND);
                 }
             }
             
