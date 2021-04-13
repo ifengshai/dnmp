@@ -485,6 +485,12 @@ class NewProductDesign extends Backend
             $newProductDesign->startTrans();
             try {
                 $itemAttrData['frame_aws_imgs'] = $params['frame_images'];
+                $value = $itemAttrData['frame_aws_imgs'];
+                $value = explode(',',$value);
+                foreach ($value as $k=>$v){
+                    $value[$k]  = substr($v,1);
+                }
+                $itemAttrData['frame_aws_imgs'] = implode(',',$value);
                 $itemAttrResult = $itemAttribute->where('item_id', '=', $itemId)->update($itemAttrData);
                 $newProductDesignResult = $newProductDesign->where('id', '=', input('ids'))->update(['status'=>7,'update_time'=>date("Y-m-d H:i:s", time())]);
                 $itemAttribute->commit();
