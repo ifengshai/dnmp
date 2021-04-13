@@ -1354,7 +1354,12 @@ class WorkOrderList extends Backend
                                 $count = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
                                     ->count();
-                                Log::write($count);
+                                $sql = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
+                                    ->featchSql(true)->count();
+
+                                Log::write("=======输出sql数据=======");
+                                Log::write($sql);
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
