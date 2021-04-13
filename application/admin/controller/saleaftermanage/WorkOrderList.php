@@ -2936,7 +2936,7 @@ class WorkOrderList extends Backend
             $siteType = input('site_type');
             $prescriptionType = input('prescription_type', '');
             $key = $siteType . '_get_lens';
-            //$data = Cache::get($key);
+            $data = Cache::get($key);
             if (!$data) {
                 if ($siteType == 13 || $siteType == 14) {
                     $data = $this->model->httpRequest($siteType, 'api/mojing/lens_data',['prescriptionType'=>$prescriptionType], 'POST');
