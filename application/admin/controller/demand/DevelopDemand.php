@@ -9,7 +9,6 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\common\model\Auth;
-use think\Log;
 
 /**
  * 需求平台-开发组-日常需求管理
@@ -849,8 +848,6 @@ class DevelopDemand extends Backend
             ->join(['fa_admin' => 'b'], 'a.uid=b.id')
             ->where(['a.group_id' => 112, 'b.status' => 'normal'])
             ->column('nickname','uid');
-        Log::write("输出开发者成员");
-        Log::write($phpUser);
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params) {
