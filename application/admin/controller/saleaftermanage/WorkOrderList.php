@@ -1356,7 +1356,7 @@ class WorkOrderList extends Backend
                                     ->count();
                                 $sql = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
-                                    ->featchSql(true)->count();
+                                    ->fetchSql(true)->count();
 
                                 Log::write("=======输出sql数据=======");
                                 Log::write($sql);
