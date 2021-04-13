@@ -2,39 +2,43 @@
 
 return array (
   'autoload' => false,
-  'hooks' => 
+  'hooks' =>
   array (
-    'config_init' => 
+//          'config_init' =>
+//    array (
+//      0 => 'nkeditor',
+//    ),
+    'config_init' =>
     array (
       0 => 'aws3',
       1 => 'nkeditor',
     ),
-    'upload_after' => 
+    'upload_after' =>
     array (
       0 => 'aws3',
     ),
-    's3_upload' => 
+    's3_upload' =>
     array (
       0 => 'aws3',
     ),
-    'express_query' => 
+    'express_query' =>
     array (
       0 => 'express',
     ),
-    'admin_login_init' => 
+    'admin_login_init' =>
     array (
       0 => 'loginbg',
     ),
-    'response_send' => 
+    'response_send' =>
     array (
       0 => 'loginvideo',
     ),
-    'testhook' => 
+    'testhook' =>
     array (
       0 => 'markdown',
     ),
   ),
-  'route' => 
+  'route' =>
   array (
     '/example$' => 'example/index/index',
     '/example/d/[:name]' => 'example/demo/index',
