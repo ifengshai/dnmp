@@ -1173,6 +1173,7 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->column('sku');
                             $whe['sku'] = ['in', $true_sku];
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
@@ -1348,13 +1349,12 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-                            Log::write($barcodedata);
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
                                     ->count();
-                                Log::write($count);
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
@@ -1372,13 +1372,12 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
                                     ->count();
-                                Log::write($count);
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
@@ -1394,13 +1393,12 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
                                     ->count();
-                                Log::write($count);
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['change_frame']['change_sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
@@ -1976,6 +1974,7 @@ class WorkOrderList extends Backend
                 //拣货区盘点时不能操作
                 //查询条形码库区库位
                 $whe_sku['sku'] = $sku;
+                $whe_sku['library_status'] = 1;
                 $barcodedata = $this->_product_bar_code_item->where($whe_sku)->column('location_code');
                 if (!empty($barcodedata)){
                     $count = $this->_inventory->alias('a')
@@ -2117,6 +2116,7 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->column('sku');
                             $whe['sku'] = ['in', $true_sku];
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
@@ -2294,13 +2294,12 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-                            Log::write($barcodedata);
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
                                     ->count();
-                                Log::write($count);
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
@@ -2319,12 +2318,12 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
                                     ->count();
-                                Log::write($count);
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
@@ -2339,12 +2338,12 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
                                     ->count();
-                                Log::write($count);
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['change_frame']['change_sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
@@ -4136,10 +4135,6 @@ EOF;
                     $res_status = WorkOrderNote::create($data);
                     //查询用户的角色组id
                     $authGroupIds = AuthGroupAccess::where('uid', session('admin.id'))->column('group_id');
-                    /*Log::write("角色组");
-                    Log::write($authGroupIds);
-                    Log::write($workOrderConfigValue['warehouse_department_rule']);*/
-
                     $work = $this->model->find($params['work_id']);
                     $work_order_note_status = $work->work_order_note_status;
 
@@ -4168,9 +4163,6 @@ EOF;
                         $work_order_note_status = 3;
                     }
                     $work->work_order_note_status = $work_order_note_status;
-
-                    /*Log::write("是否包含");
-                    Log::write($work_order_note_status);*/
                     $work->save();
                     Db::commit();
                 } catch (\Exception $e) {
