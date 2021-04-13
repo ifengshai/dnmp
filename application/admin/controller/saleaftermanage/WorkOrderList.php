@@ -1173,6 +1173,7 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->column('sku');
                             $whe['sku'] = ['in', $true_sku];
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
@@ -1350,17 +1351,10 @@ class WorkOrderList extends Backend
                             $whe['sku'] = $true_sku;
                             $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-                            Log::write($barcodedata);
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
                                     ->count();
-                                $sql = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
-                                    ->fetchSql(true)->count();
-
-                                Log::write("=======输出sql数据=======");
-                                Log::write($sql);
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
@@ -1378,6 +1372,7 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             Log::write("====输出code编码===");
                             Log::write($barcodedata);
@@ -1404,6 +1399,7 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
 
                             if (!empty($barcodedata)) {
@@ -1986,6 +1982,7 @@ class WorkOrderList extends Backend
                 //拣货区盘点时不能操作
                 //查询条形码库区库位
                 $whe_sku['sku'] = $sku;
+                $whe_sku['library_status'] = 1;
                 $barcodedata = $this->_product_bar_code_item->where($whe_sku)->column('location_code');
                 if (!empty($barcodedata)){
                     $count = $this->_inventory->alias('a')
@@ -2141,6 +2138,7 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->column('sku');
                             $whe['sku'] = ['in', $true_sku];
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
@@ -2318,6 +2316,7 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             Log::write($barcodedata);
                             if (!empty($barcodedata)) {
@@ -2343,6 +2342,7 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
@@ -2363,6 +2363,7 @@ class WorkOrderList extends Backend
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
                             $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
