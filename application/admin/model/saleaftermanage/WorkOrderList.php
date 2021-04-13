@@ -2220,7 +2220,11 @@ class WorkOrderList extends Model
             $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 1);
             $param['action'] = 1;
         } elseif (5 == $measuerInfo) {//补发
-            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
+            if ($workOrderList['work_platform'] == 13 || $workOrderList['work_platform'] == 14) {//补发不扣第三方库存
+                return false;
+            }else{
+                $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
+            }
         } else {
             return false;
         }
@@ -2239,8 +2243,6 @@ class WorkOrderList extends Model
                     $param['sku'] = $value['change_sku'];
                     $param['qty'] = $value['change_number'];
 
-                }elseif(5 == $measuerInfo){//补发不扣第三方库存
-                    return false;
                 }
                 $res = $this->httpRequest($workOrderList->work_platform, 'api/mojing/stock_change', $param, 'POST');//第三方平台库存
                  if (1 == $measuerInfo) {
