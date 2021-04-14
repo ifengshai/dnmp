@@ -83,6 +83,10 @@ class NewProductDesign extends Backend
             $filter = json_decode($this->request->get('filter'), true);
 
             if ($filter['label']) {
+                if ($filter['label'] == 5 || $filter['label'] == 6){
+                    $adminId = session('admin.id');
+                    $map['responsible_id'] = ['eq',$adminId];
+                }
                 $map['status'] = $filter['label'];
             }
             if ($filter['sku']) {
@@ -90,10 +94,10 @@ class NewProductDesign extends Backend
             }
             unset($filter['label']);
             if ($filter['responsible_id']){
-                $whe_like['nickname'] = ['like','%'.$filter['responsible_id'].'%'];
-                $responsible_id =  $admin->where($whe_like)->column('id');
-                if ($responsible_id){
-                    $map['responsible_id'] = ['in',$responsible_id];
+                $wheLike['nickname'] = ['like','%'.$filter['responsible_id'].'%'];
+                $responsibleId =  $admin->where($wheLike)->column('id');
+                if ($responsibleId){
+                    $map['responsible_id'] = ['in',$responsibleId];
                 }else{
                     $map['responsible_id'] = ['eq','999999999'];
                 }
