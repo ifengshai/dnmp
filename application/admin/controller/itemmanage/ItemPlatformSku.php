@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\itemmanage;
 
+use app\admin\model\itemmanage\attribute\ItemAttribute;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 use think\Request;
@@ -30,6 +31,9 @@ class ItemPlatformSku extends Backend
     protected $model = null;
     protected $platform = null;
     protected $relationSearch = true;
+
+    protected $noNeedRight = ['batch_export_xls'];
+
     public function _initialize()
     {
         parent::_initialize();
@@ -213,7 +217,7 @@ class ItemPlatformSku extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -288,6 +292,7 @@ class ItemPlatformSku extends Backend
         }
         return $this->view->fetch();
     }
+
     /***
      * 商品上架
      */
@@ -311,6 +316,7 @@ class ItemPlatformSku extends Backend
             $this->error('404 Not found');
         }
     }
+
     /****
      * 商品下架
      */
@@ -334,6 +340,7 @@ class ItemPlatformSku extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 添加商品预售
      */
@@ -372,7 +379,7 @@ class ItemPlatformSku extends Backend
                     }
                     $params['presell_residue_num'] = $params['presell_num'];
                     $params['presell_create_person'] = session('admin.nickname');
-                    $params['presell_create_time'] = $now_time =  date("Y-m-d H:i:s", time());
+                    $params['presell_create_time'] = $now_time = date("Y-m-d H:i:s", time());
                     if ($now_time >= $params['presell_start_time']) { //如果当前时间大于开始时间
                         $params['presell_status'] = 2;
                     }
@@ -398,6 +405,7 @@ class ItemPlatformSku extends Backend
         }
         return $this->view->fetch();
     }
+
     /***
      * 编辑商品预售
      */
@@ -436,7 +444,7 @@ class ItemPlatformSku extends Backend
                         $row->validateFailException(true)->validate($validate);
                     }
                     $params['presell_create_person'] = session('admin.nickname');
-                    $params['presell_create_time'] = $now_time =  date("Y-m-d H:i:s", time());
+                    $params['presell_create_time'] = $now_time = date("Y-m-d H:i:s", time());
                     if ($now_time >= $params['presell_start_time']) { //如果当前时间大于开始时间
                         $params['presell_status'] = 2;
                     }
@@ -463,6 +471,7 @@ class ItemPlatformSku extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
+
     /***
      * 开启预售
      */
@@ -479,7 +488,7 @@ class ItemPlatformSku extends Backend
             }
             $map['id'] = $ids;
             $data['presell_status'] = 2;
-            $data['presell_open_time'] =  date('Y-m-d H:i:s', time());
+            $data['presell_open_time'] = date('Y-m-d H:i:s', time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
                 $this->success('预售开启成功');
@@ -490,6 +499,7 @@ class ItemPlatformSku extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 关闭预售
      */
@@ -502,7 +512,7 @@ class ItemPlatformSku extends Backend
             }
             $map['id'] = $ids;
             $data['presell_status'] = 3;
-            $data['presell_open_time'] =  date('Y-m-d H:i:s', time());
+            $data['presell_open_time'] = date('Y-m-d H:i:s', time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res) {
                 $this->success('关闭预售成功');
@@ -513,6 +523,7 @@ class ItemPlatformSku extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 异步查询平台sku
      */
@@ -529,6 +540,7 @@ class ItemPlatformSku extends Backend
             $this->error('404 not found');
         }
     }
+
     /***
      * 异步查询用户输入的平台sku是否存在
      */
@@ -548,6 +560,7 @@ class ItemPlatformSku extends Backend
             $this->error('404 not found');
         }
     }
+
     /***
      * 上传商品到magento平台
      */
@@ -577,7 +590,7 @@ class ItemPlatformSku extends Backend
     }
 
     /**
-     * 同步商品到magento
+     * 同步商品到magento 弃用
      *
      * @Description
      * @author wpl
@@ -585,12 +598,11 @@ class ItemPlatformSku extends Backend
      * @param [type] $ids
      * @return void
      */
-    public function afterUploadItem($ids = null)
+    public function afterUploadItemOld($ids = null)
     {
         if ($this->request->isAjax()) {
 
             $itemPlatformRow = $this->model->findItemPlatform($ids);
-
             if ($itemPlatformRow['is_upload'] == 1) { //商品已经上传，无需再次上传
                 $this->error(__('The product has been uploaded, there is no need to upload again'));
             }
@@ -599,14 +611,14 @@ class ItemPlatformSku extends Backend
             $res = $item->where(['sku' => $itemPlatformRow['sku'], 'is_open' => 1, 'is_del' => 1])->find();
             //审核通过把SKU同步到有映射关系的平台
             if ($itemPlatformRow['platform_id'] == 12) {
-                $uploadItemArr['skus'][0]  = [
-                    'sku' =>  $itemPlatformRow['platform_sku'],
-                    'type' =>  $res->category_id == 53 ? 1 : 2
+                $uploadItemArr['skus'][0] = [
+                    'sku' => $itemPlatformRow['platform_sku'],
+                    'type' => $res->category_id == 53 ? 1 : 2
                 ];
-                $uploadItemArr['sku']  = $itemPlatformRow['platform_sku'];
-                $uploadItemArr['type']  = $res->category_id == 53 ? 1 : 2;
+                $uploadItemArr['sku'] = $itemPlatformRow['platform_sku'];
+                $uploadItemArr['type'] = $res->category_id == 53 ? 1 : 2;
             } else {
-                $uploadItemArr['skus']  = [$itemPlatformRow['platform_sku']];
+                $uploadItemArr['skus'] = [$itemPlatformRow['platform_sku']];
             }
             $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
             if ($uploadItemArr['site'] == 13) {
@@ -630,7 +642,87 @@ class ItemPlatformSku extends Backend
             }
         }
     }
-  
+
+    /**
+     * 上传至对应平台
+     *
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2021/4/1
+     * Time: 11:58:07
+     */
+    public function afterUploadItem($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $itemPlatformRow = $this->model->findItemPlatform($ids);
+            $itemPlatformDetail = $this->model->where('id',$ids)->find();
+            if ($itemPlatformRow['is_upload'] == 1) { //商品已经上传，无需再次上传
+                $this->error(__('The product has been uploaded, there is no need to upload again'));
+            }
+            //查询商品分类
+            $item = new \app\admin\model\itemmanage\Item();
+            $itemAttribute = new ItemAttribute();
+            $res = $item->where(['sku' => $itemPlatformRow['sku'], 'is_open' => 1, 'is_del' => 1])->find();
+            if ($res['item_status'] !== 3){
+                $this->error(__('商品非审核通过状态，请先在商品管理模块进行审核'));
+            }
+            $itemAttributeDetail =$itemAttribute->where('item_id',$res['id'])->find();
+            if ($res->category_id == 35){
+                $attributeType = 4;//耳饰
+            }elseif ($res->category_id == 39 || $res->category_id == 34){
+                $attributeType = 5;//项链/手链
+            }elseif ($res->category_id == 38){
+                $attributeType = 6;//眼镜链
+            }elseif ($res->category_id == 32){
+                $attributeType = 7;//镜盒
+            }else{
+                $attributeType = 1;//眼镜
+            }
+            //审核通过把SKU同步到有映射关系的平台
+            $uploadItemArr['sku'] = $itemPlatformRow['platform_sku'];
+            $uploadItemArr['attribute_type'] = $attributeType;
+            $uploadItemArr['frame_height'] = $itemAttributeDetail['frame_height'];
+            $uploadItemArr['frame_width'] = $itemAttributeDetail['frame_width'];
+            $uploadItemArr['frame_length'] = $itemAttributeDetail['frame_length'];
+            $uploadItemArr['frame_temple_length'] = $itemAttributeDetail['frame_temple_length'];
+            $uploadItemArr['frame_bridge'] = $itemAttributeDetail['frame_bridge'];
+            $uploadItemArr['mirror_width'] = $itemAttributeDetail['mirror_width'];
+            $uploadItemArr['frame_weight'] = $itemAttributeDetail['frame_weight'];
+            $uploadItemArr['earrings_height'] = $itemAttributeDetail['earrings_height'];
+            $uploadItemArr['earrings_width'] = $itemAttributeDetail['earrings_width'];
+            $uploadItemArr['necklace_perimeter'] = $itemAttributeDetail['necklace_perimeter'];
+            $uploadItemArr['necklace_chain'] = $itemAttributeDetail['necklace_chain'];
+            $uploadItemArr['eyeglasses_chain'] = $itemAttributeDetail['eyeglasses_chain'];
+            $uploadItemArr['box_height'] = $itemAttributeDetail['box_height'];
+            $uploadItemArr['box_width'] = $itemAttributeDetail['box_width'];
+            $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
+            $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
+            $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
+            $uploadItemArr['status'] = $itemPlatformDetail['outer_sku_status'];
+            $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
+            $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
+            if ($uploadItemArr['site'] == 13) {
+                $params['sku_info'] = $itemPlatformRow['platform_sku'];
+                $params['platform_type'] = 1;
+                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                $thirdRes = json_decode($thirdRes, true);
+            } elseif ($uploadItemArr['site'] == 14) {
+                $params['sku_info'] = $itemPlatformRow['platform_sku'];
+                $params['platform_type'] = 2;
+                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                $thirdRes = json_decode($thirdRes, true);
+            } else {
+                $soapRes = Soap::createProduct($uploadItemArr);
+            }
+            if ($soapRes || $thirdRes['code'] == 1) {
+                $this->model->where(['id' => $ids])->update(['is_upload' => 1]);
+                $this->success('同步成功！！');
+            } else {
+                $this->success('同步失败！！');
+            }
+        }
+    }
+
     /****
      * 编辑后面的商品上传至对应平台
      */
@@ -696,7 +788,7 @@ class ItemPlatformSku extends Backend
                 foreach ($attributeList as $k => $v) {
                     if (in_array($v['code'], $uploadFieldsArr)) {
                         //找出键名
-                        $platformName =  array_search($v['code'], $uploadFieldsArr);
+                        $platformName = array_search($v['code'], $uploadFieldsArr);
                         if (!empty($platformName)) {
                             $v['platformValue'] = $itemRow[$platformName];
                         }
@@ -735,19 +827,19 @@ class ItemPlatformSku extends Backend
             }
 
             //添加上传商品的信息
-            $uploadItemArr['categories']            = array(2);
-            $uploadItemArr['websites']              = array(1);
-            $uploadItemArr['name']                  = $itemRow['name'];
-            $uploadItemArr['description']           = 'Product description';
-            $uploadItemArr['short_description']     = 'Product short description';
-            $uploadItemArr['url_key']               = $itemPlatformRow['platform_sku'];
-            $uploadItemArr['url_path']              = $itemRow['sku'];
-            $uploadItemArr['true_sku']              = $itemRow['sku'];
-            $uploadItemArr['status']                = '0';
-            $uploadItemArr['visibility']            = '4';
-            $uploadItemArr['meta_title']            = 'Product meta title';
-            $uploadItemArr['meta_keyword']          = 'Product meta keyword';
-            $uploadItemArr['meta_description']      = 'Product meta description';
+            $uploadItemArr['categories'] = array(2);
+            $uploadItemArr['websites'] = array(1);
+            $uploadItemArr['name'] = $itemRow['name'];
+            $uploadItemArr['description'] = 'Product description';
+            $uploadItemArr['short_description'] = 'Product short description';
+            $uploadItemArr['url_key'] = $itemPlatformRow['platform_sku'];
+            $uploadItemArr['url_path'] = $itemRow['sku'];
+            $uploadItemArr['true_sku'] = $itemRow['sku'];
+            $uploadItemArr['status'] = '0';
+            $uploadItemArr['visibility'] = '4';
+            $uploadItemArr['meta_title'] = 'Product meta title';
+            $uploadItemArr['meta_keyword'] = 'Product meta keyword';
+            $uploadItemArr['meta_description'] = 'Product meta description';
             if ($itemPlatformRow['magento_id'] > 0) { //更新商品
                 try {
                     $result = $client->call($session, 'catalog_product.update', array($itemRow['sku'], $uploadItemArr));
@@ -879,6 +971,7 @@ class ItemPlatformSku extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 检测平台sku是否存在并且监测库存
      */
@@ -909,11 +1002,12 @@ class ItemPlatformSku extends Backend
             $this->error('404 Not found');
         }
     }
+
     public function ceshi()
     {
         $where['platform_type'] = 4;
         $result = Db::connect('database.db_stock')->name('item_platform_sku')->where($where)->select();
-        $info   = Db::connect('database.db_stock')->name('item_platform_sku_bak')->insertAll($result);
+        $info = Db::connect('database.db_stock')->name('item_platform_sku_bak')->insertAll($result);
         if ($info) {
             echo 'ok';
         } else {

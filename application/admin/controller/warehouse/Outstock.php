@@ -4,6 +4,7 @@ namespace app\admin\controller\warehouse;
 
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
+use fast\Excel;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
@@ -24,6 +25,13 @@ use app\admin\model\StockLog;
 class Outstock extends Backend
 {
 
+    /**
+     * 取消权限验证
+     * @var string[]
+     * @author crasphb
+     * @date   2021/4/7 15:46
+     */
+    protected $noNeedRight = ['batch_export_xls'];
     /**
      * Outstock模型对象
      * @var \app\admin\model\warehouse\Outstock
@@ -72,7 +80,7 @@ class Outstock extends Backend
             }
 
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['outstocktype'])
                 ->where($where)
@@ -710,7 +718,7 @@ class Outstock extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['outstocktype'])
                 ->where(['status' => 2])
@@ -965,6 +973,9 @@ class Outstock extends Backend
 
     public function import()
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+
         $this->model = new \app\admin\model\warehouse\Outstock();
         $_item = new \app\admin\model\warehouse\OutStockItem();
         $_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
@@ -1007,7 +1018,7 @@ class Outstock extends Backend
         } else {
             $reader = new Xlsx();
         }
-
+        $result_msg=array();
         //模板文件列名
         $this->model->startTrans();
         $_item->startTrans();
@@ -1074,10 +1085,16 @@ class Outstock extends Backend
             $database_data = array_column($selectlist, 'code');
             foreach ($data as $check_k => $check_v) {
                 if (!in_array($check_v[2], $database_data)) {
+                    /*$msg['code']=$check_v[2];
+                    $msg['msg']='条码不存在';
+                    array_push($result_msg,$msg);*/
                     $this->error('条码[' . $check_v[2] . ']不存在');
                 }
             }
 
+
+            $insert_out_stoce=array();
+            //数据库中条码信息进行验证与数据拼装   如果验证不通过则记录原因
             foreach ($selectlist as $k => $v) {
                 if ($v['library_status'] == 2) {
                     $this->error(__('条码[' . $v['code'] . ']已出库'));
@@ -1095,6 +1112,29 @@ class Outstock extends Backend
                 $insert_out_stoce[$un_key][$v['code']] = $v['id'];
 
                 $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;
+
+                /*if ($v['library_status'] == 2) {
+                    $msg['code']=$v['code'];
+                    $msg['msg']='条码已出库';
+                    array_push($result_msg,$msg);
+                } elseif ($v['out_stock_id']) {
+                    $msg['code']=$v['code'];
+                    $msg['msg']='条码已存在出库单,请检查出库单' . $v['out_stock_id'];
+                    array_push($result_msg,$msg);
+                } elseif (!$v['location_id']) {
+                    $msg['code']=$v['code'];
+                    $msg['msg']='条码未绑定库区';
+                    array_push($result_msg,$msg);
+                } elseif (!$v['location_code_id']) {
+                    $msg['code']=$v['code'];
+                    $msg['msg']='条码未绑定库位';
+                    array_push($result_msg,$msg);
+                }else{
+                    $un_key = $v['location_id'] . $v['location_code_id'];
+                    $insert_out_stoce[$un_key][$v['code']] = $v['id'];
+                    $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;
+                }*/
+
             }
             $out_plat = $data[0][1];
             switch (trim($out_plat)) {
@@ -1123,6 +1163,18 @@ class Outstock extends Backend
                 //     $label = 1;
                 case 'zeelool_de':
                     $out_label = 10;
+                    break;
+                case 'Zeelool_jp':
+                    $out_label = 11;
+                    break;
+                case 'Voogueme_acc':
+                    $out_label = 12;
+                    break;
+                case 'Zeelool_cn':
+                    $out_label = 13;
+                    break;
+                case 'Alibaba':
+                    $out_label = 14;
                     break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
@@ -1153,28 +1205,83 @@ class Outstock extends Backend
                     }
                 }
             }
-            $_item->allowField(true)->saveAll($params);
-
-
+            if ($params){
+                $_item->allowField(true)->saveAll($params);
+            }
             $this->model->commit();
             $_item->commit();
             $_product_bar_code_item->commit();
         } catch (ValidateException $e) {
             $this->model->rollback();
             $_item->rollback();
-            $this->_product_bar_code_item->rollback();
+            $_product_bar_code_item->rollback();
             $this->error($e->getMessage());
         } catch (PDOException $e) {
             $this->model->rollback();
             $_item->rollback();
-            $this->_product_bar_code_item->rollback();
+            $_product_bar_code_item->rollback();
             $this->error($e->getMessage());
         } catch (Exception $e) {
             $this->model->rollback();
             $_item->rollback();
-            $this->_product_bar_code_item->rollback();
+            $_product_bar_code_item->rollback();
             $this->error($e->getMessage());
         }
-        $this->success('导入成功！');
+        if ($result_msg){
+        $savename = '/uploads/批量出库剩余数据' . date("YmdHis", time());
+        $this->writeCsv($result_msg,array('code','msg'),$savename,false);
+        return json(['msg' => "uploads",'code'=>1,'url' => "https://".$_SERVER['HTTP_HOST']."/".$savename.".csv"]);
+        }else{
+            $this->success("导入成功");
+        }
     }
+
+    public static function writeCsv($data = array(), $headlist = array(), $fileName, $export = false)
+    {
+        if ($export) {
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="' . $fileName . '.csv"');
+            header('Cache-Control: max-age=0');
+
+            //打开PHP文件句柄,php://output 表示直接输出到浏览器
+            $fp = fopen('php://output', 'a');
+        } else {
+            $fp = fopen('.' . $fileName . '.csv', 'a');
+        }
+        //输出Excel列名信息
+        foreach ($headlist as $key => $value) {
+            //CSV的Excel支持GBK编码，一定要转换，否则乱码
+            $headlist[$key] = iconv('utf-8', 'gbk', $value);
+        }
+        //将数据通过fputcsv写到文件句柄
+        fputcsv($fp, $headlist);
+
+        //计数器
+        $num = 0;
+
+        //每隔$limit行，刷新一下输出buffer，不要太大，也不要太小
+        $limit = 100000;
+
+        //逐行取出数据，不浪费内存
+        $count = count($data); //print_r($data);die;
+        for ($i = 0; $i < $count; $i++) {
+            $num++;
+            //刷新一下输出buffer，防止由于数据过多造成问题
+            if ($limit == $num) {
+                ob_flush();
+                flush();
+                $num = 0;
+            }
+
+            $row = $data[$i];
+            foreach ($row as $key => $value) {
+                $row[$key] = iconv('utf-8', 'gbk', $value);
+            }
+            fputcsv($fp, $row);
+        }
+        if (!$export) {
+            return $fileName . '.csv';
+        }
+    }
+
 }

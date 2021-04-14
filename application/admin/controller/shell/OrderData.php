@@ -157,6 +157,7 @@ class OrderData extends Backend
                                     $params['status'] = $v['status'] ?: '';
                                     $params['store_id'] = $v['store_id'];
                                     $params['base_grand_total'] = $v['base_grand_total'];
+                                    $params['grand_total'] = $v['grand_total'];
                                     $params['total_item_count'] = $v['total_item_count'];
                                     $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['order_type'] = $v['order_type'];
@@ -205,7 +206,8 @@ class OrderData extends Backend
                                     $params['increment_id'] = $v['order_no'];
                                     $params['status'] = $v['order_status'] ?: '';
                                     $params['store_id'] = $v['source'];
-                                    $params['base_grand_total'] = $v['actual_amount_paid'];
+                                    $params['base_grand_total'] = $v['base_actual_amount_paid'];
+                                    $params['grand_total'] = $v['actual_amount_paid'];
                                     $params['total_qty_ordered'] = $v['goods_quantity'];
                                     $params['base_currency_code'] = $v['base_currency'];
                                     $params['order_currency_code'] = $v['now_currency'];
@@ -242,7 +244,8 @@ class OrderData extends Backend
                                     $params['increment_id'] = $v['order_no'];
                                     $params['status'] = $v['order_status'] ?: '';
                                     $params['store_id'] = $v['source'];
-                                    $params['base_grand_total'] = $v['actual_amount_paid'];
+                                    $params['base_grand_total'] = $v['base_actual_amount_paid'];
+                                    $params['grand_total'] = $v['actual_amount_paid'];
                                     $params['total_qty_ordered'] = $v['goods_quantity'];
                                     $params['base_currency_code'] = $v['base_currency'];
                                     $params['order_currency_code'] = $v['now_currency'];
@@ -289,6 +292,7 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     $params['base_grand_total'] = $v['base_grand_total'];
+                                    $params['grand_total'] = $v['grand_total'];
                                     $params['total_item_count'] = $v['total_item_count'];
                                     $params['total_qty_ordered'] = $v['total_qty_ordered'];
                                     $params['increment_id'] = $v['increment_id'];
@@ -1336,10 +1340,10 @@ class OrderData extends Backend
             $arr['order_prescription_type'] = 3;
             $arr['is_custom_lens'] = 1;
         }
-        $od_sph = (float) urldecode($params['od_sph']);
-        $os_sph = (float) urldecode($params['os_sph']);
-        $od_cyl = (float) urldecode($params['od_cyl']);
-        $os_cyl = (float) urldecode($params['os_cyl']);
+        $od_sph = (float)urldecode($params['od_sph']);
+        $os_sph = (float)urldecode($params['os_sph']);
+        $od_cyl = (float)urldecode($params['od_cyl']);
+        $os_cyl = (float)urldecode($params['os_cyl']);
 
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
@@ -1352,6 +1356,11 @@ class OrderData extends Backend
              * SPH:0.00～-8.00 CYL:-4.25～-6.00
              */
             if ((($od_sph >= -8 && $od_sph <= 0) || ($os_sph >= -8 && $os_sph <= 0)) && (($od_cyl >= -6 && $od_cyl <= -4.25) || ($os_cyl >= -6 && $os_cyl <= -4.25))) {
+                $arr['is_custom_lens'] = 1;
+                $arr['order_prescription_type'] = 3;
+            }
+
+            if ((($od_sph >= 8 && $od_sph <= 6) || ($os_sph >= 2 && $os_sph <= 6)) && (($od_cyl >= -6 && $od_cyl <= -2.25) || ($os_cyl >= -6 && $os_cyl <= -2.25))) {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
             }
@@ -2044,11 +2053,12 @@ class OrderData extends Backend
         $this->order_data(1);
         $this->order_data(2);
         $this->order_data(3);
-        // $this->order_data(4);
+        $this->order_data(4);
         $this->order_data(5);
         $this->order_data(9);
         $this->order_data(10);
         $this->order_data(11);
+        $this->order_data(12);
     }
 
     /**
@@ -2061,31 +2071,33 @@ class OrderData extends Backend
      */
     protected function order_data($site)
     {
-        $list = $this->order->where('payment_time is null and site = '.$site)->limit(3000)->select();
+        $list = $this->order->where('grand_total < 1 and site = '.$site)->where(['status' => ['in', ['processing', 'complete', 'delivered']]])->where(['created_at' => ['>', '1599667200']])->limit(4000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
         } elseif ($site == 3) {
-            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
         } elseif ($site == 4) {
-            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
+            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
         } elseif ($site == 5) {
-            $res = Db::connect('database.db_weseeoptical')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
+            $res = Db::connect('database.db_weseeoptical')->table('orders')->where(['id' => ['in', $entity_id]])->column('actual_amount_paid', 'id');
         } elseif ($site == 9) {
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
         } elseif ($site == 10) {
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
         } elseif ($site == 11) {
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('payment_time', 'entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
+        } elseif ($site == 12) {
+            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('grand_total', 'entity_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            $params[$k]['payment_time'] = strtotime($res[$v['entity_id']]) + 28800;
-            // $params[$k]['region'] = $res[$v['entity_id']]['region'];
+            //$params[$k]['grand_total'] = $v['grand_total'];
+            $params[$k]['grand_total'] = $res[$v['entity_id']] ?? 0;
             // $params[$k]['city'] = $res[$v['entity_id']]['city'];
             // $params[$k]['street'] = $res[$v['entity_id']]['street'];
             // $params[$k]['postcode'] = $res[$v['entity_id']]['postcode'];

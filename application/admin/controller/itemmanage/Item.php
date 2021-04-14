@@ -5,6 +5,7 @@ namespace app\admin\controller\itemmanage;
 use app\admin\model\platformManage\MagentoPlatform;
 use app\admin\model\purchase\NewProductReplenishList;
 use app\common\controller\Backend;
+use fast\Http;
 use think\Request;
 use think\Db;
 use think\Exception;
@@ -37,7 +38,16 @@ class Item extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['ajaxGetItemCategoryList', 'ajaxItemInfo', 'ajaxCategoryInfo', 'ajaxGetProOrigin', 'ajaxGetLikeOriginSku', 'ajaxGetInfoName', 'export_csv'];
+    //protected $noNeedLogin = ['pullMagentoProductInfo', 'analyticMagentoField', 'analyticUpdate', 'ceshi', 'optimizeSku', 'pullMagentoProductInfoTwo', 'changeSkuToPlatformSku', 'findSku', 'skuMap', 'ajaxGoodsInfo'];
+
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    // protected $noNeedRight = ['ajaxGoodsInfo'];
+
+    protected $noNeedRight = ['ajaxGetItemCategoryList', 'ajaxItemInfo', 'ajaxCategoryInfo', 'ajaxGetProOrigin', 'ajaxGetLikeOriginSku', 'ajaxGetInfoName'];
+
 
     public function _initialize()
     {
@@ -82,20 +92,22 @@ class Item extends Backend
             //求出分类列表
             $categoryArr = $this->category->getItemCategoryList();
             //求出品牌列表
-            $brandArr    = (new ItemBrand())->getBrandToItemList();
+            $brandArr = (new ItemBrand())->getBrandToItemList();
             $list = collection($list)->toArray();
             foreach ($list as $k => $v) {
                 if ($v['category_id']) {
                     $list[$k]['category_id'] = $categoryArr[$v['category_id']];
                 }
-                $list[$k]['brand_id']  = $brandArr[$v['brand_id']];
+                $list[$k]['brand_id'] = $brandArr[$v['brand_id']];
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
+
     //商品回收站
     public function recycle()
     {
@@ -120,20 +132,22 @@ class Item extends Backend
             //求出分类列表
             $categoryArr = $this->category->getItemCategoryList();
             //求出品牌列表
-            $brandArr    = (new ItemBrand())->getBrandList();
+            $brandArr = (new ItemBrand())->getBrandList();
             $list = collection($list)->toArray();
             foreach ($list as $k => $v) {
                 if ($v['category_id']) {
                     $list[$k]['category_id'] = $categoryArr[$v['category_id']];
                 }
-                $list[$k]['brand_id']  = $brandArr[$v['brand_id']];
+                $list[$k]['brand_id'] = $brandArr[$v['brand_id']];
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
+
     //新增商品(原)
     public function add_yuan()
     {
@@ -143,7 +157,7 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
-                $price     = $params['price'];
+                $price = $params['price'];
                 // dump($params);
                 // exit;
                 if (count($itemColor) != count(array_unique($itemColor))) {
@@ -155,7 +169,7 @@ class Item extends Backend
                 if (3 == $item_type) { //配饰
                     if (is_array($itemName) && !in_array("", $itemName)) {
                         //求出对应的sku编码规则
-                        $resultEncode  = $this->category->getCategoryTexture($params['category_id']);
+                        $resultEncode = $this->category->getCategoryTexture($params['category_id']);
                         $textureEncodeInfo = $resultEncode['typeResult'];
                         if (false !== strpos($textureEncodeInfo, '-')) {
                             $textureArr = explode('-', $textureEncodeInfo);
@@ -187,7 +201,7 @@ class Item extends Backend
                             $data['origin_sku'] = $params['origin_sku'];
                         } else {
                             $data['origin_sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'];
-                            $checkOriginSku     = $this->model->checkIsExistOriginSku($data['origin_sku']);
+                            $checkOriginSku = $this->model->checkIsExistOriginSku($data['origin_sku']);
                             if ($checkOriginSku) {
                                 $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
                             }
@@ -199,8 +213,8 @@ class Item extends Backend
                                 $data['name'] = $v;
                                 $data['category_id'] = $params['category_id'];
                                 $data['item_status'] = $params['item_status'];
-                                $data['brand_id']    = $params['brand_id'];
-                                $data['price']       = $price[$k];
+                                $data['brand_id'] = $params['brand_id'];
+                                $data['price'] = $price[$k];
                                 $data['create_person'] = session('admin.nickname');
                                 $data['create_time'] = date("Y-m-d H:i:s", time());
                                 //后来添加的商品数据
@@ -268,7 +282,7 @@ class Item extends Backend
                             $data['origin_sku'] = $params['origin_sku'];
                         } else {
                             $data['origin_sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'];
-                            $checkOriginSku     = $this->model->checkIsExistOriginSku($data['origin_sku']);
+                            $checkOriginSku = $this->model->checkIsExistOriginSku($data['origin_sku']);
                             if ($checkOriginSku) {
                                 $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
                             }
@@ -280,8 +294,8 @@ class Item extends Backend
                                 $data['name'] = $v;
                                 $data['category_id'] = $params['category_id'];
                                 $data['item_status'] = $params['item_status'];
-                                $data['brand_id']    = $params['brand_id'];
-                                $data['price']       = $price[$k];
+                                $data['brand_id'] = $params['brand_id'];
+                                $data['price'] = $price[$k];
                                 $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
                                 $data['create_person'] = session('admin.nickname');
                                 $data['create_time'] = date("Y-m-d H:i:s", time());
@@ -348,8 +362,10 @@ class Item extends Backend
 
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
         return $this->view->fetch();
     }
+
     //新增商品
     public function add()
     {
@@ -359,7 +375,7 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
-                $price     = $params['price'];
+                $price = $params['price'];
                 // dump($params);
                 // exit;
                 if (count($itemColor) != count(array_unique($itemColor))) {
@@ -371,7 +387,7 @@ class Item extends Backend
                 if (3 == $item_type) { //配饰
                     if (is_array($itemName) && !in_array("", $itemName)) {
                         //求出对应的sku编码规则
-                        $resultEncode  = $this->category->getCategoryTexture($params['category_id']);
+                        $resultEncode = $this->category->getCategoryTexture($params['category_id']);
                         $textureEncodeInfo = $resultEncode['typeResult'];
                         if (false !== strpos($textureEncodeInfo, '-')) {
                             $textureArr = explode('-', $textureEncodeInfo);
@@ -403,7 +419,7 @@ class Item extends Backend
                             $data['origin_sku'] = $params['origin_sku'];
                         } else {
                             $data['origin_sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'];
-                            $checkOriginSku     = $this->model->checkIsExistOriginSku($data['origin_sku']);
+                            $checkOriginSku = $this->model->checkIsExistOriginSku($data['origin_sku']);
                             if ($checkOriginSku) {
                                 $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
                             }
@@ -415,8 +431,8 @@ class Item extends Backend
                                 $data['name'] = $v;
                                 $data['category_id'] = $params['category_id'];
                                 $data['item_status'] = $params['item_status'];
-                                $data['brand_id']    = $params['brand_id'];
-                                $data['price']       = $price[$k];
+                                $data['brand_id'] = $params['brand_id'];
+                                $data['price'] = $price[$k];
                                 $data['create_person'] = session('admin.nickname');
                                 $data['create_time'] = date("Y-m-d H:i:s", time());
                                 //后来添加的商品数据
@@ -484,7 +500,7 @@ class Item extends Backend
                             $data['origin_sku'] = $params['origin_sku'];
                         } else {
                             $data['origin_sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'];
-                            $checkOriginSku     = $this->model->checkIsExistOriginSku($data['origin_sku']);
+                            $checkOriginSku = $this->model->checkIsExistOriginSku($data['origin_sku']);
                             if ($checkOriginSku) {
                                 $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
                             }
@@ -496,8 +512,8 @@ class Item extends Backend
                                 $data['name'] = $v;
                                 $data['category_id'] = $params['category_id'];
                                 $data['item_status'] = $params['item_status'];
-                                $data['brand_id']    = $params['brand_id'];
-                                $data['price']       = $price[$k];
+                                $data['brand_id'] = $params['brand_id'];
+                                $data['price'] = $price[$k];
                                 $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
                                 $data['create_person'] = session('admin.nickname');
                                 $data['create_time'] = date("Y-m-d H:i:s", time());
@@ -564,6 +580,7 @@ class Item extends Backend
 
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
         return $this->view->fetch();
     }
 
@@ -591,7 +608,7 @@ class Item extends Backend
                 $params = $this->preExcludeFields($params);
                 $itemName = $params['name'];
                 $itemColor = $params['color'];
-                $price     = $params['price'];
+                $price = $params['price'];
                 if (count($itemColor) != count(array_unique($itemColor))) {
                     $this->error('同一款商品的颜色值不能相同');
                 }
@@ -604,13 +621,20 @@ class Item extends Backend
                         try {
                             foreach ($itemName as $k => $v) {
                                 $data['name'] = $v;
-                                $data['price']       = $price[$k];
+                                $data['price'] = $price[$k];
                                 $data['item_status'] = $params['item_status'];
                                 $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
                                 $itemAttribute['attribute_type'] = 3;
                                 $itemAttribute['accessory_color'] = $itemColor[$k];
                                 $itemAttribute['accessory_texture'] = $params['frame_texture'];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                $itemAttribute['necklace_perimeter'] = $params['necklace_perimeter'];
+                                $itemAttribute['necklace_chain'] = $params['necklace_chain'];
+                                $itemAttribute['earrings_height'] = $params['earrings_height'];
+                                $itemAttribute['earrings_width'] = $params['earrings_width'];
+                                $itemAttribute['eyeglasses_chain'] = $params['eyeglasses_chain'];
+
+
                                 $itemAttr = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
                             }
                             Db::commit();
@@ -634,12 +658,13 @@ class Item extends Backend
                         $this->error(__('No rows were updated'));
                     }
                 } else {
+
                     if (is_array($itemName) && !in_array("", $itemName)) {
                         Db::startTrans();
                         try {
                             foreach ($itemName as $k => $v) {
                                 $data['name'] = $v;
-                                $data['price']       = $price[$k];
+                                $data['price'] = $price[$k];
                                 $data['item_status'] = $params['item_status'];
                                 $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
                                 $item = Db::connect('database.db_stock')->name('item')->where('id', '=', $row['id'])->update($data);
@@ -665,6 +690,10 @@ class Item extends Backend
                                 $itemAttribute['frame_temple_is_spring'] = $params['frame_temple_is_spring'];
                                 $itemAttribute['frame_is_adjust_nose_pad'] = $params['frame_is_adjust_nose_pad'];
                                 $itemAttribute['frame_remark'] = $params['frame_remark'];
+                                $itemAttribute['box_height'] = $params['box_height'];
+                                $itemAttribute['box_width'] = $params['box_width'];
+                                $itemAttribute['frame_weight'] = $params['frame_weight'];
+
                                 $itemAttr = Db::connect('database.db_stock')->name('item_attribute')->where('item_id', '=', $row['id'])->update($itemAttribute);
                             }
                             Db::commit();
@@ -697,9 +726,9 @@ class Item extends Backend
             $this->assign('AllTexture', $info['textureResult']);
             $this->assign('AllFrameColor', $info['colorResult']);
         } else {
-            $row['itemAttribute']['frame_size']     = explode(',', $row['itemAttribute']['frame_size']);
-            $row['itemAttribute']['frame_shape']    = explode(',', $row['itemAttribute']['frame_shape']);
-            $row['itemAttribute']['glasses_type']   = explode(',', $row['itemAttribute']['glasses_type']);
+            $row['itemAttribute']['frame_size'] = explode(',', $row['itemAttribute']['frame_size']);
+            $row['itemAttribute']['frame_shape'] = explode(',', $row['itemAttribute']['frame_shape']);
+            $row['itemAttribute']['glasses_type'] = explode(',', $row['itemAttribute']['glasses_type']);
             $row['itemAttribute']['frame_is_adjust_nose_pad'] = explode(',', $row['itemAttribute']['frame_is_adjust_nose_pad']);
             $allShape = $this->itemAttribute->getAllShape();
             //获取所有材质
@@ -709,15 +738,15 @@ class Item extends Backend
             //获取所有适合性别
             $allFrameGender = $this->itemAttribute->getFrameGender();
             //获取所有型号
-            $allFrameSize  = $this->itemAttribute->getFrameSize();
+            $allFrameSize = $this->itemAttribute->getFrameSize();
             //获取所有眼镜类型
             $allGlassesType = $this->itemAttribute->getGlassesType();
             //获取所有采购产地
-            $allOrigin      = $this->itemAttribute->getOrigin();
+            $allOrigin = $this->itemAttribute->getOrigin();
             //获取配镜类型
-            $allFrameType   = $this->itemAttribute->getFrameType();
+            $allFrameType = $this->itemAttribute->getFrameType();
             //获取是否可调节鼻托类型
-            $allNosePad     = $this->itemAttribute->getAllNosePad();
+            $allNosePad = $this->itemAttribute->getAllNosePad();
             $this->assign('AllFrameType', $allFrameType);
             $this->assign('AllOrigin', $allOrigin);
             $this->assign('AllGlassesType', $allGlassesType);
@@ -728,8 +757,10 @@ class Item extends Backend
             $this->assign('AllTexture', $allTexture);
             $this->assign('AllNosePad', $allNosePad);
         }
+
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
 
@@ -745,7 +776,7 @@ class Item extends Backend
             }
             $result = $this->category->getAttrCategoryById($categoryId);
             if (!$result) {
-                return  $this->error('对应分类不存在,请从新尝试');
+                return $this->error('对应分类不存在,请从新尝试');
             } elseif ($result == -1) {
                 return $this->error('对应分类存在下级分类,请从新选择');
             }
@@ -761,15 +792,15 @@ class Item extends Backend
                 //获取所有适合性别
                 $allFrameGender = $this->itemAttribute->getFrameGender();
                 //获取所有型号
-                $allFrameSize  = $this->itemAttribute->getFrameSize();
+                $allFrameSize = $this->itemAttribute->getFrameSize();
                 //获取所有眼镜类型
                 $allGlassesType = $this->itemAttribute->getGlassesType();
                 //获取所有采购产地
-                $allOrigin      = $this->itemAttribute->getOrigin();
+                $allOrigin = $this->itemAttribute->getOrigin();
                 //获取配镜类型
-                $allFrameType   = $this->itemAttribute->getFrameType();
+                $allFrameType = $this->itemAttribute->getFrameType();
                 //获取是否可调节鼻托类型
-                $allNosePad     = $this->itemAttribute->getAllNosePad();
+                $allNosePad = $this->itemAttribute->getAllNosePad();
                 $this->assign('AllFrameType', $allFrameType);
                 $this->assign('AllOrigin', $allOrigin);
                 $this->assign('AllGlassesType', $allGlassesType);
@@ -792,11 +823,13 @@ class Item extends Backend
             } else {
                 $data = $this->fetch('attribute');
             }
-            return  $this->success('ok', '', $data);
+
+            return $this->success('ok', '', $data);
         } else {
             return $this->error(__('404 Not Found'));
         }
     }
+
     /***
      * 异步请求线下采购城市
      */
@@ -807,6 +840,7 @@ class Item extends Backend
             if (!$data) {
                 return $this->error('现在没有采购城市,请去添加', '', 'error', 0);
             }
+
             return $this->success('', '', $data, 0);
         } else {
             return $this->error(__('404 Not Found'));
@@ -824,6 +858,7 @@ class Item extends Backend
             if (!$result) {
                 return $this->error('商品SKU不存在，请重新尝试');
             }
+
             return $this->success('', '', $result, 0);
         } else {
             $this->error('404 not found');
@@ -837,13 +872,13 @@ class Item extends Backend
     {
         if ($this->request->isAjax()) {
             $categoryId = $this->request->post('categoryId');
-            $sku        = $this->request->post('sku');
+            $sku = $this->request->post('sku');
             if (!$categoryId || !$sku) {
                 $this->error('参数错误，请重新尝试');
             }
             $result = $this->category->getAttrCategoryById($categoryId);
             if (!$result) {
-                return  $this->error('对应分类不存在,请从新尝试');
+                return $this->error('对应分类不存在,请从新尝试');
             } elseif ($result == -1) {
                 return $this->error('对应分类存在下级分类,请从新选择');
             }
@@ -852,7 +887,7 @@ class Item extends Backend
             } elseif ($result == 2) { //商品是镜片类型
                 $data = $this->fetch('eyeglass');
             } elseif ($result >= 3) { //商品是饰品类型
-                $row  = $this->model->getItemInfo($sku, $result);
+                $row = $this->model->getItemInfo($sku, $result);
                 $result = $this->category->getCategoryTexture($categoryId);
                 $this->assign('AllTexture', $result['textureResult']);
                 $this->assign('AllFrameColor', $result['colorResult']);
@@ -860,7 +895,8 @@ class Item extends Backend
             } else {
                 $data = $this->fetch('attribute');
             }
-            return  $this->success('ok', '', $row);
+
+            return $this->success('ok', '', $row);
         } else {
             return $this->error(__('404 Not Found'));
         }
@@ -974,7 +1010,7 @@ class Item extends Backend
             }
 
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
@@ -991,6 +1027,7 @@ class Item extends Backend
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
         $this->assign('magentoplatformarr', $magentoplatformarr);
+
         return $this->view->fetch();
     }
 
@@ -1008,12 +1045,12 @@ class Item extends Backend
 
         //查询各站SKU虚拟库存
         $skus = array_column($list, 'sku');
-        $item_list = $item_platform->where(['sku' => ['in',$skus]])->select();
+        $item_list = $item_platform->where(['sku' => ['in', $skus]])->select();
         $item_stock = [];
-        foreach($item_list as $v) {
+        foreach ($item_list as $v) {
             $item_stock[$v['sku']][$v['platform_type']] = $v['stock'];
         }
- 
+
         foreach ($list as &$v) {
             $v['zeelool_stock'] = $item_stock[$v['sku']][1];
             $v['voogueme_stock'] = $item_stock[$v['sku']][2];
@@ -1135,7 +1172,7 @@ class Item extends Backend
             }
             $result = $this->model->getInfoName($name);
             if (!$result) {
-                return  $this->success('可以添加');
+                return $this->success('可以添加');
             } else {
                 return $this->error('商品名称已经存在,请重新添加');
             }
@@ -1173,13 +1210,13 @@ class Item extends Backend
             //获取所有适合性别
             $allFrameGender = $this->itemAttribute->getFrameGender();
             //获取所有型号
-            $allFrameSize  = $this->itemAttribute->getFrameSize();
+            $allFrameSize = $this->itemAttribute->getFrameSize();
             //获取所有眼镜类型
             $allGlassesType = $this->itemAttribute->getGlassesType();
             //获取所有采购产地
-            $allOrigin      = $this->itemAttribute->getOrigin();
+            $allOrigin = $this->itemAttribute->getOrigin();
             //获取配镜类型
-            $allFrameType   = $this->itemAttribute->getFrameType();
+            $allFrameType = $this->itemAttribute->getFrameType();
             $this->assign('AllFrameType', $allFrameType);
             $this->assign('AllOrigin', $allOrigin);
             $this->assign('AllGlassesType', $allGlassesType);
@@ -1189,10 +1226,13 @@ class Item extends Backend
             $this->assign('AllShape', $allShape);
             $this->assign('AllTexture', $allTexture);
         }
+
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
+
     /***
      * 编辑商品的图片信息
      */
@@ -1217,8 +1257,10 @@ class Item extends Backend
             }
         }
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
+
     /***
      *异步获取商品分类列表
      */
@@ -1229,11 +1271,13 @@ class Item extends Backend
             if (!$json) {
                 $json = [0 => '请添加商品分类'];
             }
+
             return json($json);
         } else {
             $this->error('404 Not found');
         }
     }
+
     /***
      * 异步获取品牌分类列表
      */
@@ -1244,6 +1288,7 @@ class Item extends Backend
             if (!$json) {
                 $json = [0 => '请添加商品分类'];
             }
+
             return json($json);
         } else {
             $this->error('404 Not found');
@@ -1276,6 +1321,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 提交审核之后审核通过
      */
@@ -1287,57 +1333,109 @@ class Item extends Backend
             if ($row['item_status'] != 2) {
                 $this->error('此商品状态不能审核通过');
             }
-
+            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             Db::startTrans();
+            $this->model->startTrans();
+            $platform->startTrans();
             try {
                 $map['id'] = $id;
                 $data['item_status'] = 3;
-                $data['check_time']  = date("Y-m-d H:i:s", time());
+                $data['check_time'] = date("Y-m-d H:i:s", time());
                 $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
                 if ($res === false) {
                     throw new Exception('审核失败！！');
                 }
-
-                // //查询同步的平台
-                // $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-                // $platformArr = $platform->where(['sku' => $row['sku'], 'is_upload' => 2])->select();
-                // $error_num = [];
-                // $uploadItemArr = [];
-                // foreach ($platformArr as $k => $v) {
-                //     //审核通过把SKU同步到有映射关系的平台
-                //     if ($v['platform_type'] == 12) {
-                //         $uploadItemArr['skus'][0]  = [
-                //             'sku' =>  $v['platform_sku'],
-                //             'type' =>  $row['category_id'] == 53 ? 1 : 2
-                //         ];
-                //         $uploadItemArr['sku']  = $v['platform_sku'];
-                //         $uploadItemArr['site']  = $v['platform_type'];
-                //     } else {
-                //         $uploadItemArr['skus']  = [$v['platform_sku']];
-                //     }
-
-                //     $soap_res = Soap::createProduct($uploadItemArr);
-                //     if (!$soap_res) {
-                //         $error_num[] = $v['platform_type'];
-                //     } else {
-                //         $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
-                //     }
-                // }
+                //查询同步的平台
+                $platformArr = $platform->where(['sku' => $row['sku']])->where('platform_type', '<>', 4)->select();
+                $errorNum = [];
+                $uploadItemArr = [];
+                foreach ($platformArr as $k => $v) {
+                    $itemAttribute = new ItemAttribute();
+                    $itemAttributeDetail = $itemAttribute->where('item_id', $id)->find();
+                    if ($row['category_id'] == 35) {
+                        $attributeType = 4;//耳饰
+                    } elseif ($row['category_id'] == 39 || $row['category_id'] == 34) {
+                        $attributeType = 5;//项链/手链
+                    } elseif ($row['category_id'] == 38) {
+                        $attributeType = 6;//眼镜链
+                    } elseif ($row['category_id'] == 32) {
+                        $attributeType = 7;//镜盒
+                    } else {
+                        $attributeType = 1;//眼镜
+                    }
+                    //审核通过把SKU同步到有映射关系的平台
+                    $uploadItemArr['sku'] = $v['platform_sku'];
+                    $uploadItemArr['attribute_type'] = $attributeType;
+                    $uploadItemArr['frame_height'] = $itemAttributeDetail['frame_height'];
+                    $uploadItemArr['frame_width'] = $itemAttributeDetail['frame_width'];
+                    $uploadItemArr['frame_length'] = $itemAttributeDetail['frame_length'];
+                    $uploadItemArr['frame_temple_length'] = $itemAttributeDetail['frame_temple_length'];
+                    $uploadItemArr['frame_bridge'] = $itemAttributeDetail['frame_bridge'];
+                    $uploadItemArr['mirror_width'] = $itemAttributeDetail['mirror_width'];
+                    $uploadItemArr['frame_weight'] = $itemAttributeDetail['frame_weight'];
+                    $uploadItemArr['earrings_height'] = $itemAttributeDetail['earrings_height'];
+                    $uploadItemArr['earrings_width'] = $itemAttributeDetail['earrings_width'];
+                    $uploadItemArr['necklace_perimeter'] = $itemAttributeDetail['necklace_perimeter'];
+                    $uploadItemArr['necklace_chain'] = $itemAttributeDetail['necklace_chain'];
+                    $uploadItemArr['eyeglasses_chain'] = $itemAttributeDetail['eyeglasses_chain'];
+                    $uploadItemArr['box_height'] = $itemAttributeDetail['box_height'];
+                    $uploadItemArr['box_width'] = $itemAttributeDetail['box_width'];
+                    $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
+                    $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
+                    $uploadItemArr['site'] = $v['platform_type'];
+                    $uploadItemArr['status'] = $v['outer_sku_status'];
+                    $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
+                    $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
+                    //审核通过把SKU同步到有映射关系的平台
+                    if ($v['platform_type'] == 12) {
+                        $uploadItemArr['skus'][0] = [
+                            'sku'  => $v['platform_sku'],
+                            'type' => $row['category_id'] == 53 ? 1 : 2,
+                        ];
+                        $uploadItemArr['sku'] = $v['platform_sku'];
+                        $uploadItemArr['site'] = $v['platform_type'];
+                    } elseif ($uploadItemArr['site'] == 13) {
+                        $params['sku_info'] = $v['platform_sku'];
+                        $params['platform_type'] = 1;
+                        $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                        $thirdRes = json_decode($thirdRes, true);
+                    } elseif ($uploadItemArr['site'] == 14) {
+                        $params['sku_info'] = $v['platform_sku'];
+                        $params['platform_type'] = 2;
+                        $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                        $thirdRes = json_decode($thirdRes, true);
+                    } else {
+                        $soapRes = Soap::createProduct($uploadItemArr);
+                    }
+                    if ($soapRes || $thirdRes['code'] == 1) {
+                        $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+                    } else {
+                        $errorNum[] = $v['platform_type'];
+                    }
+                }
                 Db::commit();
+                $this->model->commit();
+                $platform->commit();
             } catch (ValidateException $e) {
                 Db::rollback();
+                $this->model->rollback();
+                $platform->rollback();
                 $this->error($e->getMessage());
             } catch (PDOException $e) {
                 Db::rollback();
+                $this->model->rollback();
+                $platform->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
                 Db::rollback();
+                $this->model->rollback();
+                $platform->rollback();
                 $this->error($e->getMessage());
             }
-
             $this->success('审核成功！！');
         }
     }
+
     /***
      * 提交审核之后审核拒绝
      */
@@ -1384,6 +1482,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 启用商品
      */
@@ -1408,6 +1507,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 禁止商品
      */
@@ -1432,6 +1532,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 多个一起审核通过
      */
@@ -1446,44 +1547,108 @@ class Item extends Backend
                 }
             }
             $data['item_status'] = 3;
-            $data['check_time']  = date("Y-m-d H:i:s", time());
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            if ($res !== false) {
-                // foreach ($row as $val) {
-                //     //查询同步的平台
-                //     $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-                //     // $magento_platform = new \app\admin\model\platformmanage\MagentoPlatform();
-                //     $platformArr = $platform->where(['sku' => $val['sku'], 'is_upload' => 2])->select();
-                //     $uploadItemArr = [];
-                //     foreach ($platformArr as $k => $v) {
-                //         // $magentoArr = $magento_platform->where('id', '=', $v['platform_type'])->find();
-                //         //审核通过把SKU同步到有映射关系的平台
+            $data['check_time'] = date("Y-m-d H:i:s", time());
+            //查询同步的平台
+            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
 
-                //         if ($v['platform_type'] == 12) {
-                //             $uploadItemArr['skus'][0]  = [
-                //                 'sku' => $v['platform_sku'],
-                //                 'type' => $val['category_id'] == 53 ? 1 : 2
-                //             ];
-                //             $uploadItemArr['sku']  = $v['platform_sku'];
-                //             $uploadItemArr['type']  = $val['category_id'] == 53 ? 1 : 2;
-                //         } else {
-                //             $uploadItemArr['skus']  = [$v['platform_sku']];
-                //         }
-                //         $uploadItemArr['site']  = $v['platform_type'];
-                //         $soap_res = Soap::createProduct($uploadItemArr);
-                //         if ($soap_res) {
-                //             $platform->where(['sku' => $val['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
-                //         }
-                //     }
-                // }
+                Db::startTrans();
+                $this->model->startTrans();
+                $platform->startTrans();
+                try {
+                    $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+                    foreach ($row as $val) {
+                        $platformArr = $platform->where(['sku' => $val['sku']])->where('platform_type', '<>', 4)->select();
+                        $uploadItemArr = [];
+                        foreach ($platformArr as $k => $v) {
+                            $itemAttribute = new ItemAttribute();
+                            $itemAttributeDetail = $itemAttribute->where('item_id', $val['id'])->find();
+                            if ($row['category_id'] == 35) {
+                                $attributeType = 4;//耳饰
+                            } elseif ($row['category_id'] == 39 || $row['category_id'] == 34) {
+                                $attributeType = 5;//项链/手链
+                            } elseif ($row['category_id'] == 38) {
+                                $attributeType = 6;//眼镜链
+                            } elseif ($row['category_id'] == 32) {
+                                $attributeType = 7;//镜盒
+                            } else {
+                                $attributeType = 1;//眼镜
+                            }
+                            //审核通过把SKU同步到有映射关系的平台
+                            $uploadItemArr['sku'] = $v['platform_sku'];
+                            $uploadItemArr['attribute_type'] = $attributeType;
+                            $uploadItemArr['frame_height'] = $itemAttributeDetail['frame_height'];
+                            $uploadItemArr['frame_width'] = $itemAttributeDetail['frame_width'];
+                            $uploadItemArr['frame_length'] = $itemAttributeDetail['frame_length'];
+                            $uploadItemArr['frame_temple_length'] = $itemAttributeDetail['frame_temple_length'];
+                            $uploadItemArr['frame_bridge'] = $itemAttributeDetail['frame_bridge'];
+                            $uploadItemArr['mirror_width'] = $itemAttributeDetail['mirror_width'];
+                            $uploadItemArr['frame_weight'] = $itemAttributeDetail['frame_weight'];
+                            $uploadItemArr['earrings_height'] = $itemAttributeDetail['earrings_height'];
+                            $uploadItemArr['earrings_width'] = $itemAttributeDetail['earrings_width'];
+                            $uploadItemArr['necklace_perimeter'] = $itemAttributeDetail['necklace_perimeter'];
+                            $uploadItemArr['necklace_chain'] = $itemAttributeDetail['necklace_chain'];
+                            $uploadItemArr['eyeglasses_chain'] = $itemAttributeDetail['eyeglasses_chain'];
+                            $uploadItemArr['box_height'] = $itemAttributeDetail['box_height'];
+                            $uploadItemArr['box_width'] = $itemAttributeDetail['box_width'];
+                            $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
+                            $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
+                            $uploadItemArr['site'] = $v['platform_type'];
+                            $uploadItemArr['status'] = $v['outer_sku_status'];
+                            $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
+                            $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
+                            //审核通过把SKU同步到有映射关系的平台
+                            if ($v['platform_type'] == 12) {
+                                $uploadItemArr['skus'][0] = [
+                                    'sku'  => $v['platform_sku'],
+                                    'type' => $row['category_id'] == 53 ? 1 : 2,
+                                ];
+                                $uploadItemArr['sku'] = $v['platform_sku'];
+                                $uploadItemArr['site'] = $v['platform_type'];
+                            } elseif ($uploadItemArr['site'] == 13) {
+                                $params['sku_info'] = $v['platform_sku'];
+                                $params['platform_type'] = 1;
+                                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                                $thirdRes = json_decode($thirdRes, true);
+                            } elseif ($uploadItemArr['site'] == 14) {
+                                $params['sku_info'] = $v['platform_sku'];
+                                $params['platform_type'] = 2;
+                                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                                $thirdRes = json_decode($thirdRes, true);
+                            } else {
+                                $soapRes = Soap::createProduct($uploadItemArr);
+                            }
+                            if ($soapRes || $thirdRes['code'] == 1) {
+                                $platform->where(['sku' => $val['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+                            } else {
+                                $errorNum[] = $v['platform_type'];
+                            }
+                        }
+                    }
+                    Db::commit();
+                    $this->model->commit();
+                    $platform->commit();
+                } catch (ValidateException $e) {
+                    Db::rollback();
+                    $this->model->rollback();
+                    $platform->rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    Db::rollback();
+                    $this->model->rollback();
+                    $platform->rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    Db::rollback();
+                    $this->model->rollback();
+                    $platform->rollback();
+                    $this->error($e->getMessage());
+                }
                 $this->success('审核成功');
-            } else {
-                $this->error('审核失败');
-            }
         } else {
             $this->error('404 Not found');
         }
     }
+
     /***
      * 多个一起审核拒绝
      */
@@ -1508,6 +1673,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 多个商品移入回收站
      */
@@ -1532,6 +1698,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 一个还原
      */
@@ -1554,6 +1721,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 多个还原
      */
@@ -1578,6 +1746,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /**
      * 异步检测仓库sku和库存的数量是否符合更改镜架的要求
      */
@@ -1599,11 +1768,13 @@ class Item extends Backend
             if ($result['available_stock'] < $change_number) {
                 return $this->error('镜架可用数量大于可用库存数量,无法更改镜架');
             }
+
             return $this->success();
         } else {
             $this->error('404 Not found');
         }
     }
+
     /**
      * 异步获取商品库存信息
      */
@@ -1632,24 +1803,25 @@ class Item extends Backend
             }
         }
     }
+
     /***
      * 异步检测sku是否存在
      */
     public function checkOriginIsExist()
     {
         if ($this->request->isAjax()) {
-            $frame_texture     = $this->request->param('frame_texture');
+            $frame_texture = $this->request->param('frame_texture');
             $procurment_origin = $this->request->param('procurement_origin');
-            $origin_sku        = $this->request->param('origin_sku');
+            $origin_sku = $this->request->param('origin_sku');
             if ($frame_texture) {
                 $textureEncode = $this->itemAttribute->getTextureEncode($frame_texture);
             } else {
                 $textureEncode = 'O';
             }
             $final_sku = $procurment_origin . $textureEncode . $origin_sku;
-            $checkOriginSku     = $this->model->checkIsExistOriginSku($final_sku);
+            $checkOriginSku = $this->model->checkIsExistOriginSku($final_sku);
             if ($checkOriginSku) {
-                return  $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
+                return $this->error(__('The commodity sku code already exists, please add the commodity again or contact the developer'));
             } else {
                 return $this->success('可以使用这个sku');
             }
@@ -1679,15 +1851,15 @@ class Item extends Backend
         foreach ($platform_map as $key => $val) {
             if (1 == $val['platform_id']) {
                 $mapArr[1]['platform_field'][] = $val['platform_field'];
-                $mapArr[1]['magento_field'][]  = $val['magento_field'];
+                $mapArr[1]['magento_field'][] = $val['magento_field'];
             }
             if (2 == $val['platform_id']) {
                 $mapArr[2]['platform_field'][] = $val['platform_field'];
-                $mapArr[2]['magento_field'][]  = $val['magento_field'];
+                $mapArr[2]['magento_field'][] = $val['magento_field'];
             }
             if (3 == $val['platform_id']) {
                 $mapArr[3]['platform_field'][] = $val['platform_field'];
-                $mapArr[3]['magento_field'][]  = $val['magento_field'];
+                $mapArr[3]['magento_field'][] = $val['magento_field'];
             }
         }
         foreach ($sku_map as $k => $v) {
@@ -1749,7 +1921,7 @@ class Item extends Backend
      * 第二步
      * 解析magento字段获取字段的值
      */
-    public  function  analyticMagentoField()
+    public function analyticMagentoField()
     {
         //求出每个站点的地址,用户名和key
         $magentoPlatform = Db::name('magento_platform')->field('id,magento_account,magento_key,magento_url')->select();
@@ -1804,6 +1976,7 @@ class Item extends Backend
             Db::connect('database.db_stock')->table('sku_map')->where(['sku' => $v['sku']])->update($updateData);
         }
     }
+
     /***
      * 第三步
      * 解析更新到数据库
@@ -1822,19 +1995,19 @@ class Item extends Backend
             return false;
         }
         //获取所有材质
-        $texture    = (new ItemAttribute())->getAllTexture();
+        $texture = (new ItemAttribute())->getAllTexture();
         //获取所有眼镜形状
         $frameShape = (new ItemAttribute())->getAllFrameShape();
         //获取适合人群
-        $frameGender   = (new ItemAttribute())->getFrameGender();
+        $frameGender = (new ItemAttribute())->getFrameGender();
         //获取镜架所有的颜色
         //$frameColor    = (new ItemAttribute())->getFrameColor();
         //获取眼镜类型
-        $glassesType   = (new ItemAttribute())->getGlassesType();
+        $glassesType = (new ItemAttribute())->getGlassesType();
         //获取所有线下采购产地
         //$origin        = (new ItemAttribute())->getOrigin();
         //获取配镜类型
-        $frameType     = (new ItemAttribute())->getFrameType();
+        $frameType = (new ItemAttribute())->getFrameType();
         //每个平台的存储字段都放在一起
         foreach ($platform_map as $key => $val) {
             if (1 == $val['platform_id']) {
@@ -1863,16 +2036,16 @@ class Item extends Backend
                 }
                 if (2 != $v['pull_status']) {
                     //获得所有框型
-                    $shape  = (new ItemAttribute())->getAllShape();
+                    $shape = (new ItemAttribute())->getAllShape();
                     //获取尺寸型号
-                    $frameSize     = (new ItemAttribute())->getFrameSize();
+                    $frameSize = (new ItemAttribute())->getFrameSize();
                 } else {
-                    $shape  = (new ItemAttribute())->getAllShape(2);
-                    $frameSize     = (new ItemAttribute())->getFrameSize(2);
+                    $shape = (new ItemAttribute())->getAllShape(2);
+                    $frameSize = (new ItemAttribute())->getFrameSize(2);
                 }
                 foreach ($arr as $keys => $vals) {
                     //找出键名
-                    $platformName =  array_search($keys, $map);
+                    $platformName = array_search($keys, $map);
                     if ($platformName) {
                         $platform[$platformName] = $vals;
                     }
@@ -1888,7 +2061,7 @@ class Item extends Backend
                         //  echo $platform['frame_texture'];
                         //  echo '<br/>';
                         //  echo array_search($platform['frame_texture'],$texture);
-                        $finalResult['frame_texture'] =  array_search($platform['frame_texture'], $texture);
+                        $finalResult['frame_texture'] = array_search($platform['frame_texture'], $texture);
                         unset($platform['frame_texture']);
                     } else {
                         $finalResult['frame_texture'] = 0;
@@ -2015,18 +2188,19 @@ class Item extends Backend
             //求出分类列表
             $categoryArr = $this->category->getItemCategoryList();
             //求出品牌列表
-            $brandArr    = (new ItemBrand())->getBrandToItemList();
+            $brandArr = (new ItemBrand())->getBrandToItemList();
             $list = collection($list)->toArray();
             foreach ($list as $k => $v) {
                 if ($v['category_id']) {
                     $list[$k]['category_id'] = $categoryArr[$v['category_id']];
                 }
-                $list[$k]['brand_id']  = $brandArr[$v['brand_id']];
+                $list[$k]['brand_id'] = $brandArr[$v['brand_id']];
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -2076,7 +2250,7 @@ class Item extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $params['presell_residue_num'] = $params['presell_num'];
-                    $now_time =  date("Y-m-d H:i:s", time());
+                    $now_time = date("Y-m-d H:i:s", time());
                     if ($now_time >= $params['presell_end_time']) { //如果当前时间大于开始时间
                         $params['presell_status'] = 2;
                     }
@@ -2100,20 +2274,22 @@ class Item extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
         return $this->view->fetch();
     }
+
     /***
      * @todo 弃用
      * 检测商品sku是否存在
-     * 
+     *
      */
     public function check_sku_exists()
     {
         if ($this->request->isAjax()) {
             $final_sku = $this->request->post('origin_sku');
-            $checkOriginSku     = $this->model->pass_check_sku($final_sku);
+            $checkOriginSku = $this->model->pass_check_sku($final_sku);
             if ($checkOriginSku) {
-                return  $this->success(__('此sku存在'));
+                return $this->success(__('此sku存在'));
             } else {
                 return $this->error(__('此sku不存在'));
             }
@@ -2121,6 +2297,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * @todo 弃用
      * 开启预售
@@ -2148,6 +2325,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 关闭预售
      * @todo 弃用
@@ -2171,6 +2349,7 @@ class Item extends Backend
             $this->error('404 Not found');
         }
     }
+
     /***
      * 编辑预售
      * @todo 弃用
@@ -2204,7 +2383,7 @@ class Item extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $now_time =  date("Y-m-d H:i:s", time());
+                    $now_time = date("Y-m-d H:i:s", time());
                     if ($now_time >= $params['presell_end_time']) { //如果当前时间大于开始时间
                         $params['presell_status'] = 2;
                     }
@@ -2228,9 +2407,11 @@ class Item extends Backend
             }
         } else {
             $this->view->assign('row', $row);
+
             return $this->view->fetch();
         }
     }
+
     /***
      * 预售历史记录
      * @todo 弃用
@@ -2245,6 +2426,7 @@ class Item extends Backend
         if ($result) {
             $this->view->assign('result', $result);
         }
+
         return $this->view->fetch();
     }
 
@@ -2263,7 +2445,7 @@ class Item extends Backend
             ->where($addWhere)
             ->where($where)
             ->select();
-        //分类列表	
+        //分类列表
         $categoryArr = $this->category->getItemCategoryList();
         $list = collection($list)->toArray();
         if (!$list) {

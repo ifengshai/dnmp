@@ -1,0 +1,157 @@
+<style>
+    .content {
+        max-width: 100%;
+    }
+</style>
+
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 45%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+    .handle_table1 td {
+        border: 1px solid #ccc;
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 14px;
+        border-style: solid;
+    }
+    .nav-tabs>li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav>li {
+        position: relative;
+        display: block;
+    }
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .nav-tabs>li>a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+    <div class="panel-body">
+        <div class="tab-pane fade active in" id="one">
+            <div class="widget-body no-padding">
+                <form id="form" class="form-commonsearch form-horizontal" role="form" method="post">
+                    <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-6 col-md-3">
+                                <div class="form-group">
+                                    <label class="control-label col-xs-4">平台</label>
+                                    <div class="col-xs-8">
+                                        <select id="order_platform" data-rule="required" class="form-control"
+                                            name="order_platform">
+                                            {foreach name="magentoplatformarr" item="vo" key="key"}
+                                            <option value="{$vo.id}" {if condition="$vo.id == $web_site"}selected="selected"{/if}>{$vo.name}</option>
+                                            {/foreach}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="float: right;margin: 0px 50px 10px 0px;">
+                                <input type="button" value="数据导出" id="export" class="btn" style="background: #18bc9c;color: #fefefe">
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+
+                <div style="width: 100%;">
+                    <div class="row item_info"
+                        style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;padding:10px;margin-left: 1px;">
+                        <div class="col-lg-12">
+                            <div style="float: left;width:48%;">
+                                <div id="echart1" style="float: left;height:400px;width:100%;"></div>
+                            </div>
+                            <div style="float: left;width:48%;">
+                                <div id="echart2" style="float: left;height:400px;width:100%;margin-left: 20px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 100%;">
+                    <div class="row item_info"
+                        style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;margin-left: 1px;padding: 10px;">
+                        <div class="col-xs-6 col-md-12">
+                            <div>
+                                <table class="handle_table1" style="width:100%;">
+                                    <tr>
+                                        <td>日期（月）</td>
+                                        <td>客户数</td>
+                                        <td>年复购客户数</td>
+                                        <td>年复购客户订单数</td>
+                                        <td>年复购率</td>
+                                        <td>年复购频次</td>
+                                    </tr>
+                                    <tbody id="table_data">
+                                    {foreach name="list" item="vo" key="key"}
+                                    <tr>
+                                        <td>{$vo.day_date}</td>
+                                        <td>{$vo.usernum}</td>
+                                        <td>{$vo.againbuy_usernum}</td>
+                                        <td>{$vo.againbuy_usernum_ordernum}</td>
+                                        <td>{$vo.againbuy_rate}%</td>
+                                        <td>{$vo.againbuy_num_rate}</td>
+                                    </tr>
+                                    {/foreach}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

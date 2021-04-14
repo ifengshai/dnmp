@@ -11,13 +11,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         $('select[name="work_type"]').parents('.form-group').hide();
         $('select[name="is_work_order"]').parents('.form-group').hide();
         $('select[name="shelf_number"]').parents('.form-group').hide();
+        $('#check_time').parents('.form-group').hide();
         $('.btn-distribution').addClass('hide');
         if (0 == value) {
             $('select[name="abnormal"]').parents('.form-group').show();
+            $('#check_time').parents('.form-group').show();
             $('.btn-batch-export-xls').removeClass('hide');
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
+            $('.btn-batch-export-account').removeClass('hide');
         } else if (1 == value) {
+            $('#check_time').hide();
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
             $('.btn-batch-export-xlsz').removeClass('hide');
@@ -350,6 +354,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             visible: false
                         },
                         {
+                            field: 'check_time',
+                            title: __('审单时间'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            visible: false
+                        },
+                        {
                             field: 'created_at',
                             title: __('创建时间'),
                             operate: false
@@ -481,6 +492,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
                 }
                 window.open(Config.moduleurl + '/order/distribution/printing_batch_export_xls?' + params, '_blank');
+            });
+
+            //批量导出xls
+            $('.btn-batch-export-account').click(function () {
+                var ids = Table.api.selectedids(table);
+                var params = '';
+                if (ids.length > 0) {
+                    params = 'ids=' + ids;
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
+                }
+                window.open(Config.moduleurl + '/order/distribution/batch_export_xls_account?' + params, '_blank');
             });
 
             //批量打印

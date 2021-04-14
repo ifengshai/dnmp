@@ -3,6 +3,7 @@
 namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
+use fast\Tree;
 use think\Db;
 use Mpdf\Mpdf;
 
@@ -19,6 +20,7 @@ class PayOrder extends Backend
         $this->batch = new \app\admin\model\purchase\PurchaseBatch();
         $this->batch_item = new \app\admin\model\purchase\PurchaseBatchItem();
         $this->purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $this->purchase_order = new \app\admin\model\purchase\PurchaseOrder;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $this->outstockItem = new \app\admin\model\warehouse\OutStockItem;
         $this->instockItem = new \app\admin\model\warehouse\InstockItem;
@@ -45,13 +47,37 @@ class PayOrder extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
+
+            $where_pur_order=array();
+            if ($filter['purchase_order_user']){
+                //申请人  采购单创建人
+                $where_pur_order['fpo.create_person']= ['like', '%'.$filter['purchase_order_user'].'%'];
+            }
+            if ($filter['1688_number']){
+                //1688运单号
+                $where_pur_order['fpo.1688_number']=$filter['1688_number'];
+            }
+            //1688单号与申请人都是采购单的数据 ,付款单关联采购单,获取付款单ID,查询结果在付款单ID内查询
+            if ($where_pur_order){
+                $pay_id = $this->payorder_item
+                    ->alias('pi')
+                    ->join('fa_purchase_order fpo', 'pi.purchase_order_id=fpo.id', 'left')
+                    ->where($where_pur_order)
+                    ->group('pi.pay_id')
+                    ->column('pi.pay_id');
+                if ($pay_id){
+                    $map['p.id'] =['in',$pay_id];
+                }
+
+            }
+
             if ($filter['pay_number']) {
                 //付款申请单号
                 $map['p.pay_number'] = $filter['pay_number'];
             }
-            if ($filter['supplier_name']) {
+            if ($filter['supplier_id']) {
                 //供应商名称
-                $map['s.supplier_name'] = ['like', '%' . $filter['supplier_name'] . '%'];
+                $map['p.supply_id'] = $filter['supplier_id'];
             }
             if ($filter['status']) {
                 //状态
@@ -78,6 +104,11 @@ class PayOrder extends Backend
             unset($filter['check_user']);
             unset($filter['create_time']);
             unset($filter['one_time-operate']);
+            unset($filter['1688_number']);
+            unset($filter['purchase_order_user']);
+            unset($filter['supplier_id']);
+
+
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $sort = 'p.id';
@@ -91,7 +122,7 @@ class PayOrder extends Backend
             $list = $this->payorder
                 ->alias('p')
                 ->join('fa_supplier s', 'p.supply_id=s.id', 'left')
-                ->field('p.id,s.supplier_name,p.pay_number,p.status,p.create_user,p.check_user,FROM_UNIXTIME(p.create_time) create_time')
+                ->field('p.id,s.supplier_name,p.pay_number,p.status,p.create_user,p.pay_amount,p.check_user,FROM_UNIXTIME(p.create_time) create_time')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -106,6 +137,32 @@ class PayOrder extends Backend
         return $this->view->fetch();
     }
 
+    public function getSupplier(){
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            //设置过滤方法
+            $this->request->filter(['strip_tags', 'htmlspecialchars']);
+            $this->request->filter(['strip_tags', 'htmlspecialchars']);
+            //搜索关键词,客户端输入以空格分开,这里接收为数组
+            $word = (array) $this->request->request("q_word/a");
+            //当前页
+            $page = $this->request->request("pageNumber");
+            //分页大小
+            $pagesize = $this->request->request("pageSize");
+            //搜索条件
+            $supplier = new \app\admin\model\purchase\Supplier;
+            $name=$word[0];
+            $total=$supplier->where('supplier_name', "like", "%{$name}%")->count();
+
+            $data = $supplier->field('id,supplier_name')
+                ->where('supplier_name', "like", "%{$name}%")
+                ->page($page, $pagesize)
+                ->select();
+            //这里一定要返回有list这个字段,total是可选的,如果total<=list的数量,则会隐藏分页按钮
+            return json(['list' => $data, 'total' => $total]);
+        }
+
+    }
 
 
     /*
@@ -193,35 +250,51 @@ class PayOrder extends Backend
         $imgs = array_filter(explode(',', $pay_order['invoice']));
         //获取付款单子单结算信息
         $settle = $this->payorder_item->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.id as purchase_ids')
             ->where(['a.pay_id' => $id, 'a.pay_type' => 3])
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
             ->select();
         $total1 = 0;
+        $total3 = 0;
         $count1 = 0;
         foreach ($settle as $k => $v) {
+            if ($v['purchase_batch_id'] > 0){
+                $instockDetail = Db::name('check_order')
+                    ->alias('a')
+                    ->join(['in_stock' => 'b'], 'b.check_id = a.id')
+                    ->join(['in_stock_item' => 'c'], 'c.in_stock_id = b.id')
+                    ->where('a.batch_id',$v['purchase_batch_id'])
+                    ->find();
+                $settle[$k]['batch_instock_num'] = $instockDetail['in_stock_num'];
+            }else{
+                $settle[$k]['batch_instock_num'] = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_ids'])->value('instock_num');
+            }
             $total1 += $v['wait_statement_total'];
+            $total3 += $settle[$k]['batch_instock_num'];
             $count1++;
         }
         //获取付款单子单预付信息
         $prepay = $this->payorder_item
             ->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,c.purchase_num')
             ->where(['pay_id' => $id])
             ->where('a.pay_type', '<>', 3)
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
+            ->join(['fa_purchase_order_item' => 'c'], 'c.purchase_id=b.id')
             ->select();
         $total2 = 0;
         $count2 = 0;
+        $count3 = 0;
         foreach ($prepay as $k1 => $v1) {
             $pay_rate = $v1['pay_rate'] * 100;
             $prepay[$k1]['pay_rate'] = $pay_rate;
             $total2 += $v1['pay_grand_total'];
+            $count3 += $v1['purchase_num'];
             $count2++;
         }
         $total = $total1 + $total2;
         $supplier = $this->supplier->where('id', $pay_order['supply_id'])->field('id,supplier_name,remark,currency,period,opening_bank,bank_account,recipient_name')->find();
-        $this->view->assign(compact('pay_order', 'supplier', 'settle', 'prepay', 'total1', 'total2', 'total', 'count1', 'count2', 'imgs'));
+        $this->view->assign(compact('pay_order', 'supplier', 'settle', 'prepay', 'total1', 'total2', 'total', 'count1', 'count2', 'imgs','count3','total3'));
         return $this->view->fetch();
     }
     /*
@@ -550,27 +623,42 @@ class PayOrder extends Backend
         $pay_order->pay_time = $pay_order->pay_time ? date('Y-m-d H:i:s', $pay_order->pay_time) : '';
         //获取付款单子单结算信息
         $settle = $this->payorder_item->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.id as purchase_ids')
             ->where(['a.pay_id' => $ids, 'a.pay_type' => 3])
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
             ->select();
         $total1 = 0;
+        $total3 = 0;
         $count1 = 0;
         foreach ($settle as $k => $v) {
+            if ($v['purchase_batch_id'] > 0){
+                $instockDetail = Db::name('check_order')
+                    ->alias('a')
+                    ->join(['in_stock' => 'b'], 'b.check_id = a.id')
+                    ->join(['in_stock_item' => 'c'], 'c.in_stock_id = b.id')
+                    ->where('a.batch_id',$v['purchase_batch_id'])
+                    ->find();
+                $settle[$k]['batch_instock_num'] = $instockDetail['in_stock_num'];
+            }else{
+                $settle[$k]['batch_instock_num'] = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_ids'])->value('instock_num');
+            }
             $total1 += $v['wait_statement_total'];
+            $total3 += $settle[$k]['batch_instock_num'];
             $count1++;
         }
 
         //获取付款单子单预付信息
         $prepay = $this->payorder_item
             ->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.purchase_name,b.purchase_total')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.purchase_name,b.purchase_total,c.purchase_num')
             ->where(['pay_id' => $ids])
             ->where('a.pay_type', '<>', 3)
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
+            ->join(['fa_purchase_order_item' => 'c'], 'c.purchase_id=b.id')
             ->select();
         $total2 = 0;
         $count2 = 0;
+        $count3 = 0;
         $item = new \app\admin\model\itemmanage\Item();
         $itemcategory = new \app\admin\model\itemmanage\ItemCategory();
         foreach ($prepay as $k1 => $v1) {
@@ -580,12 +668,13 @@ class PayOrder extends Backend
             $prepay[$k1]['pay_rate'] = $pay_rate;
             $prepay[$k1]['category_name'] = $category_name;
             $total2 += $v1['pay_grand_total'];
+            $count3 += $v1['purchase_num'];
             $count2++;
         }
         $total = $total1 + $total2;
         $supplier = $this->supplier->where('id', $pay_order['supply_id'])->field('id,remark,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
         /***********end***************/
-        $this->assign(compact('pay_order', 'supplier', 'settle', 'prepay', 'total1', 'total2', 'total', 'count1', 'count2'));
+        $this->assign(compact('pay_order', 'supplier', 'settle', 'prepay', 'total1', 'total2', 'total', 'count1', 'count2', 'count3', 'total3'));
 
         //去掉控制台
         $this->view->engine->layout(false);

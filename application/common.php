@@ -6,9 +6,11 @@ if (!function_exists('__')) {
 
     /**
      * 获取语言变量值
-     * @param string $name 语言变量名
-     * @param array  $vars 动态变量值
-     * @param string $lang 语言
+     *
+     * @param  string  $name  语言变量名
+     * @param  array  $vars  动态变量值
+     * @param  string  $lang  语言
+     *
      * @return mixed
      */
     function __($name, $vars = [], $lang = '')
@@ -21,6 +23,7 @@ if (!function_exists('__')) {
             array_shift($vars);
             $lang = '';
         }
+
         return \think\Lang::get($name, $vars, $lang);
     }
 }
@@ -29,17 +32,20 @@ if (!function_exists('format_bytes')) {
 
     /**
      * 将字节转换为可读文本
-     * @param int    $size      大小
-     * @param string $delimiter 分隔符
+     *
+     * @param  int  $size  大小
+     * @param  string  $delimiter  分隔符
+     *
      * @return string
      */
     function format_bytes($size, $delimiter = '')
     {
-        $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB');
+        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
         for ($i = 0; $size >= 1024 && $i < 6; $i++) {
             $size /= 1024;
         }
-        return round($size, 2) . $delimiter . $units[$i];
+
+        return round($size, 2).$delimiter.$units[$i];
     }
 }
 
@@ -47,13 +53,16 @@ if (!function_exists('datetime')) {
 
     /**
      * 将时间戳转换为日期时间
-     * @param int    $time   时间戳
-     * @param string $format 日期时间格式
+     *
+     * @param  int  $time  时间戳
+     * @param  string  $format  日期时间格式
+     *
      * @return string
      */
     function datetime($time, $format = 'Y-m-d H:i:s')
     {
         $time = is_numeric($time) ? $time : strtotime($time);
+
         return date($format, $time);
     }
 }
@@ -62,8 +71,10 @@ if (!function_exists('human_date')) {
 
     /**
      * 获取语义化时间
-     * @param int $time  时间
-     * @param int $local 本地时间
+     *
+     * @param  int  $time  时间
+     * @param  int  $local  本地时间
+     *
      * @return string
      */
     function human_date($time, $local = null)
@@ -76,18 +87,21 @@ if (!function_exists('cdnurl')) {
 
     /**
      * 获取上传资源的CDN的地址
-     * @param string  $url    资源相对地址
-     * @param boolean $domain 是否显示域名 或者直接传入域名
+     *
+     * @param  string  $url  资源相对地址
+     * @param  boolean  $domain  是否显示域名 或者直接传入域名
+     *
      * @return string
      */
     function cdnurl($url, $domain = false)
     {
         $regex = "/^((?:[a-z]+:)?\/\/|data:image\/)(.*)/i";
-        $url = preg_match($regex, $url) ? $url : \think\Config::get('upload.cdnurl') . $url;
+        $url = preg_match($regex, $url) ? $url : \think\Config::get('upload.cdnurl').$url;
         if ($domain && !preg_match($regex, $url)) {
             $domain = is_bool($domain) ? request()->domain() : $domain;
-            $url = $domain . $url;
+            $url = $domain.$url;
         }
+
         return $url;
     }
 }
@@ -97,7 +111,9 @@ if (!function_exists('is_really_writable')) {
 
     /**
      * 判断文件或文件夹是否可写
-     * @param    string $file 文件或目录
+     *
+     * @param  string  $file  文件或目录
+     *
      * @return    bool
      */
     function is_really_writable($file)
@@ -106,18 +122,20 @@ if (!function_exists('is_really_writable')) {
             return is_writable($file);
         }
         if (is_dir($file)) {
-            $file = rtrim($file, '/') . '/' . md5(mt_rand());
+            $file = rtrim($file, '/').'/'.md5(mt_rand());
             if (($fp = @fopen($file, 'ab')) === false) {
                 return false;
             }
             fclose($fp);
             @chmod($file, 0777);
             @unlink($file);
+
             return true;
         } elseif (!is_file($file) or ($fp = @fopen($file, 'ab')) === false) {
             return false;
         }
         fclose($fp);
+
         return true;
     }
 }
@@ -126,8 +144,10 @@ if (!function_exists('rmdirs')) {
 
     /**
      * 删除文件夹
-     * @param string $dirname  目录
-     * @param bool   $withself 是否删除自身
+     *
+     * @param  string  $dirname  目录
+     * @param  bool  $withself  是否删除自身
+     *
      * @return boolean
      */
     function rmdirs($dirname, $withself = true)
@@ -147,6 +167,7 @@ if (!function_exists('rmdirs')) {
         if ($withself) {
             @rmdir($dirname);
         }
+
         return true;
     }
 }
@@ -155,8 +176,9 @@ if (!function_exists('copydirs')) {
 
     /**
      * 复制文件夹
-     * @param string $source 源文件夹
-     * @param string $dest   目标文件夹
+     *
+     * @param  string  $source  源文件夹
+     * @param  string  $dest  目标文件夹
      */
     function copydirs($source, $dest)
     {
@@ -170,12 +192,12 @@ if (!function_exists('copydirs')) {
             ) as $item
         ) {
             if ($item->isDir()) {
-                $sontDir = $dest . DS . $iterator->getSubPathName();
+                $sontDir = $dest.DS.$iterator->getSubPathName();
                 if (!is_dir($sontDir)) {
                     mkdir($sontDir, 0755, true);
                 }
             } else {
-                copy($item, $dest . DS . $iterator->getSubPathName());
+                copy($item, $dest.DS.$iterator->getSubPathName());
             }
         }
     }
@@ -184,7 +206,7 @@ if (!function_exists('copydirs')) {
 if (!function_exists('mb_ucfirst')) {
     function mb_ucfirst($string)
     {
-        return mb_strtoupper(mb_substr($string, 0, 1)) . mb_strtolower(mb_substr($string, 1));
+        return mb_strtoupper(mb_substr($string, 0, 1)).mb_strtolower(mb_substr($string, 1));
     }
 }
 
@@ -192,8 +214,10 @@ if (!function_exists('addtion')) {
 
     /**
      * 附加关联字段数据
-     * @param array $items  数据列表
-     * @param mixed $fields 渲染的来源字段
+     *
+     * @param  array  $items  数据列表
+     * @param  mixed  $fields  渲染的来源字段
+     *
      * @return array
      */
     function addtion($items, $fields)
@@ -256,6 +280,7 @@ if (!function_exists('addtion')) {
                 }
             }
         }
+
         return $items;
     }
 }
@@ -264,24 +289,27 @@ if (!function_exists('var_export_short')) {
 
     /**
      * 返回打印数组结构
-     * @param string $var    数组
-     * @param string $indent 缩进字符
+     *
+     * @param  string  $var  数组
+     * @param  string  $indent  缩进字符
+     *
      * @return string
      */
     function var_export_short($var, $indent = "")
     {
         switch (gettype($var)) {
             case "string":
-                return '"' . addcslashes($var, "\\\$\"\r\n\t\v\f") . '"';
+                return '"'.addcslashes($var, "\\\$\"\r\n\t\v\f").'"';
             case "array":
                 $indexed = array_keys($var) === range(0, count($var) - 1);
                 $r = [];
                 foreach ($var as $key => $value) {
                     $r[] = "$indent    "
-                        . ($indexed ? "" : var_export_short($key) . " => ")
-                        . var_export_short($value, "$indent    ");
+                        .($indexed ? "" : var_export_short($key)." => ")
+                        .var_export_short($value, "$indent    ");
                 }
-                return "[\n" . implode(",\n", $r) . "\n" . $indent . "]";
+
+                return "[\n".implode(",\n", $r)."\n".$indent."]";
             case "boolean":
                 return $var ? "TRUE" : "FALSE";
             default:
@@ -293,7 +321,9 @@ if (!function_exists('var_export_short')) {
 if (!function_exists('letter_avatar')) {
     /**
      * 首字母头像
+     *
      * @param $text
+     *
      * @return string
      */
     function letter_avatar($text)
@@ -305,8 +335,9 @@ if (!function_exists('letter_avatar')) {
         $bg = "rgb({$r},{$g},{$b})";
         $color = "#ffffff";
         $first = mb_strtoupper(mb_substr($text, 0, 1));
-        $src = base64_encode('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="100" width="100"><rect fill="' . $bg . '" x="0" y="0" width="100" height="100"></rect><text x="50" y="50" font-size="50" text-copy="fast" fill="' . $color . '" text-anchor="middle" text-rights="admin" alignment-baseline="central">' . $first . '</text></svg>');
-        $value = 'data:image/svg+xml;base64,' . $src;
+        $src = base64_encode('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="100" width="100"><rect fill="'.$bg.'" x="0" y="0" width="100" height="100"></rect><text x="50" y="50" font-size="50" text-copy="fast" fill="'.$color.'" text-anchor="middle" text-rights="admin" alignment-baseline="central">'.$first.'</text></svg>');
+        $value = 'data:image/svg+xml;base64,'.$src;
+
         return $value;
     }
 }
@@ -358,54 +389,59 @@ if (!function_exists('hsv2rgb')) {
         return [
             floor($r * 255),
             floor($g * 255),
-            floor($b * 255)
+            floor($b * 255),
         ];
     }
 }
-if(!function_exists('getTree')){
-    function getTree($list,$pid=0,$itemprefix = '') {
-        static $icon = array('│', '├', '└');
+if (!function_exists('getTree')) {
+    function getTree($list, $pid = 0, $itemprefix = '')
+    {
+        static $icon = ['│', '├', '└'];
         static $nbsp = "&nbsp;";
-        static $arr = array();
+        static $arr = [];
         $number = 1;
-        foreach($list as $row) {
-            if($row['pid'] == $pid) {
+        foreach ($list as $row) {
+            if ($row['pid'] == $pid) {
                 $brotherCount = 0;
                 //判断当前有多少个兄弟分类
-                foreach($list as $r) {
-                    if($row['pid'] == $r['pid']) {
+                foreach ($list as $r) {
+                    if ($row['pid'] == $r['pid']) {
                         $brotherCount++;
                     }
                 }
-                if($brotherCount >0) {
+                if ($brotherCount > 0) {
                     $j = $k = '';
-                    if($number == $brotherCount) {
+                    if ($number == $brotherCount) {
                         $j .= $icon[2];
                         $k = $itemprefix ? $nbsp : '';
-                    }else{
+                    } else {
                         $j .= $icon[1];
                         $k = $itemprefix ? $icon[0] : '';
                     }
-                    $spacer = $itemprefix ? $itemprefix . $j : '';
+                    $spacer = $itemprefix ? $itemprefix.$j : '';
                     $row['name'] = $spacer.$row['name'];
                     $arr[] = $row;
                     $number++;
-                   getTree($list,$row['id'],$itemprefix . $k . $nbsp);
+                    getTree($list, $row['id'], $itemprefix.$k.$nbsp);
                 }
             }
         }
-        return  $arr;
+
+        return $arr;
     }
 }
 /**
  * 中文转拼音 (utf8版,gbk转utf8也可用)
- * @param string $str         utf8字符串
- * @param string $ret_format  返回格式 [all:全拼音|first:首字母|one:仅第一字符首字母]
- * @param string $placeholder 无法识别的字符占位符
- * @param string $allow_chars 允许的非中文字符
+ *
+ * @param  string  $str  utf8字符串
+ * @param  string  $ret_format  返回格式 [all:全拼音|first:首字母|one:仅第一字符首字母]
+ * @param  string  $placeholder  无法识别的字符占位符
+ * @param  string  $allow_chars  允许的非中文字符
+ *
  * @return string             拼音字符串
  */
-function pinyin($str, $ret_format = 'all', $placeholder = '_', $allow_chars = '/[a-zA-Z\d ]/') {
+function pinyin($str, $ret_format = 'all', $placeholder = '_', $allow_chars = '/[a-zA-Z\d ]/')
+{
     static $pinyins = null;
 
     if (null === $pinyins) {
@@ -413,8 +449,8 @@ function pinyin($str, $ret_format = 'all', $placeholder = '_', $allow_chars = '/
 
         $rows = explode('|', $data);
 
-        $pinyins = array();
-        foreach($rows as $v) {
+        $pinyins = [];
+        foreach ($rows as $v) {
             list($py, $vals) = explode(':', $v);
             $chars = explode(',', $vals);
 
@@ -438,7 +474,7 @@ function pinyin($str, $ret_format = 'all', $placeholder = '_', $allow_chars = '/
             }
         } else { // 128-255
             if (isset($pinyins[$chr])) {
-                $rs .= 'first' === $ret_format ? $pinyins[$chr][0] : ($pinyins[$chr] . ' ');
+                $rs .= 'first' === $ret_format ? $pinyins[$chr][0] : ($pinyins[$chr].' ');
             } else {
                 $rs .= $placeholder;
             }
@@ -451,15 +487,18 @@ function pinyin($str, $ret_format = 'all', $placeholder = '_', $allow_chars = '/
 
     return rtrim($rs, ' ');
 }
+
 /**
  * [发送钉钉通知]
- * @param  array  $userIds [用户的userid]
+ *
+ * @param  array  $userIds  [用户的userid]
  * @param  [type] $title   [标题]
  * @param  [type] $text    [内容]
+ *
  * @return [type]          [description]
  */
 if (!function_exists('send_ding_message')) {
-    
+
     function send_ding_message(array $userIds, $title, $text)
     {
         //type 1    收到需求，待通过
@@ -470,19 +509,82 @@ if (!function_exists('send_ding_message')) {
         $agentId = config('ding.agent_id');
         $link = [
             'msgtype' => 'link',
-            'link' => [
+            'link'    => [
                 'messageUrl' => $url,
-                'picUrl' => 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png',
-                'title' => $title,
-                'text' => $text
-            ]
-            
+                'picUrl'     => 'https://static.dingtalk.com/media/lALPDeC2v2wwMcPMpcyk_164_165.png',
+                'title'      => $title,
+                'text'       => $text,
+            ],
+
         ];
         $params = [
-            'agent_id' => $agentId,
+            'agent_id'    => $agentId,
             'userid_list' => join(',', $userIds),
-            'msg' => json_encode($link)
+            'msg'         => json_encode($link),
         ];
+
         return $params;
+    }
+}
+
+if (!function_exists('downloadFile')) {
+    function downloadFile($filename)
+    {
+        //获取文件的扩展名
+        $allowDownExt = ['rar', 'zip', 'png', 'txt', 'mp4', 'html'];
+        //获取文件信息
+        $fileExt = pathinfo($filename);
+        //检测文件类型是否允许下载
+        if (！in_array($fileExt['extension'], $allowDownExt)) {
+            return false;
+        }
+
+        //设置脚本的最大执行时间，设置为0则无时间限制
+        set_time_limit(0);
+
+        ini_set('max_execution_time', '0');
+
+        //通过header（）发送头信息
+
+        //因为不知道文件是什么类型的，告诉浏览器输出的是字节流
+
+        header('content-type:application/octet-stream');
+
+        //告诉浏览器返回的文件大小类型是字节
+
+        header('Accept-Ranges:bytes');
+
+        //获得文件大小
+
+        //$filesize = filesize（$filename）；//（此方法无法获取到远程文件大小）
+
+        $header_array = get_headers($filename, true);
+
+        $filesize = $header_array['Content-Length'];
+
+        //告诉浏览器返回的文件大小
+
+        header('Accept-Length:'.$filesize);
+
+        //告诉浏览器文件作为附件处理并且设定最终下载完成的文件名称
+
+        header('content-disposition:attachment;filename='.basename($filename));
+
+        //针对大文件，规定每次读取文件的字节数为4096字节，直接输出数据
+        $read_buffer = 4096;
+
+        $handle = fopen($filename, 'rb');
+
+        //总的缓冲的字节数
+        $sum_buffer = 0;
+
+        //只要没到文件尾，就一直读取
+        while (!feof($handle) && $sum_buffer < $filesize) {
+            echo fread($handle, $read_buffer);
+            $sum_buffer += $read_buffer;
+        }
+        //关闭句柄
+        fclose($handle);
+        exit;
     }
 }

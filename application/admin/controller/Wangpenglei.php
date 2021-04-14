@@ -2,6 +2,8 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
 use think\Db;
 use FacebookAds\Api;
@@ -26,17 +28,156 @@ class Wangpenglei extends Backend
         $this->accounts = $this->facebook->accounts;
     }
 
+    public function select_sku()
+    {
+        $itemPlatformSku = new ItemPlatformSku();
+        $productbarcodeitem = new ProductBarCodeItem();
+        $skus = $itemPlatformSku
+            ->where('platform_sku', 'in', [
+                'GOT018229-01',
+                'GER495319-01',
+                'GACC6013-01',
+                'GOT018229-01',
+                'GFP0044-08',
+                'GOX259645-01',
+                'GFP0044-08',
+                'Chain-G05',
+                'ZOM02024-02',
+                'ZOX01969-02',
+                'ZOM469870-01',
+                'ZOP02048-03',
+                'ZSA941431-05',
+                'ZOP313158-03',
+                'ZOX739865-03',
+                'ZACC628151-02',
+                'ZUSA01119-01',
+                'ER5032-01',
+                'ZUOT01580-02',
+                'GOT018229-01',
+                'GFP0044-08',
+                'GOP527327-03',
+                'ZACC628151-02',
+                'ER5012-01',
+                'ZOP313158-03',
+                'ZOX739865-03',
+                'NFX006851-03',
+                'ZOX059051-02',
+                'GOA02008-01',
+                'GTX225717-02',
+                'NVFP0158-04',
+                'ZWA135389-01',
+                'ZTX225717-02',
+                'ZWA062782-03',
+                'GACC06052-01',
+                'ZOX01878-02',
+                'ZOX739865-03',
+                'ZDP784598-02',
+                'ZOA01995-01',
+                'ZWA01654-03',
+                'ZOT092185-01',
+                'ZSA941431-05',
+                'FX0689-01',
+                'ZOA01834-01',
+                'GDM473233-07',
+                'NOT01580-01',
+                'VFP0236-03',
+                'ZWA01701-01',
+                'ZOM469870-01',
+                'ZWA885863-01',
+                'GOP527327-03',
+                'GDM473233-07',
+                'ZOA01499-03',
+                'ZOM935234-01',
+                'GSX0019-06',
+                'ZWA729538-01',
+                'ZOI815956-02',
+                'ZSA941431-05',
+                'GWA245023-03',
+                'GOP527327-01',
+                'GOP336618-05',
+                'GWA192071-05',
+                'GOT018229-03',
+                'GOT018229-01',
+                'GSX0019-03',
+                'ZWA135389-01',
+                'ER5032-01',
+                'GOT018229-02',
+                'Chain-G05',
+                'GOP01912-06',
+                'GER092586-01',
+                'ZOX739865-03',
+                'GFP0044-08',
+                'VFP0188-01',
+                'VFP0166-01',
+                'GSX0019-03',
+                'GWA609979-04',
+                'GOP527327-03',
+                'GWA609979-05',
+                'GVHP0189-07',
+                'DSX0019-04',
+                'GER495319-01',
+                'GCH521292-01',
+                'GWA192071-05',
+                'VFP0236-03',
+                'GOP01912-06',
+                'ZWX701721-03',
+                'GVHP0189-04',
+                'ZOP432631-01',
+                'GXT417734-01',
+                'DOW01844-01',
+                'DOT092477-07',
+                'ZOP313158-03',
+                'GFP0044-08',
+                'GOP233677-03',
+                'FX0757-02',
+                'FX0757-02',
+                'ZOX01969-02',
+                'GWA609979-05',
+                'GWA192071-05',
+                'GVHP0189-07',
+                'DFM0361-01',
+                'GSX0019-03',
+                'ZSA941431-05',
+                'NFX007571-02',
+                'ZOP302058-01',
+                'ZOP765682-02',
+                'ZER081175-01',
+                'GOX259645-01',
+                'GOM01473-02',
+                'ZOA01995-01',
+                'ZP0940-01',
+                'ZWA106882-03',
+                'GDM473233-07',
+                'GACC208367-01',
+                'VFP0263-01',
+                'GSX0019-06 ',
+            ])
+            ->field('sku')
+            ->group('sku')
+            ->select();
+        $skus = collection($skus)->toArray();
+
+        foreach ($skus as $k => $v) {
+            $list[$k]['sku'] = $v['sku'];
+            $list[$k]['stock'] = $productbarcodeitem
+                ->where(['library_status' => 1, 'item_order_number' => '', 'sku' => $v['sku']])
+                ->where('location_code_id','>',0)
+                ->count();
+        }
+        Db::name('zz_temp2')->insertAll($list);
+
+    }
     /************************跑库存数据用START*****勿删*****************************/
     //导入实时库存 第一步
     public function set_product_relstock()
     {
-
+        $this->item = new \app\admin\model\itemmanage\Item;
         $list = Db::table('fa_zz_temp2')->select();
         foreach ($list as $k => $v) {
             $p_map['sku'] = $v['sku'];
             $data['real_time_qty'] = $v['stock'];
             $res = $this->item->where($p_map)->update($data);
-            echo $v['sku']."\n";
+            echo $v['sku'] . "\n";
         }
         echo 'ok';
         die;
@@ -96,7 +237,7 @@ class Wangpenglei extends Backend
             $p_map['sku'] = $v;
             $data['distribution_occupy_stock'] = $distribution_occupy_stock;
             $this->item->where($p_map)->update($data);
-            echo $v."\n";
+            echo $v . "\n";
             usleep(20000);
         }
         echo 'ok';
@@ -156,7 +297,7 @@ class Wangpenglei extends Backend
             $p_map['sku'] = $v;
             $data['occupy_stock'] = $occupy_stock;
             $this->item->where($p_map)->update($data);
-            echo $v."\n";
+            echo $v . "\n";
             usleep(20000);
         }
         echo 'ok';
@@ -184,7 +325,7 @@ class Wangpenglei extends Backend
             $p_map['sku'] = $v['sku'];
             $res = $this->item->where($p_map)->update($data);
 
-            echo $k."\n";
+            echo $k . "\n";
             usleep(20000);
         }
         echo 'ok';
@@ -203,8 +344,8 @@ class Wangpenglei extends Backend
     {
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $skus1 = $platform->where(['stock' => ['<', 0]])->column('sku');
-        $skus = Db::table('fa_zz_temp2')->where(['sku' => ['in', $skus1]])->column('sku');
+//        $skus1 = $platform->where(['stock' => ['<', 0]])->column('sku');
+        $skus = Db::table('fa_zz_temp2')->column('sku');
         // dump($skus);die;
         foreach ($skus as $k => $v) {
             // $v = 'OA01901-06';
@@ -276,7 +417,7 @@ class Wangpenglei extends Backend
                 }
             }
             usleep(10000);
-            echo $k."\n";
+            echo $k . "\n";
         }
         echo "ok";
     }
@@ -362,7 +503,7 @@ class Wangpenglei extends Backend
                     $params[$k]['sales_num'] = $order->getSkuSalesNumTest($v['platform_sku'], $map, $v['site']);
                     $params[$k]['id'] = $v['id'];
                 }
-                echo $v['id']."\n";
+                echo $v['id'] . "\n";
                 usleep(100000);
             }
             if ($params) {
@@ -391,7 +532,7 @@ class Wangpenglei extends Backend
             $create_time = $this->ordernodedetail->where(['order_number' => $v['order_number'], 'site' => $v['site'], 'order_node' => 2, 'node_type' => 7])->order('id asc')->value('create_time');
             $params[$k]['delivery_time'] = $create_time;
             $params[$k]['id'] = $v['id'];
-            echo $k."\n";
+            echo $k . "\n";
         }
         $this->ordernode->saveAll($params);
         echo "ok";
@@ -428,7 +569,7 @@ class Wangpenglei extends Backend
                     $params[$k]['id'] = $v['id'];
                 }
 
-                echo $k."\n";
+                echo $k . "\n";
                 usleep(50000);
             }
             if ($params) {
@@ -458,7 +599,7 @@ class Wangpenglei extends Backend
             $check_time = $instock->where(['id' => $v['in_stock_id']])->value('check_time');
             $product_barcode->where(['id' => $v['id']])->update(['in_stock_time' => $check_time]);
 
-            echo $k."\n";
+            echo $k . "\n";
             usleep(50000);
         }
     }
@@ -508,7 +649,7 @@ class Wangpenglei extends Backend
             if ($content) {
                 $ordernode->where(['id' => $v['id']])->update(['shipment_last_msg' => $content]);
             }
-            echo $k."\n";
+            echo $k . "\n";
             usleep(100000);
         }
         echo 'ok';
@@ -674,12 +815,12 @@ class Wangpenglei extends Backend
             $count = $orderItem->where(['distribution_status' => ['in', [0, 8, 9]], 'order_id' => $v['order_id']])->count();
 
             //查询工单是否处理完成
-            $workcount = $worklist->where(['order_item_numbers' => ['like', '%'.$v['item_order_number'].'%'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
+            $workcount = $worklist->where(['order_item_numbers' => ['like', '%' . $v['item_order_number'] . '%'], 'work_status' => ['in', [1, 2, 3, 5]]])->count();
             if ($allcount == $count && $workcount < 1) {
                 $orderItem->where(['order_id' => $v['order_id'], 'distribution_status' => 8])->update(['distribution_status' => 9]);
                 $orderProcess->where(['order_id' => $v['order_id']])->update(['combine_status' => 1, 'combine_time' => time()]);
 
-                echo $v['id']."\n";
+                echo $v['id'] . "\n";
             }
 
             usleep(100000);
@@ -712,7 +853,7 @@ class Wangpenglei extends Backend
                 $type = 1;
             }
             $process->where('order_id', $value)->update(['order_prescription_type' => $type]);
-            echo $value.' is ok'."\n";
+            echo $value . ' is ok' . "\n";
             usleep(100000);
         }
     }
@@ -846,6 +987,352 @@ class Wangpenglei extends Backend
         $storehouse = new \app\admin\model\warehouse\StockHouse();
         foreach ($list as $k => $v) {
             $storehouse->where(['type' => 1, 'area_id' => 3, 'coding' => $v['store_house']])->update(['picking_sort' => $v['sort']]);
+        }
+    }
+
+    /**
+     *  处理采购成本单价
+     * @Description
+     * @author: wpl
+     * @since : 2021/4/1 17:40
+     */
+    public function getPurchasePrice()
+    {
+        //查询镜架成本为0的财务数据
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $list = $finace_cost->where(['type' => 2, 'frame_cost' => 0, 'bill_type' => 8])->select();
+        $list = collection($list)->toArray();
+        $params = [];
+        $i = 0;
+        foreach ($list as $k => $v) {
+            $data = $barcode->alias('a')
+                ->where(['item_order_number' => ['like', $v['order_number'] . '%']])
+                ->field('a.sku,a.in_stock_id,b.price')
+                ->join(['fa_in_stock_item' => 'b'], 'a.in_stock_id=b.in_stock_id and a.sku=b.sku')
+                ->select();
+            $data = collection($data)->toArray();
+            foreach ($data as $key => $val) {
+                $params[$i]['order_number'] = $v['order_number'];
+                $params[$i]['sku'] = $val['sku'];
+                $params[$i]['price'] = $val['price'];
+                $i++;
+            }
+        }
+        $headlist = ['订单号', 'sku', '采购成本'];
+        Excel::writeCsv($params, $headlist, '采购成本');
+        die;
+    }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since : 2021/4/2 11:52
+     */
+    public function getFinanceCost()
+    {
+        ini_set('memory_limit', '1512M');
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $list = $finace_cost->where(['type' => 2, 'bill_type' => 8, 'frame_cost' => 0, 'createtime' => ['>', 1614528000]])->select();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $frame_cost = $this->order_frame_cost($v['order_number']);
+            $finace_cost->where(['id' => $v['id']])->update(['frame_cost' => $frame_cost]);
+            echo $v['id'] . "\n";
+            usleep(100000);
+        }
+    }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since : 2021/4/2 11:52
+     */
+    public function getOrderGrandTotal()
+    {
+        ini_set('memory_limit', '1512M');
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $list = $finace_cost->where(['bill_type' => 1, 'income_amount' => 0, 'createtime' => ['>', 1614528000]])->select();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $params = [];
+        foreach ($list as $k => $v) {
+            //查询订单支付金额
+            $grand_total = $order->where(['increment_id' => $v['order_number'], 'site' => $v['site']])->value('grand_total');
+            $finace_cost->where(['id' => $v['id']])->update(['income_amount' => $grand_total, 'order_money' => $grand_total]);
+            echo $v['id'] . "\n";
+            usleep(100000);
+        }
+    }
+
+    /**
+     *  重新计算三月份财务成本
+     * @Description
+     * @author: wpl
+     * @since : 2021/4/2 11:52
+     */
+    public function getOrderGrandTotalTwo()
+    {
+        ini_set('memory_limit', '1512M');
+        $finace_cost = new \app\admin\model\finance\FinanceCost();
+        $list = $finace_cost->where(['bill_type' => 8, 'income_amount' => 0, 'createtime' => ['>', 1614528000]])->select();
+        $order = new \app\admin\model\order\order\NewOrder();
+        $params = [];
+        foreach ($list as $k => $v) {
+            //查询订单支付金额
+            $grand_total = $order->where(['increment_id' => $v['order_number'], 'site' => $v['site']])->value('grand_total');
+            $finace_cost->where(['id' => $v['id']])->update(['income_amount' => $grand_total, 'order_money' => $grand_total]);
+            echo $v['id'] . "\n";
+            usleep(100000);
+        }
+    }
+
+    /**
+     * 订单镜架成本
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 18:20:45 
+     *
+     * @param     [type] $order_id     订单id
+     * @param     [type] $order_number 订单号
+     *
+     * @return void
+     */
+    protected function order_frame_cost($order_number = null)
+    {
+        $product_barcode_item = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        //查询订单子单号
+        $item_order_number = $order_item_process
+            ->alias('a')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->where(['increment_id' => $order_number])
+            ->column('item_order_number');
+
+        //判断是否有工单
+        $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
+
+        //查询更改类型为赠品
+        $goods_number = $worklist->alias('a')
+            ->join(['fa_work_order_change_sku' => 'b'], 'a.id=b.work_id')
+            ->where(['platform_order' => $order_number, 'work_status' => 6, 'change_type' => 4])
+            ->column('b.goods_number');
+        $workcost = 0;
+        if ($goods_number) {
+            //计算成本
+            $workdata = $product_barcode_item->alias('a')->field('purchase_price,actual_purchase_price,c.purchase_total,purchase_num')
+                ->where(['code' => ['in', $goods_number]])
+                ->join(['fa_purchase_order_item' => 'b'], 'a.purchase_id=b.purchase_id and a.sku=b.sku')
+                ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
+                ->select();
+            foreach ($workdata as $k => $v) {
+                $workcost += $v['actual_purchase_price'] > 0 ? $v['actual_purchase_price'] : $v['purchase_total'] / $v['purchase_num'];
+            }
+        }
+
+        //根据子单号查询条形码绑定关系
+        $list = $product_barcode_item->alias('a')->field('a.sku,b.price')
+            ->where(['item_order_number' => ['in', $item_order_number]])
+            ->join(['fa_in_stock_item' => 'b'], 'a.in_stock_id=b.in_stock_id and a.sku=b.sku')
+            ->select();
+        $list = collection($list)->toArray();
+        $allcost = 0;
+        $purchase_item = new \app\admin\model\purchase\PurchaseOrderItem();
+        foreach ($list as $k => $v) {
+            $purchase_price = $v['price'] > 0 ? $v['price'] : $v['price'];
+            $allcost += $purchase_price;
+        }
+
+        return $allcost + $workcost;
+    }
+
+
+    /**
+     * 镜片成本测试
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 16:31:21 
+     * @return void
+     */
+    public function order_lens_cost()
+    {
+        $order_id = 1388996;
+        $order_number = 100232168;
+        //判断是否有工单
+        $worklist = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $workchangesku = new \app\admin\model\saleaftermanage\WorkOrderChangeSku();
+        $work_id = $worklist->where(['platform_order' => $order_number, 'work_status' => 6])->order('id desc')->value('id');
+        //查询更改类型为更改镜片
+        $work_data = $workchangesku->where(['work_id' => $work_id, 'change_type' => 2])
+            ->field('od_sph,os_sph,od_cyl,os_cyl,os_add,od_add,lens_number,item_order_number')
+            ->select();
+        $work_data = collection($work_data)->toArray();
+        //工单计算镜片成本
+        if ($work_data) {
+            $where['item_order_number'] = ['not in', array_column($work_data, 'item_order_number')];
+            $lens_number = array_column($work_data, 'lens_number');
+            //查询镜片编码对应价格
+            $lens_price = new \app\admin\model\lens\LensPrice();
+            $lens_list = $lens_price->where(['lens_number' => ['in', $lens_number]])->order('price asc')->select();
+            $work_cost = 0;
+            foreach ($work_data as $k => $v) {
+                $data = [];
+                foreach ($lens_list as $key => $val) {
+                    $od_temp_cost = 0;
+                    $os_temp_cost = 0;
+                    //判断子单右眼是否已判断
+                    if (!in_array('od' . '-' . $val['lens_number'], $data)) {
+                        if ($v['od_cyl'] == '-0.25') {
+                            //右眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] == (float)$val['cyl_end'] && (float)$v['od_cyl'] == (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $od_temp_cost += $val['price'];
+                            } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $od_temp_cost += $val['price'];
+                            }
+                        } else {
+                            //右眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $od_temp_cost += $val['price'];
+                            }
+                        }
+                        if ($od_temp_cost > 0) {
+                            $data[] = 'od' . '-' . $v['lens_number'];
+                        }
+                    }
+
+                    //判断子单左眼是否已判断
+                    if (!in_array('os' . '-' . $val['lens_number'], $data)) {
+
+                        if ($v['os_cyl'] == '-0.25') {
+                            //左眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] == (float)$val['cyl_end'] && (float)$v['os_cyl'] == (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $os_temp_cost += $val['price'];
+                            } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $os_temp_cost += $val['price'];
+                            }
+                        } else {
+                            //左眼
+                            if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
+                                $work_cost += $val['price'];
+                                $os_temp_cost += $val['price'];
+                            }
+                        }
+
+                        if ($os_temp_cost > 0) {
+                            $data[] = 'os' . '-' . $v['lens_number'];
+                        }
+                    }
+                }
+            }
+        }
+
+        //查询处方数据
+        $order_item_process = new \app\admin\model\order\order\NewOrderItemProcess();
+        $order_prescription = $order_item_process->alias('a')->field('b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.os_add,b.od_add,b.lens_number')
+            ->where(['a.order_id' => $order_id, 'distribution_status' => 9])
+            ->where($where)
+            ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+            ->select();
+
+        $order_prescription = collection($order_prescription)->toArray();
+        $lens_number = array_column($order_prescription, 'lens_number');
+        //查询镜片编码对应价格
+        $lens_price = new \app\admin\model\lens\LensPrice();
+        $lens_list = $lens_price->where(['lens_number' => ['in', $lens_number]])->order('price asc')->select();
+        $cost = 0;
+
+        foreach ($order_prescription as $k => $v) {
+            $data = [];
+            foreach ($lens_list as $key => $val) {
+                $od_temp_cost = 0;
+                $os_temp_cost = 0;
+                //判断子单右眼是否已判断
+                if (!in_array('od' . '-' . $val['lens_number'], $data)) {
+                    if ($v['od_cyl'] == '-0.25') {
+                        //右眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] == (float)$val['cyl_end'] && (float)$v['od_cyl'] == (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        }
+                    } else {
+                        //右眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['od_sph'] >= (float)$val['sph_start'] && (float)$v['od_sph'] <= (float)$val['sph_end']) && ((float)$v['od_cyl'] >= (float)$val['cyl_start'] && (float)$v['od_cyl'] <= (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $od_temp_cost += $val['price'];
+                        }
+                    }
+                    if ($od_temp_cost > 0) {
+                        $data[] = 'od' . '-' . $v['lens_number'];
+                    }
+                }
+
+                //判断子单左眼是否已判断
+                if (!in_array('os' . '-' . $val['lens_number'], $data)) {
+
+                    if ($v['os_cyl'] == '-0.25') {
+                        //左眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] == (float)$val['cyl_end'] && (float)$v['os_cyl'] == (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        } elseif ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        }
+                    } else {
+                        //左眼
+                        if ($v['lens_number'] == $val['lens_number'] && ((float)$v['os_sph'] >= (float)$val['sph_start'] && (float)$v['os_sph'] <= (float)$val['sph_end']) && ((float)$v['os_cyl'] >= (float)$val['cyl_start'] && (float)$v['os_cyl'] <= (float)$val['cyl_end'])) {
+                            $cost += $val['price'];
+                            $os_temp_cost += $val['price'];
+                        }
+                    }
+
+                    if ($os_temp_cost > 0) {
+                        $data[] = 'os' . '-' . $v['lens_number'];
+                    }
+                }
+            }
+        }
+
+        dump($cost);
+        dump($work_cost);
+        dump($cost + $work_cost);
+        die;
+    }
+
+    /**
+     * 处理波次单数据
+     * @author wpl
+     * @date   2021/4/9 14:35
+     */
+    public function process_wave_data()
+    {
+        $wave = new \app\admin\model\order\order\WaveOrder();
+        $orderItem = new \app\admin\model\order\order\NewOrderItemProcess();
+        $list = $wave->where(['status' => 1])->select();
+        foreach ($list as $k => $v) {
+            //添加波次单打印状态为已打印
+            $count = $orderItem->alias('a')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->where(['wave_order_id' => $v['id'], 'is_print' => 0, 'distribution_status' => ['<>', 0]])
+                ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']]])
+                ->count();
+            if ($count > 0) {
+                $status = 1;
+            } elseif ($count == 0) {
+                $status = 2;
+            }
+            $wave->where(['id' => $v['id']])->update(['status' => $status]);
         }
     }
 }

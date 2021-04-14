@@ -12,10 +12,12 @@ class Soap
      * @Description
      * @author wpl
      * @since 2020/07/22 11:34:19 
-     * @param string $magentoUrl
+     *
+     * @param  string  $magentoUrl
      * @param [type] $magento_account
      * @param [type] $magento_key
      * @param [type] $params
+     *
      * @return void
      */
     public static function createProduct_bak($config = [], $params)
@@ -26,23 +28,23 @@ class Soap
         //M需要SSL证书验证
         if ($config['id'] == 4) {
             //stream_context_create作用：创建并返回一个文本数据流并应用各种选项，可用于fopen()、file_get_contents、soap等过程的超时设置、代理服务器、请求方式、头信息设置的特殊过程。
-            $options = array(
-                'cache_wsdl' => 0,
-                'trace' => 1,
-                'stream_context' => stream_context_create(array(
-                    'ssl' => array(
-                        'verify_peer' => false,
-                        'verify_peer_name' => false,
-                        'allow_self_signed' => true
-                    )
-                ))
-            );
+            $options = [
+                'cache_wsdl'     => 0,
+                'trace'          => 1,
+                'stream_context' => stream_context_create([
+                    'ssl' => [
+                        'verify_peer'       => false,
+                        'verify_peer_name'  => false,
+                        'allow_self_signed' => true,
+                    ],
+                ]),
+            ];
         } else {
-            $options = array("trace" => 1, 'cache_wsdl' => 0);
+            $options = ["trace" => 1, 'cache_wsdl' => 0];
         }
 
         try {
-            $client = new \SoapClient($config['magento_url'] . '/api/soap/?wsdl', $options);
+            $client = new \SoapClient($config['magento_url'].'/api/soap/?wsdl', $options);
             $session = $client->login($config['magento_account'], $config['magento_key']);
             //获取magento产品属性设置
             $attributeSets = $client->call($session, 'product_attribute_set.list');
@@ -53,10 +55,11 @@ class Soap
                 }
             }
             // product creation
-            $client->call($session, 'catalog_product.create', array($config['item_type'], $attributeSet['set_id'], $params['sku'], $params));
+            $client->call($session, 'catalog_product.create', [$config['item_type'], $attributeSet['set_id'], $params['sku'], $params]);
         } catch (\SoapFault $e) {
             return false;
         }
+
         return true;
     }
 
@@ -113,17 +116,24 @@ class Soap
                 return false;
                 break;
         }
+        file_put_contents('/www/wwwroot/mojing/runtime/log/goods.log', serialize($params)."\r\n", FILE_APPEND);
+
 
         $client = new Client(['verify' => false]);
         unset($params['site']);
-        $response = $client->request('POST', $url, array('form_params' => $params));
+
+        $response = $client->request('POST', $url, ['form_params' => $params]);
+
+        file_put_contents('/www/wwwroot/mojing/runtime/log/goods.log', serialize($response)."\r\n", FILE_APPEND);
         $body = $response->getBody();
-        $stringBody = (string) $body;
+        $stringBody = (string)$body;
         $res = json_decode($stringBody, true);
+
+
         if ($res === null) {
             return false;
         }
-        if ($res['code'] == 200 || $res['status'] == 200) {
+        if ($res['code'] == 200 || $res['status'] == 200 || $res['code'] == 1) {
             return true;
         } else {
             return false;
