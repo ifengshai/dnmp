@@ -10,7 +10,7 @@ namespace app\admin\controller\elasticsearch\operate;
 
 
 use app\admin\controller\elasticsearch\BaseElasticsearch;
-use app\service\google\session;
+use app\service\google\Session;
 
 class Hour extends BaseElasticsearch
 {
@@ -22,7 +22,7 @@ class Hour extends BaseElasticsearch
         $hourOrderData = $this->buildHourOrderSearch($site, $start, $end);
         $hourCartData = $this->buildHourCartSearch($site, $start, $end);
 
-        $sessionService = new session($site);
+        $sessionService = new Session($site);
         $gaData = $sessionService->gaHourData('2018-02-05', '2021-02-05');
         $res = $this->esFormatData->formatHourData($hourOrderData, $hourCartData, $gaData);
         echo json_encode($res);

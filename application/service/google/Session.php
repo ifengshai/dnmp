@@ -12,7 +12,7 @@ use app\enum\GoogleId;
 use app\enum\Site;
 
 
-class session
+class Session
 {
     public $viewId = '';
 
