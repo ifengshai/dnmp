@@ -59,11 +59,11 @@ class EsService
      * @author crasphb
      * @date   2021/4/1 14:46
      */
-    public function createOrderIndex(string $index = '', array $selfProperties = [])
+    public function createIndex(string $index = '', array $selfProperties = [])
     {
 
         $properties = array_merge($selfProperties, $this->commonProperties);
-        $this->createIndex($index, $properties);
+        $this->createEsIndex($index, $properties);
     }
 
     /**
@@ -76,7 +76,7 @@ class EsService
      * @author crasphb
      * @date   2021/4/1 14:14
      */
-    public function createIndex(string $indexName = '', array $properties = [])
+    public function createEsIndex(string $indexName = '', array $properties = [])
     {
         $params = [
             'index' => $indexName,
@@ -126,6 +126,27 @@ class EsService
 
         return $this->esClient->index($params);
     }
+    /**
+     * 格式化时间字段，方便后续查询聚合
+     *
+     * @param $date
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/1 15:21
+     */
+    public function formatDate($date)
+    {
+        return [
+            'year' => date('Y',$date),
+            'month' => date('m',$date),
+            'month_date' => date('Ym',$date),
+            'day' => date('d',$date),
+            'day_date' => date('Ymd',$date),
+            'hour' => date('H',$date),
+            'hour_date' => date('YmdH',$date),
+        ];
+    }
 
     /**
      * es查询
@@ -139,8 +160,7 @@ class EsService
     public function search($params)
     {
         $results = $this->esClient->search($params);
-
-        return $results;
+        return $results['aggregations'];
     }
 
     /**

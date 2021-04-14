@@ -153,7 +153,182 @@ class BaseElasticsearch extends Backend
             ],
         ];
 
-        $this->esService->createOrderIndex('mojing_order', $selfProperties);
+        $this->esService->createIndex('mojing_order', $selfProperties);
+    }
+
+    /**
+     * 每日情况统计的索引
+     *
+     * @author crasphb
+     * @date   2021/4/14 10:14
+     */
+    public function createDatacenterDayIndex()
+    {
+        $selfProperties = [
+            'id'                           => [
+                'type' => 'integer',
+            ],
+            'site'                         => [
+                'type' => 'integer',
+            ],
+            'active_user_num'              => [
+                'type' => 'integer',
+            ],
+            'register_num'                 => [
+                'type' => 'integer',
+            ],
+            'login_user_num'               => [
+                'type' => 'integer',
+            ],
+            'vip_user_num'                 => [
+                'type'           => 'integer',
+            ],
+            'sum_order_num'                => [
+                'type' => 'integer',
+            ],
+            'order_num'                    => [
+                'type' => 'integer',
+            ],
+            'sales_total_money'            => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'shipping_total_money'         => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'order_unit_price'             => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'sessions'                     => [
+                'type' => 'integer',
+            ],
+            'update_add_cart_rate'         => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'add_cart_rate'                => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'session_rate'                 => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'new_cart_num'                 => [
+                'type' => 'integer',
+            ],
+            'update_cart_num'              => [
+                'type' => 'integer',
+            ],
+            'cart_rate'                    => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'update_cart_cart'             => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'replacement_order_num'        => [
+                'type' => 'integer',
+            ],
+            'online_celebrity_order_num'   => [
+                'type' => 'integer',
+            ],
+            'replacement_order_total'      => [
+                'type' => 'integer',
+            ],
+            'online_celebrity_order_total' => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'order_total_midnum'           => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'order_total_standard'         => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'landing_num'                  => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'detail_num'                   => [
+                'type' => 'integer',
+            ],
+            'cart_num'                     => [
+                'type'           => 'integer',
+            ],
+            'complete_num'                 => [
+                'type'           => 'integer',
+            ],
+            'create_user_change_rate'      => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'update_user_change_rate'      => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 100,
+            ],
+            'virtual_stock'                => [
+                'type' => 'integer',
+            ],
+            'glass_in_sale_num'            => [
+                'type' => 'integer',
+            ],
+            'glass_presell_num'            => [
+                'type' => 'integer',
+            ],
+            'glass_shelves_num'            => [
+                'type' => 'integer',
+            ],
+            'box_in_sale_num'              => [
+                'type' => 'integer',
+            ],
+            'box_presell_num'              => [
+                'type' => 'integer',
+            ],
+            'box_shelves_num'              => [
+                'type' => 'integer',
+            ],
+        ];
+
+        $this->esService->createIndex('mojing_datacenterday', $selfProperties);
+    }
+
+    /**
+     * 购物车的索引
+     *
+     * @author crasphb
+     * @date   2021/4/14 10:15
+     */
+    public function createCartIndex()
+    {
+        $selfProperties = [
+            'id'                      => [
+                'type' => 'integer',
+            ],
+            'site'                    => [
+                'type' => 'integer',
+            ],
+            'status'                  => [
+                'type' => 'keyword',
+            ],
+            'create_time'            => [
+                'type' => 'date',
+            ],
+            'update_time'            => [
+                'type' => 'date',
+            ],
+            'update_time_day'            => [
+                'type' => 'date',
+            ],
+
+        ];
+
+        $this->esService->createIndex('mojing_cart', $selfProperties);
     }
 
     /**

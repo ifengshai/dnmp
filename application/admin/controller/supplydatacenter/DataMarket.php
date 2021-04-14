@@ -6,6 +6,7 @@ use app\admin\model\OrderStatistics;
 use app\common\controller\Backend;
 use fast\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use think\Debug;
 use function GuzzleHttp\Psr7\str;
 use think\Cache;
 use think\Controller;
@@ -62,7 +63,6 @@ class DataMarket extends Backend
         //默认近1年的数据
         $start3 = date('Y-m-01 00:00:00', strtotime('-12 months'));
         $time_str3 = $start3 . ' - ' . $end1;
-
         //库存总览
         $stock_overview = $this->stock_overview();
         //仓库指标总览
