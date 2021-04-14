@@ -18,35 +18,38 @@ class DashBoard extends BaseElasticsearch
         $start = '20180205';
         $end = '20210205';
         $dashBoardData = $this->getDashBoard(1, '20180205 20210205');
+
         return json(['code' => 1, 'data' => $dashBoardData]);
     }
 
     /**
      * 获取数据
+     *
      * @param        $site
      * @param string $time
      *
      * @author crasphb
      * @date   2021/4/14 13:56
      */
-    public function getDashBoard($site,$time = '')
+    public function getDashBoard($site, $time = '')
     {
         //获取时间
-        if($time) {
+        if ($time) {
             $timeRange = explode(' ', $time);
-        }else {
+        } else {
             $timeRange = [
-                date('Ymd',strtotime('-6 days')),
-                date('Ymd')
+                date('Ymd', strtotime('-6 days')),
+                date('Ymd'),
             ];
         }
         //判断是否为全部站点
         $siteAll = $site == 4;
-        $result = $this->buildDashBoardSearch($site,$timeRange[0],$timeRange[1],$siteAll);
-        $a = $this->esFormatData->formatDashBoardData($site,$result,$siteAll);
-        file_put_contents('./a.json',$a);
+        $result = $this->buildDashBoardSearch($site, $timeRange[0], $timeRange[1], $siteAll);
+        $a = $this->esFormatData->formatDashBoardData($site, $result, $siteAll);
+        file_put_contents('./a.json', $a);
 
     }
+
     /**
      * @param $site
      * @param $start

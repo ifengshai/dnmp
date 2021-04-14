@@ -25,11 +25,14 @@ class Hour extends BaseElasticsearch
         $sessionService = new session($site);
         $gaData = $sessionService->gaHourData('2018-02-05', '2021-02-05');
         $res = $this->esFormatData->formatHourData($hourOrderData, $hourCartData, $gaData);
-        file_put_contents('./a.json',json_encode($res));
+        echo json_encode($res);
+        die;
+        file_put_contents('./a.json', json_encode($res));
     }
 
     /**
      * 获取时段销量数据
+     *
      * @param $site
      * @param $start
      * @param $end
@@ -110,6 +113,11 @@ class Hour extends BaseElasticsearch
                             ],
                         ],
                     ],
+                    "sumOrder"          => [
+                        "sum_bucket" => [
+                            "buckets_path" => "hourSale>_count",
+                        ],
+                    ],
                 ],
             ],
         ];
@@ -119,6 +127,7 @@ class Hour extends BaseElasticsearch
 
     /**
      * 获取购物车数据
+     *
      * @param $site
      * @param $start
      * @param $end
@@ -156,14 +165,19 @@ class Hour extends BaseElasticsearch
                     ],
                 ],
                 "aggs"  => [
-                    "hourCart"          => [
+                    "hourCart" => [
                         "terms" => [
                             "field" => 'hour',
                             'size'  => '24',
                             'order' => [
                                 '_key' => 'asc',
                             ],
-                        ]
+                        ],
+                    ],
+                    "sumCarts" => [
+                        "sum_bucket" => [
+                            "buckets_path" => "hourCart>_count",
+                        ],
                     ],
                 ],
             ],

@@ -10,7 +10,6 @@ namespace app\service\elasticsearch;
 
 
 use Elasticsearch\Client;
-use Elasticsearch\ClientBuilder;
 
 class EsService
 {
@@ -45,7 +44,7 @@ class EsService
     ];
     protected $esClient = null;
 
-    public function __construct( Client $esClient)
+    public function __construct(Client $esClient)
     {
         $this->esClient = $esClient;
     }
@@ -126,6 +125,7 @@ class EsService
 
         return $this->esClient->index($params);
     }
+
     /**
      * 格式化时间字段，方便后续查询聚合
      *
@@ -138,13 +138,13 @@ class EsService
     public function formatDate($date)
     {
         return [
-            'year' => date('Y',$date),
-            'month' => date('m',$date),
-            'month_date' => date('Ym',$date),
-            'day' => date('d',$date),
-            'day_date' => date('Ymd',$date),
-            'hour' => date('H',$date),
-            'hour_date' => date('YmdH',$date),
+            'year'       => date('Y', $date),
+            'month'      => date('m', $date),
+            'month_date' => date('Ym', $date),
+            'day'        => date('d', $date),
+            'day_date'   => date('Ymd', $date),
+            'hour'       => date('H', $date),
+            'hour_date'  => date('YmdH', $date),
         ];
     }
 
@@ -160,6 +160,7 @@ class EsService
     public function search($params)
     {
         $results = $this->esClient->search($params);
+
         return $results['aggregations'];
     }
 

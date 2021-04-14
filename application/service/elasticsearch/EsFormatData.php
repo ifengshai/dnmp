@@ -31,6 +31,7 @@ class EsFormatData
 
     /**
      * 时段销量格式化
+     *
      * @param $orderData
      * @param $cartData
      * @param $gaData
@@ -47,6 +48,7 @@ class EsFormatData
         $hourCartFormat = array_combine(array_column($hourCart, 'key'), $hourCart);
         $finalLists = $this->formatHour();
         //时段销量数据
+        $allSession = 0;
         foreach ($finalLists as $key => $finalList) {
             foreach ($gaData as $gaKey => $gaValue) {
                 if ((int)$finalList['hour'] == (int)substr($gaValue['ga:dateHour'], 8)) {
@@ -63,17 +65,52 @@ class EsFormatData
             $finalLists[$key]['cartCouont'] = $hourCartData['doc_count'];
 
             //加购率
-            $finalLists[$key]['addCartRate'] = $finalLists[$key]['sessions'] ? bcdiv($hourCartData['doc_count'],$finalLists[$key]['sessions'],2) . '%' : '0%';
+            $finalLists[$key]['addCartRate'] = $finalLists[$key]['sessions'] ? bcdiv($hourCartData['doc_count'], $finalLists[$key]['sessions'], 2) . '%' : '0%';
             //新增购物车转化率
-            $finalLists[$key]['cartRate'] = $hourOrderData['doc_count'] ? bcdiv($hourCartData['doc_count'],$hourOrderData['doc_count'],2) . '%' : '0%';
+            $finalLists[$key]['cartRate'] = $hourOrderData['doc_count'] ? bcdiv($hourCartData['doc_count'], $hourOrderData['doc_count'], 2) . '%' : '0%';
             //回话转化率
-            $finalLists[$key]['sessionRate'] = $finalLists[$key]['sessions'] ? bcdiv($hourOrderData['doc_count'],$finalLists[$key]['sessions'],2) . '%' : '0%';
+            $finalLists[$key]['sessionRate'] = $finalLists[$key]['sessions'] ? bcdiv($hourOrderData['doc_count'], $finalLists[$key]['sessions'], 2) . '%' : '0%';
+
+            //总回话数
+            $allSession += $finalLists[$key]['sessions'];
         }
-        return $finalLists;
+
+        //总订单数
+        $allOrderAmount = $orderData['sumOrder']['value'];
+        //总新增购物车数
+        $allCartAmount = $orderData['sumCart']['value'];
+        //总销量
+        $allQtyOrdered = $orderData['allQtyOrdered']['value'];
+        //总销售额
+        $allDaySalesAmount = $orderData['allDaySalesAmount']['value'];
+        //总客单价
+        $allAvgPrice = $orderData['allAvgPrice']['value'];
+
+        //加购率
+        $addCartRate = $allSession ? bcdiv($allCartAmount, $allSession, 2) . '%' : '0%';
+        //新增购物车转化率
+        $cartRate = $allOrderAmount ? bcdiv($allCartAmount, $allOrderAmount, 2) . '%' : '0%';
+        //回话转化率
+        $sessionRate = $allSession ? bcdiv($allOrderAmount, $allSession, 2) . '%' : '0%';
+
+        //合计
+        //返回图标
+        $echartData = $this->getHourEcharts($finalLists);
+        //销售量
+        $orderitemCounter = $this->hourEcharts($echartData['hourStr'], $echartData['totalQtyOrdered'], '销售量');
+        //销售额
+        $saleAmount = $this->hourEcharts($echartData['hourStr'], $echartData['daySalesAmount'], '销售额');
+        //订单量
+        $orderCounter = $this->hourEcharts($echartData['hourStr'], $echartData['orderCounter'], '订单量');
+        //客单价
+        $grandTotalOrderConversion = $this->hourEcharts($echartData['hourStr'], $echartData['avgPrice'], '客单价');
+
+        return compact('finalLists', 'addCartRate', 'cartRate', 'sessionRate', 'allOrderAmount', 'allCartAmount', 'allQtyOrdered', 'allDaySalesAmount', 'allAvgPrice', 'orderitemCounter', 'saleAmount', 'grandTotalOrderConversion', 'orderCounter');
     }
 
     /**
      * 格式化0-24小时
+     *
      * @param bool $today
      *
      * @return array
@@ -97,6 +134,78 @@ class EsFormatData
         }
 
         return $finalList;
+    }
+
+    /**
+     * 分时的数表
+     *
+     * @param $finalLists
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/14 16:47
+     */
+    public function getHourEcharts($finalLists)
+    {
+        $echartData = [];
+        $echartData['hourStr'] = "";
+        $echartData['daySalesAmount'] = "";
+        $echartData['orderCounter'] = "";
+        $echartData['totalQtyOrdered'] = "";
+        $echartData['avgPrice'] = "";
+
+        for ($i = 0; $i < 24; $i++) {
+            if ($finalLists[$i]['sessions'] || $finalLists[$i]['quote_counter']) {
+                $echartData['hourStr'] .= "$i:00,";
+                $echartData['daySalesAmount'] .= $finalLists[$i]['daySalesAmount'] ? $finalLists[$i]['daySalesAmount'] . "," : "0,";
+                $echartData['orderCounter'] .= $finalLists[$i]['orderCounter'] ? $finalLists[$i]['orderCounter'] . "," : "0,";
+                $echartData['totalQtyOrdered'] .= $finalLists[$i]['totalQtyOrdered'] ? $finalLists[$i]['totalQtyOrdered'] . "," : "0,";
+                $echartData['avgPrice'] .= $finalLists[$i]['avgPrice'] . ",";
+            } else {
+                $echartData['hourStr'] .= "$i:00,";
+                $echartData['daySalesAmount'] .= "0,";
+                $echartData['orderCounter'] .= "0,";
+                $echartData['totalQtyOrdered'] .= "0,";
+                $echartData['avgPrice'] .= "0,";
+            }
+        }
+        $echartData['hourStr'] = rtrim($echartData['hourStr'], ',');
+        $echartData['daySalesAmount'] = rtrim($echartData['daySalesAmount'], ',');
+        $echartData['orderCounter'] = rtrim($echartData['orderCounter'], ',');
+        $echartData['totalQtyOrdered'] = rtrim($echartData['totalQtyOrdered'], ',');
+        $echartData['avgPrice'] = rtrim($echartData['avgPrice'], ',');
+
+        return $echartData;
+    }
+
+    /**
+     * 时间的格式
+     *
+     * @param        $xdata
+     * @param        $ydata
+     * @param string $name
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/14 16:47
+     */
+    public function hourEcharts($xdata, $ydata, $name = '')
+    {
+        $xdata = explode(',', $xdata);
+        $ydata = explode(',', $ydata);
+        $echart['xcolumnData'] = $xdata;
+        $echart['column'] = [$name];
+        $echart['columnData'] = [
+            [
+                'type'   => 'line',
+                'data'   => $ydata,
+                'name'   => $name,
+                'smooth' => false //平滑曲线
+            ],
+
+        ];
+
+        return $echart;
     }
 
     /**

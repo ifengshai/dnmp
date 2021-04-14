@@ -181,7 +181,7 @@ class BaseElasticsearch extends Backend
                 'type' => 'integer',
             ],
             'vip_user_num'                 => [
-                'type'           => 'integer',
+                'type' => 'integer',
             ],
             'sum_order_num'                => [
                 'type' => 'integer',
@@ -259,10 +259,10 @@ class BaseElasticsearch extends Backend
                 'type' => 'integer',
             ],
             'cart_num'                     => [
-                'type'           => 'integer',
+                'type' => 'integer',
             ],
             'complete_num'                 => [
-                'type'           => 'integer',
+                'type' => 'integer',
             ],
             'create_user_change_rate'      => [
                 'type'           => 'scaled_float',
@@ -307,22 +307,22 @@ class BaseElasticsearch extends Backend
     public function createCartIndex()
     {
         $selfProperties = [
-            'id'                      => [
+            'id'              => [
                 'type' => 'integer',
             ],
-            'site'                    => [
+            'site'            => [
                 'type' => 'integer',
             ],
-            'status'                  => [
+            'status'          => [
                 'type' => 'keyword',
             ],
-            'create_time'            => [
+            'create_time'     => [
                 'type' => 'date',
             ],
-            'update_time'            => [
+            'update_time'     => [
                 'type' => 'date',
             ],
-            'update_time_day'            => [
+            'update_time_day' => [
                 'type' => 'date',
             ],
 
