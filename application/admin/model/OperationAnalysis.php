@@ -55,6 +55,9 @@ class OperationAnalysis extends Model
             case 11:
                 $model = Db::connect('database.db_zeelool_jp');
                 break;
+            case 12:
+                $model = Db::connect('database.db_voogueme_acc');
+                break;
             default:
                 $model = false;
                 break;

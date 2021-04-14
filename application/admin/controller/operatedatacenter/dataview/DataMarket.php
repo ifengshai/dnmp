@@ -59,6 +59,7 @@ class DataMarket extends Backend
         $orderStatistics = new OrderStatistics();
         $list = $orderStatistics->getAllData();
         $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = $meeloogSalesNumList = $zeelool_esSalesNumList = $zeelool_deSalesNumList = $zeelool_jpSalesNumList = [];
+        $voogmechicSalesNumList = [];
         foreach ($list as $v) {
             //如果有zeelool权限
             if(in_array(1,$arr)){
@@ -115,66 +116,81 @@ class DataMarket extends Backend
                 $zeelool_deRegisterCustomer[$v['create_date']]	     = $v['zeelool_de_register_customer'];
             }
             //如果有zeelool_jp权限
-            if(in_array(11,$arr)){
-                $zeelool_jpSalesNumList[$v['create_date']]    	     = $v['zeelool_jp_sales_num'];
-                $zeelool_jpSalesMoneyList[$v['create_date']]	     = $v['zeelool_jp_sales_money'];
-                $zeelool_jpUnitPriceList[$v['create_date']]			 = $v['zeelool_jp_unit_price'];
-                $zeelool_jpShoppingcartTotal[$v['create_date']]		 = $v['zeelool_jp_shoppingcart_total'];
+            if (in_array(11, $arr)) {
+                $zeelool_jpSalesNumList[$v['create_date']] = $v['zeelool_jp_sales_num'];
+                $zeelool_jpSalesMoneyList[$v['create_date']] = $v['zeelool_jp_sales_money'];
+                $zeelool_jpUnitPriceList[$v['create_date']] = $v['zeelool_jp_unit_price'];
+                $zeelool_jpShoppingcartTotal[$v['create_date']] = $v['zeelool_jp_shoppingcart_total'];
                 $zeelool_jpShoppingcartConversion[$v['create_date']] = $v['zeelool_jp_shoppingcart_conversion'];
-                $zeelool_jpRegisterCustomer[$v['create_date']]	     = $v['zeelool_jp_register_customer'];
+                $zeelool_jpRegisterCustomer[$v['create_date']] = $v['zeelool_jp_register_customer'];
+            }
+            //如果有voogmechic权限
+            if (in_array(12, $arr)) {
+                $voogmechicSalesNumList[$v['create_date']] = $v['voogmechic_sales_num'];
+                $voogmechicSalesMoneyList[$v['create_date']] = $v['voogmechic_sales_money'];
+                $voogmechicUnitPriceList[$v['create_date']] = $v['voogmechic_unit_price'];
+                $voogmechicShoppingcartTotal[$v['create_date']] = $v['voogmechic_shoppingcart_total'];
+                $voogmechicShoppingcartConversion[$v['create_date']] = $v['voogmechic_shoppingcart_conversion'];
+                $voogmechicRegisterCustomer[$v['create_date']] = $v['voogmechic_register_customer'];
             }
         }
         //下边部分数据 默认30天数据
         $bottom_data = $this->get_platform_data(1);
         $this->view->assign([
-            'orderPlatformList'					=> $platform,
-            'zeelool_data'						=> $zeelool_data,
-            'date'								=> $this->date(),
-            'zeeloolSalesNumList'       		=> $zeeloolSalesNumList ?:[], //折线图数据
-            'vooguemeSalesNumList'      		=> $vooguemeSalesNumList ?:[],
-            'nihaoSalesNumList'         		=> $nihaoSalesNumList ?:[],
-            'meeloogSalesNumList'         		=> $meeloogSalesNumList ?:[],
-            'zeelool_esSalesNumList'            => $zeelool_esSalesNumList ?:[],
-            'zeelool_deSalesNumList'            => $zeelool_deSalesNumList ?:[],
-            'zeelool_jpSalesNumList'            => $zeelool_jpSalesNumList ?:[],
-            'zeeloolSalesMoneyList'				=> $zeeloolSalesMoneyList ?:[],
-            'vooguemeSalesMoneyList'			=> $vooguemeSalesMoneyList ?:[],
-            'nihaoSalesMoneyList'				=> $nihaoSalesMoneyList ?:[],
-            'meeloogSalesMoneyList'				=> $meeloogSalesMoneyList ?:[],
-            'zeelool_esSalesMoneyList'          => $zeelool_esSalesMoneyList ?:[],
-            'zeelool_deSalesMoneyList'          => $zeelool_deSalesMoneyList ?:[],
-            'zeelool_jpSalesMoneyList'          => $zeelool_jpSalesMoneyList ?:[],
-            'zeeloolUnitPriceList'				=> $zeeloolUnitPriceList ?:[],
-            'vooguemeUnitPriceList'				=> $vooguemeUnitPriceList ?:[],
-            'nihaoUnitPriceList'				=> $nihaoUnitPriceList ?:[],
-            'meeloogUnitPriceList'				=> $meeloogUnitPriceList ?:[],
-            'zeelool_esUnitPriceList'		    => $zeelool_esUnitPriceList ?:[],
-            'zeelool_deUnitPriceList'		    => $zeelool_deUnitPriceList ?:[],
-            'zeelool_jpUnitPriceList'		    => $zeelool_jpUnitPriceList ?:[],
-            'zeeloolShoppingcartTotal'			=> $zeeloolShoppingcartTotal ?:[],
-            'vooguemeShoppingcartTotal' 		=> $vooguemeShoppingcartTotal ?:[],
-            'nihaoShoppingcartTotal'			=> $nihaoShoppingcartTotal ?:[],
-            'meeloogShoppingcartTotal'			=> $meeloogShoppingcartTotal ?:[],
-            'zeelool_esShoppingcartTotal'	    => $zeelool_esShoppingcartTotal ?:[],
-            'zeelool_deShoppingcartTotal'		=> $zeelool_deShoppingcartTotal ?:[],
-            'zeelool_jpShoppingcartTotal'		=> $zeelool_jpShoppingcartTotal ?:[],
-            'zeeloolShoppingcartConversion'	 	=> $zeeloolShoppingcartConversion ?:[],
-            'vooguemeShoppingcartConversion'	=> $vooguemeShoppingcartConversion ?:[],
-            'nihaoShoppingcartConversion'	 	=> $nihaoShoppingcartConversion ?:[],
-            'meeloogShoppingcartConversion'	 	=> $meeloogShoppingcartConversion ?:[],
-            'zeelool_esShoppingcartConversion'	=> $zeelool_esShoppingcartConversion ?:[],
-            'zeelool_deShoppingcartConversion'	=> $zeelool_deShoppingcartConversion ?:[],
-            'zeelool_jpShoppingcartConversion'	=> $zeelool_jpShoppingcartConversion ?:[],
-            'zeeloolRegisterCustomer'			=> $zeeloolRegisterCustomer ?:[],
-            'vooguemeRegisterCustomer'			=> $vooguemeRegisterCustomer ?:[],
-            'nihaoRegisterCustomer'				=> $nihaoRegisterCustomer ?:[],
-            'meeloogRegisterCustomer'			=> $meeloogRegisterCustomer ?:[],
-            'zeelool_esRegisterCustomer'		=> $zeelool_esRegisterCustomer ?:[],
-            'zeelool_deRegisterCustomer'		=> $zeelool_deRegisterCustomer ?:[],
-            'zeelool_jpRegisterCustomer'		=> $zeelool_jpRegisterCustomer ?:[],
-            'bottom_data'						=> $bottom_data,
-            'result'                            => $arr,
-            'arr'                               => $arr
+            'orderPlatformList' => $platform,
+            'zeelool_data' => $zeelool_data,
+            'date' => $this->date(),
+            'zeeloolSalesNumList' => $zeeloolSalesNumList ?: [], //折线图数据
+            'vooguemeSalesNumList' => $vooguemeSalesNumList ?: [],
+            'nihaoSalesNumList' => $nihaoSalesNumList ?: [],
+            'meeloogSalesNumList' => $meeloogSalesNumList ?: [],
+            'zeelool_esSalesNumList' => $zeelool_esSalesNumList ?: [],
+            'zeelool_deSalesNumList' => $zeelool_deSalesNumList ?: [],
+            'zeelool_jpSalesNumList' => $zeelool_jpSalesNumList ?: [],
+            'voogmechicSalesNumList' => $voogmechicSalesNumList ?: [],
+            'zeeloolSalesMoneyList' => $zeeloolSalesMoneyList ?: [],
+            'vooguemeSalesMoneyList' => $vooguemeSalesMoneyList ?: [],
+            'nihaoSalesMoneyList' => $nihaoSalesMoneyList ?: [],
+            'meeloogSalesMoneyList' => $meeloogSalesMoneyList ?: [],
+            'zeelool_esSalesMoneyList' => $zeelool_esSalesMoneyList ?: [],
+            'zeelool_deSalesMoneyList' => $zeelool_deSalesMoneyList ?: [],
+            'zeelool_jpSalesMoneyList' => $zeelool_jpSalesMoneyList ?: [],
+            'voogmechicSalesMoneyList' => $voogmechicSalesMoneyList ?: [],
+            'zeeloolUnitPriceList' => $zeeloolUnitPriceList ?: [],
+            'vooguemeUnitPriceList' => $vooguemeUnitPriceList ?: [],
+            'nihaoUnitPriceList' => $nihaoUnitPriceList ?: [],
+            'meeloogUnitPriceList' => $meeloogUnitPriceList ?: [],
+            'zeelool_esUnitPriceList' => $zeelool_esUnitPriceList ?: [],
+            'zeelool_deUnitPriceList' => $zeelool_deUnitPriceList ?: [],
+            'zeelool_jpUnitPriceList' => $zeelool_jpUnitPriceList ?: [],
+            'voogmechicUnitPriceList' => $voogmechicUnitPriceList ?: [],
+            'zeeloolShoppingcartTotal' => $zeeloolShoppingcartTotal ?: [],
+            'vooguemeShoppingcartTotal' => $vooguemeShoppingcartTotal ?: [],
+            'nihaoShoppingcartTotal' => $nihaoShoppingcartTotal ?: [],
+            'meeloogShoppingcartTotal' => $meeloogShoppingcartTotal ?: [],
+            'zeelool_esShoppingcartTotal' => $zeelool_esShoppingcartTotal ?: [],
+            'zeelool_deShoppingcartTotal' => $zeelool_deShoppingcartTotal ?: [],
+            'zeelool_jpShoppingcartTotal' => $zeelool_jpShoppingcartTotal ?: [],
+            'voogmechicShoppingcartTotal' => $voogmechicShoppingcartTotal ?: [],
+            'zeeloolShoppingcartConversion' => $zeeloolShoppingcartConversion ?: [],
+            'vooguemeShoppingcartConversion' => $vooguemeShoppingcartConversion ?: [],
+            'nihaoShoppingcartConversion' => $nihaoShoppingcartConversion ?: [],
+            'meeloogShoppingcartConversion' => $meeloogShoppingcartConversion ?: [],
+            'zeelool_esShoppingcartConversion' => $zeelool_esShoppingcartConversion ?: [],
+            'zeelool_deShoppingcartConversion' => $zeelool_deShoppingcartConversion ?: [],
+            'zeelool_jpShoppingcartConversion' => $zeelool_jpShoppingcartConversion ?: [],
+            'voogmechicShoppingcartConversion' => $voogmechicShoppingcartConversion ?: [],
+            'zeeloolRegisterCustomer' => $zeeloolRegisterCustomer ?: [],
+            'vooguemeRegisterCustomer' => $vooguemeRegisterCustomer ?: [],
+            'nihaoRegisterCustomer' => $nihaoRegisterCustomer ?: [],
+            'meeloogRegisterCustomer' => $meeloogRegisterCustomer ?: [],
+            'zeelool_esRegisterCustomer' => $zeelool_esRegisterCustomer ?: [],
+            'zeelool_deRegisterCustomer' => $zeelool_deRegisterCustomer ?: [],
+            'zeelool_jpRegisterCustomer' => $zeelool_jpRegisterCustomer ?: [],
+            'voogmechicRegisterCustomer' => $voogmechicRegisterCustomer ?: [],
+            'bottom_data' => $bottom_data,
+            'result' => $arr,
+            'arr' => $arr
         ]);
         // $this->view->assign("orderPlatformList", $platform);
         // $this->view->assign("zeelool_data",$zeelool_data);
@@ -240,6 +256,7 @@ class DataMarket extends Backend
         $zeelool_es_model = Db::connect('database.db_zeelool_es');
         $zeelool_de_model = Db::connect('database.db_zeelool_de');
         $zeelool_jp_model = Db::connect('database.db_zeelool_jp');
+        $voogmechicModel = Db::connect('database.db_voogueme_acc');
         $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $voogueme_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $nihao_model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -247,7 +264,11 @@ class DataMarket extends Backend
         $zeelool_es_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_de_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_jp_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $status['status']  = ['in', ['processing', 'complete', 'free_processing','paypal_canceled_reversal','paypal_reversed','delivered']];
+        $voogmechicModel->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $status['status'] = [
+            'in',
+            ['processing', 'complete', 'free_processing', 'paypal_canceled_reversal', 'paypal_reversed', 'delivered']
+        ];
         $status['order_type'] = 1;
         $pc['store_id']    = 1;
         $wap['store_id']   = ['in',[2,4]];
@@ -411,26 +432,47 @@ class DataMarket extends Backend
         $zeelool_jp_wap_sales_num	= $zeelool_jp_model->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
         //zeelool_jp中pc端客单价
         if($zeelool_jp_pc_sales_num>0){
-            $zeelool_jp_pc_unit_price  = round(($zeelool_jp_pc_sales_money/$zeelool_jp_pc_sales_num), 2);
-        }else{
-            $zeelool_jp_pc_unit_price  = 0;
+            $zeelool_jp_pc_unit_price = round(($zeelool_jp_pc_sales_money / $zeelool_jp_pc_sales_num), 2);
+        } else {
+            $zeelool_jp_pc_unit_price = 0;
         }
         //zeelool_jp wap客单价
-        if($zeelool_jp_wap_sales_num>0){
-            $zeelool_jp_wap_unit_price = round(($zeelool_jp_wap_sales_money/$zeelool_jp_wap_sales_num), 2);
-        }else{
+        if ($zeelool_jp_wap_sales_num > 0) {
+            $zeelool_jp_wap_unit_price = round(($zeelool_jp_wap_sales_money / $zeelool_jp_wap_sales_num), 2);
+        } else {
             $zeelool_jp_wap_unit_price = 0;
         }
+
+        //voogmechic中pc销售额
+        $voogmechicPcSalesMoney = $voogmechicModel->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
+        //voogmechic中wap销售额
+        $voogmechicWapSalesMoney = $voogmechicModel->table('sales_flat_order')->where($wap)->where($status)->where($map)->sum('base_grand_total');
+        //voogmechic中pc支付成功数
+        $voogmechicPcSalesNum = $voogmechicModel->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
+        //voogmechic中wap支付成功数
+        $voogmechicWapSalesNum = $voogmechicModel->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
+        //voogmechic中pc端客单价
+        if ($voogmechicPcSalesMoney > 0) {
+            $voogmechicPcUnitPrice = round(($voogmechicPcSalesMoney / $voogmechicPcSalesNum), 2);
+        } else {
+            $voogmechicPcUnitPrice = 0;
+        }
+        //voogmechic wap客单价
+        if ($voogmechicWapSalesMoney > 0) {
+            $voogmechicWapUnitPrice = round(($voogmechicWapSalesMoney / $voogmechicWapSalesNum), 2);
+        } else {
+            $voogmechicWapUnitPrice = 0;
+        }
         $arr = [
-            'zeelool_pc_sales_money' 	=> $zeelool_pc_sales_money ?:0,
-            'zeelool_wap_sales_money' 	=> $zeelool_wap_sales_money ?:0,
-            'zeelool_app_sales_money' 	=> $zeelool_app_sales_money ?:0,
-            'zeelool_android_sales_money' 	=> $zeelool_android_sales_money ?:0,
-            'zeelool_pc_sales_num' 		=> $zeelool_pc_sales_num ?:0,
-            'zeelool_wap_sales_num'		=> $zeelool_wap_sales_num ?:0,
-            'zeelool_app_sales_num' 	=> $zeelool_app_sales_num ?:0,
-            'zeelool_android_sales_num' 	=> $zeelool_android_sales_num ?:0,
-            'zeelool_pc_unit_price' 	=> $zeelool_pc_unit_price ?:0,
+            'zeelool_pc_sales_money' => $zeelool_pc_sales_money ?: 0,
+            'zeelool_wap_sales_money' => $zeelool_wap_sales_money ?: 0,
+            'zeelool_app_sales_money' => $zeelool_app_sales_money ?: 0,
+            'zeelool_android_sales_money' => $zeelool_android_sales_money ?: 0,
+            'zeelool_pc_sales_num' => $zeelool_pc_sales_num ?: 0,
+            'zeelool_wap_sales_num' => $zeelool_wap_sales_num ?: 0,
+            'zeelool_app_sales_num' => $zeelool_app_sales_num ?: 0,
+            'zeelool_android_sales_num' => $zeelool_android_sales_num ?: 0,
+            'zeelool_pc_unit_price' => $zeelool_pc_unit_price ?: 0,
             'zeelool_wap_unit_price' 	=> $zeelool_wap_unit_price ?:0,
             'zeelool_app_unit_price' 	=> $zeelool_app_unit_price ?:0,
             'zeelool_android_unit_price' 	=> $zeelool_android_unit_price ?:0,
@@ -460,16 +502,22 @@ class DataMarket extends Backend
             'zeelool_es_wap_unit_price' => $zeelool_es_wap_unit_price ?:0,
             'zeelool_de_pc_sales_money' => $zeelool_de_pc_sales_money ?:0,
             'zeelool_de_wap_sales_money' =>$zeelool_de_wap_sales_money ?:0,
-            'zeelool_de_pc_sales_num' 	=> $zeelool_de_pc_sales_num ?:0,
-            'zeelool_de_wap_sales_num' 	=> $zeelool_de_wap_sales_num ?:0,
-            'zeelool_de_pc_unit_price' 	=> $zeelool_de_pc_unit_price ?:0,
-            'zeelool_de_wap_unit_price' => $zeelool_de_wap_unit_price ?:0,
-            'zeelool_jp_pc_sales_money' => $zeelool_jp_pc_sales_money ?:0,
-            'zeelool_jp_wap_sales_money' =>$zeelool_jp_wap_sales_money ?:0,
-            'zeelool_jp_pc_sales_num' 	=> $zeelool_jp_pc_sales_num ?:0,
-            'zeelool_jp_wap_sales_num' 	=> $zeelool_jp_wap_sales_num ?:0,
-            'zeelool_jp_pc_unit_price' 	=> $zeelool_jp_pc_unit_price ?:0,
-            'zeelool_jp_wap_unit_price' => $zeelool_jp_wap_unit_price ?:0,
+            'zeelool_de_pc_sales_num' => $zeelool_de_pc_sales_num ?: 0,
+            'zeelool_de_wap_sales_num' => $zeelool_de_wap_sales_num ?: 0,
+            'zeelool_de_pc_unit_price' => $zeelool_de_pc_unit_price ?: 0,
+            'zeelool_de_wap_unit_price' => $zeelool_de_wap_unit_price ?: 0,
+            'zeelool_jp_pc_sales_money' => $zeelool_jp_pc_sales_money ?: 0,
+            'zeelool_jp_wap_sales_money' => $zeelool_jp_wap_sales_money ?: 0,
+            'zeelool_jp_pc_sales_num' => $zeelool_jp_pc_sales_num ?: 0,
+            'zeelool_jp_wap_sales_num' => $zeelool_jp_wap_sales_num ?: 0,
+            'zeelool_jp_pc_unit_price' => $zeelool_jp_pc_unit_price ?: 0,
+            'zeelool_jp_wap_unit_price' => $zeelool_jp_wap_unit_price ?: 0,
+            'voogmechicPcSalesMoney' => $voogmechicPcSalesMoney ?: 0,
+            'voogmechicWapSalesMoney' => $voogmechicWapSalesMoney ?: 0,
+            'voogmechicPcSalesNum' => $voogmechicPcSalesNum ?: 0,
+            'voogmechicWapSalesNum' => $voogmechicWapSalesNum ?: 0,
+            'voogmechicPcUnitPrice' => $voogmechicPcUnitPrice ?: 0,
+            'voogmechicWapUnitPrice' => $voogmechicWapUnitPrice ?: 0,
         ];
         Cache::set('Dashboard_get_platform_data_'.md5(serialize($map)), $arr, 7200);
         return $arr;
