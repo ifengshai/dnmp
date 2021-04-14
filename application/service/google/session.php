@@ -8,31 +8,97 @@
 
 namespace app\service\google;
 
+use app\enum\GoogleId;
+use app\enum\Site;
+
 
 class session
 {
-    //获取分时数据
-    public function ga_hour_data($start_time,$end_time)
+    public $viewId = '';
+
+    public function __construct($site)
+    {
+        $this->getConfig($site);
+    }
+
+    /**
+     * 获取google的view id
+     *
+     * @param $site
+     *
+     * @author crasphb
+     * @date   2021/4/14 11:32
+     */
+    public function getConfig($site)
+    {
+        switch ($site) {
+            case Site::ZEELOOL:
+                $this->viewId = GoogleId::ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID;
+                break;
+            case Site::VOOGUEME:
+                $this->viewId = GoogleId::VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID;
+                break;
+            case Site::NIHAO:
+                $this->viewId = GoogleId::NIHAO_GOOGLE_ANALYTICS_VIEW_ID;
+                break;
+            case Site::MEELOOG:
+                $this->viewId = GoogleId::MEELOOG_GOOGLE_ANALYTICS_VIEW_ID;
+                break;
+            case Site::WESEEOPTICAL:
+                $this->viewId = GoogleId::WESEEOPTICAL_GOOGLE_ANALYTICS_VIEW_ID;
+                break;
+            case Site::ZEELOOL_ES:
+                $this->viewId = GoogleId::ZEELOOLES_GOOGLE_ANALYTICS_VIEW_ID;
+                break;
+            case Site::ZEELOOL_DE:
+                $this->viewId = GoogleId::ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID;
+                break;
+            case Site::ZEELOOL_JP:
+                $this->viewId = GoogleId::ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID;
+                break;
+            default:
+                $this->viewId = GoogleId::ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID;
+        }
+    }
+
+    /**
+     * 获取分时数据
+     *
+     * @param string $site
+     * @param        $start_time
+     * @param        $end_time
+     *
+     * @return array
+     * @throws \Google_Exception
+     * @author crasphb
+     * @date   2021/4/14 11:35
+     */
+    public function gaHourData($start_time, $end_time)
     {
         $client = new \Google_Client();
         $client->setAuthConfig('./oauth/oauth-credentials.json');
         $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
-        // Create an authorized analytics service object.
+
         $analytics = new \Google_Service_AnalyticsReporting($client);
-        // $analytics = $this->initializeAnalytics();
-        // Call the Analytics Reporting API V4.
-        $response = $this->getReport_session($analytics, $start_time, $end_time);
 
-        // dump($response);die;
+        $response = $this->getReportSession($analytics, $start_time, $end_time);
 
-        // Print the response.
-        $result = $this->printResults($response);
-
-        return $result;
+        return $this->printResults($response);
     }
-    protected function getReport_session($analytics, $startDate, $endDate)
+
+    /**
+     * 获取session数据
+     *
+     * @param $analytics
+     * @param $startDate
+     * @param $endDate
+     *
+     * @return mixed
+     * @author crasphb
+     * @date   2021/4/14 11:34
+     */
+    protected function getReportSession($analytics, $startDate, $endDate)
     {
-        $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($startDate);
         $dateRange->setEndDate($endDate);
@@ -40,26 +106,35 @@ class session
         $adCostMetric = new \Google_Service_AnalyticsReporting_Metric();
         $adCostMetric->setExpression("ga:sessions");
         $adCostMetric->setAlias("ga:sessions");
-        // $adCostMetric->setExpression("ga:adCost");
-        // $adCostMetric->setAlias("ga:adCost");
         $sessionDayDimension = new \Google_Service_AnalyticsReporting_Dimension();
         $sessionDayDimension->setName("ga:day");
         $sessionDayDimension->setName("ga:dateHour");
 
         // Create the ReportRequest object.
         $request = new \Google_Service_AnalyticsReporting_ReportRequest();
-        $request->setViewId($VIEW_ID);
+        $request->setViewId($this->viewId);
         $request->setDateRanges($dateRange);
-        $request->setMetrics(array($adCostMetric));
-        $request->setDimensions(array($sessionDayDimension));
+        $request->setMetrics([$adCostMetric]);
+        $request->setDimensions([$sessionDayDimension]);
 
         $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
-        $body->setReportRequests(array($request));
+        $body->setReportRequests([$request]);
+
         return $analytics->reports->batchGet($body);
     }
+
+    /**
+     * 格式化数据
+     *
+     * @param $reports
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/14 11:34
+     */
     protected function printResults($reports)
     {
-        $finalResult = array();
+        $finalResult = [];
         for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
             $report = $reports[$reportIndex];
             $header = $report->getColumnHeader();
@@ -82,6 +157,7 @@ class session
                     }
                 }
             }
+
             return $finalResult;
         }
     }

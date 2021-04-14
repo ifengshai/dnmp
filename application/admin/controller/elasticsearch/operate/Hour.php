@@ -10,18 +10,34 @@ namespace app\admin\controller\elasticsearch\operate;
 
 
 use app\admin\controller\elasticsearch\BaseElasticsearch;
+use app\service\google\session;
 
 class Hour extends BaseElasticsearch
 {
     public function index()
     {
-        $start = '20180205';
-        $end = '20210205';
+        $start = '2018020500';
+        $end = '2021020500';
         $site = 1;
-        $hourOrderData = $this->buildHourOrderSearch($site,$start,$end);
-        $hourCartData = $this->buildHourCartSearch($site,$start,$end);
-        $this->formatHourData($hourOrderData,$hourCartData);
+        $hourOrderData = $this->buildHourOrderSearch($site, $start, $end);
+        $hourCartData = $this->buildHourCartSearch($site, $start, $end);
+
+        $sessionService = new session($site);
+        $gaData = $sessionService->gaHourData('2018-02-05', '2021-02-05');
+        $res = $this->esFormatData->formatHourData($hourOrderData, $hourCartData, $gaData);
+        file_put_contents('./a.json',json_encode($res));
     }
+
+    /**
+     * 获取时段销量数据
+     * @param $site
+     * @param $start
+     * @param $end
+     *
+     * @return mixed
+     * @author crasphb
+     * @date   2021/4/14 13:56
+     */
     public function buildHourOrderSearch($site, $start, $end)
     {
         if (!is_array($site)) {
@@ -93,13 +109,24 @@ class Hour extends BaseElasticsearch
                                 ],
                             ],
                         ],
-                    ]
+                    ],
                 ],
             ],
         ];
 
         return $this->esService->search($params);
     }
+
+    /**
+     * 获取购物车数据
+     * @param $site
+     * @param $start
+     * @param $end
+     *
+     * @return mixed
+     * @author crasphb
+     * @date   2021/4/14 13:56
+     */
     public function buildHourCartSearch($site, $start, $end)
     {
         if (!is_array($site)) {
@@ -127,7 +154,18 @@ class Hour extends BaseElasticsearch
                             ],
                         ],
                     ],
-                ]
+                ],
+                "aggs"  => [
+                    "hourCart"          => [
+                        "terms" => [
+                            "field" => 'hour',
+                            'size'  => '24',
+                            'order' => [
+                                '_key' => 'asc',
+                            ],
+                        ]
+                    ],
+                ],
             ],
         ];
 

@@ -20,6 +20,15 @@ class DashBoard extends BaseElasticsearch
         $dashBoardData = $this->getDashBoard(1, '20180205 20210205');
         return json(['code' => 1, 'data' => $dashBoardData]);
     }
+
+    /**
+     * 获取数据
+     * @param        $site
+     * @param string $time
+     *
+     * @author crasphb
+     * @date   2021/4/14 13:56
+     */
     public function getDashBoard($site,$time = '')
     {
         //获取时间

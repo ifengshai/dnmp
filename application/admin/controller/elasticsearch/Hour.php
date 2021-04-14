@@ -14,149 +14,15 @@ class Hour extends BaseElasticsearch
 
     public function test()
     {
-        $start = '20180205';
-        $end = '20210205';
-        $pruchaseData = $this->dashBoard([1, 2, 3], $start, $end,false);
-        $data = array_combine(array_column($pruchaseData['site']['buckets'],'key'),$pruchaseData['site']['buckets']);
+        $start = '2018020500';
+        $end = '2021020500';
+        $pruchaseData = $this->getPurchaseSearch([1, 2, 3], $start, $end, false);
+        //$data = array_combine(array_column($pruchaseData['site']['buckets'],'key'),$pruchaseData['site']['buckets']);
         file_put_contents('./b.json', json_encode($pruchaseData));
         die;
 
         return $this->esFormatData->formatPurchaseData($pruchaseData);
 
-    }
-
-    /**
-     * @param      $site
-     * @param      $start
-     * @param      $end
-     * @param bool $siteAll
-     *
-     * @return mixed
-     * @author crasphb
-     * @date   2021/4/13 15:02
-     */
-    public function dashBoard($site, $start, $end, $siteAll = false)
-    {
-        if (!is_array($site)) {
-            $site = [$site];
-        }
-        $params = [
-            'index' => 'mojing_datacenterday',
-            'body'  => [
-                'query' => [
-                    'bool' => [
-                        'must' => [
-                            [
-                                'range' => [
-                                    'day_date' => [
-                                        'gte' => $start,
-                                        'lte' => $end,
-                                    ],
-                                ],
-                            ],
-                            //in查询
-                            [
-                                'terms' => [
-                                    'site' => $site,
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ];
-        $aggs = [
-            //总数聚合
-            'activeUserNum'      => [
-                "sum" => [
-                    'field' => 'active_user_num',
-                ],
-            ],
-            'registerNum'        => [
-                'sum' => [
-                    'field' => 'register_num',
-                ],
-            ],
-            'vipUserNum'         => [
-                "sum" => [
-                    'field' => 'vip_user_num',
-                ],
-            ],
-            'orderNum'           => [
-                "sum" => [
-                    'field' => 'order_num',
-                ],
-            ],
-            'orderUnitPrice'     => [
-                "sum" => [
-                    'field' => 'order_unit_price',
-                ],
-            ],
-            'salesTotalMoney'    => [
-                "sum" => [
-                    'field' => 'sales_total_money',
-                ],
-            ],
-            'shippingTotalMoney' => [
-                "sum" => [
-                    'field' => 'shipping_total_money',
-                ],
-            ],
-            'landingNum'         => [
-                "sum" => [
-                    'field' => 'landing_num',
-                ],
-            ],
-            'detailNum'          => [
-                "sum" => [
-                    'field' => 'detail_num',
-                ],
-            ],
-            'cartNum'            => [
-                "sum" => [
-                    'field' => 'cart_num',
-                ],
-            ],
-            'completeNum'        => [
-                "sum" => [
-                    'field' => 'complete_num',
-                ],
-            ],
-            'daySale'            => [
-                'terms' => [
-                    "field" => 'day_date',
-                    'order' => [
-                        '_key' => 'asc',
-                    ],
-                ],
-                'aggs'  => [
-                    'orderNum'      => [
-                        'sum' => [
-                            'field' => 'order_num',
-                        ],
-                    ],
-                    'activeUserNum' => [
-                        'sum' => [
-                            'field' => 'active_user_num',
-                        ],
-                    ],
-                ],
-            ],
-        ];
-        $params['body']['aggs'] = $aggs;
-
-        if (!$siteAll) {
-            $params['body']['aggs'] = [
-                'site' => [
-                    "terms" => [
-                        "field" => 'site',
-                    ],
-                    "aggs"  => $aggs,
-                ],
-            ];
-        }
-
-        return $this->esService->search($params);
     }
 
     /**
@@ -340,6 +206,140 @@ class Hour extends BaseElasticsearch
                 ],
             ],
         ];
+
+        return $this->esService->search($params);
+    }
+
+    /**
+     * @param      $site
+     * @param      $start
+     * @param      $end
+     * @param bool $siteAll
+     *
+     * @return mixed
+     * @author crasphb
+     * @date   2021/4/13 15:02
+     */
+    public function dashBoard($site, $start, $end, $siteAll = false)
+    {
+        if (!is_array($site)) {
+            $site = [$site];
+        }
+        $params = [
+            'index' => 'mojing_datacenterday',
+            'body'  => [
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            [
+                                'range' => [
+                                    'day_date' => [
+                                        'gte' => $start,
+                                        'lte' => $end,
+                                    ],
+                                ],
+                            ],
+                            //in查询
+                            [
+                                'terms' => [
+                                    'site' => $site,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $aggs = [
+            //总数聚合
+            'activeUserNum'      => [
+                "sum" => [
+                    'field' => 'active_user_num',
+                ],
+            ],
+            'registerNum'        => [
+                'sum' => [
+                    'field' => 'register_num',
+                ],
+            ],
+            'vipUserNum'         => [
+                "sum" => [
+                    'field' => 'vip_user_num',
+                ],
+            ],
+            'orderNum'           => [
+                "sum" => [
+                    'field' => 'order_num',
+                ],
+            ],
+            'orderUnitPrice'     => [
+                "sum" => [
+                    'field' => 'order_unit_price',
+                ],
+            ],
+            'salesTotalMoney'    => [
+                "sum" => [
+                    'field' => 'sales_total_money',
+                ],
+            ],
+            'shippingTotalMoney' => [
+                "sum" => [
+                    'field' => 'shipping_total_money',
+                ],
+            ],
+            'landingNum'         => [
+                "sum" => [
+                    'field' => 'landing_num',
+                ],
+            ],
+            'detailNum'          => [
+                "sum" => [
+                    'field' => 'detail_num',
+                ],
+            ],
+            'cartNum'            => [
+                "sum" => [
+                    'field' => 'cart_num',
+                ],
+            ],
+            'completeNum'        => [
+                "sum" => [
+                    'field' => 'complete_num',
+                ],
+            ],
+            'daySale'            => [
+                'terms' => [
+                    "field" => 'day_date',
+                    'order' => [
+                        '_key' => 'asc',
+                    ],
+                ],
+                'aggs'  => [
+                    'orderNum'      => [
+                        'sum' => [
+                            'field' => 'order_num',
+                        ],
+                    ],
+                    'activeUserNum' => [
+                        'sum' => [
+                            'field' => 'active_user_num',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $params['body']['aggs'] = $aggs;
+
+        if (!$siteAll) {
+            $params['body']['aggs'] = [
+                'site' => [
+                    "terms" => [
+                        "field" => 'site',
+                    ],
+                    "aggs"  => $aggs,
+                ],
+            ];
+        }
 
         return $this->esService->search($params);
     }

@@ -1107,6 +1107,8 @@ class Zeelool extends Model
     //获取分时数据
     public function ga_hour_data($start_time,$end_time)
     {
+        echo $start_time;
+        echo $end_time;die;
         $client = new \Google_Client();
         $client->setAuthConfig('./oauth/oauth-credentials.json');
         $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
