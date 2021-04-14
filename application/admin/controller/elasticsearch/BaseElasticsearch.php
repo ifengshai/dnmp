@@ -332,6 +332,42 @@ class BaseElasticsearch extends Backend
     }
 
     /**
+     * 物流的索引
+     *
+     * @author mjj
+     * @date   2021/4/14 15:34:52
+     */
+    public function createTrackIndex()
+    {
+        $selfProperties = [
+            'id' => [
+                'type' => 'integer',
+            ],
+            'site' => [
+                'type' => 'integer',
+            ],
+            'node_type' => [
+                'type' => 'integer',
+            ],
+            'shipment_data_type' => [
+                'type' => 'keyword',
+            ],
+            'create_time' => [
+                'type' => 'date',
+            ],
+            'delivery_time' => [
+                'type' => 'date',
+            ],
+            'signing_time' => [
+                'type' => 'date',
+            ],
+
+        ];
+
+        $this->esService->createIndex('mojing_track', $selfProperties);
+    }
+
+    /**
      * 删除索引
      *
      * @return array
