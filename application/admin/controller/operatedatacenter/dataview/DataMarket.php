@@ -264,16 +264,18 @@ class DataMarket extends Backend
         $zeelool_es_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_de_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_jp_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $voogmechicModel->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $voogmechicModel
+            ->table('sales_flat_order')
+            ->query("set time_zone='+8:00'");
         $status['status'] = [
             'in',
             ['processing', 'complete', 'free_processing', 'paypal_canceled_reversal', 'paypal_reversed', 'delivered']
         ];
         $status['order_type'] = 1;
-        $pc['store_id']    = 1;
-        $wap['store_id']   = ['in',[2,4]];
-        $app['store_id']   = 5;
-        $android['store_id']   = 6;
+        $pc['store_id'] = 1;
+        $wap['store_id'] = ['in', [2, 4]];
+        $app['store_id'] = 5;
+        $android['store_id'] = 6;
         //zeelool中pc销售额
         $zeelool_pc_sales_money  	= $zeelool_model->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
         //zeelool中wap销售额
@@ -444,13 +446,33 @@ class DataMarket extends Backend
         }
 
         //voogmechic中pc销售额
-        $voogmechicPcSalesMoney = $voogmechicModel->table('sales_flat_order')->where($pc)->where($status)->where($map)->sum('base_grand_total');
+        $voogmechicPcSalesMoney = $voogmechicModel
+            ->table('sales_flat_order')
+            ->where($pc)
+            ->where($status)
+            ->where($map)
+            ->sum('base_grand_total');
         //voogmechic中wap销售额
-        $voogmechicWapSalesMoney = $voogmechicModel->table('sales_flat_order')->where($wap)->where($status)->where($map)->sum('base_grand_total');
+        $voogmechicWapSalesMoney = $voogmechicModel
+            ->table('sales_flat_order')
+            ->where($wap)
+            ->where($status)
+            ->where($map)
+            ->sum('base_grand_total');
         //voogmechic中pc支付成功数
-        $voogmechicPcSalesNum = $voogmechicModel->table('sales_flat_order')->where($pc)->where($status)->where($map)->count('*');
+        $voogmechicPcSalesNum = $voogmechicModel
+            ->table('sales_flat_order')
+            ->where($pc)
+            ->where($status)
+            ->where($map)
+            ->count('*');
         //voogmechic中wap支付成功数
-        $voogmechicWapSalesNum = $voogmechicModel->table('sales_flat_order')->where($wap)->where($status)->where($map)->count('*');
+        $voogmechicWapSalesNum = $voogmechicModel
+            ->table('sales_flat_order')
+            ->where($wap)
+            ->where($status)
+            ->where($map)
+            ->count('*');
         //voogmechic中pc端客单价
         if ($voogmechicPcSalesMoney > 0) {
             $voogmechicPcUnitPrice = round(($voogmechicPcSalesMoney / $voogmechicPcSalesNum), 2);

@@ -20,4 +20,5 @@ return [
     'app\admin\command\Crasp',
     'app\admin\controller\shell\operate\Repurchase',
     'app\admin\controller\shell\operate\RepurchaseAsynData',
+    'app\admin\controller\shell\operate\DataMarketAsynData',
 ];
