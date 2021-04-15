@@ -52,6 +52,7 @@ class WebShoppingCart extends Model
                 $params[$k]['updated_at'] = strtotime($v['updated_at']) + 28800;
             }
             (new WebShoppingCart)->saveAll($params);
+            return true;
         } catch (\Exception $e) {
             Log::record('webShoppingCart:'.$e->getMessage());
         }
@@ -90,6 +91,7 @@ class WebShoppingCart extends Model
                 (new WebShoppingCart)->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
             }
 
+            return true;
         } catch (\Exception $e) {
             Log::record('webShoppingCart:'.$e->getMessage());
         }

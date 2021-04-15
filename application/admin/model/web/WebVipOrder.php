@@ -54,6 +54,7 @@ class WebVipOrder extends Model
                 $params[$k]['country_id'] = $v['country_id'];
             }
             (new WebVipOrder)->saveAll($params);
+            return true;
         } catch (\Exception $e) {
             Log::record('webVipOrder:'.$e->getMessage());
         }
@@ -94,6 +95,7 @@ class WebVipOrder extends Model
                 (new WebVipOrder)->where(['web_id' => $v['id'], 'site' => $site])->update($params);
             }
 
+            return true;
         } catch (\Exception $e) {
             Log::record('webUsers:'.$e->getMessage());
         }

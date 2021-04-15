@@ -48,6 +48,7 @@ class WebUsers extends Model
                 $params[$k]['is_vip'] = $v['is_vip'];
             }
             (new WebUsers)->saveAll($params);
+            return true;
         } catch (\Exception $e) {
             Log::record('webUsers:'.$e->getMessage());
         }
@@ -80,6 +81,8 @@ class WebUsers extends Model
                 $params['is_vip'] = $v['is_vip'];
                 (new WebUsers)->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
             }
+
+            return true;
 
         } catch (\Exception $e) {
             Log::record('webUsers:'.$e->getMessage());
@@ -116,6 +119,8 @@ class WebUsers extends Model
                 $params[$k]['is_vip'] = $v['is_vip'];
             }
             (new WebUsers)->saveAll($params);
+
+            return true;
         } catch (\Exception $e) {
             Log::record('webUsers:'.$e->getMessage());
         }
@@ -148,6 +153,7 @@ class WebUsers extends Model
                 (new WebUsers)->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
             }
 
+            return true;
         } catch (\Exception $e) {
             Log::record('webUsers:'.$e->getMessage());
         }

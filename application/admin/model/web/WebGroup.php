@@ -44,6 +44,7 @@ class WebGroup extends Model
                 $params[$k]['updated_at'] = time();
             }
             (new WebGroup)->saveAll($params);
+            return true;
         } catch (\Exception $e) {
             Log::record('WebGroup:'.$e->getMessage());
         }
@@ -72,6 +73,8 @@ class WebGroup extends Model
                 $params[$k]['customer_group_code'] = $v['customer_group_code'];
                 (new WebGroup)->where(['group_id' => $v['customer_group_id'], 'site' => $site])->update($params);
             }
+
+            return true;
 
         } catch (\Exception $e) {
             Log::record('webGroup:'.$e->getMessage());
