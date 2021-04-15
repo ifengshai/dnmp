@@ -1397,12 +1397,12 @@ class Item extends Backend
                     } elseif ($uploadItemArr['site'] == 13) {
                         $params['sku_info'] = $v['platform_sku'];
                         $params['platform_type'] = 1;
-                        $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                        $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
                         $thirdRes = json_decode($thirdRes, true);
                     } elseif ($uploadItemArr['site'] == 14) {
                         $params['sku_info'] = $v['platform_sku'];
                         $params['platform_type'] = 2;
-                        $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                        $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
                         $thirdRes = json_decode($thirdRes, true);
                     } else {
                         $soapRes = Soap::createProduct($uploadItemArr);
@@ -1607,12 +1607,12 @@ class Item extends Backend
                             } elseif ($uploadItemArr['site'] == 13) {
                                 $params['sku_info'] = $v['platform_sku'];
                                 $params['platform_type'] = 1;
-                                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
                                 $thirdRes = json_decode($thirdRes, true);
                             } elseif ($uploadItemArr['site'] == 14) {
                                 $params['sku_info'] = $v['platform_sku'];
                                 $params['platform_type'] = 2;
-                                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
                                 $thirdRes = json_decode($thirdRes, true);
                             } else {
                                 $soapRes = Soap::createProduct($uploadItemArr);

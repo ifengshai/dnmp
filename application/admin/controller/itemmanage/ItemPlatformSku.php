@@ -624,17 +624,17 @@ class ItemPlatformSku extends Backend
             if ($uploadItemArr['site'] == 13) {
                 $params['sku_info'] = implode(',', $uploadItemArr['skus']);
                 $params['platform_type'] = 1;
-                $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
-                $third_res = json_decode($third_res, true);
+                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
+                $thirdRes = json_decode($thirdRes, true);
             } elseif ($uploadItemArr['site'] == 14) {
                 $params['sku_info'] = implode(',', $uploadItemArr['skus']);
                 $params['platform_type'] = 2;
-                $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
-                $third_res = json_decode($third_res, true);
+                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
+                $thirdRes = json_decode($thirdRes, true);
             } else {
-                $soap_res = Soap::createProduct($uploadItemArr);
+                $soapRes = Soap::createProduct($uploadItemArr);
             }
-            if ($soap_res || $third_res['code'] == 1) {
+            if ($soapRes || $thirdRes['code'] == 1) {
                 $this->model->where(['id' => $ids])->update(['is_upload' => 1]);
                 $this->success('同步成功！！');
             } else {
@@ -704,12 +704,12 @@ class ItemPlatformSku extends Backend
             if ($uploadItemArr['site'] == 13) {
                 $params['sku_info'] = $itemPlatformRow['platform_sku'];
                 $params['platform_type'] = 1;
-                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
                 $thirdRes = json_decode($thirdRes, true);
             } elseif ($uploadItemArr['site'] == 14) {
                 $params['sku_info'] = $itemPlatformRow['platform_sku'];
                 $params['platform_type'] = 2;
-                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
                 $thirdRes = json_decode($thirdRes, true);
             } else {
                 $soapRes = Soap::createProduct($uploadItemArr);
