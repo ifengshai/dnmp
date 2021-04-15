@@ -28,7 +28,7 @@ class WebGroup extends Model
      * @author wpl
      * @date   2021/4/15 9:30
      */
-    public static function setInsertData($data = [], $site = null): bool
+    public static function setInsertData($data = [], $site = null)
     {
         if (!$data) {
             return false;
@@ -60,7 +60,7 @@ class WebGroup extends Model
      * @author wpl
      * @date   2021/4/15 9:30
      */
-    public static function setUpdateData($data = [], $site = null): bool
+    public static function setUpdateData($data = [], $site = null)
     {
         if (!$data) {
             return false;
