@@ -1249,7 +1249,7 @@ class WorkOrderList extends Backend
 
                         //校验库存
                         if ($original_sku) {
-                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
+                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku), $platform_order);
                             !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
@@ -1951,7 +1951,7 @@ class WorkOrderList extends Backend
      * @param array $num 站点类型
      * @return array
      */
-    protected function skuIsStock($skus = [], $siteType, $num = [])
+    protected function skuIsStock($skus = [], $siteType, $num = [], $platform_order)
     {
         if (!array_filter($skus)) {
             return ['result' => false, 'msg' => 'SKU不能为空'];
@@ -2011,7 +2011,7 @@ class WorkOrderList extends Backend
 
             //判断此sku是否在第三方平台
             if ($siteType == 13 || $siteType == 14) {
-                $res = $this->model->httpRequest($siteType, 'api/mojing/check_sku', ['sku' =>$sku,'platform_order' =>$siteType], 'POST');
+                $res = $this->model->httpRequest($siteType, 'api/mojing/check_sku', ['sku' =>$sku,'platform_order' =>$platform_order], 'POST');
                 if (empty($res[$sku])) {
                     return ['result' => false, 'msg' => $sku . '不存在！！'];
                 }
@@ -2206,7 +2206,7 @@ class WorkOrderList extends Backend
 
                         //校验库存
                         if ($original_sku) {
-                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
+                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku), $platform_order);
                             !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
@@ -2372,7 +2372,7 @@ class WorkOrderList extends Backend
                             //更改镜框校验库存
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
                             $item['change_frame']['change_sku'] = trim($item['change_frame']['change_sku']);
-                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1], $platform_order);
                             !$back_data['result'] && $this->error($back_data['msg']);
                         } /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
                             //检测之前是否处理过更改镜片措施
