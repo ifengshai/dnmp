@@ -49,8 +49,8 @@ class DataMarketAsynData extends Command
             ->select();
         foreach ($arr as $v) {
             //计算当天的销量
-            $stime = $v . ' 00:00:00';
-            $etime = $v . ' 23:59:59';
+            $stime = $v['create_date'] . ' 00:00:00';
+            $etime = $v['create_date'] . ' 23:59:59';
             $map['created_at'] = $date['created_at'] = $update['updated_at'] = ['between', [$stime, $etime]];
             $map['status'] = [
                 'in',
