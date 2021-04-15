@@ -239,7 +239,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             legend: { //图例配置
                                 padding: 5,
                                 top: '2%',
-                                data: ['老用户环比', '新用户环比']
+                                data: ['老客户环比', '新客户环比']
                             },
                             xAxis: [
                                 {
