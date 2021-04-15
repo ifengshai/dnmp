@@ -31,7 +31,8 @@ class WebVipOrder extends Migrator
     {
         // create the table
         $table = $this->table('web_vip_order', ['engine' => 'InnoDB']);
-        $table->addColumn('customer_id', 'integer', ['limit' => 11, 'default' => 0, 'comment' => '用户表ID'])
+        $table->addColumn('web_id', 'integer', ['limit' => 11, 'default' => 0, 'comment' => '网站Vip订单表id'])
+            ->addColumn('customer_id', 'integer', ['limit' => 11, 'default' => 0, 'comment' => '用户表ID'])
             ->addColumn('customer_email', 'string', ['limit' => 255, 'default' => '', 'comment' => '用户邮箱'])
             ->addColumn('site', 'integer', ['limit' => MysqlAdapter::INT_TINY, 'default' => 0, 'comment' => '站点'])
             ->addColumn('order_number', 'string', ['limit' => 255, 'default' => '', 'comment' => '订单编号'])

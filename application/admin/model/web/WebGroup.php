@@ -45,7 +45,7 @@ class WebGroup extends Model
             }
             (new WebGroup)->saveAll($params);
         } catch (\Exception $e) {
-            Log::record('webUsers:'.$e->getMessage());
+            Log::record('WebGroup:'.$e->getMessage());
         }
     }
 
