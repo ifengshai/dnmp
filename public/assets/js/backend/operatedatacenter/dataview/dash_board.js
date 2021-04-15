@@ -13,6 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     table: 'dash_board',
                 }
             });
+            order_data_view();
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
             Controller.api.formatter.line_chart1();
@@ -34,26 +35,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 $("#time_str").val('');
                 $("#compare_time_str").val('');
             });
-            // $("#time_str").on("apply.daterangepicker", function () {
-            //     setTimeout(() => {
-            //         order_data_view();
-            //         Controller.api.formatter.line_chart();
-            //         Controller.api.formatter.user_chart();
-            //         Controller.api.formatter.user_change_chart();
-            //     }, 0)
-            // })
-            // $(document).on('change', '#type', function () {
-            //     order_data_view();
-            //     Controller.api.formatter.line_chart();
-            //     Controller.api.formatter.user_chart();
-            //     Controller.api.formatter.user_change_chart();
-            // });
-            // $(document).on('change', '#order_platform', function () {
-            //     order_data_view();
-            //     Controller.api.formatter.line_chart();
-            //     Controller.api.formatter.user_chart();
-            //     Controller.api.formatter.user_change_chart();
-            // });
             
             var table = $("#table");
 
@@ -185,54 +166,17 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 
                     var options = {
                         type: 'post',
-                        url: 'operatedatacenter/dataview/dash_board/order_trend_active_user_trend',
+                        url: 'elasticsearch/operate/dash_board/ajaxGetDashBoard',
                         data: {
                             order_platform: $("#order_platform").val(),
                             time_str: $("#time_str").val(),
-                            type: $("#type").val()
+                            type: 1
                         }
 
                     }
                     EchartObj.api.ajax(options, chartOptions)
                 },
-                // line_chart: function () {
-                //     //订单趋势统计
-                //     var chartOptions = {
-                //         targetId: 'echart1',
-                //         downLoadTitle: '图表',
-                //         type: 'line'
-                //     };
-                //
-                //     var options = {
-                //         type: 'post',
-                //         url: 'operatedatacenter/dataview/dash_board/order_trend',
-                //         data: {
-                //             order_platform: $("#order_platform").val(),
-                //             time_str: $("#time_str").val(),
-                //             type: $("#type").val()
-                //         }
-                //     }
-                //     EchartObj.api.ajax(options, chartOptions)
-                // },
-                // user_chart: function () {
-                //     //活跃用户数折线图
-                //     var chartOptions = {
-                //         targetId: 'echart2',
-                //         downLoadTitle: '图表',
-                //         type: 'line'
-                //     };
-                //
-                //     var options = {
-                //         type: 'post',
-                //         url: 'operatedatacenter/dataview/dash_board/active_user_trend',
-                //         data: {
-                //             order_platform: $("#order_platform").val(),
-                //             time_str: $("#time_str").val(),
-                //             type: $("#type").val()
-                //         }
-                //     }
-                //     EchartObj.api.ajax(options, chartOptions)
-                // },
+
                 user_change_chart: function () {
                     //用户购买转化漏斗
                     var chartOptions = {
@@ -243,11 +187,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 
                     var options = {
                         type: 'post',
-                        url: 'operatedatacenter/dataview/dash_board/user_change_trend',
+                        url: 'elasticsearch/operate/dash_board/ajaxGetDashBoard',
                         data: {
                             order_platform: $("#order_platform").val(),
                             time_str: $("#time_str").val(),
-                            type: $("#type").val()
+                            type: 2
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions)
@@ -266,17 +210,25 @@ function order_data_view() {
     var time_str = $('#time_str').val();
     var compare_time_str = $('#compare_time_str').val();
     Backend.api.ajax({
-        url: 'operatedatacenter/dataview/dash_board/ajax_top_data',
+        url: 'elasticsearch/operate/dash_board/ajaxGetDashBoard',
         data: {order_platform: order_platform, time_str: time_str, compare_time_str: compare_time_str}
     }, function (data, ret) {
-        var order_num = ret.data.order_num;
-        var order_unit_price = ret.data.order_unit_price;
-        var sales_total_money = ret.data.sales_total_money;
-        var shipping_total_money = ret.data.shipping_total_money;
-        var active_user_num = ret.data.active_user_num;
-        var register_user_num = ret.data.register_user_num;
+        var order_num = ret.data.orderNum;
+        var order_unit_price = ret.data.orderUnitPrice;
+        var sales_total_money = ret.data.salesTotalMoney;
+        var shipping_total_money = ret.data.shippingTotalMoney;
+        var active_user_num = ret.data.activeUserNum;
+        var register_user_num = ret.data.registerNum;
         var again_user_num = ret.data.again_user_num;
-        var vip_user_num = ret.data.vip_user_num;
+        var vip_user_num = ret.data.vipUserNum;
+        var compare_order_num_rate = ret.data.compareOrderNumRate;
+        var compare_order_unit_price_rate = ret.data.compareOrderUnitPriceRate;
+        var compare_sales_total_money_rate = ret.data.compareSalesTotalMoneyRate;
+        var compare_shipping_total_money_rate = ret.data.compareShippingTotalMoneyRate;
+        var compare_active_user_num_rate = ret.data.compareActiveUserNumRate;
+        var compare_register_user_num_rate = ret.data.compareRegisterNumRate;
+        var compare_again_user_num_rate = ret.data.compareAgainUserNumRate;
+        var compare_vip_user_num_rate = ret.data.compareVipUserNuRate;
         if(compare_time_str.length > 0){
             $('.rate_class').show();
         }
@@ -284,60 +236,60 @@ function order_data_view() {
             $('.rate_class').hide();
         }
 
-        $('#order_num').text(order_num.order_num);
-        if (parseInt(order_num.contrast_order_num) < 0) {
-            $('#huan_order_num').html("<img src='/xiadie.png'>" + order_num.contrast_order_num + '%');
+        $('#order_num').text(order_num);
+        if (parseInt(compare_order_num_rate) < 0) {
+            $('#huan_order_num').html("<img src='/xiadie.png'>" + compare_order_num_rate + '%');
         } else {
-            $('#huan_order_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_num.contrast_order_num + '%');
+            $('#huan_order_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_order_num_rate + '%');
         }
 
-        $('#order_unit_price').text(order_unit_price.order_unit_price);
-        if (parseInt(order_unit_price.contrast_order_unit_price) < 0) {
-            $('#huan_order_unit_price').html("<img src='/xiadie.png'>" + order_unit_price.contrast_order_unit_price + '%');
+        $('#order_unit_price').text(order_unit_price);
+        if (parseInt(compare_order_unit_price_rate) < 0) {
+            $('#huan_order_unit_price').html("<img src='/xiadie.png'>" + compare_order_unit_price_rate + '%');
         } else {
-            $('#huan_order_unit_price').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + order_unit_price.contrast_order_unit_price + '%');
+            $('#huan_order_unit_price').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_order_unit_price_rate + '%');
         }
 
-        $('#sales_total_money').text(sales_total_money.sales_total_money);
-        if (parseInt(sales_total_money.contrast_sales_total_num) < 0) {
-            $('#huan_sales_total_money').html("<img src='/xiadie.png'>" + sales_total_money.contrast_sales_total_num + '%');
+        $('#sales_total_money').text(sales_total_money);
+        if (parseInt(compare_sales_total_money_rate) < 0) {
+            $('#huan_sales_total_money').html("<img src='/xiadie.png'>" + compare_sales_total_money_rate + '%');
         } else {
-            $('#huan_sales_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + sales_total_money.contrast_sales_total_num + '%');
+            $('#huan_sales_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_sales_total_money_rate + '%');
         }
 
-        $('#shipping_total_money').text(shipping_total_money.shipping_total_money);
-        if (parseInt(shipping_total_money.contrast_shipping_total_money) < 0) {
-            $('#huan_shipping_total_money').html("<img src='/xiadie.png'>" + shipping_total_money.contrast_shipping_total_money + '%');
+        $('#shipping_total_money').text(shipping_total_money);
+        if (parseInt(compare_shipping_total_money_rate) < 0) {
+            $('#huan_shipping_total_money').html("<img src='/xiadie.png'>" + compare_shipping_total_money_rate + '%');
         } else {
-            $('#huan_shipping_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + shipping_total_money.contrast_shipping_total_money + '%');
+            $('#huan_shipping_total_money').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_shipping_total_money_rate + '%');
         }
 
-        $('#active_user_num').text(active_user_num.active_user_num);
-        if (parseInt(active_user_num.contrast_active_user_num) < 0) {
-            $('#huan_active_user_num').html("<img src='/xiadie.png'>" + active_user_num.contrast_active_user_num + '%');
+        $('#active_user_num').text(active_user_num);
+        if (parseInt(compare_active_user_num_rate) < 0) {
+            $('#huan_active_user_num').html("<img src='/xiadie.png'>" + compare_active_user_num_rate + '%');
         } else {
-            $('#huan_active_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + active_user_num.contrast_active_user_num + '%');
+            $('#huan_active_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_active_user_num_rate + '%');
         }
 
-        $('#register_user_num').text(register_user_num.register_user_num);
-        if (parseInt(register_user_num.contrast_register_user_num) < 0) {
-            $('#huan_register_user_num').html("<img src='/xiadie.png'>" + register_user_num.contrast_register_user_num + '%');
+        $('#register_user_num').text(register_user_num);
+        if (parseInt(compare_register_user_num_rate) < 0) {
+            $('#huan_register_user_num').html("<img src='/xiadie.png'>" + compare_register_user_num_rate + '%');
         } else {
-            $('#huan_register_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + register_user_num.contrast_register_user_num + '%');
+            $('#huan_register_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_register_user_num_rate + '%');
         }
 
-        $('#again_user_num').text(again_user_num.again_user_num);
-        if (parseInt(again_user_num.contrast_again_user_num) < 0) {
-            $('#huan_again_user_num').html("<img src='/xiadie.png'>" + again_user_num.contrast_again_user_num+ '%');
+        $('#again_user_num').text(again_user_num);
+        if (parseInt(compare_again_user_num_rate) < 0) {
+            $('#huan_again_user_num').html("<img src='/xiadie.png'>" + compare_again_user_num_rate+ '%');
         } else {
-            $('#huan_again_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + again_user_num.contrast_again_user_num + '%');
+            $('#huan_again_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_again_user_num_rate + '%');
         }
 
-        $('#vip_user_num').text(vip_user_num.vip_user_num);
-        if (parseInt(vip_user_num.contrast_vip_user_num) < 0) {
-            $('#huan_vip_user_num').html("<img src='/xiadie.png'>" + vip_user_num.contrast_vip_user_num + '%');
+        $('#vip_user_num').text(vip_user_num);
+        if (parseInt(compare_vip_user_num_rate) < 0) {
+            $('#huan_vip_user_num').html("<img src='/xiadie.png'>" + compare_vip_user_num_rate + '%');
         } else {
-            $('#huan_vip_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + vip_user_num.contrast_vip_user_num + '%');
+            $('#huan_vip_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_vip_user_num_rate + '%');
         }
 
         return false;

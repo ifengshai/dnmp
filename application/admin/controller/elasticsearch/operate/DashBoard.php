@@ -10,16 +10,23 @@ namespace app\admin\controller\elasticsearch\operate;
 
 
 use app\admin\controller\elasticsearch\BaseElasticsearch;
+use app\admin\model\platformmanage\MagentoPlatform;
 
 class DashBoard extends BaseElasticsearch
 {
     public function index()
     {
-        $start = '20180205';
-        $end = '20210205';
-        $dashBoardData = $this->getDashBoard(1, '20180205 20210205');
+        $magentoplatformarr = new MagentoPlatform();
+        //查询对应平台权限
+        $magentoplatformarr = $magentoplatformarr->getAuthSite();
+        foreach ($magentoplatformarr as $key => $val) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign(compact('web_site', 'time_str', 'magentoplatformarr'));
 
-        return json(['code' => 1, 'data' => $dashBoardData]);
+        return $this->view->fetch('operatedatacenter/dataview/dash_board/index');
     }
 
     /**
@@ -31,22 +38,45 @@ class DashBoard extends BaseElasticsearch
      * @author crasphb
      * @date   2021/4/14 13:56
      */
-    public function getDashBoard($site, $time = '')
+    public function ajaxGetDashBoard()
     {
-        //获取时间
-        if ($time) {
-            $timeRange = explode(' ', $time);
-        } else {
-            $timeRange = [
-                date('Ymd', strtotime('-6 days')),
-                date('Ymd'),
-            ];
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $type = $params['type'];
+            $timeStr = $params['time_str'];
+            $compareTimeStr = $params['compare_time_str'];
+            $site = $params['order_platform'] ? $params['order_platform'] : 1;
+            $siteAll = $site == 4;
+            if (!$timeStr) {
+                $start = date('Ymd', strtotime('-6 days'));
+                $end = date('Ymd');
+            } else {
+                $createat = explode(' ', $timeStr);
+                $start = date('Ymd', strtotime($createat[0]));
+                $end = date('Ymd', strtotime($createat[3]));
+            }
+            $compareData = [];
+            if($compareTimeStr){
+                $compareTime = explode(' ', $compareTimeStr);
+                $compareStart = date('Ymd', strtotime($compareTime[0]));
+                $compareEnd = date('Ymd', strtotime($compareTime[3]));
+                $compareData = $this->buildDashBoardSearch($site, $compareStart, $compareEnd, $siteAll);
+            }
+            $result = $this->buildDashBoardSearch($site, $start, $end, $siteAll);
+            $allData = $this->esFormatData->formatDashBoardData($site, $result, $compareData, $siteAll);
+            switch ($type) {
+                case 1:
+                    $data = $allData['dayChart'];
+
+                    return json(['code' => 1, 'data' => $data]);
+                case 2:
+                    $data = $allData['funnel'];
+
+                    return json(['code' => 1, 'data' => $data]);
+                default:
+                    $this->success('', '', $allData);
+            }
         }
-        //判断是否为全部站点
-        $siteAll = $site == 4;
-        $result = $this->buildDashBoardSearch($site, $timeRange[0], $timeRange[1], $siteAll);
-        $a = $this->esFormatData->formatDashBoardData($site, $result, $siteAll);
-        file_put_contents('./a.json', $a);
 
     }
 
@@ -173,6 +203,8 @@ class DashBoard extends BaseElasticsearch
                     "aggs"  => $aggs,
                 ],
             ];
+            //删除site查询
+            unset($params['body']['query']['bool']['must'][1]);
         }
 
         return $this->esService->search($params);

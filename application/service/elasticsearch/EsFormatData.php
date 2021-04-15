@@ -62,7 +62,7 @@ class EsFormatData
             $finalLists[$key]['totalQtyOrdered'] = $hourOrderData['totalQtyOrdered']['value'];
             $finalLists[$key]['orderCounter'] = $hourOrderData['doc_count'];
             //购物车数目
-            $finalLists[$key]['cartCouont'] = $hourCartData['doc_count'];
+            $finalLists[$key]['cartCount'] = $hourCartData['doc_count'];
 
             //加购率
             $finalLists[$key]['addCartRate'] = $finalLists[$key]['sessions'] ? bcdiv($hourCartData['doc_count'], $finalLists[$key]['sessions'], 2) . '%' : '0%';
@@ -76,9 +76,9 @@ class EsFormatData
         }
 
         //总订单数
-        $allOrderAmount = $orderData['sumOrder']['value'];
+        $allOrderCount = $orderData['sumOrder']['value'];
         //总新增购物车数
-        $allCartAmount = $orderData['sumCart']['value'];
+        $allCartAmount = $cartData['sumCart']['value'];
         //总销量
         $allQtyOrdered = $orderData['allQtyOrdered']['value'];
         //总销售额
@@ -89,9 +89,9 @@ class EsFormatData
         //加购率
         $addCartRate = $allSession ? bcdiv($allCartAmount, $allSession, 2) . '%' : '0%';
         //新增购物车转化率
-        $cartRate = $allOrderAmount ? bcdiv($allCartAmount, $allOrderAmount, 2) . '%' : '0%';
+        $cartRate = $allOrderCount ? bcdiv($allCartAmount, $allOrderCount, 2) . '%' : '0%';
         //回话转化率
-        $sessionRate = $allSession ? bcdiv($allOrderAmount, $allSession, 2) . '%' : '0%';
+        $sessionRate = $allSession ? bcdiv($allOrderCount, $allSession, 2) . '%' : '0%';
 
         //合计
         //返回图标
@@ -105,7 +105,7 @@ class EsFormatData
         //客单价
         $grandTotalOrderConversion = $this->hourEcharts($echartData['hourStr'], $echartData['avgPrice'], '客单价');
 
-        return compact('finalLists', 'addCartRate', 'cartRate', 'sessionRate', 'allOrderAmount', 'allCartAmount', 'allQtyOrdered', 'allDaySalesAmount', 'allAvgPrice', 'orderitemCounter', 'saleAmount', 'grandTotalOrderConversion', 'orderCounter');
+        return compact('finalLists', 'addCartRate', 'cartRate', 'sessionRate', 'allOrderCount', 'allCartAmount', 'allQtyOrdered', 'allDaySalesAmount','allSession', 'allAvgPrice', 'orderitemCounter', 'saleAmount', 'grandTotalOrderConversion', 'orderCounter');
     }
 
     /**
@@ -213,13 +213,14 @@ class EsFormatData
      *
      * @param       $site
      * @param       $data
+     * @param array $compareData
      * @param false $siteAll
      *
      * @return array
      * @author crasphb
-     * @date   2021/4/14 10:40
+     * @date   2021/4/15 15:50
      */
-    public function formatDashBoardData($site, $data, $siteAll = false)
+    public function formatDashBoardData($site, $data, $compareData = []  ,$siteAll = false)
     {
         if (!$siteAll) {
             $buckets = $data['site']['buckets'];
@@ -239,7 +240,40 @@ class EsFormatData
         //邮费
         $shippingTotalMoney = $data['shippingTotalMoney']['value'];
         //客单价
-        $orderUnitPrice = bcdiv($salesTotalMoney, $orderNum, 2);
+        $orderUnitPrice = $orderNum ? bcdiv($salesTotalMoney, $orderNum, 2) : 0;
+
+
+        $compareActiveUserNumRate = $compareRegisterNumRate = $compareVipUserNuRate = $compareOrderNumRate = $compareSalesTotalMoneyRate = $compareShippingTotalMoneyRate = $compareOrderUnitPriceRate = 0;
+
+        if($compareData) {
+            if (!$siteAll) {
+                $compareBuckets = $compareData['site']['buckets'];
+                $compareSiteKeyData = array_combine(array_column($compareBuckets, 'key'), $compareBuckets);
+                $compareData = $compareSiteKeyData[$site];
+            }
+            //获取活跃用户数
+            $compareActiveUserNum = $compareData['activeUserNum']['value'];
+            //注册用户数
+            $compareRegisterNum = $compareData['registerNum']['value'];
+            //vip用户数
+            $compareVipUserNum = $compareData['vipUserNum']['value'];
+            //订单数
+            $compareOrderNum = $compareData['orderNum']['value'];
+            //销售额
+            $compareSalesTotalMoney = $compareData['salesTotalMoney']['value'];
+            //邮费
+            $compareShippingTotalMoney = $compareData['shippingTotalMoney']['value'];
+            //客单价
+            $compareOrderUnitPrice = $compareOrderNum ? bcdiv($compareSalesTotalMoney, $compareOrderNum, 2) : 0;
+
+            $compareActiveUserNumRate = $compareActiveUserNum ? bcdiv(bcsub($activeUserNum,$compareActiveUserNum),$compareActiveUserNum,2) : 0;
+            $compareRegisterNumRate = $compareRegisterNum ? bcdiv(bcsub($activeUserNum,$compareRegisterNum),$compareRegisterNum,2) : 0;
+            $compareVipUserNuRate = $compareVipUserNum ? bcdiv(bcsub($activeUserNum,$compareVipUserNum),$compareVipUserNum,2) : 0;
+            $compareOrderNumRate = $compareOrderNum ? bcdiv(bcsub($activeUserNum,$compareOrderNum),$compareOrderNum,2) : 0;
+            $compareSalesTotalMoneyRate = $compareSalesTotalMoney ? bcdiv(bcsub($activeUserNum,$compareSalesTotalMoney),$compareSalesTotalMoney,2) : 0;
+            $compareShippingTotalMoneyRate = $compareShippingTotalMoney ? bcdiv(bcsub($activeUserNum,$compareShippingTotalMoney),$compareShippingTotalMoney,2) : 0;
+            $compareOrderUnitPriceRate = $compareOrderUnitPrice ? bcdiv(bcsub($activeUserNum,$compareOrderUnitPrice),$compareOrderUnitPrice,2) : 0;
+        }
 
         //着陆页
         $landingNum = $data['landingNum']['value'];
@@ -259,9 +293,9 @@ class EsFormatData
         $completeNumRate = !$cartNum ? '0%' : bcdiv($completeNum, $cartNum, 2) . '%';
 
         $dayBuckets = $data['daySale']['buckets'];
-        $days = array_column($dayBuckets, 'key');
-        $dayActiveUserNum = array_column($dayBuckets, 'activeUserNum');
-        $dayOrderNum = array_column($dayBuckets, 'orderNum');
+        $days = $dayBuckets ? array_column($dayBuckets, 'key') : [];
+        $dayActiveUserNum = $dayBuckets ? array_column($dayBuckets, 'activeUserNum') : [];
+        $dayOrderNum = $dayBuckets ? array_column($dayBuckets, 'orderNum') : [];
 
         $dayChart = [
             'xColumnName' => array_values($days),
@@ -296,7 +330,7 @@ class EsFormatData
             ],
         ];
 
-        return compact('activeUserNum', 'registerNum', 'vipUserNum', 'orderNum', 'salesTotalMoney', 'shippingTotalMoney', 'orderUnitPrice', 'dayChart', 'funnel');
+        return compact('activeUserNum', 'registerNum', 'vipUserNum', 'orderNum', 'salesTotalMoney', 'shippingTotalMoney', 'orderUnitPrice', 'dayChart', 'funnel','compareActiveUserNumRate','compareRegisterNumRate','compareVipUserNuRate','compareOrderNumRate','compareSalesTotalMoneyRate','compareShippingTotalMoneyRate','compareOrderUnitPriceRate');
 
     }
 }
