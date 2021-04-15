@@ -245,9 +245,12 @@ class OperationAnalysis extends Model
 	public function getList($id)
 	{
         $model = $this->get_model_by_id($id);
+        echo 111;
         if(false == $model){
+            echo 666;exit;
             return false;
         }
+        echo 222;exit;
         $where['order_platform'] = $id;
         //求出本站点的今天所有的数据
         $today_sales_money_data                 = $this->get_today_sales_money($id);
