@@ -534,12 +534,12 @@ class DataMarket extends Backend
             'zeelool_jp_wap_sales_num' => $zeelool_jp_wap_sales_num ?: 0,
             'zeelool_jp_pc_unit_price' => $zeelool_jp_pc_unit_price ?: 0,
             'zeelool_jp_wap_unit_price' => $zeelool_jp_wap_unit_price ?: 0,
-            'voogmechicPcSalesMoney' => $voogmechicPcSalesMoney ?: 0,
-            'voogmechicWapSalesMoney' => $voogmechicWapSalesMoney ?: 0,
-            'voogmechicPcSalesNum' => $voogmechicPcSalesNum ?: 0,
-            'voogmechicWapSalesNum' => $voogmechicWapSalesNum ?: 0,
-            'voogmechicPcUnitPrice' => $voogmechicPcUnitPrice ?: 0,
-            'voogmechicWapUnitPrice' => $voogmechicWapUnitPrice ?: 0,
+            'voogmechic_pc_sales_money' => $voogmechicPcSalesMoney ?: 0,
+            'voogmechic_wap_sales_money' => $voogmechicWapSalesMoney ?: 0,
+            'voogmechic_pc_sales_num' => $voogmechicPcSalesNum ?: 0,
+            'voogmechic_wap_sales_num' => $voogmechicWapSalesNum ?: 0,
+            'voogmechic_pc_unit_price' => $voogmechicPcUnitPrice ?: 0,
+            'voogmechic_wap_unit_price' => $voogmechicWapUnitPrice ?: 0,
         ];
         Cache::set('Dashboard_get_platform_data_'.md5(serialize($map)), $arr, 7200);
         return $arr;
