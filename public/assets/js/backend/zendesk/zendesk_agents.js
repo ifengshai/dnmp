@@ -26,6 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         {field: 'admin.nickname', title: __('admin.nickname')},
                         {field: 'nickname', title: __('nickname')},
+                        {field: 'account_level', title: __('账号级别')},
                         // {field: 'admin.email', title: __('admin.email')},
                         {field: 'agent.account_user', title: __('Name'),operate: false},
                         {field: 'type', title: __('type'), custom: { 1: 'blue', 2: 'yellow' }, searchList: { 1: 'Zeelool', 2: 'Voogueme' ,3:'Nihaooptical'}, formatter: Table.api.formatter.status },

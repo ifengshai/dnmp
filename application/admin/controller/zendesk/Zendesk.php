@@ -257,12 +257,17 @@ class Zendesk extends Backend
                     //获取签名
                     $sign = Db::name('zendesk_signvalue')->where('site',$type)->value('signvalue');
                     //获取zendesk用户的昵称
-                    $zendesk_nickname = Db::name('zendesk_agents')->where('type',$type)->where('admin_id',session('admin.id'))->value('nickname');
-                    $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                    $zendeskAgentInfo = Db::name('zendesk_agents')->where('type',$type)->where('admin_id',session('admin.id'))->field('nickname,account_level')->find();
+                    $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
                     //替换签名中的昵称
                     if(strpos($sign,'{{agent.name}}')!==false){
-                        $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
-                    }             
+                        $sign = str_replace('{{agent.name}}',$zendeskNickname,$sign);
+                    }
+                    //替换签名中的账号级别
+                    $zendeskAccountLevel = $zendeskAgentInfo['account_level'] ? $zendeskAgentInfo['account_level'] : '';
+                    if(strpos($sign,'{{agent.account_level}}')!==false){
+                        $sign = str_replace('{{agent.account_level}}',$zendeskAccountLevel,$sign);
+                    }
                     $sign = $sign ? $sign : '';
                     //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
                     if(strpos($sign,'<p>')!==false){
@@ -479,11 +484,16 @@ class Zendesk extends Backend
                     //获取签名
                     $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                     //获取zendesk用户的昵称
-                    $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->value('nickname');
-                    $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                    $zendeskAgentInfo = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->field('nickname,account_level')->find();
+                    $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
                     //替换签名中的昵称
                     if(strpos($sign,'{{agent.name}}')!==false){
-                        $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                        $sign = str_replace('{{agent.name}}',$zendeskNickname,$sign);
+                    }
+                    //替换签名中的账号级别
+                    $zendeskAccountLevel = $zendeskAgentInfo['account_level'] ? $zendeskAgentInfo['account_level'] : '';
+                    if(strpos($sign,'{{agent.account_level}}')!==false){
+                        $sign = str_replace('{{agent.account_level}}',$zendeskAccountLevel,$sign);
                     }
                     $sign = $sign ? $sign : '';
                     //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
@@ -600,11 +610,16 @@ class Zendesk extends Backend
                 //获取签名
                 $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                 //获取当前评论的用户的昵称
-                $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
-                $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                $zendeskAgentInfo = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->field('nickname,account_level')->find();
+                $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
                 //替换签名中的昵称
                 if(strpos($sign,'{{agent.name}}')!==false){
-                    $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                    $sign = str_replace('{{agent.name}}',$zendeskNickname,$sign);
+                }
+                //替换签名中的账号级别
+                $zendeskAccountLevel = $zendeskAgentInfo['account_level'] ? $zendeskAgentInfo['account_level'] : '';
+                if(strpos($sign,'{{agent.account_level}}')!==false){
+                    $sign = str_replace('{{agent.account_level}}',$zendeskAccountLevel,$sign);
                 }
                 $comment->sign= $sign ? $sign : '';
             }
@@ -744,11 +759,16 @@ class Zendesk extends Backend
                 //获取签名
                 $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                 //获取当前评论的用户的昵称
-                $zendesk_nickname = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->value('nickname');
-                $zendesk_nickname = $zendesk_nickname ? $zendesk_nickname : $siteName;
+                $zendeskAgentInfo = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->field('nickname,account_level')->find();
+                $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
                 //替换签名中的昵称
                 if(strpos($sign,'{{agent.name}}')!==false){
-                    $sign = str_replace('{{agent.name}}',$zendesk_nickname,$sign);
+                    $sign = str_replace('{{agent.name}}',$zendeskNickname,$sign);
+                }
+                //替换签名中的账号级别
+                $zendeskAccountLevel = $zendeskAgentInfo['account_level'] ? $zendeskAgentInfo['account_level'] : '';
+                if(strpos($sign,'{{agent.account_level}}')!==false){
+                    $sign = str_replace('{{agent.account_level}}',$zendeskAccountLevel,$sign);
                 }
                 $comment->sign= $sign ? $sign : '';
             }
