@@ -523,13 +523,12 @@ class TrackReg extends Backend
         //查询所有站点
         $siteList = $platform->select();
 
-        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
+        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->limit(10)->column('sku');
         $params = [];
         $date = date('Y-m-d 00:00:00');
 
         //查询SKU绑定关系
         $supplierSku = (new SupplierSku)->getSupplierName();
-
         foreach ($list as $k => $v) {
             $allnum = 0;
             $dayNum = [];
@@ -550,7 +549,8 @@ class TrackReg extends Backend
                 //统计30天有效天数销量
                 $allnum += $num;
             }
-            $params[$k]['supplier_name'] = $supplierSku[$v];
+            $params[$k]['supplier_name'] = $supplierSku[$v]['supplier_name'];
+            $params[$k]['purchase_person'] = $supplierSku[$v]['purchase_person'];
             if ($allnum >= 300) {
                 $params[$k]['grade'] = 'A+';
             } elseif ($allnum >= 150 && $allnum < 300) {
@@ -579,7 +579,8 @@ class TrackReg extends Backend
             echo $v."\n";
             usleep(20000);
         }
-
+        dump($params);
+        die;
         if ($params) {
             //清空表
             Db::execute("truncate table fa_product_grade;");
