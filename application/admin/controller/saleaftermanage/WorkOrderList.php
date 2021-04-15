@@ -1248,7 +1248,7 @@ class WorkOrderList extends Backend
 
                         //校验库存
                         if ($original_sku) {
-                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
+                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku), $platform_order);
                             !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
@@ -1953,7 +1953,7 @@ class WorkOrderList extends Backend
      * @param array $num 站点类型
      * @return array
      */
-    protected function skuIsStock($skus = [], $siteType, $num = [])
+    protected function skuIsStock($skus = [], $siteType, $num = [], $platform_order)
     {
         if (!array_filter($skus)) {
             return ['result' => false, 'msg' => 'SKU不能为空'];
@@ -1988,7 +1988,12 @@ class WorkOrderList extends Backend
                 /****************************end*****************************************/
             }
             //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
-            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $siteType])->find();
+            if ($siteType == 13 || $siteType == 14) {
+                $itemPlatFormSkuWhere = ['platform_sku' => $sku, 'platform_type' => $siteType];
+            }else{
+                $itemPlatFormSkuWhere = ['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $siteType];
+            }
+            $res = $itemPlatFormSku->where($itemPlatFormSkuWhere)->find();
             //判断是否开启预售
             if ($res['stock'] >= 0 && $res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
                 $stock = $res['stock'] + $res['presell_residue_num'];
@@ -2002,6 +2007,16 @@ class WorkOrderList extends Backend
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
                 return ['result' => false, 'msg' => $sku . '库存不足！！'];
+            }
+            //判断此sku是否在第三方平台
+            if ($siteType == 13 || $siteType == 14) {
+                $res = $this->model->httpRequest($siteType, 'api/mojing/check_sku', ['sku' =>$sku,'platform_order' =>$platform_order], 'POST');
+                if (empty($res[$sku])) {
+                    return ['result' => false, 'msg' => $sku . '不存在！！'];
+                }
+                if ($res[$sku] < $num[$k]) {
+                    return ['result' => false, 'msg' => $sku . '库存不足！！'];
+                }
             }
         }
         return ['result' => true, 'msg' => ''];
@@ -2036,7 +2051,6 @@ class WorkOrderList extends Backend
 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
@@ -2188,7 +2202,7 @@ class WorkOrderList extends Backend
 
                         //校验库存
                         if ($original_sku) {
-                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku));
+                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku), $platform_order);
                             !$back_data['result'] && $this->error($back_data['msg']);
                         }
                     }
@@ -2355,7 +2369,7 @@ class WorkOrderList extends Backend
                             //更改镜框校验库存
                             !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
                             $item['change_frame']['change_sku'] = trim($item['change_frame']['change_sku']);
-                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
+                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1], $platform_order);
                             !$back_data['result'] && $this->error($back_data['msg']);
                         } /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
                             //检测之前是否处理过更改镜片措施
@@ -2928,12 +2942,21 @@ class WorkOrderList extends Backend
             $siteType = input('site_type');
             $prescriptionType = input('prescription_type', '');
             $key = $siteType . '_get_lens';
-            $data = Cache::get($key);
+            //$data = Cache::get($key);
             if (!$data) {
-                $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
+                if ($siteType == 13 || $siteType == 14) {
+                    $data = $this->model->httpRequest($siteType, 'api/mojing/lens_data',['prescriptionType'=>$prescriptionType], 'POST');
+                }else{
+                    $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
+                }
                 Cache::set($key, $data, 3600 * 24);
             }
-            $lensType = $data['lens_list'][$prescriptionType] ?: [];
+            if ($siteType == 13 || $siteType == 14) {
+                $lensType = $data;
+            }else{
+                $lensType = $data['lens_list'][$prescriptionType] ?: [];
+            }
+            
             $this->success('操作成功！！', '', $lensType);
         } else {
             $this->error('404 not found');
@@ -2951,7 +2974,7 @@ class WorkOrderList extends Backend
     public function ajax_get_order($ordertype = null, $order_number = null)
     {
         if ($this->request->isAjax()) {
-            if ($ordertype < 1 || $ordertype > 11) { //不在平台之内
+            if ($ordertype < 1 || $ordertype > 15) { //不在平台之内
                 return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
             if (!$order_number) {
@@ -3000,7 +3023,7 @@ class WorkOrderList extends Backend
     public function ajax_edit_order($ordertype = null, $order_number = null, $work_id = null, $change_type = null)
     {
         if ($this->request->isAjax()) {
-            if ($ordertype < 1 || $ordertype > 11) { //不在平台之内
+            if ($ordertype < 1 || $ordertype > 15) { //不在平台之内
                 return $this->error('选择平台错误,请重新选择', '', 'error', 0);
             }
             if (!$order_number) {
@@ -3171,6 +3194,9 @@ class WorkOrderList extends Backend
             $order = new \app\admin\model\order\order\NewOrder();
             $order_currency_code = $order->where(['increment_id' => $row->platform_order])->value('order_currency_code');
             $url = config('url.' . $domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id. '&order_currency_code=' . $order_currency_code;
+            if ($row->work_platform == 13 || $row->work_platform == 14) {
+                $url = '';
+            }
             $this->view->assign('url', $url);
         }
 
@@ -3242,7 +3268,7 @@ class WorkOrderList extends Backend
     public function ajax_change_order($work_id = null, $order_type = null, $order_number = null, $change_type = null, $operate_type = '', $item_order_number = null)
     {
         if ($this->request->isAjax()) {
-            (1 > $order_type || 11 < $order_type) && $this->error('选择平台错误,请重新选择', '', 'error', 0);
+            (1 > $order_type || 15 < $order_type) && $this->error('选择平台错误,请重新选择', '', 'error', 0);
             !$order_number && $this->error('订单号不存在，请重新选择', '', 'error', 0);
             !$work_id && $this->error('工单不存在，请重新选择', '', 'error', 0);
 
@@ -3455,9 +3481,12 @@ class WorkOrderList extends Backend
                                     if (empty($bar_code_info)) {
                                         $this->error("序号为".$i."的，赠品条形码不存在");
                                     }
-                                    if ($bar_code_info['library_status'] == 2) {
-                                        $this->error("序号为".$i."的sku(".$change_sku.")，在库状态为否");
+                                    if ($row['work_platform'] != 13 && $row['work_platform'] != 14) {
+                                        if ($bar_code_info['library_status'] == 2) {
+                                            $this->error("序号为".$i."的sku(".$change_sku.")，在库状态为否");
+                                        }
                                     }
+                                    
                                     if ($bar_code_info['sku'] != $platform_info_sku) {
                                         $this->error("序号为".$i."的sku(".$change_sku.")，条形码所绑定的sku与赠品sku不一致");
                                     }
@@ -4061,15 +4090,18 @@ EOF;
             $arr[$k]['platform_type'] = $v['platform_type'];
         }
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-
-
         //根据平台sku转sku
         $notEnough = [];
         foreach (array_filter($arr) as $v) {
             //转换sku
             $sku = trim($v['original_sku']);
+            if ($v['platform_type'] == 13 || $v['platform_type'] == 14) {
+                $itemPlatFormSkuWhere = ['platform_sku' => $sku, 'platform_type' => $v['platform_type']];
+            }else{
+                $itemPlatFormSkuWhere = ['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $v['platform_type']];
+            }
             //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
-            $res = $itemPlatFormSku->where(['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $v['platform_type']])->find();
+            $res = $itemPlatFormSku->where($itemPlatFormSkuWhere)->find();
             //判断是否开启预售
             if ($res['stock'] >= 0 && $res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
                 $stock = $res['stock'] + $res['presell_residue_num'];
@@ -4078,7 +4110,6 @@ EOF;
             } else {
                 $stock = $res['stock'];
             }
-
             //判断可用库存
             if ($stock < $v['original_number']) {
                 //判断没库存情况下 是否开启预售 并且预售时间是否满足 并且预售数量是否足够

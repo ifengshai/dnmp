@@ -2369,7 +2369,6 @@ class Inventory extends Backend
 
             //sku数量
             $original_number = $v['original_number'];
-
             //仓库sku、库存
             $warehouse_original_info = $_platform_sku
                 ->field('sku,stock')
@@ -2382,8 +2381,7 @@ class Inventory extends Backend
             $item_before = $_item
                 ->field('available_stock,occupy_stock,stock')
                 ->where(['sku' => $warehouse_original_sku])
-                ->find()
-            ;
+                ->find();
 
             //开启事务
             $_item->startTrans();

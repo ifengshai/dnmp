@@ -419,7 +419,7 @@ class WorkOrderList extends Model
     public function getAddress($increment_id, $item_order_number='')
     {
         //获取地址信息
-        $order_field = 'id,site,customer_email as email,firstname,lastname,order_type,country_id,region,region_id,city,street,postcode,telephone';
+        $order_field = 'id,site,customer_email as email,firstname,lastname,order_type,country_id,region,region_id,city,street,postcode,telephone,area';
         $_new_order = new NewOrder();
         $address = $_new_order
             ->where('increment_id', $increment_id)
@@ -478,7 +478,14 @@ class WorkOrderList extends Model
             }else{
                 $url = 'magic/product/lensData';
             }
-            $data = $this->httpRequest($siteType, $url);
+            if ($siteType == 13 || $siteType == 14) {//第三方平台接口
+                $data = [];
+                $data['lens_list'] = ['Plastic lenses','Standard Eyeglass Lenses','Beyond UV Blue Blockers','Photochromic Lenses','Color Tint','Mid-Index Mirrored lenses','Polarized'];   
+                $data['color_list'] = []; 
+                $data['coating_list'] = [];
+            }else{
+                $data = $this->httpRequest($siteType, $url);
+            }
             Cache::set($key, $data, 3600 * 24);
         }
 
@@ -518,7 +525,14 @@ class WorkOrderList extends Model
         $cache_key = $siteType . '_get_lens';
         $data = Cache::get($cache_key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if ($siteType == 13 || $siteType == 14) {//第三方平台接口
+                $data = [];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses','Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses','Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers','Photochromic Lenses' => 'Photochromic Lenses','Color Tint' => 'Color Tint','Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses','Polarized' => 'Polarized'];   
+                $data['color_list'] = []; 
+                $data['coating_list'] = [];
+            }else{
+                $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            }
             Cache::set($cache_key, $data, 3600 * 24);
         }
 
@@ -588,6 +602,12 @@ class WorkOrderList extends Model
             case 11:
                 $url = config('url.zeelooljp_url');
                 break;
+            case 13:
+                $url = config('url.zeeloolcn_url');//抖音
+                break;
+            case 14:
+                $url = config('url.zeeloolcn_url');//阿里
+                break;
             default:
                 return false;
                 break;
@@ -603,19 +623,20 @@ class WorkOrderList extends Model
                 $response = $client->request('POST', $url, array('form_params' => $params));
             }
             $body = $response->getBody();
+
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string) $body;
             $res = json_decode($stringBody, true);
+
             //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
             if ($res === null) {
                 exception('网络异常');
             }
 
-            $status = -1 == $siteType ? $res['code'] : $res['status'];
+            $status = -1 == $siteType || 13 == $siteType || 14 == $siteType? $res['code'] : $res['status'];
             if (200 == $status) {
                 return $res['data'];
             }
-
             exception($res['msg']);
         } catch (Exception $e) {
             exception($e->getMessage());
@@ -705,13 +726,23 @@ class WorkOrderList extends Model
             'country'=>$changeAddress['country_id'],
             'region_id'=>$changeAddress['region_id'],
             'region'=>$changeAddress['region'],
+            'area'=>$changeAddress['area'],
             'city'=>$changeAddress['city'],
             'street'=>$changeAddress['street'],
             'postcode'=>$changeAddress['postcode'],
             'cpf'=>$changeAddress['taxno'],
         );
-        $this->httpRequest($work->work_platform, 'magic/order/editAddress', $postData, 'POST');
-
+        $url = 'magic/order/editAddress';
+        if ($work->work_platform == 13 || $work->work_platform == 14) {
+            $_new_order = new NewOrder();
+            unset($changeAddress['address_id']);
+            $changeAddress['customer_email'] = $changeAddress['email'];
+            unset($changeAddress['email']);
+            $url = 'api/mojing/modify_address';
+            $_new_order->where(['increment_id' => $work->platform_order])->update($changeAddress);
+        }
+            $this->httpRequest($work->work_platform, $url, $postData, 'POST');
+        
         //通知发货系统
         $shipData = [
             'site'=>$work->work_platform,
@@ -890,8 +921,11 @@ class WorkOrderList extends Model
                     !$recipe_type && exception('请选择处方类型');
 
                     //获取镜片、镀膜等名称
-                    $lensCoatName = $this->getLensCoatingName($platform_type, $lensId, $coatingId, $colorId, $recipe_type);
-
+                    if ($work['work_platform'] == 13 || $work['work_platform'] == 14) {
+                        $lensCoatName = [];
+                    }else{
+                        $lensCoatName = $this->getLensCoatingName($platform_type, $lensId, $coatingId, $colorId, $recipe_type);
+                    }
                     //镜片、镀膜序列化信息
                     $prescriptionOption = [
                         'prescription_type' => $recipe_type,
@@ -903,21 +937,27 @@ class WorkOrderList extends Model
                         'color_id' => $colorId,
                         'color_name' => $lensCoatName['colorName'] ?? ''
                     ];
-
+                    
                     //从网站接口获取镜片编码、文案、语种文案
                     $lens_number = '';
                     $web_lens_name = '';
-                    if($lensId){
-                        $postData = [
-                            'sku'=>trim($changeLens['original_sku']),
-                            'prescription_type' => $recipe_type,
-                            'lens_id' => $lensId,
-                            'coating_id' => $coatingId,
-                            'color_id' => $colorId
-                        ];
-                        $lens_info = $this->httpRequest($work->work_platform, 'magic/product/lenInfo', $postData, 'POST');
-                        $lens_number = $lens_info['lens_number'] ?: '';
+                    if ($work['work_platform'] == 13 || $work['work_platform'] == 14) {
+                        $lens_number = $lensId ?: '';
+                        $lens_info = $this->httpRequest($work->work_platform, 'api/mojing/lens_info', ['lens_number' => $lensId], 'POST');
                         $web_lens_name = $lens_info['lens_name'] ?: '';
+                    }else{
+                        if($lensId){
+                            $postData = [
+                                'sku'=>trim($changeLens['original_sku']),
+                                'prescription_type' => $recipe_type,
+                                'lens_id' => $lensId,
+                                'coating_id' => $coatingId,
+                                'color_id' => $colorId
+                            ];
+                            $lens_info = $this->httpRequest($work->work_platform, 'magic/product/lenInfo', $postData, 'POST');
+                            $lens_number = $lens_info['lens_number'] ?: '';
+                            $web_lens_name = $lens_info['lens_name'] ?: '';
+                        }
                     }
 
                     //获取处方分类
@@ -925,6 +965,12 @@ class WorkOrderList extends Model
                     $lens_arr['lens_number'] = $lens_number;
                     $_order_data = new OrderData();
                     $prescription_info = $_order_data->set_processing_type($lens_arr);
+
+                    //第三方平台
+                    if ($work['work_platform'] == 13 || $work['work_platform'] == 14) {
+                        $prescriptionOption['lens_number'] = $lensId;
+                        $prescriptionOption['lens_name'] = $lens_info['lens_name'];
+                    }
 
                     $data = [
                         'email' => '',
@@ -998,7 +1044,12 @@ class WorkOrderList extends Model
                         !$recipe_type && exception('请选择处方类型');
 
                         //获取镜片、镀膜等名称
-                        $lensCoatName = $this->getLensCoatingName($platform_type, $lensId, $coatingId, $colorId, $recipe_type);
+                        if ($work['work_platform'] == 13 || $work['work_platform'] == 14) {
+                            $lensCoatName = [];
+                        }else{
+                            $lensCoatName = $this->getLensCoatingName($platform_type, $lensId, $coatingId, $colorId, $recipe_type);
+                        }
+                        
 
                         //镜片、镀膜序列化信息
                         $prescriptionOption = [
@@ -1011,6 +1062,18 @@ class WorkOrderList extends Model
                             'color_id' => $colorId,
                             'color_name' => $lensCoatName['colorName'] ?? '',
                         ];
+
+                        //第三方平台
+                        if ($work['work_platform'] == 13 || $work['work_platform'] == 14) {
+                            if ($lensId) {
+                                $lens_info = $this->httpRequest($work->work_platform, 'api/mojing/lens_info', ['lens_number' => $lensId], 'POST');
+                            }else{
+                                $lens_info = [];
+                            }
+                            
+                            $prescriptionOption['lens_number'] = $lensId;
+                            $prescriptionOption['lens_name'] = $lens_info['lens_name'];
+                        }
 
                         $data = [
                             'email' => $params['address']['email'],
@@ -1282,7 +1345,14 @@ class WorkOrderList extends Model
         $key = $siteType . '_get_lens';
         $data = Cache::get($key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if ($siteType == 13 || $siteType == 14) {//第三方平台接口
+                $data = [];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses','Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses','Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers','Photochromic Lenses' => 'Photochromic Lenses','Color Tint' => 'Color Tint','Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses','Polarized' => 'Polarized'];   
+                $data['color_list'] = []; 
+                $data['coating_list'] = [];
+            }else{
+                $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            }
             Cache::set($key, $data, 3600 * 24);
         }
         $prescription = $data['lens_list'];
@@ -1422,18 +1492,29 @@ class WorkOrderList extends Model
                     'color_id' => $prescriptions['color_id'],
                     'color_name' => $prescriptions['color_name'],
                 ];
+                if ($siteType == 13 || $siteType == 14) {
+                    $postData['product'][$key]['lens_number'] = $prescriptions['lens_number'];
+                    $postData['region'] = $address['region'];
+                    $postData['area'] = $address['area'];
+                }
                 $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
             if(!empty($postData)){
                 try {
-                    $res = $this->httpRequest($siteType, 'magic/order/createOrder', $postData, 'POST');
+                    $pathinfo = 'magic/order/createOrder';
+                    if ($siteType == 13 || $siteType == 14) {
+                        $pathinfo = 'api/mojing/reissue_order';//第三方平台补发接口
+                        $postData['site'] = $siteType;
+                        $postData['old_increment_id'] = self::where(['id' => $work_id])->value('platform_order');
+                    }
+                    $res = $this->httpRequest($siteType, $pathinfo, $postData, 'POST');
                     $increment_id = $res['increment_id'];
 
                     //添加补发的订单号
                     WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
                     self::where(['id' => $work_id])->setField('replacement_order', $increment_id);
-    
+
                     //补发扣库存
                     $this->deductionStock($work_id, $measure_id);
                 } catch (Exception $e) {
@@ -1500,7 +1581,7 @@ class WorkOrderList extends Model
     {
         $url = '';
         $key = $siteType . '_getlens_' . $is_new_version;
-        $data = Cache::get($key);
+        //$data = Cache::get($key);
         if (!$data) {
             if($is_new_version == 1){
                 $url = 'magic/product/newLensData';
@@ -1547,9 +1628,16 @@ class WorkOrderList extends Model
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
         $cache_key = $siteType . '_get_lens';
-        $data = Cache::get($cache_key);
+        //$data = Cache::get($cache_key);
         if (!$data) {
-            $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            if ($siteType == 13 || $siteType == 14) {//第三方平台接口
+                $data = [];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses','Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses','Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers','Photochromic Lenses' => 'Photochromic Lenses','Color Tint' => 'Color Tint','Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses','Polarized' => 'Polarized'];   
+                $data['color_list'] = []; 
+                $data['coating_list'] = [];
+            }else{
+                $data = $this->httpRequest($siteType, 'magic/product/lensData');
+            }
             Cache::set($cache_key, $data, 3600 * 24);
         }
 
@@ -1576,7 +1664,6 @@ class WorkOrderList extends Model
         } else {
             $rendering[] = 'showPrescriptions';
         }
-
         //拼接html页面
         $html = (new View)->fetch('saleaftermanage/work_order_list/ajax_reissue_edit', compact($rendering));
         return ['data' => $data, 'html' => $html];
@@ -2008,7 +2095,7 @@ class WorkOrderList extends Model
                         //仓库sku
                         $platform_info = $item_platform_sku
                             ->field('sku,stock')
-                            ->where(['platform_sku' => $value['change_sku'], 'platform_type' => $row['work_platform']])
+                            ->where(['platform_sku' => $value['change_sku'], 'platform_type' => $work->work_platform])
                             ->find();
                         if ($platform_info['sku']) {
                              $value['change_sku'] = $platform_info['sku'];
@@ -2122,16 +2209,52 @@ class WorkOrderList extends Model
         }
         
         $result = collection($result)->toArray();
+        $param = [];
         if (1 == $measuerInfo) { //更改镜架
             $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result);
+            $param['action'] = 1;
         } elseif (3 == $measuerInfo) { //取消订单
             $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result);
+            $param['action'] = 0;
         } elseif (4 == $measuerInfo) { //赠品
             $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 1);
+            $param['action'] = 1;
         } elseif (5 == $measuerInfo) {//补发
-            $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
+            if ($workOrderList['work_platform'] == 13 || $workOrderList['work_platform'] == 14) {//补发不扣第三方库存
+                return false;
+            }else{
+                $info = (new Inventory())->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
+            }
         } else {
             return false;
+        }
+        if ($workOrderList['work_platform'] == 13 || $workOrderList['work_platform'] == 14) {
+            foreach ($result as $key => $value) {
+                $param['increment_id'] = $workOrderList['platform_order'];
+                
+                if (1 == $measuerInfo) {
+                    $param['sku'] = $value['change_sku'];
+                    $param['qty'] = $value['change_number'];
+                } elseif(3 == $measuerInfo){
+                    $param['sku'] = $value['original_sku'];
+                    $param['qty'] = $value['original_number'];
+
+                }elseif(4 == $measuerInfo){
+                    $param['sku'] = $value['change_sku'];
+                    $param['qty'] = $value['change_number'];
+
+                }
+                $res = $this->httpRequest($workOrderList->work_platform, 'api/mojing/stock_change', $param, 'POST');//第三方平台库存
+                 if (1 == $measuerInfo) {
+                    $ChangeFrameParam = [];
+                    $ChangeFrameParam['increment_id'] = $workOrderList['platform_order'];
+                    $ChangeFrameParam['sku'] = $value['original_sku'];
+                    $ChangeFrameParam['qty'] = $value['original_number'];
+                    $ChangeFrameParam['action'] = 0;
+                    $ress = $this->httpRequest($workOrderList->work_platform, 'api/mojing/stock_change', $ChangeFrameParam, 'POST');//第三方平台库存
+                }
+            }
+            
         }
         return $info;
     }
@@ -2635,6 +2758,7 @@ class WorkOrderList extends Model
             ->where('a.increment_id', $increment_id)
             ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
             ->column('b.item_order_number');
+        $flag = 0;
         $item_order_number_diff = array_diff($all_item_order_number,$item_order_number);//其余子单
         if (!empty($item_order_number_diff)) {
             foreach ($item_order_number_diff as $key => $value) {
@@ -2642,11 +2766,12 @@ class WorkOrderList extends Model
                 if ($distribution_status == 9) {//合单完成的改成合单中
                     $_new_order_item_process->where(['item_order_number' => $value])->update(['distribution_status' => 8]);
                     $_new_order_process->where(['increment_id' => $increment_id])->update(['combine_status' => 0, 'combine_time' => null]);
+                    $flag = 1;
                 }
             }
             $store_house_id = $_new_order_process->where(['increment_id' => $increment_id])->value('store_house_id');//库位号
             $order_id = $_new_order_process->where(['increment_id' => $increment_id])->value('order_id');//order_id
-            if (!$store_house_id) {//没有库位号分配库位号
+            if (!$store_house_id  && $flag) {//没有库位号分配库位号
                 $_stock_house = new StockHouse();
                 $fictitious_time = time();
                 $store_house_info = $_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]])->find();
@@ -2700,9 +2825,10 @@ class WorkOrderList extends Model
             $_new_order_process
                 ->where(['order_id' => $order_id])
                 ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time(),'store_house_id' => 0]);
-            
-            //释放合单库位占用数量    
-            $_stock_house->where(['id' => $store_house_id])->update(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => null]);
+            if ($store_house_id) {
+                //释放合单库位占用数量    
+                $_stock_house->where(['id' => $store_house_id])->update(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => null]);
+            }
         }
         $this->clear_house_id($item_order_number);//清理掉定制片暂存库位
     }

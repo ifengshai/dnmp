@@ -29,7 +29,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Z', 2: 'V', 3: 'Nh',4:'Ml',5:'We',9:'Es',10:'De',11:'Jp' }, data: 'multiple',addClass: 'selectpicker', operate: 'IN', formatter: Table.api.formatter.status },
+                        { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Z', 2: 'V', 3: 'Nh',4:'Ml',5:'We',9:'Es',10:'De',11:'Jp',13:'Zeeloolcn',14:'Alibaba' }, data: 'multiple',addClass: 'selectpicker', operate: 'IN', formatter: Table.api.formatter.status },
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
@@ -855,6 +855,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#work_platform').val(10);
                 } else if (str == '139' || str == '469'){
                     $('#work_platform').val(11);
+                }else if (str == '180'){
+                    $('#work_platform').val(13);
+                }else if (str == '900'){
+                    $('#work_platform').val(14);
+                }
+                if (str == '180' || str == '900') {
+                    //$('#c-replenish_money').attr('disabled',true);
+                    $('.step10').find('input').attr('disabled',true);
+                    $('.step9').find('input').attr('disabled',true);
+                    $('.step2').find('input').attr('disabled',true);
+                    $('#c-area').attr('disabled',false);
+                    $('#c-area1').attr('disabled',false);
+                }else{
+                    //$('#c-replenish_money').attr('disabled',false);
+                    $('.step10').find('input').attr('disabled',false);
+                    $('.step9').find('input').attr('disabled',false);
+                    $('.step2').find('input').attr('disabled',false);
+                    $('#c-area').attr('disabled',true);
+                    $('#c-area1').attr('disabled',true);
                 }
                 $('.selectpicker ').selectpicker('refresh');
 
@@ -923,6 +942,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     }
                                     $('#c-region1').val(data.address.region);
                                     $('#c-city').val(data.address.city);
+                                    $('#c-area').val(data.address.area);
                                     $('#c-street').val(data.address.street);
                                     $('#c-postcode').val(data.address.postcode);
                                     $('#c-taxno').val(data.address.taxno);
@@ -946,6 +966,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('#c-region').val(address.region_id);
                                 $('#c-region1').val(address.region);
                                 $('#c-city').val(address.city);
+                                $('#c-area').val(address.area);
                                 $('#c-street').val(address.street);
                                 $('#c-postcode').val(address.postcode);
                                 $('#c-taxno').val(address.taxno);
@@ -1654,6 +1675,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         }
                                         $('#c-region1').val(data.address.region);
                                         $('#c-city').val(data.address.city);
+                                        $('#c-area').val(data.address.area);
                                         $('#c-street').val(data.address.street);
                                         $('#c-postcode').val(data.address.postcode);
                                         $('#c-taxno').val(data.address.taxno);
@@ -1681,6 +1703,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-region').val(address.region_id);
                                     $('#c-region1').val(address.region);
                                     $('#c-city').val(address.city);
+                                    $('#c-area').val(address.area);
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
                                     $('#c-taxno').val(address.taxno);
@@ -2452,6 +2475,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-region').val(real_address.region_id);
                                     $('#c-region1').val(real_address.region);
                                     $('#c-city').val(real_address.city);
+                                    $('#c-area').val(real_address.area);
                                     $('#c-street').val(real_address.street);
                                     $('#c-postcode').val(real_address.postcode);
                                     $('#c-taxno').val(real_address.taxno);
@@ -2479,6 +2503,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                             $('#c-region').val(data.address.region_id);
                                             $('#c-region1').val(data.address.region);
                                             $('#c-city').val(data.address.city);
+                                            $('#c-area').val(data.address.area);
                                             $('#c-street').val(data.address.street);
                                             $('#c-postcode').val(data.address.postcode);
                                             $('#c-taxno').val(data.address.taxno);
@@ -2503,6 +2528,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-region').val(address.region_id);
                                     $('#c-region1').val(address.region);
                                     $('#c-city').val(address.city);
+                                    $('#c-area').val(address.area);
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
                                     $('#c-taxno').val(address.taxno);
@@ -3195,6 +3221,7 @@ function changeOrderAddress(){
                     }
                     $('#c-region12').val(data.address.region);
                     $('#c-city1').val(data.address.city);
+                    $('#c-area1').val(data.address.area);
                     $('#c-street1').val(data.address.street);
                     $('#c-postcode1').val(data.address.postcode);
                     $('#c-taxno1').val(data.address.taxno);
@@ -3217,6 +3244,7 @@ function changeOrderAddress(){
                 $('#c-region12').val(address.region);
                 $('#c-region2').val(address.region_id);
                 $('#c-city1').val(address.city);
+                $('#c-area1').val(address.area)
                 $('#c-street1').val(address.street);
                 $('#c-postcode1').val(address.postcode);
                 $('#c-taxno1').val(address.taxno);
@@ -3351,7 +3379,28 @@ function platform_order(){
             $('#work_platform').val(10);
         } else if (str == '139' || str == '469'){
             $('#work_platform').val(11);
+        }else if (str == '180'){
+            $('#work_platform').val(13);
+        }else if (str == '900'){
+            $('#work_platform').val(14);
         }
+
+        if (str == '180' || str == '900') {
+            //$('#c-replenish_money').attr('disabled',true);
+            $('.step10').find('input').attr('disabled',true);
+            $('.step9').find('input').attr('disabled',true);
+            $('.step2').find('input').attr('disabled',true);
+            $('#c-area').attr('disabled',false);
+            $('#c-area1').attr('disabled',false);
+        }else{
+            //$('#c-replenish_money').attr('disabled',false);
+            $('.step10').find('input').attr('disabled',false);
+            $('.step9').find('input').attr('disabled',false);
+            $('.step2').find('input').attr('disabled',false);
+            $('#c-area').attr('disabled',true);
+            $('#c-area1').attr('disabled',true);
+        }
+
 
         var sitetype = $('#work_platform').val();
         $('#c-order_sku').html('');

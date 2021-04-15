@@ -196,7 +196,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 6: '一件代发',
                                 7: '手动补单',
                                 10: '货到付款',
-                                11: '普通订单'
+                                11: '便利店支付',
+                                41: '免加工单'
                             },
                             operate: 'IN',
                             formatter: Table.api.formatter.status
