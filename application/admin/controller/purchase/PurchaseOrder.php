@@ -1737,45 +1737,6 @@ class PurchaseOrder extends Backend
             $item = new \app\admin\model\itemmanage\Item;
             $product = $item->where($map)->column('available_stock,on_way_stock', 'sku');
 
-            //计算在途数量
-            //计算SKU总采购数量
-            // $purchase = new \app\admin\model\purchase\PurchaseOrder;
-            // $hasWhere['sku'] = ['in', $skus];
-            // $purchase_map['purchase_status'] = ['in', [2, 5, 6, 7, 9]];
-            // $purchase_map['check_status'] = ['in', [0, 1]];
-            // $purchase_map['is_diff'] = 0;
-            // $purchase_map['is_del'] = 1;
-            // $purchase_list = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-            //     ->where($purchase_map)
-            //     ->group('sku')
-            //     ->column('sum(purchase_num) as purchase_num', 'sku');
-
-            // //查询出满足条件的采购单号  旧在途库存计算方式
-            // $ids = $purchase->hasWhere('purchaseOrderItem', $hasWhere)
-            //     ->where($purchase_map)
-            //     ->group('PurchaseOrder.id')
-            //     ->column('PurchaseOrder.id');
-
-            // //查询留样库存
-            // //查询实际采购信息 查询在途库存 = 采购数量 减去 到货数量
-            // $check_map['status'] = 2;
-            // $check_map['type'] = 1;
-            // $check_map['Check.purchase_id'] = ['in', $ids];
-            // $check = new \app\admin\model\warehouse\Check;
-            // $hasWhere['sku'] = ['in', $skus];
-            // $check_list = $check->hasWhere('checkItem', $hasWhere)
-            //     ->where($check_map)
-            //     ->group('sku')
-            //     ->column('sum(arrivals_num) as arrivals_num', 'sku');
-
-
-            //查询生产周期
-            $supplier_sku = new \app\admin\model\purchase\SupplierSku;
-            $supplier_where['sku'] = ['in', $skus];
-            $supplier_where['status'] = 1;
-            $supplier_where['label'] = 1;
-            $supplier_res = $supplier_sku->where($supplier_where)->column('product_cycle', 'sku');
-
             /**
              * 日均销量：A+ 和 A等级，日均销量变动较大，按照2天日均销量补；
              * B和C，C+等级按照5天的日均销量来补货;
@@ -1787,31 +1748,10 @@ class PurchaseOrder extends Backend
              * C和D和E等级按照计划售卖周期的1倍来补
              * 补货量=日均销量*生产入库周期+日均销量*计划售卖周期-实时库存-库存在途
              */
-
             foreach ($list as &$v) {
-                $product_cycle = $supplier_res[$v['true_sku']]['product_cycle'] ? $supplier_res[$v['true_sku']]['product_cycle'] : 7;
                 $onway_stock = $product[$v['true_sku']]['on_way_stock'] ?? 0;
-                if ($v['grade'] == 'A+') {
-                    $times = 1.5;
-                } elseif ($v['grade'] == 'A') {
-                    $times = 1.3;
-                } elseif ($v['grade'] == 'B') {
-                    $times = 1.2;
-                } elseif ($v['grade'] == 'C+') {
-                    $times = 1.1;
-                } else {
-                    $times = 1;
-                }
-                if ($v['grade'] == 'D' || $v['grade'] == 'E' || $v['grade'] == 'F') {
-                    $product_cycle = 7;
-                }
-
-                //补货量
-                $replenish_num = round(($v['days_sales_num'] * $product_cycle) + ($v['days_sales_num'] * $product_cycle * $times) - $product[$v['true_sku']]['available_stock'] - $onway_stock);
-                $v['replenish_num'] = $replenish_num > 0 ? $replenish_num : 0;
                 $v['stock'] = $product[$v['true_sku']]['available_stock'];
                 $v['purchase_qty'] = $onway_stock > 0 ? $onway_stock : 0;
-                //$res[$k]['out_of_stock_num'] = $sku_list[$v['true_sku']]['num'];
                 $v['replenish_days'] = $v['days_sales_num'] > 0 ? floor($v['stock'] / $v['days_sales_num']) : 0;
             }
 
