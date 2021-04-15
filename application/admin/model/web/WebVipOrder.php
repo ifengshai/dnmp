@@ -45,11 +45,11 @@ class WebVipOrder extends Model
                 $params[$k]['order_status'] = $v['order_status'];
                 $params[$k]['order_type'] = $v['order_type'];
                 $params[$k]['paypal_token'] = $v['paypal_token'];
-                $params[$k]['start_time'] = strtotime($v['start_time']) + 28800;
-                $params[$k]['end_time'] = strtotime($v['end_time']) + 28800;
+                $params[$k]['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) + 28800 : 0;
+                $params[$k]['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) + 28800 : 0;
                 $params[$k]['is_active_status'] = $v['is_active_status'];
-                $params[$k]['created_at'] = strtotime($v['created_at']) + 28800;
-                $params[$k]['updated_at'] = strtotime($v['updated_at']) + 28800;
+                $params[$k]['created_at'] = time();
+                $params[$k]['updated_at'] = time();
                 $params[$k]['pay_status'] = $v['pay_status'];
                 $params[$k]['country_id'] = $v['country_id'];
             }
@@ -86,10 +86,10 @@ class WebVipOrder extends Model
                 $params['order_status'] = $v['order_status'];
                 $params['order_type'] = $v['order_type'];
                 $params['paypal_token'] = $v['paypal_token'];
-                $params['start_time'] = strtotime($v['start_time']) + 28800;
-                $params['end_time'] = strtotime($v['end_time']) + 28800;
+                $params['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) + 28800 : 0;
+                $params['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) + 28800 : 0;
                 $params['is_active_status'] = $v['is_active_status'];
-                $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                $params['updated_at'] = time();
                 $params['pay_status'] = $v['pay_status'];
                 $params['country_id'] = $v['country_id'];
                 (new WebVipOrder)->where(['web_id' => $v['id'], 'site' => $site])->update($params);
