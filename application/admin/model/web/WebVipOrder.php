@@ -50,7 +50,7 @@ class WebVipOrder extends Model
                 $params[$k]['is_active_status'] = $v['is_active_status'];
                 $params[$k]['created_at'] = time();
                 $params[$k]['updated_at'] = time();
-                $params[$k]['pay_status'] = $v['pay_status'];
+                $params[$k]['pay_status'] = $v['pay_status'] ?: 0;
                 $params[$k]['country_id'] = $v['country_id'];
             }
             (new WebVipOrder)->saveAll($params);
@@ -90,7 +90,7 @@ class WebVipOrder extends Model
                 $params['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) + 28800 : 0;
                 $params['is_active_status'] = $v['is_active_status'];
                 $params['updated_at'] = time();
-                $params['pay_status'] = $v['pay_status'];
+                $params['pay_status'] = $v['pay_status'] ?: 0;
                 $params['country_id'] = $v['country_id'];
                 (new WebVipOrder)->where(['web_id' => $v['id'], 'site' => $site])->update($params);
             }
