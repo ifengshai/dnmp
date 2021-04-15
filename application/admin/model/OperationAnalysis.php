@@ -55,6 +55,9 @@ class OperationAnalysis extends Model
             case 11:
                 $model = Db::connect('database.db_zeelool_jp');
                 break;
+            case 12:
+                $model = Db::connect('database.db_voogueme_acc');
+                break;
             default:
                 $model = false;
                 break;
@@ -242,9 +245,12 @@ class OperationAnalysis extends Model
 	public function getList($id)
 	{
         $model = $this->get_model_by_id($id);
+        echo 111;
         if(false == $model){
+            echo 666;exit;
             return false;
         }
+        echo 222;exit;
         $where['order_platform'] = $id;
         //求出本站点的今天所有的数据
         $today_sales_money_data                 = $this->get_today_sales_money($id);

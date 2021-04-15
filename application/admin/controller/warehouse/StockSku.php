@@ -29,6 +29,8 @@ class StockSku extends Backend
      */
     protected $model = null;
 
+    protected $noNeedRight = ['import'];
+
     public function _initialize()
     {
         parent::_initialize();

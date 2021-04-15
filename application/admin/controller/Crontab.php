@@ -2285,45 +2285,6 @@ class Crontab extends Backend
         }
     }
 
-
-    /**
-     * 定时统计每天的销量(弃用)
-     */
-    public function get_sales_order_num()
-    {
-        Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
-        Db::connect('database.db_voogueme')->table('sales_flat_order')->query("set time_zone='+8:00'");
-        Db::connect('database.db_nihao')->table('sales_flat_order')->query("set time_zone='+8:00'");
-
-        //计算前一天的销量
-        $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
-        $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
-        $map['created_at'] = ['between', [$stime, $etime]];
-        $map['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
-        $zeelool_count = Db::connect('database.db_zeelool')->table('sales_flat_order')->where($map)->count(1);
-        $zeelool_total = Db::connect('database.db_zeelool')->table('sales_flat_order')->where($map)->sum('base_grand_total');
-
-        $voogueme_count = Db::connect('database.db_voogueme')->table('sales_flat_order')->where($map)->count(1);
-        $voogueme_total = Db::connect('database.db_voogueme')->table('sales_flat_order')->where($map)->sum('base_grand_total');
-
-        $nihao_count = Db::connect('database.db_nihao')->table('sales_flat_order')->where($map)->count(1);
-        $nihao_total = Db::connect('database.db_nihao')->table('sales_flat_order')->where($map)->sum('base_grand_total');
-
-        $data['zeelool_sales_num'] = $zeelool_count;
-        $data['voogueme_sales_num'] = $voogueme_count;
-        $data['nihao_sales_num'] = $nihao_count;
-        $data['all_sales_num'] = $zeelool_count + $voogueme_count + $nihao_count;
-        $data['zeelool_sales_money'] = $zeelool_total;
-        $data['voogueme_sales_money'] = $voogueme_total;
-        $data['nihao_sales_money'] = $nihao_total;
-        $data['all_sales_money'] = $zeelool_total + $voogueme_total + $nihao_total;
-        $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
-        $data['createtime'] = date("Y-m-d H:i:s");
-        Db::name('order_statistics')->insert($data);
-        echo 'ok';
-        die;
-    }
-
     /**
      * 定时统计每天的销量等数据
      *之后修改添加
@@ -2341,6 +2302,7 @@ class Crontab extends Backend
         $zeelool_es_model = Db::connect('database.db_zeelool_es');
         $zeelool_de_model = Db::connect('database.db_zeelool_de');
         $zeelool_jp_model = Db::connect('database.db_zeelool_jp');
+        $voogmechicModel = Db::connect('database.db_voogueme_acc');
         $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
@@ -2364,12 +2326,24 @@ class Crontab extends Backend
         $zeelool_jp_model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $zeelool_jp_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $zeelool_jp_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $voogmechicModel
+            ->table('sales_flat_order')
+            ->query("set time_zone='+8:00'");
+        $voogmechicModel
+            ->table('sales_flat_quote')
+            ->query("set time_zone='+8:00'");
+        $voogmechicModel
+            ->table('customer_entity')
+            ->query("set time_zone='+8:00'");
 
         //计算前一天的销量
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
-        $map['created_at'] = $date['created_at'] = $update['updated_at'] =  ['between', [$stime, $etime]];
-        $map['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete','delivered']];
+        $map['created_at'] = $date['created_at'] = $update['updated_at'] = ['between', [$stime, $etime]];
+        $map['status'] = [
+            'in',
+            ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']
+        ];
         $map['order_type'] = 1;
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
         $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
@@ -2571,76 +2545,134 @@ class Crontab extends Backend
 
         //zeelool_jp购物车更新转化率
         if ($zeelool_jp_shoppingcart_update_total > 0) {
-            $zeelool_jp_shoppingcart_update_conversion = round(($zeelool_jp_count / $zeelool_jp_shoppingcart_update_total) * 100, 2);
+            $zeelool_jp_shoppingcart_update_conversion = round(($zeelool_jp_count / $zeelool_jp_shoppingcart_update_total) * 100,
+                2);
         } else {
             $zeelool_jp_shoppingcart_update_conversion = 0;
         }
         //zeelool_jp注册用户数
         $zeelool_jp_register_customer = $zeelool_jp_model->table('customer_entity')->where($date)->count('*');
-        $data['zeelool_sales_num']                          = $zeelool_count;
-        $data['voogueme_sales_num']                         = $voogueme_count;
-        $data['nihao_sales_num']                            = $nihao_count;
-        $data['meeloog_sales_num']                          = $meeloog_count;
-        $data['zeelool_es_sales_num']                       = $zeelool_es_count;
-        $data['zeelool_de_sales_num']                       = $zeelool_de_count;
-        $data['zeelool_jp_sales_num']                       = $zeelool_jp_count;
-        $data['all_sales_num']                              = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count;
-        $data['zeelool_sales_money']                        = $zeelool_total;
-        $data['voogueme_sales_money']                       = $voogueme_total;
-        $data['nihao_sales_money']                          = $nihao_total;
-        $data['meeloog_sales_money']                        = $meeloog_total;
-        $data['zeelool_es_sales_money']                     = $zeelool_es_total;
-        $data['zeelool_de_sales_money']                     = $zeelool_de_total;
-        $data['zeelool_jp_sales_money']                     = $zeelool_jp_total;
-        $data['all_sales_money']                            = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total;
-        $data['zeelool_unit_price']                         = $zeelool_unit_price;
-        $data['voogueme_unit_price']                        = $voogueme_unit_price;
-        $data['nihao_unit_price']                           = $nihao_unit_price;
-        $data['meeloog_unit_price']                         = $meeloog_unit_price;
-        $data['zeelool_es_unit_price']                      = $zeelool_es_unit_price;
-        $data['zeelool_de_unit_price']                      = $zeelool_de_unit_price;
-        $data['zeelool_jp_unit_price']                      = $zeelool_jp_unit_price;
-        $data['all_unit_price']                             = $data['all_sales_num'] ? @round($data['all_sales_money'] / $data['all_sales_num'] * 100, 2) : 0;
-        $data['zeelool_shoppingcart_total']                 = $zeelool_shoppingcart_total;
-        $data['voogueme_shoppingcart_total']                = $voogueme_shoppingcart_total;
-        $data['nihao_shoppingcart_total']                   = $nihao_shoppingcart_total;
-        $data['meeloog_shoppingcart_total']                 = $meeloog_shoppingcart_total;
-        $data['zeelool_es_shoppingcart_total']              = $zeelool_es_shoppingcart_total;
-        $data['zeelool_de_shoppingcart_total']              = $zeelool_de_shoppingcart_total;
-        $data['zeelool_jp_shoppingcart_total']              = $zeelool_jp_shoppingcart_total;
-        $data['all_shoppingcart_total']                     = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total + $meeloog_shoppingcart_total;
-        $data['zeelool_shoppingcart_conversion']            = $zeelool_shoppingcart_conversion;
-        $data['voogueme_shoppingcart_conversion']           = $voogueme_shoppingcart_conversion;
-        $data['nihao_shoppingcart_conversion']              = $nihao_shoppingcart_conversion;
-        $data['meeloog_shoppingcart_conversion']            = $meeloog_shoppingcart_conversion;
-        $data['zeelool_es_shoppingcart_conversion']         = $zeelool_es_shoppingcart_conversion;
-        $data['zeelool_de_shoppingcart_conversion']         = $zeelool_de_shoppingcart_conversion;
-        $data['zeelool_jp_shoppingcart_conversion']         = $zeelool_jp_shoppingcart_conversion;
-        $data['all_shoppingcart_conversion']                = $data['all_shoppingcart_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_total'] * 100, 2) : 0;
-        $data['zeelool_register_customer']                  = $zeelool_register_customer;
-        $data['voogueme_register_customer']                 = $voogueme_register_customer;
-        $data['nihao_register_customer']                    = $nihao_register_customer;
-        $data['meeloog_register_customer']                  = $meeloog_register_customer;
-        $data['zeelool_es_register_customer']               = $zeelool_es_register_customer;
-        $data['zeelool_de_register_customer']               = $zeelool_de_register_customer;
-        $data['zeelool_jp_register_customer']               = $zeelool_jp_register_customer;
-        $data['all_register_customer']                      = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer + $meeloog_register_customer;
-        $data['zeelool_shoppingcart_update_total']          = $zeelool_shoppingcart_update_total;
-        $data['voogueme_shoppingcart_update_total']         = $voogueme_shoppingcart_update_total;
-        $data['nihao_shoppingcart_update_total']            = $nihao_shoppingcart_update_total;
-        $data['meeloog_shoppingcart_update_total']          = $meeloog_shoppingcart_update_total;
-        $data['zeelool_es_shoppingcart_update_total']       = $zeelool_es_shoppingcart_update_total;
-        $data['zeelool_de_shoppingcart_update_total']       = $zeelool_de_shoppingcart_update_total;
-        $data['zeelool_jp_shoppingcart_update_total']       = $zeelool_jp_shoppingcart_update_total;
-        $data['all_shoppingcart_update_total']              = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total + $meeloog_shoppingcart_update_total;
-        $data['zeelool_shoppingcart_update_conversion']     = $zeelool_shoppingcart_update_conversion;
-        $data['voogueme_shoppingcart_update_conversion']    = $voogueme_shoppingcart_update_conversion;
-        $data['nihao_shoppingcart_update_conversion']       = $nihao_shoppingcart_update_conversion;
-        $data['meeloog_shoppingcart_update_conversion']     = $meeloog_shoppingcart_update_conversion;
-        $data['zeelool_es_shoppingcart_update_conversion']  = $zeelool_es_shoppingcart_update_conversion;
-        $data['zeelool_de_shoppingcart_update_conversion']  = $zeelool_de_shoppingcart_update_conversion;
-        $data['zeelool_jp_shoppingcart_update_conversion']  = $zeelool_jp_shoppingcart_update_conversion;
-        $data['all_shoppingcart_update_conversion']       = $data['all_shoppingcart_update_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_update_total'] * 100, 2) : 0;
+
+        //voogmechic
+        $voogmechicCount = $voogmechicModel
+            ->table('sales_flat_order')
+            ->where($map)
+            ->count(1);
+        $voogmechicTotal = $voogmechicModel
+            ->table('sales_flat_order')
+            ->where($map)
+            ->sum('base_grand_total');
+        //voogmechic客单价
+        if ($voogmechicCount > 0) {
+            $voogmechicUnitPrice = round(($voogmechicTotal / $voogmechicCount), 2);
+        } else {
+            $voogmechicUnitPrice = 0;
+        }
+        //voogmechic购物车数
+        $voogmechicShoppingcartTotal = $voogmechicModel
+            ->table('sales_flat_quote')
+            ->where($date)->where('base_grand_total', 'GT', 0)
+            ->count('*');
+        //voogmechic购物车更新数
+        $voogmechicShoppingcartUpdateTotal = $voogmechicModel
+            ->table('sales_flat_quote')
+            ->where($update)
+            ->where('base_grand_total', 'GT', 0)
+            ->count('*');
+        //voogmechic购物车转化率
+        if ($voogmechicShoppingcartTotal > 0) {
+            $voogmechicShoppingcartConversion = round(($voogmechicCount / $voogmechicShoppingcartTotal) * 100, 2);
+        } else {
+            $voogmechicShoppingcartConversion = 0;
+        }
+        //voogmechic购物车更新转化率
+        if ($voogmechicShoppingcartUpdateTotal > 0) {
+            $voogmechicShoppingcartUpdateConversion = round(($voogmechicCount / $voogmechicShoppingcartUpdateTotal) * 100,
+                2);
+        } else {
+            $voogmechicShoppingcartUpdateConversion = 0;
+        }
+        //voogmechic注册用户数
+        $voogmechicRegisterCustomer = $voogmechicModel
+            ->table('customer_entity')
+            ->where($date)
+            ->count('*');
+
+        $data['zeelool_sales_num'] = $zeelool_count;
+        $data['voogueme_sales_num'] = $voogueme_count;
+        $data['nihao_sales_num'] = $nihao_count;
+        $data['meeloog_sales_num'] = $meeloog_count;
+        $data['zeelool_es_sales_num'] = $zeelool_es_count;
+        $data['zeelool_de_sales_num'] = $zeelool_de_count;
+        $data['zeelool_jp_sales_num'] = $zeelool_jp_count;
+        $data['voogmechic_sales_num'] = $voogmechicCount;
+        $data['all_sales_num'] = $zeelool_count + $voogueme_count + $nihao_count + $meeloog_count;
+        $data['zeelool_sales_money'] = $zeelool_total;
+        $data['voogueme_sales_money'] = $voogueme_total;
+        $data['nihao_sales_money'] = $nihao_total;
+        $data['meeloog_sales_money'] = $meeloog_total;
+        $data['zeelool_es_sales_money'] = $zeelool_es_total;
+        $data['zeelool_de_sales_money'] = $zeelool_de_total;
+        $data['zeelool_jp_sales_money'] = $zeelool_jp_total;
+        $data['voogmechic_sales_money'] = $voogmechicTotal;
+        $data['all_sales_money'] = $zeelool_total + $voogueme_total + $nihao_total + $meeloog_total;
+        $data['zeelool_unit_price'] = $zeelool_unit_price;
+        $data['voogueme_unit_price'] = $voogueme_unit_price;
+        $data['nihao_unit_price'] = $nihao_unit_price;
+        $data['meeloog_unit_price'] = $meeloog_unit_price;
+        $data['zeelool_es_unit_price'] = $zeelool_es_unit_price;
+        $data['zeelool_de_unit_price'] = $zeelool_de_unit_price;
+        $data['zeelool_jp_unit_price'] = $zeelool_jp_unit_price;
+        $data['voogmechic_unit_price'] = $voogmechicUnitPrice;
+        $data['all_unit_price'] = $data['all_sales_num'] ? @round($data['all_sales_money'] / $data['all_sales_num'] * 100,
+            2) : 0;
+        $data['zeelool_shoppingcart_total'] = $zeelool_shoppingcart_total;
+        $data['voogueme_shoppingcart_total'] = $voogueme_shoppingcart_total;
+        $data['nihao_shoppingcart_total'] = $nihao_shoppingcart_total;
+        $data['meeloog_shoppingcart_total'] = $meeloog_shoppingcart_total;
+        $data['zeelool_es_shoppingcart_total'] = $zeelool_es_shoppingcart_total;
+        $data['zeelool_de_shoppingcart_total'] = $zeelool_de_shoppingcart_total;
+        $data['zeelool_jp_shoppingcart_total'] = $zeelool_jp_shoppingcart_total;
+        $data['voogmechic_shoppingcart_total'] = $voogmechicShoppingcartTotal;
+        $data['all_shoppingcart_total'] = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total + $meeloog_shoppingcart_total;
+        $data['zeelool_shoppingcart_conversion'] = $zeelool_shoppingcart_conversion;
+        $data['voogueme_shoppingcart_conversion'] = $voogueme_shoppingcart_conversion;
+        $data['nihao_shoppingcart_conversion'] = $nihao_shoppingcart_conversion;
+        $data['meeloog_shoppingcart_conversion'] = $meeloog_shoppingcart_conversion;
+        $data['zeelool_es_shoppingcart_conversion'] = $zeelool_es_shoppingcart_conversion;
+        $data['zeelool_de_shoppingcart_conversion'] = $zeelool_de_shoppingcart_conversion;
+        $data['zeelool_jp_shoppingcart_conversion'] = $zeelool_jp_shoppingcart_conversion;
+        $data['voogmechic_shoppingcart_conversion'] = $voogmechicShoppingcartConversion;
+        $data['all_shoppingcart_conversion'] = $data['all_shoppingcart_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_total'] * 100,
+            2) : 0;
+        $data['zeelool_register_customer'] = $zeelool_register_customer;
+        $data['voogueme_register_customer'] = $voogueme_register_customer;
+        $data['nihao_register_customer'] = $nihao_register_customer;
+        $data['meeloog_register_customer'] = $meeloog_register_customer;
+        $data['zeelool_es_register_customer'] = $zeelool_es_register_customer;
+        $data['zeelool_de_register_customer'] = $zeelool_de_register_customer;
+        $data['zeelool_jp_register_customer'] = $zeelool_jp_register_customer;
+        $data['voogmechic_register_customer'] = $voogmechicRegisterCustomer;
+        $data['all_register_customer'] = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer + $meeloog_register_customer;
+        $data['zeelool_shoppingcart_update_total'] = $zeelool_shoppingcart_update_total;
+        $data['voogueme_shoppingcart_update_total'] = $voogueme_shoppingcart_update_total;
+        $data['nihao_shoppingcart_update_total'] = $nihao_shoppingcart_update_total;
+        $data['meeloog_shoppingcart_update_total'] = $meeloog_shoppingcart_update_total;
+        $data['zeelool_es_shoppingcart_update_total'] = $zeelool_es_shoppingcart_update_total;
+        $data['zeelool_de_shoppingcart_update_total'] = $zeelool_de_shoppingcart_update_total;
+        $data['zeelool_jp_shoppingcart_update_total'] = $zeelool_jp_shoppingcart_update_total;
+        $data['voogmechic_shoppingcart_update_total'] = $voogmechicShoppingcartUpdateTotal;
+        $data['all_shoppingcart_update_total'] = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total + $meeloog_shoppingcart_update_total;
+        $data['zeelool_shoppingcart_update_conversion'] = $zeelool_shoppingcart_update_conversion;
+        $data['voogueme_shoppingcart_update_conversion'] = $voogueme_shoppingcart_update_conversion;
+        $data['nihao_shoppingcart_update_conversion'] = $nihao_shoppingcart_update_conversion;
+        $data['meeloog_shoppingcart_update_conversion'] = $meeloog_shoppingcart_update_conversion;
+        $data['zeelool_es_shoppingcart_update_conversion'] = $zeelool_es_shoppingcart_update_conversion;
+        $data['zeelool_de_shoppingcart_update_conversion'] = $zeelool_de_shoppingcart_update_conversion;
+        $data['zeelool_jp_shoppingcart_update_conversion'] = $zeelool_jp_shoppingcart_update_conversion;
+        $data['voogmechic_shoppingcart_update_conversion'] = $voogmechicShoppingcartUpdateConversion;
+        $data['all_shoppingcart_update_conversion'] = $data['all_shoppingcart_update_total'] ? @round($data['all_sales_num'] / $data['all_shoppingcart_update_total'] * 100,
+            2) : 0;
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_statistics')->insert($data);
@@ -3124,6 +3156,9 @@ class Crontab extends Backend
             case 11:
                 $model = Db::connect('database.db_zeelool_jp');
                 break;
+            case 12:
+                $model = Db::connect('database.db_voogueme_acc');
+                break;
             default:
                 $model = false;
                 break;
@@ -3391,6 +3426,9 @@ class Crontab extends Backend
                 break;
             case 11:
                 $model = Db::connect('database.db_zeelool_jp');
+                break;
+            case 12:
+                $model = Db::connect('database.db_voogueme_acc');
                 break;
             default:
                 $model = false;

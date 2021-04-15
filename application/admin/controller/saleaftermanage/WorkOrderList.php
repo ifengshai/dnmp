@@ -2755,7 +2755,7 @@ class WorkOrderList extends Backend
 
         $result = $this->model->getOrderItem($order_number, '', 0, [], 1);
         empty($result) && $this->error('未获取到数据');
-        empty($result['sku_list']) && $this->error('未获取到子单数据');
+        //empty($result['sku_list']) && $this->error('未获取到子单数据');
 
         $this->success('', '', $result, 0);
     }

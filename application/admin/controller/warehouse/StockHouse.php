@@ -31,7 +31,7 @@ class StockHouse extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['print_label', 'stock_print_label'];
+    protected $noNeedRight = ['print_label', 'stock_print_label', 'import'];
 
     public function _initialize()
     {
