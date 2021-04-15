@@ -4,7 +4,7 @@
  * 执行时间：每天一次
  */
 
-namespace app\admin\controller\shell;
+namespace app\admin\controller\shell\kafka;
 
 use app\common\controller\Backend;
 use think\Db;
