@@ -624,12 +624,12 @@ class ItemPlatformSku extends Backend
             if ($uploadItemArr['site'] == 13) {
                 $params['sku_info'] = implode(',', $uploadItemArr['skus']);
                 $params['platform_type'] = 1;
-                $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                $third_res = Http::post('https://modian.nextmar.com/index.php/api/commodity/index', $params);
                 $third_res = json_decode($third_res, true);
             } elseif ($uploadItemArr['site'] == 14) {
                 $params['sku_info'] = implode(',', $uploadItemArr['skus']);
                 $params['platform_type'] = 2;
-                $third_res = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                $third_res = Http::post('https://modian.nextmar.com/index.php/api/commodity/index', $params);
                 $third_res = json_decode($third_res, true);
             } else {
                 $soap_res = Soap::createProduct($uploadItemArr);
@@ -704,12 +704,12 @@ class ItemPlatformSku extends Backend
             if ($uploadItemArr['site'] == 13) {
                 $params['sku_info'] = $itemPlatformRow['platform_sku'];
                 $params['platform_type'] = 1;
-                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                $thirdRes = Http::post('https://modian.nextmar.com/index.php/api/commodity/index', $params);
                 $thirdRes = json_decode($thirdRes, true);
             } elseif ($uploadItemArr['site'] == 14) {
                 $params['sku_info'] = $itemPlatformRow['platform_sku'];
                 $params['platform_type'] = 2;
-                $thirdRes = Http::post('http://shop.mruilove.com/index.php/api/commodity/index', $params);
+                $thirdRes = Http::post('https://modian.nextmar.com/index.php/api/commodity/index', $params);
                 $thirdRes = json_decode($thirdRes, true);
             } else {
                 $soapRes = Soap::createProduct($uploadItemArr);
