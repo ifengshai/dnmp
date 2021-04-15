@@ -523,7 +523,7 @@ class TrackReg extends Backend
         //查询所有站点
         $siteList = $platform->select();
 
-        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->limit(10)->column('sku');
+        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
         $params = [];
         $date = date('Y-m-d 00:00:00');
 
@@ -579,8 +579,6 @@ class TrackReg extends Backend
             echo $v."\n";
             usleep(20000);
         }
-        dump($params);
-        die;
         if ($params) {
             //清空表
             Db::execute("truncate table fa_product_grade;");
