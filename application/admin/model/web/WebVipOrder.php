@@ -51,7 +51,7 @@ class WebVipOrder extends Model
                 $params[$k]['created_at'] = time();
                 $params[$k]['updated_at'] = time();
                 $params[$k]['pay_status'] = $v['pay_status'] ?: 0;
-                $params[$k]['country_id'] = $v['country_id'];
+                $params[$k]['country_id'] = $v['country_id'] ?: 0;
             }
             (new WebVipOrder)->saveAll($params);
             return true;
@@ -83,15 +83,15 @@ class WebVipOrder extends Model
                 $params['customer_id'] = $v['customer_id'];
                 $params['order_number'] = $v['order_number'];
                 $params['order_amount'] = $v['order_amount'];
-                $params['order_status'] = $v['order_status'];
-                $params['order_type'] = $v['order_type'];
+                $params['order_status'] = $v['order_status'] ?: 0;
+                $params['order_type'] = $v['order_type'] ?: 0;
                 $params['paypal_token'] = $v['paypal_token'];
                 $params['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) + 28800 : 0;
                 $params['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) + 28800 : 0;
                 $params['is_active_status'] = $v['is_active_status'];
                 $params['updated_at'] = time();
                 $params['pay_status'] = $v['pay_status'] ?: 0;
-                $params['country_id'] = $v['country_id'];
+                $params['country_id'] = $v['country_id'] ?: 0;
                 (new WebVipOrder)->where(['web_id' => $v['id'], 'site' => $site])->update($params);
             }
 
