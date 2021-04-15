@@ -106,11 +106,9 @@ class Soap
                 break;
             case 13:
                 $url = config('url.api_zeelool_cn_url');
-                $url = 'https://modian.nextmar.com/api/commodity/index';
                 break;
             case 14:
-                $url = config('url.api_alibaba_url');
-                $url = 'https://modian.nextmar.com/index.php/api/commodity/index';
+                $url = config('url.api_zeelool_cn_url');
                 break;
             default:
                 return false;
