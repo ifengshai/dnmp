@@ -18,4 +18,7 @@ return [
     'app\admin\command\Addon',
     'app\admin\command\Api',
     'app\admin\command\Crasp',
+    'app\admin\controller\shell\operate\Repurchase',
+    'app\admin\controller\shell\operate\RepurchaseAsynData',
+    'app\admin\controller\shell\operate\DataMarketAsynData',
 ];

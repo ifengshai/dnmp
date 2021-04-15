@@ -512,6 +512,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                         return true;
                                     }
                                 },
+                                {
+                                    name: 'detail',
+                                    text: '加入日度补货计划',
+                                    title: __('加入日度补货计划'),
+                                    classname: 'btn btn-xs btn btn-info btn-dialog',
+                                    icon: 'fa fa-pencil',
+                                    url: Config.moduleurl + '/new_product/addReplenishOrder/type/3',
+                                    extend: 'data-area = \'["40%","40%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        return true;
+                                    }
+                                },
 
                             ],
                             formatter: Table.api.formatter.operate
@@ -584,8 +600,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             formatter: Table.api.formatter.status, visible: false
                         },
                         {
-                            field: 'type', title: __('类型'), custom: { 1: 'success', 2: 'danger' },
-                            searchList: { 1: '月度计划', 2: '周度计划' },
+                            field: 'type', title: __('类型'), custom: { 1: 'success', 2: 'danger' , 3: 'info' },
+                            searchList: { 1: '月度计划', 2: '周度计划', 3: '日度计划' },
                             formatter: Table.api.formatter.status
                         },
 
@@ -724,8 +740,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
                         {
-                            field: 'type', title: __('需求类型'), custom: { 1: 'success', 2: 'danger' },
-                            searchList: { 1: '月度计划', 2: '周度计划' },
+                            field: 'type', title: __('需求类型'), custom: { 1: 'success', 2: 'danger' , 3: 'info'},
+                            searchList: { 1: '月度计划', 2: '周度计划', 3: '日度计划' },
                             formatter: Table.api.formatter.status
                         },
                         // {field: 'create_person', title: __('Create_person')},

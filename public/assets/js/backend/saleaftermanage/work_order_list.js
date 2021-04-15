@@ -559,7 +559,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('#c-order_sku').attr("disabled",false);
                     $('.selectpicker ').selectpicker('refresh');
                     var is_order_item = $('#is_order_item').val();
-                    if (2 != Config.work_type && 1 != is_order_item) {itemSelectpicker(1,$(this));}
+                    if (2 != Config.work_type && 1 != is_order_item) {
+                        itemSelectpicker(1,$(this));
+                    }
                 }
             })
 
@@ -943,6 +945,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-area').val(data.address.area);
                                     $('#c-street').val(data.address.street);
                                     $('#c-postcode').val(data.address.postcode);
+                                    $('#c-taxno').val(data.address.taxno);
                                     $('#c-currency_code').val(order_pay_currency);
                                 /*} else {
                                     address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
@@ -966,6 +969,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('#c-area').val(address.area);
                                 $('#c-street').val(address.street);
                                 $('#c-postcode').val(address.postcode);
+                                $('#c-taxno').val(address.taxno);
                             })
 
                             //追加
@@ -1674,6 +1678,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         $('#c-area').val(data.address.area);
                                         $('#c-street').val(data.address.street);
                                         $('#c-postcode').val(data.address.postcode);
+                                        $('#c-taxno').val(data.address.taxno);
                                         $('#c-currency_code').val(order_pay_currency);
                                     /*} else {
                                         address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
@@ -1701,6 +1706,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-area').val(address.area);
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
+                                    $('#c-taxno').val(address.taxno);
                                 })
 
                                 //追加
@@ -1987,6 +1993,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#item_input-hidden').html('');
                         if (2 != Config.work_type) {
                             $('#order_item_numbers').val('');
+                        }else{
+                            var item_order_sku_arr = $('.item_order_selectpicker').val();//子单号
+                            var item_order_sku = [];
+                            if (item_order_sku_arr) {
+                                for (var i = item_order_sku_arr.length - 1; i >= 0; i--) {
+                                   $split = item_order_sku_arr[i].split("/");
+                                   item_order_sku[i] = $split[0];
+                                }
+                                var order_item_numbers = item_order_sku.join(',');
+                                $('#order_item_numbers').val(order_item_numbers);
+                            }else{
+                                $('#order_item_numbers').val('');
+                            }
                         }
     
                     }
@@ -2000,6 +2019,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#item_input-hidden').html('');
                         if (2 != Config.work_type) {
                             $('#order_item_numbers').val('');
+                        }else{
+                            var item_order_sku_arr = $('.item_order_selectpicker').val();//子单号
+                            var item_order_sku = [];
+                            if (item_order_sku_arr) {
+                                for (var i = item_order_sku_arr.length - 1; i >= 0; i--) {
+                                   $split = item_order_sku_arr[i].split("/");
+                                   item_order_sku[i] = $split[0];
+                                }
+                                var order_item_numbers = item_order_sku.join(',');
+                                $('#order_item_numbers').val(order_item_numbers);
+                            }else{
+                                $('#order_item_numbers').val('');
+                            }
                         }
                     }
                     $('.status').val(2);
@@ -2446,6 +2478,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-area').val(real_address.area);
                                     $('#c-street').val(real_address.street);
                                     $('#c-postcode').val(real_address.postcode);
+                                    $('#c-taxno').val(real_address.taxno);
                                     $('#c-currency_code').val(order_pay_currency);
                                     $('#shipping_type').val(real_address.shipping_type);
                                     $('#pay_method').val(real_address.pay_method);
@@ -2473,6 +2506,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                             $('#c-area').val(data.address.area);
                                             $('#c-street').val(data.address.street);
                                             $('#c-postcode').val(data.address.postcode);
+                                            $('#c-taxno').val(data.address.taxno);
                                             $('#c-currency_code').val(order_pay_currency);
                                         /*} else {
                                             address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
@@ -2497,6 +2531,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     $('#c-area').val(address.area);
                                     $('#c-street').val(address.street);
                                     $('#c-postcode').val(address.postcode);
+                                    $('#c-taxno').val(address.taxno);
                                 })
 
                                 //追加
@@ -2743,6 +2778,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (!id) {
                         return false;
                     }
+                    if (id == 'BR') {
+                        $('#c-taxno').attr('disabled',false);
+                    }else{
+                        $('#c-taxno').attr('disabled',true);
+                    }
                     $.ajax({
                         type: "POST",
                         url: "saleaftermanage/work_order_list/ajaxGetProvince",
@@ -2768,6 +2808,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var id = $(this).val();
                     if (!id) {
                         return false;
+                    }
+                    if (id == 'BR') {
+                        $('#c-taxno1').attr('disabled',false);
+                    }else{
+                        $('#c-taxno1').attr('disabled',true);
                     }
                     $.ajax({
                         type: "POST",
@@ -3179,6 +3224,7 @@ function changeOrderAddress(){
                     $('#c-area1').val(data.address.area);
                     $('#c-street1').val(data.address.street);
                     $('#c-postcode1').val(data.address.postcode);
+                    $('#c-taxno1').val(data.address.taxno);
                     $('#c-currency_code1').val(order_pay_currency);
                 /*}else{
                     address1 += '<option value="' + i + '">' + data.address.address_type + '</option>';
@@ -3201,6 +3247,7 @@ function changeOrderAddress(){
                 $('#c-area1').val(address.area)
                 $('#c-street1').val(address.street);
                 $('#c-postcode1').val(address.postcode);
+                $('#c-taxno1').val(address.taxno);
             })
             $('.selectpicker ').selectpicker('refresh');
         });

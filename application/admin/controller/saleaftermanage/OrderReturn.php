@@ -39,7 +39,7 @@ class OrderReturn extends Backend
     protected $zeelool = null;
     protected $modelItem = null;
     protected $relationSearch = true;
-    protected $noNeedRight = ['machining','order_detail','logistics_node'];
+    protected $noNeedRight = ['machining', 'order_detail', 'logistics_node'];
     //17track key
     protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
 
@@ -69,7 +69,7 @@ class OrderReturn extends Backend
                 return $this->selectpage();
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['saleAfterIssue'])
                 ->where($where)

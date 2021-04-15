@@ -3,6 +3,7 @@
 namespace app\admin\controller\finance;
 
 use app\common\controller\Backend;
+use fast\Tree;
 use think\Db;
 use Mpdf\Mpdf;
 
@@ -19,6 +20,7 @@ class PayOrder extends Backend
         $this->batch = new \app\admin\model\purchase\PurchaseBatch();
         $this->batch_item = new \app\admin\model\purchase\PurchaseBatchItem();
         $this->purchase_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        $this->purchase_order = new \app\admin\model\purchase\PurchaseOrder;
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $this->outstockItem = new \app\admin\model\warehouse\OutStockItem;
         $this->instockItem = new \app\admin\model\warehouse\InstockItem;
@@ -45,13 +47,37 @@ class PayOrder extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
+
+            $where_pur_order=array();
+            if ($filter['purchase_order_user']){
+                //申请人  采购单创建人
+                $where_pur_order['fpo.create_person']= ['like', '%'.$filter['purchase_order_user'].'%'];
+            }
+            if ($filter['1688_number']){
+                //1688运单号
+                $where_pur_order['fpo.1688_number']=$filter['1688_number'];
+            }
+            //1688单号与申请人都是采购单的数据 ,付款单关联采购单,获取付款单ID,查询结果在付款单ID内查询
+            if ($where_pur_order){
+                $pay_id = $this->payorder_item
+                    ->alias('pi')
+                    ->join('fa_purchase_order fpo', 'pi.purchase_order_id=fpo.id', 'left')
+                    ->where($where_pur_order)
+                    ->group('pi.pay_id')
+                    ->column('pi.pay_id');
+                if ($pay_id){
+                    $map['p.id'] =['in',$pay_id];
+                }
+
+            }
+
             if ($filter['pay_number']) {
                 //付款申请单号
                 $map['p.pay_number'] = $filter['pay_number'];
             }
-            if ($filter['supplier_name']) {
+            if ($filter['supplier_id']) {
                 //供应商名称
-                $map['s.supplier_name'] = ['like', '%' . $filter['supplier_name'] . '%'];
+                $map['p.supply_id'] = $filter['supplier_id'];
             }
             if ($filter['status']) {
                 //状态
@@ -78,6 +104,11 @@ class PayOrder extends Backend
             unset($filter['check_user']);
             unset($filter['create_time']);
             unset($filter['one_time-operate']);
+            unset($filter['1688_number']);
+            unset($filter['purchase_order_user']);
+            unset($filter['supplier_id']);
+
+
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $sort = 'p.id';
@@ -91,7 +122,7 @@ class PayOrder extends Backend
             $list = $this->payorder
                 ->alias('p')
                 ->join('fa_supplier s', 'p.supply_id=s.id', 'left')
-                ->field('p.id,s.supplier_name,p.pay_number,p.status,p.create_user,p.check_user,FROM_UNIXTIME(p.create_time) create_time')
+                ->field('p.id,s.supplier_name,p.pay_number,p.status,p.create_user,p.pay_amount,p.check_user,FROM_UNIXTIME(p.create_time) create_time')
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -106,6 +137,32 @@ class PayOrder extends Backend
         return $this->view->fetch();
     }
 
+    public function getSupplier(){
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            //设置过滤方法
+            $this->request->filter(['strip_tags', 'htmlspecialchars']);
+            $this->request->filter(['strip_tags', 'htmlspecialchars']);
+            //搜索关键词,客户端输入以空格分开,这里接收为数组
+            $word = (array) $this->request->request("q_word/a");
+            //当前页
+            $page = $this->request->request("pageNumber");
+            //分页大小
+            $pagesize = $this->request->request("pageSize");
+            //搜索条件
+            $supplier = new \app\admin\model\purchase\Supplier;
+            $name=$word[0];
+            $total=$supplier->where('supplier_name', "like", "%{$name}%")->count();
+
+            $data = $supplier->field('id,supplier_name')
+                ->where('supplier_name', "like", "%{$name}%")
+                ->page($page, $pagesize)
+                ->select();
+            //这里一定要返回有list这个字段,total是可选的,如果total<=list的数量,则会隐藏分页按钮
+            return json(['list' => $data, 'total' => $total]);
+        }
+
+    }
 
 
     /*
@@ -193,35 +250,51 @@ class PayOrder extends Backend
         $imgs = array_filter(explode(',', $pay_order['invoice']));
         //获取付款单子单结算信息
         $settle = $this->payorder_item->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.id as purchase_ids')
             ->where(['a.pay_id' => $id, 'a.pay_type' => 3])
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
             ->select();
         $total1 = 0;
+        $total3 = 0;
         $count1 = 0;
         foreach ($settle as $k => $v) {
+            if ($v['purchase_batch_id'] > 0){
+                $instockDetail = Db::name('check_order')
+                    ->alias('a')
+                    ->join(['in_stock' => 'b'], 'b.check_id = a.id')
+                    ->join(['in_stock_item' => 'c'], 'c.in_stock_id = b.id')
+                    ->where('a.batch_id',$v['purchase_batch_id'])
+                    ->find();
+                $settle[$k]['batch_instock_num'] = $instockDetail['in_stock_num'];
+            }else{
+                $settle[$k]['batch_instock_num'] = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_ids'])->value('instock_num');
+            }
             $total1 += $v['wait_statement_total'];
+            $total3 += $settle[$k]['batch_instock_num'];
             $count1++;
         }
         //获取付款单子单预付信息
         $prepay = $this->payorder_item
             ->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,c.purchase_num')
             ->where(['pay_id' => $id])
             ->where('a.pay_type', '<>', 3)
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
+            ->join(['fa_purchase_order_item' => 'c'], 'c.purchase_id=b.id')
             ->select();
         $total2 = 0;
         $count2 = 0;
+        $count3 = 0;
         foreach ($prepay as $k1 => $v1) {
             $pay_rate = $v1['pay_rate'] * 100;
             $prepay[$k1]['pay_rate'] = $pay_rate;
             $total2 += $v1['pay_grand_total'];
+            $count3 += $v1['purchase_num'];
             $count2++;
         }
         $total = $total1 + $total2;
         $supplier = $this->supplier->where('id', $pay_order['supply_id'])->field('id,supplier_name,remark,currency,period,opening_bank,bank_account,recipient_name')->find();
-        $this->view->assign(compact('pay_order', 'supplier', 'settle', 'prepay', 'total1', 'total2', 'total', 'count1', 'count2', 'imgs'));
+        $this->view->assign(compact('pay_order', 'supplier', 'settle', 'prepay', 'total1', 'total2', 'total', 'count1', 'count2', 'imgs','count3','total3'));
         return $this->view->fetch();
     }
     /*
@@ -284,143 +357,231 @@ class PayOrder extends Backend
             $params = $this->request->post("row/a");
             $id = $params['id'];
             //更改状态
-            $this->payorder->where('id', $id)->update(['status' => 4, 'pay_time' => time(), 'pay_person' => session('admin.nickname'), 'pay_remarks' => $params['pay_remarks']]);
+            $this->payorder
+                ->where('id', $id)
+                ->update([
+                    'status' => 4,
+                    'pay_time' => time(),
+                    'pay_person' => session('admin.nickname'),
+                    'pay_remarks' => $params['pay_remarks']
+                ]);
             //获取付款单下所有的采购单id
-            $pay_order_item = $this->payorder_item->where('pay_id', $id)->where('pay_type', 'in', '1,2')->field('purchase_order_id,pay_type')->select();
-            foreach ($pay_order_item as $key => $value) {
+            $payOrderItem = $this->payorder_item
+                ->where('pay_id', $id)
+                ->where('pay_type', 'in', '1,2')
+                ->field('purchase_order_id,pay_type')
+                ->select();
+            foreach ($payOrderItem as $key => $value) {
                 //判断预付款:修改采购单状态为部分付款
                 if ($value['pay_type'] == 1) {
-                    Db::name('purchase_order')->where('id', $value['purchase_order_id'])->update(['payment_status' => 2]);
+                    Db::name('purchase_order')
+                        ->where('id', $value['purchase_order_id'])
+                        ->update(['payment_status' => 2]);
                 }
                 //判断全款预付:修改采购单状态为已经付款
                 if ($value['pay_type'] == 2) {
-                    Db::name('purchase_order')->where('id', $value['purchase_order_id'])->update(['payment_status' => 3]);
+                    Db::name('purchase_order')
+                        ->where('id', $value['purchase_order_id'])
+                        ->update(['payment_status' => 3]);
                 }
             }
             /**************************************计算采购成本start**********************************/
             //判断采购单id
-            $purchase_order_ids = $this->payorder_item->where('pay_type', 3)->where('pay_id', $id)->group('purchase_order_id')->column('purchase_order_id');
-            foreach ($purchase_order_ids as $v) {
+            $purchaseOrderIds = $this->payorder_item
+                ->where('pay_type', 3)
+                ->where('pay_id', $id)
+                ->group('purchase_order_id')
+                ->column('purchase_order_id');
+            foreach ($purchaseOrderIds as $v) {
                 //采购单总批次
-                $batch_count = $this->batch->where('purchase_id', $v)->count();
-                $batch_count = $batch_count == 0 ? 1 : $batch_count;
+                $batchCount = $this->batch
+                    ->where('purchase_id', $v)
+                    ->count();
+                $batchCount = $batchCount == 0 ? 1 : $batchCount;
                 //付款完成总批次
                 $where['i.purchase_order_id'] = $v;
                 $where['p.status'] = ['in', '4,5'];
                 $where['i.pay_type'] = 3;
-                $pay_batch_count = $this->payorder_item->alias('i')->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')->where($where)->count();
-                if ($batch_count == $pay_batch_count) {
+                $payBatchCount = $this->payorder_item
+                    ->alias('i')
+                    ->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')
+                    ->where($where)
+                    ->count();
+                if ($batchCount == $payBatchCount) {
                     //判断尾款：判断批次若全部完成，修改采购单状态为已经付款
-                    Db::name('purchase_order')->where('id', $v)->update(['payment_status' => 3]);
+                    Db::name('purchase_order')
+                        ->where('id', $v)
+                        ->update(['payment_status' => 3]);
                     //判断结算尾款的采购单是否结算完成，如果完成计算采购成本单价
                     $map['i.purchase_order_id'] = $v;
                     $map['p.status'] = ['in', '4,5'];
-                    $total1 = $this->payorder_item->alias('i')->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')->where($map)->where('i.pay_type', 1)->value('pay_grand_total');  //首付金额
-                    $total2 = $this->payorder_item->alias('i')->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')->where($map)->where('i.pay_type', 3)->sum('wait_statement_total');
+                    $total1 = $this->payorder_item
+                        ->alias('i')
+                        ->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')
+                        ->where($map)
+                        ->where('i.pay_type', 'in', [1, 2])
+                        ->value('pay_grand_total');  //首付金额
+                    $total2 = $this->payorder_item
+                        ->alias('i')
+                        ->join('fa_finance_payorder p', 'i.pay_id=p.id', 'left')
+                        ->where($map)
+                        ->where('i.pay_type', 3)
+                        ->sum('wait_statement_total');
                     $total = $total1 + $total2;
                     //入库总数量
-                    $count = $this->instockItem->alias('i')->join('fa_in_stock s', 'i.in_stock_id=s.id')->join('fa_check_order c', 's.check_id=c.id')->where('c.purchase_id', $v)->sum('i.in_stock_num');
+                    $count = $this->instockItem
+                        ->alias('i')
+                        ->join('fa_in_stock s', 'i.in_stock_id=s.id')
+                        ->join('fa_check_order c', 's.check_id=c.id')
+                        ->where('c.purchase_id', $v)
+                        ->sum('i.in_stock_num');
                     $data['actual_purchase_price'] = $count ? round($total / $count, 2) : 0;
-                    $this->purchase_item->where('purchase_id', $v)->update($data);
+                    $this->purchase_item
+                        ->where('purchase_id', $v)
+                        ->update($data);
                     /**************************************计算采购成本end**********************************/
                     /**************************************计算成本冲减start****************************************/
                     $result = array();
-                    $purchase_order = $this->purchase_item->alias('i')->join('fa_purchase_order o', 'i.purchase_id=o.id')->where('i.purchase_id', $v)->field('round(o.purchase_total/purchase_num,2) purchase_price,actual_purchase_price,i.sku')->find();
+                    $purchaseOrder = $this->purchase_item
+                        ->alias('i')
+                        ->join('fa_purchase_order o', 'i.purchase_id=o.id')
+                        ->where('i.purchase_id', $v)
+                        ->field('round(o.purchase_total/purchase_num,2) purchase_price,actual_purchase_price,i.sku')
+                        ->find();
+
                     //实际采购成本和预估成本不一致，冲减差值
-                    if ($purchase_order['purchase_price'] != $purchase_order['actual_purchase_price']) {
+                    if ($purchaseOrder['purchase_price'] != $purchaseOrder['actual_purchase_price']) {
                         //计算订单出库数量
-                        $out_count1 = $this->item->where('purchase_id', $v)->where('item_order_number', '<>', '')->where('sku', $purchase_order['sku'])->where('library_status', 2)->count();
+                        $outCount1 = $this->item
+                            ->where('purchase_id', $v)
+                            ->where('item_order_number', '<>', '')
+                            ->where('sku', $purchaseOrder['sku'])
+                            ->where('library_status', 2)
+                            ->count();
                         //计算出库数量
-                        $out_count2 = $this->outstockItem->alias('i')->join('fa_out_stock s', 's.id=i.out_stock_id', 'left')->where('s.purchase_id', $v)->where('status', 2)->where('i.sku', $purchase_order['sku'])->sum('out_stock_num');
-                        $out_count = $out_count1 + $out_count2;
+                        $outCount2 = $this->outstockItem
+                            ->alias('i')
+                            ->join('fa_out_stock s', 's.id=i.out_stock_id', 'left')
+                            ->where('s.purchase_id', $v)
+                            ->where('status', 2)
+                            ->where('i.sku', $purchaseOrder['sku'])
+                            ->sum('out_stock_num');
+                        $outCount = $outCount1 + $outCount2;
                         $result['purchase_id'] = $v;
                         $result['create_time'] = time();
                         //误差数量
-                        $result['count'] = $count - $out_count;
+                        $result['count'] = $count - $outCount;
                         //误差单价
-                        $result['price'] = round($purchase_order['actual_purchase_price'] - $purchase_order['purchase_price'], 2);
+                        $result['price'] = round($purchaseOrder['actual_purchase_price'] - $purchaseOrder['purchase_price'],
+                            2);
                         //误差总金额
                         $result['total'] = round($result['count'] * $result['price'], 2);
                         Db::name('finance_cost_error')->insert($result);
                         /**************************************计算成本冲减end****************************************/
                         /**************************************成本核算start****************************************/
-                        if ($out_count1 != 0) {
+                        if ($outCount1) {
                             //订单出库
-                            $order = $this->item->where('purchase_id', $v)->where('item_order_number', '<>', '')->where('sku', $purchase_order['sku'])->where('library_status', 2)->select();
+                            $order = $this->item
+                                ->where('purchase_id', $v)
+                                ->where('item_order_number', '<>', '')
+                                ->where('sku', $purchaseOrder['sku'])
+                                ->where('library_status', 2)
+                                ->select();
                             $result1 = array();
                             foreach ($order as $kk1 => $vv1) {
                                 //拆分订单号
-                                $order_number = explode('-', $vv1['item_order_number']);
-                                $order_number = $order_number[0];
-                                if (isset($result1[$order_number])) {
-                                    $result1[$order_number] += 1;
+                                $orderNumber = explode('-', $vv1['item_order_number']);
+                                $orderNumber = $orderNumber[0];
+                                if (isset($result1[$orderNumber])) {
+                                    $result1[$orderNumber] += 1;
                                 } else {
-                                    $result1[$order_number] = 1;
+                                    $result1[$orderNumber] = 1;
                                 }
                             }
                             foreach ($result1 as $rr1 => $ss1) {
                                 //获取成本核算中的订单数据
-                                $cost_order_info = $this->financecost->where(['order_number' => $rr1, 'type' => 2, 'bill_type' => 8])->find();
+                                $costOrderInfo = $this->financecost
+                                    ->where([
+                                        'order_number' => $rr1,
+                                        'type' => 2,
+                                        'bill_type' => 8
+                                    ])->order('id desc')
+                                    ->find();
                                 //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                                 $arr1['type'] = 2;   //类型：成本
                                 $arr1['bill_type'] = 10;    //单据类型：暂估结算金额
-                                $arr1['frame_cost'] = round($ss1 * $purchase_order['purchase_price'], 2);    //镜架成本：剩余预估单价*剩余数量
+                                $arr1['frame_cost'] = $costOrderInfo['frame_cost'];    //镜架成本：原订单金额
                                 $arr1['order_number'] = $rr1;  //订单号
-                                $arr1['site'] = $cost_order_info['site'];  //站点
-                                $arr1['order_type'] = $cost_order_info['order_type'];  //订单类型
-                                $arr1['order_money'] = $cost_order_info['order_money'];  //订单金额
-                                $arr1['income_amount'] = $cost_order_info['income_amount'];  //收入金额
+                                $arr1['site'] = $costOrderInfo['site'];  //站点
+                                $arr1['order_type'] = $costOrderInfo['order_type'];  //订单类型
+                                $arr1['order_money'] = $costOrderInfo['order_money'];  //订单金额
+                                $arr1['income_amount'] = $costOrderInfo['income_amount'];  //收入金额
                                 $arr1['action_type'] = 2;  //动作类型：冲减
-                                $arr1['order_currency_code'] = $cost_order_info['order_currency_code'];  //币种
-                                $arr1['is_carry_forward'] = $cost_order_info['is_carry_forward'];  //是否结转
-                                $arr1['payment_time'] = $cost_order_info['payment_time'];  //订单支付时间
-                                $arr1['payment_method'] = $cost_order_info['payment_method'];  //订单支付方式
+                                $arr1['order_currency_code'] = $costOrderInfo['order_currency_code'];  //币种
+                                $arr1['is_carry_forward'] = $costOrderInfo['is_carry_forward'];  //是否结转
+                                $arr1['payment_time'] = $costOrderInfo['payment_time'];  //订单支付时间
+                                $arr1['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                 $arr1['createtime'] = time();  //创建时间
-                                $arr1['cycle_id'] = $cost_order_info['cycle_id'];  //关联周期结转单id
-                                Db::name('finance_cost')->insert($arr1);
+                                $arr1['cycle_id'] = $costOrderInfo['cycle_id'];  //关联周期结转单id
+                                Db::name('finance_cost')
+                                    ->insert($arr1);
                                 //增加成本核算记录
                                 $arr2['type'] = 2;   //类型：成本
                                 $arr2['bill_type'] = 8;    //单据类型：实际结算金额
-                                $arr2['frame_cost'] = round($ss1 * $purchase_order['actual_purchase_price'], 2);    //镜架成本：剩余实际单价*剩余数量
+                                $arr2['frame_cost'] = round($costOrderInfo['frame_cost'] + $ss1 * ($purchaseOrder['actual_purchase_price'] - $purchaseOrder['purchase_price']),
+                                    2);    //镜架成本：（实际单价-预估）*数量+原订单金额
                                 $arr2['order_number'] = $rr1;  //订单号
-                                $arr2['site'] = $cost_order_info['site'];  //站点
-                                $arr2['order_type'] = $cost_order_info['order_type'];  //订单类型
-                                $arr2['order_money'] = $cost_order_info['order_money'];  //订单金额
-                                $arr2['income_amount'] = $cost_order_info['income_amount'];  //收入金额
+                                $arr2['site'] = $costOrderInfo['site'];  //站点
+                                $arr2['order_type'] = $costOrderInfo['order_type'];  //订单类型
+                                $arr2['order_money'] = $costOrderInfo['order_money'];  //订单金额
+                                $arr2['income_amount'] = $costOrderInfo['income_amount'];  //收入金额
                                 $arr2['action_type'] = 1;  //动作类型：增加
-                                $arr2['order_currency_code'] = $cost_order_info['order_currency_code'];  //币种
-                                $arr2['is_carry_forward'] = $cost_order_info['is_carry_forward'];  //是否结转
-                                $arr2['payment_time'] = $cost_order_info['payment_time'];  //订单支付时间
-                                $arr2['payment_method'] = $cost_order_info['payment_method'];  //订单支付方式
+                                $arr2['order_currency_code'] = $costOrderInfo['order_currency_code'];  //币种
+                                $arr2['is_carry_forward'] = $costOrderInfo['is_carry_forward'];  //是否结转
+                                $arr2['payment_time'] = $costOrderInfo['payment_time'];  //订单支付时间
+                                $arr2['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                 $arr2['createtime'] = time();  //创建时间
-                                $arr2['cycle_id'] = $cost_order_info['cycle_id'];  //关联周期结转单id
-                                Db::name('finance_cost')->insert($arr2);
+                                $arr2['cycle_id'] = $costOrderInfo['cycle_id'];  //关联周期结转单id
+                                Db::name('finance_cost')
+                                    ->insert($arr2);
                             }
                         }
-                        if ($out_count2 != 0) {
+                        if ($outCount2) {
                             //出库单出库
-                            $outorder = $this->outstockItem->alias('i')->join('fa_out_stock s', 's.id=i.out_stock_id', 'left')->where('s.purchase_id', $v)->where('status', 2)->where('i.sku', $purchase_order['sku'])->group('s.out_stock_number')->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')->select();
+                            $outorder = $this->outstockItem
+                                ->alias('i')
+                                ->join('fa_out_stock s', 's.id=i.out_stock_id', 'left')
+                                ->where('s.purchase_id', $v)
+                                ->where('status', 2)
+                                ->where('i.sku', $purchaseOrder['sku'])
+                                ->group('s.out_stock_number')
+                                ->field('s.id,s.out_stock_number,sum(i.out_stock_num) count')
+                                ->select();
                             foreach ($outorder as $rr2 => $ss2) {
                                 //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                                 $arr3['type'] = 2;   //类型：成本
                                 $arr3['bill_type'] = 11;    //单据类型：暂估结算金额
-                                $arr3['frame_cost'] = round($ss2['count'] * $purchase_order['purchase_price'], 2);    //镜架成本：剩余预估单价*剩余数量
+                                $arr3['frame_cost'] = round($ss2['count'] * $purchaseOrder['purchase_price'],
+                                    2);    //镜架成本：剩余预估单价*剩余数量
                                 $arr3['order_number'] = $ss2['out_stock_number'];  //出库单号
                                 $arr3['out_stock_id'] = $ss2['id'];  //出库单id
                                 $arr3['action_type'] = 2;  //动作类型：冲减
                                 $arr3['order_currency_code'] = 'CNY';  //币种
                                 $arr3['createtime'] = time();  //创建时间
-                                Db::name('finance_cost')->insert($arr3);
+                                Db::name('finance_cost')
+                                    ->insert($arr3);
                                 //增加成本核算记录
                                 $arr4['type'] = 2;   //类型：成本
                                 $arr4['bill_type'] = 9;    //单据类型：实际结算金额
-                                $arr4['frame_cost'] = round($ss2['count'] * $purchase_order['actual_purchase_price'], 2);    //镜架成本：剩余实际单价*剩余数量
+                                $arr4['frame_cost'] = round($ss2['count'] * $purchaseOrder['actual_purchase_price'],
+                                    2);    //镜架成本：剩余实际单价*剩余数量
                                 $arr4['order_number'] = $ss2['out_stock_number'];  //出库单号
                                 $arr4['out_stock_id'] = $ss2['id'];  //出库单id
                                 $arr4['action_type'] = 1;  //动作类型：增加
                                 $arr4['order_currency_code'] = 'CNY';  //币种
                                 $arr4['createtime'] = time();  //创建时间
-                                Db::name('finance_cost')->insert($arr4);
+                                Db::name('finance_cost')
+                                    ->insert($arr4);
                             }
                         }
                         /**************************************成本核算end****************************************/
@@ -550,27 +711,42 @@ class PayOrder extends Backend
         $pay_order->pay_time = $pay_order->pay_time ? date('Y-m-d H:i:s', $pay_order->pay_time) : '';
         //获取付款单子单结算信息
         $settle = $this->payorder_item->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.id as purchase_ids')
             ->where(['a.pay_id' => $ids, 'a.pay_type' => 3])
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
             ->select();
         $total1 = 0;
+        $total3 = 0;
         $count1 = 0;
         foreach ($settle as $k => $v) {
+            if ($v['purchase_batch_id'] > 0){
+                $instockDetail = Db::name('check_order')
+                    ->alias('a')
+                    ->join(['in_stock' => 'b'], 'b.check_id = a.id')
+                    ->join(['in_stock_item' => 'c'], 'c.in_stock_id = b.id')
+                    ->where('a.batch_id',$v['purchase_batch_id'])
+                    ->find();
+                $settle[$k]['batch_instock_num'] = $instockDetail['in_stock_num'];
+            }else{
+                $settle[$k]['batch_instock_num'] = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_ids'])->value('instock_num');
+            }
             $total1 += $v['wait_statement_total'];
+            $total3 += $settle[$k]['batch_instock_num'];
             $count1++;
         }
 
         //获取付款单子单预付信息
         $prepay = $this->payorder_item
             ->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.purchase_name,b.purchase_total')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.purchase_name,b.purchase_total,c.purchase_num')
             ->where(['pay_id' => $ids])
             ->where('a.pay_type', '<>', 3)
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
+            ->join(['fa_purchase_order_item' => 'c'], 'c.purchase_id=b.id')
             ->select();
         $total2 = 0;
         $count2 = 0;
+        $count3 = 0;
         $item = new \app\admin\model\itemmanage\Item();
         $itemcategory = new \app\admin\model\itemmanage\ItemCategory();
         foreach ($prepay as $k1 => $v1) {
@@ -580,12 +756,13 @@ class PayOrder extends Backend
             $prepay[$k1]['pay_rate'] = $pay_rate;
             $prepay[$k1]['category_name'] = $category_name;
             $total2 += $v1['pay_grand_total'];
+            $count3 += $v1['purchase_num'];
             $count2++;
         }
         $total = $total1 + $total2;
         $supplier = $this->supplier->where('id', $pay_order['supply_id'])->field('id,remark,supplier_name,currency,period,opening_bank,bank_account,recipient_name')->find();
         /***********end***************/
-        $this->assign(compact('pay_order', 'supplier', 'settle', 'prepay', 'total1', 'total2', 'total', 'count1', 'count2'));
+        $this->assign(compact('pay_order', 'supplier', 'settle', 'prepay', 'total1', 'total2', 'total', 'count1', 'count2', 'count3', 'total3'));
 
         //去掉控制台
         $this->view->engine->layout(false);
