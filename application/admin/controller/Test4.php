@@ -2919,13 +2919,13 @@ class Test4 extends Controller
         $skus = Db::name('temp_sku')->select();
         foreach ($skus as $k=>$v){
             $platform = new ItemPlatformSku();
-            $platSku =$platform->where('sku',$v)->where('platform_type',14)->value('platform_sku');
+            $platSku =$platform->where('sku',$v['sku'])->where('platform_type',14)->value('platform_sku');
             $params['sku_info'] = $platSku;
             $params['platform_type'] = 2;
             $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
             $thirdRes = json_decode($thirdRes, true);
             if ($thirdRes['code'] == 1) {
-                $platform->where('sku',$v)->where('platform_type',14)->update(['is_upload' => 1]);
+                $platform->where('sku',$v['sku'])->where('platform_type',14)->update(['is_upload' => 1]);
                 echo $platSku.'is ok'."\n";
             }else{
                 echo $platSku.'没有映射关系'."\n";
