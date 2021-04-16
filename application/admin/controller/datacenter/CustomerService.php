@@ -17,6 +17,12 @@ class CustomerService extends Backend
     protected $model = null;
     protected $step  = null;
     protected $workload = null;
+    /**
+     * 无需鉴权的方法,但需要登录
+     * @var array
+     */
+    protected $noNeedRight = ['batch_export_xls'];
+
     public function _initialize()
     {
         parent::_initialize();
