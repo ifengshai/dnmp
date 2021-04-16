@@ -4,6 +4,10 @@ return array (
   'autoload' => false,
   'hooks' => 
   array (
+    'app_init' => 
+    array (
+      0 => 'crontab',
+    ),
     'express_query' => 
     array (
       0 => 'express',

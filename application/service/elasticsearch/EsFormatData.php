@@ -40,13 +40,13 @@ class EsFormatData
      * @author crasphb
      * @date   2021/4/14 14:39
      */
-    public function formatHourData($orderData, $cartData, $gaData)
+    public function formatHourData($orderData, $cartData, $gaData,$today = true)
     {
         $hourSale = $orderData['hourSale']['buckets'];
         $hourCart = $cartData['hourCart']['buckets'];
         $hourSaleFormat = array_combine(array_column($hourSale, 'key'), $hourSale);
         $hourCartFormat = array_combine(array_column($hourCart, 'key'), $hourCart);
-        $finalLists = $this->formatHour();
+        $finalLists = $this->formatHour($today);
         //时段销量数据
         $allSession = 0;
         foreach ($finalLists as $key => $finalList) {
@@ -55,8 +55,12 @@ class EsFormatData
                     $finalLists[$key]['sessions'] += $gaValue['ga:sessions'];
                 }
             }
-            $hourOrderData = $hourSaleFormat['0' . $finalList['hour']];
-            $hourCartData = $hourCartFormat['0' . $finalList['hour']];
+            $formatHour = $finalList['hour'];
+            if(strlen($finalList['hour']) == 1) {
+                $formatHour = '0' . $finalList['hour'];
+            }
+            $hourOrderData = $hourSaleFormat[$formatHour];
+            $hourCartData = $hourCartFormat[$formatHour];
             $finalLists[$key]['daySalesAmount'] = $hourOrderData['daySalesAmount']['value'];
             $finalLists[$key]['avgPrice'] = $hourOrderData['avgPrice']['value'];
             $finalLists[$key]['totalQtyOrdered'] = $hourOrderData['totalQtyOrdered']['value'];
@@ -264,15 +268,16 @@ class EsFormatData
             //邮费
             $compareShippingTotalMoney = $compareData['shippingTotalMoney']['value'];
             //客单价
-            $compareOrderUnitPrice = $compareOrderNum ? bcdiv($compareSalesTotalMoney, $compareOrderNum, 2) : 0;
+            $compareOrderUnitPrice = $compareOrderNum ? bcdiv($compareSalesTotalMoney, $compareOrderNum,2) : 0;
 
-            $compareActiveUserNumRate = $compareActiveUserNum ? bcdiv(bcsub($activeUserNum,$compareActiveUserNum),$compareActiveUserNum,2) : 0;
-            $compareRegisterNumRate = $compareRegisterNum ? bcdiv(bcsub($activeUserNum,$compareRegisterNum),$compareRegisterNum,2) : 0;
-            $compareVipUserNuRate = $compareVipUserNum ? bcdiv(bcsub($activeUserNum,$compareVipUserNum),$compareVipUserNum,2) : 0;
-            $compareOrderNumRate = $compareOrderNum ? bcdiv(bcsub($activeUserNum,$compareOrderNum),$compareOrderNum,2) : 0;
-            $compareSalesTotalMoneyRate = $compareSalesTotalMoney ? bcdiv(bcsub($activeUserNum,$compareSalesTotalMoney),$compareSalesTotalMoney,2) : 0;
-            $compareShippingTotalMoneyRate = $compareShippingTotalMoney ? bcdiv(bcsub($activeUserNum,$compareShippingTotalMoney),$compareShippingTotalMoney,2) : 0;
-            $compareOrderUnitPriceRate = $compareOrderUnitPrice ? bcdiv(bcsub($activeUserNum,$compareOrderUnitPrice),$compareOrderUnitPrice,2) : 0;
+
+            $compareActiveUserNumRate = $compareActiveUserNum ? bcmul(bcdiv(bcsub($activeUserNum,$compareActiveUserNum),$compareActiveUserNum,4),100,2) : 0;
+            $compareRegisterNumRate = $compareRegisterNum ? bcmul(bcdiv(bcsub($registerNum,$compareRegisterNum),$compareRegisterNum,4),100,2) : 0;
+            $compareVipUserNuRate = $compareVipUserNum ? bcmul(bcdiv(bcsub($vipUserNum,$compareVipUserNum),$compareVipUserNum,4),100,2) : 0;
+            $compareOrderNumRate = $compareOrderNum ? bcmul(bcdiv(bcsub($orderNum,$compareOrderNum),$compareOrderNum,4),100,2) : 0;
+            $compareSalesTotalMoneyRate = $compareSalesTotalMoney ? bcmul(bcdiv(bcsub($salesTotalMoney,$compareSalesTotalMoney),$compareSalesTotalMoney,4),100,2) : 0;
+            $compareShippingTotalMoneyRate = $compareShippingTotalMoney ? bcmul(bcdiv(bcsub($shippingTotalMoney,$compareShippingTotalMoney),$compareShippingTotalMoney,4),100,2) : 0;
+            $compareOrderUnitPriceRate = $compareOrderUnitPrice ? bcmul(bcdiv(bcsub($orderUnitPrice,$compareOrderUnitPrice),$compareOrderUnitPrice,4),100,2) : 0;
         }
 
         //着陆页
@@ -286,11 +291,11 @@ class EsFormatData
 
         $landingNumRate = '100%';
         //详情页
-        $detailNumRate = !$landingNum ? '0%' : bcdiv($detailNum, $landingNum, 2) . '%';
+        $detailNumRate = !$landingNum ? '0%' : bcmul(bcdiv($detailNum, $landingNum,4),100,2) . '%';
         //加购数
-        $cartNumRate = !$detailNum ? '0%' : bcdiv($cartNum, $detailNum, 2) . '%';
+        $cartNumRate = !$detailNum ? '0%' : bcmul(bcdiv($cartNum, $detailNum,4), 100,2) . '%';
         //支付数
-        $completeNumRate = !$cartNum ? '0%' : bcdiv($completeNum, $cartNum, 2) . '%';
+        $completeNumRate = !$cartNum ? '0%' : bcmul(bcdiv($completeNum, $cartNum,4),100, 2) . '%';
 
         $dayBuckets = $data['daySale']['buckets'];
         $days = $dayBuckets ? array_column($dayBuckets, 'key') : [];

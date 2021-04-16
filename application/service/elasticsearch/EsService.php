@@ -115,7 +115,6 @@ class EsService
      */
     public function addToEs($indexName, $view, $mergeData)
     {
-        $view = array_merge($view, $this->formatDate($mergeData));
         $params = [
             'index' => $indexName,
             'type'  => '_doc',
@@ -126,27 +125,25 @@ class EsService
         return $this->esClient->index($params);
     }
 
-    /**
-     * 格式化时间字段，方便后续查询聚合
-     *
-     * @param $date
-     *
-     * @return array
-     * @author crasphb
-     * @date   2021/4/1 15:21
-     */
-    public function formatDate($date)
+    public function addMutilToEs($indexName, $view)
     {
-        return [
-            'year'       => date('Y', $date),
-            'month'      => date('m', $date),
-            'month_date' => date('Ym', $date),
-            'day'        => date('d', $date),
-            'day_date'   => date('Ymd', $date),
-            'hour'       => date('H', $date),
-            'hour_date'  => date('YmdH', $date),
+        $params = [
+            'index' => $indexName,
+            'type'  => '_doc',
         ];
+        foreach($view as $key => $val) {
+            $params['body'][]=array(
+                'create' => array(    #注意create也可换成index
+                    '_id'=> $val['id']
+                ),
+            );
+
+            $params['body'][] = $val;
+        }
+        return $this->esClient->bulk($params);
     }
+
+
 
     /**
      * es查询
@@ -160,7 +157,6 @@ class EsService
     public function search($params)
     {
         $results = $this->esClient->search($params);
-
         return $results['aggregations'];
     }
 

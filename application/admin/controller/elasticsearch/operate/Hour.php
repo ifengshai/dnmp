@@ -39,31 +39,38 @@ class Hour extends BaseElasticsearch
             $type = $params['type'];
             $timeStr = $params['time_str'];
             $nowDate = date('Ymd').'00';
+            $today = false;
             if(!$timeStr){
                 $start = $end = $timeStr = $nowDate;
                 $gaStart = $gaEnd = date('Y-m-d');
+                $today = true;
             }else{
                 $createat = explode(' ', $timeStr);
                 $start = date('Ymd',strtotime($createat[0])).'00';
-                $end = date('Ymd',strtotime($createat[3])).'00';
+                $end = date('Ymd',strtotime($createat[3])).'99';
                 $gaStart = date('Y-m-d',strtotime($createat[0]));
                 $gaEnd = date('Y-m-d',strtotime($createat[3]));
             }
+//            echo $start. PHP_EOL;
+//            echo $end. PHP_EOL;
+//            DIE;
+            //2021030100 2021030599
+            $start = '2021020100';
+            $end = '2021030500';
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             $time = $start . '-' . $end;
             $cacheStr = 'day_hour_order_quote_'.$site.$time;
-            $cacheData = Cache::get($cacheStr);
-            if(!$cacheData) {
+//            $cacheData = Cache::get($cacheStr);
+//            if(!$cacheData) {
                 $hourOrderData = $this->buildHourOrderSearch($site, $start, $end);
                 $hourCartData = $this->buildHourCartSearch($site, $start, $end);
                 $sessionService = new Session($site);
                 $gaData = $sessionService->gaHourData($gaStart, $gaEnd);
-                $allData = $this->esFormatData->formatHourData($hourOrderData, $hourCartData, $gaData);
-                Cache::set($cacheStr,$allData,600);
-            }else{
-                $allData = $cacheData;
-            }
-
+                $allData = $this->esFormatData->formatHourData($hourOrderData, $hourCartData, $gaData,$today);
+//                Cache::set($cacheStr,$allData,600);
+//            }else{
+//                $allData = $cacheData;
+//            }
 
             switch($type) {
                 case 1:
