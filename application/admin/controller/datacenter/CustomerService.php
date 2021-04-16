@@ -385,7 +385,19 @@ class CustomerService extends Backend
                             }
                         }
                     }
-                }
+                }else {
+                    for ($i = 6; $i >= 0; $i--) {
+                        $j = $i-1;
+                        $nextDay = date("Y-m-d", strtotime("-$i day"));
+                        $nextNextDay = date("Y-m-d", strtotime("-$j day"));
+                        $where['c.create_time'] = ['between', [$nextDay, $nextNextDay]];
+                        $dateArr[$nextDay] = $this->zendeskComments
+                            ->alias('c')
+                            ->join('fa_zendesk z','c.zid=z.id')
+                            ->where($where)
+                            ->count();
+                    }
+            }
 
                 $json['xcolumnData'] = array_keys($dateArr);
                 $json['columnData'][] = array_values(array_merge($user,$dateArr));
