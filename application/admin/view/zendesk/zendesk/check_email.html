@@ -130,7 +130,8 @@
                         <th>Date</th>
                         <th>Amount</th>
                         <th>Status</th>
-                        <th></th>
+                        <th>Increment_id</th>
+                        <th>操作</th>
                     </tr>
                     {foreach name="orders" item="vo" key="key"}
                     <tr>
@@ -387,7 +388,6 @@
     function my(id){
         return document.getElementById(id);
     }
-    var key_val =   $("#showmessage").data("value")
     var trageet =  document.getElementById("winuiconsole");
     my("showmessage").onclick = function (){
         if (trageet.style.display =="none"){
