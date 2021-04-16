@@ -2925,7 +2925,7 @@ class Test4 extends Controller
             $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
             $thirdRes = json_decode($thirdRes, true);
             if ($thirdRes['code'] == 1) {
-                $platform->where('sku',$v)->where('platform_type')->update(['is_upload' => 1]);
+                $platform->where('sku',$v)->where('platform_type',14)->update(['is_upload' => 1]);
                 echo $platSku.'is ok'."\n";
             }else{
                 echo $platSku.'没有映射关系'."\n";
