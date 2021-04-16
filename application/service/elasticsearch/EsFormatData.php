@@ -9,25 +9,10 @@
 namespace app\service\elasticsearch;
 
 
+use app\enum\OrderType;
+
 class EsFormatData
 {
-    public function formatPurchaseData($site, $purchaseData)
-    {
-        $start = '2018020500';
-        $end = '2021020531';
-        $siteDataKeyColumn = array_column($purchaseData, 'key');
-        $siteData = $siteDataKeyColumn[$site];
-        //总销售额
-        $allDaySalesAmount = $siteData['allDaySalesAmount']['value'];
-        //总订单数
-        $allOrderCount = $siteData['doc_count'];
-        //总副数
-        $allQtyOrdered = $siteData['allQtyOrdered']['value'];
-        //客单价
-        $allAvgPrice = $siteData['allAvgPrice']['value'];
-        //分时销量
-        $hourSale = $siteData['hourSale']['buckets'];
-    }
 
     /**
      * 时段销量格式化
@@ -337,5 +322,42 @@ class EsFormatData
 
         return compact('activeUserNum', 'registerNum', 'vipUserNum', 'orderNum', 'salesTotalMoney', 'shippingTotalMoney', 'orderUnitPrice', 'dayChart', 'funnel','compareActiveUserNumRate','compareRegisterNumRate','compareVipUserNuRate','compareOrderNumRate','compareSalesTotalMoneyRate','compareShippingTotalMoneyRate','compareOrderUnitPriceRate');
 
+    }
+    public function formatPurchaseData($site, $data, $compareData = [])
+    {
+        //顶部指标
+        $orderNum = $data['sumOrder']['value'];
+        $allAvgPrice = $data['allAvgPrice']['value'];
+        $allDaySalesAmount = $data['allDaySalesAmount']['value'];
+        $allShippingAmount = $data['allShippingAmount']['value'];
+
+        $dayBuckets = $data['daySale']['buckets'];
+        $days = $dayBuckets ? array_column($dayBuckets, 'key') : [];
+        $daySalesAmount = $dayBuckets ? array_column($dayBuckets, 'daySalesAmount') : [];
+        $dayOrderNum = $dayBuckets ? array_column($dayBuckets, 'doc_count') : [];
+        //订单量趋势
+        $daySalesAmountEcharts = $this->hourEcharts($days,$daySalesAmount,'销售额');
+        $dayOrderNumEcharts = $this->hourEcharts($days,$dayOrderNum,'订单量');
+        //销售额趋势
+
+        //订单类型
+        $orderType = $data['orderType']['buckets'];
+        $orderTypeData = array_combine(array_column($orderType, 'key'), $orderType);
+        //网红单//补发单
+        $replacemenOrder = $orderTypeData[OrderType::REPLACEMENT_ORDER];
+        $socialOrder = $orderTypeData[OrderType::SOCIAL_ORDER];
+
+        //金额分部
+        $priceRangesData = $data['priceRanges']['buckets'];
+        foreach($priceRangesData as $key => $val) {
+            $priceRangesData[$key]['rate'] = bcdiv($val['doc_count'],$orderNum,2).'%';
+        }
+
+        //国家分部
+        $countrySaleData = $data['countrySale']['buckets'];
+        foreach($countrySaleData as $key => $val) {
+            $countrySaleData[$key]['rate'] = bcdiv($val['doc_count'],$orderNum,2).'%';
+        }
+        return compact('orderNum','allAvgPrice','allDaySalesAmount','allShippingAmount','daySalesAmountEcharts','dayOrderNumEcharts','replacemenOrder','socialOrder','priceRangesData','countrySaleData');
     }
 }
