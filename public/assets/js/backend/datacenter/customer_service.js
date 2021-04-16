@@ -660,7 +660,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             $(document).on('click', '.click_look', function () {
                 var admin_id = $(this).data('id');
                 var time_str = $(this).data('value');
-                Backend.api.open('datacenter/customer_service/dealnum_alert_line?admin_id='+admin_id+'&time_str='+time_str,'处理量',{area:["50%", "50%"]});
+                Backend.api.open('/datacenter/customer_service/dealnum_alert_line?admin_id='+admin_id+'&time_str='+time_str,'处理量',{area:["50%", "50%"]});
             });
         
             //折线图
