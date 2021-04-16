@@ -443,14 +443,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
 
             $(document).on("click", ".batch-log-recipient", function () {
                 var ids = $(this).data('value');
-                console.log(ids)
+                console.log(ids);
                 Backend.api.open('zendesk/zendesk/order_detail?ids='+ids, '订单节点',{area: ['50%', '45%'] });
             });
 
             $(document).on('click', '.load_more', function () {
-                var page =  $(".load_more").data("value")
-                var email =  $(".load_more").data("area")
-                var type =  $(".load_more").data("action")
+                var page =  $(".load_more").data("value");
+                var email =  $(".load_more").data("area");
+                var type =  $(".load_more").data("action");
                 $.ajax({
                     type: "POST",
                     url: "zendesk/zendesk/order_toload_more",
