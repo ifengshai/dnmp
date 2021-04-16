@@ -386,8 +386,8 @@ class NewProductDesign extends Backend
 
     }
 
-    //上传图片
-    public function add_img()
+    //上传图片 弃用
+    public function add_img_old()
     {
         $item = new \app\admin\model\itemmanage\Item;
         $itemAttribute = new ItemAttribute();
@@ -472,6 +472,58 @@ class NewProductDesign extends Backend
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }
-
+    public function add_img()
+    {
+        $item = new \app\admin\model\itemmanage\Item;
+        $itemAttribute = new ItemAttribute();
+        $newProductDesign = new \app\admin\model\NewProductDesign();
+        $newProductDesignDetail = $newProductDesign->where('id', input('ids'))->find();
+        $itemId = $item->where('sku', $newProductDesignDetail['sku'])->value('id');
+        $row = $item->get($itemId, 'itemAttribute');
+        if ($this->request->isAjax()) {
+            $params = $this->request->post("row/a");
+            $itemAttrData['frame_images'] = $params['frame_images'];
+            $itemAttrData['create_frame_images_time'] = date("Y-m-d H:i:s", time());
+            $itemAttribute->startTrans();
+            $item->startTrans();
+            $newProductDesign->startTrans();
+            try {
+                $itemAttrData['frame_aws_imgs'] = $params['frame_images'];
+                $value = $itemAttrData['frame_aws_imgs'];
+                $value = explode(',',$value);
+                foreach ($value as $k=>$v){
+                    $value[$k]  = substr($v,1);
+                }
+                $itemAttrData['frame_aws_imgs'] = implode(',',$value);
+                $itemAttrResult = $itemAttribute->where('item_id', '=', $itemId)->update($itemAttrData);
+                $newProductDesignResult = $newProductDesign->where('id', '=', input('ids'))->update(['status'=>7,'update_time'=>date("Y-m-d H:i:s", time())]);
+                $itemAttribute->commit();
+                $item->commit();
+                $newProductDesign->commit();
+            }  catch (ValidateException $e) {
+                $itemAttribute->rollback();
+                $item->rollback();
+                $newProductDesign->rollback();
+                $this->error($e->getMessage(), [], 406);
+            } catch (PDOException $e) {
+                $itemAttribute->rollback();
+                $item->rollback();
+                $newProductDesign->rollback();
+                $this->error($e->getMessage(), [], 407);
+            } catch (Exception $e) {
+                $itemAttribute->rollback();
+                $item->rollback();
+                $newProductDesign->rollback();
+                $this->error($e->getMessage(), [], 408);
+            }
+            if (($itemAttrResult !== false)  && ($newProductDesignResult !== false)){
+                $this->success();
+            } else {
+                $this->error(__('Failed to upload product picture, please try again'));
+            }
+        }
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
 
 }
