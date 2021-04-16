@@ -312,7 +312,9 @@ class CustomerService extends Backend
         }
         if($groupId){
             //查询客服类型
-            $groupAdminId = Db::name('admin')->where(['group_id' => $groupId, 'status' => 'normal'])->column('id');
+            $groupAdminId = Db::name('admin')
+                ->where(['group_id' => $groupId, 'status' => 'normal'])
+                ->column('id');
             $where['c.due_id'] = array('in', $groupAdminId);
         }
         if ($timeStr) {
@@ -330,11 +332,16 @@ class CustomerService extends Backend
         //查询所有客服人员
         $map['due_id'] = ['neq',0];
         $map['is_admin'] = 1;
-        $allServiceIds = $this->zendeskComments->where($map)->column('due_id');
+        $allServiceIds = $this->zendeskComments
+            ->where($map)
+            ->column('due_id');
         $allService = array_unique($allServiceIds);
         if ($allService) {
             foreach ($allService as $key => $value) {
-                $admin = Db::name('admin')->where('id',$value)->field('nickname,group_id')->find();
+                $admin = Db::name('admin')
+                    ->where('id',$value)
+                    ->field('nickname,group_id')
+                    ->find();
                 //用户姓名
                 $user = [];
                 $user[] = $admin['nickname'];
@@ -355,7 +362,11 @@ class CustomerService extends Backend
                     $createat = explode(' ', $timeStr);
                     $where['c.create_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
                     $dateArr = array(
-                        $createat[0] => $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count()
+                        $createat[0] => $this->zendeskComments
+                            ->alias('c')
+                            ->join('fa_zendesk z','c.zid=z.id')
+                            ->where($where)
+                            ->count()
                     );
                     if ($createat[0] != $createat[3]) {
                         for ($i = 0; $i <= 100; $i++) {
@@ -364,7 +375,11 @@ class CustomerService extends Backend
                             date_add($dealDate, date_interval_create_from_date_string("$m days"));
                             $nextDay = date_format($dealDate, "Y-m-d");
                             $where['c.create_time'] = ['between', [$nextDay, $nextDay  . ' 23:59:59']];
-                            $dateArr[$nextDay] = $this->zendeskComments->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
+                            $dateArr[$nextDay] = $this->zendeskComments
+                                ->alias('c')
+                                ->join('fa_zendesk z','c.zid=z.id')
+                                ->where($where)
+                                ->count();
                             if ($nextDay == $createat[3]) {
                                 break;
                             }
