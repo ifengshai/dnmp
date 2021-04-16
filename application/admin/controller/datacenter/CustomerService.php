@@ -9,6 +9,8 @@ use app\admin\model\Admin;
 use app\admin\model\zendesk\ZendeskAgents;
 use think\Db;
 use think\Log;
+use fast\Excel;
+use think\Request;
 
 class CustomerService extends Backend
 {
@@ -292,6 +294,122 @@ class CustomerService extends Backend
             $arr = $data;
         }
         return $arr;
+    }
+
+    /*
+     * 工作量导出
+     * */
+    public function batch_export_xls()
+    {
+        $params = $this->request->param();
+        $platform = $params['platform'];
+        $timeStr = $params['time_str'];
+        $groupId = $params['group_id'];
+        //$admin_id = $params['admin_id'];
+        $where['c.due_id'] = ['neq',0];
+        if($platform){
+            $where['c.platform'] = $platform;
+        }
+        if($groupId){
+            //查询客服类型
+            $groupAdminId = Db::name('admin')
+                ->where(['group_id' => $groupId, 'status' => 'normal'])
+                ->column('id');
+            $where['c.due_id'] = array('in', $groupAdminId);
+        }
+        if ($timeStr) {
+            $createat1 = explode(' ', $timeStr);
+            $oneTime = $createat1[0].' - '.$createat1[3];
+            $map['create_time'] = ['between', [$createat1[0] . ' ' . $createat1[1], $createat1[3]  . ' ' . $createat1[4]]];
+            $timeTime = $timeStr;
+        }else{
+            $sevenStartdate = date("Y-m-d", strtotime("-6 day"));
+            $sevenEnddate = date("Y-m-d");
+            $oneTime = $sevenStartdate.' - '.$sevenEnddate;
+            $map['create_time'] = ['between', [$sevenStartdate, $sevenEnddate]];
+            $timeTime = '';
+        }
+        //查询所有客服人员
+        $map['due_id'] = ['neq',0];
+        $map['is_admin'] = 1;
+        $allServiceIds = $this->zendeskComments
+            ->where($map)
+            ->column('due_id');
+        $allService = array_unique($allServiceIds);
+        if ($allService) {
+            foreach ($allService as $key => $value) {
+                $admin = Db::name('admin')
+                    ->where('id',$value)
+                    ->field('nickname,group_id')
+                    ->find();
+                //用户姓名
+                $user = [];
+                $user[] = $admin['nickname'];
+                //分组名称
+                if ($admin['group_id'] == 1) {
+                    $user[] = 'A组';
+                } elseif ($admin['group_id'] == 2) {
+                    $user[] = 'B组';
+                } else {
+                    $user[] = '';
+                }
+                if($allService){
+                    $where['c.due_id'] = $value;
+                }
+                $where['c.is_admin'] = 1;
+                $where['z.channel'] = ['neq','voice'];
+                if($timeStr){
+                    $createat = explode(' ', $timeStr);
+                    $where['c.create_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
+                    $dateArr = array(
+                        $createat[0] => $this->zendeskComments
+                            ->alias('c')
+                            ->join('fa_zendesk z','c.zid=z.id')
+                            ->where($where)
+                            ->count()
+                    );
+                    if ($createat[0] != $createat[3]) {
+                        for ($i = 0; $i <= 100; $i++) {
+                            $m = $i + 1;
+                            $dealDate = date_create($createat[0]);
+                            date_add($dealDate, date_interval_create_from_date_string("$m days"));
+                            $nextDay = date_format($dealDate, "Y-m-d");
+                            $where['c.create_time'] = ['between', [$nextDay, $nextDay  . ' 23:59:59']];
+                            $dateArr[$nextDay] = $this->zendeskComments
+                                ->alias('c')
+                                ->join('fa_zendesk z','c.zid=z.id')
+                                ->where($where)
+                                ->count();
+                            if ($nextDay == $createat[3]) {
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                $json['xcolumnData'] = array_keys($dateArr);
+                $json['columnData'][] = array_values(array_merge($user,$dateArr));
+            }
+            
+        }
+        if (!empty($json)) {
+            $path = '/uploads/customerService/';
+            $headList = ['姓名', '组别'];
+            foreach ($json['xcolumnData'] as $key => $value) {
+                array_push($headList, $value);
+            }
+            $saveName = '工作量导出'.date("YmdHis", time());
+            Excel::writeCsv($json['columnData'], $headList, $path.$saveName, false);
+            //获取当前域名
+            $request = Request::instance();
+            $domain = $request->domain();
+            unset($i);
+            header('Location: '.$domain.$path.$saveName.'.csv');
+            die;
+        }else{
+            echo "无数据";
+        }
+        
     }
     /*
      * ajax获取工作量统计信息
