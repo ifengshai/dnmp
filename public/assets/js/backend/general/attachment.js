@@ -138,13 +138,13 @@ define(['jquery', 'bootstrap', 'backend', 'form', 'table'], function ($, undefin
                 thumb: function (value, row, index) {
                     if (row.mimetype.indexOf("image") > -1) {
                         var style = row.storage == 'upyun' ? '!/fwfh/120x90' : '';
-                        return '<a href="' + row.fullurl + '" target="_blank"><img src="' + row.fullurl + style + '" alt="" style="max-height:90px;max-width:120px"></a>';
+                        return '<a href="' + 'https://mojing.s3-us-west-2.amazonaws.com'+ row.fullurl + '" target="_blank"><img src="'+ 'https://mojing.s3-us-west-2.amazonaws.com'+ row.fullurl + style + '" alt="" style="max-height:90px;max-width:120px"></a>';
                     } else {
-                        return '<a href="' + row.fullurl + '" target="_blank"><img src="https://tool.fastadmin.net/icon/' + row.imagetype + '.png" alt=""></a>';
+                        return '<a href="' + 'https://mojing.s3-us-west-2.amazonaws.com'+ row.fullurl + '" target="_blank"><img src="https://tool.fastadmin.net/icon/' + row.imagetype + '.png" alt=""></a>';
                     }
                 },
                 url: function (value, row, index) {
-                    return '<a href="' + row.fullurl + '" target="_blank" class="label bg-green">' + value + '</a>';
+                    return '<a href="' + 'https://mojing.s3-us-west-2.amazonaws.com'+row.fullurl + '" target="_blank" class="label bg-green">' + value + '</a>';
                 },
             }
         }
