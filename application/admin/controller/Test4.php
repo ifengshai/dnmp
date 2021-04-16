@@ -2914,6 +2914,13 @@ class Test4 extends Controller
 
     }
 
+    /**
+     * 阿里巴巴国际站
+     * Interface upload_third_sku
+     * @package app\admin\controller
+     * @author  jhh
+     * @date    2021/4/16 18:21:42
+     */
     public function upload_third_sku()
     {
         $skus = Db::name('temp_sku')->select();
@@ -2939,4 +2946,35 @@ class Test4 extends Controller
         }
     }
 
+    /**
+     * 抖音
+     * Interface upload_third_sku_douyin
+     * @package app\admin\controller
+     * @author  jhh
+     * @date    2021/4/16 18:21:33
+     */
+    public function upload_third_sku_douyin()
+    {
+        $skus = Db::name('temp_sku')->select();
+        foreach ($skus as $k=>$v){
+            $platform = new ItemPlatformSku();
+            $platSku =$platform->where('sku',$v['sku'])->where('platform_type',13)->value('platform_sku');
+            if ($platSku) {
+                $params['sku_info'] = $platSku;
+                $params['platform_type'] = 1;
+                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
+                $thirdRes = json_decode($thirdRes, true);
+                if ($thirdRes['code'] == 1) {
+                    $platform->where('sku',$v['sku'])->where('platform_type',13)->update(['is_upload' => 1]);
+                    echo $platSku.'is ok'."\n";
+                }else{
+                    echo $platSku.'上传失败'."\n";
+                }
+            }
+            else{
+                echo $v['sku'].'没有映射关系'."\n";
+            }
+
+        }
+    }
 }
