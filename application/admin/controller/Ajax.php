@@ -117,8 +117,8 @@ class Ajax extends Backend
         //
         $splInfo = $file->validate(['size' => $size])->move(ROOT_PATH . '/public' . $uploadDir, $fileName);
         if ($splInfo) {
-            $params = array(
-                'admin_id'    => (int) $this->auth->id,
+            $params = [
+                'admin_id'    => (int)$this->auth->id,
                 'user_id'     => 0,
                 'filesize'    => $fileInfo['size'],
                 'imagewidth'  => $imagewidth,
@@ -126,20 +126,22 @@ class Ajax extends Backend
                 'imagetype'   => $suffix,
                 'imageframes' => 0,
                 'mimetype'    => $fileInfo['type'],
-                'url'         => $uploadDir . $splInfo->getSaveName(),
+                'url'         => $uploadDir.$splInfo->getSaveName(),
                 'uploadtime'  => time(),
                 'storage'     => 'local',
                 'sha1'        => $sha1,
                 'extparam'    => json_encode($extparam),
-            );
+            ];
             $attachment = model("attachment");
             $attachment->data(array_filter($params));
             $attachment->save();
             $result = \think\Hook::listen("upload_after", $attachment);
             //上传s3失败
-            if(isset($result[0]['code']) && $result[0]['code'] == 0) $this->error($result[0]['msg']);
+            if (isset($result[0]['code']) && $result[0]['code'] == 0) {
+                $this->error($result[0]['msg']);
+            }
             $this->success(__('Upload successful'), null, [
-                'url' => $uploadDir . $splInfo->getSaveName()
+                'url' => $uploadDir.$splInfo->getSaveName(),
             ]);
         } else {
             // 上传失败获取错误信息

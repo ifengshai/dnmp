@@ -208,9 +208,9 @@ class Scm extends Api
         $pda_md5 = model('Config')->get(['name' => 'pda_md5']);
 
         $data = [
-            'version' => $pda_version['value'],
-            'download' => $this->config['s3_url'] . $pda_download['value'],
-            'pda_md5' => $pda_md5
+            'version'  => $pda_version['value'],
+            'download' => $this->config['s3_url'].$pda_download['value'],
+            'pda_md5'  => $pda_md5,
         ];
 
         $this->success('', $data, 200);

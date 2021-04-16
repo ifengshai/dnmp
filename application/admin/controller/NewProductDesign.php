@@ -109,7 +109,7 @@ class NewProductDesign extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($map)
@@ -373,15 +373,16 @@ class NewProductDesign extends Backend
             }
         }
         //获取筛选人
-        $authGroupAccess= new AuthGroupAccess();
+        $authGroupAccess = new AuthGroupAccess();
         $auth_user = $authGroupAccess
             ->alias('a')
-            ->join(['fa_admin'=>'b'],'a.uid=b.id')
+            ->join(['fa_admin' => 'b'], 'a.uid=b.id')
             ->where('a.group_id=160')
             ->field('id,nickname')
             ->select();
-        $this->assign('ids',$ids);
-        $this->assign('auth_user',collection($auth_user)->toArray());
+        $this->assign('ids', $ids);
+        $this->assign('auth_user', collection($auth_user)->toArray());
+
         return $this->view->fetch();
 
     }
@@ -463,15 +464,17 @@ class NewProductDesign extends Backend
                 $newProductDesign->rollback();
                 $this->error($e->getMessage(), [], 408);
             }
-            if (($itemAttrResult !== false) && ($data['type'] == 1) && ($newProductDesignResult !== false)){
+            if (($itemAttrResult !== false) && ($data['type'] == 1) && ($newProductDesignResult !== false)) {
                 $this->success();
             } else {
                 $this->error(__('Failed to upload product picture, please try again'));
             }
         }
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
+
     public function add_img()
     {
         $item = new \app\admin\model\itemmanage\Item;
@@ -490,17 +493,17 @@ class NewProductDesign extends Backend
             try {
                 $itemAttrData['frame_aws_imgs'] = $params['frame_images'];
                 $value = $itemAttrData['frame_aws_imgs'];
-                $value = explode(',',$value);
-                foreach ($value as $k=>$v){
-                    $value[$k]  = substr($v,1);
+                $value = explode(',', $value);
+                foreach ($value as $k => $v) {
+                    $value[$k] = substr($v, 1);
                 }
-                $itemAttrData['frame_aws_imgs'] = implode(',',$value);
+                $itemAttrData['frame_aws_imgs'] = implode(',', $value);
                 $itemAttrResult = $itemAttribute->where('item_id', '=', $itemId)->update($itemAttrData);
-                $newProductDesignResult = $newProductDesign->where('id', '=', input('ids'))->update(['status'=>7,'update_time'=>date("Y-m-d H:i:s", time())]);
+                $newProductDesignResult = $newProductDesign->where('id', '=', input('ids'))->update(['status' => 7, 'update_time' => date("Y-m-d H:i:s", time())]);
                 $itemAttribute->commit();
                 $item->commit();
                 $newProductDesign->commit();
-            }  catch (ValidateException $e) {
+            } catch (ValidateException $e) {
                 $itemAttribute->rollback();
                 $item->rollback();
                 $newProductDesign->rollback();
@@ -516,13 +519,14 @@ class NewProductDesign extends Backend
                 $newProductDesign->rollback();
                 $this->error($e->getMessage(), [], 408);
             }
-            if (($itemAttrResult !== false)  && ($newProductDesignResult !== false)){
+            if (($itemAttrResult !== false) && ($newProductDesignResult !== false)) {
                 $this->success();
             } else {
                 $this->error(__('Failed to upload product picture, please try again'));
             }
         }
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
 

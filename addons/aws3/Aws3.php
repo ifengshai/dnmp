@@ -84,7 +84,7 @@ class Aws3 extends Addons
      */
     public function uploadAfter($attachment)
     {
-        $sourceFile = '.' . $attachment['url'];
+        $sourceFile = '.'.$attachment['url'];
         $fileName = substr($attachment['url'], 1);
 
         return $this->s3Upload($fileName, $sourceFile);
@@ -129,6 +129,6 @@ class Aws3 extends Addons
         }
 
         //上传文件
-        return ['code' => 1, 'msg' => '上传成功', 'url' => $this->config['s3_url'] . $fileName];
+        return ['code' => 1, 'msg' => '上传成功', 'url' => $this->config['s3_url'].$fileName];
     }
 }

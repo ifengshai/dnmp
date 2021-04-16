@@ -12,6 +12,7 @@ class NewProductAttribute extends Model
 
     /**
      * 自定义s3获取器
+     *
      * @param $value
      * @param $data
      *
@@ -19,9 +20,9 @@ class NewProductAttribute extends Model
      * @author crasphb
      * @date   2021/4/1 10:36
      */
-    public function getS3FrameImagesAttr($value,$data)
+    public function getS3FrameImagesAttr($value, $data)
     {
-        return 'https://mojing.s3-us-west-2.amazonaws.com' . $data['frame_images'];
+        return 'https://mojing.s3-us-west-2.amazonaws.com'.$data['frame_images'];
     }
-    
+
 }

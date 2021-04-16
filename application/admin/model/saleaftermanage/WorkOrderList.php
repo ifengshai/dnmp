@@ -522,8 +522,8 @@ class WorkOrderList extends Model
     public function getReissueLens($siteType, $showPrescriptions, $type = 1, $item_order_number = '')
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
-        $cache_key = $siteType . '_get_lens';
-        //$data = Cache::get($cache_key);
+        $cache_key = $siteType.'_get_lens';
+        $data = Cache::get($cache_key);
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
@@ -1581,7 +1581,7 @@ class WorkOrderList extends Model
     {
         $url = '';
         $key = $siteType . '_getlens_' . $is_new_version;
-        $data = Cache::get($key);
+        //$data = Cache::get($key);
         if (!$data) {
             if($is_new_version == 1){
                 $url = 'magic/product/newLensData';
@@ -2095,7 +2095,7 @@ class WorkOrderList extends Model
                         //仓库sku
                         $platform_info = $item_platform_sku
                             ->field('sku,stock')
-                            ->where(['platform_sku' => $value['change_sku'], 'platform_type' => $row['work_platform']])
+                            ->where(['platform_sku' => $value['change_sku'], 'platform_type' => $work->work_platform])
                             ->find();
                         if ($platform_info['sku']) {
                              $value['change_sku'] = $platform_info['sku'];

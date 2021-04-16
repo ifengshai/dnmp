@@ -57,6 +57,26 @@ class SupplierSku extends Model
             $where['supplier_id'] = $supplier_id;
         }
         $where['status'] = 1;
+
         return $this->where($where)->value('supplier_sku');
+    }
+
+    /**
+     * 获取供应商名称
+     *
+     * @return array|false|string
+     * @author wpl
+     * @date   2021/4/15 14:27
+     */
+    public function getSupplierName()
+    {
+        $where['a.status'] = 1;
+        $where['b.status'] = 1;
+
+        return $this
+            ->alias('a')
+            ->where($where)
+            ->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')
+            ->column('b.supplier_name,b.purchase_person', 'a.sku');
     }
 }

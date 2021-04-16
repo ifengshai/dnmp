@@ -134,10 +134,12 @@ class Repurchase extends Command
     }
     /**
      * 获取用户邮箱及用户数
+     *
      * @param $site 站点
      * @param $startDate   用户所在开始时间
      * @param $endDate     用户所在结束时间
-     * @return array
+     *
+     * @return int
      * @author mjj
      * @date   2021/4/1 09:57:30
      */
