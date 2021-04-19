@@ -2208,7 +2208,8 @@ class PurchaseOrder extends Backend
 
         [$where] = $this->buildparams();
         $list = $this->model->alias('purchase_order')
-            ->field('purchase_order.id,effect_time,type,logistics_info,receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,1688_number')
+            ->field('purchase_order.id,effect_time,type,logistics_info,receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,1688_number,
+            purchase_order.purchase_type,purchase_order.factory_type,purchase_order.pay_type')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
             ->where($where)
@@ -2249,6 +2250,9 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("S1", "是否大货");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("T1", "揽件时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("U1", "订单生效时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("V1", "工厂类型");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("W1", "采购单类型");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("X1", "采购单付款类型");
 
         $logistic = new \app\admin\model\warehouse\LogisticsInfo();
         foreach ($list as $key => $value) {
@@ -2283,6 +2287,31 @@ class PurchaseOrder extends Backend
             } else {
                 $is_sample = '否';
             }
+            $payTypeName='未知';
+            switch ($value['pay_type']) {
+                case 1:
+                    $payTypeName = '预付款';
+                    break;
+                case 2:
+                    $payTypeName = '全款预付';
+                    break;
+                case 3:
+                    $payTypeName = '货到付款';
+                    break;
+            }
+
+            if ($value['factory_type'] == 1) {
+                $factoryTypeName = '贸易';
+            } else {
+                $factoryTypeName = '工厂';
+            }
+
+            if ($value['purchase_type'] == 1) {
+                $purchaseTypeName = '线下采购单';
+            } else {
+                $purchaseTypeName = '线上采购单';
+            }
+
 
             //查询揽收时间
             $collect_time = $logistic->where(['purchase_id' => $value['id']])->value('collect_time');
@@ -2293,6 +2322,9 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("S".($key * 1 + 2), $value['type']);
             $spreadsheet->getActiveSheet()->setCellValue("T".($key * 1 + 2), $collect_time);
             $spreadsheet->getActiveSheet()->setCellValue("U".($key * 1 + 2), $value['effect_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("V".($key * 1 + 2), $factoryTypeName);
+            $spreadsheet->getActiveSheet()->setCellValue("W".($key * 1 + 2), $purchaseTypeName);
+            $spreadsheet->getActiveSheet()->setCellValue("X".($key * 1 + 2), $payTypeName);
         }
 
         //设置宽度
@@ -2317,6 +2349,9 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('W')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('X')->setWidth(20);
 
         //设置边框
         $border = [
@@ -2334,7 +2369,7 @@ class PurchaseOrder extends Backend
         $setBorder = 'A1:'.$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:U'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:X'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
