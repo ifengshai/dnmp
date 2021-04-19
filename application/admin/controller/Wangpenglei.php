@@ -450,7 +450,7 @@ class Wangpenglei extends Backend
 
             $map['a.sku'] = ['in', array_filter($skus)];
             $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-            $map['a.distribution_status'] = ['>', 1]; //大于待打印标签
+            $map['a.distribution_status'] = ['>', 2]; //大于待配货
             $map['c.check_status'] = 0; //未审单计算订单占用
             $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
             $distribution_occupy_stock = $this->orderitemprocess->alias('a')->where($map)
