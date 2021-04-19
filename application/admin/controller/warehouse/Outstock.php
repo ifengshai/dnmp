@@ -456,13 +456,15 @@ class Outstock extends Backend
 
         $this->assign('type', $type);
 
-
+        $barCodeItem = new ProductBarCodeItem();
+        $ared = $barCodeItem->where('out_stock_id',$row->id)->field('location_id,location_code')->find();
         /***********查询出库商品信息***************/
         //查询入库单商品信息
         $item_map['out_stock_id'] = $ids;
         $item = $this->item->where($item_map)->select();
         $this->assign('item', $item);
         $this->view->assign("row", $row);
+        $this->view->assign("ared", $ared);
         return $this->view->fetch();
     }
 
@@ -494,12 +496,12 @@ class Outstock extends Backend
         //配货完成时判断
         //拣货区盘点时不能操作
         //查询条形码库区库位
-        $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => ['in', $ids]])->column('location_code');
+        $barcodedata = $this->_product_bar_code_item->where(['out_stock_id' => ['in', $ids]])->column('location_code');
         $count = $this->_inventory->alias('a')
             ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
             ->count();
         if ($count > 0) {
-            $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
+            $this->error('此库位正在盘点,暂无法入库审核');
         }
         /****************************end*****************************************/
         
@@ -511,7 +513,7 @@ class Outstock extends Backend
             }
         }
 
-        //查询入库单商品信息
+        //查询出库单商品信息
         $where['out_stock_id'] = ['in', $ids];
         $list = $this->item
             ->alias('a')
@@ -546,6 +548,7 @@ class Outstock extends Backend
              */ (new StockLog())->startTrans();
             $platform->startTrans();
             $item->startTrans();
+            $this->_product_bar_code_item->startTrans();
             Db::startTrans();
             try {
                 if ($data['status'] == 2) {
@@ -608,6 +611,9 @@ class Outstock extends Backend
                             $financecost = new \app\admin\model\finance\FinanceCost();
                             $financecost->outstock_cost($v['out_stock_id'], $v['out_stock_number']);
                         }
+                        //更改商品条形码子表在库状态
+                        $this->_product_bar_code_item->where('out_stock_id',$v['id'])->update(['library_status'=>2]);
+
                     }
                 } else {
                     //审核拒绝解除条形码绑定关系
@@ -615,30 +621,34 @@ class Outstock extends Backend
                     $_product_bar_code_item
                         ->allowField(true)
                         ->isUpdate(true, ['out_stock_id' => ['in', $ids]])
-                        ->save(['out_stock_id' => 0,'location_code'=>'','location_id'=>'0','location_code_id'=>'0']);
+                        ->save(['out_stock_id' => 0]);
                 }
 
                 Db::commit();
                 (new StockLog())->commit();
                 $platform->commit();
                 $item->commit();
+                $this->_product_bar_code_item->commit();
             } catch (ValidateException $e) {
                 Db::rollback();
                 (new StockLog())->rollback();
                 $platform->rollback();
                 $item->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage());
             } catch (PDOException $e) {
                 Db::rollback();
                 (new StockLog())->rollback();
                 $platform->rollback();
                 $item->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
                 Db::rollback();
                 (new StockLog())->rollback();
                 $platform->rollback();
                 $item->rollback();
+                $this->_product_bar_code_item->rollback();
                 $this->error($e->getMessage());
             }
 

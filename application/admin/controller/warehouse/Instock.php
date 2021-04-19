@@ -909,7 +909,7 @@ class Instock extends Backend
                 //条形码入库时间
                 $this->_product_bar_code_item
                     ->where(['in_stock_id' => ['in', $ids]])
-                    ->update(['in_stock_time' => date('Y-m-d H:i:s')]);
+                    ->update(['in_stock_time' => date('Y-m-d H:i:s'),'library_status'=>1]);
 
                 //有错误 则回滚数据
                 if (count($error_num) > 0) {
