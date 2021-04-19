@@ -46,7 +46,7 @@ class OrderData extends Backend
          */
         // 设置将要消费消息的主题
         $topic = 'test';
-        $host = '127.0.0.1:9092';
+        $host = 'kafka-prod.com';
         $group_id = '0';
         $conf = new \RdKafka\Conf();
         // 当有新的消费进程加入或者退出消费组时，kafka 会自动重新分配分区给消费者进程，这里注册了一个回调函数，当分区被重新分配时触发
