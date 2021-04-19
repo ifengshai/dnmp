@@ -709,7 +709,7 @@ class OrderReturn extends Backend
             ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
             ->where('a.order_id',$entity_id)->where('a.site',$site)
             ->order('create_time desc')
-            ->field('a.content,a.create_time,a.site,a.track_number,b.shipment_data_type')
+            ->field('a.content,a.create_time,a.site,a.track_number,a.shipment_data_type')
             ->select();
         $courier_one  = $courier[0];
         unset($courier[0]);

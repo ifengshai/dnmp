@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
@@ -1335,4 +1336,120 @@ class Wangpenglei extends Backend
             $wave->where(['id' => $v['id']])->update(['status' => $status]);
         }
     }
+
+    /**
+     * 魔店 SKU选品数据同步处理
+     * @package app\admin\controller
+     * @author  fzg
+     * @date    2021/4/16 17:57
+     */
+    public function modian_sku(){
+        $itemPlatformSku = new Item();
+
+        $arrSkuInfo=['SI371941'
+            ,'OP949866'
+            ,'DT027351'
+            ,'OI318124'
+            ,'DI813129'
+            ,'DI539757'
+            ,'DI188240'
+            ,'DI979192'
+            ,'DI089496'
+            ,'OU454657'
+            ,'DI345639'
+            ,'OM304256'
+            ,'I215848'
+            ,'DI257739'
+            ,'TT347546'
+            ,'DT019440'
+            ,'oi694780'
+            ,'OI063819'
+            ,'DI013744'
+            ,'DI000416'
+            ,'DI929359'
+            ,'TT217878'
+            ,'TX122482'
+            ,'TM256438'
+            ,'GM016699'
+            ,'TX687442'
+            ,'OT026952'
+            ,'OX519935'
+            ,'OX543294'
+            ,'SP020730'
+            ,'OP704153'
+            ,'ON035814'
+            ,'OM449670'
+            ,'OP053149'
+            ,'OP626492'
+            ,'OP119687'
+            ,'DI139853'
+            ,'OX035445'
+            ,'DI072199'
+            ,'OT485292'
+            ,'OM138826'
+            ,'OM119551'
+            ,'OX090269'
+            ,'DI025760'
+            ,'OI611693'
+            ,'SP526418'
+            ,'OX591569'
+            ,'OT663524'
+            ,'OT011656'
+            ,'TX548130'
+            ,'DI656279'
+            ,'OX154394'
+            ,'OX687338'
+            ,'FM0125'
+            ,'OM341662'
+            ,'DM473233'
+            ,'DX163241'
+            ,'OM367912'
+            ,'DI906936'
+            ,'DI765717'
+            ,'DI359079'
+            ,'DT829273'
+            ,'TT751899'
+            ,'GM137973'
+            ,'OX627120'
+            ,'TX893639'
+            ,'TX531583'
+            ,'DX883751'
+            ,'DI151559'
+            ,'GM119026'
+            ,'DI046658'
+            ,'OM777828'
+            ,'TX742894'
+            ,'OI611693'
+            ,'TX898397'
+            ,'TX599374'
+            ,'GM503870'
+            ,'DX261370'
+            ,'OI986882'
+            ,'OI003342'
+            ,'TM625894'
+            ,'SM241073'
+            ,'SM103749'
+            ,'SM016807'
+            ,'SM901394'
+            ,'OM777679'
+            ,'TM329140'
+            ,'TT256753'
+            ,'TT123484'
+            ,'OT465170'];
+
+        foreach ($arrSkuInfo as $skuK=>$skuV){
+            $wheLike['sku'] = ['like',$skuV.'%'];
+            $sku=$itemPlatformSku
+                ->where($wheLike)
+                ->select();
+            foreach ($sku as $insetK=>$insetV){
+                $save['sku']=$insetV['sku'];
+                Db::name('temp_sku')->insert($save);
+            }
+        }
+
+    }
+
+
+
 }
