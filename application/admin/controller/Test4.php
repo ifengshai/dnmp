@@ -2977,4 +2977,142 @@ class Test4 extends Controller
 
         }
     }
+
+    /**
+     * 跑出映射关系 alibaba国际站
+     * Interface
+     * @package app\admin\controller
+     * @author  jhh
+     * @date    2021/4/19 9:19:57
+     */
+    public function run_plat_sku()
+    {
+        $this->model = new \app\admin\model\NewProduct;
+        $this->attribute = new \app\admin\model\NewProductAttribute;
+        $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
+        $this->category = new \app\admin\model\itemmanage\ItemCategory;
+        $skus = Db::name('temp_sku')->select();
+        foreach ($skus as $k=>$v) {
+            $newProductId = $this->model->where('sku',$v['sku'])->value('id');
+            $skus[$k]['new_product_id'] = $newProductId;
+            $where['new_product.id'] = $newProductId;
+            $row = $this->model->where($where)->with(['newproductattribute'])->find();
+            if (!$row) {
+                echo '未查询到数据'."\n";
+            }
+            $row = $row->toArray();
+            if ($row['item_status'] != 1 && $row['item_status'] != 2) {
+                echo '此状态不能同步'."\n";
+            }
+            $map['id'] = $newProductId;
+            $map['item_status'] = 1;
+            $data['item_status'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $params = $row;
+                $params['create_person'] = session('admin.nickname');
+                $params['create_time'] = date('Y-m-d H:i:s', time());
+                $params['item_status'] = 1;
+                unset($params['id']);
+                unset($params['newproductattribute']);
+                //查询商品表SKU是否存在
+                $tWhere['sku'] = $params['sku'];
+                $tWhere['is_del'] = 1;
+                $count = $this->item->where($tWhere)->count();
+                //此SKU已存在 跳过
+                if ($count < 1) {
+                    //添加商品主表信息
+                    $this->item->allowField(true)->save($params);
+                    $attributeParams = $row['newproductattribute'];
+                    unset($attributeParams['id']);
+                    unset($attributeParams['frame_images']);
+                    unset($attributeParams['frame_color']);
+                    $attributeParams['item_id'] = $this->item->id;
+                    //添加商品属性表信息
+                    $this->itemAttribute->allowField(true)->save($attributeParams);
+                }
+
+                //添加对应平台映射关系
+                $skuParams['site'] = 14;
+                $skuParams['sku'] = $params['sku'];
+                $skuParams['frame_is_rimless'] = $row['frame_is_rimless'];
+                $skuParams['name'] = $row['name'];
+                $skuParams['category_id'] = $row['category_id'];
+
+                $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+                echo $v['sku'].'同步成功'."\n";
+            } else {
+                echo $v['sku'].'同步失败'."\n";
+            }
+        }
+    }
+
+    /**
+     * 跑出映射关系 抖音
+     * Interface run_plat_sku_douyin
+     * @package app\admin\controller
+     * @author  jhh
+     * @date    2021/4/19 10:03:40
+     */
+    public function run_plat_sku_douyin()
+    {
+        $this->model = new \app\admin\model\NewProduct;
+        $this->attribute = new \app\admin\model\NewProductAttribute;
+        $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
+        $this->category = new \app\admin\model\itemmanage\ItemCategory;
+        $skus = Db::name('temp_sku')->select();
+        foreach ($skus as $k=>$v) {
+            $newProductId = $this->model->where('sku',$v['sku'])->value('id');
+            $skus[$k]['new_product_id'] = $newProductId;
+            $where['new_product.id'] = $newProductId;
+            $row = $this->model->where($where)->with(['newproductattribute'])->find();
+            if (!$row) {
+                echo '未查询到数据'."\n";
+            }
+            $row = $row->toArray();
+            if ($row['item_status'] != 1 && $row['item_status'] != 2) {
+                echo '此状态不能同步'."\n";
+            }
+            $map['id'] = $newProductId;
+            $map['item_status'] = 1;
+            $data['item_status'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $params = $row;
+                $params['create_person'] = session('admin.nickname');
+                $params['create_time'] = date('Y-m-d H:i:s', time());
+                $params['item_status'] = 1;
+                unset($params['id']);
+                unset($params['newproductattribute']);
+                //查询商品表SKU是否存在
+                $tWhere['sku'] = $params['sku'];
+                $tWhere['is_del'] = 1;
+                $count = $this->item->where($tWhere)->count();
+                //此SKU已存在 跳过
+                if ($count < 1) {
+                    //添加商品主表信息
+                    $this->item->allowField(true)->save($params);
+                    $attributeParams = $row['newproductattribute'];
+                    unset($attributeParams['id']);
+                    unset($attributeParams['frame_images']);
+                    unset($attributeParams['frame_color']);
+                    $attributeParams['item_id'] = $this->item->id;
+                    //添加商品属性表信息
+                    $this->itemAttribute->allowField(true)->save($attributeParams);
+                }
+
+                //添加对应平台映射关系
+                $skuParams['site'] = 13;
+                $skuParams['sku'] = $params['sku'];
+                $skuParams['frame_is_rimless'] = $row['frame_is_rimless'];
+                $skuParams['name'] = $row['name'];
+                $skuParams['category_id'] = $row['category_id'];
+
+                $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+                echo $v['sku'].'同步成功'."\n";
+            } else {
+                echo $v['sku'].'同步失败'."\n";
+            }
+        }
+    }
 }
