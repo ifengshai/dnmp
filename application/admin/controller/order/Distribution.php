@@ -2194,6 +2194,7 @@ class Distribution extends Backend
         $itemPlatformSku = new ItemPlatformSku();
         $trueSku = $itemPlatformSku->where($wheSku)->column('sku');
         $whe['sku'] = ['in', $trueSku];
+        $whe['library_status'] = 1;
         $barcodeData = $this->_product_bar_code_item->where($whe)->column('location_code');
         if (!empty($barcodeData)) {
             $count = $this->_inventory->alias('a')
@@ -2280,6 +2281,7 @@ class Distribution extends Backend
         $itemPlatformSku = new ItemPlatformSku();
         $trueSku = $itemPlatformSku->where($wheSku)->column('sku');
         $whe['sku'] = ['in', $trueSku];
+        $whe['library_status'] = 1;
         $barcodeData = $this->_product_bar_code_item->where($whe)->column('location_code');
         if (!empty($barcodeData)) {
             $count = $this->_inventory->alias('a')

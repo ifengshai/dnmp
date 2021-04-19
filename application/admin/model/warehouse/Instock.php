@@ -49,6 +49,10 @@ class Instock extends Model
     {
         return $this->hasMany('InstockItem', 'in_stock_id');
     }
+    //关联模型库位库区
+    public function productBarcodeItem(){
+        return $this->belongsTo('app\admin\model\warehouse\ProductBarCodeItem', 'id', 'in_stock_id', [], 'LEFT')->setEagerlyType(0);
+    }
 
 
     /**
