@@ -31,7 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.label,
                             custom: {sql: 'warning', url: 'info', shell: 'success'}
                         },
-                        {field: 'title', title: __('Title')},
+                        {field: 'title', title: __('Title'), operate: 'like'},
                         {field: 'maximums', title: __('Maximums'), formatter: Controller.api.formatter.maximums},
                         {field: 'executes', title: __('Executes')},
                         {
@@ -65,7 +65,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             sortable: true
                         },
                         {field: 'weigh', title: __('Weigh')},
-                        {field: 'status', title: __('Status'), formatter: Table.api.formatter.status},
+                        {
+                            field: 'status',
+                            title: __('Status'),
+                            searchList: Config.statusList,
+                            custom: {success: 'success', failure: 'danger'},
+                            formatter: Table.api.formatter.status
+                        },
                         {
                             field: 'operate',
                             title: __('Operate'),
