@@ -2992,6 +2992,8 @@ class Test4 extends Controller
         $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
         $this->item = new \app\admin\model\itemmanage\Item;
+        $this->platformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $skus = Db::name('temp_sku')->select();
         foreach ($skus as $k=>$v) {
             $newProductId = $this->model->where('sku',$v['sku'])->value('id');
@@ -3062,6 +3064,8 @@ class Test4 extends Controller
         $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
         $this->item = new \app\admin\model\itemmanage\Item;
+        $this->platformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $skus = Db::name('temp_sku')->select();
         foreach ($skus as $k=>$v) {
             $newProductId = $this->model->where('sku',$v['sku'])->value('id');
