@@ -2991,6 +2991,7 @@ class Test4 extends Controller
         $this->attribute = new \app\admin\model\NewProductAttribute;
         $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
+        $this->item = new \app\admin\model\itemmanage\Item;
         $skus = Db::name('temp_sku')->select();
         foreach ($skus as $k=>$v) {
             $newProductId = $this->model->where('sku',$v['sku'])->value('id');
@@ -3060,6 +3061,7 @@ class Test4 extends Controller
         $this->attribute = new \app\admin\model\NewProductAttribute;
         $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
+        $this->item = new \app\admin\model\itemmanage\Item;
         $skus = Db::name('temp_sku')->select();
         foreach ($skus as $k=>$v) {
             $newProductId = $this->model->where('sku',$v['sku'])->value('id');
