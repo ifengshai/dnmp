@@ -2564,7 +2564,7 @@ class Item extends Backend
      */
     public function changeValue(){
         $itemAttribute = new ItemAttribute();
-        $goodsValue = $this->model->column('id');
+        $goodsValue = $this->model->where(['is_open'=>1])->column('id');
         $itemAttributeValue = $itemAttribute->column('item_id');
         $result=array_diff($goodsValue,$itemAttributeValue);
         dump($result);
