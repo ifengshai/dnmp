@@ -25,7 +25,7 @@ class EsFormatData
      * @author crasphb
      * @date   2021/4/14 14:39
      */
-    public function formatHourData($orderData, $cartData, $gaData,$today = true)
+    public function formatHourData($orderData, $cartData, $gaData = [],$today = true)
     {
         $hourSale = $orderData['hourSale']['buckets'];
         $hourCart = $cartData['hourCart']['buckets'];
@@ -180,8 +180,13 @@ class EsFormatData
      */
     public function hourEcharts($xdata, $ydata, $name = '')
     {
-        $xdata = explode(',', $xdata);
-        $ydata = explode(',', $ydata);
+        if(!is_array($xdata)) {
+            $xdata = explode(',', $xdata);
+        }
+        if(!is_array($ydata)) {
+            $ydata = explode(',', $ydata);
+        }
+
         $echart['xcolumnData'] = $xdata;
         $echart['column'] = [$name];
         $echart['columnData'] = [
@@ -331,6 +336,20 @@ class EsFormatData
         $allDaySalesAmount = $data['allDaySalesAmount']['value'];
         $allShippingAmount = $data['allShippingAmount']['value'];
 
+        $compareOrderNumRate = $compareAllAvgPriceRate = $compareAllDaySalesAmountRate = $compareAllShippingAmountRate = 0;
+        if($compareData) {
+
+            $compareOrderNum = $compareData['sumOrder']['value'];
+            $compareAllAvgPrice = $compareData['allAvgPrice']['value'];
+            $compareAllDaySalesAmount = $compareData['allDaySalesAmount']['value'];
+            $compareAllShippingAmount = $compareData['allShippingAmount']['value'];
+
+            $compareOrderNumRate = $compareOrderNum ? bcmul(bcdiv(bcsub($orderNum,$compareOrderNum),$compareOrderNum,4),100,2) : 0;
+            $compareAllAvgPriceRate = $compareAllAvgPrice ? bcmul(bcdiv(bcsub($allAvgPrice,$compareAllAvgPrice),$compareAllAvgPrice,4),100,2) : 0;
+            $compareAllDaySalesAmountRate = $compareAllDaySalesAmount ? bcmul(bcdiv(bcsub($allDaySalesAmount,$compareAllDaySalesAmount),$compareAllDaySalesAmount,4),100,2) : 0;
+            $compareAllShippingAmountRate = $compareAllShippingAmount ? bcmul(bcdiv(bcsub($allShippingAmount,$compareAllShippingAmount),$compareAllShippingAmount,4),100,2) : 0;
+        }
+
         $dayBuckets = $data['daySale']['buckets'];
         $days = $dayBuckets ? array_column($dayBuckets, 'key') : [];
         $daySalesAmount = $dayBuckets ? array_column($dayBuckets, 'daySalesAmount') : [];
@@ -340,24 +359,37 @@ class EsFormatData
         $dayOrderNumEcharts = $this->hourEcharts($days,$dayOrderNum,'订单量');
         //销售额趋势
 
-        //订单类型
+
         $orderType = $data['orderType']['buckets'];
         $orderTypeData = array_combine(array_column($orderType, 'key'), $orderType);
         //网红单//补发单
-        $replacemenOrder = $orderTypeData[OrderType::REPLACEMENT_ORDER];
-        $socialOrder = $orderTypeData[OrderType::SOCIAL_ORDER];
+        $replacemenOrder = $orderTypeData[OrderType::REPLACEMENT_ORDER] ?? [];
+        $socialOrder = $orderTypeData[OrderType::SOCIAL_ORDER] ?? [];
 
+        //订单类型
+        //0 ，平邮免邮
+        //1.平邮
+        //2.商业快递免邮
+        //3. 商业快递
+        $shipType = $data['shipType']['buckets'];
+        $shipTypeData = array_combine(array_column($shipType, 'key'), $shipType);
+        foreach ($shipTypeData as $key => $val)
+        {
+            $shipTypeData[$key]['rate'] = $orderNum ? bcmul(bcdiv($val['doc_count'],$orderNum,4),100,2).'%' : '0%';
+        }
         //金额分部
-        $priceRangesData = $data['priceRanges']['buckets'];
+        $priceRangesData = array_combine(array_column($data['priceRanges']['buckets'], 'from'), $data['priceRanges']['buckets']);
         foreach($priceRangesData as $key => $val) {
-            $priceRangesData[$key]['rate'] = bcdiv($val['doc_count'],$orderNum,2).'%';
+            $priceRangesData[$key]['rate'] = $orderNum ? bcmul(bcdiv($val['doc_count'],$orderNum,4),100,2).'%' : '0%';
         }
 
+        $countryStr = '';
         //国家分部
         $countrySaleData = $data['countrySale']['buckets'];
         foreach($countrySaleData as $key => $val) {
-            $countrySaleData[$key]['rate'] = bcdiv($val['doc_count'],$orderNum,2).'%';
+            $countrySaleDataRrate = $orderNum ? bcmul(bcdiv($val['doc_count'],$orderNum,4),100,2).'%' : '0%';
+            $countryStr.= '<tr><td>'.$val['key'].'</td><td>'.$val['doc_count'].'</td><td>'.$countrySaleDataRrate.'</td></tr>';
         }
-        return compact('orderNum','allAvgPrice','allDaySalesAmount','allShippingAmount','daySalesAmountEcharts','dayOrderNumEcharts','replacemenOrder','socialOrder','priceRangesData','countrySaleData');
+        return compact('orderNum','allAvgPrice','allDaySalesAmount','allShippingAmount','daySalesAmountEcharts','dayOrderNumEcharts','replacemenOrder','socialOrder','priceRangesData','countryStr','compareOrderNumRate','compareAllAvgPriceRate' ,'compareAllDaySalesAmountRate' , 'compareAllShippingAmountRate','shipTypeData');
     }
 }

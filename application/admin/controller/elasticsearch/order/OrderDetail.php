@@ -11,6 +11,7 @@ namespace app\admin\controller\elasticsearch\order;
 
 use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\platformmanage\MagentoPlatform;
+use think\Db;
 
 class OrderDetail extends BaseElasticsearch
 {
@@ -28,11 +29,9 @@ class OrderDetail extends BaseElasticsearch
 
         return $this->view->fetch('operatedatacenter/orderdata/order_data_view/index');
     }
+
     /**
      * 获取数据
-     *
-     * @param        $site
-     * @param string $time
      *
      * @author crasphb
      * @date   2021/4/14 13:56
@@ -43,6 +42,7 @@ class OrderDetail extends BaseElasticsearch
             $params = $this->request->param();
             $type = $params['type'];
             $timeStr = $params['time_str'];
+            $timeStr = '2020-04-12 12:00:00 - 2020-04-18 00:00:00';
             $compareTimeStr = $params['compare_time_str'];
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if (!$timeStr) {
@@ -54,7 +54,7 @@ class OrderDetail extends BaseElasticsearch
                 $end = date('Ymd', strtotime($createat[3]));
             }
             $compareData = [];
-            if($compareTimeStr){
+            if ($compareTimeStr) {
                 $compareTime = explode(' ', $compareTimeStr);
                 $compareStart = date('Ymd', strtotime($compareTime[0]));
                 $compareEnd = date('Ymd', strtotime($compareTime[3]));
@@ -64,11 +64,11 @@ class OrderDetail extends BaseElasticsearch
             $allData = $this->esFormatData->formatPurchaseData($site, $result, $compareData);
             switch ($type) {
                 case 0:
-                    $data = $allData['saleChart'];
+                    $data = $allData['daySalesAmountEcharts'];
 
                     return json(['code' => 1, 'data' => $data]);
                 case 1:
-                    $data = $allData['dayChart'];
+                    $data = $allData['dayOrderNumEcharts'];
 
                     return json(['code' => 1, 'data' => $data]);
                 default:
@@ -77,6 +77,7 @@ class OrderDetail extends BaseElasticsearch
         }
 
     }
+
     /**
      * 订单数据统计（包含几乎所有的聚合和统计）
      *
@@ -143,7 +144,7 @@ class OrderDetail extends BaseElasticsearch
                         ],
                     ],
                     //价格区间聚合
-                    'priceRanges'      => [
+                    'priceRanges'       => [
                         'range' => [
                             'field'  => 'base_grand_total',
                             'ranges' => [
@@ -195,7 +196,7 @@ class OrderDetail extends BaseElasticsearch
                     //运输方式聚合
                     "shipType"          => [
                         'terms' => [
-                            "field" => 'shipping_method',
+                            "field" => 'shipping_method_type',
                         ],
                         'aggs'  => [
                             'allShippingAmount' => [
@@ -215,5 +216,53 @@ class OrderDetail extends BaseElasticsearch
         ];
 
         return $this->esService->search($params);
+    }
+
+    public function ajaxGetPurchaseAna()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $order_platform = $params['order_platform'];
+            //查询时间段内每天的客单价,中位数，标准差
+            $timeStr = $params['time_str'];
+            $timeStr = '2020-04-12 12:00:00 - 2020-04-18 00:00:00';
+            if (!$timeStr) {
+                $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+                $end = date('Y-m-d 23:59:59');
+                $timeStr = $start . ' - ' . $end;
+            }
+            $createat = explode(' ', $timeStr);
+            $where['day_date'] = ['between', [$createat[0], $createat[3] . ' 23:59:59']];
+            $where['site'] = $order_platform;
+            $orderInfo = Db::name('datacenter_day')
+                ->where($where)
+                ->field('day_date,order_unit_price,order_total_midnum,order_total_standard')
+                ->select();
+            $orderInfo = collection($orderInfo)->toArray();
+            $json['xColumnName'] = array_column($orderInfo, 'day_date') ? array_column($orderInfo, 'day_date') : [];
+            $json['columnData'] = [
+                [
+                    'type'     => 'bar',
+                    'barWidth' => '20%',
+                    'data'     => array_column($orderInfo, 'order_unit_price') ? array_column($orderInfo, 'order_unit_price') : [],
+                    'name'     => '客单价',
+                ],
+                [
+                    'type'     => 'bar',
+                    'barWidth' => '20%',
+                    'data'     => array_column($orderInfo, 'order_total_midnum') ? array_column($orderInfo, 'order_total_midnum') : [],
+                    'name'     => '中位数',
+                ],
+                [
+                    'type'       => 'line',
+                    'yAxisIndex' => 1,
+                    'data'       => array_column($orderInfo, 'order_total_standard') ? array_column($orderInfo, 'order_total_standard') : [],
+                    'name'       => '标准差',
+                ],
+
+            ];
+
+            return json(['code' => 1, 'data' => $json]);
+        }
     }
 }

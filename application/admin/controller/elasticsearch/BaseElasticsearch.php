@@ -85,6 +85,9 @@ class BaseElasticsearch extends Backend
             'shipping_title'          => [
                 'type' => 'keyword',
             ],
+            'shipping_method_type'    => [
+                'type' => 'integer',
+            ],
             'country_id'              => [
                 'type' => 'keyword',
             ],
@@ -340,25 +343,25 @@ class BaseElasticsearch extends Backend
     public function createTrackIndex()
     {
         $selfProperties = [
-            'id' => [
+            'id'                 => [
                 'type' => 'integer',
             ],
-            'site' => [
+            'site'               => [
                 'type' => 'integer',
             ],
-            'node_type' => [
+            'node_type'          => [
                 'type' => 'integer',
             ],
             'shipment_data_type' => [
                 'type' => 'keyword',
             ],
-            'create_time' => [
+            'create_time'        => [
                 'type' => 'date',
             ],
-            'delivery_time' => [
+            'delivery_time'      => [
                 'type' => 'date',
             ],
-            'signing_time' => [
+            'signing_time'       => [
                 'type' => 'date',
             ],
 
