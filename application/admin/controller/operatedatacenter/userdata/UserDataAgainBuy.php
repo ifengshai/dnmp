@@ -264,13 +264,13 @@ class UserDataAgainBuy extends Backend
                 [
                     'type' => 'line',
                     'data' => $arr['ydata']['one'],
-                    'name' => '老用户环比',
+                    'name' => '老客户环比',
                     'smooth' => true //平滑曲线
                 ],
                 [
                     'type' => 'line',
                     'data' => $arr['ydata']['two'],
-                    'name' => '新用户环比',
+                    'name' => '新客户环比',
                     'smooth' => true //平滑曲线
                 ],
             ];
