@@ -403,18 +403,12 @@ class NewProductReplenishOrder extends Backend
 
         $this->assignConfig('id', $ids);
         $item = new Item();
-        $replenish_id = input('replenish_id');
+        $replenishId = input('replenish_id');
         if (!$ids) {
-            $id = $replenish_id;
+            $id = $replenishId;
         } else {
             $id = $ids;
         }
-        //        if (!$replenish_id){
-        //            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
-        //        }else{
-        //            $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
-        //        }
-        //        $map['replenish_id'] = ['in', $order_ids];
         $map['replenish_id'] = ['=', $id];
         $filter = json_decode($this->request->get('filter'), true);
 
@@ -422,9 +416,9 @@ class NewProductReplenishOrder extends Backend
         if ($filter['new_old']) {
             $skus = $this->list->where('replenish_id',$id)->group('sku')->column('sku');
 
-            $item_skus = $item->where('sku', 'in', $skus)->where('is_new',$filter['new_old'])->group('sku')->column('sku');
+            $itemSkus = $item->where('sku', 'in', $skus)->where('is_new',$filter['new_old'])->group('sku')->column('sku');
 
-            $map['sku'] = ['in', $item_skus];
+            $map['sku'] = ['in', $itemSkus];
             unset($filter['new_old']);
         }
         //设置过滤方法
@@ -454,8 +448,9 @@ class NewProductReplenishOrder extends Backend
 
             foreach ($list as $k => $v) {
                 $list[$k]['new_old'] =$item->where('sku',$list[$k]['sku'])->value('is_new');
-                $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
-                $list[$k]['num'] = $new_product_replenish_order;
+                $list[$k]['is_spot'] =$item->where('sku',$list[$k]['sku'])->value('is_spot');
+                $newProductReplenishOrder = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
+                $list[$k]['num'] = $newProductReplenishOrder;
             }
             $result = array("total" => $total, "rows" => $list);
 

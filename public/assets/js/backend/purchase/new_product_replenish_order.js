@@ -543,6 +543,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id'), operate: false},
                         {field: 'sku', title: __(' sku'), operate: 'LIKE'},
                         {
+                            field: 'is_spot', title: __('大货/现货'),
+                            searchList: { 0:'-',1: '大货', 2: '现货'},
+                            custom: { 1: 'yellow', 2: 'blue'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'new_old',
                             title: __('新品/老品'),
                             custom: {1: 'green', 2: 'orange'},
