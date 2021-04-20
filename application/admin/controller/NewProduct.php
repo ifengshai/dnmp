@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use think\Log;
@@ -1178,7 +1179,7 @@ class NewProduct extends Backend
             //            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->alias('a')
-                ->field('a.*,b.sku,b.available_stock')
+                ->field('a.*,b.sku,b.available_stock,b.is_spot')
                 ->join(['fa_item' => 'b'], 'a.sku=b.sku')
                 ->where($where)
                 ->where($map)
@@ -1188,7 +1189,7 @@ class NewProduct extends Backend
 
             $list = $this->model
                 ->alias('a')
-                ->field('a.*,b.sku,b.available_stock')
+                ->field('a.*,b.sku,b.available_stock,b.is_spot')
                 ->join(['fa_item' => 'b'], 'a.sku=b.sku')
                 ->where($where)
                 ->where($map)
@@ -1350,6 +1351,7 @@ class NewProduct extends Backend
                 $v['grade'] = $productarr[$v['sku']]['grade'];
                 $v['available_stock'] = $stock[$v['sku']]['available_stock'] ?: 0;
                 $v['on_way_stock'] = $stock[$v['sku']]['on_way_stock'] ?: 0;
+                $v['is_spot'] = $this->item->where(['sku' => $v['sku']])->value('is_spot');
             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
@@ -1931,29 +1933,26 @@ class NewProduct extends Backend
     {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
-
         if ($this->request->isAjax()) {
             $this->model = new \app\admin\model\NewProductMapping();
+            $this->item = new Item();
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-
             //默认站点
-            $platform_type = input('label');
-            $map['website_type'] = $platform_type;
-
+            $platformType = input('label');
+            $map['website_type'] = $platformType;
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['website_type']) {
-                $platform_type = $filter['website_type'];
+                $platformType = $filter['website_type'];
                 unset($map['website_type']);
                 if (100 == $filter['website_type']) {
                     unset($filter['website_type']);
                     $this->request->get(['filter' => json_encode($filter)]);
                 }
             }
-
             //sku
             if ($filter['sku']) {
                 //改为模糊搜索
@@ -1961,14 +1960,12 @@ class NewProduct extends Backend
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
             //补货类型
             if ($filter['type']) {
                 $map['a.type'] = $filter['type'];
                 unset($filter['type']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
             //提报时间
             if ($filter['create_time']) {
                 $arr = explode(' ', $filter['create_time']);
@@ -1976,14 +1973,10 @@ class NewProduct extends Backend
                 unset($filter['create_time']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
-            // $check_order_item = new \app\admin\model\warehouse\CheckItem();
-            // $in_stock_item = new \app\admin\model\warehouse\InstockItem();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model->alias('a')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id', 'left')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
-                // ->join(['fa_purchase_order' => 'd'], 'a.replenish_id=d.replenish_id and c.supplier_id = d.supplier_id and d.purchase_name = a.sku', 'left')
                 ->join(['fa_purchase_order_item' => 'e'], 'a.sku=e.sku', 'left')
                 ->join(['fa_purchase_order' => 'd'], 'e.purchase_id = d.id and b.id = d.replenish_id','left')
                 ->where($where)
@@ -1993,9 +1986,7 @@ class NewProduct extends Backend
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
-
             $list = $this->model->alias('a')
-                // ->field('a.*,sum(a.replenish_num) as replenish_count,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.check_status,d.stock_status,d.id as purchase_id,sum(c.distribute_num) as distribute_count')
                 ->field('a.sku,a.type,a.create_time,a.replenish_num,b.status,c.real_dis_num,d.purchase_number,d.arrival_time,d.purchase_status,d.id as purchase_id,(c.distribute_num) as distribute_count')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id', 'left')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
@@ -2010,51 +2001,20 @@ class NewProduct extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-
-            // //根据采购单id 查询质检单
-            // $purchase_id = array_column($list, 'purchase_id');
-            // $rows = $check_order_item->field("sum(purchase_num) as purchase_num,sum(arrivals_num) as arrivals_num,sum(quantity_num) as quantity_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
-            // $rows = collection($rows)->toArray();
-            // //重组数组
-            // $check_list = [];
-            // foreach ($rows as $k => $v) {
-            //     $check_list[$v['purchase_id']][$v['sku']] = $v;
-            // }
-            //
-            // //查询入库数量
-            // $in_stock_rows = $in_stock_item->field("sum(in_stock_num) as in_stock_num,purchase_id,sku")->where(['purchase_id' => ['in', $purchase_id]])->group('purchase_id,sku')->select();
-            // $in_stock_rows = collection($in_stock_rows)->toArray();
-            // //重组数组
-            // $in_stock_list = [];
-            // foreach ($in_stock_rows as $k => $v) {
-            //     $in_stock_list[$v['purchase_id']][$v['sku']] = $v;
-            // }
-            //
-            // foreach ($list as &$v) {
-            //     $purchase_detail = Db::name('purchase_order')->where(['purchase_name' => $v['sku']])->find();
-            //     if (!$purchase_detail) {
-            //         unset($v);
-            //     } else {
-            //         $v['purchase_num'] = $check_list[$v['purchase_id']][$v['sku']]['purchase_num'];
-            //         $v['arrivals_num'] = $check_list[$v['purchase_id']][$v['sku']]['arrivals_num'];
-            //         $v['quantity_num'] = $check_list[$v['purchase_id']][$v['sku']]['quantity_num'];
-            //         $v['in_stock_num'] = $in_stock_list[$v['purchase_id']][$v['sku']]['in_stock_num'];
-            //     }
-            //     $v['platform_type'] = $platform_type;
-            // }
-            // unset($v);
+             foreach ($list as $k=>$v) {
+                 $list[$k]['is_spot'] = $this->item->where(['sku' => $v['sku']])->value('is_spot');
+             }
             $result = array("total" => $total, "rows" => $list);
             return json($result);
         }
-
         //查询对应平台权限
-        $magentoplatformarr = array_values($this->magentoplatform->getNewAuthSite1());
+        $magentoplatformArr = array_values($this->magentoplatform->getNewAuthSite1());
 
         //取第一个key为默认站点
-        $site = input('site', $magentoplatformarr[0]['id']);
+        $site = input('site', $magentoplatformArr[0]['id']);
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
-        $this->assign('magentoplatformarr', $magentoplatformarr);
+        $this->assign('magentoplatformarr', $magentoplatformArr);
         return $this->view->fetch();
     }
 
