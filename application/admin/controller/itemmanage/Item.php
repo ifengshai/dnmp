@@ -2563,10 +2563,36 @@ class Item extends Backend
      * @date   2021/4/19 18:18
      */
     public function changeValue(){
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $date = date('Y-m-d 00:00:00');
         $itemAttribute = new ItemAttribute();
         $goodsValue = $this->model->where(['is_open'=>1])->column('id');
         $itemAttributeValue = $itemAttribute->column('item_id');
         $result=array_diff($goodsValue,$itemAttributeValue);
-        dump($result);
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $goodsValue = $this->model->where(['id'=>['in',$result]])->column('sku','id');
+        foreach ($goodsValue as $key=>$value){
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $date = date('Y-m-d 00:00:00');
+            $list = $itemPlatformSku->field('id,sku,platform_type as site')->where([
+                'platform_sku'    => ['eq', $value],
+            ])->find();
+            $Sales= $skuSalesNum->where([
+                'sku'        => $list->sku,
+                'site'       => $list->site,
+                'createtime' => ['<', $date],
+            ])->field("sum(sales_num) as sales_num,count(*) as num")->order('createtime desc')->select();
+            $data[$key]['id'] = $key;
+            $data[$key]['sku'] = $value;
+            $data[$key]['sum'] = $Sales->$Sales[0]->sales_num;;
+        }
+        $data = array_values($data);
+        $headlist = [
+            'id', 'SKU', '销量'
+        ];
+        $path = "/uploads/";
+        $fileName = '排查异常商品数据';
+        Excel::writeCsv($data, $headlist, $path . $fileName);
     }
 }
