@@ -355,7 +355,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         },
                         {
                             field: 'check_time',
-                            title: __('审单时间'),
+                            title: __('审单通过时间'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
                             visible: false

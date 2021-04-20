@@ -31,11 +31,24 @@ class AsyncEs extends BaseElasticsearch
     public function asyncOrder()
     {
         Debug::remark('begin');
-        NewOrder::chunk(10000,function($newOrder){
+        NewOrder::chunk(30000,function($newOrder){
             $data = array_map(function($value) {
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
                 },$value);
+
+                $value['shipping_method_type'] = 0;
+                //运输类型添加
+                if(in_array($value['shipping_method'],['freeshipping_freeshipping','flatrate_flatrate']))
+                {
+                    if($value['base_shipping_amount'] == 0) $value['shipping_method_type'] = 0;
+                    if($value['base_shipping_amount'] > 0) $value['shipping_method_type'] = 1;
+                }
+                if(in_array($value['shipping_method'],['tablerate_bestway']))
+                {
+                    if($value['base_shipping_amount'] == 0) $value['shipping_method_type'] = 2;
+                    if($value['base_shipping_amount'] > 0) $value['shipping_method_type'] = 3;
+                }
                 $mergeData = $value['payment_time'] ?: $value['created_at'];
                 return $this->formatDate($value,$mergeData);
             },collection($newOrder)->toArray());

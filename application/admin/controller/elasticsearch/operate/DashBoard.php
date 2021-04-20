@@ -189,6 +189,31 @@ class DashBoard extends BaseElasticsearch
                             'field' => 'active_user_num',
                         ],
                     ],
+                    "cartNum"  => [
+                        "sum" => [
+                            "field" => "new_cart_num",
+                        ],
+                    ],
+                    "salesTotalMoney" => [
+                        "sum" => [
+                            "field" => "sales_total_money",
+                        ],
+                    ],
+                    "avgPrice"        => [
+                        "avg" => [
+                            "field" => "order_unit_price",
+                        ],
+                    ],
+                    "addCartRate"        => [
+                        "avg" => [
+                            "field" => "cart_rate",
+                        ],
+                    ],
+                    "registerNum"        => [
+                        "avg" => [
+                            "field" => "register_num",
+                        ],
+                    ],
                 ],
             ],
         ];

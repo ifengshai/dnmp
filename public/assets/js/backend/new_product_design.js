@@ -33,7 +33,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 extend: {
                     index_url: 'new_product_design/index' + location.search,
                     add_url: 'new_product_design/add',
-                    edit_url: 'new_product_design/edit',
+                    detail_url: 'new_product_design/detail',
                     del_url: 'new_product_design/del',
                     multi_url: 'new_product_design/multi',
                     table: 'new_product_design',
@@ -110,17 +110,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
-                                    name: 'edit',
+                                    name: 'detail',
                                     text:'查看详情',
                                     title:__('查看详情'),
-
                                     classname: 'btn btn-xs btn-primary btn-dialog',
-                                    icon: '',
-                                    url: 'new_product_design/detail/id/{row.id}',
+                                    url: 'new_product_design/detail',
                                     area: ['80%', '65%'],
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
-                                    },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
                                         if (row.label ==0 || row.label ==7){
@@ -246,7 +241,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     title:__('审核通过'),
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'new_product_design/reviewTheOperation?status=8',
+                                    url: 'new_product_design/review_the_operation?status=8',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -265,12 +260,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
-                                    name: 'audit_refused',
+                                    name: 'review_the_operation',
                                     text:__('审核拒绝'),
                                     title:__('审核拒绝'),
                                     classname: 'btn btn-xs btn-danger  btn-magic btn-ajax',
                                     icon: 'fa fa-magic',
-                                    url: 'new_product_design/reviewTheOperation?status=9',
+                                    url: 'new_product_design/review_the_operation?status=9',
                                     success: function (data, ret) {
                                         table.bootstrapTable('refresh', {});
                                         //如果需要阻止成功提示，则必须使用return false;
@@ -281,7 +276,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         return false;
                                     },
                                     visible: function (row) {
-                                        if (row.status ==7 && row.label !==0){
+
+                                        if (row.status ==7 && row.label !==0 || Config.reviewTheOperation == true) {
                                             return  true;
                                         }else{
                                             return false;
@@ -289,16 +285,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                             ],
-                            // formatter: Table.api.formatter.operate
+                             // formatter: Table.api.formatter.operate
 
                             formatter: function (value, row, index) { //隐藏自定义的视频按钮
                                 var that = $.extend({}, this);
                                 var table = $(that.table).clone(true);
                                 //权限判断
-                                if(Config.edit != true){ //通过Config.chapter 获取后台存的chapter
-                                    $(table).data("operate-edit", null);
-                                    that.table = table;
-                                }
                                 if(Config.record_size != true){ //录尺寸
                                     $(table).data("operate-edit_recipient", null);
                                     that.table = table;
@@ -320,9 +312,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     $(table).data("operate-upload_pictures", null);
                                     that.table = table;
                                 }
-                                if(Config.reviewTheOperation != true){ //通过Config.chapter 获取后台存的chapter
+                                if(Config.review_the_operation != true){ //通过Config.chapter 获取后台存的chapter
                                     $(table).data("operate-approved", null);
-                                    $(table).data("audit-audit_refused", null);
+                                    that.table = table;
+                                }
+                                if(Config.review_the_operation != true){ //通过Config.chapter 获取后台存的chapter
+                                    $(table).data("operate-review_the_operation", null);
                                     that.table = table;
                                 }
                                 return Table.api.formatter.operate.call(that, value, row, index);
@@ -381,9 +376,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         record_size: function () {
             Controller.api.bindevent();
         },
-        edit: function () {
-            Controller.api.bindevent();
-        },
+
         reviewTheOperation: function () {
             Controller.api.bindevent();
         },

@@ -9,25 +9,10 @@
 namespace app\service\elasticsearch;
 
 
+use app\enum\OrderType;
+
 class EsFormatData
 {
-    public function formatPurchaseData($site, $purchaseData)
-    {
-        $start = '2018020500';
-        $end = '2021020531';
-        $siteDataKeyColumn = array_column($purchaseData, 'key');
-        $siteData = $siteDataKeyColumn[$site];
-        //总销售额
-        $allDaySalesAmount = $siteData['allDaySalesAmount']['value'];
-        //总订单数
-        $allOrderCount = $siteData['doc_count'];
-        //总副数
-        $allQtyOrdered = $siteData['allQtyOrdered']['value'];
-        //客单价
-        $allAvgPrice = $siteData['allAvgPrice']['value'];
-        //分时销量
-        $hourSale = $siteData['hourSale']['buckets'];
-    }
 
     /**
      * 时段销量格式化
@@ -40,7 +25,7 @@ class EsFormatData
      * @author crasphb
      * @date   2021/4/14 14:39
      */
-    public function formatHourData($orderData, $cartData, $gaData,$today = true)
+    public function formatHourData($orderData, $cartData, $gaData = [],$today = true)
     {
         $hourSale = $orderData['hourSale']['buckets'];
         $hourCart = $cartData['hourCart']['buckets'];
@@ -195,8 +180,13 @@ class EsFormatData
      */
     public function hourEcharts($xdata, $ydata, $name = '')
     {
-        $xdata = explode(',', $xdata);
-        $ydata = explode(',', $ydata);
+        if(!is_array($xdata)) {
+            $xdata = explode(',', $xdata);
+        }
+        if(!is_array($ydata)) {
+            $ydata = explode(',', $ydata);
+        }
+
         $echart['xcolumnData'] = $xdata;
         $echart['column'] = [$name];
         $echart['columnData'] = [
@@ -348,32 +338,39 @@ class EsFormatData
             $arr = [];
             $i = 0;
             $sevenDelievedDay = $tenDelievedDay = $fourteenDelievedDay = $twentyDelievedDay = $twentyupDelievedDay = 0;
-            foreach ($buckets1 as $key=>$value){
+            foreach ($buckets1 as $key => $value) {
                 $arr[$i]['track_channel'] = $value['key'];
                 $arr[$i]['delieved_num'] = $value['doc_count'];
-                $arr[$i]['delieved_rate'] = $newBuckets[$value['key']] ? round($value['doc_count']/$newBuckets[$value['key']]*100,2) : 0;
-                $arr[$i]['avg_deliverd_rate'] = $value['doc_count'] ? round($value['sumWaitTime']['value'] / $value['doc_count'] / 86400, 2) : 0;
+                $arr[$i]['delieved_rate'] = $newBuckets[$value['key']] ? round($value['doc_count'] / $newBuckets[$value['key']] * 100,
+                    2) : 0;
+                $arr[$i]['avg_deliverd_rate'] = $value['doc_count'] ? round($value['sumWaitTime']['value'] / $value['doc_count'] / 86400,
+                    2) : 0;
                 $result = $value['delieveredDays']['buckets'];
-                foreach ($result as $k=>$v){
-                    switch ($v['key']){
+                foreach ($result as $k => $v) {
+                    switch ($v['key']) {
                         case '0.0-6.99':
-                            $arr[$i]['seven_delieved_rate'] = $value['doc_count'] ? round($v['doc_count']/$value['doc_count']*100,2) : 0;
+                            $arr[$i]['seven_delieved_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
+                                2) : 0;
                             $sevenDelievedDay += $v['doc_count'];
                             break;
                         case '7.0-9.99':
-                            $arr[$i]['ten_delieved_rate'] = $value['doc_count'] ? round($v['doc_count']/$value['doc_count']*100,2) : 0;
+                            $arr[$i]['ten_delieved_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
+                                2) : 0;
                             $tenDelievedDay += $v['doc_count'];
                             break;
                         case '10.0-13.99':
-                            $arr[$i]['fourteen_delieved_rate'] = $value['doc_count'] ? round($v['doc_count']/$value['doc_count']*100,2) : 0;
+                            $arr[$i]['fourteen_delieved_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
+                                2) : 0;
                             $fourteenDelievedDay += $v['doc_count'];
                             break;
                         case '14.0-19.99':
-                            $arr[$i]['twenty_delieved_rate'] = $value['doc_count'] ? round($v['doc_count']/$value['doc_count']*100,2) : 0;
+                            $arr[$i]['twenty_delieved_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
+                                2) : 0;
                             $twentyDelievedDay += $v['doc_count'];
                             break;
                         case '20.0-5000000.0':
-                            $arr[$i]['twentyup_delieved_rate'] = $value['doc_count'] ? round($v['doc_count']/$value['doc_count']*100,2) : 0;
+                            $arr[$i]['twentyup_delieved_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
+                                2) : 0;
                             $twentyupDelievedDay += $v['doc_count'];
                             break;
                     }
@@ -386,21 +383,21 @@ class EsFormatData
         //获取发货数量
         $sendNum = array_column($buckets, 'doc_count');
         //获取妥投数量
-        $deliverdOrderNum = array_column($arr,'delieved_num');
+        $deliverdOrderNum = array_column($arr, 'delieved_num');
         //获取总妥投率
-        $totalDeliverdRate = array_column($arr,'total_deliverd_rate');
+        $totalDeliverdRate = array_column($arr, 'total_deliverd_rate');
         //获取7天妥投率
-        $sevenDelievedRate = array_column($arr,'seven_delieved_rate');
+        $sevenDelievedRate = array_column($arr, 'seven_delieved_rate');
         //获取10天妥投率
-        $tenDelievedRate = array_column($arr,'ten_delieved_rate');
+        $tenDelievedRate = array_column($arr, 'ten_delieved_rate');
         //获取14天妥投率
-        $fourteenDelievedRate = array_column($arr,'fourteen_delieved_rate');
+        $fourteenDelievedRate = array_column($arr, 'fourteen_delieved_rate');
         //获取20天妥投率
-        $twentyDelievedRate = array_column($arr,'twenty_delieved_rate');
+        $twentyDelievedRate = array_column($arr, 'twenty_delieved_rate');
         //获取20天以上妥投率
-        $twentyUpDelievedRate = array_column($arr,'twentyup_delieved_rate');
+        $twentyUpDelievedRate = array_column($arr, 'twentyup_delieved_rate');
         //获取平均妥投时效
-        $avgDeliverdRate = array_column($arr,'avg_deliverd_rate');
+        $avgDeliverdRate = array_column($arr, 'avg_deliverd_rate');
 
         //发货数量统计饼图数据
         $sendEchart = [
@@ -424,6 +421,73 @@ class EsFormatData
                 $twentyupDelievedDay
             ]
         ];
-        return compact('trackChannel', 'sendNum', 'deliverdOrderNum', 'totalDeliverdRate', 'sevenDelievedRate', 'tenDelievedRate', 'fourteenDelievedRate', 'twentyDelievedRate', 'twentyUpDelievedRate','avgDeliverdRate','sendEchart','delievedEchart');
+        return compact('trackChannel', 'sendNum', 'deliverdOrderNum', 'totalDeliverdRate', 'sevenDelievedRate',
+            'tenDelievedRate', 'fourteenDelievedRate', 'twentyDelievedRate', 'twentyUpDelievedRate', 'avgDeliverdRate',
+            'sendEchart', 'delievedEchart');
+    }
+
+    public function formatPurchaseData($site, $data, $compareData = [])
+    {
+        //顶部指标
+        $orderNum = $data['sumOrder']['value'];
+        $allAvgPrice = $data['allAvgPrice']['value'];
+        $allDaySalesAmount = $data['allDaySalesAmount']['value'];
+        $allShippingAmount = $data['allShippingAmount']['value'];
+
+        $compareOrderNumRate = $compareAllAvgPriceRate = $compareAllDaySalesAmountRate = $compareAllShippingAmountRate = 0;
+        if($compareData) {
+
+            $compareOrderNum = $compareData['sumOrder']['value'];
+            $compareAllAvgPrice = $compareData['allAvgPrice']['value'];
+            $compareAllDaySalesAmount = $compareData['allDaySalesAmount']['value'];
+            $compareAllShippingAmount = $compareData['allShippingAmount']['value'];
+
+            $compareOrderNumRate = $compareOrderNum ? bcmul(bcdiv(bcsub($orderNum,$compareOrderNum),$compareOrderNum,4),100,2) : 0;
+            $compareAllAvgPriceRate = $compareAllAvgPrice ? bcmul(bcdiv(bcsub($allAvgPrice,$compareAllAvgPrice),$compareAllAvgPrice,4),100,2) : 0;
+            $compareAllDaySalesAmountRate = $compareAllDaySalesAmount ? bcmul(bcdiv(bcsub($allDaySalesAmount,$compareAllDaySalesAmount),$compareAllDaySalesAmount,4),100,2) : 0;
+            $compareAllShippingAmountRate = $compareAllShippingAmount ? bcmul(bcdiv(bcsub($allShippingAmount,$compareAllShippingAmount),$compareAllShippingAmount,4),100,2) : 0;
+        }
+
+        $dayBuckets = $data['daySale']['buckets'];
+        $days = $dayBuckets ? array_column($dayBuckets, 'key') : [];
+        $daySalesAmount = $dayBuckets ? array_column($dayBuckets, 'daySalesAmount') : [];
+        $dayOrderNum = $dayBuckets ? array_column($dayBuckets, 'doc_count') : [];
+        //订单量趋势
+        $daySalesAmountEcharts = $this->hourEcharts($days,$daySalesAmount,'销售额');
+        $dayOrderNumEcharts = $this->hourEcharts($days,$dayOrderNum,'订单量');
+        //销售额趋势
+
+
+        $orderType = $data['orderType']['buckets'];
+        $orderTypeData = array_combine(array_column($orderType, 'key'), $orderType);
+        //网红单//补发单
+        $replacemenOrder = $orderTypeData[OrderType::REPLACEMENT_ORDER] ?? [];
+        $socialOrder = $orderTypeData[OrderType::SOCIAL_ORDER] ?? [];
+
+        //订单类型
+        //0 ，平邮免邮
+        //1.平邮
+        //2.商业快递免邮
+        //3. 商业快递
+        $shipType = $data['shipType']['buckets'];
+        $shipTypeData = array_combine(array_column($shipType, 'key'), $shipType);
+        foreach ($shipTypeData as $key => $val)
+        {
+            $shipTypeData[$key]['rate'] = $orderNum ? bcmul(bcdiv($val['doc_count'],$orderNum,4),100,2).'%' : '0%';
+        }
+        //金额分部
+        $priceRangesData = array_combine(array_column($data['priceRanges']['buckets'], 'from'), $data['priceRanges']['buckets']);
+        foreach($priceRangesData as $key => $val) {
+            $priceRangesData[$key]['rate'] = $orderNum ? bcmul(bcdiv($val['doc_count'],$orderNum,4),100,2).'%' : '0%';
+        }
+
+        $countryStr = '';
+        //国家分部
+        $countrySaleData = $data['countrySale']['buckets'];
+        foreach($countrySaleData as $key => $val) {
+            $countrySaleDataRrate = $orderNum ? bcmul(bcdiv($val['doc_count'],$orderNum,4),100,2).'%' : '0%';
+            $countryStr.= '<tr><td>'.$val['key'].'</td><td>'.$val['doc_count'].'</td><td>'.$countrySaleDataRrate.'</td></tr>';
+        }
+        return compact('orderNum','allAvgPrice','allDaySalesAmount','allShippingAmount','daySalesAmountEcharts','dayOrderNumEcharts','replacemenOrder','socialOrder','priceRangesData','countryStr','compareOrderNumRate','compareAllAvgPriceRate' ,'compareAllDaySalesAmountRate' , 'compareAllShippingAmountRate','shipTypeData');
     }
 }
