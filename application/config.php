@@ -56,7 +56,7 @@ return [
     // | 模块设置
     // +----------------------------------------------------------------------
     // 默认模块名
-    'default_module'         => 'admin',
+    'default_module'         => 'index',
     // 禁止访问模块
     'deny_module_list'       => ['common', 'admin'],
     // 默认控制器名

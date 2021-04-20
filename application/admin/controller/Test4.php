@@ -2,7 +2,9 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\warehouse\ProductBarCodeItem;
+use fast\Http;
 use think\Controller;
 use app\Common\model\Auth;
 use GuzzleHttp\Client;
@@ -2912,4 +2914,211 @@ class Test4 extends Controller
 
     }
 
+    /**
+     * 阿里巴巴国际站
+     * Interface upload_third_sku
+     * @package app\admin\controller
+     * @author  jhh
+     * @date    2021/4/16 18:21:42
+     */
+    public function upload_third_sku()
+    {
+        $skus = Db::name('temp_sku')->select();
+        foreach ($skus as $k=>$v){
+            $platform = new ItemPlatformSku();
+            $platSku =$platform->where('sku',$v['sku'])->where('platform_type',14)->value('platform_sku');
+            if ($platSku) {
+                $params['sku_info'] = $platSku;
+                $params['platform_type'] = 2;
+                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
+                $thirdRes = json_decode($thirdRes, true);
+                if ($thirdRes['code'] == 1) {
+                    $platform->where('sku',$v['sku'])->where('platform_type',14)->update(['is_upload' => 1]);
+                    echo $platSku.'is ok'."\n";
+                }else{
+                    echo $platSku.'上传失败'."\n";
+                }
+            }
+            else{
+                echo $platSku.'没有映射关系'."\n";
+            }
+
+        }
+    }
+
+    /**
+     * 抖音
+     * Interface upload_third_sku_douyin
+     * @package app\admin\controller
+     * @author  jhh
+     * @date    2021/4/16 18:21:33
+     */
+    public function upload_third_sku_douyin()
+    {
+        $skus = Db::name('temp_sku')->select();
+        foreach ($skus as $k=>$v){
+            $platform = new ItemPlatformSku();
+            $platSku =$platform->where('sku',$v['sku'])->where('platform_type',13)->value('platform_sku');
+            if ($platSku) {
+                $params['sku_info'] = $platSku;
+                $params['platform_type'] = 1;
+                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
+                $thirdRes = json_decode($thirdRes, true);
+                if ($thirdRes['code'] == 1) {
+                    $platform->where('sku',$v['sku'])->where('platform_type',13)->update(['is_upload' => 1]);
+                    echo $platSku.'is ok'."\n";
+                }else{
+                    echo $platSku.'上传失败'."\n";
+                }
+            }
+            else{
+                echo $v['sku'].'没有映射关系'."\n";
+            }
+
+        }
+    }
+
+    /**
+     * 跑出映射关系 alibaba国际站
+     * Interface
+     * @package app\admin\controller
+     * @author  jhh
+     * @date    2021/4/19 9:19:57
+     */
+    public function run_plat_sku()
+    {
+        $this->model = new \app\admin\model\NewProduct;
+        $this->attribute = new \app\admin\model\NewProductAttribute;
+        $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
+        $this->category = new \app\admin\model\itemmanage\ItemCategory;
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $this->platformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        $skus = Db::name('temp_sku')->select();
+        foreach ($skus as $k=>$v) {
+            $newProductId = $this->model->where('sku',$v['sku'])->value('id');
+            $skus[$k]['new_product_id'] = $newProductId;
+            $where['new_product.id'] = $newProductId;
+            $row = $this->model->where($where)->with(['newproductattribute'])->find();
+            if (!$row) {
+                echo '未查询到数据'."\n";
+            }
+            $row = $row->toArray();
+            if ($row['item_status'] != 1 && $row['item_status'] != 2) {
+                echo '此状态不能同步'."\n";
+            }
+            $map['id'] = $newProductId;
+            $map['item_status'] = 1;
+            $data['item_status'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $params = $row;
+                $params['create_person'] = session('admin.nickname');
+                $params['create_time'] = date('Y-m-d H:i:s', time());
+                $params['item_status'] = 1;
+                unset($params['id']);
+                unset($params['newproductattribute']);
+                //查询商品表SKU是否存在
+                $tWhere['sku'] = $params['sku'];
+                $tWhere['is_del'] = 1;
+                $count = $this->item->where($tWhere)->count();
+                //此SKU已存在 跳过
+                if ($count < 1) {
+                    //添加商品主表信息
+                    $this->item->allowField(true)->save($params);
+                    $attributeParams = $row['newproductattribute'];
+                    unset($attributeParams['id']);
+                    unset($attributeParams['frame_images']);
+                    unset($attributeParams['frame_color']);
+                    $attributeParams['item_id'] = $this->item->id;
+                    //添加商品属性表信息
+                    $this->itemAttribute->allowField(true)->save($attributeParams);
+                }
+
+                //添加对应平台映射关系
+                $skuParams['site'] = 14;
+                $skuParams['sku'] = $params['sku'];
+                $skuParams['frame_is_rimless'] = $row['frame_is_rimless'];
+                $skuParams['name'] = $row['name'];
+                $skuParams['category_id'] = $row['category_id'];
+
+                $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+                echo $v['sku'].'同步成功'."\n";
+            } else {
+                echo $v['sku'].'同步失败'."\n";
+            }
+        }
+    }
+
+    /**
+     * 跑出映射关系 抖音
+     * Interface run_plat_sku_douyin
+     * @package app\admin\controller
+     * @author  jhh
+     * @date    2021/4/19 10:03:40
+     */
+    public function run_plat_sku_douyin()
+    {
+        $this->model = new \app\admin\model\NewProduct;
+        $this->attribute = new \app\admin\model\NewProductAttribute;
+        $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
+        $this->category = new \app\admin\model\itemmanage\ItemCategory;
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $this->platformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        $skus = Db::name('temp_sku')->select();
+        foreach ($skus as $k=>$v) {
+            $newProductId = $this->model->where('sku',$v['sku'])->value('id');
+            $skus[$k]['new_product_id'] = $newProductId;
+            $where['new_product.id'] = $newProductId;
+            $row = $this->model->where($where)->with(['newproductattribute'])->find();
+            if (!$row) {
+                echo '未查询到数据'."\n";
+            }
+            $row = $row->toArray();
+            if ($row['item_status'] != 1 && $row['item_status'] != 2) {
+                echo '此状态不能同步'."\n";
+            }
+            $map['id'] = $newProductId;
+            $map['item_status'] = 1;
+            $data['item_status'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $params = $row;
+                $params['create_person'] = session('admin.nickname');
+                $params['create_time'] = date('Y-m-d H:i:s', time());
+                $params['item_status'] = 1;
+                unset($params['id']);
+                unset($params['newproductattribute']);
+                //查询商品表SKU是否存在
+                $tWhere['sku'] = $params['sku'];
+                $tWhere['is_del'] = 1;
+                $count = $this->item->where($tWhere)->count();
+                //此SKU已存在 跳过
+                if ($count < 1) {
+                    //添加商品主表信息
+                    $this->item->allowField(true)->save($params);
+                    $attributeParams = $row['newproductattribute'];
+                    unset($attributeParams['id']);
+                    unset($attributeParams['frame_images']);
+                    unset($attributeParams['frame_color']);
+                    $attributeParams['item_id'] = $this->item->id;
+                    //添加商品属性表信息
+                    $this->itemAttribute->allowField(true)->save($attributeParams);
+                }
+
+                //添加对应平台映射关系
+                $skuParams['site'] = 13;
+                $skuParams['sku'] = $params['sku'];
+                $skuParams['frame_is_rimless'] = $row['frame_is_rimless'];
+                $skuParams['name'] = $row['name'];
+                $skuParams['category_id'] = $row['category_id'];
+
+                $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+                echo $v['sku'].'同步成功'."\n";
+            } else {
+                echo $v['sku'].'同步失败'."\n";
+            }
+        }
+    }
 }

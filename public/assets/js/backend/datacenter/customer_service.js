@@ -644,8 +644,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 //折线图
                 Controller.api.formatter.workload_line_chart();
             })
+            //导出
+            $("#account_order_batch_export_xls").click(function(){
+                var time_str = $("#one_time").val();
+                var platform = $("#order_platform").val();
+                var group_id = $("#customer_type").val();
+                window.open(Config.moduleurl + '/datacenter/customer_service/batch_export_xls?time_str='+time_str+'&platform='+platform+'&group_id='+group_id, '_blank');
+            })
             $("#worknum_reset").click(function(){
-                 $("#order_platform").val(1);
+                $("#order_platform").val(1);
                 $("#one_time").val('');
                 $("#customer_type").val(0);
             })

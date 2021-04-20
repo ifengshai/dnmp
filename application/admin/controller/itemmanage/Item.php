@@ -71,6 +71,7 @@ class Item extends Backend
      */
     public function index()
     {
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) { // 判断是否为Ajax调用
@@ -2555,5 +2556,17 @@ class Item extends Backend
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
+    }
+
+    /**
+     * @author zjw
+     * @date   2021/4/19 18:18
+     */
+    public function changeValue(){
+        $itemAttribute = new ItemAttribute();
+        $goodsValue = $this->model->where(['is_open'=>1])->column('id');
+        $itemAttributeValue = $itemAttribute->column('item_id');
+        $result=array_diff($goodsValue,$itemAttributeValue);
+        dump($result);
     }
 }
