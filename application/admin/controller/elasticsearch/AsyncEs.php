@@ -36,6 +36,10 @@ class AsyncEs extends BaseElasticsearch
                     return $v === null ? 0 : $v;
                 },$value);
 
+                //nihao站的终端转换
+                if($value['site'] == 3 && $value['store_id'] == 2) {
+                    $value['store_id'] = 4;
+                }
                 $value['shipping_method_type'] = 0;
                 //运输类型添加
                 if(in_array($value['shipping_method'],['freeshipping_freeshipping','flatrate_flatrate']))

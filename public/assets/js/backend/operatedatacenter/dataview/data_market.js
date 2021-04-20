@@ -4,6 +4,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
         index: function () {
             Controller.api.formatter.daterangepicker($("div[role=form8]"));
             Form.api.bindevent($("div[role=form8]"));
+            get_bottom();
             // 基于准备好的dom，初始化echarts实例
             //销售额
             var myChart  = Echarts.init(document.getElementById('echart'), 'walden');
@@ -145,7 +146,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.zeelool_jpSalesMoneyList
-                }  
+                }
                 ]
             };
             var option2 = {
@@ -280,9 +281,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.zeelool_jpSalesNumList
-                }                
+                }
                 ]
-            };            
+            };
             var option3 = {
                 title: {
                     text: '',
@@ -381,7 +382,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.zeelool_esUnitPriceList
-                }, 
+                },
                 {
                     name: __('Zeelool_de站客单价'),
                     type: 'line',
@@ -395,7 +396,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.zeelool_deUnitPriceList
-                }, 
+                },
                 {
                     name: __('Zeelool_jp站客单价'),
                     type: 'line',
@@ -409,7 +410,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.zeelool_jpUnitPriceList
-                }                
+                }
                 ]
             };
             var option4 = {
@@ -538,7 +539,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.zeelool_jpShoppingcartTotal
-                }                
+                }
                 ]
             };
             var option5 = {
@@ -667,7 +668,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.zeelool_jpShoppingcartConversion
-                }                  
+                }
                 ]
             };
             var option6 = {
@@ -768,7 +769,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.zeelool_esRegisterCustomer
-                }, 
+                },
                 {
                     name: __('Zeelool_de站注册用户数'),
                     type: 'line',
@@ -782,7 +783,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.zeelool_deRegisterCustomer
-                }, 
+                },
                 {
                     name: __('Zeelool_jp站注册用户数'),
                     type: 'line',
@@ -796,9 +797,9 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         }
                     },
                     data: Orderdata.zeelool_jpRegisterCustomer
-                }                 
+                }
                 ]
-            };                                     
+            };
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
 			myChart2.setOption(option2);
@@ -910,7 +911,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#lastmonth_sign_customer').text(ret.data.lastmonth_sign_customer);
                     $('#thisyear_sign_customer').text(ret.data.thisyear_sign_customer);
                     $('#lastyear_sign_customer').text(ret.data.lastyear_sign_customer);
-                    $('#total_sign_customer').text(ret.data.total_sign_customer);                                                                                    
+                    $('#total_sign_customer').text(ret.data.total_sign_customer);
                     //console.log(ret.data);
                     return false;
                 }, function(data, ret){
@@ -1004,121 +1005,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#lastmonth_sign_customer').text(0);
                     $('#thisyear_sign_customer').text(0);
                     $('#lastyear_sign_customer').text(0);
-                    $('#total_sign_customer').text(0);                      
+                    $('#total_sign_customer').text(0);
                     //console.log(ret);
                     Layer.alert(ret.msg);
                     return false;
                 });
             });
 			$('#submit').on('click',function(){
-                var create_time = $('#created_at').val();
-                Backend.api.ajax({
-                    url:'operatedatacenter/dataview/data_market/async_bottom_data',
-                    data:{create_time:create_time}
-                }, function(data, ret){
-                    console.log(ret);
-                    $('#zeelool_pc_sales_money').text(ret.data.zeelool_pc_sales_money);
-                    $('#zeelool_pc_sales_num').text(ret.data.zeelool_pc_sales_num);
-                    $('#zeelool_pc_unit_price').text(ret.data.zeelool_pc_unit_price);
-                    $('#zeelool_wap_sales_money').text(ret.data.zeelool_wap_sales_money);
-                    $('#zeelool_wap_sales_num').text(ret.data.zeelool_wap_sales_num);
-                    $('#zeelool_wap_unit_price').text(ret.data.zeelool_wap_unit_price);
-                    $('#zeelool_app_sales_money').text(ret.data.zeelool_app_sales_money);
-                    $('#zeelool_app_sales_num').text(ret.data.zeelool_app_sales_num);
-                    $('#zeelool_app_unit_price').text(ret.data.zeelool_app_unit_price);
-                    $('#zeelool_android_sales_money').text(ret.data.zeelool_android_sales_money);
-                    $('#zeelool_android_sales_num').text(ret.data.zeelool_android_sales_num);
-                    $('#zeelool_android_unit_price').text(ret.data.zeelool_android_unit_price);
-                    $('#voogueme_pc_sales_money').text(ret.data.voogueme_pc_sales_money);
-                    $('#voogueme_pc_sales_num').text(ret.data.voogueme_pc_sales_num);
-                    $('#voogueme_pc_unit_price').text(ret.data.voogueme_pc_unit_price);
-                    $('#voogueme_wap_sales_money').text(ret.data.voogueme_wap_sales_money);
-                    $('#voogueme_wap_sales_num').text(ret.data.voogueme_wap_sales_num);
-                    $('#voogueme_wap_unit_price').text(ret.data.voogueme_wap_unit_price);
-                    $('#nihao_pc_sales_money').text(ret.data.nihao_pc_sales_money);
-                    $('#nihao_pc_sales_num').text(ret.data.nihao_pc_sales_num);
-                    $('#nihao_pc_unit_price').text(ret.data.nihao_pc_unit_price);
-                    $('#nihao_wap_sales_money').text(ret.data.nihao_wap_sales_money);
-                    $('#nihao_wap_sales_num').text(ret.data.nihao_wap_sales_num);
-                    $('#nihao_wap_unit_price').text(ret.data.nihao_wap_unit_price);
-                    $('#meeloog_pc_sales_money').text(ret.data.meeloog_pc_sales_money);
-                    $('#meeloog_pc_sales_num').text(ret.data.meeloog_pc_sales_num);
-                    $('#meeloog_pc_unit_price').text(ret.data.meeloog_pc_unit_price);
-                    $('#meeloog_wap_sales_money').text(ret.data.meeloog_wap_sales_money);
-                    $('#meeloog_wap_sales_num').text(ret.data.meeloog_wap_sales_num);
-                    $('#meeloog_wap_unit_price').text(ret.data.meeloog_wap_unit_price);
-                    $('#zeelool_es_pc_sales_money').text(ret.data.zeelool_es_pc_sales_money);
-                    $('#zeelool_es_pc_sales_num').text(ret.data.zeelool_es_pc_sales_num);
-                    $('#zeelool_es_pc_unit_price').text(ret.data.zeelool_es_pc_unit_price);
-                    $('#zeelool_es_wap_sales_money').text(ret.data.zeelool_es_wap_sales_money);
-                    $('#zeelool_es_wap_sales_num').text(ret.data.zeelool_es_wap_sales_num);
-                    $('#zeelool_es_wap_unit_price').text(ret.data.zeelool_es_wap_unit_price);
-                    $('#zeelool_de_pc_sales_money').text(ret.data.zeelool_de_pc_sales_money);
-                    $('#zeelool_de_pc_sales_num').text(ret.data.zeelool_de_pc_sales_num);
-                    $('#zeelool_de_pc_unit_price').text(ret.data.zeelool_de_pc_unit_price);
-                    $('#zeelool_de_wap_sales_money').text(ret.data.zeelool_de_wap_sales_money);
-                    $('#zeelool_de_wap_sales_num').text(ret.data.zeelool_de_wap_sales_num);
-                    $('#zeelool_de_wap_unit_price').text(ret.data.zeelool_de_wap_unit_price);
-                    $('#zeelool_jp_pc_sales_money').text(ret.data.zeelool_jp_pc_sales_money);
-                    $('#zeelool_jp_pc_sales_num').text(ret.data.zeelool_jp_pc_sales_num);
-                    $('#zeelool_jp_pc_unit_price').text(ret.data.zeelool_jp_pc_unit_price);
-                    $('#zeelool_jp_wap_sales_money').text(ret.data.zeelool_jp_wap_sales_money);
-                    $('#zeelool_jp_wap_sales_num').text(ret.data.zeelool_jp_wap_sales_num);
-                    $('#zeelool_jp_wap_unit_price').text(ret.data.zeelool_jp_wap_unit_price);
-                    //console.log(ret.data);
-                    return false;
-                }, function(data, ret){
-                    //失败的回调
-                    $('#zeelool_pc_sales_money').text(0);
-                    $('#zeelool_pc_sales_num').text(0);
-                    $('#zeelool_pc_unit_price').text(0);
-                    $('#zeelool_wap_sales_money').text(0);
-                    $('#zeelool_wap_sales_num').text(0);
-                    $('#zeelool_wap_unit_price').text(0);
-                    $('#zeelool_app_sales_money').text(0);
-                    $('#zeelool_app_sales_num').text(0);
-                    $('#zeelool_app_unit_price').text(0);
-                    $('#voogueme_pc_sales_money').text(0);
-                    $('#voogueme_pc_sales_num').text(0);
-                    $('#voogueme_pc_unit_price').text(0);
-                    $('#voogueme_wap_sales_money').text(0);
-                    $('#voogueme_wap_sales_num').text(0);
-                    $('#voogueme_wap_unit_price').text(0);
-                    $('#nihao_pc_sales_money').text(0);
-                    $('#nihao_pc_sales_num').text(0);
-                    $('#nihao_pc_unit_price').text(0);
-                    $('#nihao_wap_sales_money').text(0);
-                    $('#nihao_wap_sales_num').text(0);
-                    $('#nihao_wap_unit_price').text(0);
-                    $('#meeloog_pc_sales_money').text(0);
-                    $('#meeloog_pc_sales_num').text(0);
-                    $('#meeloog_pc_unit_price').text(0);
-                    $('#meeloog_wap_sales_money').text(0);
-                    $('#meeloog_wap_sales_num').text(0);
-                    $('#meeloog_wap_unit_price').text(0);
-                    $('#zeelool_es_pc_sales_money').text(0);
-                    $('#zeelool_es_pc_sales_num').text(0);
-                    $('#zeelool_es_pc_unit_price').text(0);
-                    $('#zeelool_es_wap_sales_money').text(0);
-                    $('#zeelool_es_wap_sales_num').text(0);
-                    $('#zeelool_es_wap_unit_price').text(0);
-                    $('#zeelool_de_pc_sales_money').text(0);
-                    $('#zeelool_de_pc_sales_num').text(0);
-                    $('#zeelool_de_pc_unit_price').text(0);
-                    $('#zeelool_de_wap_sales_money').text(0);
-                    $('#zeelool_de_wap_sales_num').text(0);
-                    $('#zeelool_de_wap_unit_price').text(0);
-                    $('#zeelool_jp_pc_sales_money').text(0);
-                    $('#zeelool_jp_pc_sales_num').text(0);
-                    $('#zeelool_jp_pc_unit_price').text(0);
-                    $('#zeelool_jp_wap_sales_money').text(0);
-                    $('#zeelool_jp_wap_sales_num').text(0);
-                    $('#zeelool_jp_wap_unit_price').text(0);
-                    //console.log(ret);
-                    Layer.alert(ret.msg);
-                    return false;
-                });
-			});            
+                get_bottom();
+			});
         },
         api: {
             formatter: {
@@ -1174,3 +1069,22 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
     };
     return Controller;
 });
+function get_bottom()
+{
+    var create_time = $('#created_at').val();
+    Backend.api.ajax({
+        url:'elasticsearch/operate/data_market/ajaxGetBottom',
+        data:{create_time:create_time}
+    }, function(data, ret){
+        console.log(ret);
+        $('#site_sales').html(ret.data)
+
+        return false;
+    }, function(data, ret){
+        //失败的回调
+
+        Layer.alert(ret.msg);
+        $('#site_sales').html(ret.data)
+        return false;
+    });
+}
