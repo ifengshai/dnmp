@@ -15,7 +15,7 @@
         }
     ],
     "require": {
-        "php": ">=7.1",
+        "php": ">=5.6.0",
         "topthink/framework": "~5.0.24",
         "overtrue/wechat": "~3.1",
         "endroid/qr-code": "^1.9",
@@ -34,9 +34,9 @@
         "sch-group/17track": "^1.7",
         "google/apiclient": "^2.0",
         "facebook/php-business-sdk": "5.0.5",
-        "aws/aws-sdk-php": "^3.176",
         "guzzlehttp/promises": "1.4.0",
-        "guzzlehttp/psr7": "1.7.0"
+        "guzzlehttp/psr7": "1.7.0",
+        "aws/aws-sdk-php": "^3.176"
     },
     "config": {
         "preferred-install": "dist"

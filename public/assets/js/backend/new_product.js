@@ -103,7 +103,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             formatter: Controller.api.formatter.getClear,
                             operate: false
                         },
-                        {field: 'newproductattribute.frame_images', operate: false},
+                        {field: 'newproductattribute.s3_frame_images', operate: false},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange'},
                         {
