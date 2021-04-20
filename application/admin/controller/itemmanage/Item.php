@@ -5,6 +5,7 @@ namespace app\admin\controller\itemmanage;
 use app\admin\model\platformManage\MagentoPlatform;
 use app\admin\model\purchase\NewProductReplenishList;
 use app\common\controller\Backend;
+use app\common\model\Category;
 use fast\Http;
 use think\Request;
 use think\Db;
@@ -2593,5 +2594,17 @@ class Item extends Backend
         $path = "/uploads/";
         $fileName = '排查异常商品数据';
         Excel::writeCsv($data, $headlist, $path . $fileName);
+    }
+
+    public function categoryValue(){
+        $cateGory = new  \app\admin\model\itemmanage\ItemCategory();
+        $subordinateValue = $cateGory->where(['pid'=>['in','21,24,45']])->column('id');
+        $value = $this->model->where(['category_id'=>['in',$subordinateValue]])->column('sku');
+        $headlist = [
+            'SKU'
+        ];
+        $path = "/uploads/";
+        $fileName = '镜框，配饰，生活用品下的sku';
+        Excel::writeCsv($value, $headlist, $path . $fileName);
     }
 }
