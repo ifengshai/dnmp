@@ -329,80 +329,89 @@ class EsFormatData
 
     }
 
-    public function formatTrackData($site, $data  ,$data1,$siteAll = false)
+    public function formatTrackData($data  ,$data1)
     {
-        if (!$siteAll) {
-            $buckets = $data['track_channel']['buckets'];
-            $newBuckets = array_column($buckets, 'doc_count', 'key');
-            $buckets1 = $data1['track_channel']['buckets'];
-            $arr = [];
-            $i = 0;
-            $sevenDelievedDay = $tenDelievedDay = $fourteenDelievedDay = $twentyDelievedDay = $twentyupDelievedDay = 0;
-            foreach ($buckets1 as $key => $value) {
-                $arr[$i]['track_channel'] = $value['key'];
-                $arr[$i]['delieved_num'] = $value['doc_count'];
-                $arr[$i]['delieved_rate'] = $newBuckets[$value['key']] ? round($value['doc_count'] / $newBuckets[$value['key']] * 100,
-                    2) : 0;
-                $arr[$i]['avg_deliverd_rate'] = $value['doc_count'] ? round($value['sumWaitTime']['value'] / $value['doc_count'] / 86400,
-                    2) : 0;
-                $result = $value['delieveredDays']['buckets'];
-                foreach ($result as $k => $v) {
-                    switch ($v['key']) {
-                        case '0.0-6.99':
-                            $arr[$i]['seven_delieved_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
-                                2) : 0;
-                            $sevenDelievedDay += $v['doc_count'];
-                            break;
-                        case '7.0-9.99':
-                            $arr[$i]['ten_delieved_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
-                                2) : 0;
-                            $tenDelievedDay += $v['doc_count'];
-                            break;
-                        case '10.0-13.99':
-                            $arr[$i]['fourteen_delieved_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
-                                2) : 0;
-                            $fourteenDelievedDay += $v['doc_count'];
-                            break;
-                        case '14.0-19.99':
-                            $arr[$i]['twenty_delieved_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
-                                2) : 0;
-                            $twentyDelievedDay += $v['doc_count'];
-                            break;
-                        case '20.0-5000000.0':
-                            $arr[$i]['twentyup_delieved_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
-                                2) : 0;
-                            $twentyupDelievedDay += $v['doc_count'];
-                            break;
-                    }
+        $buckets = $data['track_channel']['buckets'];
+        $newBuckets = array_column($buckets, 'doc_count', 'key');
+        $buckets1 = $data1['track_channel']['buckets'];
+        $arr = [];
+        $i = 0;
+        $sendNum = $delievedNum = $waitTime = $sevenDelievedDay = $tenDelievedDay = $fourteenDelievedDay = $twentyDelievedDay = $twentyupDelievedDay = 0;
+        foreach ($buckets1 as $key => $value) {
+            $sendNum += $newBuckets[$value['key']];
+            $delievedNum += $value['doc_count'];
+            $waitTime += $value['sumWaitTime']['value'];
+            $arr[$i]['shipment_data_type'] = $value['key'];
+            $arr[$i]['send_order_num'] = $newBuckets[$value['key']];
+            $arr[$i]['deliverd_order_num'] = $value['doc_count'];
+            $arr[$i]['total_deliverd_rate'] = $newBuckets[$value['key']] ? round($value['doc_count'] / $newBuckets[$value['key']] * 100,
+                2) : 0;
+            $arr[$i]['avg_deliverd_rate'] = $value['doc_count'] ? round($value['sumWaitTime']['value'] / $value['doc_count'] / 86400,
+                2) : 0;
+            $result = $value['delieveredDays']['buckets'];
+            foreach ($result as $k => $v) {
+
+                switch ($v['key']) {
+                    case '0.0-6.99':
+                        $arr[$i]['serven_deliverd_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
+                            2) : 0;
+                        $sevenDelievedDay += $v['doc_count'];
+                        break;
+                    case '7.0-9.99':
+                        $arr[$i]['ten_deliverd_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
+                            2) : 0;
+                        $tenDelievedDay += $v['doc_count'];
+                        break;
+                    case '10.0-13.99':
+                        $arr[$i]['fourteen_deliverd_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
+                            2) : 0;
+                        $fourteenDelievedDay += $v['doc_count'];
+                        break;
+                    case '14.0-19.99':
+                        $arr[$i]['twenty_deliverd_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
+                            2) : 0;
+                        $twentyDelievedDay += $v['doc_count'];
+                        break;
+                    case '20.0-5000000.0':
+                        $arr[$i]['gtTwenty_deliverd_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
+                            2) : 0;
+                        $twentyupDelievedDay += $v['doc_count'];
+                        break;
                 }
-                $i++;
             }
+            $i++;
         }
+        $allRate = $sendNum ? round($delievedNum/$sendNum*100,2) : 0;
+        $sevenRate = $delievedNum ? round($sevenDelievedDay/$delievedNum*100,2) : 0;
+        $tenRate = $delievedNum ? round($tenDelievedDay/$delievedNum*100,2) : 0;
+        $fourteenRate = $delievedNum ? round($fourteenDelievedDay/$delievedNum*100,2) : 0;
+        $twentyRate = $delievedNum ? round($twentyDelievedDay/$delievedNum*100,2) : 0;
+        $twentyupRate = $delievedNum ? round($twentyupDelievedDay/$delievedNum*100,2) : 0;
+        $allDelievedTime = $delievedNum ? round($waitTime/$delievedNum/86400,2) : 0;
+        $arr[] = [
+            'shipment_data_type' => '合计',
+            'send_order_num' => $sendNum,
+            'deliverd_order_num' => $delievedNum,
+            'total_deliverd_rate' => $allRate,
+            'serven_deliverd_rate' => $sevenRate,
+            'ten_deliverd_rate' => $tenRate,
+            'fourteen_deliverd_rate' => $fourteenRate,
+            'twenty_deliverd_rate' => $twentyRate,
+            'gtTwenty_deliverd_rate' => $twentyupRate,
+            'avg_deliverd_rate' => $allDelievedTime,
+        ];
         //获取物流渠道
         $trackChannel = array_column($buckets, 'key');
-        //获取发货数量
-        $sendNum = array_column($buckets, 'doc_count');
-        //获取妥投数量
-        $deliverdOrderNum = array_column($arr, 'delieved_num');
-        //获取总妥投率
-        $totalDeliverdRate = array_column($arr, 'total_deliverd_rate');
-        //获取7天妥投率
-        $sevenDelievedRate = array_column($arr, 'seven_delieved_rate');
-        //获取10天妥投率
-        $tenDelievedRate = array_column($arr, 'ten_delieved_rate');
-        //获取14天妥投率
-        $fourteenDelievedRate = array_column($arr, 'fourteen_delieved_rate');
-        //获取20天妥投率
-        $twentyDelievedRate = array_column($arr, 'twenty_delieved_rate');
-        //获取20天以上妥投率
-        $twentyUpDelievedRate = array_column($arr, 'twentyup_delieved_rate');
-        //获取平均妥投时效
-        $avgDeliverdRate = array_column($arr, 'avg_deliverd_rate');
 
+        $data = [];
+        foreach ($buckets as $kk=>$vv){
+            $data[$kk]['name'] = $vv['key'];
+            $data[$kk]['value'] = $vv['doc_count'];
+        }
         //发货数量统计饼图数据
         $sendEchart = [
             'column' => $trackChannel,
-            'columnData' => $sendNum
+            'columnData' => $data,
         ];
         //妥投比率统计饼图数据
         $delievedEchart = [
@@ -414,16 +423,14 @@ class EsFormatData
                 '20天以上妥投率',
             ],
             'columnData' => [
-                $sevenDelievedDay,
-                $tenDelievedDay,
-                $fourteenDelievedDay,
-                $twentyDelievedDay,
-                $twentyupDelievedDay
+                ['value' => $sevenDelievedDay, 'name' => '7天妥投率'],
+                ['value' => $tenDelievedDay, 'name' => '10天妥投率'],
+                ['value' => $fourteenDelievedDay, 'name' => '14天妥投率'],
+                ['value' => $twentyDelievedDay, 'name' => '20天妥投率'],
+                ['value' => $twentyupDelievedDay, 'name' => '20天以上妥投率']
             ]
         ];
-        return compact('trackChannel', 'sendNum', 'deliverdOrderNum', 'totalDeliverdRate', 'sevenDelievedRate',
-            'tenDelievedRate', 'fourteenDelievedRate', 'twentyDelievedRate', 'twentyUpDelievedRate', 'avgDeliverdRate',
-            'sendEchart', 'delievedEchart');
+        return compact( 'arr','sendEchart', 'delievedEchart');
     }
 
     public function formatPurchaseData($site, $data, $compareData = [])
