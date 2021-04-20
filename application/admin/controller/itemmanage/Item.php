@@ -2599,12 +2599,16 @@ class Item extends Backend
     public function categoryValue(){
         $cateGory = new  \app\admin\model\itemmanage\ItemCategory();
         $subordinateValue = $cateGory->where(['pid'=>['in','21,24,45']])->column('id');
-        $value = $this->model->where(['category_id'=>['in',$subordinateValue]])->column('sku');
+        $value = $this->model->where(['category_id'=>['in',$subordinateValue]])->column('sku','id');
+        foreach ($value as $key=>$val){
+            $data[$key]['sku'] = $val;
+        }
+        $data = array_values($data);
         $headlist = [
             'SKU'
         ];
         $path = "/uploads/";
         $fileName = '镜框，配饰，生活用品下的sku';
-        Excel::writeCsv($value, $headlist, $path . $fileName);
+        Excel::writeCsv($data, $headlist, $path . $fileName);
     }
 }
