@@ -2565,7 +2565,6 @@ class Item extends Backend
     public function changeValue(){
         set_time_limit(0);
         ini_set('memory_limit', '512M');
-        $date = date('Y-m-d 00:00:00');
         $itemAttribute = new ItemAttribute();
         $goodsValue = $this->model->where(['is_open'=>1])->column('id');
         $itemAttributeValue = $itemAttribute->column('item_id');
@@ -2575,17 +2574,17 @@ class Item extends Backend
         foreach ($goodsValue as $key=>$value){
             $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
             $date = date('Y-m-d 00:00:00');
-            $list = $itemPlatformSku->field('id,sku,platform_type as site')->where([
-                'sku'    => ['eq', $value],
+            $list[] = $itemPlatformSku->field('id,sku,platform_type as site')->where([
+                'platform_sku'    => ['eq', $value],
             ])->find();
-            $Sales= $skuSalesNum->where([
+            $sales= $skuSalesNum->where([
                 'sku'        => $list->sku,
                 'site'       => $list->site,
                 'createtime' => ['<', $date],
-            ])->field("sum(sales_num) as sales_num,count(*) as num")->order('createtime desc')->select();
+            ])->sum('sales_num');
             $data[$key]['id'] = $key;
             $data[$key]['sku'] = $value;
-            $data[$key]['sum'] = $Sales->$Sales[0]->sales_num;;
+            $data[$key]['sum'] = $sales;
         }
         $data = array_values($data);
         $headlist = [
