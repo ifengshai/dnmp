@@ -12,6 +12,7 @@ namespace app\admin\controller\elasticsearch;
 use app\admin\model\operatedatacenter\Datacenter;
 use app\admin\model\operatedatacenter\DatacenterDay;
 use app\admin\model\order\order\NewOrder;
+use app\admin\model\OrderNode;
 use think\Db;
 use think\Debug;
 
@@ -112,4 +113,39 @@ class AsyncEs extends BaseElasticsearch
         return array_merge($value, $format);
     }
 
+    /**
+     * 同步物流数据到es
+     * @author mjj
+     * @date   2021/4/16 10:57:29
+     */
+    public function asyncTrack()
+    {
+        OrderNode::chunk(10000,function($track){
+            $data = array_map(function($value) {
+                $value = array_map(function($v){
+                    return $v === null ? 0 : $v;
+                },$value);
+                $mergeData = strtotime($value['delivery_time']);
+                $insertData = [
+                    'id' => $value['id'],
+                    'order_node' => $value['order_node'],
+                    'node_type' => $value['node_type'],
+                    'site' => $value['site'],
+                    'order_id' => $value['order_id'],
+                    'order_number' => $value['order_number'],
+                    'shipment_type' => $value['shipment_type'],
+                    'shipment_data_type' => $value['shipment_data_type'],
+                    'track_number' => $value['track_number'],
+                    'signing_time' => $value['signing_time'] ? strtotime($value['signing_time']) : 0,
+                    'delivery_time' => $mergeData,
+                    'shipment_last_msg' => $value['shipment_last_msg'],
+                    'delievered_days' => (strtotime($value['signing_time'])-$mergeData)/86400,
+                    'wait_time' => abs(strtotime($value['signing_time'])-$mergeData),
+                ];
+                return $this->formatDate($insertData,$mergeData);
+            },collection($track)->toArray());
+            $this->esService->addMutilToEs('mojing_track',$data);
+        });
+
+    }
 }

@@ -343,17 +343,29 @@ class BaseElasticsearch extends Backend
             'id' => [
                 'type' => 'integer',
             ],
-            'site' => [
+            'order_node' => [
                 'type' => 'integer',
             ],
             'node_type' => [
                 'type' => 'integer',
             ],
+            'site' => [
+                'type' => 'integer',
+            ],
+            'order_id' => [
+                'type' => 'integer',
+            ],
+            'order_number' => [
+                'type' => 'keyword',
+            ],
+            'shipment_type' => [
+                'type' => 'keyword',
+            ],
             'shipment_data_type' => [
                 'type' => 'keyword',
             ],
-            'create_time' => [
-                'type' => 'date',
+            'track_number' => [
+                'type' => 'keyword',
             ],
             'delivery_time' => [
                 'type' => 'date',
@@ -361,7 +373,15 @@ class BaseElasticsearch extends Backend
             'signing_time' => [
                 'type' => 'date',
             ],
-
+            'shipment_last_msg' => [
+                'type' => 'keyword',
+            ],
+            'delievered_days' => [
+                'type' => 'integer',
+            ],
+            'wait_time' => [
+                'type' => 'integer',
+            ],
         ];
 
         $this->esService->createIndex('mojing_track', $selfProperties);

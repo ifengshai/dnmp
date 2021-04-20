@@ -13,15 +13,10 @@ class LogisticsStatistic extends BaseElasticsearch
 {
     public function index()
     {
-        $start = '20180205';
-
-        echo date('Ymd160000');
-        exit;
-        echo date('Ymd160000', strtotime('-30 days'));
-        exit;
-        $end = '20210205';
-        $dashBoardData = $this->getDashBoard(1, '20180205 20210205');
-        return json(['code' => 1, 'data' => $dashBoardData]);
+        $start = strtotime('2020-01-02');
+        $end = strtotime('2020-04-15 23:59:59');
+        $trackData = $this->getTrack(1,$start.' '.$end);
+        return json(['code' => 1, 'data' => $trackData]);
     }
 
     /**
@@ -32,23 +27,24 @@ class LogisticsStatistic extends BaseElasticsearch
      * @author crasphb
      * @date   2021/4/14 13:56
      */
-    public function getDashBoard($site, $time = '')
+    public function getTrack($site, $time = '')
     {
         //获取时间
         if ($time) {
             $timeRange = explode(' ', $time);
         } else {
             $timeRange = [
-                date('Ymd', strtotime('-30 days')),
-                date('Ymd')
+                strtotime('-200 days'),
+                time()
             ];
         }
+        $siteAll = $site == 99;
         //判断是否为全部站点
-        $siteAll = $site == 4;
-        $result = $this->buildTrackSearch($site, $timeRange[0], $timeRange[1], $siteAll);
-        $a = $this->esFormatData->formatDashBoardData($site, $result, $siteAll);
-        file_put_contents('./t.json', $a);
-
+        $trackResult = $this->buildTrackSearch($site, $timeRange[0], $timeRange[1],$siteAll);
+        $trackDelievedResult = $this->buildTrackDelievedSearch($site, $timeRange[0], $timeRange[1],$siteAll);
+        //$data = $this->esFormatData->formatTrackData($site, $trackResult,$trackDelievedResult, $siteAll);
+        $trackResult = json_encode($trackResult);
+        file_put_contents('./t.json', $trackResult);
     }
 
     /**
@@ -60,7 +56,7 @@ class LogisticsStatistic extends BaseElasticsearch
      * @author crasphb
      * @date   2021/4/13 15:02
      */
-    public function buildTrackSearch($site, $start, $end, $siteAll = false)
+    public function buildTrackSearch($site, $start, $end,$siteAll = false)
     {
         if (!is_array($site)) {
             $site = [$site];
@@ -79,7 +75,6 @@ class LogisticsStatistic extends BaseElasticsearch
                                     ],
                                 ],
                             ],
-                            //in查询
                             [
                                 'terms' => [
                                     'site' => $site,
@@ -88,94 +83,89 @@ class LogisticsStatistic extends BaseElasticsearch
                         ],
                     ],
                 ],
+
             ],
         ];
         $aggs = [
-            //总数聚合
-            'activeUserNum' => [
-                "sum" => [
-                    'field' => 'active_user_num',
-                ],
-            ],
-            'registerNum' => [
-                'sum' => [
-                    'field' => 'register_num',
-                ],
-            ],
-            'vipUserNum' => [
-                "sum" => [
-                    'field' => 'vip_user_num',
-                ],
-            ],
-            'orderNum' => [
-                "sum" => [
-                    'field' => 'order_num',
-                ],
-            ],
-            'salesTotalMoney' => [
-                "sum" => [
-                    'field' => 'sales_total_money',
-                ],
-            ],
-            'shippingTotalMoney' => [
-                "sum" => [
-                    'field' => 'shipping_total_money',
-                ],
-            ],
-            'landingNum' => [
-                "sum" => [
-                    'field' => 'landing_num',
-                ],
-            ],
-            'detailNum' => [
-                "sum" => [
-                    'field' => 'detail_num',
-                ],
-            ],
-            'cartNum' => [
-                "sum" => [
-                    'field' => 'cart_num',
-                ],
-            ],
-            'completeNum' => [
-                "sum" => [
-                    'field' => 'complete_num',
-                ],
-            ],
-            'daySale' => [
-                'terms' => [
-                    "field" => 'day_date',
-                    'order' => [
-                        '_key' => 'asc',
-                    ],
-                ],
-                'aggs' => [
-                    'orderNum' => [
-                        'sum' => [
-                            'field' => 'order_num',
-                        ],
-                    ],
-                    'activeUserNum' => [
-                        'sum' => [
-                            'field' => 'active_user_num',
-                        ],
-                    ],
+            "track_channel" => [
+                "terms" => [
+                    "field"=>'shipment_data_type'
                 ],
             ],
         ];
         $params['body']['aggs'] = $aggs;
-
-        if (!$siteAll) {
-            $params['body']['aggs'] = [
-                'site' => [
-                    "terms" => [
-                        "field" => 'site',
-                    ],
-                    "aggs" => $aggs,
-                ],
-            ];
+        if ($siteAll) {
+            //删除site查询
+            unset($params['body']['query']['bool']['must'][1]);
         }
+        return $this->esService->search($params);
+    }
+    public function buildTrackDelievedSearch($site, $start, $end,$siteAll = false)
+    {
+        if (!is_array($site)) {
+            $site = [$site];
+        }
+        $params = [
+            'index' => 'mojing_track',
+            'body' => [
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            [
+                                'range' => [
+                                    'delivery_time' => [
+                                        'gte' => $start,
+                                        'lte' => $end,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'terms' => [
+                                    'site' => $site,
+                                ],
+                            ],
+                            [
+                                'term' => [
+                                    'node_type' => 40,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
 
+            ],
+        ];
+        $aggs = [
+            "track_channel" => [
+                "terms" => [
+                    "field"=>'shipment_data_type'
+                ],
+                "aggs" => [
+                    'delieveredDays' => [
+                        'range' => [
+                            'field'  => 'delievered_days',
+                            'ranges' => [
+                                ['from' => '0', 'to' => '6.99'],
+                                ['from' => '7', 'to' => '9.99'],
+                                ['from' => '10', 'to' => '13.99'],
+                                ['from' => '14', 'to' => '19.99'],
+                                ['from' => '20', 'to' => '5000000'],
+                            ],
+                        ],
+                    ],
+                    "sumWaitTime"=>[
+                        'sum'=>[
+                            'field'=>'wait_time'
+                        ]
+                    ]
+                ],
+            ],
+        ];
+        $params['body']['aggs'] = $aggs;
+        if ($siteAll) {
+            //删除site查询
+            unset($params['body']['query']['bool']['must'][1]);
+        }
         return $this->esService->search($params);
     }
 }
