@@ -2608,7 +2608,7 @@ class Item extends Backend
             'SKU'
         ];
         $path = "/uploads/";
-        $fileName = '镜框，配饰，生活用品下的sku';
+        $fileName = '镜框-配饰-生活用品下的sku';
         Excel::writeCsv($data, $headlist, $path . $fileName);
     }
 }
