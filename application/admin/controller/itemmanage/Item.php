@@ -2576,7 +2576,7 @@ class Item extends Backend
             $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
             $date = date('Y-m-d 00:00:00');
             $list = $itemPlatformSku->field('id,sku,platform_type as site')->where([
-                'platform_sku'    => ['eq', $value],
+                'sku'    => ['eq', $value],
             ])->find();
             $Sales= $skuSalesNum->where([
                 'sku'        => $list->sku,
