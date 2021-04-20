@@ -10,6 +10,7 @@ namespace app\service\elasticsearch;
 
 
 use app\enum\OrderType;
+use app\enum\Site;
 
 class EsFormatData
 {
@@ -328,7 +329,7 @@ class EsFormatData
         return compact('activeUserNum', 'registerNum', 'vipUserNum', 'orderNum', 'salesTotalMoney', 'shippingTotalMoney', 'orderUnitPrice', 'dayChart', 'funnel','compareActiveUserNumRate','compareRegisterNumRate','compareVipUserNuRate','compareOrderNumRate','compareSalesTotalMoneyRate','compareShippingTotalMoneyRate','compareOrderUnitPriceRate');
 
     }
-
+    
     public function formatTrackData($data  ,$data1)
     {
         $buckets = $data['track_channel']['buckets'];
@@ -496,5 +497,111 @@ class EsFormatData
             $countryStr.= '<tr><td>'.$val['key'].'</td><td>'.$val['doc_count'].'</td><td>'.$countrySaleDataRrate.'</td></tr>';
         }
         return compact('orderNum','allAvgPrice','allDaySalesAmount','allShippingAmount','daySalesAmountEcharts','dayOrderNumEcharts','replacemenOrder','socialOrder','priceRangesData','countryStr','compareOrderNumRate','compareAllAvgPriceRate' ,'compareAllDaySalesAmountRate' , 'compareAllShippingAmountRate','shipTypeData');
+    }
+
+    /**
+     * 数据概况 -- 底部数据格式化
+     * @param $data
+     *
+     * @return string
+     * @author crasphb
+     * @date   2021/4/20 11:47
+     */
+    public function formatDataMarketBottom($data)
+    {
+        $siteBuckets = $data['site']['buckets'];
+        $str = '';
+        foreach($siteBuckets as $key => $val) {
+            $site = '';
+            switch ($val['key']) {
+                case Site::ZEELOOL:
+                    $site = 'zeelool';
+                    break;
+                case Site::VOOGUEME:
+                    $site = 'voogueme';
+                    break;
+                case Site::NIHAO:
+                    $site = 'nihao';
+                    break;
+                case Site::MEELOOG:
+                    $site = 'meeloog';
+                    break;
+                case Site::ZEELOOL_ES:
+                    $site = 'zeelool_es';
+                    break;
+                case Site::ZEELOOL_DE:
+                    $site = 'zeelool_de';
+                    break;
+                case Site::ZEELOOL_JP:
+                    $site = 'zeelool_jp';
+                    break;
+                case Site::VOOGUEME_ACC:
+                    $site = 'voogmechic';
+                    break;
+            }
+            $storeBuckets = $val['store']['buckets'];
+            $i = 1;
+            foreach($storeBuckets as $k => $v) {
+                $source = '';
+                switch ($v['key']) {
+                    case 1:
+                        $source = '网页端';
+                        break;
+                    case 4:
+                        $source = '移动端';
+                        break;
+                    case 5:
+                        $source = 'IOS';
+                        break;
+                    case 6:
+                        $source = 'Android';
+                        break;
+                }
+                $str .= '<tr>
+                            <td style="text-align: center; vertical-align: middle;">'.$i.'</td>
+                            <td style="text-align: center; vertical-align: middle;">'.$site.'</td>
+                            <td style="text-align: center; vertical-align: middle;">'.$source.'</td>
+                            <td style="text-align: center; vertical-align: middle;">'.$v['allDaySalesAmount']['value'].'</td>
+                            <td style="text-align: center; vertical-align: middle;">'.$v['allAvgPrice']['value'].'</td>
+                            <td style="text-align: center; vertical-align: middle;">'.$v['doc_count'].'</td>
+                        </tr>';
+                $i++;
+            }
+        }
+        return $str;
+    }
+
+    public function formatDataMarketEcharts($data,$start,$end)
+    {
+        $siteBuckets = $data['site']['buckets'];
+        foreach($siteBuckets as $key => $val) {
+            $site = '';
+            switch ($val['key']) {
+                case Site::ZEELOOL:
+                    $site = 'zeelool';
+                    break;
+                case Site::VOOGUEME:
+                    $site = 'voogueme';
+                    break;
+                case Site::NIHAO:
+                    $site = 'nihao';
+                    break;
+                case Site::MEELOOG:
+                    $site = 'meeloog';
+                    break;
+                case Site::ZEELOOL_ES:
+                    $site = 'zeelool_es';
+                    break;
+                case Site::ZEELOOL_DE:
+                    $site = 'zeelool_de';
+                    break;
+                case Site::ZEELOOL_JP:
+                    $site = 'zeelool_jp';
+                    break;
+                case Site::VOOGUEME_ACC:
+                    $site = 'voogmechic';
+                    break;
+            }
+        }
     }
 }

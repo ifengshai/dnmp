@@ -42,7 +42,6 @@ class OrderDetail extends BaseElasticsearch
             $params = $this->request->param();
             $type = $params['type'];
             $timeStr = $params['time_str'];
-            $timeStr = '2020-04-12 12:00:00 - 2020-04-18 00:00:00';
             $compareTimeStr = $params['compare_time_str'];
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if (!$timeStr) {
