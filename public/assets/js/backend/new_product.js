@@ -447,6 +447,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { checkbox: true },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
+                        {
+                            field: 'is_spot', title: __('大货/现货'),
+                            searchList: { 0:'-',1: '大货', 2: '现货'},
+                            custom: { 1: 'yellow', 2: 'blue'},
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'purchase_price', title: __('采购成本'), operate: false },
                         { field: 'category_name', title: __('商品分类'), operate: false },
                         {
@@ -593,6 +599,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             }, operate: false
                         },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
+                        {
+                            field: 'is_spot', title: __('大货/现货'),
+                            searchList: { 0:'-',1: '大货', 2: '现货'},
+                            custom: { 1: 'yellow', 2: 'blue'},
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'category_name', title: __('商品分类'), operate: false },
                         {
                             field: 'category_id', title: __('Category_id'),
@@ -739,6 +751,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             }, operate: false
                         },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
+                        {
+                            field: 'is_spot', title: __('大货/现货'),
+                            searchList: { 0:'-',1: '大货', 2: '现货'},
+                            custom: { 1: 'yellow', 2: 'blue'},
+                            formatter: Table.api.formatter.status
+                        },
                         {
                             field: 'type', title: __('需求类型'), custom: { 1: 'success', 2: 'danger' , 3: 'info'},
                             searchList: { 1: '月度计划', 2: '周度计划', 3: '日度计划' },
@@ -1136,7 +1154,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         var resultData = ret.data;
                         if (resultData != false) {
                             $('.ajax-add').remove();
-                            $('#table-content').remove();
+                            // $('#table-content').remove();
                             $('.upload-photo').remove();
                             $('#item-stock').after(resultData);
                             Form.api.bindevent($("form[role=form]"));

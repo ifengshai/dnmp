@@ -5,6 +5,7 @@ namespace app\admin\controller\itemmanage;
 use app\admin\model\platformManage\MagentoPlatform;
 use app\admin\model\purchase\NewProductReplenishList;
 use app\common\controller\Backend;
+use app\common\model\Category;
 use fast\Http;
 use think\Request;
 use think\Db;
@@ -71,6 +72,7 @@ class Item extends Backend
      */
     public function index()
     {
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) { // 判断是否为Ajax调用
@@ -2555,5 +2557,58 @@ class Item extends Backend
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
+    }
+
+    /**
+     * @author zjw
+     * @date   2021/4/19 18:18
+     */
+    public function changeValue(){
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $itemAttribute = new ItemAttribute();
+        $goodsValue = $this->model->where(['is_open'=>1])->column('id');
+        $itemAttributeValue = $itemAttribute->column('item_id');
+        $result=array_diff($goodsValue,$itemAttributeValue);
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $goodsValue = $this->model->where(['id'=>['in',$result]])->column('sku','id');
+        foreach ($goodsValue as $key=>$value){
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $date = date('Y-m-d 00:00:00');
+            $list[] = $itemPlatformSku->field('id,sku,platform_type as site')->where([
+                'platform_sku'    => ['eq', $value],
+            ])->find();
+            $sales= $skuSalesNum->where([
+                'sku'        => $list->sku,
+                'site'       => $list->site,
+                'createtime' => ['<', $date],
+            ])->sum('sales_num');
+            $data[$key]['id'] = $key;
+            $data[$key]['sku'] = $value;
+            $data[$key]['sum'] = $sales;
+        }
+        $data = array_values($data);
+        $headlist = [
+            'id', 'SKU', '销量'
+        ];
+        $path = "/uploads/";
+        $fileName = '排查异常商品数据';
+        Excel::writeCsv($data, $headlist, $path . $fileName);
+    }
+
+    public function categoryValue(){
+        $cateGory = new  \app\admin\model\itemmanage\ItemCategory();
+        $subordinateValue = $cateGory->where(['pid'=>['in','21,24,45']])->column('id');
+        $value = $this->model->where(['category_id'=>['in',$subordinateValue]])->column('sku','id');
+        foreach ($value as $key=>$val){
+            $data[$key]['sku'] = $val;
+        }
+        $data = array_values($data);
+        $headlist = [
+            'SKU'
+        ];
+        $path = "/uploads/";
+        $fileName = '镜框-配饰-生活用品下的sku';
+        Excel::writeCsv($data, $headlist, $path . $fileName);
     }
 }

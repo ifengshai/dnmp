@@ -82,14 +82,14 @@ class Instock extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['checkorder', 'instocktype'])
+                ->with(['checkorder', 'instocktype','productBarcodeItem'])
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['checkorder', 'instocktype'])
+                ->with(['checkorder', 'instocktype','productBarcodeItem'])
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -907,7 +907,7 @@ class Instock extends Backend
                 //条形码入库时间
                 $this->_product_bar_code_item
                     ->where(['in_stock_id' => ['in', $ids]])
-                    ->update(['in_stock_time' => date('Y-m-d H:i:s')]);
+                    ->update(['in_stock_time' => date('Y-m-d H:i:s'),'library_status'=>1]);
 
                 //有错误 则回滚数据
                 if (count($error_num) > 0) {
@@ -918,7 +918,7 @@ class Instock extends Backend
                 $_product_bar_code_item = new ProductBarCodeItem();
                 $_product_bar_code_item
                     ->where(['in_stock_id' => ['in', $ids]])
-                    ->update(['in_stock_id' => 0]);
+                    ->update(['in_stock_id' => 0,'location_code'=>'','location_id'=>'0','location_code_id'=>'0']);
             }
 
             $this->model->commit();
