@@ -2574,7 +2574,10 @@ class Item extends Backend
         $goodsValue = $this->model->where(['is_open'=>1])->column('id');
         $itemAttributeValue = $itemAttribute->column('item_id');
         $result=array_diff($goodsValue,$itemAttributeValue);
-        dump($result);die();
+        foreach ($result as $k=>$v){
+            $data[$k]['item_id'] = $v;
+        }
+        $itemAttribute->insertAll($data);
     }
 
     public function categoryValue(){
