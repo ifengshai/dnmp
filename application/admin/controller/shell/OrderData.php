@@ -565,8 +565,8 @@ class OrderData extends Backend
          * 对 中台生产的  用户信息 进行消费
          */
         // 设置将要消费消息的主题
-        $topic = 'test';
-        $host = '172.31.49.138:800';
+        $topic = 'mojing_order';
+        $host = '127.0.0.1:9092';
         $group_id = '0';
         $conf = new \RdKafka\Conf();
         // 当有新的消费进程加入或者退出消费组时，kafka 会自动重新分配分区给消费者进程，这里注册了一个回调函数，当分区被重新分配时触发
@@ -631,6 +631,8 @@ class OrderData extends Backend
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志
                         dump($payload);
+
+                        dump($payload['data']);
 
                         break;
                     case RD_KAFKA_RESP_ERR__PARTITION_EOF: //没有数据
