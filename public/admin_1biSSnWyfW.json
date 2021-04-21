@@ -1,8 +1,6 @@
 {
   "name": "admin_1biSSnWyfW",
-  "args": "shell/order_data/process_order_data",
-  "script": "admin_1biSSnWyfW.php",
-  "exec_interpreter": "php",
-  "exec_mode": "fork",
+  "args": "",
+  "script": "sudo docker exec php7.3 php /var/www/mojing/public/admin_1biSSnWyfW.php shell/order_data/process_order_data",
   "max_memory_restart": "100M"
 }
