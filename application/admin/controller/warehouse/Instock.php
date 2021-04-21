@@ -82,14 +82,14 @@ class Instock extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['checkorder', 'instocktype','productBarcodeItem'])
+                ->with(['checkorder', 'instocktype'])
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['checkorder', 'instocktype','productBarcodeItem'])
+                ->with(['checkorder', 'instocktype'])
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
