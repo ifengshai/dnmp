@@ -2570,30 +2570,7 @@ class Item extends Backend
         $goodsValue = $this->model->where(['is_open'=>1])->column('id');
         $itemAttributeValue = $itemAttribute->column('item_id');
         $result=array_diff($goodsValue,$itemAttributeValue);
-        $skuSalesNum = new \app\admin\model\SkuSalesNum();
-        $goodsValue = $this->model->where(['id'=>['in',$result]])->column('sku','id');
-        foreach ($goodsValue as $key=>$value){
-            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $date = date('Y-m-d 00:00:00');
-            $list[] = $itemPlatformSku->field('id,sku,platform_type as site')->where([
-                'platform_sku'    => ['eq', $value],
-            ])->find();
-            $sales= $skuSalesNum->where([
-                'sku'        => $list->sku,
-                'site'       => $list->site,
-                'createtime' => ['<', $date],
-            ])->sum('sales_num');
-            $data[$key]['id'] = $key;
-            $data[$key]['sku'] = $value;
-            $data[$key]['sum'] = $sales;
-        }
-        $data = array_values($data);
-        $headlist = [
-            'id', 'SKU', '销量'
-        ];
-        $path = "/uploads/";
-        $fileName = '排查异常商品数据';
-        Excel::writeCsv($data, $headlist, $path . $fileName);
+        dump($result);die();
     }
 
     public function categoryValue(){
