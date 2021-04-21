@@ -1,0 +1,8 @@
+{
+  "name": "admin_1biSSnWyfW",
+  "args": "shell/order_data/process_order_data",
+  "script": "admin_1biSSnWyfW.php",
+  "exec_interpreter": "php",
+  "exec_mode": "fork",
+  "max_memory_restart": "100M"
+}
