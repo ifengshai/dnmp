@@ -96,12 +96,12 @@ class Outstock extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            foreach ($list as $key=>$item){
-                $productBarcodeItem = new ProductBarCodeItem();
-                $location =  $productBarcodeItem->where('out_stock_id',$item['id'])->order('id desc')->field('location_code,location_id')->find();
-                $list[$key]['location_code'] = $location->location_code;
-                $list[$key]['location_id'] = $location->location_id;
-            }
+//            foreach ($list as $key=>$item){
+//                $productBarcodeItem = new ProductBarCodeItem();
+//                $location =  $productBarcodeItem->where('out_stock_id',$item['id'])->order('id desc')->field('location_code,location_id')->find();
+//                $list[$key]['location_code'] = $location->location_code;
+//                $list[$key]['location_id'] = $location->location_id;
+//            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
