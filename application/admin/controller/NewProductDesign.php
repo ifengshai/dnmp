@@ -540,7 +540,7 @@ class NewProductDesign extends Backend
         $item = new Item();
         $itemAttribute =new ItemAttribute();
         $goodsId = $item->where(['sku'=>['in',$sku]])->column('id');
-        $otherValue = $itemAttribute->where(['item_id'=>['in',$goodsId],'frame_width'=>['elt ',0],'frame_height'=>['elt ',0]])->column('item_id');
+        $otherValue = $itemAttribute->where(['item_id'=>['in',$goodsId],'frame_width'=>['elt',0],'frame_height'=>['elt',0]])->column('item_id');
         $skuValue = $item->where(['id'=>['in',$otherValue]])->column('sku');
         dump($skuValue);die();
     }
