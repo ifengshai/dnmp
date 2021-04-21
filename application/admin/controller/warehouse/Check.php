@@ -861,14 +861,18 @@ class Check extends Backend
             ->join(['fa_supplier' => 'supplier'], 'check.supplier_id=supplier.id','left')
             ->join(['fa_check_order_item' => 'b'], 'b.check_id=check.id')
             ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
-            ->field('check.*,b.*,c.purchase_price,purchaseorder.purchase_number,purchaseorder.create_person as person,purchaseorder.purchase_remark,supplier.supplier_name,purchaseorder.is_new_product,purchaseorder.type,purchaseorder.customized_procurement')
+            ->field('check.id,check.type,check.check_order_number,check.remark,check.createtime,check.create_person,
+                            b.sku,b.supplier_sku,b.purchase_num,b.arrivals_num,b.quantity_num,b.unqualified_num,
+                            c.purchase_price,
+                            purchaseorder.purchase_number,purchaseorder.create_person as person,purchaseorder.purchase_remark,
+                            supplier.supplier_name,
+                            purchaseorder.is_new_product,purchaseorder.type as ptype,purchaseorder.customized_procurement')
             ->where($where)
             ->where($map)
             ->order('check.id desc')
             ->select();
 
         $list = collection($list)->toArray();
-
         /*//查询供应商
         $supplier = new \app\admin\model\purchase\Supplier();
         $supplier_data = $supplier->getSupplierData();*/
@@ -901,7 +905,6 @@ class Check extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setTitle('质检单数据');
 
         foreach ($list as $key => $value) {
-
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['check_order_number']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['type'] == 1 ? '采购质检' : '退货质检');
             $spreadsheet->getActiveSheet()->setCellValueExplicit("C" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
@@ -912,12 +915,9 @@ class Check extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['remark']);
             $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['supplier_sku']);
-            $value['is_new_product'] =$value['is_new_product']==1?'是':'否';
-            $value['type'] =$value['type']==2?'是':'否';
-            $value['customized_procurement'] =$value['customized_procurement']==1?'是':'否';
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['is_new_product']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['type']);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['customized_procurement']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2),$value['is_new_product']==1?'是':'否');
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2),  $value['ptype'] == 2 ? '是':'否');
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['customized_procurement']==1?'是':'否');
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['purchase_price']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['purchase_num']);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['arrivals_num']);
