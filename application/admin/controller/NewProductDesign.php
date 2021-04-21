@@ -530,4 +530,18 @@ class NewProductDesign extends Backend
         return $this->view->fetch();
     }
 
+    /**
+     * @author zjw
+     * @date   2021/4/21 15:27
+     * 选品设计异常数据
+     */
+    public function checkTheData(){
+        $sku = $this->model->column('sku');
+        $item = new Item();
+        $itemAttribute =new ItemAttribute();
+        $goodsId = $item->where(['sku'=>['in',$sku]])->column('id');
+        $otherValue = $itemAttribute->where(['item_id'=>['in',$goodsId],'frame_width'=>['elt ',0],'frame_height'=>['elt ',0]])->column('item_id');
+        $skuValue = $item->where(['id'=>['in',$otherValue]])->column('sku');
+        dump($skuValue);die();
+    }
 }
