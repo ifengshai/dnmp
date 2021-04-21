@@ -1018,10 +1018,10 @@ class Item extends Backend
         }
         //查询对应平台权限 getNewAuthSite是存在all权限的
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite1();
-        //商品库存列表展示顺序调整：需要把阿里巴巴和西语站的展示位置换换
-        $key_name = array('1','2','3','4','5','8','14','10','11','12','13','9','100');
-        $magentoplatformarr = array_combine($key_name,$magentoplatformarr);
-        ksort($magentoplatformarr);
+//        //商品库存列表展示顺序调整：需要把阿里巴巴和西语站的展示位置换换
+//        $key_name = array('1','2','3','4','5','8','14','10','11','12','13','9','100');
+//        $magentoplatformarr = array_combine($key_name,$magentoplatformarr);
+//        ksort($magentoplatformarr);
         // $platform = (new MagentoPlatform())->getAuthSite();
         // dump(collection($platform)->toArray());
         // dump(collection($magentoplatformarr)->toArray());die;
