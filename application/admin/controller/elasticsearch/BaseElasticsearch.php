@@ -373,6 +373,9 @@ class BaseElasticsearch extends Backend
             'delivery_time'      => [
                 'type' => 'date',
             ],
+            'delivery_error_flag'      => [
+                'type' => 'integer',
+            ],
             'signing_time'       => [
                 'type' => 'date',
             ],
