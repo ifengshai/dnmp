@@ -116,23 +116,24 @@ class ZeeloolDe extends Model
      */
     protected function printResults($reports)
     {
-        $finalResult = array();
+        $finalResult = [];
+        $reports = $reports ?: [];
         for ($reportIndex = 0; $reportIndex < count($reports); $reportIndex++) {
             $report = $reports[$reportIndex];
             $header = $report->getColumnHeader();
-            $dimensionHeaders = $header->getDimensions();
+            $dimensionHeaders = $header->getDimensions() ?: [];
             $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
-            $rows = $report->getData()->getRows();
+            $rows = $report->getData()->getRows() ?: [];
             for ($rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
                 $row = $rows[$rowIndex];
-                $dimensions = $row->getDimensions();
-                $metrics = $row->getMetrics();
+                $dimensions = $row->getDimensions() ?: [];
+                $metrics = $row->getMetrics() ?: [];
                 for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
                     $finalResult[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
                 }
 
                 for ($j = 0; $j < count($metrics); $j++) {
-                    $values = $metrics[$j]->getValues();
+                    $values = $metrics[$j]->getValues() ?: [];
                     for ($k = 0; $k < count($values); $k++) {
                         $entry = $metricHeaders[$k];
                         $finalResult[$rowIndex][$entry->getName()] = $values[$k];
