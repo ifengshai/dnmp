@@ -1342,7 +1342,7 @@ class ScmWarehouse extends Scm
             //生成子数据
             $check_item_data = ['check_id' => $check, 'sku' => $value['sku'], 'purchase_num' => $value['in_stock_num'], 'check_num' => $value['in_stock_num'], 'purchase_id' => $purchase];
             $gen_check_item->insert($check_item_data);
-            $purchase_order_item_data = ['purchase_id' => $purchase, 'sku' => $value['sku'], 'purchase_order_number' => $value['in_stock_num'], 'purchase_num' => $value['in_stock_num'], 'purchase_price' => $value['price'], 'purchase_total' => $value['price'] * $value['in_stock_num'], 'instock_num' => $value['in_stock_num']];
+            $purchase_order_item_data = ['purchase_id' => $purchase, 'sku' => $value['sku'], 'purchase_order_number' => $purchase_number, 'purchase_num' => $value['in_stock_num'], 'purchase_price' => $value['price'], 'purchase_total' => $value['price'] * $value['in_stock_num'], 'instock_num' => $value['in_stock_num']];
             $gen_purchase_order_item->insert($purchase_order_item_data);
         }
 
