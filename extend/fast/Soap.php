@@ -120,7 +120,7 @@ class Soap
         $client = new Client(['verify' => false]);
         unset($params['site']);
 
-        $response = $client->request('POST', $url, ['form_params' => $params]);
+        $response = $client->request('GET', $url, ['form_params' => $params]);
 
         file_put_contents('/www/wwwroot/mojing/runtime/log/goods.log', serialize($response)."\r\n", FILE_APPEND);
         $body = $response->getBody();
