@@ -5,6 +5,7 @@ namespace app\admin\controller\warehouse;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\StockLog;
 use app\common\controller\Backend;
+use app\enum\PlatformType;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
@@ -578,7 +579,6 @@ class TransferOrder extends Backend
             }
 
             //校验模板文件格式
-            // $listName = ['商品SKU', '类型', '补货需求数量'];
             $listName = ['调出仓', '调入仓', 'SKU', '调出数量'];
 
             $listName !== $fields && $this->error(__('模板文件格式错误！'));
@@ -593,116 +593,118 @@ class TransferOrder extends Backend
             empty($data) && $this->error('表格数据为空！');
 
             //获取表格中sku集合
-            $sku_arr = [];
+            $skuArr = [];
             foreach ($data as $k => $v) {
                 //获取sku
                 $sku = trim($v[2]);
                 empty($sku) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行SKU为空！'));
-                $sku_arr[] = $sku;
+                $skuArr[] = $sku;
             }
             //获取导出仓和导入仓
 
-            $out_plat = $data[0][0];
-            switch (trim($out_plat)) {
-                case 'zeelool':
-                    $out_label = 1;
+            $outPlat = $data[0][0];
+            switch (trim($outPlat)) {
+                case PlatformType::ZEELOOL:
+                    $outLabel = 1;
                     break;
-                case 'voogueme':
-                    $out_label = 2;
+                case PlatformType::VOOGUEME:
+                    $outLabel = 2;
                     break;
-                case 'nihao':
-                    $out_label = 3;
+                case PlatformType::NIHAO:
+                    $outLabel = 3;
                     break;
-                case 'meeloog':
-                    $out_label = 4;
+                case PlatformType::MEELOOG:
+                    $outLabel = 4;
                     break;
-                case 'wesee':
-                    $out_label = 5;
+                case PlatformType::WESEE:
+                    $outLabel = 5;
                     break;
-                case 'amazon':
-                    $out_label = 8;
+                case PlatformType::AMAZON:
+                    $outLabel = 8;
                     break;
-                case 'zeelool_es':
-                    $out_label = 9;
+                case PlatformType::ZEELOOL_ES:
+                    $outLabel = 9;
                     break;
-                // case 'zeelool_jp':
-                //     $label = 1;
-                case 'zeelool_de':
-                    $out_label = 10;
+                case PlatformType::ZEELOOL_DE:
+                    $outLabel = 10;
                     break;
-                case 'zeelool_jp':
-                    $out_label = 11;
+                case PlatformType::ZEELOOL_JP:
+                    $outLabel = 11;
                     break;
-                case 'voogmechic':
-                    $out_label = 12;
+                case PlatformType::VOOGMECHIC:
+                    $outLabel = 12;
                     break;
-                case 'zeelool_cn':
-                    $out_label = 13;
+                case PlatformType::ZEELOOL_CN:
+                    $outLabel = 13;
                     break;
-                case 'alibaba':
-                    $out_label = 14;
+                case PlatformType::ALIBABA:
+                    $outLabel = 14;
+                    break;
+                case PlatformType::ZEELOOL_FR:
+                    $outLabel = 15;
                     break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             };
-            $in_plat = $data[0][1];
-            switch (trim($in_plat)) {
-                case 'zeelool':
-                    $in_label = 1;
+            $inPlat = $data[0][1];
+            switch (trim($inPlat)) {
+                case PlatformType::ZEELOOL:
+                    $inLabel = 1;
                     break;
-                case 'voogueme':
-                    $in_label = 2;
+                case PlatformType::VOOGUEME:
+                    $inLabel = 2;
                     break;
-                case 'nihao':
-                    $in_label = 3;
+                case PlatformType::NIHAO:
+                    $inLabel = 3;
                     break;
-                case 'meeloog':
-                    $in_label = 4;
+                case PlatformType::MEELOOG:
+                    $inLabel = 4;
                     break;
-                case 'wesee':
-                    $in_label = 5;
+                case PlatformType::WESEE:
+                    $inLabel = 5;
                     break;
-                case 'amazon':
-                    $in_label = 8;
+                case PlatformType::AMAZON:
+                    $inLabel = 8;
                     break;
-                case 'zeelool_es':
-                    $in_label = 9;
+                case PlatformType::ZEELOOL_ES:
+                    $inLabel = 9;
                     break;
-                // case 'zeelool_jp':
-                //     $label = 1;
-                case 'zeelool_de':
-                    $in_label = 10;
+                case PlatformType::ZEELOOL_DE:
+                    $inLabel = 10;
                     break;
-                case 'zeelool_jp':
-                    $in_label = 11;
+                case PlatformType::ZEELOOL_JP:
+                    $inLabel = 11;
                     break;
-                case 'voogmechic':
-                    $in_label = 12;
+                case PlatformType::VOOGMECHIC:
+                    $inLabel = 12;
                     break;
-                case 'zeelool_cn':
-                    $in_label = 13;
+                case PlatformType::ZEELOOL_CN:
+                    $inLabel = 13;
                     break;
-                case 'alibaba':
-                    $in_label = 14;
+                case PlatformType::ALIBABA:
+                    $inLabel = 14;
+                    break;
+                case PlatformType::ZEELOOL_FR:
+                    $inLabel = 15;
                     break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             }
             //获取站点sku列表 及当前调出仓的虚拟仓库存
             $list = $_platform
-                ->where('platform_type', $out_label)
-                ->where(['sku' => ['in', $sku_arr]])
+                ->where('platform_type', $outLabel)
+                ->where(['sku' => ['in', $skuArr]])
                 ->field('sku,stock')
                 ->select();
-            $platform_arr = array_column(collection($list)->toArray(), 'stock', 'sku');
+            $platformArr = array_column(collection($list)->toArray(), 'stock', 'sku');
             //插入一条数据到调拨单主表
-            $transfer_order['transfer_order_number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-            $transfer_order['call_out_site'] = $out_label;
-            $transfer_order['call_in_site'] = $in_label;
-            $transfer_order['status'] = 0;
-            $transfer_order['create_time'] = date('Y-m-d H:i:s');
-            $transfer_order['create_person'] = session('admin.nickname');
-            $transfer_order_id = $this->model->insertGetId($transfer_order);
+            $transferOrder['transfer_order_number'] = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+            $transferOrder['call_out_site'] = $outLabel;
+            $transferOrder['call_in_site'] = $inLabel;
+            $transferOrder['status'] = 0;
+            $transferOrder['create_time'] = date('Y-m-d H:i:s');
+            $transferOrder['create_person'] = session('admin.nickname');
+            $transferOrderId = $this->model->insertGetId($transferOrder);
 
             //批量导入
             $params = [];
@@ -711,33 +713,33 @@ class TransferOrder extends Backend
                 $sku = trim($v[2]);
 
                 //校验sku是否重复
-                isset($params[$sku]) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 重复！'));
+                isset($params[$sku]) && $this->model->where('id', $transferOrderId)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 重复！'));
 
                 //获取调出数量
-                $replenish_num = (int)$v[3];
-                empty($replenish_num) && $this->model->where('id', $transfer_order_id)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 调出数量不能为空！'));
+                $replenishNum = (int)$v[3];
+                empty($replenishNum) && $this->model->where('id', $transferOrderId)->delete() && $this->error(__('导入失败,商品 ' . $sku . ' 调出数量不能为空！'));
                 //校验调出数量是否大于当前调出仓库存
-                if ($replenish_num > $platform_arr[$sku]) {
-                    $this->model->where('id', $transfer_order_id)->delete();
+                if ($replenishNum > $platformArr[$sku]) {
+                    $this->model->where('id', $transferOrderId)->delete();
                     $this->error(__('导入失败' . $sku . ' 调出数量大于调出仓虚拟仓库存！'));
                 }
                 //校验当前sku在调出仓是否存在
-                if (!($_platform->where('platform_type', $out_label)->where('sku',$sku)->find())){
-                    $this->model->where('id', $transfer_order_id)->delete();
-                    $this->error(__('导入失败' . $sku . '在调出仓：'.$out_plat.'站不存在映射关系'));
+                if (!($_platform->where('platform_type', $outLabel)->where('sku',$sku)->find())){
+                    $this->model->where('id', $transferOrderId)->delete();
+                    $this->error(__('导入失败' . $sku . '在调出仓：'.$outPlat.'站不存在映射关系'));
                 }
                 //校验当前sku在调入仓是否存在
-                if (!($_platform->where('platform_type', $in_label)->where('sku',$sku)->find())){
-                    $this->model->where('id', $transfer_order_id)->delete();
-                    $this->error(__('导入失败' . $sku . '在调入仓：'.$in_plat.'站不存在映射关系'));
+                if (!($_platform->where('platform_type', $inLabel)->where('sku',$sku)->find())){
+                    $this->model->where('id', $transferOrderId)->delete();
+                    $this->error(__('导入失败' . $sku . '在调入仓：'.$inPlat.'站不存在映射关系'));
                 }
 
                 //拼接参数 插入调拨单子表 调拨单详情表中
                 $params[$sku] = [
-                    'transfer_order_id' => $transfer_order_id,
+                    'transfer_order_id' => $transferOrderId,
                     'sku' => $sku,
-                    'num' => $replenish_num,
-                    'stock' => $platform_arr[$sku],
+                    'num' => $replenishNum,
+                    'stock' => $platformArr[$sku],
                 ];
             }
 

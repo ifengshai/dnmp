@@ -4,6 +4,7 @@ namespace app\admin\controller\warehouse;
 
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
+use app\enum\PlatformType;
 use fast\Excel;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
@@ -504,7 +505,7 @@ class Outstock extends Backend
             $this->error('此库位正在盘点,暂无法入库审核');
         }
         /****************************end*****************************************/
-        
+
         $map['id'] = ['in', $ids];
         $row = $this->model->where($map)->select();
         foreach ($row as $v) {
@@ -928,8 +929,8 @@ class Outstock extends Backend
                 case 'zeelool_es':
                     $out_label = 9;
                     break;
-                    // case 'zeelool_jp':
-                    //     $label = 1;
+                // case 'zeelool_jp':
+                //     $label = 1;
                 case 'zeelool_de':
                     $out_label = 10;
                     break;
@@ -1034,7 +1035,7 @@ class Outstock extends Backend
         } else {
             $reader = new Xlsx();
         }
-        $result_msg=array();
+        $resultMsg=array();
         //模板文件列名
         $this->model->startTrans();
         $_item->startTrans();
@@ -1074,42 +1075,39 @@ class Outstock extends Backend
             empty($data) && $this->error('表格数据为空！');
 
             //获取表格中条码集合
-            $sku_arr = [];
-            $site_type = [];
+            $skuArr = [];
+            $siteType = [];
             foreach ($data as $k => $v) {
                 //获取sku
                 $sku = trim($v[2]);
                 $site = trim($v[1]);
-                $out_type = trim($v[0]);
-                $cherck_out_type[$v[0]] = trim($v[0]);
-                $site_type[$v[1]] = trim($v[1]);
+                $outType = trim($v[0]);
+                $cherckOutType[$v[0]] = trim($v[0]);
+                $siteType[$v[1]] = trim($v[1]);
                 empty($sku) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行商品条码为空！'));
                 empty($site) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 行平台类型为空！'));
-                empty($out_type) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 出库类型为空！'));
-                $sku_arr[] = $sku;
+                empty($outType) && $this->error(__('导入失败,第 ' . ($k + 1) . ' 出库类型为空！'));
+                $skuArr[] = $sku;
             }
 
-            $sku_code = array_column($data, '2');
+            $skuCode = array_column($data, '2');
             //检测条形码是否重复
-            if (count($data) != count(array_unique($sku_code))) $this->error(__(' 条形码有重复，请检查'));
-            if (count($site_type) > 1) $this->error("一次只能导入一个平台类型");
-            if (count($cherck_out_type) > 1) $this->error("一次只能导入一种出库单类型");
-            $where['code'] = ['in', $sku_code];
+            if (count($data) != count(array_unique($skuCode))) $this->error(__(' 条形码有重复，请检查'));
+            if (count($siteType) > 1) $this->error("一次只能导入一个平台类型");
+            if (count($cherckOutType) > 1) $this->error("一次只能导入一种出库单类型");
+            $where['code'] = ['in', $skuCode];
             $selectlist = $_product_bar_code_item->where($where)->select();
             $selectlist = collection($selectlist)->toArray();
 
-            $database_data = array_column($selectlist, 'code');
+            $databaseData = array_column($selectlist, 'code');
             foreach ($data as $check_k => $check_v) {
-                if (!in_array($check_v[2], $database_data)) {
-                    /*$msg['code']=$check_v[2];
-                    $msg['msg']='条码不存在';
-                    array_push($result_msg,$msg);*/
+                if (!in_array($check_v[2], $databaseData)) {
                     $this->error('条码[' . $check_v[2] . ']不存在');
                 }
             }
 
 
-            $insert_out_stoce=array();
+            $insertOutStoce=array();
             //数据库中条码信息进行验证与数据拼装   如果验证不通过则记录原因
             foreach ($selectlist as $k => $v) {
                 if ($v['library_status'] == 2) {
@@ -1125,99 +1123,77 @@ class Outstock extends Backend
                     $this->error(__('条码[' . $v['code'] . ']未绑定库位'));
                 }
                 $un_key = $v['location_id'] . $v['location_code_id'];
-                $insert_out_stoce[$un_key][$v['code']] = $v['id'];
+                $insertOutStoce[$un_key][$v['code']] = $v['id'];
 
-                $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;
-
-                /*if ($v['library_status'] == 2) {
-                    $msg['code']=$v['code'];
-                    $msg['msg']='条码已出库';
-                    array_push($result_msg,$msg);
-                } elseif ($v['out_stock_id']) {
-                    $msg['code']=$v['code'];
-                    $msg['msg']='条码已存在出库单,请检查出库单' . $v['out_stock_id'];
-                    array_push($result_msg,$msg);
-                } elseif (!$v['location_id']) {
-                    $msg['code']=$v['code'];
-                    $msg['msg']='条码未绑定库区';
-                    array_push($result_msg,$msg);
-                } elseif (!$v['location_code_id']) {
-                    $msg['code']=$v['code'];
-                    $msg['msg']='条码未绑定库位';
-                    array_push($result_msg,$msg);
-                }else{
-                    $un_key = $v['location_id'] . $v['location_code_id'];
-                    $insert_out_stoce[$un_key][$v['code']] = $v['id'];
-                    $insert_out_stoce[$un_key]['sku'][$v['sku']][$k]=1;
-                }*/
-
+                $insertOutStoce[$un_key]['sku'][$v['sku']][$k]=1;
             }
-            $out_plat = $data[0][1];
-            switch (trim($out_plat)) {
-                case 'zeelool':
-                    $out_label = 1;
+            $outPlat = $data[0][1];
+            switch (trim($outPlat)) {
+                case PlatformType::ZEELOOL:
+                    $outLabel = 1;
                     break;
-                case 'voogueme':
-                    $out_label = 2;
+                case PlatformType::VOOGUEME:
+                    $outLabel = 2;
                     break;
-                case 'nihao':
-                    $out_label = 3;
+                case PlatformType::NIHAO:
+                    $outLabel = 3;
                     break;
-                case 'meeloog':
-                    $out_label = 4;
+                case PlatformType::MEELOOG:
+                    $outLabel = 4;
                     break;
-                case 'wesee':
-                    $out_label = 5;
+                case PlatformType::WESEE:
+                    $outLabel = 5;
                     break;
-                case 'amazon':
-                    $out_label = 8;
+                case PlatformType::AMAZON:
+                    $outLabel = 8;
                     break;
-                case 'zeelool_es':
-                    $out_label = 9;
+                case PlatformType::ZEELOOL_ES:
+                    $outLabel = 9;
                     break;
-                // case 'zeelool_jp':
-                //     $label = 1;
-                case 'zeelool_de':
-                    $out_label = 10;
+                case PlatformType::ZEELOOL_DE:
+                    $outLabel = 10;
                     break;
-                case 'Zeelool_jp':
-                    $out_label = 11;
+                case PlatformType::ZEELOOL_JP:
+                    $outLabel = 11;
                     break;
-                case 'Voogueme_acc':
-                    $out_label = 12;
+                case PlatformType::VOOGMECHIC:
+                    $outLabel = 12;
                     break;
-                case 'Zeelool_cn':
-                    $out_label = 13;
+                case PlatformType::ZEELOOL_CN:
+                    $outLabel = 13;
                     break;
-                case 'Alibaba':
-                    $out_label = 14;
+                case PlatformType::ALIBABA:
+                    $outLabel = 14;
+                    break;
+                case PlatformType::ZEELOOL_FR:
+                    $outLabel = 15;
                     break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             };
-            $instock_type = Db::name('out_stock_type')->where('is_del', 1)->field('id,name')->select();
-            $instock_type = array_column(collection($instock_type)->toArray(), 'id', 'name');
+            $instockType = Db::name('out_stock_type')->where('is_del', 1)->field('id,name')->select();
+            $instockType = array_column(collection($instockType)->toArray(), 'id', 'name');
 
             $params=array();
-            foreach ($insert_out_stoce as $inset_k => $insert_v) {
-                $transfer_order['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-                $transfer_order['type_id'] = $instock_type[$data[0][0]];
-                $transfer_order['status'] = 0;
-                $transfer_order['platform_id'] = $out_label;
-                $transfer_order['createtime'] = date('Y-m-d H:i:s');
-                $transfer_order['create_person'] = session('admin.nickname');
-                $transfer_order_id = $this->model->insertGetId($transfer_order);
+            foreach ($insertOutStoce as $inset_k => $insert_v) {
+                $outStock['out_stock_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                $outStock['type_id'] = $instockType[$data[0][0]];
+                $outStock['status'] = 0;
+                $outStock['platform_id'] = $outLabel;
+                $outStock['createtime'] = date('Y-m-d H:i:s');
+                $outStock['create_person'] = session('admin.nickname');
+                $outStockId = $this->model->insertGetId($outStock);
                 foreach ($insert_v as $item => $value) {
                     if (is_array($value)) {
                         foreach ($value as $sku_k=>$sku_v){
                             $params[$sku_k] = [
                                 'out_stock_num' => count($sku_v),
                                 'sku' => $sku_k,
-                                'out_stock_id' => $transfer_order_id,
+                                'out_stock_id' => $outStockId,
                             ];
                         }
                     } else {
-                        $_product_bar_code_item->where(['id' => trim($value)])->update(['out_stock_id' => $transfer_order_id]);
+                        $_product_bar_code_item->where(['id' => trim($value)])->update(['out_stock_id' => $outStockId]);
                     }
                 }
             }
@@ -1243,9 +1219,9 @@ class Outstock extends Backend
             $_product_bar_code_item->rollback();
             $this->error($e->getMessage());
         }
-        if ($result_msg){
+        if ($resultMsg){
         $savename = '/uploads/批量出库剩余数据' . date("YmdHis", time());
-        $this->writeCsv($result_msg,array('code','msg'),$savename,false);
+        $this->writeCsv($resultMsg,array('code','msg'),$savename,false);
         return json(['msg' => "uploads",'code'=>1,'url' => "https://".$_SERVER['HTTP_HOST']."/".$savename.".csv"]);
         }else{
             $this->success("导入成功");

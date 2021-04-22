@@ -317,51 +317,51 @@ class ScmWarehouse extends Scm
      */
     public function out_stock_add()
     {
-        $out_stock_id = $this->request->request('out_stock_id');
-        if ($out_stock_id) {
+        $outStockId = $this->request->request('out_stock_id');
+        if ($outStockId) {
             $info = $this->_out_stock
                 ->field('out_stock_number,type_id,platform_id')
-                ->where('id', $out_stock_id)
+                ->where('id', $outStockId)
                 ->find();
 
             //获取出库单商品数据
-            $item_data = $this->_out_stock_item
+            $itemData = $this->_out_stock_item
                 ->field('sku,out_stock_num')
-                ->where('out_stock_id', $out_stock_id)
+                ->where('out_stock_id', $outStockId)
                 ->select();
 
             //获取各站点虚拟仓库存
-            $stock_list = $this->_item_platform_sku
+            $stockList = $this->_item_platform_sku
                 ->where('platform_type', $info['platform_id'])
                 ->column('stock', 'sku');
 
             //获取条形码数据
-            $bar_code_list = $this->_product_bar_code_item
-                ->where(['out_stock_id' => $out_stock_id])
+            $barCodeList = $this->_product_bar_code_item
+                ->where(['out_stock_id' => $outStockId])
                 ->field('sku,code')
                 ->select();
-            $bar_code_list = collection($bar_code_list)->toArray();
+            $barCodeList = collection($barCodeList)->toArray();
 
-            foreach ($item_data as $key => $value) {
+            foreach ($itemData as $key => $value) {
                 $sku = $value['sku'];
                 //条形码列表
-                $sku_agg = array_filter($bar_code_list, function ($v) use ($sku) {
+                $skuAgg = array_filter($barCodeList, function ($v) use ($sku) {
                     if ($v['sku'] == $sku) {
                         return $v;
                     }
                 });
 
-                if (!empty($sku_agg)) {
-                    array_walk($sku_agg, function (&$value, $k, $p) {
+                if (!empty($skuAgg)) {
+                    array_walk($skuAgg, function (&$value, $k, $p) {
                         $value = array_merge($value, $p);
                     }, ['is_new' => 0]);
                 }
 
-                $item_data[$key]['sku_agg'] = array_values($sku_agg);
-                $item_data[$key]['stock'] = $stock_list[$sku];
+                $itemData[$key]['sku_agg'] = array_values($skuAgg);
+                $itemData[$key]['stock'] = $stockList[$sku];
             }
 
-            $info['item_data'] = $item_data;
+            $info['item_data'] = $itemData;
         } else {
             $info = [
                 'out_stock_number' => 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999),
@@ -370,21 +370,21 @@ class ScmWarehouse extends Scm
                 'item_data' => []
             ];
         }
-        $kuqu_kuwei = $this->_product_bar_code_item->where(['out_stock_id' => $out_stock_id])->find();
+        $kuquKuwei = $this->_product_bar_code_item->where(['out_stock_id' => $outStockId])->find();
         //出库单所需数据
-        $info['location_id'] = $kuqu_kuwei['location_id'];
-        $info['location_area'] = Db::name('warehouse_area')->where('id', $kuqu_kuwei['location_id'])->value('coding');
-        $info['location_code_id'] = $kuqu_kuwei['location_code_id'];
-        $info['location_code'] = $kuqu_kuwei['location_code'];
+        $info['location_id'] = $kuquKuwei['location_id'];
+        $info['location_area'] = Db::name('warehouse_area')->where('id', $kuquKuwei['location_id'])->value('coding');
+        $info['location_code_id'] = $kuquKuwei['location_code_id'];
+        $info['location_code'] = $kuquKuwei['location_code'];
         //获取出库分类数据
-        $type_list = $this->_out_stock_type
+        $typeList = $this->_out_stock_type
             ->field('id,name')
             ->where('is_del', 1)
             ->where('id', 'not in', [2, 4])
             ->select();
 
         //站点列表
-        $site_list = [
+        $siteList = [
             ['id' => 1, 'title' => 'zeelool'],
             ['id' => 2, 'title' => 'voogueme'],
             ['id' => 3, 'title' => 'nihao'],
@@ -396,10 +396,11 @@ class ScmWarehouse extends Scm
             ['id' => 11, 'title' => 'zeelool_jp'],
             ['id' => 12, 'title' => 'voogmechic'],
             ['id' => 13, 'title' => 'zeelool_cn'],
-            ['id' => 14, 'title' => 'alibaba']
+            ['id' => 14, 'title' => 'alibaba'],
+            ['id' => 15, 'title' => 'zeelool_fr'],
         ];
 
-        $this->success('', ['type_list' => $type_list, 'site_list' => $site_list, 'info' => $info], 200);
+        $this->success('', ['type_list' => $typeList, 'site_list' => $siteList, 'info' => $info], 200);
     }
 
     /**
