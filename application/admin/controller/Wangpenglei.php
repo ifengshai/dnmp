@@ -3597,7 +3597,18 @@ class Wangpenglei extends Backend
     public function process_purchase_order()
     {
         $purchase = new \app\admin\model\purchase\PurchaseOrder();
-        $purchase->where(['is_in_stock' => 1])->select();
+        $purchaseItem = new \app\admin\model\purchase\PurchaseOrderItem();
+        $list = $purchase->alias('a')->field('a.purchase_number,b.id')
+            ->where(['a.is_in_stock' => 1])
+            ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
+            ->select();
+        $list = collection($list)->toArray();
+        $params = [];
+        foreach ($list as $k => $item) {
+            $params[$k]['purchase_order_number'] = $item['purchase_number'];
+            $params[$k]['id'] = $item['id'];
+        }
+        $purchaseItem->saveAll($params);
     }
 
 }
