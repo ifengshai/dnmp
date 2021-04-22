@@ -1459,8 +1459,10 @@ class Distribution extends Backend
 
         file_put_contents('./a.json',111);
         try{
+            file_put_contents('./d.json',111);
             //从数据库查询需要的数据
             $spreadsheet = new Spreadsheet();
+            file_put_contents('./d.json',111);
 
             //常规方式：利用setCellValue()填充数据
             $spreadsheet->setActiveSheetIndex(0)
