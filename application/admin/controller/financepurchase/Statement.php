@@ -220,7 +220,6 @@ class Statement extends Backend
             ->where('b.supplier_id', $supplier_id)
             ->where('a.id', 'in', $ids)
             ->where('a.status', 2)//已审核通过的入库单
-            ->where('c.id', '>', 16475)
             ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
             ->select();
         $all = 0;
@@ -522,12 +521,12 @@ class Statement extends Backend
                             $allItems = Db::name('finance_statement_item')
                                 ->where('purchase_id', $vv['purchase_id'])
                                 ->select();
-                            $instockToal = array_sum(array_column($allItems, 'instock_total'));
-                            $deductionTotal = array_sum(array_column($allItems, 'deduction_total'));
-                            $instockNum = array_sum(array_column($allItems, 'instock_num'));
+                            $instock_total = array_sum(array_column($allItems, 'instock_total'));
+                            $deduction_total = array_sum(array_column($allItems, 'deduction_total'));
+                            $instock_num = array_sum(array_column($allItems, 'instock_num'));
                             if ($allBatch == count($allItems)) {
                                 /**************************************计算采购成本start**********************************/
-                                $actualPurchasePrice = round(($instockToal - $deductionTotal + $allItems[0]['freight']) / $instockNum ,2);
+                                $actualPurchasePrice = round(($instock_total - $deduction_total + $allItems[0]['freight']) / $instock_num ,2);
                                 //更新采购单成本
                                 Db::name('purchase_order_item')
                                     ->where('purchase_id',$vv['purchase_id'])
@@ -731,6 +730,9 @@ class Statement extends Backend
                                     ->insert($result);
                                 /**************************************计算成本冲减end****************************************/
                                 /**************************************成本核算start****************************************/
+                                Log::write('======采购单成本日志输出=======');
+                                Log::write($vv['purchase_id'].'采购单id实际成本'.$actualPurchasePrice.'预估成本'.$purchaseOrder['purchase_price']);
+                                Log::write('订单出库'.$outCount1.'入库总数量'.$count);
                                 if($outCount1 != 0){
                                     //订单出库
                                     $order = $this->item
@@ -751,12 +753,15 @@ class Statement extends Backend
                                             $result1[$orderNumber] = 1;
                                         }
                                     }
+                                    Log::write('订单'.$result1);
+                                    Log::write($result1);
                                     foreach ($result1 as $rr1=>$ss1){
                                         //获取成本核算中的订单数据
                                         $costOrderInfo = $this->financecost
                                             ->where(['order_number' => $rr1, 'type' => 2,'bill_type'=>8])
                                             ->order('id desc')
                                             ->find();
+                                        Log::write('成本核算数据'.$costOrderInfo);
                                         //如果有出库数据，需要添加冲减暂估结算金额和增加成本核算数据
                                         $arr1['type'] = 2;   //类型：成本
                                         $arr1['bill_type'] = 10;    //单据类型：暂估结算金额
@@ -773,12 +778,14 @@ class Statement extends Backend
                                         $arr1['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                         $arr1['createtime'] = time();  //创建时间
                                         $arr1['cycle_id'] = $costOrderInfo['cycle_id'];  //关联周期结转单id
+                                        Log::write('冲减类型为10'.$arr1);
                                         Db::name('finance_cost')
                                             ->insert($arr1);
                                         //增加成本核算记录
                                         $arr2['type'] = 2;   //类型：成本
                                         $arr2['bill_type'] = 8;    //单据类型：实际结算金额
                                         $arr2['frame_cost'] = round($costOrderInfo['frame_cost'] + $ss1 * ($actualPurchasePrice - $purchaseOrder['purchase_price']), 2);    //镜架成本：剩余实际单价*剩余数量//镜架成本：（实际单价-预估）*数量+原订单金额2021.4.8修改逻辑
+                                        Log::write($costOrderInfo['frame_cost'].'/'.$ss1.'/'.$actualPurchasePrice.'/'.$purchaseOrder['purchase_price']);
                                         $arr2['order_number'] = $rr1;  //订单号
                                         $arr2['site'] = $costOrderInfo['site'];  //站点
                                         $arr2['order_type'] = $costOrderInfo['order_type'];  //订单类型
@@ -791,6 +798,7 @@ class Statement extends Backend
                                         $arr2['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                         $arr2['createtime'] = time();  //创建时间
                                         $arr2['cycle_id'] = $costOrderInfo['cycle_id'];  //关联周期结转单id
+                                        Log::write('冲减类型为8'.$arr2);
                                         Db::name('finance_cost')
                                             ->insert($arr2);
                                     }
@@ -892,7 +900,6 @@ class Statement extends Backend
                 ->where('b.supplier_id', $supplier_id)
                 ->where('a.id', 'in', $ids)
                 ->where('a.status', 2)//已审核通过的入库单
-                ->where('c.id', '>', 16475)
                 ->field('c.purchase_number,a.id,d.purchase_price,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                 ->select();
             foreach ($list as $k => $v) {

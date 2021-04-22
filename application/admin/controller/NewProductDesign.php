@@ -109,7 +109,7 @@ class NewProductDesign extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($map)
@@ -373,7 +373,7 @@ class NewProductDesign extends Backend
             }
         }
         //获取筛选人
-        $authGroupAccess= new AuthGroupAccess();
+        $authGroupAccess = new AuthGroupAccess();
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin' => 'b'], 'a.uid=b.id')

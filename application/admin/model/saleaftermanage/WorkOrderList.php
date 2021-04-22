@@ -522,7 +522,7 @@ class WorkOrderList extends Model
     public function getReissueLens($siteType, $showPrescriptions, $type = 1, $item_order_number = '')
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
-        $cache_key = $siteType . '_get_lens';
+        $cache_key = $siteType.'_get_lens';
         $data = Cache::get($cache_key);
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口

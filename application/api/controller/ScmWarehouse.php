@@ -995,6 +995,8 @@ class ScmWarehouse extends Scm
 
         //入库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
+        Log::write("入库库位详情");
+        Log::write($warehouse_area);
 
         /*****************限制如果有盘点单未结束不能操作配货完成*******************/
         //配货完成时判断
@@ -1003,6 +1005,7 @@ class ScmWarehouse extends Scm
         $count = $this->_inventory->alias('a')
             ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'], 'area_id' => $area_id])
             ->count();
+        Log::write($count);
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法入库提交'), [], 403);
         }
@@ -1131,6 +1134,7 @@ class ScmWarehouse extends Scm
                                 $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
                                 $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                                 $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
+                                $save_code_data['library_status'] = 1; //在库状态
                                 $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                             }
                         } else {
@@ -1217,6 +1221,7 @@ class ScmWarehouse extends Scm
                                     $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
                                     $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                                     $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
+                                    $save_code_data['library_status'] = 1; //在库状态为1
                                     $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                                 }
                             } else {
@@ -1569,11 +1574,14 @@ class ScmWarehouse extends Scm
         //拣货区盘点时不能操作
         //查询条形码库区库位
         $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->column('location_code');
+        Log::write("输出库区库位");
+        Log::write($barcodedata);
         $count = $this->_inventory->alias('a')
             ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
             ->count();
+        Log::write($count);
         if ($count > 0) {
-            $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
+            $this->error(__('此库位正在盘点,暂无法入库审核001'), [], 403);
         }
         /****************************end*****************************************/
 
@@ -2776,6 +2784,10 @@ class ScmWarehouse extends Scm
                             ->count();
                         $list[$k]['sku'] = $v['sku'];
                         $list[$k]['out_stock_num'] = $other_message;
+                        $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
+                        $this->_product_bar_code_item
+                            ->where(['code' => ['in', $codes]])
+                            ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
                         //更新如果出库单id为空 添加出库单id
                         $this->_product_bar_code_item
                             ->where(['code' => ['not in', $codes],'library_status' => 1,'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
@@ -2795,7 +2807,6 @@ class ScmWarehouse extends Scm
                                 ->where(['code' => ['not in', $codes],'library_status' => 1,'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
                                 ->where("item_order_number=''")
                                 ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
-
                         }
                     }
                 }

@@ -40,6 +40,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                             searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
                             formatter: Table.api.formatter.status
                         },
+
                         {
                             field: 'product_barcode_item.location_id', title: __('库区号'), custom: { 0: '暂无', 1: '大货区', 2: '货架区', 3: '拣货区' },
                             searchList: { 0: '暂无', 1: '大货区', 2: '货架区', 3: '拣货区'},
@@ -128,7 +129,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                                         //返回true时按钮显示,返回false隐藏
                                         return false;
                                     }
-                                }
+                                },
+
+
 
                             ], formatter: Table.api.formatter.operate
                         }

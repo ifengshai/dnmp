@@ -1,32 +1,32 @@
 <?php
 
-return array(
+return [
     'beian'               => '',
     'cdnurl'              => '',
     'version'             => '1.0.38',
     'timezone'            => 'Asia/Shanghai',
     'forbiddenip'         => '',
     'languages'           =>
-        array(
+        [
             'backend'  => 'zh-cn',
             'frontend' => 'zh-cn',
-        ),
+        ],
     'fixedpage'           => 'dashboard',
     'categorytype'        =>
-        array(
-    'default' => 'Default',
-    'page' => 'Page',
-    'article' => 'Article',
-    'test' => 'Test',
-  ),
+        [
+            'default' => 'Default',
+            'page'    => 'Page',
+            'article' => 'Article',
+            'test'    => 'Test',
+        ],
     'configgroup'         =>
-  array (
-    'basic' => 'Basic',
-    'email' => 'Email',
-    'dictionary' => 'Dictionary',
-    'user' => 'User',
-    'example' => 'Example',
-  ),
+        [
+            'basic'      => 'Basic',
+            'email'      => 'Email',
+            'dictionary' => 'Dictionary',
+            'user'       => 'User',
+            'example'    => 'Example',
+        ],
     'mail_type'           => '1',
     'mail_smtp_host'      => 'smtp.qq.com',
     'mail_smtp_port'      => '465',
@@ -39,4 +39,4 @@ return array(
     'pda_version'         => '1.0.0',
     'pda_download'        => '/uploads/20210413/99cecc731f32465fefb690f62a3641c6.apk',
     'pda_md5'             => '99cecc731f32465fefb690f62a3641c6',
-);
+];

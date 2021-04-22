@@ -80,7 +80,7 @@ class Item extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model->where('is_open', '<', 3)
                 ->where($where)
                 ->order($sort, $order)
@@ -120,7 +120,7 @@ class Item extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model->where(['is_open' => 3])
                 ->where($where)
                 ->order($sort, $order)
@@ -933,7 +933,7 @@ class Item extends Backend
                 unset($filter['platform_type']);
                 unset($map['platform_type']);
                 $this->request->get(['filter' => json_encode($filter)]);
-                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+                [$where, $sort, $order, $offset, $limit] = $this->buildparams();
 
                 $map['is_open'] = 1;
                 $map['is_del'] = 1;
@@ -975,7 +975,7 @@ class Item extends Backend
                 }
                 $this->request->get(['filter' => json_encode($filter)]);
 
-                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+                [$where, $sort, $order, $offset, $limit] = $this->buildparams();
                 // dump($where);
                 $map['is_open'] = 1;
                 $map['is_del'] = 1;
@@ -2179,7 +2179,7 @@ class Item extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $whereData['item_status'] = 3;
             $whereData['is_open'] = ['LT', 3];
             $whereData['presell_create_time'] = ['NEQ', '0000-00-00 00:00:00'];
@@ -2448,7 +2448,7 @@ class Item extends Backend
         if ($ids) {
             $addWhere .= " AND id IN ({$ids})";
         }
-        list($where) = $this->buildparams();
+        [$where] = $this->buildparams();
         $list = $this->model->where('is_open', '<', 3)
             ->where($addWhere)
             ->where($where)

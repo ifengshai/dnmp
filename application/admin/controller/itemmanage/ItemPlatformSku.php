@@ -57,7 +57,7 @@ class ItemPlatformSku extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['item' => ['item_status']])
                 ->where($where)
@@ -109,7 +109,7 @@ class ItemPlatformSku extends Backend
         //自定义sku搜索
         $filter = json_decode($this->request->get('filter'), true);
 
-        list($where) = $this->buildparams();
+        [$where] = $this->buildparams();
         $list = $this->model
             ->with(['item' => ['item_status']])
             ->where($where)
@@ -263,7 +263,7 @@ class ItemPlatformSku extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->whereNotNull('presell_create_time')
