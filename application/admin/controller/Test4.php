@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use fast\Http;
@@ -3118,6 +3119,27 @@ class Test4 extends Controller
                 echo $v['sku'].'同步成功'."\n";
             } else {
                 echo $v['sku'].'同步失败'."\n";
+            }
+        }
+    }
+
+    /**
+     * 跑sku的大货现货属性
+     * Interface run_item_is_spot
+     * @package app\admin\controller
+     * @author  jhh
+     * @date    2021/4/20 10:24:37
+     */
+    public function run_item_is_spot()
+    {
+        $item = new Item();
+        $skuSpot = Db::name('zzzz_temp_is_spot')->select();
+        foreach ($skuSpot as $k=>$v){
+            $res =$item->where('sku',$v['sku'])->update(['is_spot'=>$v['is_spot']]);
+            if ($res > 0){
+                echo $v['sku'].'更新为'.$v['is_spot']."\n";
+            }else{
+                echo $v['sku'].'更新失败'."\n";
             }
         }
     }

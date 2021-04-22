@@ -232,4 +232,7 @@ class Dashboard extends Backend
     public function alibaba()
     {
     }
+    public function zeelool_fr()
+    {
+    }
 }

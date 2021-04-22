@@ -5,6 +5,7 @@ namespace app\admin\controller\itemmanage;
 use app\admin\model\platformManage\MagentoPlatform;
 use app\admin\model\purchase\NewProductReplenishList;
 use app\common\controller\Backend;
+use app\common\model\Category;
 use fast\Http;
 use think\Request;
 use think\Db;
@@ -963,6 +964,7 @@ class Item extends Backend
                     $v['voogmechic_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 12])->value('stock');
                     $v['douyin_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 13])->value('stock');
                     $v['alibaba_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 14])->value('stock');
+                    $v['zeelool_fr_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 15])->value('stock');
                 }
                 unset($v);
             } else {
@@ -1017,6 +1019,10 @@ class Item extends Backend
         }
         //查询对应平台权限 getNewAuthSite是存在all权限的
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite1();
+        //商品库存列表展示顺序调整：需要把阿里巴巴和西语站的展示位置换换
+        $key_name = array('1','2','3','4','5','8','14','10','11','12','13','9','100');
+        $magentoplatformarr = array_combine($key_name,$magentoplatformarr);
+        ksort($magentoplatformarr);
         // $platform = (new MagentoPlatform())->getAuthSite();
         // dump(collection($platform)->toArray());
         // dump(collection($magentoplatformarr)->toArray());die;
@@ -1046,28 +1052,29 @@ class Item extends Backend
 
         //查询各站SKU虚拟库存
         $skus = array_column($list, 'sku');
-        $item_list = $item_platform->where(['sku' => ['in', $skus]])->select();
-        $item_stock = [];
-        foreach ($item_list as $v) {
-            $item_stock[$v['sku']][$v['platform_type']] = $v['stock'];
+        $itemList = $item_platform->where(['sku' => ['in', $skus]])->select();
+        $itemStock = [];
+        foreach ($itemList as $v) {
+            $itemStock[$v['sku']][$v['platform_type']] = $v['stock'];
         }
 
         foreach ($list as &$v) {
-            $v['zeelool_stock'] = $item_stock[$v['sku']][1];
-            $v['voogueme_stock'] = $item_stock[$v['sku']][2];
-            $v['nihao_stock'] = $item_stock[$v['sku']][3];
-            $v['meeloog_stock'] = $item_stock[$v['sku']][4];
-            $v['wesee_stock'] = $item_stock[$v['sku']][5];
-            $v['amazon_stock'] = $item_stock[$v['sku']][8];
-            $v['zeelool_es_stock'] = $item_stock[$v['sku']][9];
-            $v['zeelool_de_stock'] = $item_stock[$v['sku']][10];
-            $v['zeelool_jp_stock'] = $item_stock[$v['sku']][11];
-            $v['voogmechic_stock'] = $item_stock[$v['sku']][12];
-            $v['douyin_stock'] = $item_stock[$v['sku']][13];
-            $v['alibaba_stock'] = $item_stock[$v['sku']][14];
+            $v['zeelool_stock'] = $itemStock[$v['sku']][1];
+            $v['voogueme_stock'] = $itemStock[$v['sku']][2];
+            $v['nihao_stock'] = $itemStock[$v['sku']][3];
+            $v['meeloog_stock'] = $itemStock[$v['sku']][4];
+            $v['wesee_stock'] = $itemStock[$v['sku']][5];
+            $v['amazon_stock'] = $itemStock[$v['sku']][8];
+            $v['zeelool_es_stock'] = $itemStock[$v['sku']][9];
+            $v['zeelool_de_stock'] = $itemStock[$v['sku']][10];
+            $v['zeelool_jp_stock'] = $itemStock[$v['sku']][11];
+            $v['voogmechic_stock'] = $itemStock[$v['sku']][12];
+            $v['douyin_stock'] = $itemStock[$v['sku']][13];
+            $v['alibaba_stock'] = $itemStock[$v['sku']][14];
+            $v['zeelool_fr_stock'] = $itemStock[$v['sku']][15];
         }
 
-        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic', '虚拟库存ZeeloolCn', '虚拟库存Alibaba'];
+        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic', '虚拟库存ZeeloolCn', '虚拟库存Alibaba', '虚拟库存ZeeloolFr'];
         $filename = '商品虚拟库存';
         Excel::writeCsv($list, $headlist, $filename, true);
         die;
@@ -2563,10 +2570,51 @@ class Item extends Backend
      * @date   2021/4/19 18:18
      */
     public function changeValue(){
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
         $itemAttribute = new ItemAttribute();
         $goodsValue = $this->model->where(['is_open'=>1])->column('id');
         $itemAttributeValue = $itemAttribute->column('item_id');
         $result=array_diff($goodsValue,$itemAttributeValue);
-        dump($result);
+        $skuSalesNum = new \app\admin\model\SkuSalesNum();
+        $goodsValue = $this->model->where(['id'=>['in',$result]])->column('sku','id');
+        foreach ($goodsValue as $key=>$value){
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $date = date('Y-m-d 00:00:00');
+            $list[] = $itemPlatformSku->field('id,sku,platform_type as site')->where([
+                'platform_sku'    => ['eq', $value],
+            ])->find();
+            $sales= $skuSalesNum->where([
+                'sku'        => $list->sku,
+                'site'       => $list->site,
+                'createtime' => ['<', $date],
+            ])->sum('sales_num');
+            $data[$key]['id'] = $key;
+            $data[$key]['sku'] = $value;
+            $data[$key]['sum'] = $sales;
+        }
+        $data = array_values($data);
+        $headlist = [
+            'id', 'SKU', '销量'
+        ];
+        $path = "/uploads/";
+        $fileName = '排查异常商品数据';
+        Excel::writeCsv($data, $headlist, $path . $fileName);
+    }
+
+    public function categoryValue(){
+        $cateGory = new  \app\admin\model\itemmanage\ItemCategory();
+        $subordinateValue = $cateGory->where(['pid'=>['in','21,24,45']])->column('id');
+        $value = $this->model->where(['category_id'=>['in',$subordinateValue]])->column('sku','id');
+        foreach ($value as $key=>$val){
+            $data[$key]['sku'] = $val;
+        }
+        $data = array_values($data);
+        $headlist = [
+            'SKU'
+        ];
+        $path = "/uploads/";
+        $fileName = '镜框-配饰-生活用品下的sku';
+        Excel::writeCsv($data, $headlist, $path . $fileName);
     }
 }

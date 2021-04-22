@@ -869,7 +869,7 @@ class SaleAfterTask extends Model
             $customer['customer_email'] = $customer_email;
             $customer['customer_name'] = $result[0]['customer_firstname'] . ' ' . $result[0]['customer_lastname'];
             $customer['success_counter'] = $customer['success_total'] = $customer['failed_counter'] = $customer['failed_total'] = 0;
-            $orderStatus = array('complete', 'processing', 'free_processing');
+            $orderStatus = array('complete', 'processing', 'free_processing','delivered');
             foreach ($result as $key => $val) {
                 //计算支付成功和失败次数
                 if (in_array($val['status'], $orderStatus)) {
