@@ -964,6 +964,7 @@ class Item extends Backend
                     $v['voogmechic_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 12])->value('stock');
                     $v['douyin_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 13])->value('stock');
                     $v['alibaba_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 14])->value('stock');
+                    $v['zeelool_fr_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 15])->value('stock');
                 }
                 unset($v);
             } else {
@@ -1051,28 +1052,29 @@ class Item extends Backend
 
         //查询各站SKU虚拟库存
         $skus = array_column($list, 'sku');
-        $item_list = $item_platform->where(['sku' => ['in', $skus]])->select();
-        $item_stock = [];
-        foreach ($item_list as $v) {
-            $item_stock[$v['sku']][$v['platform_type']] = $v['stock'];
+        $itemList = $item_platform->where(['sku' => ['in', $skus]])->select();
+        $itemStock = [];
+        foreach ($itemList as $v) {
+            $itemStock[$v['sku']][$v['platform_type']] = $v['stock'];
         }
 
         foreach ($list as &$v) {
-            $v['zeelool_stock'] = $item_stock[$v['sku']][1];
-            $v['voogueme_stock'] = $item_stock[$v['sku']][2];
-            $v['nihao_stock'] = $item_stock[$v['sku']][3];
-            $v['meeloog_stock'] = $item_stock[$v['sku']][4];
-            $v['wesee_stock'] = $item_stock[$v['sku']][5];
-            $v['amazon_stock'] = $item_stock[$v['sku']][8];
-            $v['zeelool_es_stock'] = $item_stock[$v['sku']][9];
-            $v['zeelool_de_stock'] = $item_stock[$v['sku']][10];
-            $v['zeelool_jp_stock'] = $item_stock[$v['sku']][11];
-            $v['voogmechic_stock'] = $item_stock[$v['sku']][12];
-            $v['douyin_stock'] = $item_stock[$v['sku']][13];
-            $v['alibaba_stock'] = $item_stock[$v['sku']][14];
+            $v['zeelool_stock'] = $itemStock[$v['sku']][1];
+            $v['voogueme_stock'] = $itemStock[$v['sku']][2];
+            $v['nihao_stock'] = $itemStock[$v['sku']][3];
+            $v['meeloog_stock'] = $itemStock[$v['sku']][4];
+            $v['wesee_stock'] = $itemStock[$v['sku']][5];
+            $v['amazon_stock'] = $itemStock[$v['sku']][8];
+            $v['zeelool_es_stock'] = $itemStock[$v['sku']][9];
+            $v['zeelool_de_stock'] = $itemStock[$v['sku']][10];
+            $v['zeelool_jp_stock'] = $itemStock[$v['sku']][11];
+            $v['voogmechic_stock'] = $itemStock[$v['sku']][12];
+            $v['douyin_stock'] = $itemStock[$v['sku']][13];
+            $v['alibaba_stock'] = $itemStock[$v['sku']][14];
+            $v['zeelool_fr_stock'] = $itemStock[$v['sku']][15];
         }
 
-        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic', '虚拟库存ZeeloolCn', '虚拟库存Alibaba'];
+        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Nihao', '虚拟库存Meeloog', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic', '虚拟库存ZeeloolCn', '虚拟库存Alibaba', '虚拟库存ZeeloolFr'];
         $filename = '商品虚拟库存';
         Excel::writeCsv($list, $headlist, $filename, true);
         die;
