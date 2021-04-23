@@ -1668,6 +1668,8 @@ class OrderData extends Backend
             $list['is_prescription_abnormal'] = 1;
         }
 
+        $list['is_prescription_abnormal'] = $list['is_prescription_abnormal'] ?: 0;
+
         return $list;
     }
 
