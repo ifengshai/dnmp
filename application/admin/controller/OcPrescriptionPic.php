@@ -200,6 +200,8 @@ class OcPrescriptionPic extends Backend
             }
             if ($filter['created_at']){
                 $created_at = explode(' - ',$filter['created_at']);
+                $created_at[0] = date("Y-m-d H:i:s",strtotime($created_at[0])-28800);
+                $created_at[1] = date("Y-m-d H:i:s",strtotime($created_at[1])-28800);
                 $WhereSql .= " and created_at between '$created_at[0]' and '$created_at[1]' ";
             }
             if ($filter['completion_time']){
