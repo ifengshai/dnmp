@@ -291,6 +291,7 @@ class Excel
         //每隔$limit行，刷新一下输出buffer，不要太大，也不要太小
         $limit = 100000;
 
+        $data = $data ?: [];
         //逐行取出数据，不浪费内存
         $count = count($data); //print_r($data);die;
         for ($i = 0; $i < $count; $i++) {
