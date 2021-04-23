@@ -157,7 +157,7 @@ class SelfApi extends Api
                 'node_type' => ['>=', 1]
             ])->count();
             if ($order_count < 0) {
-                $res_node = (new OrderNode())->save([
+                $res_node = $this->node->save([
                     'order_node' => 0,
                     'node_type' => 1,
                     'update_time' => date('Y-m-d H:i:s'),
@@ -169,10 +169,9 @@ class SelfApi extends Api
                 //更新order_node表中es数据
                 $arr = [
                     'id' => $id,
-                    'order_node' => 0,
                     'node_type' => 1,
                 ];
-                $this->asyncEs->esService->updateEsById('mojing_track',$arr);
+                $this->asyncEs->updateEsById('mojing_track',$arr);
             }
 
             $count = (new OrderNodeDetail())->where([
@@ -277,7 +276,7 @@ class SelfApi extends Api
             'track_number' => $track_number,
             'delivery_time' => time()
         ];
-        $this->asyncEs->esService->updateEsById('mojing_track',$arr);
+        $this->asyncEs->updateEsById('mojing_track',$arr);
 
         //插入节点子表
         (new OrderNodeDetail())->allowField(true)->save([

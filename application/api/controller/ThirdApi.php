@@ -127,7 +127,7 @@ class ThirdApi extends Api
                             'order_node' => 3,
                             'node_type' => 8,
                         ];
-                        $this->asyncEs->esService->updateEsById('mojing_track',$arr);
+                        $this->asyncEs->updateEsById('mojing_track',$arr);
 
                         $order_node_detail['node_type'] = 8;
                         $order_node_detail['content'] = $this->str1;
@@ -148,7 +148,7 @@ class ThirdApi extends Api
                             'order_node' => 3,
                             'node_type' => 10,
                         ];
-                        $this->asyncEs->esService->updateEsById('mojing_track',$arr);
+                        $this->asyncEs->updateEsById('mojing_track',$arr);
 
                         $order_node_detail['node_type'] = 10;
                         $order_node_detail['content'] = $this->str3;
@@ -180,7 +180,7 @@ class ThirdApi extends Api
                             $arr['id'] = $order_node_date['id'];
                             $arr['order_node'] = 4;
                             $arr['node_type'] = $data['e'];
-                            $this->asyncEs->esService->updateEsById('mojing_track',$arr);
+                            $this->asyncEs->updateEsById('mojing_track',$arr);
 
                             $order_node_detail['order_node'] = 4;
                             $order_node_detail['node_type'] = $data['e'];
@@ -220,7 +220,7 @@ class ThirdApi extends Api
                             $arr['id'] = $order_node_date['id'];
                             $arr['order_node'] = 4;
                             $arr['node_type'] = $data['e'];
-                            $this->asyncEs->esService->updateEsById('mojing_track',$arr);
+                            $this->asyncEs->updateEsById('mojing_track',$arr);
 
                             $order_node_detail['order_node'] = 4;
                             $order_node_detail['node_type'] = $data['e'];
@@ -251,7 +251,7 @@ class ThirdApi extends Api
                     //更新es
                     $arr['id'] = $order_node_date['id'];
                     $arr['shipment_last_msg'] = $v['z'];
-                    $this->asyncEs->esService->updateEsById('mojing_track',$arr);
+                    $this->asyncEs->updateEsById('mojing_track',$arr);
 
                 }
             }
