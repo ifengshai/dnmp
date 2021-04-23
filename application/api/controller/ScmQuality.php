@@ -1074,9 +1074,6 @@ class ScmQuality extends Scm
             $list[$key]['show_sign'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['show_quality'] = (1 == $value['type'] && 1 == $value['status']) ? 1 : 0;
         }
-        dump($list);die();
-        $sortValue = array_column($list,'is_new_product');
-        array_multisort($sortValue,SORT_DESC,$list);
         $this->success('', ['list' => $list], 200);
     }
 
