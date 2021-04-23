@@ -409,7 +409,9 @@ class OrderData extends Backend
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
 
                                     $order_prescription_type = $options['order_prescription_type'];
+                                    $is_prescription_abnormal = $options['is_prescription_abnormal'];
                                     unset($options['order_prescription_type']);
+                                    unset($options['is_prescription_abnormal']);
                                     if ($options) {
                                         $options_id = $this->orderitemoption->insertGetId($options);
                                         $data = []; //子订单表数据
@@ -420,6 +422,7 @@ class OrderData extends Backend
                                             $data[$i]['option_id'] = $options_id;
                                             $data[$i]['sku'] = $options['sku'];
                                             $data[$i]['order_prescription_type'] = $order_prescription_type;
+                                            $data[$i]['is_prescription_abnormal'] = $is_prescription_abnormal;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
@@ -455,6 +458,7 @@ class OrderData extends Backend
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
+                                    unset($options['is_prescription_abnormal']);
                                     if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['id'], 'site' => $site])->update($options);
 
@@ -497,7 +501,9 @@ class OrderData extends Backend
                                     $options['base_row_total'] = $v['base_row_total'];
                                     $options['product_id'] = $v['product_id'];
                                     $order_prescription_type = $options['order_prescription_type'];
+                                    $is_prescription_abnormal = $options['is_prescription_abnormal'];
                                     unset($options['order_prescription_type']);
+                                    unset($options['is_prescription_abnormal']);
                                     if ($options) {
                                         $options_id = $this->orderitemoption->insertGetId($options);
                                         $data = []; //子订单表数据
@@ -508,6 +514,7 @@ class OrderData extends Backend
                                             $data[$i]['option_id'] = $options_id;
                                             $data[$i]['sku'] = $v['sku'];
                                             $data[$i]['order_prescription_type'] = $order_prescription_type;
+                                            $data[$i]['is_prescription_abnormal'] = $is_prescription_abnormal;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
@@ -546,6 +553,7 @@ class OrderData extends Backend
                                     $options['base_row_total'] = $v['base_row_total'];
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
+                                    unset($options['is_prescription_abnormal']);
                                     if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
 
