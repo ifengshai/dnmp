@@ -4,6 +4,7 @@ namespace app\api\controller;
 
 use app\common\controller\Api;
 use think\Db;
+use app\admin\controller\elasticsearch\AsyncEs;
 
 
 /**
@@ -24,6 +25,7 @@ class ThirdApi extends Api
 
     public function _initialize()
     {
+        $this->asyncEs = new AsyncEs();
         parent::_initialize();
     }
     /*
@@ -71,11 +73,6 @@ class ThirdApi extends Api
         }
         // }
     }
-
-
-
-
-
 
     /**
      * @author wgj
