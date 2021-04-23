@@ -102,7 +102,7 @@
         <div class="input_item">
             <label class="input_tiem_label">抄送：</label>
             <span class="input_tiem_span">
-                {:Form::select('row[copy_to_user_id][]', config('demand.copyToUserId'), $row['copy_to_user_id_arr'], ['class'=>'selectpicker select_input', null,'data-live-search' => true,'multiple'=>true])}
+                {:Form::select('row[copy_to_user_id][]', $userlist, $row['copy_to_user_id_arr'], ['class'=>'selectpicker select_input', null,'data-live-search' => true,'multiple'=>true])}
             </span>
         </div>
         <div class="input_item">
