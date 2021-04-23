@@ -2471,6 +2471,9 @@ class ScmWarehouse extends Scm
         foreach ($item_sku as $key => $value) {
 
             $sku_code = array_column($value['sku_agg'], 'code');
+
+            Log::write("输出skucode");
+            Log::write($sku_code);
             //查询条形码是否已绑定过sku
             $where = [];
             $where['code'] = ['in', array_unique($sku_code)];
@@ -2479,6 +2482,8 @@ class ScmWarehouse extends Scm
                 ->where($where)
                 ->where($where)
                 ->column('code');
+            Log::write("输出skucode002");
+            Log::write($code);
             if ($code) {
                 $this->error(__('条形码:' . implode(',', $code) . ' 已绑定,请移除'), [], 405);
                 exit;
