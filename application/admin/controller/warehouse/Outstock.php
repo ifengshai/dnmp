@@ -1279,6 +1279,7 @@ class Outstock extends Backend
         $limit = 100000;
 
         //逐行取出数据，不浪费内存
+        $data = $data ?: [];
         $count = count($data); //print_r($data);die;
         for ($i = 0; $i < $count; $i++) {
             $num++;
