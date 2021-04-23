@@ -16,6 +16,6 @@ jobMaster_env:
     - cd /www/wwwroot/mojing
     - sudo git pull origin master
   tags:
-    - mojing-runner
+    - mojing-srv-runner
   only:
     - master
