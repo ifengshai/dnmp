@@ -100,15 +100,15 @@
                                         <label class="control-label col-xs-4">订单平台</label>
                                         <div class="col-xs-8">
                                             <select  id="c-order_platform" data-rule="required" class="form-control" name="order_platform">
-                                                {foreach name="orderPlatformList" item="vo"}
+                                                {foreach name="platform" item="vo"}
                                                 <option value="{$key}">{$vo}</option>
                                                 {/foreach}
                                             </select>
-                                           
+
                                         </div>
-                                       
+
                                     </div>
-                                   
+
                                 </div>
 
                                 <b style="color: red;line-height: 30px;">注：由于币种问题，筛选项全部只包含Zeelool、Voogueme、Nihao数据汇总</b>
@@ -369,47 +369,47 @@
 <script>
     var Orderdata = {
         column: {:json_encode($xData)},
-    zeeloolSalesNumList: {:json_encode($ydata['zeelool']['orderCount'])},
-    vooguemeSalesNumList: {:json_encode($ydata['voogueme']['orderCount'])},
-    nihaoSalesNumList: {:json_encode($ydata['nihao']['orderCount'])},
-    meeloogSalesNumList: {:json_encode($ydata['meeloog']['orderCount'])},
-    zeelool_esSalesNumList: {:json_encode($ydata['zeelool_es']['orderCount'])},
-    zeelool_deSalesNumList: {:json_encode($ydata['zeelool_de']['orderCount'])},
-    zeelool_jpSalesNumList: {:json_encode($ydata['zeelool_jp']['orderCount'])},
-    zeeloolSalesMoneyList : {:json_encode($ydata['zeelool']['salesTotalMoney'])},
-    vooguemeSalesMoneyList : {:json_encode($ydata['voogueme']['salesTotalMoney'])},
-    nihaoSalesMoneyList :{:json_encode($ydata['nihao']['salesTotalMoney'])},
-    meeloogSalesMoneyList :{:json_encode($ydata['meeloog']['salesTotalMoney'])},
-    zeelool_esSalesMoneyList :{:json_encode($ydata['zeelool_es']['salesTotalMoney'])},
-    zeelool_deSalesMoneyList :{:json_encode($ydata['zeelool_de']['salesTotalMoney'])},
-    zeelool_jpSalesMoneyList :{:json_encode($ydata['zeelool_jp']['salesTotalMoney'])},
-    zeeloolUnitPriceList :{:json_encode($ydata['zeelool']['avgPrice'])},
-    vooguemeUnitPriceList :{:json_encode($ydata['voogueme']['avgPrice'])},
-    nihaoUnitPriceList :{:json_encode($ydata['nihao']['avgPrice'])},
-    meeloogUnitPriceList :{:json_encode($ydata['meeloog']['avgPrice'])},
-    zeelool_esUnitPriceList :{:json_encode($ydata['zeelool_es']['avgPrice'])},
-    zeelool_deUnitPriceList :{:json_encode($ydata['zeelool_de']['avgPrice'])},
-    zeelool_jpUnitPriceList :{:json_encode($ydata['zeelool_jp']['avgPrice'])},
-    zeeloolShoppingcartTotal :{:json_encode($ydata['zeelool']['cartNum'])},
-    vooguemeShoppingcartTotal :{:json_encode($ydata['voogueme']['cartNum'])},
-    nihaoShoppingcartTotal :{:json_encode($ydata['nihao']['cartNum'])},
-    meeloogShoppingcartTotal :{:json_encode($ydata['meeloog']['cartNum'])},
-    zeelool_esShoppingcartTotal :{:json_encode($ydata['zeelool_es']['cartNum'])},
-    zeelool_deShoppingcartTotal :{:json_encode($ydata['zeelool_de']['cartNum'])},
-    zeelool_jpShoppingcartTotal :{:json_encode($ydata['zeelool_jp']['cartNum'])},
-    zeeloolShoppingcartConversion :{:json_encode($ydata['zeelool']['cartNumRate'])},
-    vooguemeShoppingcartConversion :{:json_encode($ydata['voogueme']['cartNumRate'])},
-    nihaoShoppingcartConversion :{:json_encode($ydata['nihao']['cartNumRate'])},
-    meeloogShoppingcartConversion :{:json_encode($ydata['meeloog']['cartNumRate'])},
-    zeelool_esShoppingcartConversion :{:json_encode($ydata['zeelool_es']['cartNumRate'])},
-    zeelool_deShoppingcartConversion :{:json_encode($ydata['zeelool_de']['cartNumRate'])},
-    zeelool_jpShoppingcartConversion :{:json_encode($ydata['zeelool_jp']['cartNumRate'])},
-    zeeloolRegisterCustomer :{:json_encode($ydata['zeelool']['registerNum'])},
-    vooguemeRegisterCustomer :{:json_encode($ydata['voogueme']['registerNum'])},
-    nihaoRegisterCustomer :{:json_encode($ydata['nihao']['registerNum'])},
-    meeloogRegisterCustomer :{:json_encode($ydata['meeloog']['registerNum'])},
-    zeelool_esRegisterCustomer :{:json_encode($ydata['zeelool_es']['registerNum'])},
-    zeelool_deRegisterCustomer :{:json_encode($ydata['zeelool_de']['registerNum'])},
-    zeelool_jpRegisterCustomer :{:json_encode($ydata['zeelool_jp']['registerNum'])},
+    zeeloolSalesNumList: {:json_encode($yData['zeelool']['orderNum'])},
+    vooguemeSalesNumList: {:json_encode($yData['voogueme']['orderNum'])},
+    nihaoSalesNumList: {:json_encode($yData['nihao']['orderNum'])},
+    meeloogSalesNumList: {:json_encode($yData['meeloog']['orderNum'])},
+    zeelool_esSalesNumList: {:json_encode($yData['zeelool_es']['orderNum'])},
+    zeelool_deSalesNumList: {:json_encode($yData['zeelool_de']['orderNum'])},
+    zeelool_jpSalesNumList: {:json_encode($yData['zeelool_jp']['orderNum'])},
+    zeeloolSalesMoneyList : {:json_encode($yData['zeelool']['salesTotalMoney'])},
+    vooguemeSalesMoneyList : {:json_encode($yData['voogueme']['salesTotalMoney'])},
+    nihaoSalesMoneyList :{:json_encode($yData['nihao']['salesTotalMoney'])},
+    meeloogSalesMoneyList :{:json_encode($yData['meeloog']['salesTotalMoney'])},
+    zeelool_esSalesMoneyList :{:json_encode($yData['zeelool_es']['salesTotalMoney'])},
+    zeelool_deSalesMoneyList :{:json_encode($yData['zeelool_de']['salesTotalMoney'])},
+    zeelool_jpSalesMoneyList :{:json_encode($yData['zeelool_jp']['salesTotalMoney'])},
+    zeeloolUnitPriceList :{:json_encode($yData['zeelool']['avgPrice'])},
+    vooguemeUnitPriceList :{:json_encode($yData['voogueme']['avgPrice'])},
+    nihaoUnitPriceList :{:json_encode($yData['nihao']['avgPrice'])},
+    meeloogUnitPriceList :{:json_encode($yData['meeloog']['avgPrice'])},
+    zeelool_esUnitPriceList :{:json_encode($yData['zeelool_es']['avgPrice'])},
+    zeelool_deUnitPriceList :{:json_encode($yData['zeelool_de']['avgPrice'])},
+    zeelool_jpUnitPriceList :{:json_encode($yData['zeelool_jp']['avgPrice'])},
+    zeeloolShoppingcartTotal :{:json_encode($yData['zeelool']['cartNum'])},
+    vooguemeShoppingcartTotal :{:json_encode($yData['voogueme']['cartNum'])},
+    nihaoShoppingcartTotal :{:json_encode($yData['nihao']['cartNum'])},
+    meeloogShoppingcartTotal :{:json_encode($yData['meeloog']['cartNum'])},
+    zeelool_esShoppingcartTotal :{:json_encode($yData['zeelool_es']['cartNum'])},
+    zeelool_deShoppingcartTotal :{:json_encode($yData['zeelool_de']['cartNum'])},
+    zeelool_jpShoppingcartTotal :{:json_encode($yData['zeelool_jp']['cartNum'])},
+    zeeloolShoppingcartConversion :{:json_encode($yData['zeelool']['cartNumRate'])},
+    vooguemeShoppingcartConversion :{:json_encode($yData['voogueme']['cartNumRate'])},
+    nihaoShoppingcartConversion :{:json_encode($yData['nihao']['cartNumRate'])},
+    meeloogShoppingcartConversion :{:json_encode($yData['meeloog']['cartNumRate'])},
+    zeelool_esShoppingcartConversion :{:json_encode($yData['zeelool_es']['cartNumRate'])},
+    zeelool_deShoppingcartConversion :{:json_encode($yData['zeelool_de']['cartNumRate'])},
+    zeelool_jpShoppingcartConversion :{:json_encode($yData['zeelool_jp']['cartNumRate'])},
+    zeeloolRegisterCustomer :{:json_encode($yData['zeelool']['registerNum'])},
+    vooguemeRegisterCustomer :{:json_encode($yData['voogueme']['registerNum'])},
+    nihaoRegisterCustomer :{:json_encode($yData['nihao']['registerNum'])},
+    meeloogRegisterCustomer :{:json_encode($yData['meeloog']['registerNum'])},
+    zeelool_esRegisterCustomer :{:json_encode($yData['zeelool_es']['registerNum'])},
+    zeelool_deRegisterCustomer :{:json_encode($yData['zeelool_de']['registerNum'])},
+    zeelool_jpRegisterCustomer :{:json_encode($yData['zeelool_jp']['registerNum'])},
     };
 </script>

@@ -132,6 +132,11 @@ class Hour extends BaseElasticsearch
                                     'site' => $site,
                                 ],
                             ],
+                            [
+                                'terms' => [
+                                    'status' => $this->status,
+                                ],
+                            ],
                         ],
                     ],
                 ],

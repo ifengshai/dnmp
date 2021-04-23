@@ -112,6 +112,11 @@ class OrderDetail extends BaseElasticsearch
                                     'site' => $site,
                                 ],
                             ],
+                            [
+                                'terms' => [
+                                    'status' => $this->status,
+                                ],
+                            ],
                         ],
                     ],
                 ],

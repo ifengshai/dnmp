@@ -2,6 +2,7 @@
 
 namespace app\admin\model;
 
+use think\Collection;
 use think\Model;
 use think\Db;
 use think\Cache;
@@ -545,5 +546,22 @@ class OperationAnalysis extends Model
         $arr['lastyear_sales_money']                        = round($arr['lastyear_sales_money'],2);
         $arr['total_sales_money']                           = round($arr['total_sales_money'],2);
         return $arr;
+    }
+
+    /**
+     * 获取某个站点的销量统计
+     * @param $site
+     *
+     * @return array
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @author crasphb
+     * @date   2021/4/21 11:40
+     */
+    public function getSiteAnalysis($site)
+    {
+        return collection(self::where('id','>',0)->select())->toArray();
     }
 }

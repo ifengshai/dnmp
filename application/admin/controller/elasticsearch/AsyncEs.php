@@ -83,6 +83,12 @@ class AsyncEs extends BaseElasticsearch
 
     }
 
+    /**
+     * 同步购物车
+     * @throws \think\Exception
+     * @author crasphb
+     * @date   2021/4/21 10:24
+     */
     public function asyncCart()
     {
         $i = 0;
@@ -105,6 +111,42 @@ class AsyncEs extends BaseElasticsearch
                 $this->esService->addToEs('mojing_cart',$this->formatDate($insertData,$mergeData));
                 echo $i . PHP_EOL;
             },collection($carts)->toArray());
+        });
+    }
+
+    /**
+     * 同步用户数据
+     * @throws \think\Exception
+     * @author crasphb
+     * @date   2021/4/21 16:06
+     */
+    public function asyncCustomer()
+    {
+        $i = 0;
+        Db::connect('database.db_zeelool_de')->table('customer_entity')->chunk(10000,function($users) use (&$i){
+            $data = array_map(function($value) use (&$i) {
+                $value = array_map(function($v){
+                    return $v === null ? 0 : $v;
+                },$value);
+                $mergeData = strtotime($value['created_at']);
+                $insertData = [
+                    'id' => intval(10 . rand(1000000,9999999)),
+                    'site' => 10,
+                    'email' => $value['email'],
+                    'update_time_day' => date('Ymd',strtotime($value['updated_at'])),
+                    'update_time' => strtotime($value['updated_at']),
+                    'create_time' => $mergeData,
+                    'is_vip' => $value['is_vip'] ?? 0,
+                    'group_id' => $value['group_id'],
+                    'store_id' => $value['store_id'],
+                    'resouce' => $value['resouce'] ?? 0,
+
+                ];
+                $i++;
+                echo $i . PHP_EOL;
+                return $this->formatDate($insertData,$mergeData);
+            },collection($users)->toArray());
+            $this->esService->addMutilToEs('mojing_customer',$data);
         });
     }
     /**

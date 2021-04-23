@@ -14,7 +14,6 @@ use app\enum\Site;
 
 class EsFormatData
 {
-
     /**
      * 时段销量格式化
      *
@@ -434,6 +433,16 @@ class EsFormatData
         return compact( 'arr','sendEchart', 'delievedEchart');
     }
 
+    /**
+     * 订单数据 -- 订单数据概况格式化
+     * @param       $site
+     * @param       $data
+     * @param array $compareData
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/21 11:43
+     */
     public function formatPurchaseData($site, $data, $compareData = [])
     {
         //顶部指标
@@ -500,7 +509,7 @@ class EsFormatData
     }
 
     /**
-     * 数据概况 -- 底部数据格式化
+     * 仪表盘 -- 底部数据格式化
      * @param $data
      *
      * @return string
@@ -571,14 +580,27 @@ class EsFormatData
         return $str;
     }
 
-    public function formatDataMarketEcharts($data,$start,$end)
+    /**
+     * 仪表盘 -- 中间图标格式化
+     * @param $data
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/21 11:42
+     */
+    public function formatDataMarketEcharts($data)
     {
         $siteBuckets = $data['site']['buckets'];
+        $xData = [];
+        $yData = [];
         foreach($siteBuckets as $key => $val) {
+            $daySaleBuckets = $val['daySale']['buckets'];
             $site = '';
             switch ($val['key']) {
                 case Site::ZEELOOL:
                     $site = 'zeelool';
+                    $xData = array_combine(array_column($daySaleBuckets, 'key'), $daySaleBuckets);
+                    $xData = array_keys($xData);
                     break;
                 case Site::VOOGUEME:
                     $site = 'voogueme';
@@ -602,6 +624,315 @@ class EsFormatData
                     $site = 'voogmechic';
                     break;
             }
+            foreach($daySaleBuckets as $k => $v) {
+                $yData[$site]['salesTotalMoney'][] = $v['salesTotalMoney']['value'] ?: 0;
+                $yData[$site]['avgPrice'][] = $v['avgPrice']['value'] ?: 0;
+                $yData[$site]['registerNum'][] = $v['registerNum']['value'] ?: 0;
+                $yData[$site]['cartNum'][] = $v['cartNum']['value'] ?: 0;
+                $yData[$site]['orderNum'][] = $v['orderNum']['value'] ?: 0;
+                $yData[$site]['cartNumRate'][] = $v['orderNum']['value'] ? bcmul(bcdiv($v['cartNum']['value'],$v['orderNum']['value'],4),100) : 0;
+            }
+
         }
+        return compact('xData','yData');
+    }
+
+    public function formatDataMarketTop($site, $operationData, $order, $cart , $customer,$time,$status,$siteAll = false)
+    {
+        $cartDay = $this->formatDataMarketCartCustomer($cart,$time);
+        $customerDay = $this->formatDataMarketCartCustomer($customer,$time);
+        $orderDay = $this->formatDataMarketOrder($order,$status);
+        $operationDetail = [];
+        foreach($operationData as $key => $val) {
+            if(!$siteAll) {
+                if($val['order_platform'] == $site) {
+                    $yesterday_sales_money =   $val['yesterday_sales_money'];
+                    $pastsevenday_sales_money =   $val['pastsevenday_sales_money'];
+                    $pastthirtyday_sales_money =   $val['pastthirtyday_sales_money'];
+                    $thismonth_sales_money =   $val['thismonth_sales_money'];
+                    $lastmonth_sales_money =   $val['lastmonth_sales_money'];
+                    $thisyear_sales_money =   $val['thisyear_sales_money'];
+                    $lastyear_sales_money =   $val['lastyear_sales_money'];
+                    $total_sales_money =   $val['total_sales_money'];
+                    $yesterday_order_num =   $val['yesterday_order_num'];
+                    $pastsevenday_order_num =   $val['pastsevenday_order_num'];
+                    $pastthirtyday_order_num =   $val['pastthirtyday_order_num'];
+                    $thismonth_order_num =   $val['thismonth_order_num'];
+                    $lastmonth_order_num =   $val['lastmonth_order_num'];
+                    $thisyear_order_num =   $val['thisyear_order_num'];
+                    $lastyear_order_num =   $val['lastyear_order_num'];
+                    $total_order_num =   $val['total_order_num'];
+                    $yesterday_order_success =   $val['yesterday_order_success'];
+                    $pastsevenday_order_success =   $val['pastsevenday_order_success'];
+                    $pastthirtyday_order_success =   $val['pastthirtyday_order_success'];
+                    $thismonth_order_success =   $val['thismonth_order_success'];
+                    $lastmonth_order_success =   $val['lastmonth_order_success'];
+                    $thisyear_order_success =   $val['thisyear_order_success'];
+                    $lastyear_order_success =   $val['lastyear_order_success'];
+                    $total_order_success =   $val['total_order_success'];
+                    $yesterday_unit_price =   $val['yesterday_unit_price'];
+                    $pastsevenday_unit_price =   $val['pastsevenday_unit_price'];
+                    $pastthirtyday_unit_price =   $val['pastthirtyday_unit_price'];
+                    $thismonth_unit_price =   $val['thismonth_unit_price'];
+                    $lastmonth_unit_price =   $val['lastmonth_unit_price'];
+                    $thisyear_unit_price =   $val['thisyear_unit_price'];
+                    $lastyear_unit_price =   $val['lastyear_unit_price'];
+                    $total_unit_price =   $val['total_unit_price'];
+                    $yesterday_shoppingcart_total =   $val['yesterday_shoppingcart_total'];
+                    $pastsevenday_shoppingcart_total =   $val['pastsevenday_shoppingcart_total'];
+                    $pastthirtyday_shoppingcart_total =   $val['pastthirtyday_shoppingcart_total'];
+                    $thismonth_shoppingcart_total =   $val['thismonth_shoppingcart_total'];
+                    $lastmonth_shoppingcart_total =   $val['lastmonth_shoppingcart_total'];
+                    $thisyear_shoppingcart_total =   $val['thisyear_shoppingcart_total'];
+                    $lastyear_shoppingcart_total =   $val['lastyear_shoppingcart_total'];
+                    $total_shoppingcart_total =   $val['total_shoppingcart_total'];
+                    $yesterday_shoppingcart_conversion =   $val['yesterday_shoppingcart_conversion'];
+                    $pastsevenday_shoppingcart_conversion =   $val['pastsevenday_shoppingcart_conversion'];
+                    $pastthirtyday_shoppingcart_conversion =   $val['pastthirtyday_shoppingcart_conversion'];
+                    $thismonth_shoppingcart_conversion =   $val['thismonth_shoppingcart_conversion'];
+                    $lastmonth_shoppingcart_conversion =   $val['lastmonth_shoppingcart_conversion'];
+                    $thisyear_shoppingcart_conversion =   $val['thisyear_shoppingcart_conversion'];
+                    $lastyear_shoppingcart_conversion =   $val['lastyear_shoppingcart_conversion'];
+                    $total_shoppingcart_conversion =   $val['total_shoppingcart_conversion'];
+                    $yesterday_shoppingcart_new =   $val['yesterday_shoppingcart_new'];
+                    $pastsevenday_shoppingcart_new =   $val['pastsevenday_shoppingcart_new'];
+                    $pastthirtyday_shoppingcart_new =   $val['pastthirtyday_shoppingcart_new'];
+                    $thismonth_shoppingcart_new =   $val['thismonth_shoppingcart_new'];
+                    $lastmonth_shoppingcart_new =   $val['lastmonth_shoppingcart_new'];
+                    $thisyear_shoppingcart_new =   $val['thisyear_shoppingcart_new'];
+                    $lastyear_shoppingcart_new =   $val['lastyear_shoppingcart_new'];
+                    $total_shoppingcart_new =   $val['total_shoppingcart_new'];
+                    $yesterday_shoppingcart_newconversion =   $val['yesterday_shoppingcart_newconversion'];
+                    $pastsevenday_shoppingcart_newconversion =   $val['pastsevenday_shoppingcart_newconversion'];
+                    $pastthirtyday_shoppingcart_newconversion =   $val['pastthirtyday_shoppingcart_newconversion'];
+                    $thismonth_shoppingcart_newconversion =   $val['thismonth_shoppingcart_newconversion'];
+                    $lastmonth_shoppingcart_newconversion =   $val['lastmonth_shoppingcart_newconversion'];
+                    $thisyear_shoppingcart_newconversion =   $val['thisyear_shoppingcart_newconversion'];
+                    $lastyear_shoppingcart_newconversion =   $val['lastyear_shoppingcart_newconversion'];
+                    $total_shoppingcart_newconversion =   $val['total_shoppingcart_newconversion'];
+                    $yesterday_register_customer =   $val['yesterday_register_customer'];
+                    $pastsevenday_register_customer =   $val['pastsevenday_register_customer'];
+                    $pastthirtyday_register_customer =   $val['pastthirtyday_register_customer'];
+                    $thismonth_register_customer =   $val['thismonth_register_customer'];
+                    $lastmonth_register_customer =   $val['lastmonth_register_customer'];
+                    $thisyear_register_customer =   $val['thisyear_register_customer'];
+                    $lastyear_register_customer =   $val['lastyear_register_customer'];
+                    $total_register_customer =   $val['total_register_customer'];
+                    $yesterday_sign_customer =   $val['yesterday_sign_customer'];
+                    $pastsevenday_sign_customer =   $val['pastsevenday_sign_customer'];
+                    $pastthirtyday_sign_customer =   $val['pastthirtyday_sign_customer'];
+                    $thismonth_sign_customer =   $val['thismonth_sign_customer'];
+                    $lastmonth_sign_customer =   $val['lastmonth_sign_customer'];
+                    $thisyear_sign_customer =   $val['thisyear_sign_customer'];
+                    $lastyear_sign_customer =   $val['lastyear_sign_customer'];
+                    $total_sign_customer =   $val['total_sign_customer'];
+                    break;
+                }
+            }else{
+                if($val['order_platform'] <= 4) {
+                    $yesterday_sales_money +=  $val['yesterday_sales_money'];
+                    $pastsevenday_sales_money +=  $val['pastsevenday_sales_money'];
+                    $pastthirtyday_sales_money +=  $val['pastthirtyday_sales_money'];
+                    $thismonth_sales_money +=  $val['thismonth_sales_money'];
+                    $lastmonth_sales_money +=  $val['lastmonth_sales_money'];
+                    $thisyear_sales_money +=  $val['thisyear_sales_money'];
+                    $lastyear_sales_money +=  $val['lastyear_sales_money'];
+                    $total_sales_money +=  $val['total_sales_money'];
+                    $yesterday_order_num +=  $val['yesterday_order_num'];
+                    $pastsevenday_order_num +=  $val['pastsevenday_order_num'];
+                    $pastthirtyday_order_num +=  $val['pastthirtyday_order_num'];
+                    $thismonth_order_num +=  $val['thismonth_order_num'];
+                    $lastmonth_order_num +=  $val['lastmonth_order_num'];
+                    $thisyear_order_num +=  $val['thisyear_order_num'];
+                    $lastyear_order_num +=  $val['lastyear_order_num'];
+                    $total_order_num +=  $val['total_order_num'];
+                    $yesterday_order_success +=  $val['yesterday_order_success'];
+                    $pastsevenday_order_success +=  $val['pastsevenday_order_success'];
+                    $pastthirtyday_order_success +=  $val['pastthirtyday_order_success'];
+                    $thismonth_order_success +=  $val['thismonth_order_success'];
+                    $lastmonth_order_success +=  $val['lastmonth_order_success'];
+                    $thisyear_order_success +=  $val['thisyear_order_success'];
+                    $lastyear_order_success +=  $val['lastyear_order_success'];
+                    $total_order_success +=  $val['total_order_success'];
+
+                    $yesterday_shoppingcart_total +=  $val['yesterday_shoppingcart_total'];
+                    $pastsevenday_shoppingcart_total +=  $val['pastsevenday_shoppingcart_total'];
+                    $pastthirtyday_shoppingcart_total +=  $val['pastthirtyday_shoppingcart_total'];
+                    $thismonth_shoppingcart_total +=  $val['thismonth_shoppingcart_total'];
+                    $lastmonth_shoppingcart_total +=  $val['lastmonth_shoppingcart_total'];
+                    $thisyear_shoppingcart_total +=  $val['thisyear_shoppingcart_total'];
+                    $lastyear_shoppingcart_total +=  $val['lastyear_shoppingcart_total'];
+                    $total_shoppingcart_total +=  $val['total_shoppingcart_total'];
+
+                    $yesterday_shoppingcart_new +=  $val['yesterday_shoppingcart_new'];
+                    $pastsevenday_shoppingcart_new +=  $val['pastsevenday_shoppingcart_new'];
+                    $pastthirtyday_shoppingcart_new +=  $val['pastthirtyday_shoppingcart_new'];
+                    $thismonth_shoppingcart_new +=  $val['thismonth_shoppingcart_new'];
+                    $lastmonth_shoppingcart_new +=  $val['lastmonth_shoppingcart_new'];
+                    $thisyear_shoppingcart_new +=  $val['thisyear_shoppingcart_new'];
+                    $lastyear_shoppingcart_new +=  $val['lastyear_shoppingcart_new'];
+                    $total_shoppingcart_new +=  $val['total_shoppingcart_new'];
+
+                    $yesterday_register_customer +=  $val['yesterday_register_customer'];
+                    $pastsevenday_register_customer +=  $val['pastsevenday_register_customer'];
+                    $pastthirtyday_register_customer +=  $val['pastthirtyday_register_customer'];
+                    $thismonth_register_customer +=  $val['thismonth_register_customer'];
+                    $lastmonth_register_customer +=  $val['lastmonth_register_customer'];
+                    $thisyear_register_customer +=  $val['thisyear_register_customer'];
+                    $lastyear_register_customer +=  $val['lastyear_register_customer'];
+                    $total_register_customer +=  $val['total_register_customer'];
+                    $yesterday_sign_customer +=  $val['yesterday_sign_customer'];
+                    $pastsevenday_sign_customer +=  $val['pastsevenday_sign_customer'];
+                    $pastthirtyday_sign_customer +=  $val['pastthirtyday_sign_customer'];
+                    $thismonth_sign_customer +=  $val['thismonth_sign_customer'];
+                    $lastmonth_sign_customer +=  $val['lastmonth_sign_customer'];
+                    $thisyear_sign_customer +=  $val['thisyear_sign_customer'];
+                    $lastyear_sign_customer +=  $val['lastyear_sign_customer'];
+                    $total_sign_customer +=  $val['total_sign_customer'];
+                }
+            }
+        }
+        if($siteAll) {
+            $yesterday_unit_price =   $yesterday_order_success ? bcdiv($yesterday_sales_money,$yesterday_order_success,2) : 0;
+            $pastsevenday_unit_price =   $pastsevenday_order_success ? bcdiv($pastsevenday_sales_money,$pastsevenday_order_success,2) : 0;
+            $pastthirtyday_unit_price =   $pastthirtyday_order_success ? bcdiv($pastthirtyday_sales_money,$pastthirtyday_order_success,2) : 0;
+            $lastmonth_unit_price =   $lastmonth_order_success ? bcdiv($lastmonth_sales_money,$lastmonth_order_success,2) : 0;
+            $lastyear_unit_price =   $lastyear_order_success ? bcdiv($lastyear_sales_money,$lastyear_order_success,2) : 0;
+
+            $yesterday_shoppingcart_conversion =   $yesterday_shoppingcart_total ? bcmul(bcdiv($yesterday_order_success,$yesterday_shoppingcart_total,4),100,2) : 0;
+            $pastsevenday_shoppingcart_conversion =   $pastsevenday_shoppingcart_total ? bcmul(bcdiv($pastsevenday_order_success,$pastsevenday_shoppingcart_total,4),100,2) : 0;
+            $pastthirtyday_shoppingcart_conversion =   $pastthirtyday_shoppingcart_total ? bcmul(bcdiv($pastthirtyday_order_success,$pastthirtyday_shoppingcart_total,4),100,2) : 0;
+            $lastmonth_shoppingcart_conversion =   $lastmonth_shoppingcart_total ? bcmul(bcdiv($lastmonth_order_success,$lastmonth_shoppingcart_total,4),100,2) : 0;
+            $lastyear_shoppingcart_conversion =   $lastyear_shoppingcart_total ? bcmul(bcdiv($lastyear_order_success,$lastyear_shoppingcart_total,4),100,2) : 0;
+                    
+            $yesterday_shoppingcart_newconversion =   $yesterday_shoppingcart_new ? bcmul(bcdiv($yesterday_order_success,$yesterday_shoppingcart_new,4),100,2) : 0;
+            $pastsevenday_shoppingcart_newconversion =   $pastsevenday_shoppingcart_new ? bcmul(bcdiv($pastsevenday_order_success,$pastsevenday_shoppingcart_new,4),100,2) : 0;
+            $pastthirtyday_shoppingcart_newconversion =   $pastthirtyday_shoppingcart_new ? bcmul(bcdiv($pastthirtyday_order_success,$pastthirtyday_shoppingcart_new,4),100,2) : 0;
+            $lastmonth_shoppingcart_newconversion =   $lastmonth_shoppingcart_new ? bcmul(bcdiv($lastmonth_order_success,$lastmonth_shoppingcart_new,4),100,2) : 0;
+            $lastyear_shoppingcart_newconversion =   $lastyear_shoppingcart_new ? bcmul(bcdiv($lastyear_order_success,$lastyear_shoppingcart_new,4),100,2) : 0;
+        }
+        $operationDetail = compact('yesterday_sales_money','pastsevenday_sales_money','pastthirtyday_sales_money','thismonth_sales_money','lastmonth_sales_money','thisyear_sales_money','lastyear_sales_money','total_sales_money','yesterday_order_num','pastsevenday_order_num','pastthirtyday_order_num','thismonth_order_num','lastmonth_order_num','thisyear_order_num','lastyear_order_num','total_order_num','yesterday_order_success','pastsevenday_order_success','pastthirtyday_order_success','thismonth_order_success','lastmonth_order_success','thisyear_order_success','lastyear_order_success','total_order_success','yesterday_unit_price','pastsevenday_unit_price','pastthirtyday_unit_price','thismonth_unit_price','lastmonth_unit_price','thisyear_unit_price','lastyear_unit_price','total_unit_price','yesterday_shoppingcart_total','pastsevenday_shoppingcart_total','pastthirtyday_shoppingcart_total','thismonth_shoppingcart_total','lastmonth_shoppingcart_total','thisyear_shoppingcart_total','lastyear_shoppingcart_total','total_shoppingcart_total','yesterday_shoppingcart_conversion','pastsevenday_shoppingcart_conversion','pastthirtyday_shoppingcart_conversion','thismonth_shoppingcart_conversion','lastmonth_shoppingcart_conversion','thisyear_shoppingcart_conversion','lastyear_shoppingcart_conversion','total_shoppingcart_conversion','yesterday_shoppingcart_new','pastsevenday_shoppingcart_new','pastthirtyday_shoppingcart_new','thismonth_shoppingcart_new','lastmonth_shoppingcart_new','thisyear_shoppingcart_new','lastyear_shoppingcart_new','total_shoppingcart_new','yesterday_shoppingcart_newconversion','pastsevenday_shoppingcart_newconversion','pastthirtyday_shoppingcart_newconversion','thismonth_shoppingcart_newconversion','lastmonth_shoppingcart_newconversion','thisyear_shoppingcart_newconversion','lastyear_shoppingcart_newconversion','total_shoppingcart_newconversion','yesterday_register_customer','pastsevenday_register_customer','pastthirtyday_register_customer','thismonth_register_customer','lastmonth_register_customer','thisyear_register_customer','lastyear_register_customer','total_register_customer','yesterday_sign_customer','pastsevenday_sign_customer','pastthirtyday_sign_customer','thismonth_sign_customer','lastmonth_sign_customer','thisyear_sign_customer','lastyear_sign_customer','total_sign_customer');
+        //当月加上今天
+        $operationDetail['thismonth_sales_money'] = bcadd($operationDetail['thismonth_sales_money'],$orderDay['allDaySalesAmount'],2);
+        $operationDetail['thismonth_order_num'] = bcadd($operationDetail['thismonth_order_num'],$orderDay['allCount'],2);
+        $operationDetail['thismonth_order_success'] = bcadd($operationDetail['thismonth_order_success'],$orderDay['successCount']);
+        $operationDetail['thismonth_unit_price'] = $operationDetail['thismonth_order_success'] ? bcdiv($operationDetail['thismonth_sales_money'],$operationDetail['thismonth_order_success'],2) : 0;
+
+        $operationDetail['thismonth_shoppingcart_total'] = bcadd($operationDetail['thismonth_shoppingcart_total'],$cartDay['dayUpdate']);
+        $operationDetail['thismonth_shoppingcart_conversion'] = $operationDetail['thismonth_shoppingcart_total'] ? bcmul(bcdiv($operationDetail['thismonth_order_success'],$operationDetail['thismonth_shoppingcart_total'],4),100,2) : 0;
+
+        $operationDetail['thismonth_shoppingcart_new'] = bcadd($operationDetail['thismonth_shoppingcart_new'],$cartDay['dayCreate']);
+        $operationDetail['thismonth_shoppingcart_newconversion'] = $operationDetail['thismonth_shoppingcart_new'] ? bcmul(bcdiv($operationDetail['thismonth_order_success'],$operationDetail['thismonth_shoppingcart_new'],4),100,2) : 0;
+
+        $operationDetail['thismonth_register_customer'] = bcadd($operationDetail['thismonth_register_customer'],$customerDay['dayUpdate']);
+        $operationDetail['thismonth_sign_customer'] = bcadd($operationDetail['thismonth_sign_customer'],$customerDay['dayCreate']);
+
+        //今年加上今天
+        $operationDetail['thisyear_sales_money'] = bcadd($operationDetail['thisyear_sales_money'],$orderDay['allDaySalesAmount'],2);
+        $operationDetail['thisyear_order_num'] = bcadd($operationDetail['thisyear_order_num'],$orderDay['allCount']);
+        $operationDetail['thisyear_order_success'] = bcadd($operationDetail['thisyear_order_success'],$orderDay['successCount']);
+        $operationDetail['thisyear_unit_price'] = $operationDetail['thisyear_order_success'] ? bcdiv($operationDetail['thisyear_sales_money'],$operationDetail['thisyear_order_success'],2) : 0;
+
+        $operationDetail['thisyear_shoppingcart_total'] = bcadd($operationDetail['thisyear_shoppingcart_total'],$cartDay['dayUpdate']);
+        $operationDetail['thisyear_shoppingcart_conversion'] = $operationDetail['thisyear_shoppingcart_total'] ? bcmul(bcdiv($operationDetail['thisyear_order_success'],$operationDetail['thisyear_shoppingcart_total'],4),100,2) : 0;
+
+        $operationDetail['thisyear_shoppingcart_new'] = bcadd($operationDetail['thisyear_shoppingcart_new'],$cartDay['dayCreate']);
+        $operationDetail['thisyear_shoppingcart_newconversion'] = $operationDetail['thisyear_shoppingcart_new'] ? bcmul(bcdiv($operationDetail['thisyear_order_success'],$operationDetail['thisyear_shoppingcart_new'],4),100,2) : 0;
+
+        $operationDetail['thisyear_register_customer'] = bcadd($operationDetail['thisyear_register_customer'],$customerDay['dayUpdate']);
+        $operationDetail['thisyear_sign_customer'] = bcadd($operationDetail['thisyear_sign_customer'],$customerDay['dayCreate']);
+
+
+        //总计加上今天
+        $operationDetail['total_sales_money'] = bcadd($operationDetail['total_sales_money'],$orderDay['allDaySalesAmount'],2);
+        $operationDetail['total_order_num'] = bcadd($operationDetail['total_order_num'],$orderDay['allCount']);
+        $operationDetail['total_order_success'] = bcadd($operationDetail['total_order_success'],$orderDay['successCount']);
+        $operationDetail['total_unit_price'] = $operationDetail['total_order_success'] ? bcdiv($operationDetail['total_sales_money'],$operationDetail['total_order_success'],2) : 0;
+
+        $operationDetail['total_shoppingcart_total'] = bcadd($operationDetail['total_shoppingcart_total'],$cartDay['dayUpdate']);
+        $operationDetail['total_shoppingcart_conversion'] = $operationDetail['total_shoppingcart_total'] ? bcmul(bcdiv($operationDetail['total_order_success'],$operationDetail['total_shoppingcart_total'],4),100,2) : 0;
+
+        $operationDetail['total_shoppingcart_new'] = bcadd($operationDetail['total_shoppingcart_new'],$cartDay['dayCreate']);
+        $operationDetail['total_shoppingcart_newconversion'] = $operationDetail['total_shoppingcart_new'] ? bcmul(bcdiv($operationDetail['total_order_success'],$operationDetail['total_shoppingcart_new'],4),100,2) : 0;
+
+        $operationDetail['total_register_customer'] = bcadd($operationDetail['total_register_customer'],$customerDay['dayUpdate']);
+        $operationDetail['total_sign_customer'] = bcadd($operationDetail['total_sign_customer'],$customerDay['dayCreate']);
+
+        //今天的
+        $operationDetail['today_sales_money'] = round($orderDay['allDaySalesAmount'],2) ?: 0;
+        $operationDetail['today_order_num'] = $orderDay['allCount'] ?: 0;
+        $operationDetail['today_order_success'] = $orderDay['successCount'] ?: 0;
+        $operationDetail['today_unit_price'] = round($orderDay['allAvgPrice'],2);
+
+        $operationDetail['today_shoppingcart_total'] = $cartDay['dayUpdate'] ?: 0;
+        $operationDetail['today_shoppingcart_conversion'] = $operationDetail['today_shoppingcart_today'] ? bcmul(bcdiv($operationDetail['today_order_success'],$operationDetail['today_shoppingcart_today'],4),100,2) : 0;
+
+        $operationDetail['today_shoppingcart_new'] = $cartDay['dayCreate'] ?: 0;
+        $operationDetail['today_shoppingcart_newconversion'] = $operationDetail['today_shoppingcart_new'] ? bcmul(bcdiv($operationDetail['today_order_success'],$operationDetail['today_shoppingcart_new'],4),100,2) : 0;
+
+        $operationDetail['today_register_customer'] = $customerDay['dayUpdate'] ?: 0;
+        $operationDetail['today_sign_customer'] = bcadd($operationDetail['today_sign_customer'],$customerDay['dayCreate'],2);              
+
+        return $operationDetail;
+       
+    }
+
+    /**
+     * 格式化日跟新，新增数据
+     * @param $data
+     * @param $time
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/22 10:38
+     */
+    public function formatDataMarketCartCustomer($data,$time)
+    {
+        $dayUpdateAll = $data['dayUpdate']['buckets'];
+        $dayCreateAll = $data['dayCreate']['buckets'];
+        $dayUpdate = '';
+        $dayCreate = '';
+        foreach($dayUpdateAll as $key => $val)
+        {
+            if($time == $val['key']) {
+                $dayUpdate = $val['doc_count'];
+                break;
+            }
+        }
+        foreach($dayCreateAll as $key => $val)
+        {
+            if($time == $val['key']) {
+                $dayCreate = $val['doc_count'];
+                break;
+            }
+        }
+        return compact('dayUpdate','dayCreate');
+    }
+
+    /**
+     * 获取近日的订单数据
+     * @param $data
+     * @param $status
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/22 10:44
+     */
+    public function formatDataMarketOrder($data,$status)
+    {
+        $orderAll = $data['status']['buckets'];
+        $allCount = 0;
+        $successCount = 0;
+        $allDaySalesAmount = 0;
+        foreach($orderAll as $key => $val) {
+            $count = $val['doc_count'];
+            $allCount += $count;
+            if(in_array($val['key'],$status)) {
+                $successCount += $count;
+                $allDaySalesAmount += $val['allDaySalesAmount']['value'];
+            }
+        }
+        $allAvgPrice = $successCount ? bcdiv($allDaySalesAmount,$successCount,2) : 0;
+        return compact('allCount','successCount','allDaySalesAmount','allAvgPrice');
     }
 }

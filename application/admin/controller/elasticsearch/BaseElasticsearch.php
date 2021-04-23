@@ -8,6 +8,7 @@
 namespace app\admin\controller\elasticsearch;
 
 use app\common\controller\Backend;
+use app\enum\Site;
 use app\service\elasticsearch\EsFormatData;
 use app\service\elasticsearch\EsService;
 use Elasticsearch\ClientBuilder;
@@ -21,6 +22,24 @@ class BaseElasticsearch extends Backend
     public $esFormatData = null;
     protected $esClient;
     protected $noNeedLogin = ['*'];
+    public $site = [
+        Site::ZEELOOL,
+        Site::VOOGUEME,
+        Site::NIHAO,
+        Site::ZEELOOL_DE,
+        Site::ZEELOOL_JP,
+        Site::ZEELOOL_ES,
+        Site::VOOGUEME_ACC,
+    ];
+    public $status = [
+        'free_processing',
+        'processing',
+        'complete',
+        'paypal_reversed',
+        'payment_review',
+        'paypal_canceled_reversal',
+        'delivered',
+    ];
 
     public function __construct(Request $request = null)
     {
@@ -332,6 +351,50 @@ class BaseElasticsearch extends Backend
         ];
 
         $this->esService->createIndex('mojing_cart', $selfProperties);
+    }
+
+    /**
+     * 创建网站用户的索引
+     * @author crasphb
+     * @date   2021/4/21 10:22
+     */
+    public function createCustomerIndex()
+    {
+        $selfProperties = [
+            'id'              => [
+                'type' => 'integer',
+            ],
+            'site'            => [
+                'type' => 'integer',
+            ],
+            'email'          => [
+                'type' => 'keyword',
+            ],
+            'group_id'          => [
+                'type' => 'integer',
+            ],
+            'resouce'          => [
+                'type' => 'integer',
+            ],
+            'is_vip'          => [
+                'type' => 'integer',
+            ],
+            'store_id'          => [
+                'type' => 'integer',
+            ],
+            'create_time'     => [
+                'type' => 'date',
+            ],
+            'update_time'     => [
+                'type' => 'date',
+            ],
+            'update_time_day' => [
+                'type' => 'date',
+            ],
+
+        ];
+
+        $this->esService->createIndex('mojing_customer', $selfProperties);
     }
 
     /**

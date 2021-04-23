@@ -14,6 +14,7 @@ use app\admin\model\platformmanage\MagentoPlatform;
 
 class DashBoard extends BaseElasticsearch
 {
+
     public function index()
     {
         $magentoplatformarr = new MagentoPlatform();

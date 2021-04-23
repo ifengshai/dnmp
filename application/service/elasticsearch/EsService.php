@@ -140,7 +140,12 @@ class EsService
 
             $params['body'][] = $val;
         }
-        return $this->esClient->bulk($params);
+        try {
+            return $this->esClient->bulk($params);
+        }catch (\Exception $e){
+            echo $e->getMessage();
+        }
+
     }
 
 
