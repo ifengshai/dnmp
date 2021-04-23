@@ -148,8 +148,22 @@ class EsService
 
     }
 
-
-
+    /**
+     * 更新数据
+     * @author mjj
+     * @date   2021/4/22 15:35:50
+     */
+    public function updateEs($indexName,$view){
+        $params = [
+            'index' => $indexName,
+            'type'  => '_doc',
+            'id'    => $view['id'],
+            'body'  => [
+                'doc'=>$view
+            ],
+        ];
+        return $this->esClient->update($params);
+    }
     /**
      * es查询
      *

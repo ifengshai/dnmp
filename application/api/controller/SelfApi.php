@@ -11,6 +11,7 @@ use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use app\admin\model\StockLog;
 use app\admin\model\finance\FinanceCost;
+use app\admin\controller\elasticsearch\AsyncEs;
 
 /**
  * 系统接口
@@ -23,9 +24,10 @@ class SelfApi extends Api
 
     public function _initialize()
     {
+        $this->node = new OrderNode();
+        $this->asyncEs = new AsyncEs();
         parent::_initialize();
     }
-
     /**
      * 创建订单节点 订单号 站点 时间
      * @Description
@@ -59,7 +61,7 @@ class SelfApi extends Api
             'node_type' => ['>=', 0]
         ])->count();
         if ($order_count <= 0) {
-            $res_node = (new OrderNode())->allowField(true)->save([
+            $res_node = $this->node->allowField(true)->save([
                 'order_number' => $order_number,
                 'order_id' => $order_id,
                 'site' => $site,
@@ -68,6 +70,26 @@ class SelfApi extends Api
                 'node_type' => 0,
                 'update_time' => date('Y-m-d H:i:s'),
             ]);
+            $insertId = $this->node->getLastInsID();
+            $arr = [
+                'id'=>$insertId,
+                'order_node' => 0,
+                'node_type' => 0,
+                'site' => $site,
+                'order_id' => $order_id,
+                'order_number' => $order_number,
+                'shipment_type' => '',
+                'shipment_data_type' => '',
+                'track_number' => '',
+                'signing_time' => 0,
+                'delivery_time' => 0,
+                'delivery_error_flag' => 0,
+                'shipment_last_msg' => "",
+                'delievered_days' => 0,
+                'wait_time' => 0,
+            ];
+            $data[] = $this->asyncEs->formatDate($arr,time());
+            $this->asyncEs->esService->addMutilToEs('mojing_track',$data);
         }
 
         $count = (new OrderNodeDetail())->where([
@@ -135,11 +157,21 @@ class SelfApi extends Api
                 'node_type' => ['>=', 1]
             ])->count();
             if ($order_count < 0) {
-                $res_node = (new OrderNode())->save([
+                $res_node = $this->node->save([
                     'order_node' => 0,
                     'node_type' => 1,
                     'update_time' => date('Y-m-d H:i:s'),
                 ], ['order_id' => $order_id, 'site' => $site]);
+                //获取主表id
+                $id = $this->node
+                    ->where(['order_id' => $order_id, 'site' => $site])
+                    ->value('id');
+                //更新order_node表中es数据
+                $arr = [
+                    'id' => $id,
+                    'node_type' => 1,
+                ];
+                $this->asyncEs->updateEsById('mojing_track',$arr);
             }
 
             $count = (new OrderNodeDetail())->where([
@@ -234,6 +266,17 @@ class SelfApi extends Api
             'track_number' => $track_number,
             'delivery_time' => date('Y-m-d H:i:s')
         ]);
+        //更新order_node表中es数据
+        $arr = [
+            'id' => $row['id'],
+            'order_node' => 2,
+            'node_type' => 7,
+            'shipment_type' => $title,
+            'shipment_data_type' => $shipment_data_type,
+            'track_number' => $track_number,
+            'delivery_time' => time()
+        ];
+        $this->asyncEs->updateEsById('mojing_track',$arr);
 
         //插入节点子表
         (new OrderNodeDetail())->allowField(true)->save([

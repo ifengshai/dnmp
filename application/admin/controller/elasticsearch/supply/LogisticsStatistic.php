@@ -14,31 +14,25 @@ class LogisticsStatistic extends BaseElasticsearch
 {
     public function index()
     {
-        if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            $site = $params['platform'] ?: 10;
-            if ($params['time']) {
-                $timeOne = explode(' ', $params['time']);
-                $start = strtotime($timeOne[0] . ' ' . $timeOne[1]);
-                $end = strtotime($timeOne[3] . ' ' . $timeOne[4]);
-                $trackInfo = $this->getTrack($site,$start.' '.$end);
-            } else{
-                $trackInfo = $this->getTrack($site);
-            }
-            $this->success('', '', $trackInfo['arr']);
-        }
         $orderPlatformList = config('logistics.platform');
-        $trackInfo = $this->getTrack(10);
-        $result = $trackInfo['arr'];
-        $this->view->assign(compact('orderPlatformList','result'));
-
+        $this->view->assign(compact('orderPlatformList'));
         return $this->view->fetch('logistics/logistics_statistic/index');
     }
-    public function send_num_echart()
+    /**
+     * 获取数据
+     *
+     * @param        $site
+     * @param string $time
+     *
+     * @author crasphb
+     * @date   2021/4/14 13:56
+     */
+    public function ajaxGetLogistics()
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $site = $params['platform'] ?: 10;
+            $type = $params['type'];
             if ($params['time']) {
                 $timeOne = explode(' ', $params['time']);
                 $start = strtotime($timeOne[0] . ' ' . $timeOne[1]);
@@ -47,28 +41,18 @@ class LogisticsStatistic extends BaseElasticsearch
             } else{
                 $trackInfo = $this->getTrack($site);
             }
-            //发货数
-            $json = $trackInfo['sendEchart'];
-            return json(['code' => 1, 'data' => $json]);
-        }
-    }
-    public function delieved_num_echart()
-    {
-        if ($this->request->isAjax()) {
-            $params = $this->request->param();
-            $site = $params['platform'] ?: 10;
-            if ($params['time']) {
-                $timeOne = explode(' ', $params['time']);
-                $start = strtotime($timeOne[0] . ' ' . $timeOne[1]);
-                $end = strtotime($timeOne[3] . ' ' . $timeOne[4]);
-                $trackInfo = $this->getTrack($site,$start.' '.$end);
-            } else{
-                $trackInfo = $this->getTrack($site);
+            switch ($type) {
+                case 1:
+                    $json = $trackInfo['sendEchart'];
+                    return json(['code' => 1, 'data' => $json]);
+                case 2:
+                    $json = $trackInfo['delievedEchart'];
+                    return json(['code' => 1, 'data' => $json]);
+                default:
+                    $this->success('', '', $trackInfo['arr']);
             }
-            //妥投订单数
-            $json = $trackInfo['delievedEchart'];
-            return json(['code' => 1, 'data' => $json]);
         }
+
     }
 
     /**
@@ -86,13 +70,9 @@ class LogisticsStatistic extends BaseElasticsearch
             $timeRange = explode(' ', $time);
         } else {
             $timeRange = [
-                1577894400,
-                1586966399
-            ];
-            /*$timeRange = [
                 strtotime('-200 days'),
                 time()
-            ];*/
+            ];
         }
         $siteAll = $site == 10;
         //判断是否为全部站点
@@ -138,17 +118,15 @@ class LogisticsStatistic extends BaseElasticsearch
                         ],
                     ],
                 ],
-                "sort" => [
-                    "shipment_data_type"  =>[
-                        "order"=>"asc"
-                    ]
-                ],
             ],
         ];
         $aggs = [
             "track_channel" => [
                 "terms" => [
-                    "field"=>'shipment_data_type'
+                    "field"=>'shipment_data_type',
+                    "order" => [
+                        "_key"=> 'asc'
+                    ],
                 ],
             ],
         ];
@@ -180,6 +158,11 @@ class LogisticsStatistic extends BaseElasticsearch
                             ],
                             [
                                 'term' => [
+                                    'delivery_error_flag' => 0,
+                                ],
+                            ],
+                            [
+                                'term' => [
                                     'node_type' => 40,
                                 ],
                             ],
@@ -191,17 +174,15 @@ class LogisticsStatistic extends BaseElasticsearch
                         ],
                     ],
                 ],
-                "sort" => [
-                    "shipment_data_type"  =>[
-                        "order"=>"asc"
-                    ]
-                ],
             ],
         ];
         $aggs = [
             "track_channel" => [
                 "terms" => [
-                    "field"=>'shipment_data_type'
+                    "field"=>'shipment_data_type',
+                    "order" => [
+                        "_key"=> 'asc'
+                    ],
                 ],
                 "aggs" => [
                     'delieveredDays' => [
@@ -227,7 +208,7 @@ class LogisticsStatistic extends BaseElasticsearch
         $params['body']['aggs'] = $aggs;
         if ($siteAll) {
             //删除site查询
-            unset($params['body']['query']['bool']['must'][2]);
+            unset($params['body']['query']['bool']['must'][3]);
         }
         return $this->esService->search($params);
     }

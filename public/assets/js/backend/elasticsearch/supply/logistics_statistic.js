@@ -6,6 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
             Controller.api.formatter.daterangepicker($("div[role=form8]"));
 
+            getTableData();
             Controller.api.formatter.send_num_echart();   //发货数量占比饼图
             Controller.api.formatter.delieved_num_echart();   //妥投比率占比饼图
             //点击提交
@@ -91,10 +92,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     };
                     var options1 = {
                         type: 'post',
-                        url: 'elasticsearch/supply/logistics_statistic/send_num_echart',
+                        url: 'elasticsearch/supply/logistics_statistic/ajaxGetLogistics',
                         data: {
                             'time': $('#workload_time').val(),
                             'platform': $('#order_platform_workload').val(),
+                            'type' : 1
                         }
                     }               
                     EchartObj.api.ajax(options1, chartOptions1);
@@ -115,10 +117,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                     };
                     var options3 = {
                         type: 'post',
-                        url: 'elasticsearch/supply/logistics_statistic/delieved_num_echart',
+                        url: 'elasticsearch/supply/logistics_statistic/ajaxGetLogistics',
                         data: {
                             'time': $('#workload_time').val(),
                             'platform': $('#order_platform_workload').val(),
+                            'type' : 2
                         }
                     }                 
                     
@@ -137,7 +140,7 @@ function getTableData(){
     var create_time = $('#workload_time').val();
     var platform    = $('#order_platform_workload').val();
     Backend.api.ajax({
-        url:'elasticsearch/supply/logistics_statistic/index',
+        url:'elasticsearch/supply/logistics_statistic/ajaxGetLogistics',
         data:{time:create_time,platform:platform}
     }, function(data, ret){
         $("#workload-info tr").remove();
