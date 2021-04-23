@@ -199,10 +199,10 @@ class OcPrescriptionPic extends Backend
                 $WhereSql .= ' and status='.$filter['status'];
             }
             if ($filter['created_at']){
-                $created_at = explode(' - ',$filter['created_at']);
-                $created_at[0] = date("Y-m-d H:i:s",strtotime($created_at[0])-28800);
-                $created_at[1] = date("Y-m-d H:i:s",strtotime($created_at[1])-28800);
-                $WhereSql .= " and created_at between '$created_at[0]' and '$created_at[1]' ";
+                $createdAt = explode(' - ',$filter['created_at']);
+                $createdAt[0] = date("Y-m-d H:i:s",strtotime($createdAt[0])-28800);
+                $createdAt[1] = date("Y-m-d H:i:s",strtotime($createdAt[1])-28800);
+                $WhereSql .= " and created_at between '$createdAt[0]' and '$createdAt[1]' ";
             }
             if ($filter['completion_time']){
                 $completion_time = explode(' - ',$filter['completion_time']);
