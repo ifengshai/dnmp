@@ -42,10 +42,6 @@ class TrackCost extends Backend
             $map['increment_id'] = ['<>',''];
             $model = Db::connect('database.db_delivery');
             $model->table('ld_delivery_order_finance')->query("set time_zone='+8:00'");
-            unset($filter['increment_id']);
-            unset($filter['platform_shop_name']);
-            unset($filter['created_at']);
-            unset($filter['one_time-operate']);
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $model->table('ld_delivery_order_finance')
