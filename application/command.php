@@ -21,4 +21,5 @@ return [
     'app\admin\controller\shell\operate\Repurchase',
     'app\admin\controller\shell\operate\RepurchaseAsynData',
     'app\admin\controller\shell\operate\DataMarketAsynData',
+    'app\admin\controller\shell\service\EmailAsynData',
 ];
