@@ -2,8 +2,9 @@
 
 use think\migration\Migrator;
 use think\migration\db\Column;
+use Phinx\Db\Adapter\MysqlAdapter;
 
-class OrderItemProcess extends Migrator
+class UpdateOrderItemProcess extends Migrator
 {
     /**
      * Change Method.
@@ -28,9 +29,11 @@ class OrderItemProcess extends Migrator
      */
     public function change()
     {
-        $table = $this->table('mojing.fa_order_item_process');
-        $table
-            ->addColumn('is_prescription_abnormal', 'integer', ['limit' => 100, 'comment' => '账号级别'])
+
+        $table = $this->table('fa_order_item_process');
+        $table->addColumn('is_prescription_abnormal', 'integer', ['limit' => MysqlAdapter::INT_TINY, 'default' => 0, 'comment' => '处方是否异常 1 是 0 否'])
             ->update();
+
+
     }
 }

@@ -203,6 +203,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'is_prescription_abnormal',
+                            title: __('处方异常'),
+                            addClass: 'selectpicker',
+                            data: 'multiple',
+                            searchList: {
+                                0: __('无异常'),
+                                1: __('异常')
+                            },
+                            custom: {
+                                0: 'green',
+                                1: 'danger',
+                            },
+                            operate: 'IN',
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'status',
                             title: __('订单状态'),
                             addClass: 'selectpicker',
