@@ -205,8 +205,8 @@ class OcPrescriptionPic extends Backend
                 $WhereSql .= " and created_at between '$createdAt[0]' and '$createdAt[1]' ";
             }
             if ($filter['completion_time']){
-                $completion_time = explode(' - ',$filter['completion_time']);
-                $WhereSql .= " and completion_time between '$completion_time[0]' and '$completion_time[1]' ";
+                $completionTime = explode(' - ',$filter['completion_time']);
+                $WhereSql .= " and completion_time between '$completionTime[0]' and '$completionTime[1]' ";
             }
             $model  = Db::connect('database.db_zeelool');
             $WhereOrder = '  ORDER BY  created_at desc';
