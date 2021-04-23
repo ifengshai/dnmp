@@ -1447,6 +1447,10 @@ class OrderData extends Backend
      */
     public function set_processing_type($params = [])
     {
+        $arr = [];
+        //判断处方是否异常
+        $list = $this->is_prescription_abnormal($params);
+        $arr = array_merge($arr, $list);
         /**
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
@@ -1454,7 +1458,7 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
-        $arr = [];
+
         $lens_number = config('LENS_NUMBER');
         if (in_array($params['lens_number'], $lens_number)) {
             $arr['order_prescription_type'] = 3;
@@ -1608,6 +1612,56 @@ class OrderData extends Backend
         }
 
         return $arr;
+    }
+
+    /**
+     * 判断处方是否异常
+     *
+     * @param  array  $params
+     *
+     * @author wpl
+     * @date   2021/4/23 9:31
+     */
+    protected function is_prescription_abnormal($params = [])
+    {
+        $list = [];
+        $od_sph = (float)urldecode($params['od_sph']);
+        $os_sph = (float)urldecode($params['os_sph']);
+        $od_cyl = (float)urldecode($params['od_cyl']);
+        $os_cyl = (float)urldecode($params['os_cyl']);
+        /**
+         * 判断处方是否异常规则
+         * 1、SPH值或CYL值的“+”“_”号不一致
+         * 2、左右的SPH或CYL 绝对值相差超过3
+         * 3、有SPH或CYL无PD
+         * 4、有PD无SPH及CYL
+         */
+        if (($od_sph < 0 && $od_cyl > 0) || ($od_sph > 0 && $od_cyl < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        if (($os_sph < 0 && $os_cyl > 0) || ($os_sph > 0 && $os_cyl < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        //绝对值相差超过3
+        $odDifference = abs($od_sph) - abs($od_cyl);
+        $osDifference = abs($od_sph) - abs($od_cyl);
+        if (abs($odDifference) > 3 || abs($osDifference) > 3) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        //有PD无SPH和CYL
+        if (($params['pdcheck'] == 'on' || $params['pd']) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        //有SPH或CYL无PD
+        if (($params['pdcheck'] != 'on' && !$params['pd']) && ($od_sph || $os_sph || $od_cyl || $os_cyl)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        return $list;
     }
 
 

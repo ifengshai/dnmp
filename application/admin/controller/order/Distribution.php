@@ -385,6 +385,7 @@ class Distribution extends Backend
                         $whereOr = [
                             'a.id' => ['in', $item_process_ids],
                             'b.increment_id' => ['in', $platform_order],
+                            'a.is_prescription_abnormal' => 1,
                         ];
                     }
                 }
@@ -413,7 +414,7 @@ class Distribution extends Backend
             //combine_time  合单时间  delivery_time 打印时间 check_time审单时间  update_time更新时间  created_at创建时间
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.check_time')
+                ->field('a.id,a.is_prescription_abnormal,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.check_time')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
@@ -3530,32 +3531,43 @@ class Distribution extends Backend
         $admin = (object)session('admin');
         foreach ($ids as $key => $value) {
             $item_info = $this->model
-                ->field('id,site,sku,distribution_status,abnormal_house_id,temporary_house_id,item_order_number')
+                ->field('id,order_id,site,sku,distribution_status,abnormal_house_id,temporary_house_id,item_order_number,is_prescription_abnormal')
                 ->where(['id' => $ids[$key]])
                 ->find();
-            empty($item_info) && $this->error('子订单' . $item_info['item_order_number'] . '不存在');
-            empty($item_info['abnormal_house_id']) && $this->error('子订单' . $item_info['item_order_number'] . '没有异常存在');
+
+            //判断是否为处方异常标记
+            if ($item_info['is_prescription_abnormal'] == 1) {
+                $this->model->where(['id' => $value])->update(['is_prescription_abnormal' => 0]);
+                //更新主单更新时间-波次单
+                $this->_new_order->where(['id' => $item_info['order_id']])->update(['updated_at' => time()]);
+                continue;
+            }
+
+            empty($item_info) && $this->error('子订单'.$item_info['item_order_number'].'不存在');
+            empty($item_info['abnormal_house_id']) && $this->error('子订单'.$item_info['item_order_number'].'没有异常存在');
             //检测工单
-            $work_order_list = $this->_work_order_list->where(['order_item_numbers' => ['like', $item_info['item_order_number'] . '%'], 'work_status' => ['in', [1, 2, 3, 5]]])->find();
-            !empty($work_order_list) && $this->error('子订单' . $item_info['item_order_number'] . '存在未完成的工单');
+            $work_order_list = $this->_work_order_list->where(['order_item_numbers' => ['like', $item_info['item_order_number'].'%'], 'work_status' => ['in', [1, 2, 3, 5]]])->find();
+            !empty($work_order_list) && $this->error('子订单'.$item_info['item_order_number'].'存在未完成的工单');
             $abnormal_house_id[] = $item_info['abnormal_house_id'];
             //配货日志
             DistributionLog::record($this->auth, $ids[$key], 10, "子单号{$item_info['item_order_number']}，异常取消");
         }
 
         //异常库位占用数量-1
-        $this->_stock_house
-            ->where(['id' => ['in', $abnormal_house_id]])
-            ->setDec('occupy', 1);
+        if ($abnormal_house_id) {
+            $this->_stock_house
+                ->where(['id' => ['in', $abnormal_house_id]])
+                ->setDec('occupy', 1);
 
-        //子订单状态回滚
-        $save_data = [
-            'abnormal_house_id' => 0 //异常库位ID
-        ];
+            //子订单状态回滚
+            $save_data = [
+                'abnormal_house_id' => 0 //异常库位ID
+            ];
 
-        //标记处理异常状态及时间
-        $this->_distribution_abnormal->where(['item_process_id' => ['in', $ids]])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
-        $this->model->where(['id' => ['in', $ids]])->update($save_data);
+            //标记处理异常状态及时间
+            $this->_distribution_abnormal->where(['item_process_id' => ['in', $ids]])->update(['status' => 2, 'do_time' => time(), 'do_person' => $admin->nickname]);
+            $this->model->where(['id' => ['in', $ids]])->update($save_data);
+        }
 
         $this->success('操作成功!', '', 'success', 200);
     }
