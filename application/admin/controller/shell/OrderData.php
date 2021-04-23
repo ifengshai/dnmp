@@ -1653,7 +1653,7 @@ class OrderData extends Backend
 
         //绝对值相差超过3
         $odDifference = abs($od_sph) - abs($od_cyl);
-        $osDifference = abs($od_sph) - abs($od_cyl);
+        $osDifference = abs($os_sph) - abs($os_cyl);
         if (abs($odDifference) > 3 || abs($osDifference) > 3) {
             $list['is_prescription_abnormal'] = 1;
         }
