@@ -711,25 +711,32 @@ class PayOrder extends Backend
         $pay_order->pay_time = $pay_order->pay_time ? date('Y-m-d H:i:s', $pay_order->pay_time) : '';
         //获取付款单子单结算信息
         $settle = $this->payorder_item->alias('a')
-            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.id as purchase_ids')
+            ->field('a.*,b.create_person,b.purchase_type,b.1688_number,b.purchase_number,b.id as purchase_ids,b.purchase_name,b.create_person')
             ->where(['a.pay_id' => $ids, 'a.pay_type' => 3])
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_order_id=b.id')
+            ->join(['fa_purchase_order_item' => 'c'], 'c.purchase_id=b.id')
             ->select();
         $total1 = 0;
         $total3 = 0;
         $count1 = 0;
+        $item = new \app\admin\model\itemmanage\Item();
+        $itemcategory = new \app\admin\model\itemmanage\ItemCategory();
         foreach ($settle as $k => $v) {
-            if ($v['purchase_batch_id'] > 0){
+            $category_id = $item->where(['sku' => $v['purchase_name']])->value('category_id');
+            $category_name = $itemcategory->getCategoryName($category_id);
+
+            if ($v['purchase_batch_id'] > 0) {
                 $instockDetail = Db::name('check_order')
                     ->alias('a')
                     ->join(['in_stock' => 'b'], 'b.check_id = a.id')
                     ->join(['in_stock_item' => 'c'], 'c.in_stock_id = b.id')
-                    ->where('a.batch_id',$v['purchase_batch_id'])
+                    ->where('a.batch_id', $v['purchase_batch_id'])
                     ->find();
                 $settle[$k]['batch_instock_num'] = $instockDetail['in_stock_num'];
-            }else{
+            } else {
                 $settle[$k]['batch_instock_num'] = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_ids'])->value('instock_num');
             }
+            $settle[$k]['category_name'] = $category_name;
             $total1 += $v['wait_statement_total'];
             $total3 += $settle[$k]['batch_instock_num'];
             $count1++;
@@ -747,8 +754,7 @@ class PayOrder extends Backend
         $total2 = 0;
         $count2 = 0;
         $count3 = 0;
-        $item = new \app\admin\model\itemmanage\Item();
-        $itemcategory = new \app\admin\model\itemmanage\ItemCategory();
+
         foreach ($prepay as $k1 => $v1) {
             $category_id = $item->where(['sku' => $v1['purchase_name']])->value('category_id');
             $category_name = $itemcategory->getCategoryName($category_id);
