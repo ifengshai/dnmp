@@ -1019,10 +1019,10 @@ class Item extends Backend
         }
         //查询对应平台权限 getNewAuthSite是存在all权限的
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite1();
-        //商品库存列表展示顺序调整：需要把阿里巴巴和西语站的展示位置换换
-        $key_name = array('1','2','3','4','5','8','14','10','11','12','13','9','100');
-        $magentoplatformarr = array_combine($key_name,$magentoplatformarr);
-        ksort($magentoplatformarr);
+//        //商品库存列表展示顺序调整：需要把阿里巴巴和西语站的展示位置换换
+//        $key_name = array('1','2','3','4','5','8','14','10','11','12','13','9','100');
+//        $magentoplatformarr = array_combine($key_name,$magentoplatformarr);
+//        ksort($magentoplatformarr);
         // $platform = (new MagentoPlatform())->getAuthSite();
         // dump(collection($platform)->toArray());
         // dump(collection($magentoplatformarr)->toArray());die;
@@ -2576,30 +2576,10 @@ class Item extends Backend
         $goodsValue = $this->model->where(['is_open'=>1])->column('id');
         $itemAttributeValue = $itemAttribute->column('item_id');
         $result=array_diff($goodsValue,$itemAttributeValue);
-        $skuSalesNum = new \app\admin\model\SkuSalesNum();
-        $goodsValue = $this->model->where(['id'=>['in',$result]])->column('sku','id');
-        foreach ($goodsValue as $key=>$value){
-            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $date = date('Y-m-d 00:00:00');
-            $list[] = $itemPlatformSku->field('id,sku,platform_type as site')->where([
-                'platform_sku'    => ['eq', $value],
-            ])->find();
-            $sales= $skuSalesNum->where([
-                'sku'        => $list->sku,
-                'site'       => $list->site,
-                'createtime' => ['<', $date],
-            ])->sum('sales_num');
-            $data[$key]['id'] = $key;
-            $data[$key]['sku'] = $value;
-            $data[$key]['sum'] = $sales;
+        foreach ($result as $k=>$v){
+            $data[$k]['item_id'] = $v;
         }
-        $data = array_values($data);
-        $headlist = [
-            'id', 'SKU', '销量'
-        ];
-        $path = "/uploads/";
-        $fileName = '排查异常商品数据';
-        Excel::writeCsv($data, $headlist, $path . $fileName);
+        $itemAttribute->insertAll($data);
     }
 
     public function categoryValue(){

@@ -488,7 +488,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 };
                 Fast.api.open('saleaftermanage/work_order_list/add?order_number=' +order_number, '分配', options);
             });
-
+            $(document).on("click", ".batch-log-recipient", function () {
+                var ids = $(this).data('value');
+                console.log(ids);
+                Backend.api.open('zendesk/zendesk/order_detail?ids='+ids, '订单节点',{area: ['50%', '45%'] });
+            });
             //上面的修改承接人
             $(document).on("click", ".batch-edit-recipient", function () {
                 var ids =$(this).data("value");

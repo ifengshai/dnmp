@@ -39,6 +39,7 @@ class SaleAfterTask extends Backend
     protected $changesku = null;
     protected $relationSearch = true;
     protected $groupdata = [];
+    protected  $noNeedRight = ['getAjaxOrderPlatformList'];
     // protected $noNeedLogin = [
     //     'updateRepId',
     //     'updateMoreRepId',

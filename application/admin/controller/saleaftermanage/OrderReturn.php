@@ -358,7 +358,7 @@ class OrderReturn extends Backend
                         $morder_other_value = collection($morder_other_value)->toArray();
                     }
                     $customer[$key]['agent_way_title'] = $morder_other_value['agent_way_title'];
-                    $customer[$key]['shipping_num_temp'] = $morder_other_value['shipping_num_temp'];
+                    $customer[$key]['shipment_num'] = $morder_other_value['shipment_num'];
                     $customer[$key]['total_qty_ordered'] = $morder_other_value['total_qty_ordered'];
                 }
             }
