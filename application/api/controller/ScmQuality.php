@@ -1005,7 +1005,7 @@ class ScmQuality extends Scm
 
         $where = [];
         if ($logistics_number) {
-            $where['logistics_number'] = ['like', '%' . $logistics_number . '%'];
+            $where['a.logistics_number'] = ['like', '%' . $logistics_number . '%'];
         }
         //        if ($sign_number) {
         //            $where['sign_number'] = ['like', '%' . $sign_number . '%'];
@@ -1014,7 +1014,7 @@ class ScmQuality extends Scm
             $where['status'] = $status;
         }
         if ($start_time && $end_time) {
-            $where['createtime'] = ['between', [$start_time, $end_time]];
+            $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
 
         //获取采购单数据
@@ -1030,7 +1030,7 @@ class ScmQuality extends Scm
                 }
             });
             $purchase_ids = array_keys($purchase_ids);
-            $where['purchase_id'] = ['in', $purchase_ids];
+            $where['a.purchase_id'] = ['in', $purchase_ids];
         }
 
         $offset = ($page - 1) * $page_size;
@@ -1038,10 +1038,12 @@ class ScmQuality extends Scm
 
         //获取物流单列表数据
         $list = $this->_logistics_info
+            ->alias('a')
+            ->join(['fa_purchase_order'=>'b'],'a.purchase_id=b.id')
             ->where($where)
-            ->where('type', 1)//采购单类型
-            ->field('id,logistics_number,sign_number,createtime,sign_time,status,purchase_id,type,is_check_order,batch_id')
-            ->order('createtime desc,id')
+            ->where('a.type', 1)//采购单类型
+            ->field('a.id,a.logistics_number,a.sign_number,a.createtime,a.sign_time,a.status,purchase_id,a.type,a.is_check_order,a.batch_id,b.is_new_product')
+            ->order('b.is_new_product desc,a.createtime desc,id')
             ->limit($offset, $limit)
             ->select();
         $list = collection($list)->toArray();
@@ -1072,8 +1074,6 @@ class ScmQuality extends Scm
             $list[$key]['show_sign'] = 0 == $value['status'] ? 1 : 0;
             $list[$key]['show_quality'] = (1 == $value['type'] && 1 == $value['status']) ? 1 : 0;
         }
-        $sortValue = array_column($list,'is_new_product');
-        array_multisort($sortValue,SORT_DESC,$list);
         $this->success('', ['list' => $list], 200);
     }
 
