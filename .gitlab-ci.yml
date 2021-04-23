@@ -13,7 +13,7 @@ jobTest_env:
 jobMaster_env:
   stage: deploy-master-env
   script:
-    - cd /www/wwwroot/mojing
+    - cd /var/www/mojing
     - sudo git pull origin master
   tags:
     - mojing-srv-runner
