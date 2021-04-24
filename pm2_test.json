@@ -1,0 +1,6 @@
+{
+  "name": "pm2test",
+  "args": "",
+  "script": "php /www/wwwroot/mojing/public/admin_1biSSnWyfW.php shell/order_data/process_order_data",
+  "max_memory_restart": "100M"
+}
