@@ -1093,17 +1093,17 @@ class Wangpenglei extends Backend
          * 3、有SPH或CYL无PD
          * 4、有PD无SPH及CYL
          */
-        if (($od_sph < 0 && $od_cyl > 0) || ($od_sph > 0 && $od_cyl < 0)) {
+        if (($od_sph < 0 && $os_sph > 0) || ($od_sph > 0 && $os_sph < 0)) {
             $list['is_prescription_abnormal'] = 1;
         }
 
-        if (($os_sph < 0 && $os_cyl > 0) || ($os_sph > 0 && $os_cyl < 0)) {
+        if (($os_cyl < 0 && $od_cyl > 0) || ($os_cyl > 0 && $od_cyl < 0)) {
             $list['is_prescription_abnormal'] = 1;
         }
 
         //绝对值相差超过3
-        $odDifference = abs($od_sph) - abs($od_cyl);
-        $osDifference = abs($os_sph) - abs($os_cyl);
+        $odDifference = abs($od_sph) - abs($os_sph);
+        $osDifference = abs($od_cyl) - abs($os_cyl);
         if (abs($odDifference) > 3 || abs($osDifference) > 3) {
             $list['is_prescription_abnormal'] = 1;
         }
