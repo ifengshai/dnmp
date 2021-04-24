@@ -216,34 +216,6 @@
                                             <td>新增购物车转化率</td>
                                         </tr>
                                         <tbody id="table_data">
-                                        {foreach name="data" item="vo" key="key"}
-                                        <tr>
-                                            <td>{$key+1}</td>
-                                            <td>{$vo.hour_created}</td>
-                                            <td>{$vo.order_counter}</td>
-                                            <td>{$vo.orderitem_counter}</td>
-                                            <td>{$vo.hour_grand_total}</td>
-                                            <td>{$vo.grand_total_order_conversion}</td>
-                                            <td>{$vo.sessions}</td>
-                                            <td>{$vo.quote_sessions_conversion}</td>
-                                            <td>{$vo.order_sessions_conversion}</td>
-                                            <td>{$vo.quote_counter}</td>
-                                            <td>{$vo.order_quote_conversion}</td>
-                                        </tr>
-                                        {/foreach}
-                                        <tr>
-                                            <td>{$count}</td>
-                                            <td>合计</td>
-                                            <td>{$total.order_counter}</td>
-                                            <td>{$total.orderitem_counter}</td>
-                                            <td>{$total.hour_grand_total}</td>
-                                            <td>{$total.grand_total_order_conversion}</td>
-                                            <td>{$total.sessions}</td>
-                                            <td>{$total.quote_sessions_conversion}</td>
-                                            <td>{$total.order_sessions_conversion}</td>
-                                            <td>{$total.quote_counter}</td>
-                                            <td>{$total.order_quote_conversion}</td>
-                                        </tr>
                                         </tbody>
                                     </table>
                                 </div>

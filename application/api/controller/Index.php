@@ -41,6 +41,7 @@ class Index extends Api
      */
     public function index()
     {
+        echo 1;die;
         $this->success('请求成功');
     }
     public function test()
