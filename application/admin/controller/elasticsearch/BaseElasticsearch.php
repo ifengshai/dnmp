@@ -47,7 +47,7 @@ class BaseElasticsearch extends Backend
 
         //es配置
         $params = [
-            '127.0.0.1:9200',
+            'http://test.utools.club:36942',
         ];
         //获取es的实例
         $this->esClient = ClientBuilder::create()->setHosts($params)->build();
@@ -466,5 +466,27 @@ class BaseElasticsearch extends Backend
     public function deleteIndex()
     {
         return $this->esService->deleteIndex('mojing_order');
+    }
+    /**
+     * 格式化时间字段，方便后续查询聚合
+     *
+     * @param $date
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/1 15:21
+     */
+    public function formatDate($value,$date)
+    {
+        $format =  [
+            'year'       => date('Y', $date),
+            'month'      => date('m', $date),
+            'month_date' => date('Ym', $date),
+            'day'        => date('d', $date),
+            'day_date'   => date('Ymd', $date),
+            'hour'       => date('H', $date),
+            'hour_date'  => date('YmdH', $date),
+        ];
+        return array_merge($value, $format);
     }
 }

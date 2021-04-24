@@ -6,6 +6,7 @@
 
 namespace app\admin\controller\shell;
 
+use app\admin\controller\elasticsearch\async\AsyncOrder;
 use app\common\controller\Backend;
 use think\Db;
 
@@ -28,6 +29,7 @@ class OrderData extends Backend
         $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
         $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
         $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->asyncOrder = new AsyncOrder();
     }
 
     /**
@@ -187,6 +189,8 @@ class OrderData extends Backend
 
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
+                                    //es同步订单数据，插入
+                                    $this->asyncOrder->runInsert($params,$order_id);
                                     $order_params[$k]['site'] = $site;
                                     $order_params[$k]['order_id'] = $order_id;
                                     $order_params[$k]['entity_id'] = $v['entity_id'];
@@ -226,6 +230,8 @@ class OrderData extends Backend
 
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
+                                    //es同步订单数据，插入
+                                    $this->asyncOrder->runInsert($params,$order_id);
                                     $order_params[$k]['site'] = $site;
                                     $order_params[$k]['order_id'] = $order_id;
                                     $order_params[$k]['entity_id'] = $v['id'];
@@ -261,6 +267,8 @@ class OrderData extends Backend
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
                                     $this->order->where(['entity_id' => $v['id'], 'site' => $site])->update($params);
+                                    //es同步订单数据，插入
+                                    $this->asyncOrder->runUpdate($params,$v['id']);
                                 }
                             }
 
@@ -281,6 +289,8 @@ class OrderData extends Backend
                                         $params['lastname'] = $v['lastname'];
                                         $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update($params);
+                                        //es同步订单数据，插入
+                                        $this->asyncOrder->runUpdate($params,$v['order_id']);
                                     }
                                 }
                             }
@@ -319,6 +329,8 @@ class OrderData extends Backend
                                     }
 
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
+                                    //es同步订单数据，插入
+                                    $this->asyncOrder->runUpdate($params,$v['entity_id']);
                                 }
                             }
 
@@ -338,6 +350,8 @@ class OrderData extends Backend
                                         $params['lastname'] = $v['lastname'];
                                         $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
+                                        //es同步订单数据，插入
+                                        $this->asyncOrder->runUpdate($params,$v['parent_id']);
                                     }
                                 }
                             }
@@ -349,6 +363,8 @@ class OrderData extends Backend
                                     $params['payment_method'] = $v['method'];
                                     $params['last_trans_id'] = $v['last_trans_id'];
                                     $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
+                                    //es同步订单数据，插入
+                                    $this->asyncOrder->runUpdate($params,$v['parent_id']);
                                 }
                             }
 

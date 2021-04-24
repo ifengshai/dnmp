@@ -31,7 +31,7 @@ class AsyncEs extends BaseElasticsearch
     public function asyncOrder()
     {
         Debug::remark('begin');
-        NewOrder::chunk(30000,function($newOrder){
+        NewOrder::chunk(3000,function($newOrder){
             $data = array_map(function($value) {
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
@@ -149,28 +149,7 @@ class AsyncEs extends BaseElasticsearch
             $this->esService->addMutilToEs('mojing_customer',$data);
         });
     }
-    /**
-     * 格式化时间字段，方便后续查询聚合
-     *
-     * @param $date
-     *
-     * @return array
-     * @author crasphb
-     * @date   2021/4/1 15:21
-     */
-    public function formatDate($value,$date)
-    {
-        $format =  [
-            'year'       => date('Y', $date),
-            'month'      => date('m', $date),
-            'month_date' => date('Ym', $date),
-            'day'        => date('d', $date),
-            'day_date'   => date('Ymd', $date),
-            'hour'       => date('H', $date),
-            'hour_date'  => date('YmdH', $date),
-        ];
-        return array_merge($value, $format);
-    }
+
 
     /**
      * 同步物流数据到es

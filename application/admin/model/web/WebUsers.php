@@ -2,6 +2,7 @@
 
 namespace app\admin\model\web;
 
+use app\admin\controller\elasticsearch\async\AsyncCustomer;
 use think\Model;
 use think\Log;
 
@@ -37,17 +38,21 @@ class WebUsers extends Model
         try {
             $params = [];
             foreach ($data as $k => $v) {
-                $params[$k]['entity_id'] = $v['entity_id'];
-                $params[$k]['email'] = $v['email'];
-                $params[$k]['site'] = $site;
-                $params[$k]['group_id'] = $v['group_id'];
-                $params[$k]['store_id'] = $v['store_id'];
-                $params[$k]['created_at'] = strtotime($v['created_at']) + 28800;
-                $params[$k]['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $params[$k]['resouce'] = $v['resouce'];
-                $params[$k]['is_vip'] = $v['is_vip'];
+                $params['entity_id'] = $v['entity_id'];
+                $params['email'] = $v['email'];
+                $params['site'] = $site;
+                $params['group_id'] = $v['group_id'];
+                $params['store_id'] = $v['store_id'];
+                $params['created_at'] = strtotime($v['created_at']) + 28800;
+                $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                $params['resouce'] = $v['resouce'];
+                $params['is_vip'] = $v['is_vip'];
+                $user = (new WebUsers)->insert($params);
+                $userId = $user->getLastInsID();
+                //新增用户信息
+                (new AsyncCustomer())->runInsert($params,$userId);
             }
-            (new WebUsers)->saveAll($params);
+
             return true;
         } catch (\Exception $e) {
             Log::record('webUsers:'.$e->getMessage());
@@ -79,7 +84,10 @@ class WebUsers extends Model
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                 $params['resouce'] = $v['resouce'];
                 $params['is_vip'] = $v['is_vip'];
-                (new WebUsers)->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
+                $user = (new WebUsers)->where(['entity_id' => $v['entity_id'], 'site' => $site])->find();
+                $user->save($params);
+                //更新用户信息
+                (new AsyncCustomer())->runUpdate($params,$user->id);
             }
 
             return true;
@@ -117,8 +125,11 @@ class WebUsers extends Model
                 $params[$k]['created_at'] = strtotime($v['created_at']) + 28800;
                 $params[$k]['updated_at'] = strtotime($v['updated_at']) + 28800;
                 $params[$k]['is_vip'] = $v['is_vip'];
+                $user = (new WebUsers)->insert($params);
+                $userId = $user->getLastInsID();
+                //新增用户信息
+                (new AsyncCustomer())->runInsert($params,$userId);
             }
-            (new WebUsers)->saveAll($params);
 
             return true;
         } catch (\Exception $e) {
@@ -150,7 +161,10 @@ class WebUsers extends Model
                 $params['store_id'] = $v['store_id'];
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                 $params['is_vip'] = $v['is_vip'];
-                (new WebUsers)->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
+                $user = (new WebUsers)->where(['entity_id' => $v['entity_id'], 'site' => $site])->find();
+                $user->save($params);
+                //更新用户信息
+                (new AsyncCustomer())->runUpdate($params,$user->id);
             }
 
             return true;

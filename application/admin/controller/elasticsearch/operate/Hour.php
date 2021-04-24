@@ -13,84 +13,99 @@ use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\platformmanage\MagentoPlatform;
 use app\service\google\Session;
 use think\Cache;
-use think\Db;
-use think\Debug;
 
 class Hour extends BaseElasticsearch
 {
+    /**
+     * 分时销量首页
+     * @return string|\think\response\Json
+     * @throws \think\Exception
+     * @author crasphb
+     * @date   2021/4/24 14:08
+     */
     public function index()
     {
         $magentoplatformarr = new MagentoPlatform();
         //查询对应平台权限
         $magentoplatformarr = $magentoplatformarr->getAuthSite();
-        foreach ($magentoplatformarr as $key => $val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao','zeelool_de','zeelool_jp'])){
+        foreach ($magentoplatformarr as $key => $val) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('web_site','time_str','magentoplatformarr'));
+        $this->view->assign(compact('web_site', 'time_str', 'magentoplatformarr'));
+
         return $this->view->fetch('operatedatacenter/dataview/time_data/index');
 
     }
+
+    /**
+     * ajax获取销量数据
+     * @return \think\response\Json
+     * @throws \Google_Exception
+     * @author crasphb
+     * @date   2021/4/24 14:09
+     */
     public function ajaxGetResult()
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $type = $params['type'];
             $timeStr = $params['time_str'];
-            $nowDate = date('Ymd').'00';
+            $nowDate = date('Ymd') . '00';
             $today = false;
-            if(!$timeStr){
+            if (!$timeStr) {
                 $start = $end = $timeStr = $nowDate;
                 $gaStart = $gaEnd = date('Y-m-d');
                 $today = true;
-            }else{
+            } else {
                 $createat = explode(' ', $timeStr);
-                $start = date('Ymd',strtotime($createat[0])).'00';
-                $end = date('Ymd',strtotime($createat[3])).'99';
-                $gaStart = date('Y-m-d',strtotime($createat[0]));
-                $gaEnd = date('Y-m-d',strtotime($createat[3]));
+                $start = date('Ymd', strtotime($createat[0])) . '00';
+                $end = date('Ymd', strtotime($createat[3])) . '99';
+                $gaStart = date('Y-m-d', strtotime($createat[0]));
+                $gaEnd = date('Y-m-d', strtotime($createat[3]));
             }
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             $time = $start . '-' . $end;
-            $cacheStr = 'day_hour_order_quote_'.$site.$time;
+            $cacheStr = 'day_hour_order_quote_' . $site . $time;
             $cacheData = Cache::get($cacheStr);
-            if(!$cacheData) {
+            if (!$cacheData) {
                 $hourOrderData = $this->buildHourOrderSearch($site, $start, $end);
                 $hourCartData = $this->buildHourCartSearch($site, $start, $end);
                 $sessionService = new Session($site);
-                $gaData = [];
-                //if(!$type) {
-                    $gaData = $sessionService->gaHourData($gaStart, $gaEnd);
-                //}
+                $gaData = $sessionService->gaHourData($gaStart, $gaEnd);
 
-                $allData = $this->esFormatData->formatHourData($hourOrderData, $hourCartData, $gaData,$today);
-                Cache::set($cacheStr,$allData,600);
-            }else{
+                $allData = $this->esFormatData->formatHourData($hourOrderData, $hourCartData, $gaData, $today);
+                Cache::set($cacheStr, $allData, 600);
+            } else {
                 $allData = $cacheData;
             }
 
-            switch($type) {
+            switch ($type) {
                 case 1:
                     $data = $allData['orderitemCounter'];
+
                     return json(['code' => 1, 'data' => $data]);
                 case 2:
                     $data = $allData['saleAmount'];
+
                     return json(['code' => 1, 'data' => $data]);
                 case 3:
                     $data = $allData['orderCounter'];
+
                     return json(['code' => 1, 'data' => $data]);
                 case 4:
                     $data = $allData['grandTotalOrderConversion'];
+
                     return json(['code' => 1, 'data' => $data]);
                 default:
                     $str = '';
-                    foreach ($allData['finalLists'] as $key => $val){
-                        $num = $key+1;
-                        $str .= '<tr><td>'.$num.'</td><td>'.$val['hour_created'].'</td><td>'.$val['orderCounter'].'</td><td>'.$val['totalQtyOrdered'].'</td><td>'.$val['daySalesAmount'].'</td><td>'.$val['avgPrice'].'</td><td>'.$val['sessions'].'</td><td>'.$val['addCartRate'].'</td><td>'.$val['sessionRate'].'</td><td>'.$val['cartCount'].'</td><td>'.$val['cartRate'].'</td></tr>';
+                    foreach ($allData['finalLists'] as $key => $val) {
+                        $num = $key + 1;
+                        $str .= '<tr><td>' . $num . '</td><td>' . $val['hour_created'] . '</td><td>' . $val['orderCounter'] . '</td><td>' . $val['totalQtyOrdered'] . '</td><td>' . round($val['daySalesAmount'], 2) . '</td><td>' . $val['avgPrice'] . '</td><td>' . $val['sessions'] . '</td><td>' . $val['addCartRate'] . '</td><td>' . $val['sessionRate'] . '</td><td>' . $val['cartCount'] . '</td><td>' . $val['cartRate'] . '</td></tr>';
                     }
-                    $str .= '<tr><td>'.count($allData['finalLists']).'</td><td>合计</td><td>'.$allData['allOrderCount'].'</td><td>'.$allData['allQtyOrdered'].'</td><td>'.$allData['allDaySalesAmount'].'</td><td>'.$allData['allAvgPrice'].'</td><td>'.$allData['allSession'].'</td><td>'.$allData['addCartRate'].'</td><td>'.$allData['sessionRate'].'</td><td>'.$allData['allCartAmount'].'</td><td>'.$allData['cartRate'].'</td></tr>';
-                    $data = compact('time_str', 'order_platform','str');
+                    $str .= '<tr><td>' . count($allData['finalLists']) . '</td><td>合计</td><td>' . $allData['allOrderCount'] . '</td><td>' . $allData['allQtyOrdered'] . '</td><td>' . $allData['allDaySalesAmount'] . '</td><td>' . $allData['allAvgPrice'] . '</td><td>' . $allData['allSession'] . '</td><td>' . $allData['addCartRate'] . '</td><td>' . $allData['sessionRate'] . '</td><td>' . $allData['allCartAmount'] . '</td><td>' . $allData['cartRate'] . '</td></tr>';
+                    $data = compact('time_str', 'order_platform', 'str');
                     $this->success('', '', $data);
             }
         }

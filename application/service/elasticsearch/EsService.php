@@ -107,13 +107,12 @@ class EsService
      *
      * @param $indexName
      * @param $view
-     * @param $mergeData
      *
      * @return mixed
      * @author crasphb
      * @date   2021/4/1 15:20
      */
-    public function addToEs($indexName, $view, $mergeData)
+    public function addToEs($indexName, $view)
     {
         $params = [
             'index' => $indexName,

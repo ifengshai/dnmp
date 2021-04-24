@@ -15,6 +15,13 @@ use app\admin\model\platformmanage\MagentoPlatform;
 class DashBoard extends BaseElasticsearch
 {
 
+    /**
+     * 数据大盘
+     * @return string|\think\response\Json
+     * @throws \think\Exception
+     * @author crasphb
+     * @date   2021/4/24 14:10
+     */
     public function index()
     {
         $magentoplatformarr = new MagentoPlatform();
@@ -33,9 +40,7 @@ class DashBoard extends BaseElasticsearch
     /**
      * 获取数据
      *
-     * @param        $site
-     * @param string $time
-     *
+     * @return \think\response\Json
      * @author crasphb
      * @date   2021/4/14 13:56
      */
@@ -57,7 +62,7 @@ class DashBoard extends BaseElasticsearch
                 $end = date('Ymd', strtotime($createat[3]));
             }
             $compareData = [];
-            if($compareTimeStr){
+            if ($compareTimeStr) {
                 $compareTime = explode(' ', $compareTimeStr);
                 $compareStart = date('Ymd', strtotime($compareTime[0]));
                 $compareEnd = date('Ymd', strtotime($compareTime[3]));
@@ -180,17 +185,17 @@ class DashBoard extends BaseElasticsearch
                     ],
                 ],
                 'aggs'  => [
-                    'orderNum'      => [
+                    'orderNum'        => [
                         'sum' => [
                             'field' => 'order_num',
                         ],
                     ],
-                    'activeUserNum' => [
+                    'activeUserNum'   => [
                         'sum' => [
                             'field' => 'active_user_num',
                         ],
                     ],
-                    "cartNum"  => [
+                    "cartNum"         => [
                         "sum" => [
                             "field" => "new_cart_num",
                         ],
@@ -205,12 +210,12 @@ class DashBoard extends BaseElasticsearch
                             "field" => "order_unit_price",
                         ],
                     ],
-                    "addCartRate"        => [
+                    "addCartRate"     => [
                         "avg" => [
                             "field" => "cart_rate",
                         ],
                     ],
-                    "registerNum"        => [
+                    "registerNum"     => [
                         "avg" => [
                             "field" => "register_num",
                         ],

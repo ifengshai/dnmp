@@ -15,6 +15,13 @@ use think\Db;
 
 class OrderDetail extends BaseElasticsearch
 {
+    /**
+     * 数据获取首页
+     * @return string|\think\response\Json
+     * @throws \think\Exception
+     * @author crasphb
+     * @date   2021/4/24 14:10
+     */
     public function index()
     {
         $magentoplatformarr = new MagentoPlatform();
