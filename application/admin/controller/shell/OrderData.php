@@ -389,7 +389,9 @@ class OrderData extends Backend
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
 
                                     $order_prescription_type = $options['order_prescription_type'];
+                                    $is_prescription_abnormal = $options['is_prescription_abnormal'];
                                     unset($options['order_prescription_type']);
+                                    unset($options['is_prescription_abnormal']);
                                     if ($options) {
                                         $options_id = $this->orderitemoption->insertGetId($options);
                                         $data = []; //子订单表数据
@@ -400,6 +402,7 @@ class OrderData extends Backend
                                             $data[$i]['option_id'] = $options_id;
                                             $data[$i]['sku'] = $options['sku'];
                                             $data[$i]['order_prescription_type'] = $order_prescription_type;
+                                            $data[$i]['is_prescription_abnormal'] = $is_prescription_abnormal;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
@@ -434,6 +437,7 @@ class OrderData extends Backend
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
+                                    unset($options['is_prescription_abnormal']);
                                     if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['id'], 'site' => $site])->update($options);
 
@@ -476,7 +480,9 @@ class OrderData extends Backend
                                     $options['base_row_total'] = $v['base_row_total'];
                                     $options['product_id'] = $v['product_id'];
                                     $order_prescription_type = $options['order_prescription_type'];
+                                    $is_prescription_abnormal = $options['is_prescription_abnormal'];
                                     unset($options['order_prescription_type']);
+                                    unset($options['is_prescription_abnormal']);
                                     if ($options) {
                                         $options_id = $this->orderitemoption->insertGetId($options);
                                         $data = []; //子订单表数据
@@ -487,6 +493,7 @@ class OrderData extends Backend
                                             $data[$i]['option_id'] = $options_id;
                                             $data[$i]['sku'] = $v['sku'];
                                             $data[$i]['order_prescription_type'] = $order_prescription_type;
+                                            $data[$i]['is_prescription_abnormal'] = $is_prescription_abnormal;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
@@ -525,6 +532,7 @@ class OrderData extends Backend
                                     $options['base_row_total'] = $v['base_row_total'];
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
+                                    unset($options['is_prescription_abnormal']);
                                     if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
 
@@ -1331,6 +1339,10 @@ class OrderData extends Backend
      */
     public function set_processing_type($params = [])
     {
+        $arr = [];
+        //判断处方是否异常
+        $list = $this->is_prescription_abnormal($params);
+        $arr = array_merge($arr, $list);
         /**
          * 判断定制现片逻辑
          * 1、渐进镜 Progressive
@@ -1338,7 +1350,7 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
-        $arr = [];
+
         $lens_number = config('LENS_NUMBER');
         if (in_array($params['lens_number'], $lens_number)) {
             $arr['order_prescription_type'] = 3;
@@ -1533,7 +1545,7 @@ class OrderData extends Backend
      * @author wpl
      * @date   2021/4/23 9:31
      */
-    public function is_prescription_abnormal($params = [])
+    protected function is_prescription_abnormal($params = [])
     {
         $list = [];
         $od_sph = (float)urldecode($params['od_sph']);
@@ -1555,10 +1567,26 @@ class OrderData extends Backend
             $list['is_prescription_abnormal'] = 1;
         }
 
+        //绝对值相差超过3
         $odDifference = abs($od_sph) - abs($od_cyl);
-        $osDifference = abs($od_sph) - abs($od_cyl);
+        $osDifference = abs($os_sph) - abs($os_cyl);
+        if (abs($odDifference) > 3 || abs($osDifference) > 3) {
+            $list['is_prescription_abnormal'] = 1;
+        }
 
+        //有PD无SPH和CYL
+        if (($params['pdcheck'] == 'on' || $params['pd']) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
 
+        //有SPH或CYL无PD
+        if (($params['pdcheck'] != 'on' && !$params['pd']) && ($od_sph || $os_sph || $od_cyl || $os_cyl)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        $list['is_prescription_abnormal'] = $list['is_prescription_abnormal'] ?: 0;
+
+        return $list;
     }
 
 
@@ -1712,6 +1740,7 @@ class OrderData extends Backend
         // $where['a.created_at'] = ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]];
         $where['b.is_print'] = 0;
         $where['b.wave_order_id'] = 0;
+        $where['b.is_prescription_abnormal'] = 0;
         $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
         $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,a.updated_at,entity_id,a.site')
             ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
