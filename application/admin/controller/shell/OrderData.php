@@ -698,7 +698,6 @@ class OrderData extends Backend
          * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
          * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
          */
-
         $lens_number = config('LENS_NUMBER');
         if (in_array($params['lens_number'], $lens_number)) {
             $arr['order_prescription_type'] = 3;
@@ -715,6 +714,7 @@ class OrderData extends Backend
              * 1.61非球面绿膜 定制片
              * SPH:0.00～-8.00 CYL:-4.25～-6.00
              */
+
             if ((((float)urldecode($params['od_sph']) >= -8 && (float)urldecode($params['od_sph']) <= 0) || ((float)urldecode($params['os_sph']) >= -8 && (float)urldecode($params['os_sph']) <= 0)) && (((float)urldecode($params['od_cyl']) >= -6 && (float)urldecode($params['od_cyl']) <= -4.25) || ((float)urldecode($params['os_cyl']) >= -6 && (float)urldecode($params['os_cyl']) <= -4.25))) {
                 $arr['is_custom_lens'] = 1;
                 $arr['order_prescription_type'] = 3;
