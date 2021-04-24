@@ -2535,4 +2535,110 @@ class NewProduct extends Backend
             $this->error($e->getMessage());
         }
     }
+
+
+    /**
+     * @author zjw
+     * @date   2021/4/24 10:20
+     * 运营补货需求购物车
+     */
+    public function printing_batch_export_xls(){
+        $this->model = new \app\admin\model\NewProductMapping();
+        $value = input('param.filter');
+        $filter = json_decode($value,true);
+        if (empty($filter)){
+            $map['website_type'] =1;
+        }else{
+            $map['website_type'] = $filter['website_type'];
+        }
+        $list = $this->model
+            ->where('is_show', 1)
+            ->where($map)
+            ->order('id desc')
+            ->select();
+        $list = collection($list)->toArray();
+        //查询商品分类
+        $category = $this->category->where('is_del', 1)->column('name', 'id');
+        foreach ($list as &$v) {
+            $v['category_name'] = $category[$v['category_id']];
+            $v['is_spot'] = $this->item->where(['sku' => $v['sku']])->value('is_spot');
+            if ($v['is_spot'] ==1){
+                $v['is_spot'] = '大货';
+            }elseif ($v['is_spot'] ==2){
+                $v['is_spot'] = '现货';
+            }else{
+                $v['is_spot'] = '-';
+            }
+            if ($v['type'] ==1){
+                $v['type'] = '月度计划';
+            }elseif ($v['type'] ==2){
+                $v['type'] = '周度计划';
+            }else{
+                $v['type'] = '日度计划';
+            }
+        }
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "ID")
+            ->setCellValue("B1", "商品SKU")
+            ->setCellValue("C1", "大货/现货");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "商品分类")
+            ->setCellValue("E1", "类型")
+            ->setCellValue("F1", "补货需求数量");
+
+        foreach ($list as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['id']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['is_spot']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['category_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['type']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['replenish_num']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:F' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '运营补货需求购物车' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
 }
