@@ -981,6 +981,12 @@ class ItWebDemand extends Backend
         $row['site_type_arr'] = explode(',', $row['site_type']);
         $row['copy_to_user_id_arr'] = explode(',', $row['copy_to_user_id']);
 
+        $admin = new \app\admin\model\Admin();
+        $userList = $admin->where('status', 'normal')->column('nickname', 'id');
+        $userList = collection($userList)->toArray();
+
+        $this->view->assign('userlist', $userList);
+
         $this->view->assign('demand_type', input('demand_type'));
         $this->view->assign("type", input('type'));
         $this->view->assign("row", $row);
@@ -1072,7 +1078,11 @@ class ItWebDemand extends Backend
                 }
             }
         }
+        $admin = new \app\admin\model\Admin();
+        $userList = $admin->where('status', 'normal')->column('nickname', 'id');
+        $userList = collection($userList)->toArray();
 
+        $this->view->assign('userlist', $userList);
         $this->view->assign('demand_type', input('demand_type'));
         return $this->view->fetch();
     }
@@ -1215,7 +1225,11 @@ class ItWebDemand extends Backend
 
         $this->view->assign("type", input('type'));
         $this->view->assign("row", $row);
+        $admin = new \app\admin\model\Admin();
+        $userList = $admin->where('status', 'normal')->column('nickname', 'id');
+        $userList = collection($userList)->toArray();
 
+        $this->view->assign('userlist', $userList);
         //确认权限
         $this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
         $this->view->assign('admin_id', session('admin.id'));

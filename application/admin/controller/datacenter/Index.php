@@ -996,12 +996,13 @@ class Index extends Backend
         /*******************************库存数据***********************************/
         //仓库总库存
         $allStock = $dataConfig->where('key', 'allStock')->value('value');
-
+        $allStock = intval($allStock);
         //仓库库存总金额       
         $allStockPrice = $dataConfig->where('key', 'allStockPrice')->value('value');
 
         //在途库存
         $onwayAllStock = $dataConfig->where('key', 'onwayAllStock')->value('value');
+        $onwayAllStock = intval($onwayAllStock);
 
         //在途库存总金额
         $onwayAllStockPrice = $dataConfig->where('key', 'onwayAllStockPrice')->value('value');
@@ -1011,28 +1012,28 @@ class Index extends Backend
 
         //可用库存
         $available_stock = $this->item->getAllAvailableStock();
-
+        $available_stock = intval($available_stock);
         //样品库存
         $sampleNumStock = $dataConfig->where('key', 'sampleNumStock')->value('value');
-
+        $sampleNumStock = intval($sampleNumStock);
         //样品库存总金额
         $sampleNumStockPrice = $dataConfig->where('key', 'sampleNumStockPrice')->value('value');
 
         //镜架库存统计
         $frameStock = $dataConfig->where('key', 'frameStock')->value('value');
-
+        $frameStock = intval($frameStock);
         //镜架总金额 
         $frameStockPrice = $dataConfig->where('key', 'frameStockPrice')->value('value');
 
         //镜片库存
         $lensStock = $dataConfig->where('key', 'lensStock')->value('value');
-
+        $lensStock = intval($lensStock);
         //镜片库存总金额
         $lensStockPrice = $dataConfig->where('key', 'lensStockPrice')->value('value');
 
         //饰品库存
         $ornamentsStock = $dataConfig->where('key', 'ornamentsStock')->value('value');
-
+        $ornamentsStock = intval($ornamentsStock);
         //饰品库存总金额
         $ornamentsStockPrice = $dataConfig->where('key', 'ornamentsStockPrice')->value('value');
 
@@ -1042,13 +1043,13 @@ class Index extends Backend
 
         //未出库总订单
         $allUnorderNum = $dataConfig->where('key', 'allUnorderNum')->value('value');
-
+        $allUnorderNum = intval($allUnorderNum);
         //超时订单总数
         $overtimeOrder = $dataConfig->where('key', 'overtimeOrder')->value('value');
-
+        $overtimeOrder = intval($overtimeOrder);
         //总SKU数
         $skuNum = $dataConfig->where('key', 'skuNum')->value('value');
-
+        $skuNum = intval($skuNum);
         //30天处理订单
         $orderLog = new \app\admin\model\OrderLog();
         $days30OrderProcessNum = $orderLog->get30daysOrderProcessNum();

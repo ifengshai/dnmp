@@ -54,7 +54,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                 showToggle: true,
                 pagination: false,
                 extend: {
-                    index_url: 'datacenter/operationanalysis/operationkanban/conversionrate/index' + location.search + '?time=' + Config.create_time + '&platform=' + Config.platform + '&type=list',
+                    index_url: 'datacenter/operationanalysis/operationkanban/conversionrate/index' + location.search + '?time=' + Config.create_time + '&platform=1&type=list',
                 }
             });
             var table = $("#table");

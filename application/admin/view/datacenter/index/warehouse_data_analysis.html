@@ -303,7 +303,7 @@
                                             <td>1</td>
                                             <td>库存 < 0</td>
                                             <td>{$stockData[0]['a']}</td>
-                                            <td>{:round($stockData[0]['a']/$skuNum*100,2)}</td>
+                                            <td>{:round($stockData[0]['a']/$skuNum*100,2)}%</td>
 
                                         </tr>
 
@@ -311,7 +311,7 @@
                                             <td>2</td>
                                             <td>库存 = 0</td>
                                             <td>{$stockData[0]['b']}</td>
-                                            <td>{:round($stockData[0]['b']/$skuNum*100,2)}</td>
+                                            <td>{:round($stockData[0]['b']/$skuNum*100,2)}%</td>
 
                                         </tr>
 
@@ -319,7 +319,7 @@
                                             <td>3</td>
                                             <td>1 <= 库存 <=10</td>
                                             <td>{$stockData[0]['c']}</td>
-                                            <td>{:round($stockData[0]['c']/$skuNum*100,2)}</td>
+                                            <td>{:round($stockData[0]['c']/$skuNum*100,2)}%</td>
 
                                         </tr>
 
@@ -327,35 +327,35 @@
                                             <td>4</td>
                                             <td>11 <= 库存 <=30</td>
                                             <td>{$stockData[0]['d']}</td>
-                                            <td>{:round($stockData[0]['d']/$skuNum*100,2)}</td>
+                                            <td>{:round($stockData[0]['d']/$skuNum*100,2)}%</td>
 
                                         </tr>
                                         <tr>
                                             <td>5</td>
                                             <td>31 <= 库存 <=50</td>
                                             <td>{$stockData[0]['e']}</td>
-                                            <td>{:round($stockData[0]['e']/$skuNum*100,2)}</td>
+                                            <td>{:round($stockData[0]['e']/$skuNum*100,2)}%</td>
 
                                         </tr>
                                         <tr>
                                             <td>6</td>
                                             <td>51 <= 库存 <=70</td>
                                             <td>{$stockData[0]['f']}</td>
-                                            <td>{:round($stockData[0]['f']/$skuNum*100,2)}</td>
+                                            <td>{:round($stockData[0]['f']/$skuNum*100,2)}%</td>
 
                                         </tr>
                                         <tr>
                                             <td>7</td>
                                             <td>71 <= 库存 <=100</td>
                                             <td>{$stockData[0]['g']}</td>
-                                            <td>{:round($stockData[0]['g']/$skuNum*100,2)}</td>
+                                            <td>{:round($stockData[0]['g']/$skuNum*100,2)}%</td>
 
                                         </tr>
                                         <tr>
                                             <td>8</td>
                                             <td>101 <= 库存</td>
                                             <td>{$stockData[0]['h']}</td>
-                                            <td>{:round($stockData[0]['h']/$skuNum*100,2)}</td>
+                                            <td>{:round($stockData[0]['h']/$skuNum*100,2)}%</td>
 
                                         </tr>
 
@@ -386,65 +386,65 @@
                                         <tr>
                                             <td>A+</td>
                                             <td>{$res.AA_num}</td>
-                                            <td>{$res.AA_percent}</td>
+                                            <td>{$res.AA_percent}%</td>
                                             <td>{$gradeSkuStock.aa_stock_num}</td>
-                                            <td>{:round($gradeSkuStock['aa_stock_num']/$allStock*100,2)}</td>
+                                            <td>{:round($gradeSkuStock['aa_stock_num']/$allStock*100,2)}%</td>
                                             <td>{$gradeSkuStock.aa_stock_price}</td>
                                         </tr>
                                         <tr>
                                             <td>A</td>
                                             <td>{$res.A_num}</td>
-                                            <td>{$res.A_percent}</td>
+                                            <td>{$res.A_percent}%</td>
                                             <td>{$gradeSkuStock.a_stock_num}</td>
-                                            <td>{:round($gradeSkuStock['a_stock_num']/$allStock*100,2)}</td>
+                                            <td>{:round($gradeSkuStock['a_stock_num']/$allStock*100,2)}%</td>
                                             <td>{$gradeSkuStock.a_stock_price}</td>
                                         </tr>
                                         <tr>
                                             <td>B</td>
                                             <td>{$res.B_num}</td>
-                                            <td>{$res.B_percent}</td>
+                                            <td>{$res.B_percent}%</td>
                                             <td>{$gradeSkuStock.b_stock_num}</td>
-                                            <td>{:round($gradeSkuStock['b_stock_num']/$allStock*100,2)}</td>
+                                            <td>{:round($gradeSkuStock['b_stock_num']/$allStock*100,2)}%</td>
                                             <td>{$gradeSkuStock.b_stock_price}</td>
                                         </tr>
                                         <tr>
                                             <td>C+</td>
                                             <td>{$res.CA_num}</td>
-                                            <td>{$res.CA_percent}</td>
+                                            <td>{$res.CA_percent}%</td>
                                             <td>{$gradeSkuStock.ca_stock_num}</td>
-                                            <td>{:round($gradeSkuStock['ca_stock_num']/$allStock*100,2)}</td>
+                                            <td>{:round($gradeSkuStock['ca_stock_num']/$allStock*100,2)}%</td>
                                             <td>{$gradeSkuStock.ca_stock_price}</td>
                                         </tr>
                                         <tr>
                                             <td>C</td>
                                             <td>{$res.C_num}</td>
-                                            <td>{$res.C_percent}</td>
+                                            <td>{$res.C_percent}%</td>
                                             <td>{$gradeSkuStock.c_stock_num}</td>
-                                            <td>{:round($gradeSkuStock['c_stock_num']/$allStock*100,2)}</td>
+                                            <td>{:round($gradeSkuStock['c_stock_num']/$allStock*100,2)}%</td>
                                             <td>{$gradeSkuStock.c_stock_price}</td>
                                         </tr>
                                         <tr>
                                             <td>D</td>
                                             <td>{$res.D_num}</td>
-                                            <td>{$res.D_percent}</td>
+                                            <td>{$res.D_percent}%</td>
                                             <td>{$gradeSkuStock.d_stock_num}</td>
-                                            <td>{:round($gradeSkuStock['d_stock_num']/$allStock*100,2)}</td>
+                                            <td>{:round($gradeSkuStock['d_stock_num']/$allStock*100,2)}%</td>
                                             <td>{$gradeSkuStock.d_stock_price}</td>
                                         </tr>
                                         <tr>
                                             <td>E</td>
                                             <td>{$res.E_num}</td>
-                                            <td>{$res.E_percent}</td>
+                                            <td>{$res.E_percent}%</td>
                                             <td>{$gradeSkuStock.e_stock_num}</td>
-                                            <td>{:round($gradeSkuStock['e_stock_num']/$allStock*100,2)}</td>
+                                            <td>{:round($gradeSkuStock['e_stock_num']/$allStock*100,2)}%</td>
                                             <td>{$gradeSkuStock.e_stock_price}</td>
                                         </tr>
                                         <tr>
                                             <td>F</td>
                                             <td>{$res.F_num}</td>
-                                            <td>{$res.F_percent}</td>
+                                            <td>{$res.F_percent}%</td>
                                             <td>{$gradeSkuStock.f_stock_num}</td>
-                                            <td>{:round($gradeSkuStock['f_stock_num']/$allStock*100,2)}</td>
+                                            <td>{:round($gradeSkuStock['f_stock_num']/$allStock*100,2)}%</td>
                                             <td>{$gradeSkuStock.f_stock_price}</td>
                                         </tr>
 
