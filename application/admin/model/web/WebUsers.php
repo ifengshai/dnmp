@@ -83,10 +83,11 @@ class WebUsers extends Model
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                 $params['resouce'] = $v['resouce'];
                 $params['is_vip'] = $v['is_vip'];
-                $user = (new WebUsers)->where(['entity_id' => $v['entity_id'], 'site' => $site])->find();
-                $user->save($params);
+                (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
+
+                $userId = (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->value('id');
                 //更新用户信息
-                (new AsyncCustomer())->runUpdate($params,$user->id);
+                (new AsyncCustomer())->runUpdate($params,$userId);
             }
 
             return true;
@@ -159,10 +160,12 @@ class WebUsers extends Model
                 $params['store_id'] = $v['store_id'];
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                 $params['is_vip'] = $v['is_vip'];
-                $user = (new WebUsers)->where(['entity_id' => $v['entity_id'], 'site' => $site])->find();
-                $user->save($params);
+
+                (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
+
+                $userId = (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->value('id');
                 //更新用户信息
-                (new AsyncCustomer())->runUpdate($params,$user->id);
+                (new AsyncCustomer())->runUpdate($params,$userId);
             }
 
             return true;

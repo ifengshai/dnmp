@@ -92,9 +92,9 @@ class WebShoppingCart extends Model
                 $params['customer_id'] = $v['customer_id'];
                 $params['customer_email'] = $v['customer_email'];
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $cart = (new WebShoppingCart())->where(['entity_id' => $v['entity_id'], 'site' => $site])->find();
-                $cart->save($params);
-                (new AsyncCart())->runUpdate($params,$cart->id);
+                (new WebShoppingCart())->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
+                $cartId = (new WebShoppingCart())->where(['entity_id' => $v['entity_id'], 'site' => $site])->value('id');
+                (new AsyncCart())->runUpdate($params,$cartId);
             }
 
             return true;

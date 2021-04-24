@@ -62,7 +62,7 @@ class AsyncOrder extends BaseElasticsearch
      *
      * @param $data
      * @param $entityId
-     * @param $site
+     * @param  $site
      *
      * @author crasphb
      * @date   2021/4/23 15:12
