@@ -51,8 +51,7 @@ class WebShoppingCart extends Model
                 $params['customer_email'] = $v['customer_email'];
                 $params['created_at'] = strtotime($v['created_at']) + 28800;
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $cart = (new WebShoppingCart())->insert($params);
-                $cartId = $cart->getLastInsID();
+                $cartId = (new WebShoppingCart())->insertGetId($params);
                 (new AsyncCart())->runInsert($params,$cartId);
 
             }
