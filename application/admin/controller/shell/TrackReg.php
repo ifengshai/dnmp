@@ -1097,7 +1097,7 @@ class TrackReg extends Backend
         $arr['vip_user_num'] = $zeelool_model->table('oc_vip_order')->where($vip_where)->count();
         //支付成功的订单数
         $order_where = [];
-        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$date_time."'")];
+        $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '".$date_time."'")];
         $order_where['status'] = [
             'in',
             [
@@ -1275,7 +1275,7 @@ class TrackReg extends Backend
         //支付成功的订单数
         $order_where = [];
         $order_where = [];
-        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$date_time."'")];
+        $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '".$date_time."'")];
         $order_where['status'] = [
             'in',
             [
@@ -1448,7 +1448,7 @@ class TrackReg extends Backend
 
         //支付成功的订单数
         $order_where = [];
-        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$date_time."'")];
+        $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '".$date_time."'")];
         $order_where['status'] = [
             'in',
             [
