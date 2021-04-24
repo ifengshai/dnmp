@@ -10,7 +10,7 @@ namespace app\admin\controller\elasticsearch\async;
 
 
 use app\admin\controller\elasticsearch\BaseElasticsearch;
-use app\admin\model\order\order\Order;
+use app\admin\model\order\Order;
 
 class AsyncOrder extends BaseElasticsearch
 {

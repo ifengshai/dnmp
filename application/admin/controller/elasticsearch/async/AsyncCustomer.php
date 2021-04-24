@@ -30,6 +30,7 @@ class AsyncCustomer extends BaseElasticsearch
         $mergeData = $value['created_at'];
         $insertData = [
             'id' => $id,
+            'entity_id' => $value['entity_id'],
             'site' => $value['site'],
             'email' => $value['email'],
             'update_time_day' => date('Ymd',$value['updated_at']),
@@ -61,6 +62,8 @@ class AsyncCustomer extends BaseElasticsearch
         },$data);
         $value['update_time_day'] = date('Ymd',$value['updated_at']);
         $mergeData = $value['updated_at'];
+        unset($value['updated_at']);
+        unset($value['created_at']);
         $insertData = $this->formatDate($value,$mergeData);
         $this->esService->updateEs('mojing_customer',$insertData);
     }
