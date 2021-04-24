@@ -1070,4 +1070,68 @@ class Wangpenglei extends Backend
         }
     }
 
+
+    /**
+     * 判断处方是否异常
+     *
+     * @param  array  $params
+     *
+     * @author wpl
+     * @date   2021/4/23 9:31
+     */
+    protected function is_prescription_abnormal($params = [])
+    {
+        $list = [];
+        $od_sph = (float)urldecode($params['od_sph']);
+        $os_sph = (float)urldecode($params['os_sph']);
+        $od_cyl = (float)urldecode($params['od_cyl']);
+        $os_cyl = (float)urldecode($params['os_cyl']);
+        /**
+         * 判断处方是否异常规则
+         * 1、SPH值或CYL值的“+”“_”号不一致
+         * 2、左右的SPH或CYL 绝对值相差超过3
+         * 3、有SPH或CYL无PD
+         * 4、有PD无SPH及CYL
+         */
+        if (($od_sph < 0 && $od_cyl > 0) || ($od_sph > 0 && $od_cyl < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        if (($os_sph < 0 && $os_cyl > 0) || ($os_sph > 0 && $os_cyl < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        //绝对值相差超过3
+        $odDifference = abs($od_sph) - abs($od_cyl);
+        $osDifference = abs($os_sph) - abs($os_cyl);
+        if (abs($odDifference) > 3 || abs($osDifference) > 3) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        //有PD无SPH和CYL
+        if (($params['pdcheck'] == 'on' || $params['pd']) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        //有SPH或CYL无PD
+        if (($params['pdcheck'] != 'on' && !$params['pd']) && ($od_sph || $os_sph || $od_cyl || $os_cyl)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        $list['is_prescription_abnormal'] = $list['is_prescription_abnormal'] ?: 0;
+
+        return $list;
+    }
+
+    public function test001()
+    {
+        $params['od_sph'] = '3.00';
+        $params['os_sph'] = '2.00';
+        $params['od_cyl'] = '-0.75';
+        $params['os_cyl'] = '-0.50';
+        $params['pd'] = 60;
+        $list = $this->is_prescription_abnormal($params);
+        dump($list);
+    }
+
 }
