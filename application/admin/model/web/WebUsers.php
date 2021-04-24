@@ -47,8 +47,7 @@ class WebUsers extends Model
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                 $params['resouce'] = $v['resouce'];
                 $params['is_vip'] = $v['is_vip'];
-                $user = (new WebUsers)->insert($params);
-                $userId = $user->getLastInsID();
+                $userId = (new WebUsers)->insertGetId($params);
                 //新增用户信息
                 (new AsyncCustomer())->runInsert($params,$userId);
             }
@@ -125,8 +124,7 @@ class WebUsers extends Model
                 $params[$k]['created_at'] = strtotime($v['created_at']) + 28800;
                 $params[$k]['updated_at'] = strtotime($v['updated_at']) + 28800;
                 $params[$k]['is_vip'] = $v['is_vip'];
-                $user = (new WebUsers)->insert($params);
-                $userId = $user->getLastInsID();
+                $userId = (new WebUsers)->insertGetId($params);
                 //新增用户信息
                 (new AsyncCustomer())->runInsert($params,$userId);
             }
