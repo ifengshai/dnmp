@@ -1298,6 +1298,7 @@ class NewProduct extends Backend
      */
     public function productMappingList()
     {
+
         //设置过滤方法
         $this->request->filter(['strip_tags']);
 
@@ -1316,6 +1317,19 @@ class NewProduct extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['website_type']) {
                 unset($map['website_type']);
+            }
+            if ($filter['is_spot']){
+                $sku = $this->item->where(['is_spot' =>$filter['is_spot']])->column('sku');
+                if ($sku){
+                    $map['sku'] = ['in',$sku];
+                }
+                unset($filter['is_spot']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }else{
+              if ($filter['is_spot'] ==0){
+                  unset($filter['is_spot']);
+                  $this->request->get(['filter' => json_encode($filter)]);
+              }
             }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -1972,6 +1986,19 @@ class NewProduct extends Backend
                 $map['a.create_time'] = ['between', [$arr[0] . ' ' . $arr[1], $arr[3] . ' ' . $arr[4]]];
                 unset($filter['create_time']);
                 $this->request->get(['filter' => json_encode($filter)]);
+            }
+            if ($filter['is_spot']){
+                $sku = $this->item->where(['is_spot' =>$filter['is_spot']])->column('sku');
+                if ($sku){
+                    $map['a.sku'] = ['in',$sku];
+                }
+                unset($filter['is_spot']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }else{
+                if ($filter['is_spot'] ==0){
+                    unset($filter['is_spot']);
+                    $this->request->get(['filter' => json_encode($filter)]);
+                }
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model->alias('a')
