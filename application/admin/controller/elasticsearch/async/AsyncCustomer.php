@@ -64,7 +64,7 @@ class AsyncCustomer extends BaseElasticsearch
         $mergeData = $value['updated_at'];
         unset($value['updated_at']);
         unset($value['created_at']);
-        $insertData = $this->formatDate($value,$mergeData);
-        $this->esService->updateEs('mojing_customer',$insertData);
+        $updateData = $this->formatDate($value,$mergeData);
+        $this->esService->updateEs('mojing_customer',$updateData);
     }
 }

@@ -64,6 +64,7 @@ class AsyncCart extends BaseElasticsearch
             'create_time' => $mergeData,
 
         ];
-        $this->esService->addToEs('mojing_cart',$this->formatDate($insertData,$mergeData));
+        $updateData = $this->formatDate($insertData,$mergeData);
+        $this->esService->updateEs('mojing_cart', $updateData);
     }
 }
