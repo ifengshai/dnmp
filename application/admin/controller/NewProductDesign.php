@@ -9,6 +9,7 @@ use app\admin\model\DistributionLog;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemBrand;
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\Order;
 use app\common\controller\Backend;
 use app\common\model\Auth;
@@ -75,6 +76,7 @@ class NewProductDesign extends Backend
     public function index()
     {
         $admin = new Admin();
+        $Item = new Item();
         //当前是否为关联查询
         $this->relationSearch = false;
         //设置过滤方法
@@ -91,6 +93,12 @@ class NewProductDesign extends Backend
             }
             if ($filter['sku']) {
                 $map['sku'] = ['like','%'.$filter['sku'].'%'];
+            }
+            if ($filter['site']){
+                $itemPlatformSku = new ItemPlatformSku();
+                $sku = $itemPlatformSku->where(['platform_type'=>$filter['site']])->column('sku');
+                $map['sku'] = ['in',$sku];
+                unset($filter['site']);
             }
             unset($filter['label']);
             if ($filter['responsible_id']){
@@ -124,10 +132,8 @@ class NewProductDesign extends Backend
                 ->select();
             foreach ($list as $row) {
                 $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time']);
-
             }
             $list = collection($list)->toArray();
-
             foreach ($list as $key=>$item){
                 $list[$key]['label'] = $map['status']?$map['status']:0;
                 if ($item['responsible_id'] !==null){
@@ -135,10 +141,10 @@ class NewProductDesign extends Backend
                 }else{
                     $list[$key]['responsible_id'] = '暂无';
                 }
+                $itemStatusIsNew = $Item->where(['sku'=>$item['sku']])->field('item_status,is_new')->find();
+                $list[$key]['item_status'] =$itemStatusIsNew->item_status;
+                $list[$key]['is_new'] = $itemStatusIsNew->is_new;
             }
-            //获取当前用户id
-
-
             $result = array("total" => $total,"label"=>$map['status']?$map['status']:0, "rows" => $list);
 
             return json($result);
