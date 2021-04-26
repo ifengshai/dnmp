@@ -1136,7 +1136,7 @@ class Wangpenglei extends Backend
 
     public function test01()
     {
-        echo shell_exec('cd /var/www/mojing/public && sudo  php admin_1biSSnWyfW.php shell/order_data/create_wave_order');
+        echo shell_exec('cd /var/www/mojing/public && php admin_1biSSnWyfW.php shell/order_data/create_wave_order');
     }
 
 }
