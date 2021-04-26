@@ -34,31 +34,30 @@ class WebShoppingCart extends Model
             return false;
         }
 
-        $params = [];
-        foreach ($data as $k => $v) {
-            $params[$k]['entity_id'] = $v['entity_id'];
-            $params[$k]['store_id'] = $v['store_id'];
-            $params[$k]['is_active'] = $v['is_active'];
-            $params[$k]['site'] = $site;
-            $params[$k]['items_count'] = $v['items_count'];
-            $params[$k]['items_qty'] = $v['items_qty'];
-            $params[$k]['base_currency_code'] = $v['base_currency_code'];
-            $params[$k]['quote_currency_code'] = $v['quote_currency_code'];
-            $params[$k]['grand_total'] = $v['grand_total'];
-            $params[$k]['base_grand_total'] = $v['base_grand_total'];
-            $params[$k]['customer_id'] = $v['customer_id'] ?: 0;
-            $params[$k]['customer_email'] = $v['customer_email'] ?: '';
-            $params[$k]['created_at'] = strtotime($v['created_at']) + 28800;
-            $params[$k]['updated_at'] = strtotime($v['updated_at']) + 28800;
+        try {
+            $params = [];
+            foreach ($data as $k => $v) {
+                $params[$k]['entity_id'] = $v['entity_id'];
+                $params[$k]['store_id'] = $v['store_id'];
+                $params[$k]['is_active'] = $v['is_active'];
+                $params[$k]['site'] = $site;
+                $params[$k]['items_count'] = $v['items_count'];
+                $params[$k]['items_qty'] = $v['items_qty'];
+                $params[$k]['base_currency_code'] = $v['base_currency_code'];
+                $params[$k]['quote_currency_code'] = $v['quote_currency_code'];
+                $params[$k]['grand_total'] = $v['grand_total'];
+                $params[$k]['base_grand_total'] = $v['base_grand_total'];
+                $params[$k]['customer_id'] = $v['customer_id'] ?: 0;
+                $params[$k]['customer_email'] = $v['customer_email'] ?: '';
+                $params[$k]['created_at'] = strtotime($v['created_at']) + 28800;
+                $params[$k]['updated_at'] = strtotime($v['updated_at']) + 28800;
+            }
+            (new WebShoppingCart)->saveAll($params);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::record('webShoppingCart:'.$e->getMessage());
         }
-        (new WebShoppingCart)->saveAll($params);
-//        return true;
-//
-//        try {
-//
-//        } catch (\Exception $e) {
-//            Log::record('webShoppingCart:'.$e->getMessage());
-//        }
     }
 
     /**
