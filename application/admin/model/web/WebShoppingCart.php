@@ -46,8 +46,8 @@ class WebShoppingCart extends Model
             $params[$k]['quote_currency_code'] = $v['quote_currency_code'];
             $params[$k]['grand_total'] = $v['grand_total'];
             $params[$k]['base_grand_total'] = $v['base_grand_total'];
-            $params[$k]['customer_id'] = $v['customer_id'];
-            $params[$k]['customer_email'] = $v['customer_email'];
+            $params[$k]['customer_id'] = $v['customer_id'] ?: 0;
+            $params[$k]['customer_email'] = $v['customer_email'] ?: '';
             $params[$k]['created_at'] = strtotime($v['created_at']) + 28800;
             $params[$k]['updated_at'] = strtotime($v['updated_at']) + 28800;
         }
@@ -88,8 +88,8 @@ class WebShoppingCart extends Model
                 $params['quote_currency_code'] = $v['quote_currency_code'];
                 $params['grand_total'] = $v['grand_total'];
                 $params['base_grand_total'] = $v['base_grand_total'];
-                $params['customer_id'] = $v['customer_id'];
-                $params['customer_email'] = $v['customer_email'];
+                $params['customer_id'] = $v['customer_id'] ?: 0;
+                $params['customer_email'] = $v['customer_email'] ?: '';
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                 (new WebShoppingCart)->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
             }
