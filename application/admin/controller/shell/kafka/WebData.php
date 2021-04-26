@@ -228,6 +228,8 @@ class WebData extends Backend
         $this->process_data(10);
         $this->process_data(11);
         $this->process_data(12);
+
+        echo "ok";
     }
 
     /**

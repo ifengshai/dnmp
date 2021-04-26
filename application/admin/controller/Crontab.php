@@ -4674,6 +4674,7 @@ class Crontab extends Backend
         }
 
         Db::table('fa_goods_stock_change')->insertAll(array_values($info));
+        echo "ok";
     }
     public function get_workload_data()
     {
