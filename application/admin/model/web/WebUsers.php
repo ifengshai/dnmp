@@ -38,16 +38,17 @@ class WebUsers extends Model
             $params = [];
             foreach ($data as $k => $v) {
                 $params[$k]['entity_id'] = $v['entity_id'];
-                $params[$k]['email'] = $v['email'];
+                $params[$k]['email'] = $v['email'] ?: '';
                 $params[$k]['site'] = $site;
-                $params[$k]['group_id'] = $v['group_id'];
-                $params[$k]['store_id'] = $v['store_id'];
+                $params[$k]['group_id'] = $v['group_id'] ?: 0;
+                $params[$k]['store_id'] = $v['store_id'] ?: 0;
                 $params[$k]['created_at'] = strtotime($v['created_at']) + 28800;
                 $params[$k]['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $params[$k]['resouce'] = $v['resouce'];
-                $params[$k]['is_vip'] = $v['is_vip'];
+                $params[$k]['resouce'] = $v['resouce'] ?: 0;
+                $params[$k]['is_vip'] = $v['is_vip'] ?: 0;
             }
             (new WebUsers)->saveAll($params);
+
             return true;
         } catch (\Exception $e) {
             Log::record('webUsers:'.$e->getMessage());
@@ -73,12 +74,12 @@ class WebUsers extends Model
         try {
             foreach ($data as $k => $v) {
                 $params = [];
-                $params['email'] = $v['email'];
-                $params['group_id'] = $v['group_id'];
-                $params['store_id'] = $v['store_id'];
+                $params['email'] = $v['email'] ?: '';
+                $params['group_id'] = $v['group_id'] ?: 0;
+                $params['store_id'] = $v['store_id'] ?: 0;
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $params['resouce'] = $v['resouce'];
-                $params['is_vip'] = $v['is_vip'];
+                $params['resouce'] = $v['resouce'] ?: 0;
+                $params['is_vip'] = $v['is_vip'] ?: 0;
                 (new WebUsers)->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
             }
 
