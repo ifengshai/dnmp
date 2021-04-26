@@ -1720,7 +1720,7 @@ class OrderData extends Backend
      */
     public function create_wave_order()
     {
-        ini_set('memory_limit', '1024M');
+        ini_set('memory_limit', '526M');
         /**
          *
          * 生成规则
