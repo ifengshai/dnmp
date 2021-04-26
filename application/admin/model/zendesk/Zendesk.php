@@ -489,6 +489,8 @@ class Zendesk extends Model
 
             echo 'ok';
         }
+
+        echo "ok";
     }
     /*
      * 统计工作量概况
