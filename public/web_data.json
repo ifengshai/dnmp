@@ -1,5 +1,5 @@
 {
-  "name": "admin_1biSSnWyfW",
+  "name": "web_data",
   "args": "",
   "script": "sudo docker exec php7.3 php /var/www/mojing/public/admin_1biSSnWyfW.php shell/kafka/web_data/syc_data",
   "max_memory_restart": "100M"
