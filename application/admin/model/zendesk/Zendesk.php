@@ -484,6 +484,7 @@ class Zendesk extends Model
                         echo $str." is ok"."\n";
                     }
                 }
+                echo 'ok';
                 usleep(1000);
             }
         }
