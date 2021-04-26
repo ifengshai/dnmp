@@ -71,6 +71,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
+                search: false,
+                showToggle:false,
+                cardView: false,
+                searchFormVisible: true,
+                showExport:false,
                 sortName: 'id',
                 columns: [
                     [
@@ -81,7 +86,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'item_status', title: __('商品状态'),
                             searchList: { 1: '保存', 2: '待审核', 3: '审核通过', 4: '待分配', 5: '审核拒绝', 6: '取消'},
                             custom: { 1: 'black', 2: 'red', 3: 'blue', 4: 'black', 5: 'black', 6: 'black'},
-                            formatter: Table.api.formatter.status
+                            formatter: Table.api.formatter.status,
+                            operate: false,
                         },
                         {
                             field: 'is_new', title: __('是否新品'),
@@ -96,7 +102,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 1: '待录尺寸', 2: '待拍摄', 3: '拍摄中', 4: '待分配', 5: '待修图', 6: '修图中', 7: '待审核', 8: '已完成', 9: '审核拒绝', 10: '完成'},
                             custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
                             formatter: Table.api.formatter.status,
-                            operate: false,
                         },
                         {field: 'responsible_id', title: __('责任人')},
                         {field: 'site', title: __('站点'), visible: false,
