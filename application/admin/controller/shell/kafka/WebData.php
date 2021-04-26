@@ -122,6 +122,7 @@ class WebData extends Backend
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
                         $key = $message->key;
+                        echo $payload['database'].'-'.$payload['type'].'-'.$payload['table'];
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志。
                         if ($payload) {
