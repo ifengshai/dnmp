@@ -114,15 +114,12 @@ class Soap
                 return false;
                 break;
         }
-        file_put_contents('/www/wwwroot/mojing/runtime/log/goods.log', serialize($params)."\r\n", FILE_APPEND);
-
 
         $client = new Client(['verify' => false]);
         unset($params['site']);
 
         $response = $client->request('POST', $url, ['form_params' => $params]);
 
-        file_put_contents('/www/wwwroot/mojing/runtime/log/goods.log', serialize($response)."\r\n", FILE_APPEND);
         $body = $response->getBody();
         $stringBody = (string)$body;
         $res = json_decode($stringBody, true);
