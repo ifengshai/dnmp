@@ -83,10 +83,17 @@ class ZendeskMailTemplate extends Backend
         $platform =  (new MagentoPlatform())->getOrderPlatformList();
         $templateCategory = $this->template_category();
         if ($this->request->isAjax()) {
+            $filter = json_decode($this->request->get('filter'), true);
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            if($filter['template_category']){
+                $templateId = array_search($filter['template_category'],$templateCategory);
+                $map['template_category'] = $templateId;
+                unset($filter['template_category']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $whereAnd = [
@@ -96,15 +103,20 @@ class ZendeskMailTemplate extends Backend
                 'template_permission' => 2,
                 'create_person' => session('admin.nickname'),
             ];
+
             $total = $this->model
-                ->where($where)->where($whereAnd)
+                ->where($where)
+                ->where($map)
+                ->where($whereAnd)
                 ->whereOr(function($query) use ($whereOr){
                     $query->where($whereOr);
                 })->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->where($where)->where($whereAnd)
+                ->where($where)
+                ->where($map)
+                ->where($whereAnd)
                 ->whereOr(function($query) use ($whereOr){
                     $query->where($whereOr);
                 })->order($sort, $order)
