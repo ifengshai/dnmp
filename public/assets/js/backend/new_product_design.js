@@ -75,7 +75,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 showToggle:false,
                 cardView: false,
                 searchFormVisible: true,
-                showExport:false,
+                showExport:true,
                 sortName: 'id',
                 columns: [
                     [
@@ -84,7 +84,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'sku', title: __('Sku')},
                         {
                             field: 'item_status', title: __('商品状态'),
-                            searchList: { 1: '保存', 2: '待审核', 3: '审核通过', 4: '待分配', 5: '审核拒绝', 6: '取消'},
+                            searchList: { 1: '新建', 2: '待审核', 3: '审核通过', 4: '待分配', 5: '审核拒绝', 6: '取消'},
                             custom: { 1: 'black', 2: 'red', 3: 'blue', 4: 'black', 5: 'black', 6: 'black'},
                             formatter: Table.api.formatter.status,
                             operate: false,
