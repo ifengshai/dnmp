@@ -481,10 +481,10 @@ class Zendesk extends Model
                         $task->save();
 
                         $str .= $assign_id.'--'.$due_id;
-                        file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$str."\r\n",FILE_APPEND);
                         echo $str." is ok"."\n";
                     }
                 }
+                echo 'ok';
                 usleep(1000);
             }
         }
