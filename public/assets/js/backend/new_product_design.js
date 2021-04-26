@@ -87,14 +87,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: { 1: '新建', 2: '待审核', 3: '审核通过', 4: '待分配', 5: '审核拒绝', 6: '取消'},
                             custom: { 1: 'black', 2: 'red', 3: 'blue', 4: 'black', 5: 'black', 6: 'black'},
                             formatter: Table.api.formatter.status,
-                            operate: false,
                         },
                         {
                             field: 'is_new', title: __('是否新品'),
                             searchList: { 1: '是', 2: '否'},
                             custom: { 1: 'black', 2: 'red'},
                             formatter: Table.api.formatter.status,
-                            operate: false,
                         },
                         {
                             field: 'status',
