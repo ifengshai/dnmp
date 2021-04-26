@@ -240,6 +240,7 @@ class WebData extends Backend
 
         if ($site == 1) {
             $entity_id = WebShoppingCart::where(['entity_id' => ['<', 18266819], 'site' => 1])->max('entity_id');
+            echo $entity_id."\n";
             $res = Db::connect('database.db_zeelool')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
         } elseif ($site == 2) {
             $entity_id = WebShoppingCart::where(['entity_id' => ['<', 2048469], 'site' => 2])->max('entity_id');
@@ -261,6 +262,7 @@ class WebData extends Backend
             $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
         }
         $res = collection($res)->toArray();
+        dump($res);
         WebShoppingCart::setInsertData($res, $site);
         echo $site.'--ok'."\n";
     }
