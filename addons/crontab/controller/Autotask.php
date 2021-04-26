@@ -100,6 +100,7 @@ class Autotask extends Controller
             try {
                 if ($crontab['type'] == 'url') {
                     if (substr($crontab['content'], 0, 1) == "/") {
+
                         // 本地项目URL
                         $message = shell_exec('php '.ROOT_PATH.'public/index.php '.$crontab['content']);
                         $result = $message ? true : false;
@@ -130,6 +131,7 @@ class Autotask extends Controller
             } catch (\Exception $e) {
                 $message = $e->getMessage();
             }
+            $message = $message."\n".phpversion();
             $log = [
                 'crontab_id'   => $crontab['id'],
                 'executetime'  => $time,
