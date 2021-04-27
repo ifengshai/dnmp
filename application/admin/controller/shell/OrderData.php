@@ -1494,7 +1494,7 @@ class OrderData extends Backend
         }
 
 
-        if ($params['lens_number'] == '23302000' || $params['lens_number'] == '23303000' || $params['lens_number'] == '23302001') {
+        if ($params['lens_number'] == '23302000' || $params['lens_number'] == '23302001') {
             /**
              * 1.61变色灰 现片
              * SPH:0.00～-8.00 CYL:0.00～-2.00
