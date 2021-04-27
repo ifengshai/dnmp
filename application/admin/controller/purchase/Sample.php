@@ -1771,6 +1771,5 @@ class Sample extends Backend
             }
         }
     }
-
 }
 
