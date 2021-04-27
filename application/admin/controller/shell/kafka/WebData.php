@@ -268,38 +268,48 @@ class WebData extends Backend
     }
 
 
+    public function process_list_user()
+    {
+        $this->process_users_data(1);
+        $this->process_users_data(2);
+        $this->process_users_data(3);
+        $this->process_users_data(9);
+        $this->process_users_data(10);
+        $this->process_users_data(11);
+        $this->process_users_data(12);
+    }
+
     /**
      * 处理用户表旧数据
      * @author wpl
      * @date   2021/4/26 15:59
      */
-    public function process_users_data($site)
+    protected function process_users_data($site)
     {
         if ($site == 1) {
-            $entity_id = WebShoppingCart::where(['entity_id' => ['<', 18266819], 'site' => 1])->max('entity_id');
-            echo $entity_id."\n";
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $entity_id = WebUsers::where(['entity_id' => ['<', 1155328], 'site' => 1])->max('entity_id');
+            $res = Db::connect('database.db_zeelool')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
         } elseif ($site == 2) {
-            $entity_id = WebShoppingCart::where(['entity_id' => ['<', 2048469], 'site' => 2])->max('entity_id');
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $entity_id = WebUsers::where(['entity_id' => ['<', 421074], 'site' => 2])->max('entity_id');
+            $res = Db::connect('database.db_voogueme')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
         } elseif ($site == 3) {
-            $entity_id = WebShoppingCart::where(['entity_id' => ['<', 2568158], 'site' => 3])->max('entity_id');
-            $res = Db::connect('database.db_nihao')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $entity_id = WebUsers::where(['entity_id' => ['<', 71892], 'site' => 3])->max('entity_id');
+            $res = Db::connect('database.db_nihao')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
         } elseif ($site == 9) {
-            $entity_id = WebShoppingCart::where(['site' => 9])->max('entity_id');
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $entity_id = WebUsers::where(['site' => 9])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
         } elseif ($site == 10) {
-            $entity_id = WebShoppingCart::where(['entity_id' => ['<', 59581], 'site' => 10])->max('entity_id');
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $entity_id = WebUsers::where(['entity_id' => ['<', 10823], 'site' => 10])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
         } elseif ($site == 11) {
-            $entity_id = WebShoppingCart::where(['entity_id' => ['<', 30131], 'site' => 11])->max('entity_id');
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $entity_id = WebUsers::where(['entity_id' => ['<', 8070], 'site' => 11])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
         } elseif ($site == 12) {
-            $entity_id = WebShoppingCart::where(['site' => 12])->max('entity_id');
-            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $entity_id = WebUsers::where(['site' => 12])->max('entity_id');
+            $res = Db::connect('database.db_voogueme_acc')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
         }
         $res = collection($res)->toArray();
-        WebShoppingCart::setInsertData($res, $site);
+        WebUsers::setInsertData($res, $site);
         echo $site.'--ok'."\n";
     }
 
