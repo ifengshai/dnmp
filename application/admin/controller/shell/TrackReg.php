@@ -846,6 +846,8 @@ class TrackReg extends Backend
             ->where(['is_show' => 1, 'type' => 3])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
             ->setField('is_show', 0);
+
+        echo "ok";
     }
 
     //活跃用户数
@@ -2063,6 +2065,7 @@ class TrackReg extends Backend
         $arr['sales_num_e'] = $zeelool[6] + $voogueme[6] + $nihao[6];
         $arr['sales_num_f'] = $zeelool[7] + $voogueme[7] + $nihao[7];
         Db::name('datacenter_day_supply')->insert($arr);
+        echo "ok";
     }
 
     public function getSalesnum($site)
@@ -2331,6 +2334,8 @@ class TrackReg extends Backend
         if ($data['active_user_num'] == 0) {
             $this->only_ga_data();
         }
+
+        echo "ok";
     }
 
     //计划任务跑每天的分类销量的数据
@@ -2793,6 +2798,8 @@ class TrackReg extends Backend
             unset($sku_data[$k]['plat_on_way_stock']);
             Db::name('datacenter_sku_day')->insert($sku_data[$k]);
         }
+
+        echo "ok";
     }
 
     //跑sku每天唯一身份浏览量
@@ -3820,5 +3827,6 @@ class TrackReg extends Backend
             $params[$k]['wait_instock_num'] = $purchase_num;
         }
         $item->saveAll($params);
+        echo "ok";
     }
 }
