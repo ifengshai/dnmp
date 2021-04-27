@@ -2,6 +2,8 @@
 
 namespace app\admin\controller;
 
+use app\admin\controller\elasticsearch\async\AsyncOperation;
+use app\admin\controller\elasticsearch\async\AsyncOrder;
 use app\admin\model\purchase\PurchaseOrder;
 use app\admin\model\warehouse\LogisticsInfo;
 use app\common\controller\Backend;
@@ -3370,6 +3372,10 @@ class Crontab extends Backend
             $info = Db::name('operation_analysis')->where(['order_platform' => $platform])->update($updateData);
         }
         if ($info) {
+            /**
+             * 更新es数据
+             */
+            (new AsyncOperation())->runUpdate($platform);
             echo 'ok';
         } else {
             echo 'error';
@@ -3729,6 +3735,10 @@ class Crontab extends Backend
             $info = Db::name('operation_analysis')->where(['order_platform' => $platform])->update($updateData);
         }
         if ($info) {
+            /**
+             * 更新es数据
+             */
+            (new AsyncOperation())->runUpdate($platform);
             echo 'ok';
         } else {
             echo 'error';
