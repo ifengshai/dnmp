@@ -1339,10 +1339,10 @@ class Item extends Backend
             if ($row['item_status'] != 2) {
                 $this->error('此商品状态不能审核通过');
             }
-            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+//            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             Db::startTrans();
             $this->model->startTrans();
-            $platform->startTrans();
+//            $platform->startTrans();
             try {
                 $map['id'] = $id;
                 $data['item_status'] = 3;
@@ -1351,91 +1351,92 @@ class Item extends Backend
                 if ($res === false) {
                     throw new Exception('审核失败！！');
                 }
+                //需求1829 商品审核时不给网站传商品数据，只改变商品状态为已审核
                 //查询同步的平台
-                $platformArr = $platform->where(['sku' => $row['sku']])->where('platform_type', '<>', 4)->select();
-                $errorNum = [];
-                $uploadItemArr = [];
-                foreach ($platformArr as $k => $v) {
-                    $itemAttribute = new ItemAttribute();
-                    $itemAttributeDetail = $itemAttribute->where('item_id', $id)->find();
-                    if ($row['category_id'] == 35) {
-                        $attributeType = 4;//耳饰
-                    } elseif ($row['category_id'] == 39 || $row['category_id'] == 34) {
-                        $attributeType = 5;//项链/手链
-                    } elseif ($row['category_id'] == 38) {
-                        $attributeType = 6;//眼镜链
-                    } elseif ($row['category_id'] == 32) {
-                        $attributeType = 7;//镜盒
-                    } else {
-                        $attributeType = 1;//眼镜
-                    }
-                    //审核通过把SKU同步到有映射关系的平台
-                    $uploadItemArr['sku'] = $v['platform_sku'];
-                    $uploadItemArr['attribute_type'] = $attributeType;
-                    $uploadItemArr['frame_height'] = $itemAttributeDetail['frame_height'];
-                    $uploadItemArr['frame_width'] = $itemAttributeDetail['frame_width'];
-                    $uploadItemArr['frame_length'] = $itemAttributeDetail['frame_length'];
-                    $uploadItemArr['frame_temple_length'] = $itemAttributeDetail['frame_temple_length'];
-                    $uploadItemArr['frame_bridge'] = $itemAttributeDetail['frame_bridge'];
-                    $uploadItemArr['mirror_width'] = $itemAttributeDetail['mirror_width'];
-                    $uploadItemArr['frame_weight'] = $itemAttributeDetail['frame_weight'];
-                    $uploadItemArr['earrings_height'] = $itemAttributeDetail['earrings_height'];
-                    $uploadItemArr['earrings_width'] = $itemAttributeDetail['earrings_width'];
-                    $uploadItemArr['necklace_perimeter'] = $itemAttributeDetail['necklace_perimeter'];
-                    $uploadItemArr['necklace_chain'] = $itemAttributeDetail['necklace_chain'];
-                    $uploadItemArr['eyeglasses_chain'] = $itemAttributeDetail['eyeglasses_chain'];
-                    $uploadItemArr['box_height'] = $itemAttributeDetail['box_height'];
-                    $uploadItemArr['box_width'] = $itemAttributeDetail['box_width'];
-                    $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
-                    $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
-                    $uploadItemArr['site'] = $v['platform_type'];
-                    $uploadItemArr['status'] = $v['outer_sku_status'];
-                    $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
-                    $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
-                    //审核通过把SKU同步到有映射关系的平台
-                    if ($v['platform_type'] == 12) {
-                        $uploadItemArr['skus'][0] = [
-                            'sku'  => $v['platform_sku'],
-                            'type' => $row['category_id'] == 53 ? 1 : 2,
-                        ];
-                        $uploadItemArr['sku'] = $v['platform_sku'];
-                        $uploadItemArr['site'] = $v['platform_type'];
-                    } elseif ($uploadItemArr['site'] == 13) {
-                        $params['sku_info'] = $v['platform_sku'];
-                        $params['platform_type'] = 1;
-                        $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
-                        $thirdRes = json_decode($thirdRes, true);
-                    } elseif ($uploadItemArr['site'] == 14) {
-                        $params['sku_info'] = $v['platform_sku'];
-                        $params['platform_type'] = 2;
-                        $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
-                        $thirdRes = json_decode($thirdRes, true);
-                    } else {
-                        $soapRes = Soap::createProduct($uploadItemArr);
-                    }
-                    if ($soapRes || $thirdRes['code'] == 1) {
-                        $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
-                    } else {
-                        $errorNum[] = $v['platform_type'];
-                    }
-                }
+//                $platformArr = $platform->where(['sku' => $row['sku']])->where('platform_type', '<>', 4)->select();
+//                $errorNum = [];
+//                $uploadItemArr = [];
+//                foreach ($platformArr as $k => $v) {
+//                    $itemAttribute = new ItemAttribute();
+//                    $itemAttributeDetail = $itemAttribute->where('item_id', $id)->find();
+//                    if ($row['category_id'] == 35) {
+//                        $attributeType = 4;//耳饰
+//                    } elseif ($row['category_id'] == 39 || $row['category_id'] == 34) {
+//                        $attributeType = 5;//项链/手链
+//                    } elseif ($row['category_id'] == 38) {
+//                        $attributeType = 6;//眼镜链
+//                    } elseif ($row['category_id'] == 32) {
+//                        $attributeType = 7;//镜盒
+//                    } else {
+//                        $attributeType = 1;//眼镜
+//                    }
+//                    //审核通过把SKU同步到有映射关系的平台
+//                    $uploadItemArr['sku'] = $v['platform_sku'];
+//                    $uploadItemArr['attribute_type'] = $attributeType;
+//                    $uploadItemArr['frame_height'] = $itemAttributeDetail['frame_height'];
+//                    $uploadItemArr['frame_width'] = $itemAttributeDetail['frame_width'];
+//                    $uploadItemArr['frame_length'] = $itemAttributeDetail['frame_length'];
+//                    $uploadItemArr['frame_temple_length'] = $itemAttributeDetail['frame_temple_length'];
+//                    $uploadItemArr['frame_bridge'] = $itemAttributeDetail['frame_bridge'];
+//                    $uploadItemArr['mirror_width'] = $itemAttributeDetail['mirror_width'];
+//                    $uploadItemArr['frame_weight'] = $itemAttributeDetail['frame_weight'];
+//                    $uploadItemArr['earrings_height'] = $itemAttributeDetail['earrings_height'];
+//                    $uploadItemArr['earrings_width'] = $itemAttributeDetail['earrings_width'];
+//                    $uploadItemArr['necklace_perimeter'] = $itemAttributeDetail['necklace_perimeter'];
+//                    $uploadItemArr['necklace_chain'] = $itemAttributeDetail['necklace_chain'];
+//                    $uploadItemArr['eyeglasses_chain'] = $itemAttributeDetail['eyeglasses_chain'];
+//                    $uploadItemArr['box_height'] = $itemAttributeDetail['box_height'];
+//                    $uploadItemArr['box_width'] = $itemAttributeDetail['box_width'];
+//                    $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
+//                    $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
+//                    $uploadItemArr['site'] = $v['platform_type'];
+//                    $uploadItemArr['status'] = $v['outer_sku_status'];
+//                    $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
+//                    $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
+//                    //审核通过把SKU同步到有映射关系的平台
+//                    if ($v['platform_type'] == 12) {
+//                        $uploadItemArr['skus'][0] = [
+//                            'sku'  => $v['platform_sku'],
+//                            'type' => $row['category_id'] == 53 ? 1 : 2,
+//                        ];
+//                        $uploadItemArr['sku'] = $v['platform_sku'];
+//                        $uploadItemArr['site'] = $v['platform_type'];
+//                    } elseif ($uploadItemArr['site'] == 13) {
+//                        $params['sku_info'] = $v['platform_sku'];
+//                        $params['platform_type'] = 1;
+//                        $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
+//                        $thirdRes = json_decode($thirdRes, true);
+//                    } elseif ($uploadItemArr['site'] == 14) {
+//                        $params['sku_info'] = $v['platform_sku'];
+//                        $params['platform_type'] = 2;
+//                        $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
+//                        $thirdRes = json_decode($thirdRes, true);
+//                    } else {
+//                        $soapRes = Soap::createProduct($uploadItemArr);
+//                    }
+//                    if ($soapRes || $thirdRes['code'] == 1) {
+//                        $platform->where(['sku' => $row['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+//                    } else {
+//                        $errorNum[] = $v['platform_type'];
+//                    }
+//                }
                 Db::commit();
                 $this->model->commit();
-                $platform->commit();
+//                $platform->commit();
             } catch (ValidateException $e) {
                 Db::rollback();
                 $this->model->rollback();
-                $platform->rollback();
+//                $platform->rollback();
                 $this->error($e->getMessage());
             } catch (PDOException $e) {
                 Db::rollback();
                 $this->model->rollback();
-                $platform->rollback();
+//                $platform->rollback();
                 $this->error($e->getMessage());
             } catch (Exception $e) {
                 Db::rollback();
                 $this->model->rollback();
-                $platform->rollback();
+//                $platform->rollback();
                 $this->error($e->getMessage());
             }
             $this->success('审核成功！！');
@@ -1555,98 +1556,98 @@ class Item extends Backend
             $data['item_status'] = 3;
             $data['check_time'] = date("Y-m-d H:i:s", time());
             //查询同步的平台
-            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+//            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
 
                 Db::startTrans();
                 $this->model->startTrans();
-                $platform->startTrans();
+//                $platform->startTrans();
                 try {
                     $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-                    foreach ($row as $val) {
-                        $platformArr = $platform->where(['sku' => $val['sku']])->where('platform_type', '<>', 4)->select();
-                        $uploadItemArr = [];
-                        foreach ($platformArr as $k => $v) {
-                            $itemAttribute = new ItemAttribute();
-                            $itemAttributeDetail = $itemAttribute->where('item_id', $val['id'])->find();
-                            if ($row['category_id'] == 35) {
-                                $attributeType = 4;//耳饰
-                            } elseif ($row['category_id'] == 39 || $row['category_id'] == 34) {
-                                $attributeType = 5;//项链/手链
-                            } elseif ($row['category_id'] == 38) {
-                                $attributeType = 6;//眼镜链
-                            } elseif ($row['category_id'] == 32) {
-                                $attributeType = 7;//镜盒
-                            } else {
-                                $attributeType = 1;//眼镜
-                            }
-                            //审核通过把SKU同步到有映射关系的平台
-                            $uploadItemArr['sku'] = $v['platform_sku'];
-                            $uploadItemArr['attribute_type'] = $attributeType;
-                            $uploadItemArr['frame_height'] = $itemAttributeDetail['frame_height'];
-                            $uploadItemArr['frame_width'] = $itemAttributeDetail['frame_width'];
-                            $uploadItemArr['frame_length'] = $itemAttributeDetail['frame_length'];
-                            $uploadItemArr['frame_temple_length'] = $itemAttributeDetail['frame_temple_length'];
-                            $uploadItemArr['frame_bridge'] = $itemAttributeDetail['frame_bridge'];
-                            $uploadItemArr['mirror_width'] = $itemAttributeDetail['mirror_width'];
-                            $uploadItemArr['frame_weight'] = $itemAttributeDetail['frame_weight'];
-                            $uploadItemArr['earrings_height'] = $itemAttributeDetail['earrings_height'];
-                            $uploadItemArr['earrings_width'] = $itemAttributeDetail['earrings_width'];
-                            $uploadItemArr['necklace_perimeter'] = $itemAttributeDetail['necklace_perimeter'];
-                            $uploadItemArr['necklace_chain'] = $itemAttributeDetail['necklace_chain'];
-                            $uploadItemArr['eyeglasses_chain'] = $itemAttributeDetail['eyeglasses_chain'];
-                            $uploadItemArr['box_height'] = $itemAttributeDetail['box_height'];
-                            $uploadItemArr['box_width'] = $itemAttributeDetail['box_width'];
-                            $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
-                            $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
-                            $uploadItemArr['site'] = $v['platform_type'];
-                            $uploadItemArr['status'] = $v['outer_sku_status'];
-                            $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
-                            $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
-                            //审核通过把SKU同步到有映射关系的平台
-                            if ($v['platform_type'] == 12) {
-                                $uploadItemArr['skus'][0] = [
-                                    'sku'  => $v['platform_sku'],
-                                    'type' => $row['category_id'] == 53 ? 1 : 2,
-                                ];
-                                $uploadItemArr['sku'] = $v['platform_sku'];
-                                $uploadItemArr['site'] = $v['platform_type'];
-                            } elseif ($uploadItemArr['site'] == 13) {
-                                $params['sku_info'] = $v['platform_sku'];
-                                $params['platform_type'] = 1;
-                                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
-                                $thirdRes = json_decode($thirdRes, true);
-                            } elseif ($uploadItemArr['site'] == 14) {
-                                $params['sku_info'] = $v['platform_sku'];
-                                $params['platform_type'] = 2;
-                                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
-                                $thirdRes = json_decode($thirdRes, true);
-                            } else {
-                                $soapRes = Soap::createProduct($uploadItemArr);
-                            }
-                            if ($soapRes || $thirdRes['code'] == 1) {
-                                $platform->where(['sku' => $val['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
-                            } else {
-                                $errorNum[] = $v['platform_type'];
-                            }
-                        }
-                    }
+//                    foreach ($row as $val) {
+//                        $platformArr = $platform->where(['sku' => $val['sku']])->where('platform_type', '<>', 4)->select();
+//                        $uploadItemArr = [];
+//                        foreach ($platformArr as $k => $v) {
+//                            $itemAttribute = new ItemAttribute();
+//                            $itemAttributeDetail = $itemAttribute->where('item_id', $val['id'])->find();
+//                            if ($row['category_id'] == 35) {
+//                                $attributeType = 4;//耳饰
+//                            } elseif ($row['category_id'] == 39 || $row['category_id'] == 34) {
+//                                $attributeType = 5;//项链/手链
+//                            } elseif ($row['category_id'] == 38) {
+//                                $attributeType = 6;//眼镜链
+//                            } elseif ($row['category_id'] == 32) {
+//                                $attributeType = 7;//镜盒
+//                            } else {
+//                                $attributeType = 1;//眼镜
+//                            }
+//                            //审核通过把SKU同步到有映射关系的平台
+//                            $uploadItemArr['sku'] = $v['platform_sku'];
+//                            $uploadItemArr['attribute_type'] = $attributeType;
+//                            $uploadItemArr['frame_height'] = $itemAttributeDetail['frame_height'];
+//                            $uploadItemArr['frame_width'] = $itemAttributeDetail['frame_width'];
+//                            $uploadItemArr['frame_length'] = $itemAttributeDetail['frame_length'];
+//                            $uploadItemArr['frame_temple_length'] = $itemAttributeDetail['frame_temple_length'];
+//                            $uploadItemArr['frame_bridge'] = $itemAttributeDetail['frame_bridge'];
+//                            $uploadItemArr['mirror_width'] = $itemAttributeDetail['mirror_width'];
+//                            $uploadItemArr['frame_weight'] = $itemAttributeDetail['frame_weight'];
+//                            $uploadItemArr['earrings_height'] = $itemAttributeDetail['earrings_height'];
+//                            $uploadItemArr['earrings_width'] = $itemAttributeDetail['earrings_width'];
+//                            $uploadItemArr['necklace_perimeter'] = $itemAttributeDetail['necklace_perimeter'];
+//                            $uploadItemArr['necklace_chain'] = $itemAttributeDetail['necklace_chain'];
+//                            $uploadItemArr['eyeglasses_chain'] = $itemAttributeDetail['eyeglasses_chain'];
+//                            $uploadItemArr['box_height'] = $itemAttributeDetail['box_height'];
+//                            $uploadItemArr['box_width'] = $itemAttributeDetail['box_width'];
+//                            $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
+//                            $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
+//                            $uploadItemArr['site'] = $v['platform_type'];
+//                            $uploadItemArr['status'] = $v['outer_sku_status'];
+//                            $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
+//                            $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
+//                            //审核通过把SKU同步到有映射关系的平台
+//                            if ($v['platform_type'] == 12) {
+//                                $uploadItemArr['skus'][0] = [
+//                                    'sku'  => $v['platform_sku'],
+//                                    'type' => $row['category_id'] == 53 ? 1 : 2,
+//                                ];
+//                                $uploadItemArr['sku'] = $v['platform_sku'];
+//                                $uploadItemArr['site'] = $v['platform_type'];
+//                            } elseif ($uploadItemArr['site'] == 13) {
+//                                $params['sku_info'] = $v['platform_sku'];
+//                                $params['platform_type'] = 1;
+//                                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
+//                                $thirdRes = json_decode($thirdRes, true);
+//                            } elseif ($uploadItemArr['site'] == 14) {
+//                                $params['sku_info'] = $v['platform_sku'];
+//                                $params['platform_type'] = 2;
+//                                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
+//                                $thirdRes = json_decode($thirdRes, true);
+//                            } else {
+//                                $soapRes = Soap::createProduct($uploadItemArr);
+//                            }
+//                            if ($soapRes || $thirdRes['code'] == 1) {
+//                                $platform->where(['sku' => $val['sku'], 'platform_type' => $v['platform_type']])->update(['is_upload' => 1]);
+//                            } else {
+//                                $errorNum[] = $v['platform_type'];
+//                            }
+//                        }
+//                    }
                     Db::commit();
                     $this->model->commit();
-                    $platform->commit();
+//                    $platform->commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
                     $this->model->rollback();
-                    $platform->rollback();
+//                    $platform->rollback();
                     $this->error($e->getMessage());
                 } catch (PDOException $e) {
                     Db::rollback();
                     $this->model->rollback();
-                    $platform->rollback();
+//                    $platform->rollback();
                     $this->error($e->getMessage());
                 } catch (Exception $e) {
                     Db::rollback();
                     $this->model->rollback();
-                    $platform->rollback();
+//                    $platform->rollback();
                     $this->error($e->getMessage());
                 }
                 $this->success('审核成功');
