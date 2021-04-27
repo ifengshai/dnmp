@@ -22,4 +22,5 @@ return [
     'app\admin\controller\shell\operate\RepurchaseAsynData',
     'app\admin\controller\shell\operate\DataMarketAsynData',
     'app\admin\controller\shell\service\EmailAsynData',
+    'app\admin\controller\shell\operate\DataCenterAsynData',
 ];
