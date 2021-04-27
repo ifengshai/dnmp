@@ -11,6 +11,7 @@ namespace app\admin\controller\elasticsearch\order;
 
 use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\platformmanage\MagentoPlatform;
+use think\Cache;
 use think\Db;
 
 class OrderDetail extends BaseElasticsearch
@@ -59,15 +60,23 @@ class OrderDetail extends BaseElasticsearch
                 $start = date('Ymd', strtotime($createat[0]));
                 $end = date('Ymd', strtotime($createat[3]));
             }
-            $compareData = [];
-            if ($compareTimeStr) {
-                $compareTime = explode(' ', $compareTimeStr);
-                $compareStart = date('Ymd', strtotime($compareTime[0]));
-                $compareEnd = date('Ymd', strtotime($compareTime[3]));
-                $compareData = $this->buildPurchaseSearch($site, $compareStart, $compareEnd);
+            $cacheStr = 'dash_board_' . $site . $timeStr . $compareTimeStr;
+            $cacheData = Cache::get($cacheStr);
+            if(!$cacheData) {
+                $compareData = [];
+                if ($compareTimeStr) {
+                    $compareTime = explode(' ', $compareTimeStr);
+                    $compareStart = date('Ymd', strtotime($compareTime[0]));
+                    $compareEnd = date('Ymd', strtotime($compareTime[3]));
+                    $compareData = $this->buildPurchaseSearch($site, $compareStart, $compareEnd);
+                }
+                $result = $this->buildPurchaseSearch($site, $start, $end);
+                $allData = $this->esFormatData->formatPurchaseData($site, $result, $compareData);
+                Cache::set($cacheStr, $allData, 600);
+            }else{
+                $allData = $cacheData;
             }
-            $result = $this->buildPurchaseSearch($site, $start, $end);
-            $allData = $this->esFormatData->formatPurchaseData($site, $result, $compareData);
+
             switch ($type) {
                 case 0:
                     $data = $allData['daySalesAmountEcharts'];
