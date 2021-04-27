@@ -313,4 +313,46 @@ class WebData extends Backend
         echo $site.'--ok'."\n";
     }
 
+
+    public function process_list_viporder()
+    {
+        $this->process_viporder_data(1);
+        $this->process_viporder_data(2);
+    }
+
+    /**
+     * 处理用户表旧数据
+     * @author wpl
+     * @date   2021/4/26 15:59
+     */
+    protected function process_viporder_data($site)
+    {
+        if ($site == 1) {
+            $entity_id = WebVipOrder::where(['entity_id' => ['<', 9981], 'site' => 1])->max('entity_id');
+            $res = Db::connect('database.db_zeelool')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 2) {
+            $entity_id = WebVipOrder::where(['entity_id' => ['<', 3006], 'site' => 2])->max('entity_id');
+            $res = Db::connect('database.db_voogueme')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 3) {
+            $entity_id = WebVipOrder::where(['entity_id' => ['<', 71892], 'site' => 3])->max('entity_id');
+            $res = Db::connect('database.db_nihao')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 9) {
+            $entity_id = WebVipOrder::where(['site' => 9])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 10) {
+            $entity_id = WebVipOrder::where(['entity_id' => ['<', 10823], 'site' => 10])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 11) {
+            $entity_id = WebVipOrder::where(['entity_id' => ['<', 8070], 'site' => 11])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 12) {
+            $entity_id = WebVipOrder::where(['site' => 12])->max('entity_id');
+            $res = Db::connect('database.db_voogueme_acc')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        }
+        $res = collection($res)->toArray();
+        WebVipOrder::setInsertData($res, $site);
+        echo $site.'--ok'."\n";
+    }
+
+
 }
