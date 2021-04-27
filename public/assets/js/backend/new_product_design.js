@@ -2,9 +2,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
     function viewTable(table, value) {
         //隐藏、显示搜索及按钮
         $('#responsible_id').parents('.form-group').hide();
+        $('#site').parents('.form-group').hide();
         $('select[name="status"]').parents('.form-group').hide();
         if (0 == value) {
             $('select[name="status"]').parents('.form-group').show();
+            $('#site').parents('.form-group').show();
             $table.bootstrapTable('hideColumn', 'responsible_id');
 
         } else if (1 == value) {
@@ -21,6 +23,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $('#responsible_id').parents('.form-group').show();
         } else if (7 == value) {
             $('#responsible_id').parents('.form-group').show();
+            $('#site').parents('.form-group').show();
         }else{
             $('select[name="status"]').parents('.form-group').show();
         }
@@ -68,22 +71,46 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             table.bootstrapTable({
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
+                search: false,
+                showToggle:false,
+                cardView: false,
+                searchFormVisible: true,
+                showExport:true,
                 sortName: 'id',
                 columns: [
                     [
                         {checkbox: true},
                         {field: 'id', title: __('序号'),operate: false},
                         {field: 'sku', title: __('Sku')},
-
+                        {
+                            field: 'item_status', title: __('商品状态'),
+                            searchList: { 1: '新建', 2: '待审核', 3: '审核通过', 4: '待分配', 5: '审核拒绝', 6: '取消'},
+                            custom: { 1: 'black', 2: 'red', 3: 'blue', 4: 'black', 5: 'black', 6: 'black'},
+                            formatter: Table.api.formatter.status,
+                        },
+                        {
+                            field: 'is_new', title: __('是否新品'),
+                            searchList: { 1: '是', 2: '否'},
+                            custom: { 1: 'black', 2: 'red'},
+                            formatter: Table.api.formatter.status,
+                        },
                         {
                             field: 'status',
                             title: __('状态'),
                             searchList: { 1: '待录尺寸', 2: '待拍摄', 3: '拍摄中', 4: '待分配', 5: '待修图', 6: '修图中', 7: '待审核', 8: '已完成', 9: '审核拒绝', 10: '完成'},
                             custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
-                            formatter: Table.api.formatter.status
+                            formatter: Table.api.formatter.status,
                         },
                         {field: 'responsible_id', title: __('责任人')},
-                        {field: 'create_time', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'site', title: __('站点'), visible: false,
+                            searchList: {
+                            1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',
+                            8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',
+                            12: 'voogmechic',13:'zeelool_cn',14:'alibaba',15:'zeelool_jr'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {field: 'create_time', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange',sortable:true, formatter: Table.api.formatter.datetime},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
 

@@ -1232,7 +1232,6 @@ class CustomerService extends Backend
             }
 
             //客服分组
-            //$kefumanage = config('workorder.kefumanage');
             //整个客服部门人员
             $allCustomers = $this->newCustomers();
             $workOrderNum = $totalOrderMoney = $replacementNum = $refundMoneyNum = $refundMoney = 0;$kefu_create_num = 0;
@@ -1455,24 +1454,9 @@ class CustomerService extends Backend
                 $arr[] = $val;
             }
         }
-//        $arr[] = 75;
-
-//        $result  = Admin::where('id', 'in', $arr)->field('id,nickname')->select();
-        $result = Admin::where('group_id','in',['1','2','3'])->field('id,group_id,nickname')->select();
-
+        $result = Admin::where('group_id','in',['1','2','3'])->where('status','in',['normal'])->field('id,group_id,nickname,status')->select();
         if (!empty($result)) {
             $result = collection($result)->toArray();
-
-//            foreach ($result as $k => $v) {
-//                if (in_array($v['id'], $kefumanage[95]) || (95 == $v['id'])) {
-//                    $result[$k]['group'] = 'B组';
-//                } elseif (in_array($v['id'], $kefumanage[117]) || (117 == $v['id'])) {
-//                    $result[$k]['group'] = 'A组';
-//                } else {
-//                    $result[$k]['group'] = '未知';
-//                }
-//            }
-
             foreach ($result as $k => $v) {
                 if ($v['group_id'] ==1){
                     $result[$k]['group'] = 'A组';
