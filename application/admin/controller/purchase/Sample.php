@@ -3,6 +3,10 @@
 namespace app\admin\controller\purchase;
 
 use app\admin\model\NewProductDesign;
+use app\admin\model\purchase\SampleWorkorder;
+use app\admin\model\purchase\SampleWorkorderItem;
+use app\admin\model\warehouse\Outstock;
+use app\admin\model\warehouse\OutStockItem;
 use app\common\controller\Backend;
 use Aws\S3\S3Client;
 use think\Db;
@@ -1683,5 +1687,66 @@ class Sample extends Backend
         }
         return $not_enough ? true : false;
     }
+
+
+    /**
+     * @author zjw
+     * @date   2021/4/27 10:08
+     * 样品间商品批量出库
+     */
+    public function batchDelivery(){
+        $Sample = new \app\admin\model\purchase\Sample();
+        $purchaseSampleWorkOrder = new SampleWorkorder();
+        $purchaseSampleWorkOrderItem = new SampleWorkorderItem();
+        $data =array('FT0064-01', 'FX0067-01', 'FT0069-02');
+        $data = array_unique($data);
+        foreach ($data as $key=>$val){
+            $Sample->startTrans();
+            $purchaseSampleWorkOrder->startTrans();
+            $purchaseSampleWorkOrderItem->startTrans();
+            try {
+                //将样品间信息假删除
+                $map['sku'] = $val;
+                $value['is_del'] =2;
+                $out_stock_num = $Sample->where(['sku'=>$val])->value('stock');
+                $res = $Sample->allowField(true)->isUpdate(true, $map)->save($value);
+                if ($res){
+                    //添加出库单
+                    $addValue['location_number'] = 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999);;
+                    $addValue['createtime'] = date('Y-m-d H:i:s',time());
+                    $addValue['create_user'] = session('admin.nickname');
+                    $addValue['description'] = '样品间商品批量出库';
+                    $addValue['status'] = 3;
+                    $outStockId = $purchaseSampleWorkOrder->insertGetId($addValue);
+                    if ($outStockId){
+                        //出库商品信息表对应信息
+                        $outStockItemValue['sku'] = $val;
+                        $outStockItemValue['stock'] = $out_stock_num;
+                        $outStockItemValue['parent_id'] = $outStockId;
+                        $purchaseSampleWorkOrderItem ->insert($outStockItemValue);
+                    }
+                }
+                $Sample->commit();
+                $purchaseSampleWorkOrder->commit();
+                $purchaseSampleWorkOrderItem->commit();
+            }catch (ValidateException $e) {
+                $Sample->rollback();
+                $purchaseSampleWorkOrder->rollback();
+                $purchaseSampleWorkOrderItem->rollback();
+                $this->error($e->getMessage(), [], 406);
+            } catch (PDOException $e) {
+                $Sample->rollback();
+                $purchaseSampleWorkOrder->rollback();
+                $purchaseSampleWorkOrderItem->rollback();
+                $this->error($e->getMessage(), [], 407);
+            } catch (Exception $e) {
+                $Sample->rollback();
+                $purchaseSampleWorkOrder->rollback();
+                $purchaseSampleWorkOrderItem->rollback();
+                $this->error($e->getMessage(), [], 408);
+            }
+        }
+    }
+
 }
 
