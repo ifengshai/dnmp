@@ -1150,41 +1150,30 @@ class NewProduct extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            //默认站点
-            $platform_type = input('label');
-            if ($platform_type) {
-                $map['platform_type'] = $platform_type;
-            }
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
-
-            if ($filter['platform_type']) {
-                unset($map['platform_type']);
-            }
-
-            $this->request->get(['filter' => json_encode($filter)]);
-            $params = $this->request->get();
             if ($filter['sku']) {
-                $where['a.sku'] = ['like', '%' . trim($filter['sku']) . '%'];
+                $map['a.sku'] = ['like', '%'.trim($filter['sku']).'%'];
             }
             if ($filter['category_id']) {
-                $where['a.category_id'] = ['=', $filter['category_id']];
+                $map['b.category_id'] = ['=', $filter['category_id']];
+                unset($filter['category_id']);
             }
             if ($filter['available_stock']) {
-                $where['b.available_stock'] = ['between', explode(',', $filter['available_stock'])];
+                $map['b.available_stock'] = ['between', explode(',', $filter['available_stock'])];
             }
             if ($filter['platform_type']) {
-                $where['a.platform_type'] = ['=', $filter['platform_type']];
+                $map['a.platform_type'] = ['=', $filter['platform_type']];
+                unset($filter['platform_type']);
             }
-            //            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $this->request->get(['filter' => json_encode($filter)]);
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->alias('a')
                 ->field('a.*,b.sku,b.available_stock,b.is_spot')
                 ->join(['fa_item' => 'b'], 'a.sku=b.sku')
                 ->where($where)
                 ->where($map)
-                ->order('a.id', 'desc')
-                // ->distinct('a.id')
                 ->count();
 
             $list = $this->model
@@ -1194,8 +1183,7 @@ class NewProduct extends Backend
                 ->where($where)
                 ->where($map)
                 ->order('a.id', 'desc')
-                ->limit($params['offset'], $params['limit'])
-                // ->distinct('a.id')
+                ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
             $skus = array_column($list, 'sku');
