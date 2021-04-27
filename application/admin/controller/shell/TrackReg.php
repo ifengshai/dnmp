@@ -6,6 +6,7 @@
 
 namespace app\admin\controller\shell;
 
+use app\admin\controller\elasticsearch\async\AsyncDatacenterDay;
 use app\admin\model\operatedatacenter\Zeelool;
 use app\common\controller\Backend;
 use fast\Excel;
@@ -1226,7 +1227,9 @@ class TrackReg extends Backend
             2)->count();
         $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
             1)->count();
-        Db::name('datacenter_day')->insert($arr);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
         echo $date_time."\n";
         echo date("Y-m-d H:i:s")."\n";
         usleep(100000);
@@ -1405,7 +1408,9 @@ class TrackReg extends Backend
         $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
             1)->count();
         //插入数据
-        Db::name('datacenter_day')->insert($arr);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
         echo $date_time."\n";
         echo date("Y-m-d H:i:s")."\n";
         usleep(100000);
@@ -1747,7 +1752,9 @@ class TrackReg extends Backend
             2)->count();
         $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
             1)->count();
-        Db::name('datacenter_day')->insert($arr);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
         echo $date_time."\n";
         echo date("Y-m-d H:i:s")."\n";
         usleep(100000);
@@ -1909,7 +1916,9 @@ class TrackReg extends Backend
             2)->count();
         $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
             1)->count();
-        Db::name('datacenter_day')->insert($arr);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
         echo $date_time."\n";
         echo date("Y-m-d H:i:s")."\n";
         usleep(100000);
@@ -1953,7 +1962,9 @@ class TrackReg extends Backend
             2)->count();
         $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
             1)->count();
-        Db::name('datacenter_day')->insert($arr);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
 
         //批发站
         $site_where['platform_type'] = $platform_where['platform_type'] = 5;
@@ -1973,7 +1984,9 @@ class TrackReg extends Backend
             2)->count();
         $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
             1)->count();
-        Db::name('datacenter_day')->insert($arr);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
 
         //亚马逊
         $site_where['platform_type'] = $platform_where['platform_type'] = 8;
@@ -1993,7 +2006,9 @@ class TrackReg extends Backend
             2)->count();
         $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
             1)->count();
-        Db::name('datacenter_day')->insert($arr);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
 
         //zeelool_es
         $site_where['platform_type'] = $platform_where['platform_type'] = 9;
@@ -2013,7 +2028,9 @@ class TrackReg extends Backend
             2)->count();
         $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
             1)->count();
-        Db::name('datacenter_day')->insert($arr);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
 
         echo date("Y-m-d H:i:s")."\n";
         echo "all is ok"."\n";
