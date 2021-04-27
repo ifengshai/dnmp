@@ -328,11 +328,11 @@ class WebData extends Backend
     protected function process_viporder_data($site)
     {
         if ($site == 1) {
-            $entity_id = WebVipOrder::where(['entity_id' => ['<', 9981], 'site' => 1])->max('entity_id');
-            $res = Db::connect('database.db_zeelool')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $entity_id = WebVipOrder::where(['web_id' => ['<', 9981], 'site' => 1])->max('web_id');
+            $res = Db::connect('database.db_zeelool')->table('oc_vip_order')->where(['id' => ['>', $entity_id]])->limit(1000)->select();
         } elseif ($site == 2) {
-            $entity_id = WebVipOrder::where(['entity_id' => ['<', 3006], 'site' => 2])->max('entity_id');
-            $res = Db::connect('database.db_voogueme')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $entity_id = WebVipOrder::where(['web_id' => ['<', 3006], 'site' => 2])->max('web_id');
+            $res = Db::connect('database.db_voogueme')->table('oc_vip_order')->where(['id' => ['>', $entity_id]])->limit(1000)->select();
         } elseif ($site == 3) {
             $entity_id = WebVipOrder::where(['entity_id' => ['<', 71892], 'site' => 3])->max('entity_id');
             $res = Db::connect('database.db_nihao')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
