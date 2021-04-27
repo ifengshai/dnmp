@@ -27,7 +27,7 @@ class AsyncOperation extends BaseElasticsearch
      */
     public function runUpdate($site)
     {
-        $operation = OperationAnalysis::where('order_plateform',$site)->find()->toArray();
+        $operation = OperationAnalysis::where('order_platform',$site)->find()->toArray();
         $insertData = array_map(function($value) {
 
             $value === null ? 0 : $value;
