@@ -19,6 +19,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             Controller.api.formatter.line_chart1();
             // Controller.api.formatter.user_chart();
             Controller.api.formatter.user_change_chart();
+            re_buy_num();
             $("#sku_submit").click(function () {
                 var time_str = $("#time_str").val();
                 if (time_str.length <= 0) {
@@ -29,6 +30,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 Controller.api.formatter.line_chart1();
                 // Controller.api.formatter.user_chart();
                 Controller.api.formatter.user_change_chart();
+                re_buy_num();
             });
             $("#sku_reset").click(function () {
                 $("#order_platform").val(1);
@@ -219,7 +221,7 @@ function order_data_view() {
         var shipping_total_money = ret.data.shippingTotalMoney;
         var active_user_num = ret.data.activeUserNum;
         var register_user_num = ret.data.registerNum;
-        var again_user_num = ret.data.again_user_num;
+
         var vip_user_num = ret.data.vipUserNum;
         var compare_order_num_rate = ret.data.compareOrderNumRate;
         var compare_order_unit_price_rate = ret.data.compareOrderUnitPriceRate;
@@ -227,7 +229,7 @@ function order_data_view() {
         var compare_shipping_total_money_rate = ret.data.compareShippingTotalMoneyRate;
         var compare_active_user_num_rate = ret.data.compareActiveUserNumRate;
         var compare_register_user_num_rate = ret.data.compareRegisterNumRate;
-        var compare_again_user_num_rate = ret.data.compareAgainUserNumRate;
+
         var compare_vip_user_num_rate = ret.data.compareVipUserNuRate;
         if(compare_time_str.length > 0){
             $('.rate_class').show();
@@ -278,12 +280,7 @@ function order_data_view() {
             $('#huan_register_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_register_user_num_rate + '%');
         }
 
-        $('#again_user_num').text(again_user_num);
-        if (parseInt(compare_again_user_num_rate) < 0) {
-            $('#huan_again_user_num').html("<img src='/xiadie.png'>" + compare_again_user_num_rate+ '%');
-        } else {
-            $('#huan_again_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_again_user_num_rate + '%');
-        }
+
 
         $('#vip_user_num').text(vip_user_num);
         if (parseInt(compare_vip_user_num_rate) < 0) {
@@ -292,6 +289,29 @@ function order_data_view() {
             $('#huan_vip_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_vip_user_num_rate + '%');
         }
 
+        return false;
+    }, function (data, ret) {
+        Layer.alert(ret.msg);
+        return false;
+    });
+}
+function re_buy_num()
+{
+    var order_platform = $('#order_platform').val();
+    var time_str = $('#time_str').val();
+    var compare_time_str = $('#compare_time_str').val();
+    Backend.api.ajax({
+        url: 'elasticsearch/operate/dash_board/getReBuyNum',
+        data: {order_platform: order_platform, time_str: time_str, compare_time_str: compare_time_str}
+    }, function (data, ret) {
+        var again_user_num = ret.data.again_user_num;
+        var compare_again_user_num_rate = ret.data.contrast_again_user_num;
+        $('#again_user_num').text(again_user_num);
+        if (parseInt(compare_again_user_num_rate) < 0) {
+            $('#huan_again_user_num').html("<img src='/xiadie.png'>" + compare_again_user_num_rate+ '%');
+        } else {
+            $('#huan_again_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_again_user_num_rate + '%');
+        }
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);
