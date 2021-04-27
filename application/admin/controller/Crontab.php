@@ -3117,6 +3117,7 @@ class Crontab extends Backend
         $realtime_stock = $item->getRealtimeStock();
         $data['realtime_stock'] = $realtime_stock;
         $res = Db::table('fa_product_allstock_log')->insert($data);
+        echo "ok";
     }
     /**
      * 更新zeelool站仪表盘数据
@@ -3846,6 +3847,8 @@ class Crontab extends Backend
         $data['value'] = $customSkuPrice ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'customSkuPrice')->update($data);
+
+        echo "ok";
     }
 
     /**
@@ -4005,6 +4008,8 @@ class Crontab extends Backend
         $data['value'] = $onwayOrnamentAllStockPrice;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'onwayOrnamentAllStockPrice')->update($data);
+
+        echo "ok";
     }
 
     /**
@@ -4126,6 +4131,8 @@ class Crontab extends Backend
         $data['value'] = $overtimeOrder ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'overtimeOrder')->update($data);
+
+        echo "ok";
     }
 
     /**
@@ -4216,6 +4223,8 @@ class Crontab extends Backend
         $data['value'] = $days10SalesNumPercent ?? 0;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'days10SalesNumPercent')->update($data);
+
+        echo "ok";
     }
 
     /**
