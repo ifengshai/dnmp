@@ -986,6 +986,31 @@ class TrackReg extends Backend
         return $analytics->reports->batchGet($body);
     }
 
+    public function asynData(){
+        $this->getData(10);
+        $this->getData(11);
+    }
+    public function getData($site)
+    {
+        //获取datacenter表中德语站和日本站的数据
+        $data = Db::name('datacenter_day')
+            ->where('site',$site)
+            ->where('sessions',0)
+            ->select();
+        foreach ($data as $value){
+            //会话
+            $arr['sessions'] = $this->google_session($site, $value['day_date']);
+            //计算加购率
+            $arr['add_cart_rate'] = $arr['sessions'] ? round($value['new_cart_num']/$arr['sessions']*100,2) : 0;
+            //计算会话转化率
+            $arr['session_rate'] = $arr['sessions'] ? round($value['order_num']/$arr['sessions']*100,2) : 0;
+            Db::name('datacenter_day')
+                ->where('id',$value['id'])
+                ->update($arr);
+            echo $value['id']."---".$value['day_date']." is ok"."\n";
+            usleep(10000);
+        }
+    }
     /**
      * Parses and prints the Analytics Reporting API V4 response.
      *
