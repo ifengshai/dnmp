@@ -778,6 +778,7 @@ class Sample extends Backend
                 $workorder['createtime'] = date('Y-m-d H:i:s', time());
                 $workorder['type'] = 1;
                 $workorder['description'] = $params['description'];
+                $workorder['instock_type'] = $params['instock_type'];
                 $this->sampleworkorder->save($workorder);
                 $parent_id = $this->sampleworkorder->id;
                 foreach ($params['goods'] as $value) {
@@ -869,6 +870,7 @@ class Sample extends Backend
                 //更新备注
                 $workorder['description'] = $params['description'];
                 $workorder['status'] = $params['status'];
+                $workorder['instock_type'] = $params['instock_type'];
                 $this->sampleworkorder->save($workorder, ['id' => input('ids')]);
                 $this->success();
             }
@@ -985,6 +987,7 @@ class Sample extends Backend
                 if ($status == 3) {
                     //审核通过后将商品信息添加到样品间列表
                     foreach ($ids as $id) {
+                        $sampleWorkOrder = $this->sampleworkorder->where('id',$id)->find();
                         $product_arr = Db::name('purchase_sample_workorder_item')->where('parent_id', $id)->order('id asc')->select();
                         foreach ($product_arr as $item) {
                             $is_exist = $this->sample->where('sku', $item['sku'])->value('id');
@@ -997,7 +1000,10 @@ class Sample extends Backend
                                 $lendlog['sku'] = $item['sku'];
                                 $lendlog['lend_num'] = 1;
                                 $this->samplelendlog->insert($lendlog);
-                                $newProductDesign->insert(['sku'=>$item['sku'],'status'=>1,'create_time'=>date('Y-m-d H:i:s', time()),'update_time'=>date('Y-m-d H:i:s', time())]);
+                                //入库选择换图入库时 将SKU增加到【产品开发管理】页面
+                                if ($sampleWorkOrder['instock_type'] == 2){
+                                    $newProductDesign->insert(['sku'=>$item['sku'],'status'=>1,'create_time'=>date('Y-m-d H:i:s', time()),'update_time'=>date('Y-m-d H:i:s', time())]);
+                                }
                             } else {
                                 $sample['sku'] = $item['sku'];
                                 $sample['location_id'] = $this->sample->getlocation($item['sku']);
@@ -1012,7 +1018,10 @@ class Sample extends Backend
                                 $lendlog['sku'] = $item['sku'];
                                 $lendlog['lend_num'] = 1;
                                 $this->samplelendlog->insert($lendlog);
+                                //入库选择换图入库时 将SKU增加到【产品开发管理】页面
+                                if ($sampleWorkOrder['instock_type'] == 2){
                                 $newProductDesign->insert(['sku'=>$item['sku'],'status'=>1,'create_time'=>date('Y-m-d H:i:s', time()),'update_time'=>date('Y-m-d H:i:s', time())]);
+                                }
                             }
                         }
                     }
