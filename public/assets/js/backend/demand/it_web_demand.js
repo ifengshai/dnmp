@@ -131,25 +131,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             {
                                 field: 'develop_finish_status1',
                                 title: __('开发进度'),
-                                searchList: { 1: '未响应', 2: '开发中', 3: '开发完成' },
+                                searchList: {1: '未响应', 2: '开发中', 3: '开发完成'},
                                 visible: false
                             },
                             {
                                 field: 'test_status1',
                                 title: __('测试进度'),
-                                searchList: { 1: '未确认', 2: '已确认', 3: '待通过', 4: '待上线', 5: '已上线' },
+                                searchList: {1: '未确认', 2: '已确认', 3: '待通过', 4: '待上线', 5: '已上线'},
                                 visible: false
                             },
-                            { field: 'end_time', title: __('完成时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
+                            {
+                                field: 'all_finish_time',
+                                title: __('完成时间'),
+                                operate: 'RANGE',
+                                addclass: 'datetimerange',
+                                formatter: Table.api.formatter.datetime,
+                                visible: false
+                            },
                             {
                                 field: 'priority',
                                 title: __('优先级'),
-                                searchList: { '': '-',0: '-', 1: '低', 2: '低+', 3: '中', 4: '中+', 5: '高',6:'高+' },
-                                custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black' },
+                                searchList: {'': '-', 0: '-', 1: '低', 2: '低+', 3: '中', 4: '中+', 5: '高', 6: '高+'},
+                                custom: {1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black'},
                                 formatter: Table.api.formatter.status,
                                 operate: false
                             },
-                            { field: 'node_time', title: __('期望时间'), operate: false },
+                            {field: 'node_time', title: __('期望时间'), operate: false},
                             {
                                 field: 'status',
                                 title: __('开发评审'),
