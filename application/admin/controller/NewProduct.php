@@ -1165,6 +1165,8 @@ class NewProduct extends Backend
             if ($filter['platform_type']) {
                 $map['a.platform_type'] = ['=', $filter['platform_type']];
                 unset($filter['platform_type']);
+            } else {
+                $map['a.platform_type'] = 1;
             }
             $this->request->get(['filter' => json_encode($filter)]);
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
