@@ -10,7 +10,12 @@ namespace app\admin\controller\elasticsearch\operate;
 
 
 use app\admin\controller\elasticsearch\BaseElasticsearch;
+use app\admin\model\operatedatacenter\Datacenter;
+use app\admin\model\operatedatacenter\Nihao;
+use app\admin\model\operatedatacenter\Voogueme;
+use app\admin\model\operatedatacenter\Zeelool;
 use app\admin\model\platformmanage\MagentoPlatform;
+use app\enum\Site;
 
 class DashBoard extends BaseElasticsearch
 {
@@ -84,6 +89,39 @@ class DashBoard extends BaseElasticsearch
             }
         }
 
+    }
+    public function getReBuyNum()
+    {
+        if ($this->request->isAjax()) {
+            $params = $this->request->param();
+            $type = $params['type'];
+            $timeStr = $params['time_str'];
+            $compareTimeStr = $params['compare_time_str'] ?: '';
+            $site = $params['order_platform'] ? $params['order_platform'] : 1;
+            if (!$timeStr) {
+                $nowDay = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+            }
+            switch ($site) {
+                case Site::ZEELOOL:
+                    $model = new Zeelool();
+                    break;
+                case Site::VOOGUEME:
+                    $model = new Voogueme();
+                    break;
+                case Site::NIHAO:
+                    $model = new Nihao();
+                    break;
+                case 4:
+                    $model = new Datacenter();
+                    break;
+            }
+            $now_day = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+            //时间
+            $timeStr = $timeStr ? $timeStr : $nowDay;
+            //复购用户数
+            $againUserNum = $model->getAgainUser($timeStr, $compareTimeStr);
+            $this->success('', '', $againUserNum);
+        }
     }
 
     /**
