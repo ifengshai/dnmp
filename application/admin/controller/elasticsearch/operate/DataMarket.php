@@ -12,6 +12,7 @@ namespace app\admin\controller\elasticsearch\operate;
 use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\OperationAnalysis;
 use app\admin\model\platformmanage\MagentoPlatform;
+use think\Cache;
 
 class DataMarket extends BaseElasticsearch
 {
@@ -52,9 +53,16 @@ class DataMarket extends BaseElasticsearch
     {
         $start = date('Ymd', strtotime('-30 days'));
         $end = date('Ymd');
+        $cacheStr = 'data_market_echart_' . $start . '-' . $end;
+        $cacheData = Cache::get($cacheStr);
+        if(!$cacheData) {
+            $echartsData = $this->esFormatData->formatDataMarketEcharts($this->buildDataMarketEchartsSearch($this->site, $start, $end));
+            Cache::set($cacheStr,$echartsData,600);
+        }else{
+            $echartsData = $cacheData;
+        }
 
-        return $this->esFormatData->formatDataMarketEcharts($this->buildDataMarketEchartsSearch($this->site, $start, $end));
-
+        return $echartsData;
     }
 
     /**
@@ -173,11 +181,19 @@ class DataMarket extends BaseElasticsearch
             $begin = $end = date('Ymd');
             $site = $order_platform == 100 ? [1, 2, 3, 4] : $order_platform;
             $siteAll = $order_platform == 100 ? true : false;
-            $topOrder = $this->buildDataMarketTopOrderSearch($site, $begin, $begin);
-            $topCart = $this->buildDataMarketTopCartSearch($site, $begin, $begin);
-            $topCustomer = $this->buildDataMarketTopCustomerSearch($site, $begin, $begin);
-            $operationData = (new OperationAnalysis())->getSiteAnalysis($site);
-            $data = $this->esFormatData->formatDataMarketTop($site, $operationData, $topOrder, $topCart, $topCustomer, $begin, $this->status, $siteAll);
+            $cacheStr = 'data_market_async_data_' . $site . '-' . $begin;
+            $cacheData = Cache::get($cacheStr);
+            if(!$cacheData) {
+                $topOrder = $this->buildDataMarketTopOrderSearch($site, $begin, $begin);
+                $topCart = $this->buildDataMarketTopCartSearch($site, $begin, $begin);
+                $topCustomer = $this->buildDataMarketTopCustomerSearch($site, $begin, $begin);
+                $operationData = (new OperationAnalysis())->getSiteAnalysis($site);
+                $data = $this->esFormatData->formatDataMarketTop($site, $operationData, $topOrder, $topCart, $topCustomer, $begin, $this->status, $siteAll);
+                Cache::set($cacheStr,$data,600);
+            }else{
+                $data = $cacheData;
+            }
+
             if (false == $data) {
                 return $this->error('没有该平台数据,请重新选择');
             }
@@ -370,8 +386,15 @@ class DataMarket extends BaseElasticsearch
                 $start = date('Ymd', strtotime($timeStr[0]));
                 $end = date('Ymd', strtotime($timeStr[3]));
             }
+            $cacheStr = 'data_market_async_get_bottom_' . $start . '-' . $end;
+            $cacheData = Cache::get($cacheStr);
+            if(!$cacheData) {
+                $bottomData = $this->esFormatData->formatDataMarketBottom($this->buildDataMarketBottomSearch($this->site, $start, $end));
+                Cache::set($cacheStr,$bottomData,600);
+            }else{
+                $bottomData = $cacheData;
+            }
 
-            $bottomData = $this->esFormatData->formatDataMarketBottom($this->buildDataMarketBottomSearch($this->site, $start, $end));
             if (!$bottomData) {
                 return $this->error('没有对应的时间数据，请重新尝试');
             }

@@ -16,6 +16,8 @@ use app\admin\model\operatedatacenter\Voogueme;
 use app\admin\model\operatedatacenter\Zeelool;
 use app\admin\model\platformmanage\MagentoPlatform;
 use app\enum\Site;
+use Symfony\Component\Cache\DataCollector\CacheDataCollector;
+use think\Cache;
 
 class DashBoard extends BaseElasticsearch
 {
@@ -66,15 +68,24 @@ class DashBoard extends BaseElasticsearch
                 $start = date('Ymd', strtotime($createat[0]));
                 $end = date('Ymd', strtotime($createat[3]));
             }
-            $compareData = [];
-            if ($compareTimeStr) {
-                $compareTime = explode(' ', $compareTimeStr);
-                $compareStart = date('Ymd', strtotime($compareTime[0]));
-                $compareEnd = date('Ymd', strtotime($compareTime[3]));
-                $compareData = $this->buildDashBoardSearch($site, $compareStart, $compareEnd, $siteAll);
+            $cacheStr = 'dash_board_' . $site . $timeStr . $compareTimeStr;
+            $cacheData = Cache::get($cacheStr);
+            if(!$cacheData) {
+                $compareData = [];
+                if ($compareTimeStr) {
+                    $compareTime = explode(' ', $compareTimeStr);
+                    $compareStart = date('Ymd', strtotime($compareTime[0]));
+                    $compareEnd = date('Ymd', strtotime($compareTime[3]));
+                    $compareData = $this->buildDashBoardSearch($site, $compareStart, $compareEnd, $siteAll);
+                }
+
+                $result = $this->buildDashBoardSearch($site, $start, $end, $siteAll);
+                $allData = $this->esFormatData->formatDashBoardData($site, $result, $compareData, $siteAll);
+                Cache::set($cacheStr, $allData, 600);
+            }else{
+                $allData = $cacheData;
             }
-            $result = $this->buildDashBoardSearch($site, $start, $end, $siteAll);
-            $allData = $this->esFormatData->formatDashBoardData($site, $result, $compareData, $siteAll);
+
             switch ($type) {
                 case 1:
                     $data = $allData['dayChart'];
@@ -94,7 +105,6 @@ class DashBoard extends BaseElasticsearch
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            $type = $params['type'];
             $timeStr = $params['time_str'];
             $compareTimeStr = $params['compare_time_str'] ?: '';
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
@@ -115,11 +125,18 @@ class DashBoard extends BaseElasticsearch
                     $model = new Datacenter();
                     break;
             }
-            $now_day = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
             //时间
             $timeStr = $timeStr ? $timeStr : $nowDay;
-            //复购用户数
-            $againUserNum = $model->getAgainUser($timeStr, $compareTimeStr);
+            $cacheStr = 'dash_board_rebuy_' . $site . $timeStr . $compareTimeStr;
+            $cacheData = Cache::get($cacheStr);
+            if(!$cacheData) {
+                //复购用户数
+                $againUserNum = $model->getAgainUser($timeStr, $compareTimeStr);
+                Cache::set($cacheStr,$againUserNum,600);
+            }else{
+                $againUserNum = $cacheData;
+            }
+
             $this->success('', '', $againUserNum);
         }
     }
