@@ -2717,6 +2717,10 @@ class WorkOrderList extends Backend
         $measureList = WorkOrderMeasure::workMeasureList($row->id, 1);
         !empty($measureList) && $this->assignconfig('measureList', $measureList);
 
+        //回复内容
+        $workOrderNote = WorkOrderNote::where('work_id', $ids)->select();
+        $this->view->assign('workOrderNote', $workOrderNote);
+
         //工单问题类型
         $problem_type = [];
         if (1 == $row->work_type) {
