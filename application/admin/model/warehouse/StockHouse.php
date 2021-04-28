@@ -2,6 +2,7 @@
 
 namespace app\admin\model\warehouse;
 
+use think\Cache;
 use think\Model;
 
 
@@ -68,10 +69,20 @@ class StockHouse extends Model
     public function getLocationData($area_id = null, $coding = null)
     {
         if ($coding) {
-            $where['coding'] = ['like', $coding . '%'];
+            $where['coding'] = ['like', $coding.'%'];
         }
-        $list = $this->field('id as location_id,coding,library_name')->where($where)->where(['area_id' => ['in', $area_id], 'type' => 1, 'status' => 1])->select();
+        $cacheName = 'getLocationData_'.md5(serialize($where)).$area_id;
+        $list = unserialize(Cache::get($cacheName));
+        if (!$list) {
+            $list = $this
+                ->field('id as location_id,coding,library_name')
+                ->where($where)
+                ->where(['area_id' => ['in', $area_id], 'type' => 1, 'status' => 1])
+                ->select();
+            $list = collection($list)->toArray();
+            Cache::set($cacheName, serialize($list));
+        }
 
-        return collection($list)->toArray();
+        return $list ?: [];
     }
 }

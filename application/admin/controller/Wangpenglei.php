@@ -1139,4 +1139,35 @@ class Wangpenglei extends Backend
         echo shell_exec('cd /var/www/mojing/public && php admin_1biSSnWyfW.php shell/order_data/create_wave_order');
     }
 
+
+    /**
+     *  导出库存数据对比
+     * @Description
+     * @author: wpl
+     * @since : 2021/4/1 17:40
+     */
+    public function getStockData()
+    {
+        //查询镜架成本为0的财务数据
+        $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
+
+        $item = new Item();
+        $data = $item
+            ->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])
+            ->column('stock,distribution_occupy_stock', 'sku');
+        $list = $barcode
+            ->field('sku,count(1) as num')
+            ->where(['library_status' => 1])
+            ->where("item_order_number=''")
+            ->group('sku')
+            ->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            $list[$k]['stock'] = $data[$v['sku']]['stock'] - $data[$v['sku']]['distribution_occupy_stock'];
+        }
+
+        $headlist = ['sku', '在库实时库存', '系统实时库存'];
+        Excel::writeCsv($list, $headlist, '库存', true);
+        die;
+    }
 }
