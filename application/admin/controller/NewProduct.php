@@ -1154,6 +1154,7 @@ class NewProduct extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['sku']) {
                 $map['a.sku'] = ['like', '%'.trim($filter['sku']).'%'];
+                unset($filter['sku']);
             }
             if ($filter['category_id']) {
                 $map['b.category_id'] = ['=', $filter['category_id']];
