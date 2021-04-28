@@ -43,16 +43,24 @@ class InfoSynergyTaskCategory extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $map = [];
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['pid']){
+                $idArr = Db::name('info_synergy_task_category')->where('name','like','%'.$filter['pid'].'%')->column('id');
+                $map['pid'] = ['in',$idArr];
+                unset($filter['pid']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
             //求出所有的问题数据
-
-
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -63,7 +71,6 @@ class InfoSynergyTaskCategory extends Backend
                 if($v['pid']){
                     $list[$k]['pid'] = $rsAll[$v['pid']];
                 }
-
             }
             $result = array("total" => $total, "rows" => $list);
 

@@ -3,6 +3,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         url: "warehouse/stock_house/shelf_number1",
         async: false,
         success: function (obj) {
+            console.log(obj)
             province = obj;
         }
     });
