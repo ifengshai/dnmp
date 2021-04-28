@@ -7,6 +7,7 @@
 
 namespace app\admin\controller\elasticsearch;
 
+use app\admin\controller\elasticsearch\async\AsyncOrder;
 use app\common\controller\Backend;
 use app\enum\Site;
 use app\service\elasticsearch\EsFormatData;
@@ -55,6 +56,10 @@ class BaseElasticsearch extends Backend
         $this->esFormatData = new EsFormatData();
     }
 
+    public function test()
+    {
+        (new AsyncOrder())->runUpdate('479653',1);
+    }
     /**
      * 订单的索引
      *
