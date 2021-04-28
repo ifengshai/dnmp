@@ -121,7 +121,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange'},
-                        {field: 'check_time', title: __('入库时间'), operate: 'RANGE', addclass: 'datetimerange'},
+                        {field: 'in_stock_time', title: __('入库时间'), operate: 'RANGE', addclass: 'datetimerange'},
                         {field: 'out_stock_time', title: __('出库时间'), operate: 'RANGE', addclass: 'datetimerange'}
                     ]
                 ]
