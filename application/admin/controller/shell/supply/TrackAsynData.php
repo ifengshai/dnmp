@@ -12,6 +12,14 @@ use think\Db;
 class TrackAsynData extends Command
 {
     protected $apiKey = 'F26A807B685D794C676FA3CC76567035';
+    protected $str1 = 'Arrived Shipping Partner Facility, Awaiting Item.';
+    protected $str2 = 'Delivered to Air Transport.';
+    protected $str3 = 'In Transit to Next Facility.';
+    protected $str4 = 'Arrived in the Final Destination Country.';
+    protected $str30 = 'Out for delivery or arrived at local facility, you may schedule for delivery or pickup. Please be aware of the collection deadline.'; //到达待取
+    protected $str35 = 'Attempted for delivery but failed, this may due to several reasons. Please contact the carrier for clarification.'; //投递失败
+    protected $str40 = 'Delivered successfully.'; //投递成功
+    protected $str50 = 'Item might undergo unusual shipping condition, this may due to several reasons, most likely item was returned to sender, customs issue etc.'; //可能异常
     public function __construct()
     {
         parent::__construct();
@@ -35,7 +43,6 @@ class TrackAsynData extends Command
         //查询有问题的订单物流数据
         $track = Db::name('order_node')
             ->where($where)
-            ->where('order_number',400598452)
             ->order('delivery_time desc')
             ->limit(12)
             ->select();
@@ -59,6 +66,15 @@ class TrackAsynData extends Command
     }
     public function total_track_data($data, $add,$id)
     {
+        if($data['e'] != 40){
+            //删除detail表中的签收数据
+            Db::name('order_node_detail')
+                ->where('track_number', $add['track_number'])
+                ->where('shipment_type', $add['shipment_type'])
+                ->where('order_node',4)
+                ->where('node_type',40)
+                ->delete();
+        }
         $trackdetail = array_reverse($data['z1']);
 
         $all_num = count($trackdetail);
