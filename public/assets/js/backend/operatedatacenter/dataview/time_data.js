@@ -3,29 +3,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
     var Controller = {
         index: function () {
             Controller.api.bindevent();
-            if(data_view()) {
+            Controller.api.formatter.sales_num_line();
+            Controller.api.formatter.sales_money_line();
+            Controller.api.formatter.order_num_line();
+            Controller.api.formatter.unit_price_line();
+            $(document).on('change', '#order_platform', function () {
+                data_view();
                 Controller.api.formatter.sales_num_line();
                 Controller.api.formatter.sales_money_line();
                 Controller.api.formatter.order_num_line();
                 Controller.api.formatter.unit_price_line();
-            }
-
-            $(document).on('change', '#order_platform', function () {
-                if(data_view()) {
+            });
+            $("#time_str").on("apply.daterangepicker", function () {
+                setTimeout(() => {
+                    data_view();
                     Controller.api.formatter.sales_num_line();
                     Controller.api.formatter.sales_money_line();
                     Controller.api.formatter.order_num_line();
                     Controller.api.formatter.unit_price_line();
-                }
-            });
-            $("#time_str").on("apply.daterangepicker", function () {
-                setTimeout(() => {
-                    if(data_view()) {
-                        Controller.api.formatter.sales_num_line();
-                        Controller.api.formatter.sales_money_line();
-                        Controller.api.formatter.order_num_line();
-                        Controller.api.formatter.unit_price_line();
-                    }
                 }, 0)
             })
         },
@@ -41,15 +36,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     var chartOptions = {
                         targetId: 'echart1',
                         downLoadTitle: '图表',
-                        type: 'line',
+                        type: 'line'
                     };
                     var options = {
                         type: 'post',
-                        url: 'elasticsearch/operate/hour/ajaxGetResult',
+                        url: 'operatedatacenter/dataview/time_data/sales_num_line',
                         data: {
                             'order_platform' : $("#order_platform").val(),
                             'time_str' : $("#time_str").val(),
-                            'type' : 1
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions);
@@ -72,11 +66,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     };
                     var options = {
                         type: 'post',
-                        url: 'elasticsearch/operate/hour/ajaxGetResult',
+                        url: 'operatedatacenter/dataview/time_data/sales_money_line',
                         data: {
                             'order_platform' : $("#order_platform").val(),
                             'time_str' : $("#time_str").val(),
-                            'type' : 2
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions);
@@ -89,11 +82,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     };
                     var options = {
                         type: 'post',
-                        url: 'elasticsearch/operate/hour/ajaxGetResult',
+                        url: 'operatedatacenter/dataview/time_data/order_num_line',
                         data: {
                             'order_platform' : $("#order_platform").val(),
                             'time_str' : $("#time_str").val(),
-                            'type' : 3
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions);
@@ -106,11 +98,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     };
                     var options = {
                         type: 'post',
-                        url: 'elasticsearch/operate/hour/ajaxGetResult',
+                        url: 'operatedatacenter/dataview/time_data/unit_price_line',
                         data: {
                             'order_platform' : $("#order_platform").val(),
                             'time_str' : $("#time_str").val(),
-                            'type' : 4
                         }
                     }
                     EchartObj.api.ajax(options, chartOptions);
@@ -127,16 +118,20 @@ function data_view() {
     var order_platform = $('#order_platform').val();
     var time_str = $('#time_str').val();
     Backend.api.ajax({
-        url: 'elasticsearch/operate/hour/ajaxGetResult',
-        data: { order_platform: order_platform, time_str: time_str}
+        url: 'operatedatacenter/dataview/time_data/ajax_get_data',
+        data: { order_platform: order_platform, time_str: time_str }
     }, function (data, ret) {
+        var order_platform = ret.data.order_platform;
+        var time_str = ret.data.time_str;
         var str = ret.data.str;
+
+        $('#order_platform').val(order_platform);
+        $('#time_str').val(time_str);
         $('#table_data').html(str);
-   
+
         return true;
     }, function (data, ret) {
         Layer.alert(ret.msg);
         return false;
     });
-    return true;
 }

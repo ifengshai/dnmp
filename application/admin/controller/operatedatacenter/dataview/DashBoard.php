@@ -75,11 +75,6 @@ class DashBoard extends Backend
         //默认进入页面是z站的数据
         // $arr = Cache::get('Operatedatacenter_dataviews' . 1 . md5(serialize('index')));
         $arr = [];
-        $time_arr = date('Y-m-d 00:00:00', strtotime('-500 day')) . ' - ' . date('Y-m-d H:i:s', time());
-        $data = compact('order_num', 'order_unit_price', 'sales_total_money', 'shipping_total_money', 'active_user_num', 'register_user_num', 'again_user_num', 'vip_user_num', 'magentoplatformarr');
-        Cache::set('Operatedatacenter_dataviews' . 1 . md5(serialize('index')), $data, 7200);
-        $this->view->assign($data);
-        return $this->view->fetch();
         if ($arr) {
             $this->view->assign($arr);
         } else {

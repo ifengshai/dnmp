@@ -3,7 +3,6 @@
 namespace app\admin\controller\operatedatacenter\dataview;
 
 use app\admin\model\OrderStatistics;
-use app\admin\model\platformmanage\MagentoPlatform;
 use app\common\controller\Backend;
 use think\Cache;
 use think\Controller;
@@ -48,12 +47,139 @@ class DataMarket extends Backend
         if(empty($platform)){
             $this->error('您没有权限访问','general/profile?ref=addtabs');
         }
-        $result = (new \app\admin\controller\elasticsearch\operate\DataMarket())->getCharts();
-        $xData = $result['xData'];
-        $yData = $result['yData'];
-        $this->view->assign(compact('web_site', 'time_str', 'platform', 'yData', 'xData'));
-
-        return $this->view->fetch('elasticsearch/operate/data_market/index');
+        $arr = [];
+        foreach($platform as $pkey => $pv){
+            $arr[] = $pkey;
+        }
+        $zeelool_data = $this->model->getList(key($platform));
+        //z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
+        //z站的历史数据  昨天、过去7天、过去30天、当月、上月、今年、总计
+        $zeelool_data = collection($zeelool_data)->toArray();
+        //中间部分数据
+        $orderStatistics = new OrderStatistics();
+        $list = $orderStatistics->getAllData();
+        $zeeloolSalesNumList = $vooguemeSalesNumList = $nihaoSalesNumList = $meeloogSalesNumList = $zeelool_esSalesNumList = $zeelool_deSalesNumList = $zeelool_jpSalesNumList = [];
+        foreach ($list as $v) {
+            //如果有zeelool权限
+            if(in_array(1,$arr)){
+                $zeeloolSalesNumList[$v['create_date']]  			 = $v['zeelool_sales_num'];
+                $zeeloolSalesMoneyList[$v['create_date']] 			 = $v['zeelool_sales_money'];
+                $zeeloolUnitPriceList[$v['create_date']]			 = $v['zeelool_unit_price'];
+                $zeeloolShoppingcartTotal[$v['create_date']]		 = $v['zeelool_shoppingcart_total'];
+                $zeeloolShoppingcartConversion[$v['create_date']]	 = $v['zeelool_shoppingcart_conversion'];
+                $zeeloolRegisterCustomer[$v['create_date']]		     = $v['zeelool_register_customer'];
+            }
+            //如果有voogueme权限
+            if(in_array(2,$arr)){
+                $vooguemeSalesNumList[$v['create_date']] 			 = $v['voogueme_sales_num'];
+                $vooguemeSalesMoneyList[$v['create_date']]			 = $v['voogueme_sales_money'];
+                $vooguemeUnitPriceList[$v['create_date']]			 = $v['voogueme_unit_price'];
+                $vooguemeShoppingcartTotal[$v['create_date']]		 = $v['voogueme_shoppingcart_total'];
+                $vooguemeShoppingcartConversion[$v['create_date']]   = $v['voogueme_shoppingcart_conversion'];
+                $vooguemeRegisterCustomer[$v['create_date']]		 = $v['voogueme_register_customer'];
+            }
+            //如果有nihao权限
+            if(in_array(3,$arr)){
+                $nihaoSalesNumList[$v['create_date']]    			 = $v['nihao_sales_num'];
+                $nihaoSalesMoneyList[$v['create_date']]				 = $v['nihao_sales_money'];
+                $nihaoUnitPriceList[$v['create_date']]				 = $v['nihao_unit_price'];
+                $nihaoShoppingcartTotal[$v['create_date']]			 = $v['nihao_shoppingcart_total'];
+                $nihaoShoppingcartConversion[$v['create_date']]	     = $v['nihao_shoppingcart_conversion'];
+                $nihaoRegisterCustomer[$v['create_date']]			 = $v['nihao_register_customer'];
+            }
+            //如果有meeloog权限
+            if(in_array(4,$arr)){
+                $meeloogSalesNumList[$v['create_date']]    			 = $v['meeloog_sales_num'];
+                $meeloogSalesMoneyList[$v['create_date']]			 = $v['meeloog_sales_money'];
+                $meeloogUnitPriceList[$v['create_date']]			 = $v['meeloog_unit_price'];
+                $meeloogShoppingcartTotal[$v['create_date']]		 = $v['meeloog_shoppingcart_total'];
+                $meeloogShoppingcartConversion[$v['create_date']]	 = $v['meeloog_shoppingcart_conversion'];
+                $meeloogRegisterCustomer[$v['create_date']]			 = $v['meeloog_register_customer'];
+            }
+            //如果有zeelool_es权限
+            if(in_array(9,$arr)){
+                $zeelool_esSalesNumList[$v['create_date']]    	     = $v['zeelool_es_sales_num'];
+                $zeelool_esSalesMoneyList[$v['create_date']]	     = $v['zeelool_es_sales_money'];
+                $zeelool_esUnitPriceList[$v['create_date']]			 = $v['zeelool_es_unit_price'];
+                $zeelool_esShoppingcartTotal[$v['create_date']]		 = $v['zeelool_es_shoppingcart_total'];
+                $zeelool_esShoppingcartConversion[$v['create_date']] = $v['zeelool_es_shoppingcart_conversion'];
+                $zeelool_esRegisterCustomer[$v['create_date']]	     = $v['zeelool_es_register_customer'];
+            }
+            //如果有zeelool_de权限
+            if(in_array(10,$arr)){
+                $zeelool_deSalesNumList[$v['create_date']]    	     = $v['zeelool_de_sales_num'];
+                $zeelool_deSalesMoneyList[$v['create_date']]	     = $v['zeelool_de_sales_money'];
+                $zeelool_deUnitPriceList[$v['create_date']]			 = $v['zeelool_de_unit_price'];
+                $zeelool_deShoppingcartTotal[$v['create_date']]		 = $v['zeelool_de_shoppingcart_total'];
+                $zeelool_deShoppingcartConversion[$v['create_date']] = $v['zeelool_de_shoppingcart_conversion'];
+                $zeelool_deRegisterCustomer[$v['create_date']]	     = $v['zeelool_de_register_customer'];
+            }
+            //如果有zeelool_jp权限
+            if(in_array(11,$arr)){
+                $zeelool_jpSalesNumList[$v['create_date']]    	     = $v['zeelool_jp_sales_num'];
+                $zeelool_jpSalesMoneyList[$v['create_date']]	     = $v['zeelool_jp_sales_money'];
+                $zeelool_jpUnitPriceList[$v['create_date']]			 = $v['zeelool_jp_unit_price'];
+                $zeelool_jpShoppingcartTotal[$v['create_date']]		 = $v['zeelool_jp_shoppingcart_total'];
+                $zeelool_jpShoppingcartConversion[$v['create_date']] = $v['zeelool_jp_shoppingcart_conversion'];
+                $zeelool_jpRegisterCustomer[$v['create_date']]	     = $v['zeelool_jp_register_customer'];
+            }
+        }
+        //下边部分数据 默认30天数据
+        $bottom_data = $this->get_platform_data(1);
+        $this->view->assign([
+            'orderPlatformList'					=> $platform,
+            'zeelool_data'						=> $zeelool_data,
+            'date'								=> $this->date(),
+            'zeeloolSalesNumList'       		=> $zeeloolSalesNumList ?:[], //折线图数据
+            'vooguemeSalesNumList'      		=> $vooguemeSalesNumList ?:[],
+            'nihaoSalesNumList'         		=> $nihaoSalesNumList ?:[],
+            'meeloogSalesNumList'         		=> $meeloogSalesNumList ?:[],
+            'zeelool_esSalesNumList'            => $zeelool_esSalesNumList ?:[],
+            'zeelool_deSalesNumList'            => $zeelool_deSalesNumList ?:[],
+            'zeelool_jpSalesNumList'            => $zeelool_jpSalesNumList ?:[],
+            'zeeloolSalesMoneyList'				=> $zeeloolSalesMoneyList ?:[],
+            'vooguemeSalesMoneyList'			=> $vooguemeSalesMoneyList ?:[],
+            'nihaoSalesMoneyList'				=> $nihaoSalesMoneyList ?:[],
+            'meeloogSalesMoneyList'				=> $meeloogSalesMoneyList ?:[],
+            'zeelool_esSalesMoneyList'          => $zeelool_esSalesMoneyList ?:[],
+            'zeelool_deSalesMoneyList'          => $zeelool_deSalesMoneyList ?:[],
+            'zeelool_jpSalesMoneyList'          => $zeelool_jpSalesMoneyList ?:[],
+            'zeeloolUnitPriceList'				=> $zeeloolUnitPriceList ?:[],
+            'vooguemeUnitPriceList'				=> $vooguemeUnitPriceList ?:[],
+            'nihaoUnitPriceList'				=> $nihaoUnitPriceList ?:[],
+            'meeloogUnitPriceList'				=> $meeloogUnitPriceList ?:[],
+            'zeelool_esUnitPriceList'		    => $zeelool_esUnitPriceList ?:[],
+            'zeelool_deUnitPriceList'		    => $zeelool_deUnitPriceList ?:[],
+            'zeelool_jpUnitPriceList'		    => $zeelool_jpUnitPriceList ?:[],
+            'zeeloolShoppingcartTotal'			=> $zeeloolShoppingcartTotal ?:[],
+            'vooguemeShoppingcartTotal' 		=> $vooguemeShoppingcartTotal ?:[],
+            'nihaoShoppingcartTotal'			=> $nihaoShoppingcartTotal ?:[],
+            'meeloogShoppingcartTotal'			=> $meeloogShoppingcartTotal ?:[],
+            'zeelool_esShoppingcartTotal'	    => $zeelool_esShoppingcartTotal ?:[],
+            'zeelool_deShoppingcartTotal'		=> $zeelool_deShoppingcartTotal ?:[],
+            'zeelool_jpShoppingcartTotal'		=> $zeelool_jpShoppingcartTotal ?:[],
+            'zeeloolShoppingcartConversion'	 	=> $zeeloolShoppingcartConversion ?:[],
+            'vooguemeShoppingcartConversion'	=> $vooguemeShoppingcartConversion ?:[],
+            'nihaoShoppingcartConversion'	 	=> $nihaoShoppingcartConversion ?:[],
+            'meeloogShoppingcartConversion'	 	=> $meeloogShoppingcartConversion ?:[],
+            'zeelool_esShoppingcartConversion'	=> $zeelool_esShoppingcartConversion ?:[],
+            'zeelool_deShoppingcartConversion'	=> $zeelool_deShoppingcartConversion ?:[],
+            'zeelool_jpShoppingcartConversion'	=> $zeelool_jpShoppingcartConversion ?:[],
+            'zeeloolRegisterCustomer'			=> $zeeloolRegisterCustomer ?:[],
+            'vooguemeRegisterCustomer'			=> $vooguemeRegisterCustomer ?:[],
+            'nihaoRegisterCustomer'				=> $nihaoRegisterCustomer ?:[],
+            'meeloogRegisterCustomer'			=> $meeloogRegisterCustomer ?:[],
+            'zeelool_esRegisterCustomer'		=> $zeelool_esRegisterCustomer ?:[],
+            'zeelool_deRegisterCustomer'		=> $zeelool_deRegisterCustomer ?:[],
+            'zeelool_jpRegisterCustomer'		=> $zeelool_jpRegisterCustomer ?:[],
+            'bottom_data'						=> $bottom_data,
+            'result'                            => $arr,
+            'arr'                               => $arr
+        ]);
+        // $this->view->assign("orderPlatformList", $platform);
+        // $this->view->assign("zeelool_data",$zeelool_data);
+        // $this->view->assign("date",$this->date());
+        return $this->view->fetch();
     }
     /***
      * 异步获取仪表盘首页上部分数据
