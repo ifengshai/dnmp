@@ -33,7 +33,7 @@ class NewProductDesign extends Backend
      * @var \app\admin\model\NewProductDesign
      */
     protected $model = null;
-    protected $noNeedRight = ['detail'];
+    protected $noNeedRight = ['detail','designRecording'];
     public function _initialize()
     {
         parent::_initialize();
@@ -62,7 +62,7 @@ class NewProductDesign extends Backend
         $this->assignconfig('making', $this->auth->check('new_product_design/making')); //开始制作
         $this->assignconfig('review_the_operation', $this->auth->check('new_product_design/review_the_operation')); //审核操作
         $this->assignconfig('add_img', $this->auth->check('new_product_design/add_img')); //图片上传操作
-        $this->assignconfig('change_designer', $this->auth->check('new_product_design/change_designer')); //图片上传操作
+        $this->assignconfig('change_designer', $this->auth->check('new_product_design/change_designer')); //修改人员
     }
 
     /**
@@ -310,8 +310,6 @@ class NewProductDesign extends Backend
     }
     //产品要求  状态更改需要拆分为多个方法-用于权限限制
     //拍摄-（开始拍摄、拍摄完成）、分配-（分配）、制作-（开始制作）、上传-（上传图片）、审核（审核通过、审核拒绝）
-
-
     /**
      * @author zjw
      * @date   2021/4/9 13:55
