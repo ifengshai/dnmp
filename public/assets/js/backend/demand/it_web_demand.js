@@ -78,7 +78,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             {
                                 field: 'site',
                                 title: __('项目'),
-                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp' ,12:'voogmechic'},
+                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp' ,12:'voogmechic',15:'ZeeloolFr'},
                                 custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
                                 formatter: Table.api.formatter.status
                             },
@@ -140,8 +140,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 searchList: {1: '未确认', 2: '已确认', 3: '待通过', 4: '待上线', 5: '已上线'},
                                 visible: false
                             },
+                            // {
+                            //     field: 'all_finish_time',
+                            //     title: __('完成时间'),
+                            //     operate: 'RANGE',
+                            //     addclass: 'datetimerange',
+                            //     formatter: Table.api.formatter.datetime,
+                            //     visible: false
+                            // },
                             {
-                                field: 'all_finish_time',
+                                field: 'end_time',
                                 title: __('完成时间'),
                                 operate: 'RANGE',
                                 addclass: 'datetimerange',
@@ -375,7 +383,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                             {
                                 field: 'site',
                                 title: __('项目'),
-                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp',12:'voogmechic' },
+                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Meeloog', 5: 'Wesee', 6: 'Rufoo', 7: 'Toloog', 8: 'Other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp',12:'voogmechic' ,15:'ZeeloolFr'},
                                 custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
                                 formatter: Table.api.formatter.status
                             },

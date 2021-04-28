@@ -52,7 +52,9 @@
         width: 250px;
     }
 </style>
-
+<link rel="stylesheet" type="text/css" href="/assets/css/imgmore.css"/>
+<script src="https://www.jq22.com/jquery/jquery-1.10.2.js"></script>
+<script src="/assets/js/imgmore.js" type="text/javascript" charset="utf-8"></script>
 <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <input type="hidden" name="goodsId" value="{$goodsId}">
     <input type="hidden" name="ids" value="{$ids}">
@@ -157,11 +159,25 @@
     </div>
     {/if}
     {if $img neq null}
-    <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('图片')}:</label>
-        {volist name="img" id="ct"}
-        <img style="width: 25%;margin-top: 10px;margin-left: 15px"  data-tips-image src="{$ct}" alt="">
-        {/volist}
+    <div style="width: 66%;margin: 30px auto;">
+        <div class="img-content">
+            <div class="small-img">
+                <ul>
+                    {volist name="img" id="ct"}
+                    <li>
+                            <img class="moveimg" src="{$ct}"/>
+                    </li>
+                    {/volist}
+                </ul>
+            </div>
+
+            <div class="big-img">
+                <div class="img-parent">
+                    <img src=""/>
+                </div>
+
+            </div>
+        </div>
     </div>
     {/if}
 </form>

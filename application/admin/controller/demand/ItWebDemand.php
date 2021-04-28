@@ -136,6 +136,11 @@ class ItWebDemand extends Backend
                 $map['test_status'] = $filter['test_status1'];
                 unset($filter['test_status1']);
             }
+            if ($filter['end_time']) {
+                $time = explode(' - ', $filter['end_time']);
+                $map['all_finish_time'] = ['between', [$time[0], $time[1]]];
+                unset($filter['end_time']);
+            }
 
             //筛选提出人
             if ($filter['entry_user_name']) {

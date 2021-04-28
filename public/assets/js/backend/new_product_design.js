@@ -3,12 +3,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         //隐藏、显示搜索及按钮
         $('#responsible_id').parents('.form-group').hide();
         $('#site').parents('.form-group').hide();
+        $('#export_guanlian').hide();
         $('select[name="status"]').parents('.form-group').hide();
         if (0 == value) {
             $('select[name="status"]').parents('.form-group').show();
-            $('#site').parents('.form-group').show();
-            $table.bootstrapTable('hideColumn', 'responsible_id');
-
+            table.bootstrapTable('hideColumn', 'responsible_id');
+            $('#export_guanlian').show();
         } else if (1 == value) {
             $('select[name="status"]').parents('.form-group').show();
         } else if (2 == value) {
@@ -26,6 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $('#site').parents('.form-group').show();
         }else{
             $('select[name="status"]').parents('.form-group').show();
+            $('#export_guanlian').show();
         }
     }
 
@@ -96,10 +97,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {
                             field: 'status',
+                            addclass:'design_status',
                             title: __('状态'),
                             searchList: { 1: '待录尺寸', 2: '待拍摄', 3: '拍摄中', 4: '待分配', 5: '待修图', 6: '修图中', 7: '待审核', 8: '已完成', 9: '审核拒绝', 10: '完成'},
                             custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
+
                             formatter: Table.api.formatter.status,
+                        },
+                        {field: 'responsible_id', title: __('责任人')},
+                        {field: 'site', title: __('站点'), visible: false,
+                            addclass:'plat_type',
+                            searchList: {
+                            1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',
+                            8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',
+                            12: 'voogmechic',13:'zeelool_cn',14:'alibaba',15:'zeelool_fr'
+                            },
+                            formatter: Table.api.formatter.status
                         },
                         {field: 'responsible_id', title: __('责任人')},
                         {field: 'site', title: __('站点'), visible: false,
@@ -221,6 +234,47 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
+                                    name: 'distr_user_change',
+                                    text:'更换设计师',
+                                    title:__('更换设计师'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: '',
+                                    url: 'new_product_design/change_designer?ids={row.id}',
+                                    area: ['30%', '20%'],
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if (row.status ==5 && row.label !==0 || row.label ==6){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '操作记录',
+                                    title: __('操作记录'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'new_product_design/operation_log',
+                                    extend: 'data-area = \'["60%","50%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {
+                                            title: "回传数据"
+                                        });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.label ==0){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
                                     name: 'tarted_making',
                                     text: '开始制作',
                                     title: __('开始制作'),
@@ -333,6 +387,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     $(table).data("operate-distr_user", null);
                                     that.table = table;
                                 }
+
                                 if(Config.making != true){
                                     $(table).data("operate-tarted_making", null);
                                     that.table = table;
@@ -389,6 +444,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 table.bootstrapTable('refresh', {});
                 return false;
             });
+            $("#export_guanlian").click(function(){
+                var design_status= $('.design_status').val();
+                var plat_type = $('.plat_type').val();
+                var create_time = $('#create_time').val();
+                window.location.href=Config.moduleurl+'/new_product_design/export?design_status='+design_status+'&plat_type='+plat_type+'&create_time='+create_time;
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -405,7 +466,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         record_size: function () {
             Controller.api.bindevent();
         },
-
+        change_designer: function () {
+            Controller.api.bindevent();
+        },
         reviewTheOperation: function () {
             Controller.api.bindevent();
         },
