@@ -39,8 +39,9 @@ class ThirdApi extends Api
         $verify_sign = hash("sha256", $verify_sign);
         // if($verify_sign == $track_arr['sign']){
         //妥投给maagento接口
-
-
+        $paths =ROOT_PATH."/public/uploads/17track.json";
+        $path_txt = date('Y-m-d H:i:s',time()).'单号：'. $track_arr['data']['number'].',内容:'.  json_encode($track_arr);
+        file_put_contents($paths,$path_txt);
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
             if ($track_arr['data']['track']['e'] ==40){
