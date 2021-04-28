@@ -268,7 +268,7 @@ class OrderData extends Backend
                                     }
                                     $this->order->where(['entity_id' => $v['id'], 'site' => $site])->update($params);
                                     //es同步订单数据，插入
-                                    $this->asyncOrder->runUpdate($params, $v['id'], $site);
+                                    $this->asyncOrder->runUpdate($v['id'], $site);
                                 }
                             }
 
@@ -290,7 +290,7 @@ class OrderData extends Backend
                                         $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update($params);
                                         //es同步订单数据，插入
-                                        $this->asyncOrder->runUpdate($params, $v['order_id'], $site);
+                                        $this->asyncOrder->runUpdate($v['order_id'], $site);
                                     }
                                 }
                             }
@@ -330,7 +330,7 @@ class OrderData extends Backend
 
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
                                     //es同步订单数据，插入
-                                    $this->asyncOrder->runUpdate($params, $v['entity_id'], $site);
+                                    $this->asyncOrder->runUpdate($v['entity_id'], $site);
                                 }
                             }
 
@@ -351,7 +351,7 @@ class OrderData extends Backend
                                         $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                         //es同步订单数据，插入
-                                        $this->asyncOrder->runUpdate($params, $v['parent_id'], $site);
+                                        $this->asyncOrder->runUpdate($v['parent_id'], $site);
                                     }
                                 }
                             }
@@ -364,7 +364,7 @@ class OrderData extends Backend
                                     $params['last_trans_id'] = $v['last_trans_id'];
                                     $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                     //es同步订单数据，插入
-                                    $this->asyncOrder->runUpdate($params, $v['parent_id'], $site);
+                                    $this->asyncOrder->runUpdate($v['parent_id'], $site);
                                 }
                             }
 
