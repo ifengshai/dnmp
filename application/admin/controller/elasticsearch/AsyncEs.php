@@ -189,15 +189,5 @@ class AsyncEs extends BaseElasticsearch
 
     }
 
-    /**
-     * 通过id更新order_node表中es条目
-     * @param $index  索引
-     * @param $data   数组数据
-     * @author mjj
-     * @date   2021/4/22 16:16:09
-     */
-    public function updateEsById($index,$data){
-        $this->esService->updateEs($index,$data);
-    }
 
 }
