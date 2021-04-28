@@ -44,9 +44,8 @@ class AsyncOrder extends BaseElasticsearch
     public function runUpdate($entityId, $site)
     {
         $order = Order::where(['entity_id' => $entityId, 'site' => $site])->find()->toArray();
-        echo json_encode($order);
         $updateData = $this->getData($order);
-        $this->esService->updateEs('mojing_order', $updateData);
+        dump($this->esService->updateEs('mojing_order', $updateData));
     }
 
     /**
