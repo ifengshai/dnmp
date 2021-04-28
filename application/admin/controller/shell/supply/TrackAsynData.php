@@ -43,6 +43,8 @@ class TrackAsynData extends Command
         //查询有问题的订单物流数据
         $track = Db::name('order_node')
             ->where($where)
+            ->where('order_node',4)
+            ->where('node_type',40)
             ->order('delivery_time desc')
             ->limit(12)
             ->select();
