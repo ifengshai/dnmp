@@ -1436,6 +1436,11 @@ class Distribution extends Backend
                 $map['d.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
                 unset($filter['check_time']);
             }
+            if ($filter['b.payment_time']) {
+                $payment_time = explode(' - ', $filter['b.payment_time']);
+                $map['b.payment_time'] = ['between', [strtotime($payment_time[0]), strtotime($payment_time[1])]];
+                unset($filter['b.payment_time']);
+            }
             if ($filter['distribution_status']) {
                 $map['a.distribution_status'] = ['in', $filter['distribution_status']];
                 unset($filter['distribution_status']);
@@ -1530,6 +1535,7 @@ class Distribution extends Backend
             8 => '合单中',
             9 => '合单完成',
         ];
+
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
