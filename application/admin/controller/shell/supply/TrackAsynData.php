@@ -66,15 +66,14 @@ class TrackAsynData extends Command
     }
     public function total_track_data($data, $add,$id)
     {
-        if($data['e'] != 40){
-            //删除detail表中的签收数据
-            Db::name('order_node_detail')
-                ->where('track_number', $add['track_number'])
-                ->where('shipment_type', $add['shipment_type'])
-                ->where('order_node',4)
-                ->where('node_type',40)
-                ->delete();
-        }
+        //删除detail表中的签收数据
+        Db::name('order_node_detail')
+            ->where('track_number', $add['track_number'])
+            ->where('shipment_type', $add['shipment_type'])
+            ->where('order_node',4)
+            ->where('node_type',40)
+            ->delete();
+
         $trackdetail = array_reverse($data['z1']);
 
         $all_num = count($trackdetail);
@@ -88,6 +87,7 @@ class TrackAsynData extends Command
             $order_node_detail['order_number'] = $add['order_number'];
             $order_node_detail['shipment_type'] = $add['shipment_type'];
             $order_node_detail['shipment_data_type'] = $add['shipment_data_type'];
+            $order_node_detail['track_number'] = $add['track_number'];
 
             //获取物流明细表中的描述
             $contents = Db::name('order_node_courier')
