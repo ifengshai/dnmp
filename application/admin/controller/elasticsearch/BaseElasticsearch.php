@@ -47,7 +47,7 @@ class BaseElasticsearch extends Backend
 
         //es配置
         $params = [
-            'http://test.utools.club:36942',
+            'http://test.utools.club:43930',
         ];
         //获取es的实例
         $this->esClient = ClientBuilder::create()->setHosts($params)->build();
