@@ -25,7 +25,7 @@ class AsyncCart extends BaseElasticsearch
     {
         $data['id'] = $id;
         $insertData = $this->getData($data);
-        $this->esService->addToEs('mojing_cart',$this->formatDate($insertData,$mergeData));
+        $this->esService->addToEs('mojing_cart',$insertData);
     }
 
     /**
