@@ -140,8 +140,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 searchList: {1: '未确认', 2: '已确认', 3: '待通过', 4: '待上线', 5: '已上线'},
                                 visible: false
                             },
+                            // {
+                            //     field: 'all_finish_time',
+                            //     title: __('完成时间'),
+                            //     operate: 'RANGE',
+                            //     addclass: 'datetimerange',
+                            //     formatter: Table.api.formatter.datetime,
+                            //     visible: false
+                            // },
                             {
-                                field: 'all_finish_time',
+                                field: 'end_time',
                                 title: __('完成时间'),
                                 operate: 'RANGE',
                                 addclass: 'datetimerange',
