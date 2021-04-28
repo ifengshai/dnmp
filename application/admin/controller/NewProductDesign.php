@@ -462,7 +462,7 @@ class NewProductDesign extends Backend
             $map['id'] = $ids;
             $data['responsible_id'] = $responsible_id;
             $data['update_time']  = date("Y-m-d H:i:s", time());
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            $res = $this->model->where($map)->update($data);
             //添加操作记录
             $valueLog['operator'] = session('admin.nickname');
             $valueLog['addtime'] = date('Y-m-d H:i:s',time());
