@@ -122,6 +122,7 @@ class WebData extends Backend
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
                         $key = $message->key;
+                        echo $payload['database'].'-'.$payload['type'].'-'.$payload['table'];
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志。
                         if ($payload) {
@@ -216,6 +217,141 @@ class WebData extends Backend
                 }
             }
         }
+    }
+
+    public function process_list()
+    {
+        $this->process_data(1);
+        $this->process_data(2);
+        $this->process_data(3);
+        $this->process_data(9);
+        $this->process_data(10);
+        $this->process_data(11);
+        $this->process_data(12);
+
+        echo "ok";
+    }
+
+    /**
+     * 处理购物车旧数据
+     * @author wpl
+     * @date   2021/4/26 15:59
+     */
+    public function process_data($site)
+    {
+        if ($site == 1) {
+            $entity_id = WebShoppingCart::where(['entity_id' => ['<', 18266819], 'site' => 1])->max('entity_id');
+            echo $entity_id."\n";
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 2) {
+            $entity_id = WebShoppingCart::where(['entity_id' => ['<', 2048469], 'site' => 2])->max('entity_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 3) {
+            $entity_id = WebShoppingCart::where(['entity_id' => ['<', 2568158], 'site' => 3])->max('entity_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 9) {
+            $entity_id = WebShoppingCart::where(['site' => 9])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 10) {
+            $entity_id = WebShoppingCart::where(['entity_id' => ['<', 59581], 'site' => 10])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 11) {
+            $entity_id = WebShoppingCart::where(['entity_id' => ['<', 30131], 'site' => 11])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 12) {
+            $entity_id = WebShoppingCart::where(['site' => 12])->max('entity_id');
+            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        }
+        $res = collection($res)->toArray();
+        WebShoppingCart::setInsertData($res, $site);
+        echo $site.'--ok'."\n";
+    }
+
+
+    public function process_list_user()
+    {
+        $this->process_users_data(1);
+        $this->process_users_data(2);
+        $this->process_users_data(3);
+        $this->process_users_data(9);
+        $this->process_users_data(10);
+        $this->process_users_data(11);
+        $this->process_users_data(12);
+    }
+
+    /**
+     * 处理用户表旧数据
+     * @author wpl
+     * @date   2021/4/26 15:59
+     */
+    protected function process_users_data($site)
+    {
+        if ($site == 1) {
+            $entity_id = WebUsers::where(['entity_id' => ['<', 1155328], 'site' => 1])->max('entity_id');
+            $res = Db::connect('database.db_zeelool')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 2) {
+            $entity_id = WebUsers::where(['entity_id' => ['<', 421074], 'site' => 2])->max('entity_id');
+            $res = Db::connect('database.db_voogueme')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 3) {
+            $entity_id = WebUsers::where(['entity_id' => ['<', 71892], 'site' => 3])->max('entity_id');
+            $res = Db::connect('database.db_nihao')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 9) {
+            $entity_id = WebUsers::where(['site' => 9])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 10) {
+            $entity_id = WebUsers::where(['entity_id' => ['<', 10823], 'site' => 10])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 11) {
+            $entity_id = WebUsers::where(['entity_id' => ['<', 8070], 'site' => 11])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 12) {
+            $entity_id = WebUsers::where(['site' => 12])->max('entity_id');
+            $res = Db::connect('database.db_voogueme_acc')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        }
+        $res = collection($res)->toArray();
+        WebUsers::setInsertData($res, $site);
+        echo $site.'--ok'."\n";
+    }
+
+
+    public function process_list_viporder()
+    {
+        $this->process_viporder_data(1);
+        $this->process_viporder_data(2);
+    }
+
+    /**
+     * 处理用户表旧数据
+     * @author wpl
+     * @date   2021/4/26 15:59
+     */
+    protected function process_viporder_data($site)
+    {
+        if ($site == 1) {
+            $entity_id = WebVipOrder::where(['web_id' => ['<', 9981], 'site' => 1])->max('web_id');
+            $res = Db::connect('database.db_zeelool')->table('oc_vip_order')->where(['id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 2) {
+            $entity_id = WebVipOrder::where(['web_id' => ['<', 3006], 'site' => 2])->max('web_id');
+            $res = Db::connect('database.db_voogueme')->table('oc_vip_order')->where(['id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 3) {
+            $entity_id = WebVipOrder::where(['entity_id' => ['<', 71892], 'site' => 3])->max('entity_id');
+            $res = Db::connect('database.db_nihao')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 9) {
+            $entity_id = WebVipOrder::where(['site' => 9])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 10) {
+            $entity_id = WebVipOrder::where(['entity_id' => ['<', 10823], 'site' => 10])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 11) {
+            $entity_id = WebVipOrder::where(['entity_id' => ['<', 8070], 'site' => 11])->max('entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        } elseif ($site == 12) {
+            $entity_id = WebVipOrder::where(['site' => 12])->max('entity_id');
+            $res = Db::connect('database.db_voogueme_acc')->table('oc_vip_order')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+        }
+        $res = collection($res)->toArray();
+        WebVipOrder::setInsertData($res, $site);
+        echo $site.'--ok'."\n";
     }
 
 

@@ -9,6 +9,8 @@ use app\admin\model\DistributionLog;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemBrand;
+use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\NewProductDesignLog;
 use app\admin\model\order\Order;
 use app\common\controller\Backend;
 use app\common\model\Auth;
@@ -75,6 +77,7 @@ class NewProductDesign extends Backend
     public function index()
     {
         $admin = new Admin();
+        $Item = new Item();
         //当前是否为关联查询
         $this->relationSearch = false;
         //设置过滤方法
@@ -91,6 +94,27 @@ class NewProductDesign extends Backend
             }
             if ($filter['sku']) {
                 $map['sku'] = ['like','%'.$filter['sku'].'%'];
+            }
+
+            if ($filter['site'] || $filter['item_status'] || $filter['is_new']){
+                if ($filter['site']){
+                    $cat['b.platform_type'] = ['eq',$filter['site']];
+                    unset($filter['site']);
+                }
+                if ($filter['item_status']){
+                    $cat['a.item_status'] = ['eq',$filter['item_status']];
+                    unset($filter['item_status']);
+                }
+                if ($filter['is_new']){
+                    $cat['a.is_new'] = ['eq',$filter['is_new']];
+                    unset($filter['is_new']);
+                }
+               $sku =  $Item->alias('a')
+                    ->join(['fa_item_platform_sku'=>'b'],'a.sku = b.sku')
+                    ->where($cat)
+                    ->column('a.sku');
+                $sku = array_unique($sku);
+                $map['sku'] = ['in',$sku];
             }
             unset($filter['label']);
             if ($filter['responsible_id']){
@@ -124,10 +148,8 @@ class NewProductDesign extends Backend
                 ->select();
             foreach ($list as $row) {
                 $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time']);
-
             }
             $list = collection($list)->toArray();
-
             foreach ($list as $key=>$item){
                 $list[$key]['label'] = $map['status']?$map['status']:0;
                 if ($item['responsible_id'] !==null){
@@ -135,10 +157,10 @@ class NewProductDesign extends Backend
                 }else{
                     $list[$key]['responsible_id'] = '暂无';
                 }
+                $itemStatusIsNew = $Item->where(['sku'=>$item['sku']])->field('item_status,is_new')->find();
+                $list[$key]['item_status'] =$itemStatusIsNew->item_status;
+                $list[$key]['is_new'] = $itemStatusIsNew->is_new;
             }
-            //获取当前用户id
-
-
             $result = array("total" => $total,"label"=>$map['status']?$map['status']:0, "rows" => $list);
 
             return json($result);
@@ -243,6 +265,13 @@ class NewProductDesign extends Backend
                     //更新商品属性表
                     $whe['item_id'] = $data['goodsId'];
                     $itemAttribute->where($whe)->update($data['row']);
+                    //添加操作记录
+//                    $valueLog['operator'] = session('admin.nickname');
+//                    $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+//                    $valueLog['node'] = 1;
+//                    $valueLog['operation_type'] = '录尺寸';
+//                    $valueLog['value_log'] = json_encode($data['row']);
+//                    $this->designRecording($valueLog);
                 }
                 $this->model->commit();
                 $itemAttribute->commit();
@@ -295,6 +324,19 @@ class NewProductDesign extends Backend
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+//        if ($data['status']==2){
+//            $valueLog['operation_type'] = '开始拍摄';
+//        }else{
+//            $valueLog['operation_type'] = '拍摄完成';
+//        }
+//
+//        //添加操作记录
+//        $valueLog['operator'] = session('admin.nickname');
+//        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+//        $valueLog['node'] = 1;
+//        $valueLog['operation_type'] = '录尺寸';
+//        $valueLog['value_log'] = json_encode($data['row']);
+//        $this->designRecording($valueLog);
         if ($res){
             $this->success('操作成功');
         }else{
@@ -544,4 +586,14 @@ class NewProductDesign extends Backend
         $skuValue = $item->where(['id'=>['in',$otherValue]])->column('sku');
         dump($skuValue);die();
     }
+
+    /**
+     * @param $value
+     * @author zjw
+     * @date   2021/4/26 14:26
+     */
+    public function designRecording($value){
+        Db::name('new_product_design_log')->insert($value);
+    }
+
 }

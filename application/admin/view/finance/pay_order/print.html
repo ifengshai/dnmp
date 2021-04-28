@@ -145,6 +145,9 @@
                                     <th>序号</th>
                                     <th>采购单号</th>
                                     <th>采购批次ID</th>
+                                    <th>申请人</th>
+                                    <th>SKU</th>
+                                    <th>商品分类</th>
                                     <th>已支付金额</th>
                                     <th>批次入库金额</th>
                                     <th>批次入库数量</th>
@@ -157,6 +160,9 @@
                                     <td>{$k+1}</td>
                                     <td>{$v.purchase_number}</td>
                                     <td>{$v.purchase_batch_id}</td>
+                                    <td>{$v.create_person}</td>
+                                    <td>{$v.purchase_name}</td>
+                                    <td>{$v.category_name}</td>
                                     <td>{$v.now_before_total}</td>
                                     <td>{$v.instock_total}</td>
                                     <td>{$v.batch_instock_num}</td>
@@ -167,7 +173,7 @@
                                 {/foreach}
                                
                                 <tr>
-                                    <td colspan="8" style="text-align: right;">批次入库数量合计：{$total3}待结算金额合计：</td>
+                                    <td colspan="11" style="text-align: right;">批次入库数量合计：{$total3} 待结算金额合计：</td>
                                     <td>{$total1}</td>
                                 </tr>
                                

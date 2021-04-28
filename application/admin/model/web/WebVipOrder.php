@@ -37,23 +37,24 @@ class WebVipOrder extends Model
             $params = [];
             foreach ($data as $k => $v) {
                 $params[$k]['web_id'] = $v['id'];
-                $params[$k]['customer_id'] = $v['customer_id'];
-                $params[$k]['customer_email'] = $v['customer_email'];
+                $params[$k]['customer_id'] = $v['customer_id'] ?: 0;
+                $params[$k]['customer_email'] = $v['customer_email'] ?: '';
                 $params[$k]['site'] = $site;
-                $params[$k]['order_number'] = $v['order_number'];
-                $params[$k]['order_amount'] = $v['order_amount'];
-                $params[$k]['order_status'] = $v['order_status'];
-                $params[$k]['order_type'] = $v['order_type'];
-                $params[$k]['paypal_token'] = $v['paypal_token'];
+                $params[$k]['order_number'] = $v['order_number'] ?: '';
+                $params[$k]['order_amount'] = $v['order_amount'] ?: 0;
+                $params[$k]['order_status'] = $v['order_status'] ?: 0;
+                $params[$k]['order_type'] = $v['order_type'] ?: 0;
+                $params[$k]['paypal_token'] = $v['paypal_token'] ?: '';
                 $params[$k]['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) + 28800 : 0;
                 $params[$k]['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) + 28800 : 0;
-                $params[$k]['is_active_status'] = $v['is_active_status'];
+                $params[$k]['is_active_status'] = $v['is_active_status'] ?: 0;
                 $params[$k]['created_at'] = time();
                 $params[$k]['updated_at'] = time();
                 $params[$k]['pay_status'] = $v['pay_status'] ?: 0;
                 $params[$k]['country_id'] = $v['country_id'] ?: 0;
             }
             (new WebVipOrder)->saveAll($params);
+
             return true;
         } catch (\Exception $e) {
             Log::record('webVipOrder:'.$e->getMessage());
@@ -79,16 +80,16 @@ class WebVipOrder extends Model
         try {
             foreach ($data as $k => $v) {
                 $params = [];
-                $params['customer_email'] = $v['customer_email'];
-                $params['customer_id'] = $v['customer_id'];
-                $params['order_number'] = $v['order_number'];
-                $params['order_amount'] = $v['order_amount'];
+                $params['customer_email'] = $v['customer_email'] ?: '';
+                $params['customer_id'] = $v['customer_id'] ?: 0;
+                $params['order_number'] = $v['order_number'] ?: '';
+                $params['order_amount'] = $v['order_amount'] ?: 0;
                 $params['order_status'] = $v['order_status'] ?: 0;
                 $params['order_type'] = $v['order_type'] ?: 0;
-                $params['paypal_token'] = $v['paypal_token'];
+                $params['paypal_token'] = $v['paypal_token'] ?: '';
                 $params['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) + 28800 : 0;
                 $params['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) + 28800 : 0;
-                $params['is_active_status'] = $v['is_active_status'];
+                $params['is_active_status'] = $v['is_active_status'] ?: 0;
                 $params['updated_at'] = time();
                 $params['pay_status'] = $v['pay_status'] ?: 0;
                 $params['country_id'] = $v['country_id'] ?: 0;
