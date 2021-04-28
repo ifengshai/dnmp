@@ -24,12 +24,40 @@ class AsyncCustomer extends BaseElasticsearch
     public function runInsert($data,$id)
     {
         $data['id'] = $id;
+        $insertData = $this->getData($data);
+        $this->esService->addToEs('mojing_customer',$insertData);
+    }
+
+    /**
+     * 更新用户信息
+     * @param $data
+     * @param $id
+     *
+     * @author crasphb
+     * @date   2021/4/24 9:48
+     */
+    public function runUpdate($data)
+    {
+        $updateData = $this->getData($data);
+        $this->esService->updateEs('mojing_customer',$updateData);
+    }
+
+    /**
+     * 格式化参数
+     * @param $data
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/28 9:25
+     */
+    protected function getData($data)
+    {
         $value = array_map(function($v){
             return $v === null ? 0 : $v;
         },$data);
         $mergeData = $value['created_at'];
-        $insertData = [
-            'id' => $id,
+        $updateData = [
+            'id' => $data['id'],
             'entity_id' => $value['entity_id'],
             'site' => $value['site'],
             'email' => $value['email'],
@@ -42,29 +70,6 @@ class AsyncCustomer extends BaseElasticsearch
             'resouce' => $value['resouce'] ?? 0,
 
         ];
-        $insertData = $this->formatDate($insertData,$mergeData);
-        $this->esService->addToEs('mojing_customer',$insertData);
-    }
-
-    /**
-     * 更新用户信息
-     * @param $data
-     * @param $id
-     *
-     * @author crasphb
-     * @date   2021/4/24 9:48
-     */
-    public function runUpdate($data,$id)
-    {
-        $data['id'] = $id;
-        $value = array_map(function($v){
-            return $v === null ? 0 : $v;
-        },$data);
-        $value['update_time_day'] = date('Ymd',$value['updated_at']);
-        $mergeData = $value['updated_at'];
-        unset($value['updated_at']);
-        unset($value['created_at']);
-        $updateData = $this->formatDate($value,$mergeData);
-        $this->esService->updateEs('mojing_customer',$updateData);
+        return $this->formatDate($updateData,$mergeData);
     }
 }

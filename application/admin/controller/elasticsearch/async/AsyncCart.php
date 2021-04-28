@@ -23,20 +23,8 @@ class AsyncCart extends BaseElasticsearch
      */
     public function runInsert($data,$id)
     {
-        $value = array_map(function($v){
-            return $v === null ? 0 : $v;
-        },$data);
-        $mergeData = $value['created_at'];
-        $insertData = [
-            'id' => $id,
-            'entity_id' => $value['entity_id'],
-            'site' => $value['site'],
-            'status' => $value['is_active'],
-            'update_time_day' => date('Ymd',$value['updated_at']),
-            'update_time' => $value['updated_at'],
-            'create_time' => $mergeData,
-
-        ];
+        $data['id'] = $id;
+        $insertData = $this->getData($data);
         $this->esService->addToEs('mojing_cart',$this->formatDate($insertData,$mergeData));
     }
 
@@ -48,14 +36,27 @@ class AsyncCart extends BaseElasticsearch
      * @author crasphb
      * @date   2021/4/24 13:02
      */
-    public function runUpdate($data,$id)
+    public function runUpdate($data)
+    {
+        $updateData = $this->getData($data);
+        $this->esService->updateEs('mojing_cart', $updateData);
+    }
+    /**
+     * 格式化参数
+     * @param $data
+     *
+     * @return array
+     * @author crasphb
+     * @date   2021/4/28 9:25
+     */
+    protected function getData($data)
     {
         $value = array_map(function($v){
             return $v === null ? 0 : $v;
         },$data);
         $mergeData = $value['created_at'];
         $insertData = [
-            'id' => $id,
+            'id' => $data['id'],
             'entity_id' => $value['entity_id'],
             'site' => $value['site'],
             'status' => $value['is_active'],
@@ -64,7 +65,6 @@ class AsyncCart extends BaseElasticsearch
             'create_time' => $mergeData,
 
         ];
-        $updateData = $this->formatDate($insertData,$mergeData);
-        $this->esService->updateEs('mojing_cart', $updateData);
+        return $this->formatDate($insertData,$mergeData);
     }
 }
