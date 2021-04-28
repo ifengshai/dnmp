@@ -44,13 +44,21 @@
 </style>
 
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-    <div>
+    <div style="display: inline-block">
         入库单号：{$location_number}
+    </div>
+    <div style="display: inline-block;margin-left: 20rem">
+        <label>入库类型:</label>
+        <select name="row[instock_type]" id="type">
+            <option value="1">样品带回</option>
+            <option value="2">换图入库</option>
+        </select>
     </div>
     <div class="desc">
         <label>备注：</label>
         <textarea name="row[description]" id="description" cols="30" rows="6"></textarea>
     </div>
+
     <div id="add_entry_product"><span>add</span></div>
     <table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
         <thead>
