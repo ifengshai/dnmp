@@ -50,7 +50,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             }, operate: false
                         },
                         { field: 'id', title: __('Id'), operate: false },
-                        { field: 'name', title: __('Name') },
+                        { field: 'name', title: __('Name'),operate: 'LIKE' },
                         { field: 'origin_sku', title: __('Origin_sku'), operate: 'LIKE' },
                         { field: 'sku', title: __('Sku'), operate: 'LIKE' },
                         {
