@@ -68,6 +68,12 @@ class StockHouse extends Backend
                 unset($filter['area_coding']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
+            if (isset($filter['shelf_number'])) {
+                $shelfNumber = $this->shelf_number1();
+                $map['shelf_number'] = ['=', $shelfNumber[$filter['shelf_number']]];
+                unset($filter['shelf_number']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where(['type' => 1])
