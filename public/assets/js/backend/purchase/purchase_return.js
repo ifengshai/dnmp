@@ -34,8 +34,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         {
                             field: 'supplier.supplier_type_pattern',
                             title: __('供应商类型'),
-                            custom: { 1: 'yellow', 2: 'blue' },
-                            searchList: { 1: '工厂', 2: '贸易' },
+                            custom: { 1:'yellow',2:'blue'},
+                            searchList: { 1: '工厂',2:'贸易'},
                             formatter: Table.api.formatter.status
                         },
                         { field: 'return_type', title: __('Return_type'),
