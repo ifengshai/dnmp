@@ -85,9 +85,9 @@ class WebUsers extends Model
                 $params['is_vip'] = $v['is_vip'];
                 (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
 
-                $userId = (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->value('id');
+                $user = (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->find()->toArray();
                 //更新用户信息
-                (new AsyncCustomer())->runUpdate($params,$userId);
+                (new AsyncCustomer())->runUpdate($user);
             }
 
             return true;
@@ -163,9 +163,9 @@ class WebUsers extends Model
 
                 (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
 
-                $userId = (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->value('id');
+                $user = (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->find()->toArray();
                 //更新用户信息
-                (new AsyncCustomer())->runUpdate($params,$userId);
+                (new AsyncCustomer())->runUpdate($user);
             }
 
             return true;
