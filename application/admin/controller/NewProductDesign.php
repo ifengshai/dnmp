@@ -33,7 +33,7 @@ class NewProductDesign extends Backend
      * @var \app\admin\model\NewProductDesign
      */
     protected $model = null;
-    protected $noNeedRight = ['detail'];
+    protected $noNeedRight = ['detail','designRecording'];
     public function _initialize()
     {
         parent::_initialize();
@@ -62,6 +62,7 @@ class NewProductDesign extends Backend
         $this->assignconfig('making', $this->auth->check('new_product_design/making')); //开始制作
         $this->assignconfig('review_the_operation', $this->auth->check('new_product_design/review_the_operation')); //审核操作
         $this->assignconfig('add_img', $this->auth->check('new_product_design/add_img')); //图片上传操作
+        $this->assignconfig('change_designer', $this->auth->check('new_product_design/change_designer')); //修改人员
     }
 
     /**
@@ -266,12 +267,13 @@ class NewProductDesign extends Backend
                     $whe['item_id'] = $data['goodsId'];
                     $itemAttribute->where($whe)->update($data['row']);
                     //添加操作记录
-//                    $valueLog['operator'] = session('admin.nickname');
-//                    $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-//                    $valueLog['node'] = 1;
-//                    $valueLog['operation_type'] = '录尺寸';
-//                    $valueLog['value_log'] = json_encode($data['row']);
-//                    $this->designRecording($valueLog);
+                    $valueLog['operator'] = session('admin.nickname');
+                    $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                    $valueLog['node'] = 2;
+                    $valueLog['operation_type'] = '录尺寸';
+                    $valueLog['design_id'] = $ids;
+                    $valueLog['value_log'] = json_encode($data['row']);
+                    $this->designRecording($valueLog);
                 }
                 $this->model->commit();
                 $itemAttribute->commit();
@@ -308,8 +310,6 @@ class NewProductDesign extends Backend
     }
     //产品要求  状态更改需要拆分为多个方法-用于权限限制
     //拍摄-（开始拍摄、拍摄完成）、分配-（分配）、制作-（开始制作）、上传-（上传图片）、审核（审核通过、审核拒绝）
-
-
     /**
      * @author zjw
      * @date   2021/4/9 13:55
@@ -324,19 +324,17 @@ class NewProductDesign extends Backend
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-//        if ($data['status']==2){
-//            $valueLog['operation_type'] = '开始拍摄';
-//        }else{
-//            $valueLog['operation_type'] = '拍摄完成';
-//        }
-//
-//        //添加操作记录
-//        $valueLog['operator'] = session('admin.nickname');
-//        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-//        $valueLog['node'] = 1;
-//        $valueLog['operation_type'] = '录尺寸';
-//        $valueLog['value_log'] = json_encode($data['row']);
-//        $this->designRecording($valueLog);
+        if ($data['status']==3){
+            $valueLog['operation_type'] = '开始拍摄';
+        }else{
+            $valueLog['operation_type'] = '拍摄完成';
+        }
+        //添加操作记录
+        $valueLog['operator'] = session('admin.nickname');
+        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+        $valueLog['node'] = $data['status'];
+        $valueLog['design_id'] = $ids;
+        $this->designRecording($valueLog);
         if ($res){
             $this->success('操作成功');
         }else{
@@ -358,6 +356,13 @@ class NewProductDesign extends Backend
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        //添加操作记录
+        $valueLog['operator'] = session('admin.nickname');
+        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+        $valueLog['node'] = 6;
+        $valueLog['operation_type'] = '开始制作';
+        $valueLog['design_id'] = $ids;
+        $this->designRecording($valueLog);
         if ($res){
             $this->success('操作成功');
         }else{
@@ -378,9 +383,13 @@ class NewProductDesign extends Backend
         empty($status) && $this->error('数据异常');
         $map['id'] = $ids;
         if ($status ==9){
+            $valueLog['operation_type'] = '审核拒绝';
+            $valueLog['node'] = $status;
             $status =6;
         }
         if ($status ==8){
+            $valueLog['node'] = $status;
+            $valueLog['operation_type'] = '审核通过';
             $value = $this->model->get($ids);
             $data['item_status']=1;
             $change['sku'] = $value->sku;
@@ -389,6 +398,11 @@ class NewProductDesign extends Backend
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        //添加操作记录
+        $valueLog['operator'] = session('admin.nickname');
+        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+        $valueLog['design_id'] = $ids;
+        $this->designRecording($valueLog);
         if ($res){
             $this->success('操作成功');
         }else{
@@ -408,6 +422,13 @@ class NewProductDesign extends Backend
             $data['status'] = 5;
             $data['update_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['node'] = 5;
+            $valueLog['operation_type'] = '分配人员';
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
             if ($res){
                 $this->success('人员分配成功');
             }else{
@@ -428,6 +449,48 @@ class NewProductDesign extends Backend
         return $this->view->fetch();
 
     }
+
+    /**
+     * @author zjw
+     * @date   2021/4/26 17:59
+     * 更换设计师
+     */
+    public function change_designer(){
+        if($this->request->post()){
+            $ids =  $this->request->post('ids');
+            $responsible_id =  $this->request->post('responsible_id');
+            $map['id'] = $ids;
+            $data['responsible_id'] = $responsible_id;
+            $data['update_time']  = date("Y-m-d H:i:s", time());
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['node'] = 5;
+            $valueLog['operation_type'] = '更换设计师';
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
+            if ($res){
+                $this->success('人员分配成功');
+            }else{
+                $this->error('人员分配失败');
+            }
+        }
+        //获取筛选人
+        $authGroupAccess= new AuthGroupAccess();
+        $auth_user = $authGroupAccess
+            ->alias('a')
+            ->join(['fa_admin' => 'b'], 'a.uid=b.id')
+            ->where('a.group_id=160')
+            ->field('id,nickname')
+            ->select();
+        $this->assign('ids', $ids);
+        $this->assign('auth_user', collection($auth_user)->toArray());
+
+        return $this->view->fetch();
+
+    }
+
 
     //上传图片 弃用
     public function add_img_old()
@@ -478,6 +541,12 @@ class NewProductDesign extends Backend
                 $itemAttrData['frame_aws_imgs'] = implode(',', $imgsArr);
                 $itemAttrResult = $itemAttribute->where('item_id', '=', $itemId)->update($itemAttrData);
                 $newProductDesignResult = $newProductDesign->where('id', '=', input('ids'))->update(['status'=>7,'update_time'=>date("Y-m-d H:i:s", time())]);
+                //添加操作记录
+                $valueLog['operator'] = session('admin.nickname');
+                $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                $valueLog['node'] = 6;
+                $valueLog['operation_type'] = '上传图片';
+                $this->designRecording($valueLog);
                 $itemAttribute->commit();
                 $item->commit();
                 $newProductDesign->commit();
@@ -542,6 +611,15 @@ class NewProductDesign extends Backend
                 $itemAttrData['frame_aws_imgs'] = implode(',', $value);
                 $itemAttrResult = $itemAttribute->where('item_id', '=', $itemId)->update($itemAttrData);
                 $newProductDesignResult = $newProductDesign->where('id', '=', input('ids'))->update(['status' => 7, 'update_time' => date("Y-m-d H:i:s", time())]);
+
+                //添加操作记录
+                $valueLog['operator'] = session('admin.nickname');
+                $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                $valueLog['node'] = 6;
+                $valueLog['operation_type'] = '上传图片';
+                $valueLog['design_id'] =input('ids');
+                $this->designRecording($valueLog);
+
                 $itemAttribute->commit();
                 $item->commit();
                 $newProductDesign->commit();
@@ -588,6 +666,18 @@ class NewProductDesign extends Backend
     }
 
     /**
+     * @author zjw
+     * @date   2021/4/26 18:17
+     * 操作记录
+     */
+    public function operation_log($ids=null){
+        $value = Db::table('fa_new_product_design_log')->where(['design_id'=>$ids])->order('addtime desc')->select();
+        $this->assign('list',$value);
+        return $this->view->fetch();
+    }
+
+
+    /**
      * @param $value
      * @author zjw
      * @date   2021/4/26 14:26
@@ -595,5 +685,9 @@ class NewProductDesign extends Backend
     public function designRecording($value){
         Db::name('new_product_design_log')->insert($value);
     }
+
+
+
+
 
 }

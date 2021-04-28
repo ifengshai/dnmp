@@ -221,6 +221,47 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     }
                                 },
                                 {
+                                    name: 'distr_user_change',
+                                    text:'更换设计师',
+                                    title:__('更换设计师'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: '',
+                                    url: 'new_product_design/change_designer?ids={row.id}',
+                                    area: ['30%', '20%'],
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if (row.status ==5 && row.label !==0 || row.label ==6){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '操作记录',
+                                    title: __('操作记录'),
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: 'new_product_design/operation_log',
+                                    extend: 'data-area = \'["60%","50%"]\'',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {
+                                            title: "回传数据"
+                                        });
+                                    },
+                                    visible: function (row) {
+                                        //返回true时按钮显示,返回false隐藏
+                                        if (row.label ==0){
+                                            return  true;
+                                        }else{
+                                            return false;
+                                        }
+                                    }
+                                },
+                                {
                                     name: 'tarted_making',
                                     text: '开始制作',
                                     title: __('开始制作'),
@@ -333,6 +374,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     $(table).data("operate-distr_user", null);
                                     that.table = table;
                                 }
+
                                 if(Config.making != true){
                                     $(table).data("operate-tarted_making", null);
                                     that.table = table;
@@ -405,7 +447,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         record_size: function () {
             Controller.api.bindevent();
         },
-
+        change_designer: function () {
+            Controller.api.bindevent();
+        },
         reviewTheOperation: function () {
             Controller.api.bindevent();
         },
