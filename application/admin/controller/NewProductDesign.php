@@ -15,7 +15,6 @@ use app\admin\model\order\Order;
 use app\common\controller\Backend;
 use app\common\model\Auth;
 use Aws\S3\S3Client;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -135,7 +134,7 @@ class NewProductDesign extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($map)
@@ -330,13 +329,13 @@ class NewProductDesign extends Backend
         }else{
             $valueLog['operation_type'] = '拍摄完成';
         }
-        //添加操作记录
-        $valueLog['operator'] = session('admin.nickname');
-        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-        $valueLog['node'] = $data['status'];
-        $valueLog['design_id'] = $ids;
-        $this->designRecording($valueLog);
         if ($res){
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['node'] = $data['status'];
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
             $this->success('操作成功');
         }else{
             $this->error('操作失败');
@@ -357,14 +356,14 @@ class NewProductDesign extends Backend
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-        //添加操作记录
-        $valueLog['operator'] = session('admin.nickname');
-        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-        $valueLog['node'] = 6;
-        $valueLog['operation_type'] = '开始制作';
-        $valueLog['design_id'] = $ids;
-        $this->designRecording($valueLog);
         if ($res){
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['node'] = 6;
+            $valueLog['operation_type'] = '开始制作';
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
             $this->success('操作成功');
         }else{
             $this->error('操作失败');
@@ -399,12 +398,12 @@ class NewProductDesign extends Backend
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-        //添加操作记录
-        $valueLog['operator'] = session('admin.nickname');
-        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-        $valueLog['design_id'] = $ids;
-        $this->designRecording($valueLog);
         if ($res){
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
             $this->success('操作成功');
         }else{
             $this->error('操作失败');
@@ -423,24 +422,25 @@ class NewProductDesign extends Backend
             $data['status'] = 5;
             $data['update_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            //添加操作记录
-            $valueLog['operator'] = session('admin.nickname');
-            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-            $valueLog['node'] = 5;
-            $valueLog['operation_type'] = '分配人员';
-            $valueLog['design_id'] = $ids;
-            $this->designRecording($valueLog);
             if ($res){
+                //添加操作记录
+                $valueLog['operator'] = session('admin.nickname');
+                $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                $valueLog['node'] = 5;
+                $valueLog['operation_type'] = '分配人员';
+                $valueLog['design_id'] = $ids;
+                $this->designRecording($valueLog);
                 $this->success('人员分配成功');
             }else{
                 $this->error('人员分配失败');
             }
         }
         //获取筛选人
-        $authGroupAccess = new AuthGroupAccess();
+        $authGroupAccess= new AuthGroupAccess();
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin' => 'b'], 'a.uid=b.id')
+//            ->where('a.group_id=160')
             ->where('a.group_id=72')
             ->field('id,nickname')
             ->select();
@@ -464,14 +464,14 @@ class NewProductDesign extends Backend
             $data['responsible_id'] = $responsible_id;
             $data['update_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->where($map)->update($data);
-            //添加操作记录
-            $valueLog['operator'] = session('admin.nickname');
-            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-            $valueLog['node'] = 5;
-            $valueLog['operation_type'] = '更换设计师';
-            $valueLog['design_id'] = $ids;
-            $this->designRecording($valueLog);
             if ($res){
+                //添加操作记录
+                $valueLog['operator'] = session('admin.nickname');
+                $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                $valueLog['node'] = 5;
+                $valueLog['operation_type'] = '更换设计师';
+                $valueLog['design_id'] = $ids;
+                $this->designRecording($valueLog);
                 $this->success('人员分配成功');
             }else{
                 $this->error('人员分配失败');
@@ -482,6 +482,7 @@ class NewProductDesign extends Backend
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin' => 'b'], 'a.uid=b.id')
+//            ->where('a.group_id=160')
             ->where('a.group_id=72')
             ->field('id,nickname')
             ->select();
@@ -650,22 +651,6 @@ class NewProductDesign extends Backend
 
         return $this->view->fetch();
     }
-
-    /**
-     * @author zjw
-     * @date   2021/4/21 15:27
-     * 选品设计异常数据
-     */
-    public function checkTheData(){
-        $sku = $this->model->column('sku');
-        $item = new Item();
-        $itemAttribute =new ItemAttribute();
-        $goodsId = $item->where(['sku'=>['in',$sku]])->column('id');
-        $otherValue = $itemAttribute->where(['item_id'=>['in',$goodsId],'frame_width'=>['elt',0],'frame_height'=>['elt',0]])->column('item_id');
-        $skuValue = $item->where(['id'=>['in',$otherValue]])->column('sku');
-        dump($skuValue);die();
-    }
-
     /**
      * @author zjw
      * @date   2021/4/26 18:17
@@ -690,120 +675,5 @@ class NewProductDesign extends Backend
 
 
 
-    /**
-     * 选品设计管理导出
-     * Interface export
-     * @package app\admin\controller
-     * @author  jhh
-     * @date    2021/4/26 14:55:01
-     */
-    public function export(){
-        set_time_limit(0);
-        ini_set('memory_limit', '512M');
-        $item = new Item();
-        $itemAttribute =new ItemAttribute();
-        $designStatus = input('design_status');
-        $platType= input('plat_type');
-        $createTime = input('create_time');
-        $map = [];
-        if ($platType){
-            $itemPlatformSku = new ItemPlatformSku();
-            $sku = $itemPlatformSku
-                ->where(['platform_type'=>$platType])
-                ->column('sku');
-            $map['sku'] = ['in',$sku];
-        }
-        if ($designStatus > 0){
-            $map['status'] = ['=',$designStatus];
-        }
-        if ($createTime){
-            $createat = explode(' ', $createTime);
-            $map['create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
-        }
-        $list = $this->model
-            ->field('id,sku')
-            ->where($map)
-            ->select();
-        $list = collection($list)->toArray();
-        foreach ($list as $k=>$v){
-            $value = $this->model->get($v['id']);
-            $where['sku'] = $value->sku;
-            $data = $item
-                ->where($where)
-                ->field('id,category_id')
-                ->find();
-            $attributeType = $data->category_id;
-            $goodsId = $data->id;
-            $compareValue = ['32','34','35','38','39'];
-            if (!in_array($attributeType,$compareValue)){
-                $attributeType = true;
-            }
-            $row =$itemAttribute
-                ->where('item_id',$goodsId)
-                ->find();
-            $list[$k]['detail'] = $row;
-        }
-        //从数据库查询需要的数据
-        $spreadsheet = new Spreadsheet();
-        $spreadsheet->setActiveSheetIndex(0);
-        $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
-        $spreadsheet->getActiveSheet()->setCellValue("B1", "镜框高（mm）");
-        $spreadsheet->getActiveSheet()->setCellValue("C1", "镜面宽（mm）:");
-        $spreadsheet->getActiveSheet()->setCellValue("D1", "桥（mm）:");
-        $spreadsheet->getActiveSheet()->setCellValue("E1", "镜腿长（mm）:");
-        $spreadsheet->getActiveSheet()->setCellValue("F1", "镜架总长（mm）:");
-        $spreadsheet->getActiveSheet()->setCellValue("G1", "重量（mm）:");
-        //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(22);
-        $spreadsheet->setActiveSheetIndex(0)->setTitle('眼镜尺寸明细');
-        $spreadsheet->setActiveSheetIndex(0);
-        $num = 0;
-        foreach ($list as $k=>$v){
-            $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
-            $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['detail']['frame_height']);
-            $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['detail']['mirror_width']);
-            $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['detail']['frame_bridge']);
-            $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['detail']['frame_temple_length']);
-            $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['detail']['frame_length']);
-            $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['detail']['frame_weight']);
-            $num += 1;
-        }
-        //设置边框
-        $border = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
-                ],
-            ],
-        ];
-        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
-        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
-        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $spreadsheet->setActiveSheetIndex(0);
-        $format = 'xlsx';
-        $savename = '产品设计管理';
-        if ($format == 'xls') {
-            //输出Excel03版本
-            header('Content-Type:application/vnd.ms-excel');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
-        } elseif ($format == 'xlsx') {
-            //输出07Excel版本
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
-        }
-        //输出名称
-        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
-        //禁止缓存
-        header('Cache-Control: max-age=0');
-        $writer = new $class($spreadsheet);
-        $writer->save('php://output');
-    }
+
 }
