@@ -1187,7 +1187,7 @@ class Wangpenglei extends Backend
     public function asyncTicketHttps($type, $site, $start, $end)
     {
         echo $start.'-'.$end."\n";
-
+        $this->model = new \app\admin\model\zendesk\Zendesk;
         $ticketIds = (new Notice(request(), ['type' => $site]))->asyncUpdate($start, $end);
 
         //判断是否存在
