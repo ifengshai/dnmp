@@ -1227,6 +1227,18 @@ class Wangpenglei extends Backend
             $this->asyncTicketHttps($type, $site, $start, $end);
             usleep(100000);
         }
+    }
 
+    public function test011()
+    {
+        $type = 1;
+        $site = 'zeelool';
+        for ($i = 0; $i < 24; $i++) {
+            $start = '2021-04-27T'.$i.':00:00Z';
+            $end = '2021-04-27T'.($i + 1).':00:00Z';
+
+            $this->asyncTicketHttps($type, $site, $start, $end);
+            usleep(100000);
+        }
     }
 }
