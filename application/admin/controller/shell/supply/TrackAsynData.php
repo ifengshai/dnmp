@@ -484,7 +484,6 @@ class TrackAsynData extends Command
             ->where(['order_number' => ['in', $orderNumber]])
 //            ->where('order_number','430321223')
             ->order('delivery_time desc')
-            ->limit(12)
             ->select();
 
         foreach ($track as $value){
