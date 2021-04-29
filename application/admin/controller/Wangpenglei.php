@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\controller\zendesk\Notice;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\warehouse\ProductBarCodeItem;
@@ -1180,5 +1181,52 @@ class Wangpenglei extends Backend
         $frist = substr($c_url, 0, 1);
         echo $frist;
         die;
+    }
+
+
+    public function asyncTicketHttps($type, $site, $start, $end)
+    {
+        echo $start.'-'.$end."\n";
+
+        $ticketIds = (new Notice(request(), ['type' => $site]))->asyncUpdate($start, $end);
+
+        //判断是否存在
+        $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
+
+        //求交集的更新
+
+        $intersects = array_intersect($ticketIds, $nowTicketsIds);
+        //求差集新增
+        $diffs = array_diff($ticketIds, $nowTicketsIds);
+        //更新
+
+        //$intersects = array('142871','142869');//测试是否更新
+        //$diffs = array('144352','144349');//测试是否新增
+        foreach ($intersects as $intersect) {
+            (new Notice(request(), ['type' => $site, 'id' => $intersect]))->update();
+            echo $intersect.'is ok'."\n";
+        }
+        //新增
+        foreach ($diffs as $diff) {
+            (new Notice(request(), ['type' => $site, 'id' => $diff]))->create();
+            echo $diff.'ok'."\n";
+        }
+        echo 'all ok';
+        exit;
+    }
+
+
+    public function test()
+    {
+        $type = 1;
+        $site = 'zeelool';
+        for ($i = 0; $i < 24; $i++) {
+            $start = '2021-04-26T'.$i.':00:00Z';
+            $end = '2021-04-26T'.($i + 1).':00:00Z';
+
+            $this->asyncTicketHttps($type, $site, $start, $end);
+            usleep(100000);
+        }
+
     }
 }
