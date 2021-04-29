@@ -1193,6 +1193,7 @@ class Item extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids, 'itemAttribute');
+        $newProductDesign = Db::name('new_product_design')->where(['sku'=>$row['sku'],'status'=>8])->find();
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -1232,7 +1233,10 @@ class Item extends Backend
             $this->assign('AllShape', $allShape);
             $this->assign('AllTexture', $allTexture);
         }
-
+        if (empty($newProductDesign)){
+            $row['itemAttribute']['frame_images'] = '';
+            $row['itemAttribute']['frame_images'] = '';
+        }
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
 
