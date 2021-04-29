@@ -1552,6 +1552,9 @@ class OrderData extends Backend
         $os_sph = (float)urldecode($params['os_sph']);
         $od_cyl = (float)urldecode($params['od_cyl']);
         $os_cyl = (float)urldecode($params['os_cyl']);
+        //截取镜片编码第一位
+        $str = substr($params['lens_number'], 0, 1);
+
         /**
          * 判断处方是否异常规则
          * 1、SPH值或CYL值的“+”“_”号不一致
@@ -1575,12 +1578,12 @@ class OrderData extends Backend
         }
 
         //有PD无SPH和CYL
-        if (($params['pdcheck'] == 'on' || $params['pd']) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl)) {
+        if (($params['pdcheck'] == 'on' || $params['pd']) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl && $str == '2')) {
             $list['is_prescription_abnormal'] = 1;
         }
 
         //有SPH或CYL无PD
-        if (($params['pdcheck'] != 'on' && !$params['pd']) && ($od_sph || $os_sph || $od_cyl || $os_cyl)) {
+        if (($params['pdcheck'] != 'on' && !$params['pd']) && ($od_sph || $os_sph || $od_cyl || $os_cyl) && $str == '3') {
             $list['is_prescription_abnormal'] = 1;
         }
 
