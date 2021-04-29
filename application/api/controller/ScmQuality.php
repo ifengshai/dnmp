@@ -994,7 +994,6 @@ class ScmQuality extends Scm
     public function logistics_list()
     {
         $logistics_number = $this->request->request('logistics_number');
-        $sku = $this->request->request('sku');
         $status = $this->request->request('status');
         $sku = $this->request->request('sku');
         $is_new_product = $this->request->request('is_new_product');
