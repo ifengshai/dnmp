@@ -481,11 +481,12 @@ class TrackAsynData extends Command
         ];
         //查询有问题的订单物流数据
         $track = Db::name('order_node')
-//            ->where(['order_number' => $orderNumber])
-                ->where("order_number ='430321223' ")
+//            ->where(['order_number' => ['in', $orderNumber]])
+            ->where('order_number','430321223')
             ->order('delivery_time desc')
             ->limit(12)
             ->select();
+
         foreach ($track as $value){
             $carrier = $this->getCarrier(strtolower($value['shipment_type']));
 
