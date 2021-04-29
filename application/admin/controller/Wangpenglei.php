@@ -1212,7 +1212,7 @@ class Wangpenglei extends Backend
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
-        exit;
+//        exit;
     }
 
 
