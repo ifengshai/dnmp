@@ -148,6 +148,9 @@ class OrderData extends Backend
                                 case 'voogueme_acc':
                                     $site = 12;
                                     break;
+                                case 'zeelool_fr':
+                                    $site = 15;
+                                    break;
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
