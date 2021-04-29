@@ -106,16 +106,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {field: 'responsible_id', title: __('责任人')},
                         {field: 'site', title: __('站点'), visible: false,
-                            addclass:'plat_type',
-                            searchList: {
-                            1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',
-                            8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',
-                            12: 'voogmechic',13:'zeelool_cn',14:'alibaba',15:'zeelool_fr'
-                            },
-                            formatter: Table.api.formatter.status
-                        },
-                        {field: 'responsible_id', title: __('责任人')},
-                        {field: 'site', title: __('站点'), visible: false,
                             searchList: {
                             1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',
                             8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',

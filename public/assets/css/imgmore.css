@@ -4,8 +4,7 @@ body{background-color: #1F1F1F}
 }
 .img-content{
 	width: 100%;
-	border: 1px solid #585858;
-	background-color: #fff;
+	border: 1px solid #585858;background-color: #fff;
 	padding: 10px;
 }
 .img-content .small-img{
@@ -46,7 +45,7 @@ body{background-color: #1F1F1F}
 .img-content .big-img{
 	margin-top: 30px;
 	width: 100%;
-	height: 600px;
+	height: 400px;
 	position: relative;
 	overflow: hidden;
 	border: 1px solid #d0d0d0;
@@ -60,6 +59,7 @@ body{background-color: #1F1F1F}
 	border-radius: 10px;
 	position: absolute;
 }
+
 .small-img .left{
 	left: 5px;
 	top: 30px;
@@ -100,16 +100,16 @@ body{background-color: #1F1F1F}
 .img-rotate.left{
 	top: 5px;
 	left: 5px;
-	background: url(/assets/img/left_rotate.png) no-repeat center;
+	background: url(photos/left_rotate.png) no-repeat center;
 }
 .img-rotate.left:hover{
-	background: url(/assets/img/left_rotate_h.png) no-repeat center;
+	background: url(photos/left_rotate_h.png) no-repeat center;
 }
 .img-rotate.right{
 	left: 5px;
 	top: 40px;
-	background: url(/assets/img/right_rotate.png) no-repeat center;
+	background: url(photos/right_rotate.png) no-repeat center;
 }
 .img-rotate.right:hover{
-	background: url(/assets/img/right_rotate_h.png) no-repeat center;
+	background: url(photos/right_rotate_h.png) no-repeat center;
 }
