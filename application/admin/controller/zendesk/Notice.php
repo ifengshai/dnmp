@@ -1282,12 +1282,8 @@ class Notice extends Controller
     public function asyncUpdate()
     {
 
-        //$params = 'type:ticket updated_at>=2021-03-07T00:00:00Z updated_at<=2021-03-08T23:59:59Z order_by:updated_at sort:asc';
-        $params = 'type:ticket updated_at>=2021-04-26T05:00:00Z updated_at<=2021-04-26T23:59:59Z order_by:updated_at sort:asc';
-        //$params = 'type:ticket updated_at>=2021-03-07T00:00:00Z updated_at<=2021-03-07T23:59:59Z order_by:updated_at sort:asc';
-        //$params = 'type:ticket updated_at>=2021-03-08T00:00:00Z updated_at<=2021-03-08T23:59:59Z order_by:updated_at sort:asc';
-        //$params = 'type:ticket updated_at>=2021-03-09T00:00:00Z updated_at<=2021-03-09T23:59:59Z order_by:updated_at sort:asc';
-        //$params = 'type:ticket updated_at>=2021-03-10T00:00:00Z updated_at<=2021-03-10T23:59:59Z order_by:updated_at sort:asc';
+        //$params = 'type:ticket updated_at>=2021-04-27T00:00:00Z updated_at<=2021-04-27T05:59:59Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2021-04-27T06:00:00Z updated_at<=2021-04-27T23:59:59Z order_by:updated_at sort:asc';
 
         //Get all tickets
         $tickets = $this->client->search()->find($params);
