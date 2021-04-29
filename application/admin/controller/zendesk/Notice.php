@@ -1283,7 +1283,7 @@ class Notice extends Controller
     {
 
         //$params = 'type:ticket updated_at>=2021-04-28T00:00:00Z updated_at<=2021-04-28T04:59:59Z order_by:updated_at sort:asc';
-        $params = 'type:ticket updated_at>=2021-04-28T05:00:00Z updated_at<=2021-04-28T23:59:59Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2021-04-28T05:00:00Z updated_at<=2021-04-28T15:59:59Z order_by:updated_at sort:asc';
 
         //Get all tickets
         $tickets = $this->client->search()->find($params);
