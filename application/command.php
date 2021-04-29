@@ -24,4 +24,5 @@ return [
     'app\admin\controller\shell\service\EmailAsynData',
     'app\admin\controller\shell\operate\DataCenterAsynData',
     'app\admin\controller\shell\supply\TrackAsynData',
+    'app\admin\controller\shell\service\zendeskAsynData',
 ];
