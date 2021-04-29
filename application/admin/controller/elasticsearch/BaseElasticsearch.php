@@ -13,6 +13,7 @@ use app\enum\Site;
 use app\service\elasticsearch\EsFormatData;
 use app\service\elasticsearch\EsService;
 use Elasticsearch\ClientBuilder;
+use think\Env;
 use think\Request;
 
 class BaseElasticsearch extends Backend
@@ -48,7 +49,7 @@ class BaseElasticsearch extends Backend
 
         //es配置
         $params = [
-            'http://test.utools.club:42752',
+            Env::get('es.es_host','http://127.0.0.1:9200')
         ];
         //获取es的实例
         $this->esClient = ClientBuilder::create()->setHosts($params)->build();
