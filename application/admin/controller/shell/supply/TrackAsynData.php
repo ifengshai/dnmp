@@ -481,8 +481,8 @@ class TrackAsynData extends Command
         ];
         //查询有问题的订单物流数据
         $track = Db::name('order_node')
-//            ->where(['order_number' => ['in', $orderNumber]])
-            ->where('order_number','430321223')
+            ->where(['order_number' => ['in', $orderNumber]])
+//            ->where('order_number','430321223')
             ->order('delivery_time desc')
             ->limit(12)
             ->select();
@@ -494,7 +494,7 @@ class TrackAsynData extends Command
             $trackInfo = $trackingConnector->getTrackInfo($value['track_number'],$carrier);
             //删除courier表中的数据
             Db::name('order_node_courier')
-                ->where('track_number',$value['track_number'])
+                ->where('order_number',$value['order_number'])
                 ->delete();
             $add['site'] = $value['site'];
             $add['order_id'] = $value['order_id'];
