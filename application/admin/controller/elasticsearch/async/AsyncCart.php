@@ -23,9 +23,14 @@ class AsyncCart extends BaseElasticsearch
      */
     public function runInsert($data,$id)
     {
-        $data['id'] = $id;
-        $insertData = $this->getData($data);
-        $this->esService->addToEs('mojing_cart',$insertData);
+        try{
+            $data['id'] = $id;
+            $insertData = $this->getData($data);
+            $this->esService->addToEs('mojing_cart',$insertData);
+        }catch (\Exception $e) {
+            echo $e->getMessage();
+        }
+
     }
 
     /**
@@ -38,8 +43,13 @@ class AsyncCart extends BaseElasticsearch
      */
     public function runUpdate($data)
     {
-        $updateData = $this->getData($data);
-        $this->esService->updateEs('mojing_cart', $updateData);
+        try{
+            $updateData = $this->getData($data);
+            $this->esService->updateEs('mojing_cart', $updateData);
+        }catch (\Exception $e) {
+            echo $e->getMessage();
+        }
+
     }
     /**
      * 格式化参数

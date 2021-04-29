@@ -38,8 +38,13 @@ class AsyncCustomer extends BaseElasticsearch
      */
     public function runUpdate($data)
     {
-        $updateData = $this->getData($data);
-        $this->esService->updateEs('mojing_customer',$updateData);
+        try{
+            $updateData = $this->getData($data);
+            $this->esService->updateEs('mojing_customer',$updateData);
+        }catch (\Exception $e) {
+            echo $e->getMessage();
+        }
+
     }
 
     /**

@@ -25,11 +25,15 @@ class AsyncOrder extends BaseElasticsearch
      */
     public function runInsert($data, $id)
     {
-        $data['id'] = $id;
+        try{
+            $data['id'] = $id;
 
-        $insertData = $this->getData($data);;
+            $insertData = $this->getData($data);;
 
-        $this->esService->addToEs('mojing_order', $insertData);
+            $this->esService->addToEs('mojing_order', $insertData);
+        }catch (\Exception $e) {
+            echo $e->getMessage();
+        }
     }
 
     /**
@@ -43,9 +47,14 @@ class AsyncOrder extends BaseElasticsearch
      */
     public function runUpdate($entityId, $site)
     {
-        $order = Order::where(['entity_id' => $entityId, 'site' => $site])->find()->toArray();
-        $updateData = $this->getData($order);
-        dump($this->esService->updateEs('mojing_order', $updateData));
+        try{
+            $order = Order::where(['entity_id' => $entityId, 'site' => $site])->find()->toArray();
+            $updateData = $this->getData($order);
+            $this->esService->updateEs('mojing_order', $updateData);
+        }catch (\Exception $e) {
+            echo $e->getMessage();
+        }
+
     }
 
     /**
