@@ -456,9 +456,8 @@ class NewProductDesign extends Backend
      * @date   2021/4/26 17:59
      * 更换设计师
      */
-    public function change_designer(){
+    public function change_designer($ids=null){
         if($this->request->post()){
-            $ids =  $this->request->post('ids');
             $responsible_id =  $this->request->post('responsible_id');
             $map['id'] = $ids;
             $data['responsible_id'] = $responsible_id;
