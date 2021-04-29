@@ -29,7 +29,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 columns: [
                     [
                         {field: 'increment_id', title: __('订单编号'),visible: true,operate:false},
-                        {field: 'created_at', title: __('订单时间'),visible: false,operate:false},
+                        {field: 'created_at', title: __('创建时间'),visible: false,operate:false},
+                        {field: 'payment_time', title: __('支付时间'),visible: false,operate:false},
                         {field: 'base_grand_total', title: __('订单金额'),visible: false,operate:false},
                         {field: 'base_shipping_amount', title: __('邮费'),visible: false,operate:false},
                         {field: 'status', title: __('订单状态'),visible: false,operate:false},

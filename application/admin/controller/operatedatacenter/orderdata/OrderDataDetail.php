@@ -135,7 +135,7 @@ class OrderDataDetail extends Backend
                 ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
-                ->field('o.entity_id,o.increment_id,o.created_at,o.coupon_rule_name,o.order_type,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
+                ->field('o.entity_id,o.increment_id,o.created_at,o.coupon_rule_name,o.order_type,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount,o.payment_time')
                 ->select();
             $list = collection($list)->toArray();
             $arr = array();
@@ -143,6 +143,7 @@ class OrderDataDetail extends Backend
             foreach ($list as $key=>$value){
                 $arr[$i]['increment_id'] = $value['increment_id'];
                 $arr[$i]['created_at'] = $value['created_at'];
+                $arr[$i]['payment_time'] = $value['payment_time'];
                 $arr[$i]['base_grand_total'] = round($value['base_grand_total'],2);
                 $arr[$i]['base_shipping_amount'] = round($value['base_shipping_amount'],2);
                 switch ($value['order_type']){
@@ -322,8 +323,12 @@ class OrderDataDetail extends Backend
                 'field'=>'increment_id',
             ),
             array(
-                'name'=>'订单时间',
+                'name'=>'创建时间',
                 'field'=>'created_at',
+            ),
+            array(
+                'name'=>'支付时间',
+                'field'=>'payment_time',
             ),
             array(
                 'name'=>'订单金额',
@@ -509,7 +514,7 @@ class OrderDataDetail extends Backend
             $list = $order_model->alias('o')
                 ->join('customer_entity c','o.customer_id=c.entity_id','left')
                 ->where($map)
-                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.coupon_rule_name,o.order_type,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount')
+                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.coupon_rule_name,o.order_type,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount,o.payment_time')
                 ->limit($start,$pre_count)
                 ->select();
             $list = collection($list)->toArray();
@@ -523,6 +528,10 @@ class OrderDataDetail extends Backend
                 if(in_array('created_at',$column_name)){
                     $index = array_keys($column_name,'created_at');
                     $tmpRow[$index[0]] =$val['created_at'];
+                }
+                if(in_array('payment_time',$column_name)){
+                    $index = array_keys($column_name,'payment_time');
+                    $tmpRow[$index[0]] =$val['payment_time'];
                 }
                 if(in_array('base_grand_total',$column_name)){
                     $index = array_keys($column_name,'base_grand_total');
