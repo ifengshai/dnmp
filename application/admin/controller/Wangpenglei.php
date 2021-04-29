@@ -1086,6 +1086,8 @@ class Wangpenglei extends Backend
         $os_sph = (float)urldecode($params['os_sph']);
         $od_cyl = (float)urldecode($params['od_cyl']);
         $os_cyl = (float)urldecode($params['os_cyl']);
+        //截取镜片编码第一位
+        $str = substr($params['lens_number'], 0, 1);
         /**
          * 判断处方是否异常规则
          * 1、SPH值或CYL值的“+”“_”号不一致
@@ -1109,12 +1111,12 @@ class Wangpenglei extends Backend
         }
 
         //有PD无SPH和CYL
-        if (($params['pdcheck'] == 'on' || $params['pd']) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl)) {
+        if (($params['pdcheck'] == 'on' || $params['pd']) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl && $str == '2')) {
             $list['is_prescription_abnormal'] = 1;
         }
 
         //有SPH或CYL无PD
-        if (($params['pdcheck'] != 'on' && !$params['pd']) && ($od_sph || $os_sph || $od_cyl || $os_cyl)) {
+        if (($params['pdcheck'] != 'on' && !$params['pd']) && ($od_sph || $os_sph || $od_cyl || $os_cyl) && $str == '3') {
             $list['is_prescription_abnormal'] = 1;
         }
 
@@ -1130,6 +1132,7 @@ class Wangpenglei extends Backend
         $params['od_cyl'] = '-0.75';
         $params['os_cyl'] = '-0.50';
         $params['pd'] = 60;
+        $params['lens_number'] = 32302000;
         $list = $this->is_prescription_abnormal($params);
         dump($list);
     }
@@ -1168,6 +1171,14 @@ class Wangpenglei extends Backend
 
         $headlist = ['sku', '在库实时库存', '系统实时库存'];
         Excel::writeCsv($list, $headlist, '库存', true);
+        die;
+    }
+
+    public function test002()
+    {
+        $c_url = '';
+        $frist = substr($c_url, 0, 1);
+        echo $frist;
         die;
     }
 }
