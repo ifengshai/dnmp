@@ -329,13 +329,13 @@ class NewProductDesign extends Backend
         }else{
             $valueLog['operation_type'] = '拍摄完成';
         }
-        //添加操作记录
-        $valueLog['operator'] = session('admin.nickname');
-        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-        $valueLog['node'] = $data['status'];
-        $valueLog['design_id'] = $ids;
-        $this->designRecording($valueLog);
         if ($res){
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['node'] = $data['status'];
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
             $this->success('操作成功');
         }else{
             $this->error('操作失败');
@@ -356,14 +356,14 @@ class NewProductDesign extends Backend
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-        //添加操作记录
-        $valueLog['operator'] = session('admin.nickname');
-        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-        $valueLog['node'] = 6;
-        $valueLog['operation_type'] = '开始制作';
-        $valueLog['design_id'] = $ids;
-        $this->designRecording($valueLog);
         if ($res){
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['node'] = 6;
+            $valueLog['operation_type'] = '开始制作';
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
             $this->success('操作成功');
         }else{
             $this->error('操作失败');
@@ -398,12 +398,12 @@ class NewProductDesign extends Backend
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-        //添加操作记录
-        $valueLog['operator'] = session('admin.nickname');
-        $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-        $valueLog['design_id'] = $ids;
-        $this->designRecording($valueLog);
         if ($res){
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
             $this->success('操作成功');
         }else{
             $this->error('操作失败');
@@ -422,14 +422,14 @@ class NewProductDesign extends Backend
             $data['status'] = 5;
             $data['update_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            //添加操作记录
-            $valueLog['operator'] = session('admin.nickname');
-            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-            $valueLog['node'] = 5;
-            $valueLog['operation_type'] = '分配人员';
-            $valueLog['design_id'] = $ids;
-            $this->designRecording($valueLog);
             if ($res){
+                //添加操作记录
+                $valueLog['operator'] = session('admin.nickname');
+                $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                $valueLog['node'] = 5;
+                $valueLog['operation_type'] = '分配人员';
+                $valueLog['design_id'] = $ids;
+                $this->designRecording($valueLog);
                 $this->success('人员分配成功');
             }else{
                 $this->error('人员分配失败');
@@ -440,7 +440,8 @@ class NewProductDesign extends Backend
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin' => 'b'], 'a.uid=b.id')
-            ->where('a.group_id=160')
+//            ->where('a.group_id=160')
+            ->where('a.group_id=72')
             ->field('id,nickname')
             ->select();
         $this->assign('ids', $ids);
@@ -462,15 +463,15 @@ class NewProductDesign extends Backend
             $map['id'] = $ids;
             $data['responsible_id'] = $responsible_id;
             $data['update_time']  = date("Y-m-d H:i:s", time());
-            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
-            //添加操作记录
-            $valueLog['operator'] = session('admin.nickname');
-            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
-            $valueLog['node'] = 5;
-            $valueLog['operation_type'] = '更换设计师';
-            $valueLog['design_id'] = $ids;
-            $this->designRecording($valueLog);
+            $res = $this->model->where($map)->update($data);
             if ($res){
+                //添加操作记录
+                $valueLog['operator'] = session('admin.nickname');
+                $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                $valueLog['node'] = 5;
+                $valueLog['operation_type'] = '更换设计师';
+                $valueLog['design_id'] = $ids;
+                $this->designRecording($valueLog);
                 $this->success('人员分配成功');
             }else{
                 $this->error('人员分配失败');
@@ -481,7 +482,8 @@ class NewProductDesign extends Backend
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin' => 'b'], 'a.uid=b.id')
-            ->where('a.group_id=160')
+//            ->where('a.group_id=160')
+            ->where('a.group_id=72')
             ->field('id,nickname')
             ->select();
         $this->assign('ids', $ids);
@@ -649,22 +651,6 @@ class NewProductDesign extends Backend
 
         return $this->view->fetch();
     }
-
-    /**
-     * @author zjw
-     * @date   2021/4/21 15:27
-     * 选品设计异常数据
-     */
-    public function checkTheData(){
-        $sku = $this->model->column('sku');
-        $item = new Item();
-        $itemAttribute =new ItemAttribute();
-        $goodsId = $item->where(['sku'=>['in',$sku]])->column('id');
-        $otherValue = $itemAttribute->where(['item_id'=>['in',$goodsId],'frame_width'=>['elt',0],'frame_height'=>['elt',0]])->column('item_id');
-        $skuValue = $item->where(['id'=>['in',$otherValue]])->column('sku');
-        dump($skuValue);die();
-    }
-
     /**
      * @author zjw
      * @date   2021/4/26 18:17
