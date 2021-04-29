@@ -1282,12 +1282,8 @@ class Notice extends Controller
     public function asyncUpdate()
     {
 
-        //$params = 'type:ticket updated_at>=2021-03-07T00:00:00Z updated_at<=2021-03-08T23:59:59Z order_by:updated_at sort:asc';
-        $params = 'type:ticket updated_at>=2021-04-26T00:00:00Z updated_at<=2021-04-28T23:59:59Z order_by:updated_at sort:asc';
-        //$params = 'type:ticket updated_at>=2021-03-07T00:00:00Z updated_at<=2021-03-07T23:59:59Z order_by:updated_at sort:asc';
-        //$params = 'type:ticket updated_at>=2021-03-08T00:00:00Z updated_at<=2021-03-08T23:59:59Z order_by:updated_at sort:asc';
-        //$params = 'type:ticket updated_at>=2021-03-09T00:00:00Z updated_at<=2021-03-09T23:59:59Z order_by:updated_at sort:asc';
-        //$params = 'type:ticket updated_at>=2021-03-10T00:00:00Z updated_at<=2021-03-10T23:59:59Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2021-04-28T00:00:00Z updated_at<=2021-04-28T06:59:59Z order_by:updated_at sort:asc';
+        //$params = 'type:ticket updated_at>=2021-04-27T07:00:00Z updated_at<=2021-04-27T23:59:59Z order_by:updated_at sort:asc';
 
         //Get all tickets
         $tickets = $this->client->search()->find($params);
@@ -1297,7 +1293,7 @@ class Notice extends Controller
             return true;
         }
 
-        echo $tickets->count . "\n";
+        echo $tickets->count."\n";
 
         $page = ceil($tickets->count / 100);
         if ($page >= 1) {

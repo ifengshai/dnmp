@@ -49,18 +49,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 return 1 + index;
                             }, operate: false
                         },
-                        { field: 'id', title: __('Id'), operate: false },
-                        { field: 'name', title: __('Name'),  operate: 'LIKE'},
-                        { field: 'origin_sku', title: __('Origin_sku'), operate: 'LIKE' },
-                        { field: 'sku', title: __('Sku'), operate: 'LIKE' },
+                        {field: 'id', title: __('Id'), operate: false},
+                        {field: 'name', title: __('Name'), operate: 'LIKE'},
+                        {field: 'origin_sku', title: __('Origin_sku'), operate: 'LIKE'},
+                        {field: 'sku', title: __('Sku'), operate: 'LIKE'},
                         {
                             field: 'is_spot', title: __('大货/现货'),
-                            searchList: { 0:'-',1: '大货', 2: '现货'},
-                            custom: { 1: 'yellow', 2: 'blue'},
+                            searchList: {0: '-', 1: '大货', 2: '现货'},
+                            custom: {1: 'yellow', 2: 'blue'},
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'price', title: __('打样成本'), operate: false },
-                        { field: 'purchase_price', title: __('采购成本'), operate: false },
+                        {field: 'price', title: __('打样成本'), operate: false},
+                        {field: 'purchase_price', title: __('采购成本'), operate: false},
                         {
                             field: 'brand_id',
                             title: __('Brand_id'),
@@ -909,7 +909,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     { field: 'voogmechic_stock', title: __('Voogmechic'), operate: false },
                     { field: 'douyin_stock', title: __('Zeelool_cn'), operate: false },
                     { field: 'alibaba_stock', title: __('Alibaba'), operate: false },
-                    { field: 'zeelool_fr_stock', title: __('Zeelool_fr'), operate: false },
                     { field: 'occupy_stock', title: __('订单占用库存'), operate: false },
                     { field: 'distribution_occupy_stock', title: __('配货占用库存'), operate: false },
                     { field: 'sample_num', title: __('留样库存'), operate: false },
@@ -947,7 +946,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             // 为表格绑定事件
             Table.api.bindevent(table);
 
-            var all_arr = ['zeelool_stock', 'occupy_stock', 'distribution_occupy_stock', 'voogueme_stock', 'nihao_stock', 'meeloog_stock', 'wesee_stock', 'amazon_stock', 'zeelool_es_stock', 'zeelool_de_stock', 'zeelool_jp_stock', 'on_way_stock', 'voogmechic_stock', 'douyin_stock', 'alibaba_stock', 'zeelool_fr_stock'];
+            var all_arr = ['zeelool_stock', 'occupy_stock', 'distribution_occupy_stock', 'voogueme_stock', 'nihao_stock', 'meeloog_stock', 'wesee_stock', 'amazon_stock', 'zeelool_es_stock', 'zeelool_de_stock', 'zeelool_jp_stock', 'on_way_stock', 'voogmechic_stock', 'douyin_stock', 'alibaba_stock'];
             var site_arr = ['plat_stock', 'plat_on_way_stock'];
 
             viewTable(table, Config.label == 100 ? all_arr : site_arr, Config.label == 100 ? site_arr : all_arr);
