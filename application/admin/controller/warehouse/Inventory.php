@@ -69,7 +69,21 @@ class Inventory extends Backend
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
+            if ($filter['num']) {
+                $idArr = $this->item
+                    ->field('count(*) as num,inventory_id')
+                    ->group('inventory_id')
+                    ->select();
+                foreach ($idArr as $k=>$v){
+                    if ($v['num'] != $filter['num']){
+                        unset($idArr[$k]);
+                    }
+                }
+                $idArr = array_column($idArr,'inventory_id');
+                $map['id'] = ['in', $idArr];
+                unset($filter['num']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model->alias('inventory')
