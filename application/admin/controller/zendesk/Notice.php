@@ -1283,7 +1283,7 @@ class Notice extends Controller
     {
 
         //$params = 'type:ticket updated_at>=2021-03-07T00:00:00Z updated_at<=2021-03-08T23:59:59Z order_by:updated_at sort:asc';
-        $params = 'type:ticket updated_at>=2021-04-26T00:00:00Z updated_at<=2021-04-26T04:59:59Z order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=2021-04-26T05:00:00Z updated_at<=2021-04-26T23:59:59Z order_by:updated_at sort:asc';
         //$params = 'type:ticket updated_at>=2021-03-07T00:00:00Z updated_at<=2021-03-07T23:59:59Z order_by:updated_at sort:asc';
         //$params = 'type:ticket updated_at>=2021-03-08T00:00:00Z updated_at<=2021-03-08T23:59:59Z order_by:updated_at sort:asc';
         //$params = 'type:ticket updated_at>=2021-03-09T00:00:00Z updated_at<=2021-03-09T23:59:59Z order_by:updated_at sort:asc';
