@@ -3913,6 +3913,7 @@ class TrackReg extends Backend
                                 ->where('type', 1)
                                 ->where('status', 1)
                                 ->where('purchase_id', $purchaseId)
+                                ->group('purchase_id,batch_id')
                                 ->column('batch_id');
                             $batchIds = array_filter($batchIds);
                             if (empty($batchIds)) {
