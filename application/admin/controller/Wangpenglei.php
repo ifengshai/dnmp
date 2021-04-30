@@ -1229,8 +1229,8 @@ class Wangpenglei extends Backend
 
     public function test011()
     {
-        $type = 1;
-        $site = 'zeelool';
+        $type = 2;
+        $site = 'voogueme';
         for ($i = 0; $i < 24; $i++) {
             $start = '2021-04-29T'.$i.':00:00Z';
             $end = '2021-04-29T'.$i.':59:59Z';
