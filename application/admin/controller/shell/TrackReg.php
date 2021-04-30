@@ -3986,10 +3986,67 @@ class TrackReg extends Backend
                                 ->find();
                             $params['num'] = $info['purchase_num'];
                             $params['create_time'] = $info['createtime'];
-                            $params['purchase_status'] = $info['purchase_status'];
+                            switch ($info){
+                                case 0:
+                                    $purchase_status = '新建';
+                                    break;
+                                case 1:
+                                    $purchase_status = '审核中';
+                                    break;
+                                case 2:
+                                    $purchase_status = '已审核';
+                                    break;
+                                case 3:
+                                    $purchase_status = '已拒绝';
+                                    break;
+                                case 4:
+                                    $purchase_status = '已取消';
+                                    break;
+                                case 5:
+                                    $purchase_status = '待发货';
+                                    break;
+                                case 6:
+                                    $purchase_status = '待收货';
+                                    break;
+                                case 7:
+                                    $purchase_status = '已签收';
+                                    break;
+                                case 8:
+                                    $purchase_status = '已退款';
+                                    break;
+                                case 9:
+                                    $purchase_status = '部分签收';
+                                    break;
+                                case 10:
+                                    $purchase_status = '已完成';
+                                    break;
+                            }
+                            switch ($info['check_status']){
+                                case 0:
+                                    $check_status = '未质检';
+                                    break;
+                                case 1:
+                                    $check_status = '部分质检';
+                                    break;
+                                case 2:
+                                    $check_status = '已质检';
+                                    break;
+                            }
+                            switch ($info['stock_status']){
+                                case 0:
+                                    $instock_status = '未入库';
+                                    break;
+                                case 1:
+                                    $instock_status = '部分入库';
+                                    break;
+                                case 2:
+                                    $instock_status = '已入库';
+                                    break;
+                            }
+                            $params['purchase_status'] = $purchase_status;
                             $params['purchase_number'] = $info['purchase_number'];
-                            $params['check_status'] = $info['check_status'];
-                            $params['instock_status'] = $info['stock_status'];
+                            $params['check_status'] = $check_status;
+                            $params['instock_status'] = $instock_status;
                             Db::name('wait_linshi')->insert($params);
                             echo $v['sku']." is ok"."\n";
                             usleep(10000);
