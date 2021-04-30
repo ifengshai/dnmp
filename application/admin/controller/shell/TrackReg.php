@@ -3881,20 +3881,63 @@ class TrackReg extends Backend
     public function process_wait_stock()
     {
         $item = new \app\admin\model\itemmanage\Item();
-        $purchase = new \app\admin\model\purchase\PurchaseOrder();
-
-        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'wait_instock_num' => ['<', 0]])->select();
-        $params = [];
+        $list = $item
+            ->where(['is_open' => 1, 'is_del' => 1])
+            ->field('id,sku')
+            ->select();
         foreach ($list as $k => $v) {
-            $purchase_num = $purchase->alias('a')->where([
-                'purchase_status' => 7,
-                'stock_status'    => 0,
-                'b.sku'           => $v['sku'],
-            ])->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
-            $params[$k]['id'] = $v['id'];
-            $params[$k]['wait_instock_num'] = $purchase_num;
+            $params = [];
+            $num = 0;
+            //查询sku对应的采购单id
+            $purchaseIds = Db::name('purchase_order_item')
+                ->where('sku', $v['sku'])
+                ->column('purchase_id');
+            if(!empty($purchaseIds)){
+                foreach ($purchaseIds as $purchaseId) {
+                    //判断采购单是否签收
+                    $isSign = Db::name('logistics_info')
+                        ->where('type', 1)
+                        ->where('status', 1)
+                        ->where('purchase_id', $purchaseId)
+                        ->value('id');
+                    if ($isSign) {
+                        //判断是否入库
+                        $isInStock = Db::name('in_stock')
+                            ->alias('i')
+                            ->join('check_order c', 'c.id=i.check_id')
+                            ->where('c.purchase_id', $purchaseId)
+                            ->where('i.status', 2)
+                            ->value('i.id');
+                        //没有入库
+                        if (!$isInStock) {
+                            //查询是否有批次
+                            $batchIds = Db::name('logistics_info')
+                                ->where('type', 1)
+                                ->where('status', 1)
+                                ->where('purchase_id', $purchaseId)
+                                ->column('batch_id');
+                            $batchIds = array_filter($batchIds);
+                            if (empty($batchIds)) {
+                                $num += Db::name('purchase_order_item')
+                                    ->where('purchase_id', $purchaseId)
+                                    ->value('purchase_num');
+                            } else {
+                                foreach ($batchIds as $batchId) {
+                                    $num += Db::name('purchase_batch_item')
+                                        ->where('purchase_batch_id', $batchId)
+                                        ->value('arrival_num');
+                                }
+                            }
+                        }
+                    }
+                }
+                $params['id'] = $v['id'];
+                $params['wait_instock_num'] = $num;
+                $item->save($params);
+                echo $v['sku']." is ok"."\n";
+                usleep(10000);
+            }
         }
-        $item->saveAll($params);
         echo "ok";
     }
 }
