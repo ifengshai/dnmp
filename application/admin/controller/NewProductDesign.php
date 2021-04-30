@@ -581,6 +581,16 @@ class NewProductDesign extends Backend
             ->where($map)
             ->select();
         $list = collection($list)->toArray();
+        $sheet1 = [];
+        $sheet2 = [];
+        $sheet3 = [];
+        $sheet4 = [];
+        $sheet5 = [];
+        $sheet1Key = 0;
+        $sheet2Key = 0;
+        $sheet3Key = 0;
+        $sheet4Key = 0;
+        $sheet5Key = 0;
         foreach ($list as $k=>$v){
             $value = $this->model->get($v['id']);
             $where['sku'] = $value->sku;
@@ -590,46 +600,158 @@ class NewProductDesign extends Backend
                 ->find();
             $attributeType = $data->category_id;
             $goodsId = $data->id;
-            $compareValue = ['32','34','35','38','39'];
-            if (!in_array($attributeType,$compareValue)){
-                $attributeType = true;
-            }
             $row =$itemAttribute
                 ->where('item_id',$goodsId)
                 ->find();
             $list[$k]['detail'] = $row;
+            if ($attributeType == 35){
+                //耳饰
+                $sheet2[$sheet2Key] = $v;
+                $sheet2[$sheet2Key]['detail'] = $row;
+                $sheet2Key += 1;
+            }elseif ($attributeType== 39 || $attributeType == 34){
+                //项链/手链
+                $sheet3[$sheet3Key] = $v;
+                $sheet3[$sheet3Key]['detail'] = $row;
+                $sheet3Key += 1;
+            }elseif ($attributeType == 38){
+                //眼镜链
+                $sheet4[$sheet4Key] = $v;
+                $sheet4[$sheet4Key]['detail'] = $row;
+                $sheet4Key += 1;
+            }elseif ($attributeType == 32){
+                //镜盒
+                $sheet5[$sheet5Key] = $v;
+                $sheet5[$sheet5Key]['detail'] = $row;
+                $sheet5Key += 1;
+            }else{
+                $sheet1[$sheet1Key] = $v;//眼镜
+                $sheet1[$sheet1Key]['detail'] = $row;//眼镜
+                $sheet1Key += 1;
+            }
         }
-        //从数据库查询需要的数据
-        $spreadsheet = new Spreadsheet();
-        $spreadsheet->setActiveSheetIndex(0);
-        $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
-        $spreadsheet->getActiveSheet()->setCellValue("B1", "镜框高（mm）");
-        $spreadsheet->getActiveSheet()->setCellValue("C1", "镜面宽（mm）:");
-        $spreadsheet->getActiveSheet()->setCellValue("D1", "桥（mm）:");
-        $spreadsheet->getActiveSheet()->setCellValue("E1", "镜腿长（mm）:");
-        $spreadsheet->getActiveSheet()->setCellValue("F1", "镜架总长（mm）:");
-        $spreadsheet->getActiveSheet()->setCellValue("G1", "重量（mm）:");
-        //设置宽度
-        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(22);
-        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(22);
-        $spreadsheet->setActiveSheetIndex(0)->setTitle('眼镜尺寸明细');
-        $spreadsheet->setActiveSheetIndex(0);
-        $num = 0;
-        foreach ($list as $k=>$v){
-            $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
-            $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['detail']['frame_height']);
-            $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['detail']['mirror_width']);
-            $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['detail']['frame_bridge']);
-            $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['detail']['frame_temple_length']);
-            $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['detail']['frame_length']);
-            $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['detail']['frame_weight']);
-            $num += 1;
+//dump(collection($sheet1)->toArray());
+//dump(collection($sheet2)->toArray());
+//dump(collection($sheet3)->toArray());
+//dump(collection($sheet4)->toArray());
+//dump(collection($sheet5)->toArray());
+//die;
+
+        if (!empty($sheet1)){
+            //从数据库查询需要的数据
+            $spreadsheet = new Spreadsheet();
+            $spreadsheet->setActiveSheetIndex(0);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "镜框高（mm）");
+            $spreadsheet->getActiveSheet()->setCellValue("C1", "镜面宽（mm）:");
+            $spreadsheet->getActiveSheet()->setCellValue("D1", "桥（mm）:");
+            $spreadsheet->getActiveSheet()->setCellValue("E1", "镜腿长（mm）:");
+            $spreadsheet->getActiveSheet()->setCellValue("F1", "镜架总长（mm）:");
+            $spreadsheet->getActiveSheet()->setCellValue("G1", "重量（mm）:");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex(0)->setTitle('眼镜尺寸明细');
+            $spreadsheet->setActiveSheetIndex(0);
+            $num = 0;
+            foreach ($sheet1 as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['detail']['frame_height']);
+                $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['detail']['mirror_width']);
+                $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['detail']['frame_bridge']);
+                $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['detail']['frame_temple_length']);
+                $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['detail']['frame_length']);
+                $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['detail']['frame_weight']);
+                $num += 1;
+            }
         }
+        if (!empty($sheet2)){
+            $spreadsheet->createSheet();
+            $spreadsheet->setActiveSheetIndex(1);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "高度（mm）");
+            $spreadsheet->getActiveSheet()->setCellValue("C1", "宽度（mm）:");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex(1)->setTitle('耳饰尺寸明细');
+            $spreadsheet->setActiveSheetIndex(1);
+            $num = 0;
+            foreach ($sheet2 as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['detail']['earrings_height']);
+                $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['detail']['earrings_width']);
+                $num += 1;
+            }
+        }
+
+        if (!empty($sheet3)){
+            $spreadsheet->createSheet();
+            $spreadsheet->setActiveSheetIndex(2);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "周长（mm）");
+            $spreadsheet->getActiveSheet()->setCellValue("C1", "延长链（mm）:");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex(2)->setTitle('项链手链尺寸明细');
+            $spreadsheet->setActiveSheetIndex(2);
+            $num = 0;
+            foreach ($sheet3 as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['detail']['necklace_perimeter']);
+                $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['detail']['necklace_chain']);
+                $num += 1;
+            }
+        }
+
+        if (!empty($sheet4)){
+            $spreadsheet->createSheet();
+            $spreadsheet->setActiveSheetIndex(3);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "周长（mm）");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex(3)->setTitle('眼镜链尺寸明细');
+            $spreadsheet->setActiveSheetIndex(3);
+            $num = 0;
+            foreach ($sheet4 as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['detail']['eyeglasses_chain']);
+                $num += 1;
+            }
+        }
+
+        if (!empty($sheet5)){
+            $spreadsheet->createSheet();
+            $spreadsheet->setActiveSheetIndex(4);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "镜盒高度");
+            $spreadsheet->getActiveSheet()->setCellValue("C1", "镜盒宽度:");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex(4)->setTitle('镜盒尺寸明细');
+            $spreadsheet->setActiveSheetIndex(4);
+            $num = 0;
+            foreach ($sheet5 as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['detail']['box_height']);
+                $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['detail']['box_width']);
+                $num += 1;
+            }
+        }
+
         //设置边框
         $border = [
             'borders' => [
