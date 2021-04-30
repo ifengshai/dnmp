@@ -708,6 +708,9 @@ class NewProductDesign extends Backend
             ->field('id,sku')
             ->where($map)
             ->select();
+        file_put_contents('/www/wwwroot/mojing/runtime/log/design1.txt',$map,FILE_APPEND);
+        file_put_contents('/www/wwwroot/mojing/runtime/log/design.txt',$list,FILE_APPEND);
+
         $list = collection($list)->toArray();
         $sheet1 = [];
         $sheet2 = [];
