@@ -86,6 +86,58 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                             formatter: Table.api.formatter.operate,
                             buttons:[
 
+
+                                {
+                                    name: 'ajax',
+                                    text: __('上传至对应平台'),
+                                    title: __('上传至对应平台'),
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/sku_has_imgs',
+                                    success: function (data, ret) {
+                                        console.log(ret.msg)
+                                        if ((ret.msg) == 1){
+                                            Layer.alert("商品图片不存在，是否继续发布？",{time:20000},function (){
+                                                //询问框
+                                                layer.confirm('确定要上传到对应平台吗？', {
+                                                    btn: ['确定','取消']
+                                                }, function(){
+                                                    $.ajax({
+                                                        type: "POST",
+                                                        url: Config.moduleurl + '/itemmanage/item_platform_sku/afterUploadItem',
+                                                        data: {id:ret.data},
+                                                        success: function (data) {
+                                                            layer.msg(data.msg)
+                                                        },
+                                                    });
+                                                });
+                                            });
+                                        }else{
+                                            //询问框
+                                            layer.confirm('确定要上传到对应平台吗？', {
+                                                btn: ['确定','取消']
+                                            }, function(){
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/afterUploadItem',
+                                                    data: {id:ret.data},
+                                                    success: function (data) {
+                                                        layer.msg(data.msg)
+                                                    },
+                                                });
+                                            });
+                                        }
+
+                                    },
+                                    error: function (data, ret) {
+                                        console.log(data, ret);
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    }
+                                },
+
+
+
                                 {
                                     name: 'uploadToPlatform',
                                     text: '上传至对应平台',
