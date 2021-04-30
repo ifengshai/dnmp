@@ -3907,7 +3907,7 @@ class TrackReg extends Backend
                             ->where('i.status', 2)
                             ->value('i.id');
                         //没有入库
-                        if (!is_null($isInStock) && (!$isInStock)) {
+                        if (is_null($isInStock) && (!$isInStock)) {
                             //查询是否有批次
                             $batchIds = Db::name('logistics_info')
                                 ->where('type', 1)
