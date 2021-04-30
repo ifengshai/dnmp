@@ -663,6 +663,8 @@ class ItemPlatformSku extends Backend
             $item = new \app\admin\model\itemmanage\Item();
             $itemAttribute = new ItemAttribute();
             $res = $item->where(['sku' => $itemPlatformRow['sku'], 'is_open' => 1, 'is_del' => 1])->find();
+            dump($itemPlatformDetail);
+            dump($res);
             if ($res['item_status'] <> 3){
                 $this->error(__('商品非审核通过状态，请先在商品管理模块进行审核'));
             }
