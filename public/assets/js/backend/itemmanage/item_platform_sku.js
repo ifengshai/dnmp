@@ -133,7 +133,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                                         console.log(data, ret);
                                         Layer.alert(ret.msg);
                                         return false;
-                                    }
+                                    },
+                                    visible: function (row) {
+                                        if (row.is_upload == 1) {
+                                            return false;
+                                        }
+                                        return true;
+                                    },
                                 },
 
                                 {
