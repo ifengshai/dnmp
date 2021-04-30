@@ -3977,10 +3977,15 @@ class TrackReg extends Backend
                         if (is_null($isInStock) && (!$isInStock)) {
                             $params['sku'] = $v['sku'];
                             $params['purchase_id'] = $purchaseId;
-                            $time = Db::name('purchase_order')
-                                ->where('id',$purchaseId)
-                                ->value('createtime');
-                            $params['create_time'] = $time;
+                            $info = Db::name('purchase_order')
+                                ->alias('o')
+                                ->join('fa_purchase_order_item i','o.id=i.purchase_id')
+                                ->where('o.id',$purchaseId)
+                                ->where('i.sku',$v['sku'])
+                                ->field('createtime,purchase_num')
+                                ->find();
+                            $params['num'] = $info['purchase_num'];
+                            $params['create_time'] = $info['createtime'];
                             Db::name('wait_linshi')->insert($params);
                             echo $v['sku']." is ok"."\n";
                             usleep(10000);
