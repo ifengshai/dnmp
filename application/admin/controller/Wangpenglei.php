@@ -12,6 +12,7 @@ use FacebookAds\Api;
 use FacebookAds\Object\Campaign;
 use app\admin\model\financial\Fackbook;
 use fast\Excel;
+use think\Exception;
 
 class Wangpenglei extends Backend
 {
@@ -1233,9 +1234,13 @@ class Wangpenglei extends Backend
         for ($i = 0; $i < 24; $i++) {
             $start = '2021-04-27T'.$i.':00:00Z';
             $end = '2021-04-27T'.($i + 1).':00:00Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(100000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
 
-            $this->asyncTicketHttps($type, $site, $start, $end);
-            usleep(100000);
         }
     }
 }
