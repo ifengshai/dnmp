@@ -708,8 +708,6 @@ class NewProductDesign extends Backend
             ->field('id,sku')
             ->where($map)
             ->select();
-        file_put_contents('/www/wwwroot/mojing/runtime/log/design1.txt',$map,FILE_APPEND);
-        file_put_contents('/www/wwwroot/mojing/runtime/log/design.txt',$list,FILE_APPEND);
 
         $list = collection($list)->toArray();
         $sheet1 = [];
@@ -761,12 +759,6 @@ class NewProductDesign extends Backend
                 $sheet1Key += 1;
             }
         }
-dump(collection($sheet1)->toArray());
-dump(collection($sheet2)->toArray());
-dump(collection($sheet3)->toArray());
-dump(collection($sheet4)->toArray());
-dump(collection($sheet5)->toArray());
-die;
 
         if (!empty($sheet1)){
             //从数据库查询需要的数据
