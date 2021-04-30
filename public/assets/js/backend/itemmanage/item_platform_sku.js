@@ -136,30 +136,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                                     }
                                 },
 
-
-
-                                {
-                                    name: 'uploadToPlatform',
-                                    text: '上传至对应平台',
-                                    title: __('上传至对应平台'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    url: Config.moduleurl + '/itemmanage/item_platform_sku/afterUploadItem',
-                                    confirm: '确定要上传到对应平台吗',
-                                    success: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        $(".btn-refresh").trigger("click");
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
-                                    visible: function (row) {
-                                        if (row.is_upload == 1) {
-                                            return false;
-                                        }
-                                        return true;
-                                    },
-                                },
                                 {
                                     name: 'uploadImagesToPlatform',
                                     text: '上传商品图片',
