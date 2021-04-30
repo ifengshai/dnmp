@@ -104,7 +104,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                             formatter: Table.api.formatter.status,
                         },
-                        {field: 'responsible_id', title: __('责任人')},
                         {field: 'site', title: __('站点'), visible: false,
                             addclass:'plat_type',
                             searchList: {
