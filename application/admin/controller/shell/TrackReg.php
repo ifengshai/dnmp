@@ -3982,10 +3982,14 @@ class TrackReg extends Backend
                                 ->join('fa_purchase_order_item i','o.id=i.purchase_id')
                                 ->where('o.id',$purchaseId)
                                 ->where('i.sku',$v['sku'])
-                                ->field('createtime,purchase_num')
+                                ->field('createtime,purchase_num,o.purchase_status,o.purchase_number,o.check_status,o.stock_status')
                                 ->find();
                             $params['num'] = $info['purchase_num'];
                             $params['create_time'] = $info['createtime'];
+                            $params['purchase_status'] = $info['purchase_status'];
+                            $params['purchase_number'] = $info['purchase_number'];
+                            $params['check_status'] = $info['check_status'];
+                            $params['instock_status'] = $info['stock_status'];
                             Db::name('wait_linshi')->insert($params);
                             echo $v['sku']." is ok"."\n";
                             usleep(10000);
