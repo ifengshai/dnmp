@@ -3929,9 +3929,9 @@ class TrackReg extends Backend
                         }
                     }
                 }
-                $params['id'] = $v['id'];
                 $params['wait_instock_num'] = $num;
-                $item->save($params);
+                $item->where('id',$v['id'])
+                    ->update($params);
                 echo $v['sku']." is ok"."\n";
                 usleep(10000);
             }
