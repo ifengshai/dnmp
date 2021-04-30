@@ -110,10 +110,14 @@ class Soap
             case 14:
                 $url = config('url.api_zeelool_cn_url');
                 break;
+            case 15:
+                $url = config('url.api_zeelool_fr_url');
+                break;
             default:
                 return false;
                 break;
         }
+
 
         $client = new Client(['verify' => false]);
         unset($params['site']);

@@ -48,7 +48,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                     8: 'Amazon',
                                     9: 'Zeelool_es',
                                     10: 'Zeelool_de',
-                                    11: 'Zeelool_jp'
+                                    11: 'Zeelool_jp',
+                                    12: 'voogmechic',
+                                    13: 'Zeelool_cn',
+                                    14: 'alibaba',
+                                    15: 'Zeelool_fr'
                                 }, operate: 'IN',
                                 formatter: Table.api.formatter.status
                             },
@@ -205,7 +209,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                     8: 'Amazon',
                                     9: 'Zeelool_es',
                                     10: 'Zeelool_de',
-                                    11: 'Zeelool_jp'
+                                    11: 'Zeelool_jp',
+                                    12: 'voogmechic',
                                 }, operate: 'IN',
                                 formatter: Table.api.formatter.status
                             },
