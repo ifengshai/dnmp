@@ -5,6 +5,7 @@ namespace app\admin\controller\purchase;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\NewProduct;
 use app\common\controller\Backend;
+use app\enum\PlatformType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 
@@ -471,9 +472,9 @@ class NewProductReplenishOrder extends Backend
     {
 
         $this->assignConfig('id', $ids);
-        $replenish_id = input('replenish_id');
+        $replenishId = input('replenish_id');
         if (!$ids) {
-            $id = $replenish_id;
+            $id = $replenishId;
         } else {
             $id = $ids;
         }
@@ -494,13 +495,6 @@ class NewProductReplenishOrder extends Backend
                 break;
         }
         $this->assign('replenish', $replenish);
-        //        dump(collection($replenish)->toArray());die;
-        //        if (!$replenish_id){
-        //            $order_ids = $this->model->where('replenish_id',$ids)->column('id');
-        //        }else{
-        //            $order_ids = $this->model->where('replenish_id',$replenish_id)->column('id');
-        //        }
-        //        $map['replenish_id'] = ['in', $order_ids];
         $map['replenish_id'] = ['=', $id];
         //设置过滤方法
         $this->request->filter(['strip_tags']);
@@ -511,9 +505,6 @@ class NewProductReplenishOrder extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->list
-//                ->alias('l')
-//                ->join(['fa_new_product_replenish_order'=>'o','l.replenish_order_id = o.id'])
-//                ->join(['fa_new_product_mapping'=>'m','o.sku = m.sku and  o.replenishment_num = m.replenish_num'])
                 ->where($map)
                 ->where($where)
                 ->order($sort, $order)
@@ -524,54 +515,54 @@ class NewProductReplenishOrder extends Backend
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
-
             $list = collection($list)->toArray();
-//            dump($list);die();
-
             foreach ($list as $k => $v) {
-                $new_product_replenish_order = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
+                $newProductReplenishOrder = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
                 //通过sku和实际补货需求数量获取 补货需求清单中的站点
-                $website_type =  Db::name('new_product_mapping')->where('replenish_num', $new_product_replenish_order)->where('sku',$v['sku'])->value('website_type');
-                switch ($website_type){
-                    case 1:
-                        $website_type = 'Zeelool';
+                $websiteType =  Db::name('new_product_mapping')->where('replenish_num', $newProductReplenishOrder)->where('sku',$v['sku'])->value('website_type');
+                switch ($websiteType){
+                    case PlatformType::ZEELOOL_PLAT:
+                        $websiteType = 'Zeelool';
                         break;
-                    case 2:
-                        $website_type = 'Voogueme';
+                    case PlatformType::VOOGUEME_PLAT:
+                        $websiteType = 'Voogueme';
                         break;
-                    case 3:
-                        $website_type = 'Nihao';
+                    case PlatformType::NIHAO_PLAT:
+                        $websiteType = 'Nihao';
                         break;
-                    case 4:
-                        $website_type = 'Meeloog';
+                    case PlatformType::MEELOOG_PLAT:
+                        $websiteType = 'Meeloog';
                         break;
-                    case 5:
-                        $website_type = 'Weseeoptical';
+                    case PlatformType::WESEE_PLAT:
+                        $websiteType = 'Weseeoptical';
                         break;
-                    case 8:
-                        $website_type = 'Amazon';
+                    case PlatformType::AMAZON_PLAT:
+                        $websiteType = 'Amazon';
                         break;
-                    case 9:
-                        $website_type = 'Zeelool_de';
+                    case PlatformType::ZEELOOL_ES_PLAT:
+                        $websiteType = 'Zeelool_de';
                         break;
-                    case 10:
-                        $website_type = 'Zeelool_es';
+                    case PlatformType::ZEELOOL_DE_PLAT:
+                        $websiteType = 'Zeelool_es';
                         break;
-                    case 11:
-                        $website_type = 'Zeelool_jp';
+                    case PlatformType::ZEELOOL_JP_PLAT:
+                        $websiteType = 'Zeelool_jp';
                         break;
-                    case 12:
-                        $website_type = 'Voogmehic';
+                    case PlatformType::VOOGMECHIC_PLAT:
+                        $websiteType = 'Voogmehic';
                         break;
-                    case 12:
-                        $website_type = 'Zeelool_cn';
+                    case PlatformType::ZEELOOL_CN_PLAT:
+                        $websiteType = 'Zeelool_cn';
                         break;
-                    case 12:
-                        $website_type = 'Alibaba';
+                    case PlatformType::ALIBABA_PLAT:
+                        $websiteType = 'Alibaba';
+                        break;
+                    case PlatformType::ZEELOOL_FR_PLAT:
+                        $websiteType = 'Zeelool_fr';
                         break;
                 }
-                $list[$k]['num'] = $new_product_replenish_order;
-                $list[$k]['website_type'] = $website_type;
+                $list[$k]['num'] = $newProductReplenishOrder;
+                $list[$k]['website_type'] = $websiteType;
             }
             $result = array("total" => $total, "rows" => $list);
 
