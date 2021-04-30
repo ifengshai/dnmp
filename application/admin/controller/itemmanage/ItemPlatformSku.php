@@ -723,6 +723,23 @@ class ItemPlatformSku extends Backend
         }
     }
 
+    public function sku_has_imgs()
+    {
+        $ids = input('ids');
+        $itemPlatformRow = $this->model->findItemPlatform($ids);
+        //查询商品分类
+        $item = new \app\admin\model\itemmanage\Item();
+        $itemAttribute = new ItemAttribute();
+        $res = $item->where(['sku' => $itemPlatformRow['sku']])->find();
+        $itemAttributeDetail =$itemAttribute->where('item_id',$res['id'])->find();
+        //有图片是0 无图片是1
+        if (empty($itemAttributeDetail['frame_aws_imgs'])){
+            $this->success(1,'',$ids);
+        }else{
+            $this->success(0,'',$ids);
+        }
+
+    }
     /****
      * 编辑后面的商品上传至对应平台
      */
