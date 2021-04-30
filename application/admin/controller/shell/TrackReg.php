@@ -3907,7 +3907,7 @@ class TrackReg extends Backend
                             ->where('i.status', 2)
                             ->value('i.id');
                         //没有入库
-                        if (!$isInStock) {
+                        if (!is_null($isInStock) && (!$isInStock)) {
                             //查询是否有批次
                             $batchIds = Db::name('logistics_info')
                                 ->where('type', 1)
@@ -3929,9 +3929,9 @@ class TrackReg extends Backend
                         }
                     }
                 }
-                $params['id'] = $v['id'];
                 $params['wait_instock_num'] = $num;
-                $item->save($params);
+                $item->where('id',$v['id'])
+                    ->update($params);
                 echo $v['sku']." is ok"."\n";
                 usleep(10000);
             }
@@ -3939,3 +3939,5 @@ class TrackReg extends Backend
         echo "ok";
     }
 }
+
+
