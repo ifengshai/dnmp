@@ -3939,6 +3939,62 @@ class TrackReg extends Backend
         }
         echo "ok";
     }
+
+    /**
+     * 处理待入库数量 - 计划任务
+     */
+    public function process_wait_stock1()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $list = $item
+            ->where(['is_open' => 1, 'is_del' => 1])
+            ->field('id,sku')
+            ->select();
+        foreach ($list as $k => $v) {
+            $params = [];
+            $num = 0;
+            //查询sku对应的采购单id
+            $purchaseIds = Db::name('purchase_order_item')
+                ->where('sku', $v['sku'])
+                ->column('purchase_id');
+            if(!empty($purchaseIds)){
+                foreach ($purchaseIds as $purchaseId) {
+                    //判断采购单是否签收
+                    $isSign = Db::name('logistics_info')
+                        ->where('type', 1)
+                        ->where('status', 1)
+                        ->where('purchase_id', $purchaseId)
+                        ->value('id');
+                    if ($isSign) {
+                        //判断是否入库
+                        $isInStock = Db::name('in_stock')
+                            ->alias('i')
+                            ->join('check_order c', 'c.id=i.check_id')
+                            ->where('c.purchase_id', $purchaseId)
+                            ->where('i.status', 2)
+                            ->value('i.id');
+                        //没有入库
+                        if (is_null($isInStock) && (!$isInStock)) {
+                            $params['sku'] = $v['sku'];
+                            $params['purchase_id'] = $purchaseId;
+                            $time = Db::name('purchase_order')
+                                ->where('id',$purchaseId)
+                                ->value('createtime');
+                            $params['create_time'] = $time;
+                            Db::name('wait_linshi')->insert($params);
+                            echo $v['sku']." is ok"."\n";
+                            usleep(10000);
+                        }
+                    }
+                }
+            }
+        }
+        echo "ok";
+    }
 }
+
+
+
+
 
 
