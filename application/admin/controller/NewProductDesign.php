@@ -184,15 +184,15 @@ class NewProductDesign extends Backend
             $attributeType = true;
         }
         $row =$itemAttribute->where('item_id',$goodsId)->find();
-        $img = explode(',',$row->frame_aws_imgs);
-        $net = 'https://mojing.s3-us-west-2.amazonaws.com/';
-        if(!empty($img)){
-            if (is_array($img)){
-                foreach ($img as $key=>$value){
-                    $img[$key] = $net.$value;
+        if (!empty($row->frame_aws_imgs)){
+            $img = explode(',',$row->frame_aws_imgs);
+            $net = 'https://mojing.s3-us-west-2.amazonaws.com/';
+                if (is_array($img)){
+                    foreach ($img as $key=>$value){
+                        $img[$key] = $net.$value;
+                    }
+                    $this->assign('img',$img);
                 }
-                $this->assign('img',$img);
-            }
         }
         $this->assign('attributeType',$attributeType);
         $this->assign('goodsId',$goodsId);
