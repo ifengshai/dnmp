@@ -3986,7 +3986,7 @@ class TrackReg extends Backend
                                 ->find();
                             $params['num'] = $info['purchase_num'];
                             $params['create_time'] = $info['createtime'];
-                            switch ($info){
+                            switch ($info['purchase_status']){
                                 case 0:
                                     $purchase_status = '新建';
                                     break;
