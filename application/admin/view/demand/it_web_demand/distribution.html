@@ -49,8 +49,8 @@
 </style>
 
 <div class="all_div">
-    {if $row['web_designer_group'] == 2 && $row['test_status'] >= 2}
-        <!--如果测试已经确认，并且不需要前端的话，不显示前端大萨达多的操作-->
+    {if $row['web_designer_group'] == 2 && $row['test_status'] >= 3}
+    <!--如果测试已经确认，并且不需要前端的话，不显示前端大萨达多的操作-->
     {else}
     <form role="form" method="POST" id="form_web_group" data-toggle="validator" action="">
         <input type="hidden" name="row[id]" value="{$row.id}">
@@ -145,8 +145,8 @@
     </form>
     {/if}
 
-    {if $row['phper_group'] == 2 && $row['test_status'] >= 2}
-        <!--如果测试已经确认，并且不需要后端的话，不显示后端的操作-->
+    {if $row['phper_group'] == 2 && $row['test_status'] >= 3}
+    <!--如果测试已经确认，并且不需要后端的话，不显示后端的操作-->
     {else}
     <form role="form" method="POST" id="form_php_group" data-toggle="validator" action="">
         <input type="hidden" name="row[id]" value="{$row.id}">
@@ -230,11 +230,11 @@
     </form>
     {/if}
 
-    {if $row['app_group'] == 2 && $row['test_status'] >= 2}
+    {if $row['app_group'] == 2 && $row['test_status'] >= 3}
     <!--如果测试已经确认，并且不需要APP的话，不显示APP的操作-->
     {else}
-        {if strpos($row['site_type'],'3') !== false}
-        <form role="form" method="POST" id="form_app_group" data-toggle="validator" action="">
+    {if strpos($row['site_type'],'3') !== false}
+    <form role="form" method="POST" id="form_app_group" data-toggle="validator" action="">
             <input type="hidden" name="row[id]" value="{$row.id}">
             <input type="hidden" name="row[app_status]" value="1">
             <input type="hidden" name="row[type]" id="input_app_group" value="1"><!--1:响应，修改；2：完成-->
