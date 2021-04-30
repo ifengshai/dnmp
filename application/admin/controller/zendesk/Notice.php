@@ -67,7 +67,7 @@ class Notice extends Controller
                 $this->client->setAuth('basic', ['username' => $username, 'token' => config('zendesk.nihaooptical')['token']]);
             }
         } catch (\Exception $e) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
             return true;
         }
     }
@@ -202,7 +202,7 @@ class Notice extends Controller
             //写入附表
         } catch (Exception $e) {
             Db::rollback();
-             file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.txt',"auto_add:" . $id."\r\n",FILE_APPEND);
+             file_put_contents('/var/www/mojing/runtime/log/zendesk.txt',"auto_add:" . $id."\r\n",FILE_APPEND);
             //echo $e->getMessage();
         }
         return 'success';
@@ -247,8 +247,8 @@ class Notice extends Controller
                 return 'success';
             }
         } catch (Exception $e) {
-            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
-            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            // file_put_contents('/var/www/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            // file_put_contents('/var/www/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             return 'success';
             //echo $e->getMessage();
         }
@@ -308,9 +308,9 @@ class Notice extends Controller
             }
             Db::commit();
         } catch (Exception $e) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.txt',"auto_update:" . $id."\r\n",FILE_APPEND);
-            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
-            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/zendesk.txt',"auto_update:" . $id."\r\n",FILE_APPEND);
+            // file_put_contents('/var/www/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            // file_put_contents('/var/www/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             Db::rollback();
             //return true;
             //写入日志
@@ -445,7 +445,7 @@ class Notice extends Controller
             //写入附表
         } catch (Exception $e) {
             Db::rollback();
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', $id . "\r\n", FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/zendesk.log', $id . "\r\n", FILE_APPEND);
             echo $e->getMessage();
         }
         return 'success';
@@ -490,8 +490,8 @@ class Notice extends Controller
                 return 'success';
             }
         } catch (Exception $e) {
-            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
-            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            // file_put_contents('/var/www/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
+            // file_put_contents('/var/www/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             return 'success';
             //echo $e->getMessage();
         }
@@ -621,8 +621,8 @@ class Notice extends Controller
             }
             Db::commit();
         } catch (Exception $e) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log',"update:" .$id."\r\n",FILE_APPEND);
-            // file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/zendesk.log',"update:" .$id."\r\n",FILE_APPEND);
+            // file_put_contents('/var/www/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
             Db::rollback();
             //return true;
             //写入日志
@@ -640,8 +640,8 @@ class Notice extends Controller
         try {
             return $this->client->tickets()->find($id)->ticket;
         } catch (\Exception $e) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', $id . "\r\n", FILE_APPEND);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/a.txt', $id . "\r\n", FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
             return 'success';
             //echo $e->getMessage();
         }
@@ -661,8 +661,8 @@ class Notice extends Controller
             $count = $all->count;
             return $comments[$count - 1];
         } catch (\Exception $e) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', $id . "\r\n", FILE_APPEND);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/a.txt', $id . "\r\n", FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
             return 'success';
             //echo $e->getMessage();
         }
@@ -681,8 +681,8 @@ class Notice extends Controller
             $comments = $all->comments;
             return $comments;
         } catch (\Exception $e) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', $id . "\r\n", FILE_APPEND);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/a.txt', $id . "\r\n", FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
             return 'success';
             //echo $e->getMessage();
         }
@@ -1319,7 +1319,7 @@ class Notice extends Controller
      */
     public function autoAsyncUpdate($siteType)
     {
-        $params = 'type:ticket updated_at>=6minutes order_by:updated_at sort:asc';
+        $params = 'type:ticket updated_at>=20minutes order_by:updated_at sort:asc';
 
         //Get all tickets
         $tickets = $this->client->search()->find($params);
@@ -1330,8 +1330,8 @@ class Notice extends Controller
         }
 
         if ($tickets->count > 1000) {
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 6 * 60) . "\r\n", FILE_APPEND);
-            file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 6 * 60) . "\r\n", FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         }
 
         $page = ceil($tickets->count / 100);
