@@ -654,6 +654,7 @@ class ItemPlatformSku extends Backend
     public function afterUploadItem($ids = null)
     {
         if ($this->request->isAjax()) {
+            $ids = input('id');
             $itemPlatformRow = $this->model->findItemPlatform($ids);
             $itemPlatformDetail = $this->model->where('id',$ids)->find();
             if ($itemPlatformRow['is_upload'] == 1) { //商品已经上传，无需再次上传
@@ -663,8 +664,6 @@ class ItemPlatformSku extends Backend
             $item = new \app\admin\model\itemmanage\Item();
             $itemAttribute = new ItemAttribute();
             $res = $item->where(['sku' => $itemPlatformRow['sku'], 'is_open' => 1, 'is_del' => 1])->find();
-            dump($itemPlatformDetail);
-            dump($res);
             if ($res['item_status'] <> 3){
                 $this->error(__('商品非审核通过状态，请先在商品管理模块进行审核'));
             }
