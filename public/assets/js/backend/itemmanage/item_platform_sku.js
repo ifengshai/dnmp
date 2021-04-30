@@ -107,7 +107,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                                                         url: Config.moduleurl + '/itemmanage/item_platform_sku/afterUploadItem',
                                                         data: {id:ret.data},
                                                         success: function (data) {
-                                                            layer.msg(data.msg)
+                                                            layer.msg(data.msg);
+                                                            $(".btn-refresh").trigger("click");
+                                                        },
+                                                        error: function (data, ret) {
+                                                            Layer.alert(ret.msg);
+                                                            return false;
                                                         },
                                                     });
                                                 });
@@ -122,7 +127,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','jqui','bootstrap-tabl
                                                     url: Config.moduleurl + '/itemmanage/item_platform_sku/afterUploadItem',
                                                     data: {id:ret.data},
                                                     success: function (data) {
-                                                        layer.msg(data.msg)
+                                                        layer.msg(data.msg);
+                                                        $(".btn-refresh").trigger("click");
+                                                    },
+                                                    error: function (data, ret) {
+                                                        Layer.alert(ret.msg);
+                                                        return false;
                                                     },
                                                 });
                                             });
