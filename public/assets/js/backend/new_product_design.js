@@ -395,6 +395,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     $(table).data("operate-review_the_operation", null);
                                     that.table = table;
                                 }
+                                if(Config.change_designer != true){ //通过Config.chapter 获取后台存的chapter
+                                    $(table).data("operate-distr_user_change", null);
+                                    that.table = table;
+                                }
                                 return Table.api.formatter.operate.call(that, value, row, index);
                             }
                         }
