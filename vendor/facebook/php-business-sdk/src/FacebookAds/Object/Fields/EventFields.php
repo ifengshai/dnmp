@@ -51,10 +51,13 @@ class EventFields extends AbstractEnum {
   const INTERESTED_COUNT = 'interested_count';
   const IS_CANCELED = 'is_canceled';
   const IS_DRAFT = 'is_draft';
+  const IS_ONLINE = 'is_online';
   const IS_PAGE_OWNED = 'is_page_owned';
   const MAYBE_COUNT = 'maybe_count';
   const NAME = 'name';
   const NOREPLY_COUNT = 'noreply_count';
+  const ONLINE_EVENT_FORMAT = 'online_event_format';
+  const ONLINE_EVENT_THIRD_PARTY_URL = 'online_event_third_party_url';
   const OWNER = 'owner';
   const PARENT_GROUP = 'parent_group';
   const PLACE = 'place';
@@ -84,10 +87,13 @@ class EventFields extends AbstractEnum {
       'interested_count' => 'int',
       'is_canceled' => 'bool',
       'is_draft' => 'bool',
+      'is_online' => 'bool',
       'is_page_owned' => 'bool',
       'maybe_count' => 'int',
       'name' => 'string',
       'noreply_count' => 'int',
+      'online_event_format' => 'OnlineEventFormat',
+      'online_event_third_party_url' => 'string',
       'owner' => 'Object',
       'parent_group' => 'Group',
       'place' => 'Place',

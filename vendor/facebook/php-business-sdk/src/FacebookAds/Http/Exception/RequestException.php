@@ -113,6 +113,11 @@ class RequestException extends Exception {
     if (is_string($array)) {
       $array = json_decode($array, true);
     }
+
+    if (is_null($array)) {
+      return null;
+    }
+
     return array_key_exists($key, $array)
       ? $array[$key]
       : $default;
@@ -132,6 +137,10 @@ class RequestException extends Exception {
     if (is_string(static::idx($error_data, 'error_data'))) {
       $error_data["error_data"] =
         json_decode(stripslashes(static::idx($error_data, 'error_data')), true);
+    }
+
+    if (is_null(static::idx($error_data, 'error_data'))) {
+      $error_data["error_data"] = array();
     }
 
     return array(

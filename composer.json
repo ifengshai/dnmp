@@ -33,10 +33,10 @@
         "league/html-to-markdown": "^4.9",
         "sch-group/17track": "^1.7",
         "google/apiclient": "^2.0",
-        "facebook/php-business-sdk": "5.0.5",
         "guzzlehttp/promises": "1.4.0",
         "guzzlehttp/psr7": "1.7.0",
-        "aws/aws-sdk-php": "^3.176"
+        "aws/aws-sdk-php": "^3.176",
+        "facebook/php-business-sdk": "v10.0.1"
     },
     "config": {
         "preferred-install": "dist"

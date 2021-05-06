@@ -68,6 +68,7 @@ class AdAccountTargetingUnifiedWhitelistedTypesValues extends AbstractEnum {
   const EFFECTIVE_FACEBOOK_POSITIONS = 'effective_facebook_positions';
   const EFFECTIVE_INSTAGRAM_POSITIONS = 'effective_instagram_positions';
   const EFFECTIVE_MESSENGER_POSITIONS = 'effective_messenger_positions';
+  const EFFECTIVE_OCULUS_POSITIONS = 'effective_oculus_positions';
   const EFFECTIVE_PUBLISHER_PLATFORMS = 'effective_publisher_platforms';
   const EFFECTIVE_WHATSAPP_POSITIONS = 'effective_whatsapp_positions';
   const ENGAGEMENT_SPECS = 'engagement_specs';
@@ -106,7 +107,9 @@ class AdAccountTargetingUnifiedWhitelistedTypesValues extends AbstractEnum {
   const ID = 'id';
   const INCOME = 'income';
   const INDUSTRIES = 'industries';
+  const INSTAGRAM_HASHTAGS = 'instagram_hashtags';
   const INSTAGRAM_POSITIONS = 'instagram_positions';
+  const INSTREAM_VIDEO_SKIPPABLE_EXCLUDED = 'instream_video_skippable_excluded';
   const INSTREAM_VIDEO_SPONSORSHIP_PLACEMENTS = 'instream_video_sponsorship_placements';
   const INTEREST_DEFAULTS_SOURCE = 'interest_defaults_source';
   const INTERESTED_IN = 'interested_in';
@@ -124,6 +127,7 @@ class AdAccountTargetingUnifiedWhitelistedTypesValues extends AbstractEnum {
   const MOBILE_DEVICE_MODEL = 'mobile_device_model';
   const MOMS = 'moms';
   const NET_WORTH = 'net_worth';
+  const OCULUS_POSITIONS = 'oculus_positions';
   const OFFICE_TYPE = 'office_type';
   const PAGE_TYPES = 'page_types';
   const PLACE_PAGE_SET_IDS = 'place_page_set_ids';
@@ -139,6 +143,7 @@ class AdAccountTargetingUnifiedWhitelistedTypesValues extends AbstractEnum {
   const RTB_FLAG = 'rtb_flag';
   const SITE_CATEGORY = 'site_category';
   const TARGETING_OPTIMIZATION = 'targeting_optimization';
+  const TARGETING_RELAXATION_TYPES = 'targeting_relaxation_types';
   const TIMEZONES = 'timezones';
   const TOPIC = 'topic';
   const TRENDING = 'trending';

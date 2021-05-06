@@ -29,7 +29,6 @@ use FacebookAds\Cursor;
 use FacebookAds\Http\RequestInterface;
 use FacebookAds\TypeChecker;
 use FacebookAds\Object\Fields\AdStudyFields;
-use FacebookAds\Object\Values\AdStudyObjectiveTypeValues;
 use FacebookAds\Object\Values\AdStudyTypeValues;
 
 /**
@@ -87,7 +86,7 @@ class AdStudy extends AbstractCrudObject {
     return $pending ? $request : $request->execute();
   }
 
-  public function getHealthCheckErrors(array $fields = array(), array $params = array(), $pending = false) {
+  public function getInstances(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
 
     $param_types = array(
@@ -99,10 +98,34 @@ class AdStudy extends AbstractCrudObject {
       $this->api,
       $this->data['id'],
       RequestInterface::METHOD_GET,
-      '/health_check_errors',
-      new AdsTALHealthCheckError(),
+      '/instances',
+      new PrivateLiftStudyInstance(),
       'EDGE',
-      AdsTALHealthCheckError::getFieldsEnum()->getValues(),
+      PrivateLiftStudyInstance::getFieldsEnum()->getValues(),
+      new TypeChecker($param_types, $enums)
+    );
+    $request->addParams($params);
+    $request->addFields($fields);
+    return $pending ? $request : $request->execute();
+  }
+
+  public function createInstance(array $fields = array(), array $params = array(), $pending = false) {
+    $this->assureId();
+
+    $param_types = array(
+      'breakdown_key' => 'map',
+    );
+    $enums = array(
+    );
+
+    $request = new ApiRequest(
+      $this->api,
+      $this->data['id'],
+      RequestInterface::METHOD_POST,
+      '/instances',
+      new PrivateLiftStudyInstance(),
+      'EDGE',
+      PrivateLiftStudyInstance::getFieldsEnum()->getValues(),
       new TypeChecker($param_types, $enums)
     );
     $request->addParams($params);
@@ -122,39 +145,6 @@ class AdStudy extends AbstractCrudObject {
       $this->api,
       $this->data['id'],
       RequestInterface::METHOD_GET,
-      '/objectives',
-      new AdStudyObjective(),
-      'EDGE',
-      AdStudyObjective::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function createObjective(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'adspixels' => 'list<Object>',
-      'applications' => 'list<Object>',
-      'customconversions' => 'list<Object>',
-      'is_primary' => 'bool',
-      'name' => 'string',
-      'offline_conversion_data_sets' => 'list<Object>',
-      'offsitepixels' => 'list<Object>',
-      'product_sets' => 'list<Object>',
-      'type' => 'type_enum',
-    );
-    $enums = array(
-      'type_enum' => AdStudyObjectiveTypeValues::getInstance()->getValues(),
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
       '/objectives',
       new AdStudyObjective(),
       'EDGE',

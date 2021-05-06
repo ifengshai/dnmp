@@ -29,6 +29,7 @@ use FacebookAds\Cursor;
 use FacebookAds\Http\RequestInterface;
 use FacebookAds\TypeChecker;
 use FacebookAds\Object\Fields\DestinationFields;
+use FacebookAds\Object\Values\DestinationImageFetchStatusValues;
 
 /**
  * This class is auto-generated.
@@ -42,13 +43,6 @@ use FacebookAds\Object\Fields\DestinationFields;
 class Destination extends AbstractCrudObject {
 
   /**
-   * @deprecated getEndpoint function is deprecated
-   */
-  protected function getEndpoint() {
-    return 'destinations';
-  }
-
-  /**
    * @return DestinationFields
    */
   public static function getFieldsEnum() {
@@ -57,9 +51,56 @@ class Destination extends AbstractCrudObject {
 
   protected static function getReferencedEnums() {
     $ref_enums = array();
+    $ref_enums['ImageFetchStatus'] = DestinationImageFetchStatusValues::getInstance()->getValues();
     return $ref_enums;
   }
 
+
+  public function getAugmentedRealitiesMetadata(array $fields = array(), array $params = array(), $pending = false) {
+    $this->assureId();
+
+    $param_types = array(
+    );
+    $enums = array(
+    );
+
+    $request = new ApiRequest(
+      $this->api,
+      $this->data['id'],
+      RequestInterface::METHOD_GET,
+      '/augmented_realities_metadata',
+      new AbstractCrudObject(),
+      'EDGE',
+      array(),
+      new TypeChecker($param_types, $enums)
+    );
+    $request->addParams($params);
+    $request->addFields($fields);
+    return $pending ? $request : $request->execute();
+  }
+
+  public function getVideosMetadata(array $fields = array(), array $params = array(), $pending = false) {
+    $this->assureId();
+
+    $param_types = array(
+    );
+    $enums = array(
+    );
+
+    $request = new ApiRequest(
+      $this->api,
+      $this->data['id'],
+      RequestInterface::METHOD_GET,
+      '/videos_metadata',
+      new AbstractCrudObject(),
+      'EDGE',
+      array(),
+      new TypeChecker($param_types, $enums)
+    );
+    $request->addParams($params);
+    $request->addFields($fields);
+    return $pending ? $request : $request->execute();
+  }
 
   public function getSelf(array $fields = array(), array $params = array(), $pending = false) {
     $this->assureId();
@@ -73,38 +114,6 @@ class Destination extends AbstractCrudObject {
       $this->api,
       $this->data['id'],
       RequestInterface::METHOD_GET,
-      '/',
-      new Destination(),
-      'NODE',
-      Destination::getFieldsEnum()->getValues(),
-      new TypeChecker($param_types, $enums)
-    );
-    $request->addParams($params);
-    $request->addFields($fields);
-    return $pending ? $request : $request->execute();
-  }
-
-  public function updateSelf(array $fields = array(), array $params = array(), $pending = false) {
-    $this->assureId();
-
-    $param_types = array(
-      'address' => 'Object',
-      'currency' => 'string',
-      'description' => 'string',
-      'images' => 'list<Object>',
-      'name' => 'string',
-      'price' => 'unsigned int',
-      'target_radius_in_km' => 'float',
-      'types' => 'string',
-      'url' => 'string',
-    );
-    $enums = array(
-    );
-
-    $request = new ApiRequest(
-      $this->api,
-      $this->data['id'],
-      RequestInterface::METHOD_POST,
       '/',
       new Destination(),
       'NODE',
