@@ -5,6 +5,7 @@ namespace app\admin\controller;
 use app\admin\controller\zendesk\Notice;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\lens\LensPrice;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
 use think\Db;
@@ -1213,7 +1214,6 @@ class Wangpenglei extends Backend
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
-//        exit;
     }
 
 
@@ -1242,5 +1242,63 @@ class Wangpenglei extends Backend
             }
 
         }
+    }
+
+
+    /**
+     * 判断定制现片逻辑
+     */
+    public function set_processing_type($params = [])
+    {
+        $arr = [];
+        //判断处方是否异常
+        $list = $this->is_prescription_abnormal($params);
+        $arr = array_merge($arr, $list);
+
+        //仅镜框
+        if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
+            $arr['order_prescription_type'] = 1;
+        } else {
+            $od_sph = (float)urldecode($params['od_sph']);
+            $os_sph = (float)urldecode($params['os_sph']);
+            $od_cyl = (float)urldecode($params['od_cyl']);
+            $os_cyl = (float)urldecode($params['os_cyl']);
+            //判断是否为现片，其余为定制
+            $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
+            foreach ($lensData as $v) {
+                if (($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'])
+                    && ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'])
+                    && ($os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end'])
+                    && ($od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end'])
+                ) {
+                    $arr['order_prescription_type'] = 2;
+                }
+            }
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 2) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        return $arr;
+    }
+
+    /**
+     * 测试镜片处方
+     * @author wpl
+     * @date   2021/5/6 13:54
+     */
+    public function test_lens()
+    {
+        $params['od_sph'] = '-2.50';
+        $params['os_sph'] = '-2.50';
+        $params['od_cyl'] = '-0.50';
+        $params['os_cyl'] = '-0.50';
+        $params['pd'] = 60;
+        $params['lens_number'] = 22100000;
+        $data = $this->set_processing_type($params);
+        dump($data);
+        die;
     }
 }
