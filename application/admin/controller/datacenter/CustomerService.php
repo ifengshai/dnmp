@@ -313,7 +313,6 @@ class CustomerService extends Backend
         $groupId = $params['group_id'];
         //$admin_id = $params['admin_id'];
         $where['c.due_id'] = ['neq',0];
-        $where['c.is_public'] = 1;
         if($platform){
             $where['c.platform'] = $platform;
         }
@@ -364,6 +363,7 @@ class CustomerService extends Backend
                     $where['c.due_id'] = $value;
                 }
                 $where['c.is_admin'] = 1;
+                $where['c.is_public'] = 1;
                 $where['z.channel'] = ['neq','voice'];
                 if($timeStr){
                     $createat = explode(' ', $timeStr);
