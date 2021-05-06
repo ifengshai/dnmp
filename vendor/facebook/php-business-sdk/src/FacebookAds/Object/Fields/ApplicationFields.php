@@ -43,6 +43,7 @@ class ApplicationFields extends AbstractEnum {
   const ANDROID_KEY_HASH = 'android_key_hash';
   const ANDROID_SDK_ERROR_CATEGORIES = 'android_sdk_error_categories';
   const APP_DOMAINS = 'app_domains';
+  const APP_EVENTS_CONFIG = 'app_events_config';
   const APP_EVENTS_FEATURE_BITMASK = 'app_events_feature_bitmask';
   const APP_EVENTS_SESSION_TIMEOUT = 'app_events_session_timeout';
   const APP_INSTALL_TRACKED = 'app_install_tracked';
@@ -69,7 +70,6 @@ class ApplicationFields extends AbstractEnum {
   const COMPANY = 'company';
   const CONFIGURED_IOS_SSO = 'configured_ios_sso';
   const CONTACT_EMAIL = 'contact_email';
-  const CONTEXT = 'context';
   const CREATED_TIME = 'created_time';
   const CREATOR_UID = 'creator_uid';
   const DAILY_ACTIVE_USERS = 'daily_active_users';
@@ -147,6 +147,7 @@ class ApplicationFields extends AbstractEnum {
       'android_key_hash' => 'list<string>',
       'android_sdk_error_categories' => 'list<Object>',
       'app_domains' => 'list<string>',
+      'app_events_config' => 'Object',
       'app_events_feature_bitmask' => 'unsigned int',
       'app_events_session_timeout' => 'unsigned int',
       'app_install_tracked' => 'bool',
@@ -173,7 +174,6 @@ class ApplicationFields extends AbstractEnum {
       'company' => 'string',
       'configured_ios_sso' => 'bool',
       'contact_email' => 'string',
-      'context' => 'Object',
       'created_time' => 'datetime',
       'creator_uid' => 'string',
       'daily_active_users' => 'string',

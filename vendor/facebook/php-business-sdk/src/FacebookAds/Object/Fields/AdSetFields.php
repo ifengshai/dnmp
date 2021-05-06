@@ -66,10 +66,12 @@ class AdSetFields extends AbstractEnum {
   const INSTAGRAM_ACTOR_ID = 'instagram_actor_id';
   const IS_DYNAMIC_CREATIVE = 'is_dynamic_creative';
   const ISSUES_INFO = 'issues_info';
+  const LEARNING_STAGE_INFO = 'learning_stage_info';
   const LIFETIME_BUDGET = 'lifetime_budget';
   const LIFETIME_IMPS = 'lifetime_imps';
   const LIFETIME_MIN_SPEND_TARGET = 'lifetime_min_spend_target';
   const LIFETIME_SPEND_CAP = 'lifetime_spend_cap';
+  const MULTI_OPTIMIZATION_GOAL_WEIGHT = 'multi_optimization_goal_weight';
   const NAME = 'name';
   const OPTIMIZATION_GOAL = 'optimization_goal';
   const OPTIMIZATION_SUB_EVENT = 'optimization_sub_event';
@@ -131,10 +133,12 @@ class AdSetFields extends AbstractEnum {
       'instagram_actor_id' => 'string',
       'is_dynamic_creative' => 'bool',
       'issues_info' => 'list<AdCampaignIssuesInfo>',
+      'learning_stage_info' => 'AdCampaignLearningStageInfo',
       'lifetime_budget' => 'string',
       'lifetime_imps' => 'int',
       'lifetime_min_spend_target' => 'string',
       'lifetime_spend_cap' => 'string',
+      'multi_optimization_goal_weight' => 'string',
       'name' => 'string',
       'optimization_goal' => 'OptimizationGoal',
       'optimization_sub_event' => 'string',
