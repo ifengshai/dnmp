@@ -1178,9 +1178,8 @@ class Wangpenglei extends Backend
 
     public function test002()
     {
-        $c_url = '';
-        $frist = substr($c_url, 0, 1);
-        echo $frist;
+        $file = 'fx0123-01';
+        echo str_replace(strrchr($file, "-"), "", $file);
         die;
     }
 
@@ -1232,8 +1231,8 @@ class Wangpenglei extends Backend
         $type = 1;
         $site = 'zeelool';
         for ($i = 0; $i < 24; $i++) {
-            $start = '2021-04-27T'.$i.':00:00Z';
-            $end = '2021-04-27T'.$i.':59:59Z';
+            $start = '2021-04-30T'.$i.':00:00Z';
+            $end = '2021-04-30T'.$i.':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(100000);

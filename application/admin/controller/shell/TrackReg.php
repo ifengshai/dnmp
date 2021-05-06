@@ -290,7 +290,6 @@ class TrackReg extends Backend
      */
     public function zendeskUpateData($siteType, $type)
     {
-        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
 
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $ticketIds = (new \app\admin\controller\zendesk\Notice(request(),
@@ -315,7 +314,6 @@ class TrackReg extends Backend
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
-        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         exit;
     }
 
@@ -3898,20 +3896,188 @@ class TrackReg extends Backend
     public function process_wait_stock()
     {
         $item = new \app\admin\model\itemmanage\Item();
-        $purchase = new \app\admin\model\purchase\PurchaseOrder();
-
-        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'wait_instock_num' => ['<', 0]])->select();
-        $params = [];
+        $list = $item
+            ->where(['is_open' => 1, 'is_del' => 1])
+            ->field('id,sku')
+            ->select();
         foreach ($list as $k => $v) {
-            $purchase_num = $purchase->alias('a')->where([
-                'purchase_status' => 7,
-                'stock_status'    => 0,
-                'b.sku'           => $v['sku'],
-            ])->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
-            $params[$k]['id'] = $v['id'];
-            $params[$k]['wait_instock_num'] = $purchase_num;
+            $params = [];
+            $num = 0;
+            //查询sku对应的采购单id
+            $purchaseIds = Db::name('purchase_order_item')
+                ->where('sku', $v['sku'])
+                ->column('purchase_id');
+            if(!empty($purchaseIds)){
+                foreach ($purchaseIds as $purchaseId) {
+                    //判断采购单是否签收
+                    $isSign = Db::name('logistics_info')
+                        ->where('type', 1)
+                        ->where('status', 1)
+                        ->where('purchase_id', $purchaseId)
+                        ->value('id');
+                    if ($isSign) {
+                        //判断是否入库
+                        $isInStock = Db::name('in_stock')
+                            ->alias('i')
+                            ->join('check_order c', 'c.id=i.check_id')
+                            ->where('c.purchase_id', $purchaseId)
+                            ->where('i.status', 2)
+                            ->value('i.id');
+                        //没有入库
+                        if (is_null($isInStock) && (!$isInStock)) {
+                            //查询是否有批次
+                            $batchIds = Db::name('logistics_info')
+                                ->where('type', 1)
+                                ->where('status', 1)
+                                ->where('purchase_id', $purchaseId)
+                                ->group('purchase_id,batch_id')
+                                ->column('batch_id');
+                            $batchIds = array_filter($batchIds);
+                            if (empty($batchIds)) {
+                                $num += Db::name('purchase_order_item')
+                                    ->where('purchase_id', $purchaseId)
+                                    ->value('purchase_num');
+                            } else {
+                                foreach ($batchIds as $batchId) {
+                                    $num += Db::name('purchase_batch_item')
+                                        ->where('purchase_batch_id', $batchId)
+                                        ->value('arrival_num');
+                                }
+                            }
+                        }
+                    }
+                }
+                $params['wait_instock_num'] = $num;
+                $item->where('id',$v['id'])
+                    ->update($params);
+                echo $v['sku']." is ok"."\n";
+                usleep(10000);
+            }
         }
-        $item->saveAll($params);
+        echo "ok";
+    }
+
+    /**
+     * 处理待入库数量 - 计划任务
+     */
+    public function process_wait_stock1()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $list = $item
+            ->where(['is_open' => 1, 'is_del' => 1])
+            ->field('id,sku')
+            ->select();
+        foreach ($list as $k => $v) {
+            $params = [];
+            $num = 0;
+            //查询sku对应的采购单id
+            $purchaseIds = Db::name('purchase_order_item')
+                ->where('sku', $v['sku'])
+                ->column('purchase_id');
+            if(!empty($purchaseIds)){
+                foreach ($purchaseIds as $purchaseId) {
+                    //判断采购单是否签收
+                    $isSign = Db::name('logistics_info')
+                        ->where('type', 1)
+                        ->where('status', 1)
+                        ->where('purchase_id', $purchaseId)
+                        ->value('id');
+                    if ($isSign) {
+                        //判断是否入库
+                        $isInStock = Db::name('in_stock')
+                            ->alias('i')
+                            ->join('check_order c', 'c.id=i.check_id')
+                            ->where('c.purchase_id', $purchaseId)
+                            ->where('i.status', 2)
+                            ->value('i.id');
+                        //没有入库
+                        if (is_null($isInStock) && (!$isInStock)) {
+                            $params['sku'] = $v['sku'];
+                            $params['purchase_id'] = $purchaseId;
+                            $info = Db::name('purchase_order')
+                                ->alias('o')
+                                ->join('fa_purchase_order_item i','o.id=i.purchase_id')
+                                ->where('o.id',$purchaseId)
+                                ->where('i.sku',$v['sku'])
+                                ->field('createtime,purchase_num,o.purchase_status,o.purchase_number,o.check_status,o.stock_status')
+                                ->find();
+                            $params['num'] = $info['purchase_num'];
+                            $params['create_time'] = $info['createtime'];
+                            switch ($info['purchase_status']){
+                                case 0:
+                                    $purchase_status = '新建';
+                                    break;
+                                case 1:
+                                    $purchase_status = '审核中';
+                                    break;
+                                case 2:
+                                    $purchase_status = '已审核';
+                                    break;
+                                case 3:
+                                    $purchase_status = '已拒绝';
+                                    break;
+                                case 4:
+                                    $purchase_status = '已取消';
+                                    break;
+                                case 5:
+                                    $purchase_status = '待发货';
+                                    break;
+                                case 6:
+                                    $purchase_status = '待收货';
+                                    break;
+                                case 7:
+                                    $purchase_status = '已签收';
+                                    break;
+                                case 8:
+                                    $purchase_status = '已退款';
+                                    break;
+                                case 9:
+                                    $purchase_status = '部分签收';
+                                    break;
+                                case 10:
+                                    $purchase_status = '已完成';
+                                    break;
+                            }
+                            switch ($info['check_status']){
+                                case 0:
+                                    $check_status = '未质检';
+                                    break;
+                                case 1:
+                                    $check_status = '部分质检';
+                                    break;
+                                case 2:
+                                    $check_status = '已质检';
+                                    break;
+                            }
+                            switch ($info['stock_status']){
+                                case 0:
+                                    $instock_status = '未入库';
+                                    break;
+                                case 1:
+                                    $instock_status = '部分入库';
+                                    break;
+                                case 2:
+                                    $instock_status = '已入库';
+                                    break;
+                            }
+                            $params['purchase_status'] = $purchase_status;
+                            $params['purchase_number'] = $info['purchase_number'];
+                            $params['check_status'] = $check_status;
+                            $params['instock_status'] = $instock_status;
+                            Db::name('wait_linshi')->insert($params);
+                            echo $v['sku']." is ok"."\n";
+                            usleep(10000);
+                        }
+                    }
+                }
+            }
+        }
         echo "ok";
     }
 }
+
+
+
+
+
+
