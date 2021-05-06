@@ -444,8 +444,7 @@ class NewProductDesign extends Backend
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin' => 'b'], 'a.uid=b.id')
-//            ->where('a.group_id=160')
-            ->where('a.group_id=72')
+            ->where('a.group_id=160')
             ->field('id,nickname')
             ->select();
         $this->assign('ids', $ids);
@@ -485,8 +484,7 @@ class NewProductDesign extends Backend
         $auth_user = $authGroupAccess
             ->alias('a')
             ->join(['fa_admin' => 'b'], 'a.uid=b.id')
-//            ->where('a.group_id=160')
-            ->where('a.group_id=72')
+            ->where('a.group_id=160')
             ->field('id,nickname')
             ->select();
         $this->assign('ids', $ids);
