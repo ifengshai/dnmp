@@ -1178,9 +1178,8 @@ class Wangpenglei extends Backend
 
     public function test002()
     {
-        $c_url = '';
-        $frist = substr($c_url, 0, 1);
-        echo $frist;
+        $file = 'fx0123-01';
+        echo str_replace(strrchr($file, "-"), "", $file);
         die;
     }
 
