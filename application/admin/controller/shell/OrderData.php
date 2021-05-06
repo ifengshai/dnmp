@@ -7,11 +7,26 @@
 namespace app\admin\controller\shell;
 
 use app\common\controller\Backend;
+use app\enum\Site;
 use think\Db;
+use app\admin\model\lens\LensPrice;
+use think\Env;
 
 class OrderData extends Backend
 {
     protected $noNeedLogin = ['*'];
+    /**
+     * @var bool|mixed|string|null
+     * @author wpl
+     * @date   2021/5/6 14:17
+     */
+    private $topicName;
+    /**
+     * @var bool|mixed|string|null
+     * @author wpl
+     * @date   2021/5/6 14:17
+     */
+    private $topicIp;
 
     public function _initialize()
     {
@@ -28,6 +43,8 @@ class OrderData extends Backend
         $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
         $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
         $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->topicName = Env::get('topic.orderTopicName');
+        $this->topicIp = Env::get('topic.topicIp');
     }
 
     /**
@@ -45,8 +62,8 @@ class OrderData extends Backend
          * 对 中台生产的  用户信息 进行消费
          */
         // 设置将要消费消息的主题
-        $topic = 'mojing_order';
-        $host = '172.31.4.240:9092';
+        $topic = $this->topicName;
+        $host = $this->topicIp;
         $group_id = '0';
         $conf = new \RdKafka\Conf();
         // 当有新的消费进程加入或者退出消费组时，kafka 会自动重新分配分区给消费者进程，这里注册了一个回调函数，当分区被重新分配时触发
@@ -109,44 +126,39 @@ class OrderData extends Backend
                     case RD_KAFKA_RESP_ERR_NO_ERROR: //没有错误
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
-                        $key = $message->key;
-                        //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志
-
                         echo $payload['database'].'-'.$payload['type'].'-'.$payload['table'];
 
                         if ($payload) {
                             //根据库名判断站点
+                            $site = 0;
                             switch ($payload['database']) {
-                                case 'zeelool':
-                                    $site = 1;
+                                case Env::get('site_table.zeelool'):
+                                    $site = Site::ZEELOOL;
                                     break;
-                                case 'voogueme':
-                                    $site = 2;
+                                case Env::get('site_table.voogueme'):
+                                    $site = Site::VOOGUEME;
                                     break;
-                                case 'nihao':
-                                    $site = 3;
+                                case Env::get('site_table.nihao'):
+                                    $site = Site::NIHAO;
                                     break;
-                                case 'meeloog':
-                                    $site = 4;
+                                case Env::get('site_table.meeloog'):
+                                    $site = Site::MEELOOG;
                                     break;
-                                case 'wesee':
-                                    $site = 5;
+                                case Env::get('site_table.zeelool_es'):
+                                    $site = Site::ZEELOOL_ES;
                                     break;
-                                case 'zeelool_es':
-                                    $site = 9;
+                                case Env::get('site_table.zeelool_de'):
+                                    $site = Site::ZEELOOL_DE;
                                     break;
-                                case 'zeelool_de':
-                                    $site = 10;
+                                case Env::get('site_table.zeelool_jp'):
+                                    $site = Site::ZEELOOL_JP;
                                     break;
-                                case 'zeelool_jp':
-                                    $site = 11;
+                                case Env::get('site_table.wesee'):
+                                    $site = Site::WESEEOPTICAL;
                                     break;
-                                case 'morefun':
-                                    $site = 5;
-                                    break;
-                                case 'voogueme_acc':
-                                    $site = 12;
+                                case Env::get('site_table.voogueme_acc'):
+                                    $site = Site::VOOGUEME_ACC;
                                     break;
                             }
                             //主表
@@ -1343,195 +1355,31 @@ class OrderData extends Backend
         //判断处方是否异常
         $list = $this->is_prescription_abnormal($params);
         $arr = array_merge($arr, $list);
-        /**
-         * 判断定制现片逻辑
-         * 1、渐进镜 Progressive
-         * 2、偏光镜 镜片类型包含Polarized
-         * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
-         * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
-         */
-
-        $lens_number = config('LENS_NUMBER');
-        if (in_array($params['lens_number'], $lens_number)) {
-            $arr['order_prescription_type'] = 3;
-            $arr['is_custom_lens'] = 1;
-        }
-        $od_sph = (float)urldecode($params['od_sph']);
-        $os_sph = (float)urldecode($params['os_sph']);
-        $od_cyl = (float)urldecode($params['od_cyl']);
-        $os_cyl = (float)urldecode($params['os_cyl']);
 
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
-        }
-
-        if ($params['lens_number'] == '23100000' || $params['lens_number'] == '23100001') {
-            /**
-             * 1.61非球面绿膜 定制片
-             * SPH:0.00～-8.00 CYL:-4.25～-6.00
-             */
-            if ((($od_sph >= -8 && $od_sph <= 0) || ($os_sph >= -8 && $os_sph <= 0)) && (($od_cyl >= -6 && $od_cyl <= -4.25) || ($os_cyl >= -6 && $os_cyl <= -4.25))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-
-            if ((($od_sph >= 8 && $od_sph <= 6) || ($os_sph >= 2 && $os_sph <= 6)) && (($od_cyl >= -6 && $od_cyl <= -2.25) || ($os_cyl >= -6 && $os_cyl <= -2.25))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-
-            if ((($od_sph >= -7 && $od_sph <= 0) || ($os_sph >= -7 && $os_sph <= 0)) && (($od_cyl >= -4 && $od_cyl <= 0) || ($os_cyl >= -4 && $os_cyl <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 2;
-            }
-            if ((($od_sph >= -10 && $od_sph <= -7.25) || ($os_sph >= -10 && $os_sph <= -7.25)) && (($od_cyl >= -4 && $od_cyl <= 0) || ($os_cyl >= -4 && $os_cyl <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-            if ((($od_sph >= 0 && $od_sph <= 4) || ($os_sph >= 0 && $os_sph <= 4)) && (($od_cyl >= -2 && $od_cyl <= 0) || ($os_cyl >= -2 && $os_cyl <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 2;
-            }
-            if ((($od_sph >= 4.25 && $od_sph <= 6) || ($os_sph >= 4.25 && $os_sph <= 6)) && (($od_cyl >= -6 && $od_cyl <= 0) || ($os_cyl >= -6 && $os_cyl <= 0))) {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-        }
-
-        if ($params['lens_number'] == '24100000' || $params['lens_number'] == '24200000') {
-            /**
-             * 1.67非球面绿膜 现片
-             * SPH:-3.00～-12.00 CYL:0.00～-2.00（不含-0.25）
-             */
-            if ((($od_sph >= -12 && $od_sph <= -3) || ($os_sph >= -12 && $os_sph <= -3)) && (($od_cyl >= -2 && $od_cyl < -0.5 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= -0.5 && $od_cyl != -0.25))) {
-                $arr['order_prescription_type'] = 2;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
-                $arr['order_prescription_type'] = 2;
-            } else {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-        }
-
-        if ($params['lens_number'] == '25100000') {
-            /**
-             * 1.71非球面绿膜 现片
-             * SPH:0.00～-15.00 CYL:0.00～-2.00（不含-0.25）
-             */
-            if ((($od_sph >= -15 && $od_sph <= 0) || ($os_sph >= -15 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= 0 && $od_cyl != -0.25))) {
-                $arr['order_prescription_type'] = 3;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
-                $arr['order_prescription_type'] = 3;
-            } else {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-        }
-
-        if ($params['lens_number'] == '26100000') {
-            /**
-             * 1.74非球面绿膜 现片
-             * SPH:-3.00～-13.00 CYL:0.00～-2.00（不含-0.25）
-             */
-            if ((($od_sph >= -13 && $od_sph <= -3) || ($os_sph >= -13 && $os_sph <= -3)) && (($od_cyl >= -2 && $od_cyl <= 0 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= 0 && $od_cyl != -0.25))) {
-                $arr['order_prescription_type'] = 3;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
-                $arr['order_prescription_type'] = 3;
-            } else {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-        }
-
-        if ($params['lens_number'] == '23200000' || $params['lens_number'] == '23200001') {
-            /**
-             * 1.61防蓝光 现片
-             * SPH:0.00～-8.00 CYL:0.00～-2.00
-             * SPH:0.00～-8.00 CYL:-2.25～-4.00
-             * SPH:0.00～+6.00 CYL:0.00～-2.00
-             */
-            if ((($od_sph >= -7 && $od_sph <= 0) || ($os_sph >= -7 && $os_sph <= 0)) && (($od_cyl >= -4 && $od_cyl <= 0) || ($os_cyl >= -4 && $os_cyl <= 0))) {
-                $arr['order_prescription_type'] = 2;
-            } elseif ((($od_sph >= 0 && $od_sph <= 4) || ($os_sph >= 0 && $os_sph <= 4)) && (($od_cyl >= -2 && $od_cyl <= 0) || ($os_cyl >= -2 && $os_cyl <= 0))) {
-                $arr['order_prescription_type'] = 2;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
-                $arr['order_prescription_type'] = 2;
-            } else {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-        }
-
-        if ($params['lens_number'] == '25200000' || $params['lens_number'] == '25302000' || $params['lens_number'] == '25303000') {
-            /**
-             * 1.57变色 现片 1.71变色灰
-             * SPH:0.00～-3.00 CYL:0.00～-2.00
-             */
-            if ((($od_sph >= -12 && $od_sph <= 0) || ($os_sph >= -12 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0 && $od_cyl != -0.25) || ($os_cyl >= -2 && $os_cyl <= 0 && $od_cyl != -0.25))) {
-                $arr['order_prescription_type'] = 3;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
-                $arr['order_prescription_type'] = 2;
-            } else {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-        }
-
-        if ($params['lens_number'] == '22306000' || $params['lens_number'] == '22305000' || $params['lens_number'] == '22304000') {
-            /**
-             * 1.71防蓝光 现片
-             * SPH:0.00～-12.00 CYL:0.00～-2.00（不含-0.25）
-             */
-            if ((($od_sph >= -3 && $od_sph <= 0) || ($os_sph >= -3 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0) || ($os_cyl >= -2 && $os_cyl <= 0))) {
-                $arr['order_prescription_type'] = 3;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
-                $arr['order_prescription_type'] = 2;
-            } else {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-        }
-
-
-        if ($params['lens_number'] == '23302000' || $params['lens_number'] == '23302001') {
-            /**
-             * 1.61变色灰 现片
-             * SPH:0.00～-8.00 CYL:0.00～-2.00
-             */
-            if ((($od_sph >= -5 && $od_sph <= 0) || ($os_sph >= -5 && $os_sph <= 0)) && (($od_cyl >= -1.5 && $od_cyl <= 0) || ($os_cyl >= -1.5 && $os_cyl <= 0))) {
-                $arr['order_prescription_type'] = 2;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
-                $arr['order_prescription_type'] = 2;
-            } else {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
-            }
-        }
-        if ($params['lens_number'] == '23303001') {
-
-            $arr['is_custom_lens'] = 1;
-            $arr['order_prescription_type'] = 3;
-        }
-
-        if ($params['lens_number'] == '23304000' || $params['lens_number'] == '23306000' || $params['lens_number'] == '23305000') {
-            /**
-             * 1.61变色蓝 现片
-             * SPH:0.00～-8.00 CYL:0.00～-2.00
-             */
-            if ((($od_sph >= -8 && $od_sph <= 0) || ($os_sph >= -8 && $os_sph <= 0)) && (($od_cyl >= -2 && $od_cyl <= 0.5) || ($os_cyl >= -2 && $os_cyl <= 0.5))) {
-                $arr['order_prescription_type'] = 3;
-            } elseif ($od_sph == 0 && $os_sph == 0) {
-                $arr['order_prescription_type'] = 2;
-            } else {
-                $arr['is_custom_lens'] = 1;
-                $arr['order_prescription_type'] = 3;
+        } else {
+            $od_sph = (float)urldecode($params['od_sph']);
+            $os_sph = (float)urldecode($params['os_sph']);
+            $od_cyl = (float)urldecode($params['od_cyl']);
+            $os_cyl = (float)urldecode($params['os_cyl']);
+            //判断是否为现片，其余为定制
+            $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
+            foreach ($lensData as $v) {
+                if (($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'])
+                    && ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'])
+                    && ($os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end'])
+                    && ($od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end'])
+                ) {
+                    $arr['order_prescription_type'] = 2;
+                }
             }
         }
 
         //默认如果不是仅镜架 或定制片 则为现货处方镜
-        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 3) {
-            $arr['order_prescription_type'] = 2;
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 2) {
+            $arr['order_prescription_type'] = 3;
         }
 
         return $arr;
