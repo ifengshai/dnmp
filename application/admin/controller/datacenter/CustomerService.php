@@ -363,7 +363,7 @@ class CustomerService extends Backend
                     $where['c.due_id'] = $value;
                 }
                 $where['c.is_admin'] = 1;
-                $where['c.is_public'] = 1;
+                $where['c.is_public'] = ['<>',2];
                 $where['z.channel'] = ['neq','voice'];
                 if($timeStr){
                     $createat = explode(' ', $timeStr);
