@@ -32,7 +32,7 @@ class ItemPlatformSku extends Backend
     protected $platform = null;
     protected $relationSearch = true;
 
-    protected $noNeedRight = ['batch_export_xls'];
+    protected $noNeedRight = ['batch_export_xls','sku_has_imgs'];
 
     public function _initialize()
     {
