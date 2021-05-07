@@ -161,6 +161,7 @@ class NewProductDesign extends Backend
                 $itemStatusIsNew = $Item->where(['sku'=>$item['sku']])->field('item_status,is_new')->find();
                 $list[$key]['item_status'] =$itemStatusIsNew->item_status;
                 $list[$key]['is_new'] = $itemStatusIsNew->is_new;
+                $list[$key]['operate_time'] = Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime') ? Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime'):$item['create_time'];
             }
             $result = array("total" => $total,"label"=>$map['status']?$map['status']:0, "rows" => $list);
 

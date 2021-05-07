@@ -930,6 +930,17 @@ class Item extends Backend
             $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
             //如果选择的是全部
             if ($platform_type == 100) {
+                //如果选择sku查询
+                if ($filter['sku']) {
+                    $skus = explode(' ',trim($filter['sku']));
+                    $countSkus = count($skus);
+                    if ($countSkus == 1){
+                        $map['sku'] = ['LIKE', '%' . $filter['sku'] . '%'];
+                    }else{
+                        $map['sku'] = ['in', $skus];
+                    }
+                    unset($filter['sku']);
+                }
                 unset($filter['platform_type']);
                 unset($map['platform_type']);
                 $this->request->get(['filter' => json_encode($filter)]);
@@ -970,7 +981,13 @@ class Item extends Backend
             } else {
                 //如果选择的是站点 那么主表变为映射关系表
                 if ($filter['sku']) {
-                    $map['a.sku'] = ['LIKE', '%' . $filter['sku'] . '%'];
+                    $skus = explode(' ',trim($filter['sku']));
+                    $countSkus = count($skus);
+                    if ($countSkus == 1){
+                        $map['a.sku'] = ['LIKE', '%' . $filter['sku'] . '%'];
+                    }else{
+                        $map['a.sku'] = ['in', $skus];
+                    }
                     unset($filter['sku']);
                 }
                 $this->request->get(['filter' => json_encode($filter)]);
