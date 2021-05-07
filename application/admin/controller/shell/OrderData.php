@@ -1844,23 +1844,16 @@ class OrderData extends Backend
     {
         if ($site == 2) {
             $list = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['>', 440262]])->select();
-        } else {
-            if ($site == 1) {
-                $list = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['>', 875415]])->select();
-            } else {
-                if ($site == 3) {
-                    $list = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['>', 75617]])->select();
-                } else {
-                    if ($site == 10) {
-                        $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['>', 12639]])->select();
-                    } else {
-                        if ($site == 11) {
-                            $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['>', 7293]])->select();
-                        }
-                    }
-                }
-            }
+        } elseif ($site == 1) {
+            $list = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['>', 875415]])->select();
+        } elseif ($site == 3) {
+            $list = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['>', 75617]])->select();
+        } elseif ($site == 10) {
+            $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['>', 12639]])->select();
+        } elseif ($site == 11) {
+            $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['>', 7293]])->select();
         }
+
 
         $list = collection($list)->toArray();
 
