@@ -631,6 +631,7 @@ class NewProductDesign extends Backend
             }
         }
 
+        $pIndex = 0;
         if (!empty($sheet1)){
             //从数据库查询需要的数据
             $spreadsheet = new Spreadsheet();
@@ -663,10 +664,11 @@ class NewProductDesign extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['detail']['frame_weight']);
                 $num += 1;
             }
+            $pIndex += 1;
         }
         if (!empty($sheet2)){
             $spreadsheet->createSheet();
-            $spreadsheet->setActiveSheetIndex(1);
+            $spreadsheet->setActiveSheetIndex($pIndex);
             $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
             $spreadsheet->getActiveSheet()->setCellValue("B1", "高度（mm）");
             $spreadsheet->getActiveSheet()->setCellValue("C1", "宽度（mm）:");
@@ -674,8 +676,8 @@ class NewProductDesign extends Backend
             $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
-            $spreadsheet->setActiveSheetIndex(1)->setTitle('耳饰尺寸明细');
-            $spreadsheet->setActiveSheetIndex(1);
+            $spreadsheet->setActiveSheetIndex($pIndex)->setTitle('耳饰尺寸明细');
+            $spreadsheet->setActiveSheetIndex($pIndex);
             $num = 0;
             foreach ($sheet2 as $k=>$v){
                 $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
@@ -683,11 +685,12 @@ class NewProductDesign extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['detail']['earrings_width']);
                 $num += 1;
             }
+            $pIndex += 1;
         }
 
         if (!empty($sheet3)){
             $spreadsheet->createSheet();
-            $spreadsheet->setActiveSheetIndex(2);
+            $spreadsheet->setActiveSheetIndex($pIndex);
             $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
             $spreadsheet->getActiveSheet()->setCellValue("B1", "周长（mm）");
             $spreadsheet->getActiveSheet()->setCellValue("C1", "延长链（mm）:");
@@ -695,8 +698,8 @@ class NewProductDesign extends Backend
             $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
-            $spreadsheet->setActiveSheetIndex(2)->setTitle('项链手链尺寸明细');
-            $spreadsheet->setActiveSheetIndex(2);
+            $spreadsheet->setActiveSheetIndex($pIndex)->setTitle('项链手链尺寸明细');
+            $spreadsheet->setActiveSheetIndex($pIndex);
             $num = 0;
             foreach ($sheet3 as $k=>$v){
                 $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
@@ -704,30 +707,32 @@ class NewProductDesign extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['detail']['necklace_chain']);
                 $num += 1;
             }
+            $pIndex += 1;
         }
 
         if (!empty($sheet4)){
             $spreadsheet->createSheet();
-            $spreadsheet->setActiveSheetIndex(3);
+            $spreadsheet->setActiveSheetIndex($pIndex);
             $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
             $spreadsheet->getActiveSheet()->setCellValue("B1", "周长（mm）");
             //设置宽度
             $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
-            $spreadsheet->setActiveSheetIndex(3)->setTitle('眼镜链尺寸明细');
-            $spreadsheet->setActiveSheetIndex(3);
+            $spreadsheet->setActiveSheetIndex($pIndex)->setTitle('眼镜链尺寸明细');
+            $spreadsheet->setActiveSheetIndex($pIndex);
             $num = 0;
             foreach ($sheet4 as $k=>$v){
                 $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
                 $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['detail']['eyeglasses_chain']);
                 $num += 1;
             }
+            $pIndex += 1;
         }
 
         if (!empty($sheet5)){
             $spreadsheet->createSheet();
-            $spreadsheet->setActiveSheetIndex(4);
+            $spreadsheet->setActiveSheetIndex($pIndex);
             $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
             $spreadsheet->getActiveSheet()->setCellValue("B1", "镜盒高度");
             $spreadsheet->getActiveSheet()->setCellValue("C1", "镜盒宽度:");
@@ -735,8 +740,8 @@ class NewProductDesign extends Backend
             $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
-            $spreadsheet->setActiveSheetIndex(4)->setTitle('镜盒尺寸明细');
-            $spreadsheet->setActiveSheetIndex(4);
+            $spreadsheet->setActiveSheetIndex($pIndex)->setTitle('镜盒尺寸明细');
+            $spreadsheet->setActiveSheetIndex($pIndex);
             $num = 0;
             foreach ($sheet5 as $k=>$v){
                 $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
