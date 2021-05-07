@@ -1831,15 +1831,35 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(12);
+        $this->zeelool_old_order(1);
+        $this->zeelool_old_order(2);
+        $this->zeelool_old_order(3);
+        $this->zeelool_old_order(10);
+        $this->zeelool_old_order(11);
         // $this->zeelool_old_order(5);
     }
 
 
     protected function zeelool_old_order($site)
     {
-        if ($site == 12) {
-            $list = Db::connect('database.db_voogueme_acc')->table('sales_flat_order')->select();
+        if ($site == 2) {
+            $list = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['>', 440262]])->select();
+        } else {
+            if ($site == 1) {
+                $list = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['>', 875415]])->select();
+            } else {
+                if ($site == 3) {
+                    $list = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['>', 75617]])->select();
+                } else {
+                    if ($site == 10) {
+                        $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['>', 12639]])->select();
+                    } else {
+                        if ($site == 11) {
+                            $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['>', 7293]])->select();
+                        }
+                    }
+                }
+            }
         }
 
         $list = collection($list)->toArray();
@@ -1847,9 +1867,6 @@ class OrderData extends Backend
         $order_params = [];
         foreach ($list as $k => $v) {
             $count = $this->order->where('site='.$site.' and entity_id='.$v['entity_id'])->count();
-            if ($count > 0) {
-                continue;
-            }
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
@@ -1883,13 +1900,16 @@ class OrderData extends Backend
             if (isset($v['payment_time'])) {
                 $params['payment_time'] = strtotime($v['payment_time']) + 28800;
             }
-
-            //插入订单主表
-            $order_id = $this->order->insertGetId($params);
-            $order_params[$k]['site'] = $site;
-            $order_params[$k]['order_id'] = $order_id;
-            $order_params[$k]['entity_id'] = $v['entity_id'];
-            $order_params[$k]['increment_id'] = $v['increment_id'];
+            if ($count > 0) {
+                $this->order->where(['site' => $site, 'entity_id' => $v['entity_id']])->update($params);
+            } else {
+                //插入订单主表
+                $order_id = $this->order->insertGetId($params);
+                $order_params[$k]['site'] = $site;
+                $order_params[$k]['order_id'] = $order_id;
+                $order_params[$k]['entity_id'] = $v['entity_id'];
+                $order_params[$k]['increment_id'] = $v['increment_id'];
+            }
             echo $v['entity_id']."\n";
             usleep(10000);
         }
