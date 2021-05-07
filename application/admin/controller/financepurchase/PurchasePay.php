@@ -64,7 +64,7 @@ class PurchasePay extends Backend
                 $map['id'] = ['in', $finance_purchase_id];
             } else {
                 //审核人可以看所有的 其他人只能看自己创建的
-                $audit = ['1','50','56','154'];
+                $audit = ['1','50','56','232','154'];
                 if (!in_array($userid,$audit)){
                     //创建人
                     $map['create_person'] = session('admin.nickname');
