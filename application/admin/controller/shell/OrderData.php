@@ -1858,6 +1858,7 @@ class OrderData extends Backend
         $order_params = [];
         foreach ($list as $k => $v) {
             $count = $this->order->where('site='.$site.' and entity_id='.$v['entity_id'])->count();
+            echo $this->order->getLastSql()."\n";
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
@@ -1903,7 +1904,7 @@ class OrderData extends Backend
                 $order_params[$k]['entity_id'] = $v['entity_id'];
                 $order_params[$k]['increment_id'] = $v['increment_id'];
             }
-            echo $v['entity_id']."\n";
+//            echo $v['entity_id']."\n";
             usleep(10000);
         }
         //插入订单处理表
