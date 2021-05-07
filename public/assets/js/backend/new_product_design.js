@@ -113,15 +113,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             },
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'responsible_id', title: __('责任人')},
-                        {field: 'site', title: __('站点'), visible: false,
-                            searchList: {
-                            1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',
-                            8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',
-                            12: 'voogmechic',13:'zeelool_cn',14:'alibaba',15:'zeelool_jr'
-                            },
-                            formatter: Table.api.formatter.status
-                        },
                         {field: 'operate_time', title: __('操作时间'), operate:'RANGE', addclass:'datetimerange',sortable:true, formatter: Table.api.formatter.datetime},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
@@ -449,7 +440,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var design_status= $('.design_status').val();
                 var plat_type = $('.plat_type').val();
                 var create_time = $('#create_time').val();
-                window.location.href=Config.moduleurl+'/new_product_design/export?design_status='+design_status+'&plat_type='+plat_type+'&create_time='+create_time;
+                window.location.href=Config.moduleurl+'/new_product_design/export?design_status='+design_status+'&plat_type='+plat_type;
             });
         },
         add: function () {

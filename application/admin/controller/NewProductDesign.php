@@ -758,11 +758,10 @@ class NewProductDesign extends Backend
                 $sheet1Key += 1;
             }
         }
-
+        $spreadsheet = new Spreadsheet();
         $pIndex = 0;
         if (!empty($sheet1)){
             //从数据库查询需要的数据
-            $spreadsheet = new Spreadsheet();
             $spreadsheet->setActiveSheetIndex(0);
             $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
             $spreadsheet->getActiveSheet()->setCellValue("B1", "镜框高（mm）");
