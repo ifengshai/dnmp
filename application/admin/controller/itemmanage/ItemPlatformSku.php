@@ -681,7 +681,7 @@ class ItemPlatformSku extends Backend
             //审核通过把SKU同步到有映射关系的平台
             $uploadItemArr['sku'] = $itemPlatformRow['platform_sku'];
             $uploadItemArr['attribute_type'] = $attributeType;
-            $uploadItemArr['frame_height'] = $itemAttributeDetail['frame_height'];
+            $uploadItemArr['frame_height'] = intval($itemAttributeDetail['frame_height']);
             $uploadItemArr['frame_width'] = intval($itemAttributeDetail['frame_width']);
             $uploadItemArr['frame_length'] = intval($itemAttributeDetail['frame_length']);
             $uploadItemArr['frame_temple_length'] = intval($itemAttributeDetail['frame_temple_length']);
