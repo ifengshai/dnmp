@@ -927,7 +927,7 @@ class Item extends Backend
             if ($filter['platform_type']) {
                 unset($map['platform_type']);
             }
-            $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku();
             //如果选择的是全部
             if ($platform_type == 100) {
                 //如果选择sku查询
@@ -963,19 +963,19 @@ class Item extends Backend
                 $list = collection($list)->toArray();
                 //查询各站SKU虚拟库存
                 foreach ($list as &$v) {
-                    $v['zeelool_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 1])->value('stock');
-                    $v['voogueme_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 2])->value('stock');
-                    $v['nihao_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 3])->value('stock');
-                    $v['meeloog_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 4])->value('stock');
-                    $v['wesee_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 5])->value('stock');
-                    $v['amazon_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 8])->value('stock');
-                    $v['zeelool_es_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 9])->value('stock');
-                    $v['zeelool_de_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 10])->value('stock');
-                    $v['zeelool_jp_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 11])->value('stock');
-                    $v['voogmechic_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 12])->value('stock');
-                    $v['douyin_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 13])->value('stock');
-                    $v['alibaba_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 14])->value('stock');
-                    $v['zeelool_fr_stock'] = $item_platform->where(['sku' => $v['sku'], 'platform_type' => 15])->value('stock');
+                    $v['zeelool_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 1])->value('stock');
+                    $v['voogueme_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 2])->value('stock');
+                    $v['nihao_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 3])->value('stock');
+                    $v['meeloog_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 4])->value('stock');
+                    $v['wesee_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 5])->value('stock');
+                    $v['amazon_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 8])->value('stock');
+                    $v['zeelool_es_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 9])->value('stock');
+                    $v['zeelool_de_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 10])->value('stock');
+                    $v['zeelool_jp_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 11])->value('stock');
+                    $v['voogmechic_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 12])->value('stock');
+                    $v['douyin_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 13])->value('stock');
+                    $v['alibaba_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 14])->value('stock');
+                    $v['zeelool_fr_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 15])->value('stock');
                 }
                 unset($v);
             } else {
@@ -996,7 +996,7 @@ class Item extends Backend
                 // dump($where);
                 $map['is_open'] = 1;
                 $map['is_del'] = 1;
-                $total = $item_platform
+                $total = $itemPlatform
                     ->alias('a')
                     ->join(['fa_item' => 'b'], 'a.sku=b.sku')
                     ->field('b.*,a.stock as plat_stock,platform_type,plat_on_way_stock,a.wait_instock_num')
@@ -1005,7 +1005,7 @@ class Item extends Backend
                     // ->order($sort, $order)
                     ->count();
 
-                $list = $item_platform
+                $list = $itemPlatform
                     ->alias('a')
                     ->join(['fa_item' => 'b'], 'a.sku=b.sku')
                     ->field('b.*,a.stock as plat_stock,platform_type,plat_on_way_stock,a.wait_instock_num')
@@ -1060,7 +1060,7 @@ class Item extends Backend
      */
     public function export_csv()
     {
-        $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $list = $this->model
             ->field('sku,stock,available_stock')
             ->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])
@@ -1069,7 +1069,7 @@ class Item extends Backend
 
         //查询各站SKU虚拟库存
         $skus = array_column($list, 'sku');
-        $itemList = $item_platform->where(['sku' => ['in', $skus]])->select();
+        $itemList = $itemPlatform->where(['sku' => ['in', $skus]])->select();
         $itemStock = [];
         foreach ($itemList as $v) {
             $itemStock[$v['sku']][$v['platform_type']] = $v['stock'];
