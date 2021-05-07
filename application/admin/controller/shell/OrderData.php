@@ -1839,7 +1839,6 @@ class OrderData extends Backend
         // $this->zeelool_old_order(5);
     }
 
-
     protected function zeelool_old_order($site)
     {
         if ($site == 2) {
@@ -1853,7 +1852,6 @@ class OrderData extends Backend
         } elseif ($site == 11) {
             $list = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['>', 7293]])->select();
         }
-
 
         $list = collection($list)->toArray();
 
@@ -1893,11 +1891,13 @@ class OrderData extends Backend
             if (isset($v['payment_time'])) {
                 $params['payment_time'] = strtotime($v['payment_time']) + 28800;
             }
+            echo $count."\n";
             if ($count > 0) {
                 $this->order->where(['site' => $site, 'entity_id' => $v['entity_id']])->update($params);
             } else {
                 //插入订单主表
                 $order_id = $this->order->insertGetId($params);
+                echo $order_id."\n";
                 $order_params[$k]['site'] = $site;
                 $order_params[$k]['order_id'] = $order_id;
                 $order_params[$k]['entity_id'] = $v['entity_id'];
