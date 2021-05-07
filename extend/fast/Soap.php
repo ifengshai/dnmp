@@ -110,11 +110,13 @@ class Soap
             case 14:
                 $url = config('url.api_zeelool_cn_url');
                 break;
+            case 15:
+                $url = config('url.api_zeelool_fr_url');
+                break;
             default:
                 return false;
                 break;
         }
-        file_put_contents('/www/wwwroot/mojing/runtime/log/goods.log', serialize($params)."\r\n", FILE_APPEND);
 
 
         $client = new Client(['verify' => false]);
@@ -122,7 +124,6 @@ class Soap
 
         $response = $client->request('POST', $url, ['form_params' => $params]);
 
-        file_put_contents('/www/wwwroot/mojing/runtime/log/goods.log', serialize($response)."\r\n", FILE_APPEND);
         $body = $response->getBody();
         $stringBody = (string)$body;
         $res = json_decode($stringBody, true);

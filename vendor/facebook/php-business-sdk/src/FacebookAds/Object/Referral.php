@@ -42,13 +42,6 @@ use FacebookAds\Object\Fields\ReferralFields;
 class Referral extends AbstractCrudObject {
 
   /**
-   * @deprecated getEndpoint function is deprecated
-   */
-  protected function getEndpoint() {
-    return 'referral';
-  }
-
-  /**
    * @return ReferralFields
    */
   public static function getFieldsEnum() {
@@ -117,10 +110,12 @@ class Referral extends AbstractCrudObject {
       'namespace' => 'unsigned int',
       'need_promo_code' => 'bool',
       'offer_origin' => 'string',
+      'privacy_policy_link' => 'string',
       'promotion_text' => 'string',
       'receiver_benefits_text' => 'string',
       'referral_link_uri' => 'string',
       'sender_benefits_text' => 'string',
+      'terms_and_condition_link' => 'string',
     );
     $enums = array(
     );

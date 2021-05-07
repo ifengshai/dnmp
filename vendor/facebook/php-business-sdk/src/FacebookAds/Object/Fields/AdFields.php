@@ -48,6 +48,7 @@ class AdFields extends AbstractEnum {
   const CAMPAIGN = 'campaign';
   const CAMPAIGN_ID = 'campaign_id';
   const CONFIGURED_STATUS = 'configured_status';
+  const CONVERSION_DOMAIN = 'conversion_domain';
   const CONVERSION_SPECS = 'conversion_specs';
   const CREATED_TIME = 'created_time';
   const CREATIVE = 'creative';
@@ -57,7 +58,6 @@ class AdFields extends AbstractEnum {
   const ENGAGEMENT_AUDIENCE = 'engagement_audience';
   const FAILED_DELIVERY_CHECKS = 'failed_delivery_checks';
   const ID = 'id';
-  const IS_AUTOBID = 'is_autobid';
   const ISSUES_INFO = 'issues_info';
   const LAST_UPDATED_BY_APP_ID = 'last_updated_by_app_id';
   const NAME = 'name';
@@ -92,6 +92,7 @@ class AdFields extends AbstractEnum {
       'campaign' => 'Campaign',
       'campaign_id' => 'string',
       'configured_status' => 'ConfiguredStatus',
+      'conversion_domain' => 'string',
       'conversion_specs' => 'list<ConversionActionQuery>',
       'created_time' => 'datetime',
       'creative' => 'AdCreative',
@@ -101,7 +102,6 @@ class AdFields extends AbstractEnum {
       'engagement_audience' => 'bool',
       'failed_delivery_checks' => 'list<DeliveryCheck>',
       'id' => 'string',
-      'is_autobid' => 'bool',
       'issues_info' => 'list<AdgroupIssuesInfo>',
       'last_updated_by_app_id' => 'string',
       'name' => 'string',

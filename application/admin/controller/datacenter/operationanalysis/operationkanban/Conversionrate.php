@@ -105,7 +105,8 @@ class Conversionrate extends Backend{
                 'create_time'       => $create_time
             ]
         );
-        $this->assignconfig('platform', $platform);
+        $platformId = $platform == 'zeelool' ? 1:$platform;
+        $this->assignconfig('platform', $platformId);
         $this->assignconfig('create_time',$create_time);
         return  $this->view->fetch();
     }

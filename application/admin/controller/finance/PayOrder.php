@@ -261,8 +261,8 @@ class PayOrder extends Backend
             if ($v['purchase_batch_id'] > 0){
                 $instockDetail = Db::name('check_order')
                     ->alias('a')
-                    ->join(['in_stock' => 'b'], 'b.check_id = a.id')
-                    ->join(['in_stock_item' => 'c'], 'c.in_stock_id = b.id')
+                    ->join(['fa_in_stock' => 'b'], 'b.check_id = a.id')
+                    ->join(['fa_in_stock_item' => 'c'], 'c.in_stock_id = b.id')
                     ->where('a.batch_id',$v['purchase_batch_id'])
                     ->find();
                 $settle[$k]['batch_instock_num'] = $instockDetail['in_stock_num'];
@@ -728,8 +728,8 @@ class PayOrder extends Backend
             if ($v['purchase_batch_id'] > 0) {
                 $instockDetail = Db::name('check_order')
                     ->alias('a')
-                    ->join(['in_stock' => 'b'], 'b.check_id = a.id')
-                    ->join(['in_stock_item' => 'c'], 'c.in_stock_id = b.id')
+                    ->join(['fa_in_stock' => 'b'], 'b.check_id = a.id')
+                    ->join(['fa_in_stock_item' => 'c'], 'c.in_stock_id = b.id')
                     ->where('a.batch_id', $v['purchase_batch_id'])
                     ->find();
                 $settle[$k]['batch_instock_num'] = $instockDetail['in_stock_num'];

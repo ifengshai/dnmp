@@ -481,13 +481,16 @@ class Zendesk extends Model
                         $task->save();
 
                         $str .= $assign_id.'--'.$due_id;
-                        file_put_contents('/www/wwwroot/mojing/runtime/log/111.txt',$str."\r\n",FILE_APPEND);
                         echo $str." is ok"."\n";
                     }
                 }
                 usleep(1000);
             }
+
+            echo 'ok';
         }
+
+        echo "ok";
     }
     /*
      * 统计工作量概况

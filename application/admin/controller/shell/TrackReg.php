@@ -289,7 +289,6 @@ class TrackReg extends Backend
      */
     public function zendeskUpateData($siteType, $type)
     {
-        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'starttime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
 
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $ticketIds = (new \app\admin\controller\zendesk\Notice(request(),
@@ -314,7 +313,6 @@ class TrackReg extends Backend
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
-        // file_put_contents('/www/wwwroot/mojing/runtime/log/zendesk.log', 'endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
         exit;
     }
 
@@ -846,6 +844,8 @@ class TrackReg extends Backend
             ->where(['is_show' => 1, 'type' => 3])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
             ->setField('is_show', 0);
+
+        echo "ok";
     }
 
     //活跃用户数
@@ -984,6 +984,31 @@ class TrackReg extends Backend
         return $analytics->reports->batchGet($body);
     }
 
+    public function asynData(){
+        $this->getData(10);
+        $this->getData(11);
+    }
+    public function getData($site)
+    {
+        //获取datacenter表中德语站和日本站的数据
+        $data = Db::name('datacenter_day')
+            ->where('site',$site)
+            ->where('sessions',0)
+            ->select();
+        foreach ($data as $value){
+            //会话
+            $arr['sessions'] = $this->google_session($site, $value['day_date']);
+            //计算加购率
+            $arr['add_cart_rate'] = $arr['sessions'] ? round($value['new_cart_num']/$arr['sessions']*100,2) : 0;
+            //计算会话转化率
+            $arr['session_rate'] = $arr['sessions'] ? round($value['order_num']/$arr['sessions']*100,2) : 0;
+            Db::name('datacenter_day')
+                ->where('id',$value['id'])
+                ->update($arr);
+            echo $value['id']."---".$value['day_date']." is ok"."\n";
+            usleep(10000);
+        }
+    }
     /**
      * Parses and prints the Analytics Reporting API V4 response.
      *
@@ -2063,6 +2088,7 @@ class TrackReg extends Backend
         $arr['sales_num_e'] = $zeelool[6] + $voogueme[6] + $nihao[6];
         $arr['sales_num_f'] = $zeelool[7] + $voogueme[7] + $nihao[7];
         Db::name('datacenter_day_supply')->insert($arr);
+        echo "ok";
     }
 
     public function getSalesnum($site)
@@ -2153,6 +2179,12 @@ class TrackReg extends Backend
         $date_time_behind = date('Y-m-d', strtotime("-2 day"));
 
         //z站
+        //获取前一天的数据
+        $lastData = Db::name('datacenter_day')
+            ->where('day_date',$date_time_behind)
+            ->where('site',1)
+            ->field('new_cart_num,order_num')
+            ->find();
         $data = Db::name('datacenter_day')->where([
             'day_date' => $date_time,
             'site'     => 1,
@@ -2180,15 +2212,25 @@ class TrackReg extends Backend
         $arr['cart_num'] = $zeelool_data->google_target1(1, $date_time);
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(1, $date_time);
-        $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 1])->update($arr);
+        Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 1])->update($arr);
+
         //更新前天的会话数 防止ga数据误差
+        $lastArr['sessions'] = $date_time_behind_sessions_z;
+        $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num']/$lastArr['sessions'])*100,2) : 0;
+        $lastArr['session_rate'] = $lastArr['sessions'] ? round(($lastData['order_num']/$lastArr['sessions'])*100,2) : 0;
         Db::name('datacenter_day')->where([
             'day_date' => $date_time_behind,
             'site'     => 1,
-        ])->update(['sessions' => $date_time_behind_sessions_z]);
+        ])->update($lastArr);
         usleep(100000);
 
         //v站
+        //获取前一天的数据
+        $lastData = Db::name('datacenter_day')
+            ->where('day_date',$date_time_behind)
+            ->where('site',2)
+            ->field('new_cart_num,order_num')
+            ->find();
         $data = Db::name('datacenter_day')->where([
             'day_date' => $date_time,
             'site'     => 2,
@@ -2215,14 +2257,22 @@ class TrackReg extends Backend
         $arr['cart_num'] = $zeelool_data->google_target2(2, $date_time);
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
-        $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 2])->update($arr);
+        Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 2])->update($arr);
+        $lastArr['sessions'] = $date_time_behind_sessions_v;
+        $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num']/$lastArr['sessions'])*100,2) : 0;
+        $lastArr['session_rate'] = $lastArr['sessions'] ? round(($lastData['order_num']/$lastArr['sessions'])*100,2) : 0;
         Db::name('datacenter_day')->where([
             'day_date' => $date_time_behind,
             'site'     => 2,
-        ])->update(['sessions' => $date_time_behind_sessions_v]);
+        ])->update($lastArr);
         usleep(100000);
 
         //nihao站
+        $lastData = Db::name('datacenter_day')
+            ->where('day_date',$date_time_behind)
+            ->where('site',3)
+            ->field('new_cart_num,order_num')
+            ->find();
         $data = Db::name('datacenter_day')->where([
             'day_date' => $date_time,
             'site'     => 3,
@@ -2249,7 +2299,10 @@ class TrackReg extends Backend
         $arr['cart_num'] = $zeelool_data->google_target1(3, $date_time);
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
-        $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 3])->update($arr);
+        Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 3])->update($arr);
+        $lastArr['sessions'] = $date_time_behind_sessions_n;
+        $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num']/$lastArr['sessions'])*100,2) : 0;
+        $lastArr['session_rate'] = $lastArr['sessions'] ? round(($lastData['order_num']/$lastArr['sessions'])*100,2) : 0;
         Db::name('datacenter_day')->where([
             'day_date' => $date_time_behind,
             'site'     => 3,
@@ -2257,6 +2310,11 @@ class TrackReg extends Backend
         usleep(100000);
 
         //de站
+        $lastData = Db::name('datacenter_day')
+            ->where('day_date',$date_time_behind)
+            ->where('site',10)
+            ->field('new_cart_num,order_num')
+            ->find();
         $data = Db::name('datacenter_day')->where([
             'day_date' => $date_time,
             'site'     => 10,
@@ -2267,7 +2325,7 @@ class TrackReg extends Backend
         //会话
         $arr['sessions'] = $this->google_session(10, $date_time);
         //前天的ga会话数
-        $date_time_behind_sessions_z = $this->google_session(10, $date_time_behind);
+        $date_time_behind_sessions_de = $this->google_session(10, $date_time_behind);
         //会话转化率
         $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
         //新增加购率
@@ -2284,15 +2342,23 @@ class TrackReg extends Backend
         $arr['cart_num'] = $zeeloolde_data->google_target1(10, $date_time);
         //交易次数
         $arr['complete_num'] = $zeeloolde_data->google_target_end(10, $date_time);
-        $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 10])->update($arr);
+        Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 10])->update($arr);
+        $lastArr['sessions'] = $date_time_behind_sessions_de;
+        $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num']/$lastArr['sessions'])*100,2) : 0;
+        $lastArr['session_rate'] = $lastArr['sessions'] ? round(($lastData['order_num']/$lastArr['sessions'])*100,2) : 0;
         //更新前天的会话数 防止ga数据误差
         Db::name('datacenter_day')->where([
             'day_date' => $date_time_behind,
             'site'     => 10,
-        ])->update(['sessions' => $date_time_behind_sessions_z]);
+        ])->update($lastArr);
         usleep(100000);
 
         //jp站
+        $lastData = Db::name('datacenter_day')
+            ->where('day_date',$date_time_behind)
+            ->where('site',11)
+            ->field('new_cart_num,order_num')
+            ->find();
         $data = Db::name('datacenter_day')->where([
             'day_date' => $date_time,
             'site'     => 11,
@@ -2303,7 +2369,7 @@ class TrackReg extends Backend
         //会话
         $arr['sessions'] = $this->google_session(11, $date_time);
         //前天的ga会话数
-        $date_time_behind_sessions_z = $this->google_session(11, $date_time_behind);
+        $date_time_behind_sessions_jp = $this->google_session(11, $date_time_behind);
         //会话转化率
         $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
         //新增加购率
@@ -2322,15 +2388,20 @@ class TrackReg extends Backend
         $arr['complete_num'] = $zeelooljp_data->google_target_end(11, $date_time);
         $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 11])->update($arr);
         //更新前天的会话数 防止ga数据误差
+        $lastArr['sessions'] = $date_time_behind_sessions_jp;
+        $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num']/$lastArr['sessions'])*100,2) : 0;
+        $lastArr['session_rate'] = $lastArr['sessions'] ? round(($lastData['order_num']/$lastArr['sessions'])*100,2) : 0;
         Db::name('datacenter_day')->where([
             'day_date' => $date_time_behind,
             'site'     => 11,
-        ])->update(['sessions' => $date_time_behind_sessions_z]);
+        ])->update($lastArr);
         usleep(100000);
 
         if ($data['active_user_num'] == 0) {
             $this->only_ga_data();
         }
+
+        echo "ok";
     }
 
     //计划任务跑每天的分类销量的数据
@@ -2793,6 +2864,8 @@ class TrackReg extends Backend
             unset($sku_data[$k]['plat_on_way_stock']);
             Db::name('datacenter_sku_day')->insert($sku_data[$k]);
         }
+
+        echo "ok";
     }
 
     //跑sku每天唯一身份浏览量
@@ -3806,19 +3879,188 @@ class TrackReg extends Backend
     public function process_wait_stock()
     {
         $item = new \app\admin\model\itemmanage\Item();
-        $purchase = new \app\admin\model\purchase\PurchaseOrder();
-
-        $list = $item->where(['is_open' => 1, 'is_del' => 1, 'wait_instock_num' => ['<', 0]])->select();
-        $params = [];
+        $list = $item
+            ->where(['is_open' => 1, 'is_del' => 1])
+            ->field('id,sku')
+            ->select();
         foreach ($list as $k => $v) {
-            $purchase_num = $purchase->alias('a')->where([
-                'purchase_status' => 7,
-                'stock_status'    => 0,
-                'b.sku'           => $v['sku'],
-            ])->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('purchase_num');
-            $params[$k]['id'] = $v['id'];
-            $params[$k]['wait_instock_num'] = $purchase_num;
+            $params = [];
+            $num = 0;
+            //查询sku对应的采购单id
+            $purchaseIds = Db::name('purchase_order_item')
+                ->where('sku', $v['sku'])
+                ->column('purchase_id');
+            if(!empty($purchaseIds)){
+                foreach ($purchaseIds as $purchaseId) {
+                    //判断采购单是否签收
+                    $isSign = Db::name('logistics_info')
+                        ->where('type', 1)
+                        ->where('status', 1)
+                        ->where('purchase_id', $purchaseId)
+                        ->value('id');
+                    if ($isSign) {
+                        //判断是否入库
+                        $isInStock = Db::name('in_stock')
+                            ->alias('i')
+                            ->join('check_order c', 'c.id=i.check_id')
+                            ->where('c.purchase_id', $purchaseId)
+                            ->where('i.status', 2)
+                            ->value('i.id');
+                        //没有入库
+                        if (is_null($isInStock) && (!$isInStock)) {
+                            //查询是否有批次
+                            $batchIds = Db::name('logistics_info')
+                                ->where('type', 1)
+                                ->where('status', 1)
+                                ->where('purchase_id', $purchaseId)
+                                ->group('purchase_id,batch_id')
+                                ->column('batch_id');
+                            $batchIds = array_filter($batchIds);
+                            if (empty($batchIds)) {
+                                $num += Db::name('purchase_order_item')
+                                    ->where('purchase_id', $purchaseId)
+                                    ->value('purchase_num');
+                            } else {
+                                foreach ($batchIds as $batchId) {
+                                    $num += Db::name('purchase_batch_item')
+                                        ->where('purchase_batch_id', $batchId)
+                                        ->value('arrival_num');
+                                }
+                            }
+                        }
+                    }
+                }
+                $params['wait_instock_num'] = $num;
+                $item->where('id',$v['id'])
+                    ->update($params);
+                echo $v['sku']." is ok"."\n";
+                usleep(10000);
+            }
         }
-        $item->saveAll($params);
+        echo "ok";
+    }
+
+    /**
+     * 处理待入库数量 - 计划任务
+     */
+    public function process_wait_stock1()
+    {
+        $item = new \app\admin\model\itemmanage\Item();
+        $list = $item
+            ->where(['is_open' => 1, 'is_del' => 1])
+            ->field('id,sku')
+            ->select();
+        foreach ($list as $k => $v) {
+            $params = [];
+            $num = 0;
+            //查询sku对应的采购单id
+            $purchaseIds = Db::name('purchase_order_item')
+                ->where('sku', $v['sku'])
+                ->column('purchase_id');
+            if(!empty($purchaseIds)){
+                foreach ($purchaseIds as $purchaseId) {
+                    //判断采购单是否签收
+                    $isSign = Db::name('logistics_info')
+                        ->where('type', 1)
+                        ->where('status', 1)
+                        ->where('purchase_id', $purchaseId)
+                        ->value('id');
+                    if ($isSign) {
+                        //判断是否入库
+                        $isInStock = Db::name('in_stock')
+                            ->alias('i')
+                            ->join('check_order c', 'c.id=i.check_id')
+                            ->where('c.purchase_id', $purchaseId)
+                            ->where('i.status', 2)
+                            ->value('i.id');
+                        //没有入库
+                        if (is_null($isInStock) && (!$isInStock)) {
+                            $params['sku'] = $v['sku'];
+                            $params['purchase_id'] = $purchaseId;
+                            $info = Db::name('purchase_order')
+                                ->alias('o')
+                                ->join('fa_purchase_order_item i','o.id=i.purchase_id')
+                                ->where('o.id',$purchaseId)
+                                ->where('i.sku',$v['sku'])
+                                ->field('createtime,purchase_num,o.purchase_status,o.purchase_number,o.check_status,o.stock_status')
+                                ->find();
+                            $params['num'] = $info['purchase_num'];
+                            $params['create_time'] = $info['createtime'];
+                            switch ($info['purchase_status']){
+                                case 0:
+                                    $purchase_status = '新建';
+                                    break;
+                                case 1:
+                                    $purchase_status = '审核中';
+                                    break;
+                                case 2:
+                                    $purchase_status = '已审核';
+                                    break;
+                                case 3:
+                                    $purchase_status = '已拒绝';
+                                    break;
+                                case 4:
+                                    $purchase_status = '已取消';
+                                    break;
+                                case 5:
+                                    $purchase_status = '待发货';
+                                    break;
+                                case 6:
+                                    $purchase_status = '待收货';
+                                    break;
+                                case 7:
+                                    $purchase_status = '已签收';
+                                    break;
+                                case 8:
+                                    $purchase_status = '已退款';
+                                    break;
+                                case 9:
+                                    $purchase_status = '部分签收';
+                                    break;
+                                case 10:
+                                    $purchase_status = '已完成';
+                                    break;
+                            }
+                            switch ($info['check_status']){
+                                case 0:
+                                    $check_status = '未质检';
+                                    break;
+                                case 1:
+                                    $check_status = '部分质检';
+                                    break;
+                                case 2:
+                                    $check_status = '已质检';
+                                    break;
+                            }
+                            switch ($info['stock_status']){
+                                case 0:
+                                    $instock_status = '未入库';
+                                    break;
+                                case 1:
+                                    $instock_status = '部分入库';
+                                    break;
+                                case 2:
+                                    $instock_status = '已入库';
+                                    break;
+                            }
+                            $params['purchase_status'] = $purchase_status;
+                            $params['purchase_number'] = $info['purchase_number'];
+                            $params['check_status'] = $check_status;
+                            $params['instock_status'] = $instock_status;
+                            Db::name('wait_linshi')->insert($params);
+                            echo $v['sku']." is ok"."\n";
+                            usleep(10000);
+                        }
+                    }
+                }
+            }
+        }
+        echo "ok";
     }
 }
+
+
+
+
+
+

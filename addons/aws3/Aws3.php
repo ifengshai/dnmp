@@ -123,7 +123,7 @@ class Aws3 extends Addons
         } catch (\Aws\S3\Exception\S3Exception $e) {
             return ['code' => 0, 'msg' => $e->getMessage()];
         }
-        if (in_array($fileNameEnd, ['gif', 'jpeg', 'png', 'jpg', 'bmp', 'apk'])) {
+        if (in_array($fileNameEnd, ['gif', 'jpeg', 'png', 'jpg', 'bmp'])) {
             //删除原文件
             @unlink($sourceFile);
         }

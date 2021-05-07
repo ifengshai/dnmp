@@ -78,6 +78,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                 12: 'voogmechic',
                                 13: 'zeelool_cn',
                                 14: 'alibaba',
+                                15: 'zeelool_fr',
                             },
                             formatter: Table.api.formatter.status
                         },
@@ -720,7 +721,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                 });
             });
 
+            //批量导出xls
+            $('.btn-batch-export-account').click(function () {
+                var ids = Table.api.selectedids(table);
+                var params = '';
+                if (ids.length > 0) {
+                    params = 'ids=' + ids;
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
+                }
+                window.open(Config.moduleurl + '/new_product/printing_batch_export_xls?' + params, '_blank');
+            });
+
+
+
         },
+
+
         productmappinglisthistory: function () {
             // 初始化表格参数配置
             Table.api.init({

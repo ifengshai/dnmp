@@ -9,6 +9,8 @@ use app\admin\model\DistributionLog;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemBrand;
+use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\NewProductDesignLog;
 use app\admin\model\order\Order;
 use app\common\controller\Backend;
 use app\common\model\Auth;
@@ -32,7 +34,7 @@ class NewProductDesign extends Backend
      * @var \app\admin\model\NewProductDesign
      */
     protected $model = null;
-    protected $noNeedRight = ['detail'];
+    protected $noNeedRight = ['detail','designRecording'];
     public function _initialize()
     {
         parent::_initialize();
@@ -61,6 +63,7 @@ class NewProductDesign extends Backend
         $this->assignconfig('making', $this->auth->check('new_product_design/making')); //开始制作
         $this->assignconfig('review_the_operation', $this->auth->check('new_product_design/review_the_operation')); //审核操作
         $this->assignconfig('add_img', $this->auth->check('new_product_design/add_img')); //图片上传操作
+        $this->assignconfig('change_designer', $this->auth->check('new_product_design/change_designer')); //修改人员
     }
 
     /**
@@ -76,6 +79,7 @@ class NewProductDesign extends Backend
     public function index()
     {
         $admin = new Admin();
+        $Item = new Item();
         //当前是否为关联查询
         $this->relationSearch = false;
         //设置过滤方法
@@ -92,6 +96,27 @@ class NewProductDesign extends Backend
             }
             if ($filter['sku']) {
                 $map['sku'] = ['like','%'.$filter['sku'].'%'];
+            }
+
+            if ($filter['site'] || $filter['item_status'] || $filter['is_new']){
+                if ($filter['site']){
+                    $cat['b.platform_type'] = ['eq',$filter['site']];
+                    unset($filter['site']);
+                }
+                if ($filter['item_status']){
+                    $cat['a.item_status'] = ['eq',$filter['item_status']];
+                    unset($filter['item_status']);
+                }
+                if ($filter['is_new']){
+                    $cat['a.is_new'] = ['eq',$filter['is_new']];
+                    unset($filter['is_new']);
+                }
+               $sku =  $Item->alias('a')
+                    ->join(['fa_item_platform_sku'=>'b'],'a.sku = b.sku')
+                    ->where($cat)
+                    ->column('a.sku');
+                $sku = array_unique($sku);
+                $map['sku'] = ['in',$sku];
             }
             unset($filter['label']);
             if ($filter['responsible_id']){
@@ -125,10 +150,8 @@ class NewProductDesign extends Backend
                 ->select();
             foreach ($list as $row) {
                 $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time']);
-
             }
             $list = collection($list)->toArray();
-
             foreach ($list as $key=>$item){
                 $list[$key]['label'] = $map['status']?$map['status']:0;
                 if ($item['responsible_id'] !==null){
@@ -136,10 +159,10 @@ class NewProductDesign extends Backend
                 }else{
                     $list[$key]['responsible_id'] = '暂无';
                 }
+                $itemStatusIsNew = $Item->where(['sku'=>$item['sku']])->field('item_status,is_new')->find();
+                $list[$key]['item_status'] =$itemStatusIsNew->item_status;
+                $list[$key]['is_new'] = $itemStatusIsNew->is_new;
             }
-            //获取当前用户id
-
-
             $result = array("total" => $total,"label"=>$map['status']?$map['status']:0, "rows" => $list);
 
             return json($result);
@@ -162,18 +185,21 @@ class NewProductDesign extends Backend
             $attributeType = true;
         }
         $row =$itemAttribute->where('item_id',$goodsId)->find();
-        $img = explode(',',$row->frame_aws_imgs);
-        $net = 'https://mojing.s3-us-west-2.amazonaws.com/';
-        if (is_array($img)){
-            foreach ($img as $key=>$value){
-                $img[$key] = $net.$value;
-            }
+        if (!empty($row->frame_aws_imgs)){
+            $img = explode(',',$row->frame_aws_imgs);
+            $net = 'https://mojing.s3-us-west-2.amazonaws.com/';
+                if (is_array($img)){
+                    foreach ($img as $key=>$value){
+                        $img[$key] = $net.$value;
+                    }
+                    $this->assign('img',$img);
+                }
         }
         $this->assign('attributeType',$attributeType);
         $this->assign('goodsId',$goodsId);
         $this->assign('ids',$ids);
         $this->assign('row',$row);
-        $this->assign('img',$img);
+
         return $this->view->fetch();
     }
     //录尺寸
@@ -244,6 +270,14 @@ class NewProductDesign extends Backend
                     //更新商品属性表
                     $whe['item_id'] = $data['goodsId'];
                     $itemAttribute->where($whe)->update($data['row']);
+                    //添加操作记录
+                    $valueLog['operator'] = session('admin.nickname');
+                    $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                    $valueLog['node'] = 2;
+                    $valueLog['operation_type'] = '录尺寸';
+                    $valueLog['design_id'] = $ids;
+                    $valueLog['value_log'] = json_encode($data['row']);
+                    $this->designRecording($valueLog);
                 }
                 $this->model->commit();
                 $itemAttribute->commit();
@@ -280,8 +314,6 @@ class NewProductDesign extends Backend
     }
     //产品要求  状态更改需要拆分为多个方法-用于权限限制
     //拍摄-（开始拍摄、拍摄完成）、分配-（分配）、制作-（开始制作）、上传-（上传图片）、审核（审核通过、审核拒绝）
-
-
     /**
      * @author zjw
      * @date   2021/4/9 13:55
@@ -296,7 +328,18 @@ class NewProductDesign extends Backend
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+        if ($data['status']==3){
+            $valueLog['operation_type'] = '开始拍摄';
+        }else{
+            $valueLog['operation_type'] = '拍摄完成';
+        }
         if ($res){
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['node'] = $data['status'];
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
             $this->success('操作成功');
         }else{
             $this->error('操作失败');
@@ -318,6 +361,13 @@ class NewProductDesign extends Backend
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res){
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['node'] = 6;
+            $valueLog['operation_type'] = '开始制作';
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
             $this->success('操作成功');
         }else{
             $this->error('操作失败');
@@ -337,9 +387,13 @@ class NewProductDesign extends Backend
         empty($status) && $this->error('数据异常');
         $map['id'] = $ids;
         if ($status ==9){
+            $valueLog['operation_type'] = '审核拒绝';
+            $valueLog['node'] = $status;
             $status =6;
         }
         if ($status ==8){
+            $valueLog['node'] = $status;
+            $valueLog['operation_type'] = '审核通过';
             $value = $this->model->get($ids);
             $data['item_status']=1;
             $change['sku'] = $value->sku;
@@ -349,6 +403,11 @@ class NewProductDesign extends Backend
         $data['update_time']  = date("Y-m-d H:i:s", time());
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res){
+            //添加操作记录
+            $valueLog['operator'] = session('admin.nickname');
+            $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+            $valueLog['design_id'] = $ids;
+            $this->designRecording($valueLog);
             $this->success('操作成功');
         }else{
             $this->error('操作失败');
@@ -368,6 +427,13 @@ class NewProductDesign extends Backend
             $data['update_time']  = date("Y-m-d H:i:s", time());
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res){
+                //添加操作记录
+                $valueLog['operator'] = session('admin.nickname');
+                $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                $valueLog['node'] = 5;
+                $valueLog['operation_type'] = '分配人员';
+                $valueLog['design_id'] = $ids;
+                $this->designRecording($valueLog);
                 $this->success('人员分配成功');
             }else{
                 $this->error('人员分配失败');
@@ -387,6 +453,47 @@ class NewProductDesign extends Backend
         return $this->view->fetch();
 
     }
+
+    /**
+     * @author zjw
+     * @date   2021/4/26 17:59
+     * 更换设计师
+     */
+    public function change_designer($ids=null){
+        if($this->request->post()){
+            $responsible_id =  $this->request->post('responsible_id');
+            $map['id'] = $ids;
+            $data['responsible_id'] = $responsible_id;
+            $data['update_time']  = date("Y-m-d H:i:s", time());
+            $res = $this->model->where($map)->update($data);
+            if ($res){
+                //添加操作记录
+                $valueLog['operator'] = session('admin.nickname');
+                $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                $valueLog['node'] = 5;
+                $valueLog['operation_type'] = '更换设计师';
+                $valueLog['design_id'] = $ids;
+                $this->designRecording($valueLog);
+                $this->success('人员分配成功');
+            }else{
+                $this->error('人员分配失败');
+            }
+        }
+        //获取筛选人
+        $authGroupAccess= new AuthGroupAccess();
+        $auth_user = $authGroupAccess
+            ->alias('a')
+            ->join(['fa_admin' => 'b'], 'a.uid=b.id')
+            ->where('a.group_id=160')
+            ->field('id,nickname')
+            ->select();
+        $this->assign('ids', $ids);
+        $this->assign('auth_user', collection($auth_user)->toArray());
+
+        return $this->view->fetch();
+
+    }
+
 
     //上传图片 弃用
     public function add_img_old()
@@ -437,6 +544,12 @@ class NewProductDesign extends Backend
                 $itemAttrData['frame_aws_imgs'] = implode(',', $imgsArr);
                 $itemAttrResult = $itemAttribute->where('item_id', '=', $itemId)->update($itemAttrData);
                 $newProductDesignResult = $newProductDesign->where('id', '=', input('ids'))->update(['status'=>7,'update_time'=>date("Y-m-d H:i:s", time())]);
+                //添加操作记录
+                $valueLog['operator'] = session('admin.nickname');
+                $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                $valueLog['node'] = 6;
+                $valueLog['operation_type'] = '上传图片';
+                $this->designRecording($valueLog);
                 $itemAttribute->commit();
                 $item->commit();
                 $newProductDesign->commit();
@@ -501,6 +614,15 @@ class NewProductDesign extends Backend
                 $itemAttrData['frame_aws_imgs'] = implode(',', $value);
                 $itemAttrResult = $itemAttribute->where('item_id', '=', $itemId)->update($itemAttrData);
                 $newProductDesignResult = $newProductDesign->where('id', '=', input('ids'))->update(['status' => 7, 'update_time' => date("Y-m-d H:i:s", time())]);
+
+                //添加操作记录
+                $valueLog['operator'] = session('admin.nickname');
+                $valueLog['addtime'] = date('Y-m-d H:i:s',time());
+                $valueLog['node'] = 6;
+                $valueLog['operation_type'] = '上传图片';
+                $valueLog['design_id'] =input('ids');
+                $this->designRecording($valueLog);
+
                 $itemAttribute->commit();
                 $item->commit();
                 $newProductDesign->commit();
@@ -530,20 +652,25 @@ class NewProductDesign extends Backend
 
         return $this->view->fetch();
     }
-
     /**
      * @author zjw
-     * @date   2021/4/21 15:27
-     * 选品设计异常数据
+     * @date   2021/4/26 18:17
+     * 操作记录
      */
-    public function checkTheData(){
-        $sku = $this->model->column('sku');
-        $item = new Item();
-        $itemAttribute =new ItemAttribute();
-        $goodsId = $item->where(['sku'=>['in',$sku]])->column('id');
-        $otherValue = $itemAttribute->where(['item_id'=>['in',$goodsId],'frame_width'=>['elt',0],'frame_height'=>['elt',0]])->column('item_id');
-        $skuValue = $item->where(['id'=>['in',$otherValue]])->column('sku');
-        dump($skuValue);die();
+    public function operation_log($ids=null){
+        $value = Db::table('fa_new_product_design_log')->where(['design_id'=>$ids])->order('addtime desc')->select();
+        $this->assign('list',$value);
+        return $this->view->fetch();
+    }
+
+
+    /**
+     * @param $value
+     * @author zjw
+     * @date   2021/4/26 14:26
+     */
+    public function designRecording($value){
+        Db::name('new_product_design_log')->insert($value);
     }
 
     /**

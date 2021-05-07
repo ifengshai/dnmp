@@ -43,12 +43,16 @@ class AdAssetFeedSpecFields extends AbstractEnum {
   const AUTOTRANSLATE = 'autotranslate';
   const BODIES = 'bodies';
   const CALL_TO_ACTION_TYPES = 'call_to_action_types';
+  const CALL_TO_ACTIONS = 'call_to_actions';
   const CAPTIONS = 'captions';
+  const CAROUSELS = 'carousels';
   const DESCRIPTIONS = 'descriptions';
   const GROUPS = 'groups';
   const IMAGES = 'images';
   const LINK_URLS = 'link_urls';
+  const ONSITE_DESTINATIONS = 'onsite_destinations';
   const OPTIMIZATION_TYPE = 'optimization_type';
+  const POSTS = 'posts';
   const TITLES = 'titles';
   const VIDEOS = 'videos';
 
@@ -60,12 +64,16 @@ class AdAssetFeedSpecFields extends AbstractEnum {
       'autotranslate' => 'list<string>',
       'bodies' => 'list<AdAssetFeedSpecBody>',
       'call_to_action_types' => 'list<CallToActionTypes>',
+      'call_to_actions' => 'list<Object>',
       'captions' => 'list<AdAssetFeedSpecCaption>',
+      'carousels' => 'list<Object>',
       'descriptions' => 'list<AdAssetFeedSpecDescription>',
       'groups' => 'list<AdAssetFeedSpecGroupRule>',
       'images' => 'list<AdAssetFeedSpecImage>',
       'link_urls' => 'list<AdAssetFeedSpecLinkURL>',
+      'onsite_destinations' => 'list<Object>',
       'optimization_type' => 'string',
+      'posts' => 'list<Object>',
       'titles' => 'list<AdAssetFeedSpecTitle>',
       'videos' => 'list<AdAssetFeedSpecVideo>',
     );

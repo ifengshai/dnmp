@@ -2713,6 +2713,10 @@ class WorkOrderList extends Backend
         $measureList = WorkOrderMeasure::workMeasureList($row->id, 1);
         !empty($measureList) && $this->assignconfig('measureList', $measureList);
 
+        //回复内容
+        $workOrderNote = WorkOrderNote::where('work_id', $ids)->select();
+        $this->view->assign('workOrderNote', $workOrderNote);
+
         //工单问题类型
         $problem_type = [];
         if (1 == $row->work_type) {
@@ -3606,18 +3610,41 @@ class WorkOrderList extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $map = [];
+            $maps = [];
+            $arr1 = '';
+            $arr2 = '';
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['integral']){
+                $integralArr = explode(',',$filter['integral']);
+                if ($integralArr[0]){
+                    $arr1 = 'integral >'.intval($integralArr[0]);
+                }
+                if ($integralArr[1]){
+                    $map['integral'] = ['>', 0];
+                    $arr2 = 'integral <'.intval($integralArr[1]);
+                }
+                unset($filter['integral']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }else{
+                $map['integral'] = ['>', 0];
+            }
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
-            $map['integral'] = ['>', 0];
             $total = $this->model
                 ->where($where)
                 ->where($map)
+                ->where($maps)
+                ->where($arr1)
+                ->where($arr2)
                 ->where('work_status', 'in', '5,6')
                 ->order($sort, $order)
                 ->count();
-
             $list = $this->model
                 ->where($where)
                 ->where($map)
+                ->where($maps)
+                ->where($arr1)
+                ->where($arr2)
                 ->where('work_status', 'in', '5,6')
                 ->order($sort, $order)
                 ->limit($offset, $limit)

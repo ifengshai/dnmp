@@ -2,8 +2,10 @@
 
 namespace app\admin\controller;
 
+use app\admin\controller\zendesk\Notice;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\lens\LensPrice;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
 use think\Db;
@@ -11,6 +13,7 @@ use FacebookAds\Api;
 use FacebookAds\Object\Campaign;
 use app\admin\model\financial\Fackbook;
 use fast\Excel;
+use think\Exception;
 
 class Wangpenglei extends Backend
 {
@@ -1086,6 +1089,8 @@ class Wangpenglei extends Backend
         $os_sph = (float)urldecode($params['os_sph']);
         $od_cyl = (float)urldecode($params['od_cyl']);
         $os_cyl = (float)urldecode($params['os_cyl']);
+        //截取镜片编码第一位
+        $str = substr($params['lens_number'], 0, 1);
         /**
          * 判断处方是否异常规则
          * 1、SPH值或CYL值的“+”“_”号不一致
@@ -1109,12 +1114,12 @@ class Wangpenglei extends Backend
         }
 
         //有PD无SPH和CYL
-        if (($params['pdcheck'] == 'on' || $params['pd']) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl)) {
+        if (($params['pdcheck'] == 'on' || $params['pd']) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl && $str == '2')) {
             $list['is_prescription_abnormal'] = 1;
         }
 
         //有SPH或CYL无PD
-        if (($params['pdcheck'] != 'on' && !$params['pd']) && ($od_sph || $os_sph || $od_cyl || $os_cyl)) {
+        if (($params['pdcheck'] != 'on' && !$params['pd']) && ($od_sph || $os_sph || $od_cyl || $os_cyl) && $str == '3') {
             $list['is_prescription_abnormal'] = 1;
         }
 
@@ -1130,8 +1135,170 @@ class Wangpenglei extends Backend
         $params['od_cyl'] = '-0.75';
         $params['os_cyl'] = '-0.50';
         $params['pd'] = 60;
+        $params['lens_number'] = 32302000;
         $list = $this->is_prescription_abnormal($params);
         dump($list);
     }
 
+    public function test01()
+    {
+        echo shell_exec('cd /var/www/mojing/public && php admin_1biSSnWyfW.php shell/order_data/create_wave_order');
+    }
+
+
+    /**
+     *  导出库存数据对比
+     * @Description
+     * @author: wpl
+     * @since : 2021/4/1 17:40
+     */
+    public function getStockData()
+    {
+        //查询镜架成本为0的财务数据
+        $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
+
+        $item = new Item();
+        $data = $item
+            ->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])
+            ->column('stock,distribution_occupy_stock', 'sku');
+        $list = $barcode
+            ->field('sku,count(1) as num')
+            ->where(['library_status' => 1])
+            ->where("item_order_number=''")
+            ->group('sku')
+            ->select();
+        $list = collection($list)->toArray();
+        foreach ($list as $k => $v) {
+            $list[$k]['stock'] = $data[$v['sku']]['stock'] - $data[$v['sku']]['distribution_occupy_stock'];
+        }
+
+        $headlist = ['sku', '在库实时库存', '系统实时库存'];
+        Excel::writeCsv($list, $headlist, '库存', true);
+        die;
+    }
+
+    public function test002()
+    {
+        $c_url = '';
+        $frist = substr($c_url, 0, 1);
+        echo $frist;
+        die;
+    }
+
+
+    public function asyncTicketHttps($type, $site, $start, $end)
+    {
+        echo $start.'-'.$end."\n";
+        $this->model = new \app\admin\model\zendesk\Zendesk;
+        $ticketIds = (new Notice(request(), ['type' => $site]))->asyncUpdate($start, $end);
+
+        //判断是否存在
+        $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
+
+        //求交集的更新
+
+        $intersects = array_intersect($ticketIds, $nowTicketsIds);
+        //求差集新增
+        $diffs = array_diff($ticketIds, $nowTicketsIds);
+        //更新
+
+        //$intersects = array('142871','142869');//测试是否更新
+        //$diffs = array('144352','144349');//测试是否新增
+        foreach ($intersects as $intersect) {
+            (new Notice(request(), ['type' => $site, 'id' => $intersect]))->update();
+            echo $intersect.'is ok'."\n";
+        }
+        //新增
+        foreach ($diffs as $diff) {
+            (new Notice(request(), ['type' => $site, 'id' => $diff]))->create();
+            echo $diff.'ok'."\n";
+        }
+        echo 'all ok';
+    }
+
+
+    public function test()
+    {
+        $type = 1;
+        $site = 'zeelool';
+        $start = '2021-04-26T23:00:00Z';
+        $end = '2021-04-26T23:59:59Z';
+
+        $this->asyncTicketHttps($type, $site, $start, $end);
+    }
+
+    public function test011()
+    {
+        $type = 1;
+        $site = 'zeelool';
+        for ($i = 0; $i < 24; $i++) {
+            $start = '2021-04-30T'.$i.':00:00Z';
+            $end = '2021-04-30T'.$i.':59:59Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(100000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+
+        }
+    }
+
+
+    /**
+     * 判断定制现片逻辑
+     */
+    public function set_processing_type($params = [])
+    {
+        $arr = [];
+        //判断处方是否异常
+        $list = $this->is_prescription_abnormal($params);
+        $arr = array_merge($arr, $list);
+
+        //仅镜框
+        if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
+            $arr['order_prescription_type'] = 1;
+        } else {
+            $od_sph = (float)urldecode($params['od_sph']);
+            $os_sph = (float)urldecode($params['os_sph']);
+            $od_cyl = (float)urldecode($params['od_cyl']);
+            $os_cyl = (float)urldecode($params['os_cyl']);
+            //判断是否为现片，其余为定制
+            $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
+            foreach ($lensData as $v) {
+                if (($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'])
+                    && ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'])
+                    && ($os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end'])
+                    && ($od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end'])
+                ) {
+                    $arr['order_prescription_type'] = 2;
+                }
+            }
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 2) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        return $arr;
+    }
+
+    /**
+     * 测试镜片处方
+     * @author wpl
+     * @date   2021/5/6 13:54
+     */
+    public function test_lens()
+    {
+        $params['od_sph'] = '-2.50';
+        $params['os_sph'] = '-2.50';
+        $params['od_cyl'] = '-0.50';
+        $params['os_cyl'] = '-0.50';
+        $params['pd'] = 60;
+        $params['lens_number'] = 22100000;
+        $data = $this->set_processing_type($params);
+        dump($data);
+        die;
+    }
 }

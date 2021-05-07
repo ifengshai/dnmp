@@ -34,10 +34,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         {
                             field: 'supplier.supplier_type_pattern',
                             title: __('供应商类型'),
-
-                            formatter: Controller.api.formatter.supplier_type_pattern
+                            custom: { 1:'yellow',2:'blue'},
+                            searchList: { 1: '工厂',2:'贸易'},
+                            formatter: Table.api.formatter.status
                         },
-                        { field: 'return_type', title: __('Return_type'), custom: { 1: 'success', 2: 'success', 3: 'success', 4: 'success' }, searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货', 4: '仅退货' }, formatter: Table.api.formatter.status },
+                        { field: 'return_type', title: __('Return_type'),
+                            custom: { 1: 'success', 2: 'success', 3: 'success', 4: 'success' },
+                            searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货', 4: '仅退货' },
+                            formatter: Table.api.formatter.status },
                         {
                             field: 'status', title: __('status'),
                             custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'blue', 4: 'green', 5: 'gray' },

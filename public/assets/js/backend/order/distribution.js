@@ -11,11 +11,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         $('select[name="work_type"]').parents('.form-group').hide();
         $('select[name="is_work_order"]').parents('.form-group').hide();
         $('select[name="shelf_number"]').parents('.form-group').hide();
+        $('select[name="has_work_order"]').parents('.form-group').hide();
         $('#check_time').parents('.form-group').hide();
         $('.btn-distribution').addClass('hide');
+        $('input[name="b.payment_time"]').val("");
+        table.bootstrapTable('hideColumn', 'payment_time');
+        table.bootstrapTable('showColumn', 'created_at');
+        $('input[name="a.created_at"]').parents('.form-group').show();
+        $('input[name="b.payment_time"]').parents('.form-group').hide();
         if (0 == value) {
             $('select[name="abnormal"]').parents('.form-group').show();
             $('#check_time').parents('.form-group').show();
+            table.bootstrapTable('hideColumn', 'created_at');
+            table.bootstrapTable('showColumn', 'payment_time');
+            $('input[name="b.payment_time"]').parents('.form-group').show();
+            $('input[name="a.created_at"]').parents('.form-group').hide();
+            $('select[name="has_work_order"]').parents('.form-group').show();
             $('.btn-batch-export-xls').removeClass('hide');
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-tag-printed').removeClass('hide');
@@ -48,6 +59,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             $('#stock_house_num').parents('.form-group').show();
             // $('.btn-join-complete').removeClass('hide');
         } else if (8 == value) {
+            table.bootstrapTable('hideColumn', 'created_at');
+            table.bootstrapTable('showColumn', 'payment_time');
+            $('input[name="b.payment_time"]').parents('.form-group').show();
+            $('input[name="a.created_at"]').parents('.form-group').hide();
             $('select[name="abnormal"]').parents('.form-group').show();
             $('select[name="work_status"]').parents('.form-group').show();
             $('select[name="work_type"]').parents('.form-group').show();
@@ -149,6 +164,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 12: 'Voogueme_acc',
                                 13: 'Zeelool_cn',
                                 14: 'Alibaba',
+                                15: 'Zeelool_fr',
                             },
                             operate: 'IN',
                             formatter: Table.api.formatter.status
@@ -296,6 +312,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             visible: false
                         },
                         {
+                            field: 'has_work_order',
+                            title: __('是否有工单'),
+                            searchList: {
+                                1: __('是'),
+                            },
+                            visible: false
+                        },
+                        {
                             field: 'abnormal',
                             title: __('处理异常'),
                             addClass: 'selectpicker',
@@ -371,6 +395,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             visible: false
                         },
                         {
+                            field: 'b.payment_time',
+                            title: __('支付时间'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            visible: false
+                        },
+                        {
                             field: 'check_time',
                             title: __('审单通过时间'),
                             operate: 'RANGE',
@@ -382,7 +413,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             title: __('创建时间'),
                             operate: false
                         },
-
+                        {
+                            field: 'payment_time',
+                            title: __('支付时间'),
+                            operate: false,
+                            formatter: Table.api.formatter.datetime,
+                        },
                         {
                             field: 'operate',
                             title: __('Operate'),
@@ -973,6 +1009,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 12: 'Voogueme_acc',
                                 13: 'Zeelool_cn',
                                 14: 'Alibaba',
+                                15: 'Zeelool_fr',
                             },
                             operate: 'IN',
                             formatter: Table.api.formatter.status

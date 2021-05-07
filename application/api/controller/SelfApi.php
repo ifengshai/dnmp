@@ -250,7 +250,6 @@ class SelfApi extends Api
             'track_number' => $track_number,
         ]);
         
-        file_put_contents('/www/wwwroot/mojing/runtime/log/order_delivery.log', $track_number . '-' . $shipment_data_type . "\r\n", FILE_APPEND);
         //注册17track
         $title = strtolower(str_replace(' ', '-', $title));
         $carrier = $this->getCarrier($title);

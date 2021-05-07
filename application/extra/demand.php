@@ -23,7 +23,7 @@ return [
         '10' => 'ZeeloolDe',
         '11' => 'ZeeloolJp',
         '12' => 'Voogmechic',
-        
+        '15'=>'ZeeloolFr'
     ],
     //类型
     'siteType' => [

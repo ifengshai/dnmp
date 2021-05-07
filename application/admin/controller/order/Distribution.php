@@ -208,6 +208,11 @@ class Distribution extends Backend
                     $time = explode(' - ', $filter['a.created_at']);
                     $map['a.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
                 }
+                if ($filter['b.payment_time']) {
+                    $time = explode(' - ', $filter['b.payment_time']);
+                    $map['b.payment_time'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
+                    unset($filter['b.payment_time']);
+                }
             }
 
             //默认展示订单状态
@@ -237,7 +242,7 @@ class Distribution extends Backend
 
             //工单、异常筛选
             if ($filter['is_work_order']) {
-                $is_work_order = $filter['is_work_order'];
+                $isWorkOrder = $filter['is_work_order'];
                 unset($filter['is_work_order']);
             }
 
@@ -348,43 +353,50 @@ class Distribution extends Backend
             }
 
             //工单状态
-            $work_order_status_map = [1, 2, 3, 5];
+            $workOrderStatusMap = [1, 2, 3, 5];
             $flag = false;
             if ($filter['work_status'] && 8 == $label) {
-                $work_order_status_map = [];
-                $work_order_status_map = $filter['work_status'];
+                $workOrderStatusMap = [];
+                $workOrderStatusMap = $filter['work_status'];
                 unset($filter['work_status']);
                 $flag = true;
             }
 
             //工单类型
-            $work_order_type = [1, 2];
+            $workOrderType = [1, 2];
             if ($filter['work_type'] && 8 == $label) {
-                $work_order_type = [];
-                $work_order_type = [$filter['work_type']];
+                $workOrderType = [];
+                $workOrderType = [$filter['work_type']];
                 unset($filter['work_type']);
                 $flag = true;
             }
-            $this->request->get(['filter' => json_encode($filter)]);
 
 
-            $platform_order = $this->_work_order_list->where([
-                'work_status' => ['in', $work_order_status_map],
-                'work_type'   => ['in', $work_order_type],
+
+            $platformOrder = $this->_work_order_list->where([
+                'work_status' => ['in', $workOrderStatusMap],
+                'work_type'   => ['in', $workOrderType],
             ])->group('platform_order')->column('platform_order');
 
+            if ($filter['has_work_order']) {
+                if ($filter['has_work_order'] == 1){
+                    $map['b.increment_id'] = ['in', $platformOrder];
+                }
+                unset($filter['has_work_order']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
             if (8 == $label) {
                 //展示子工单的子单
-                if ($flag || $is_work_order == 1) {
-                    $map['b.increment_id'] = ['in', $platform_order];
+                if ($flag || $isWorkOrder == 1) {
+                    $map['b.increment_id'] = ['in', $platformOrder];
                 } else {
-                    if ($is_work_order == 2) {
+                    if ($isWorkOrder == 2) {
                         $map['a.id'] = ['in', $item_process_ids];
-                        $map['b.increment_id'] = ['not in', $platform_order];
+                        $map['b.increment_id'] = ['not in', $platformOrder];
                     } else {
                         $whereOr = [
                             'a.id'                       => ['in', $item_process_ids],
-                            'b.increment_id'             => ['in', $platform_order],
+                            'b.increment_id'             => ['in', $platformOrder],
                             'a.is_prescription_abnormal' => 1,
                         ];
                     }
@@ -414,7 +426,7 @@ class Distribution extends Backend
             //combine_time  合单时间  delivery_time 打印时间 check_time审单时间  update_time更新时间  created_at创建时间
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.is_prescription_abnormal,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.check_time')
+                ->field('a.id,a.is_prescription_abnormal,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.check_time,b.payment_time')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
@@ -510,7 +522,7 @@ class Distribution extends Backend
                 $list[$key]['handle_abnormal'] = $handle_abnormal;
 
                 //判断是否显示工单按钮
-                $list[$key]['task_info'] = in_array($value['increment_id'], $platform_order) ? 1 : 0;
+                $list[$key]['task_info'] = in_array($value['increment_id'], $platformOrder) ? 1 : 0;
 
                 //获取工单更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
@@ -649,12 +661,12 @@ class Distribution extends Backend
             }
 
             //工单状态
-            $work_order_status_map = [1, 2, 3, 5];
+            $workOrderStatusMap = [1, 2, 3, 5];
             //工单类型
-            $work_order_type = [1, 2];
-            $platform_order = $this->_work_order_list->where([
-                'work_status' => ['in', $work_order_status_map],
-                'work_type'   => ['in', $work_order_type],
+            $workOrderType = [1, 2];
+            $platformOrder = $this->_work_order_list->where([
+                'work_status' => ['in', $workOrderStatusMap],
+                'work_type'   => ['in', $workOrderType],
             ])->group('platform_order')->column('platform_order');
 
             //波次单id
@@ -697,7 +709,7 @@ class Distribution extends Backend
                 }
 
                 //判断是否显示工单按钮
-                $list[$key]['task_info'] = in_array($value['increment_id'], $platform_order) ? 1 : 0;
+                $list[$key]['task_info'] = in_array($value['increment_id'], $platformOrder) ? 1 : 0;
 
                 //获取工单更改镜框最新信息
                 $change_sku = $this->_work_order_change_sku
@@ -1424,6 +1436,11 @@ class Distribution extends Backend
                 $map['d.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
                 unset($filter['check_time']);
             }
+            if ($filter['b.payment_time']) {
+                $payment_time = explode(' - ', $filter['b.payment_time']);
+                $map['b.payment_time'] = ['between', [strtotime($payment_time[0]), strtotime($payment_time[1])]];
+                unset($filter['b.payment_time']);
+            }
             if ($filter['distribution_status']) {
                 $map['a.distribution_status'] = ['in', $filter['distribution_status']];
                 unset($filter['distribution_status']);
@@ -1518,6 +1535,7 @@ class Distribution extends Backend
             8 => '合单中',
             9 => '合单完成',
         ];
+
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
@@ -1920,9 +1938,9 @@ class Distribution extends Backend
         }
 
         //工单状态
-        $work_order_status_map = [1, 2, 3, 5];
+        $workOrderStatusMap = [1, 2, 3, 5];
         //工单类型
-        $work_order_type = [1, 2];
+        $workOrderType = [1, 2];
         $this->request->get(['filter' => json_encode($filter)]);
 
         [$where] = $this->buildparams();

@@ -225,6 +225,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
 
                 $(document).on('click', '.btn-status', function () {
                     $('.status').val(1);
+                    $('#status').val(1);
                 })
 
                 //模糊匹配订单

@@ -35,18 +35,36 @@ class ZendeskAccount extends Backend
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
+            $filter = json_decode($this->request->get('filter'), true);
+            if($filter['account_type']){
+                switch ($filter['account_type']){
+                    case 'zeelool':
+                        $map['account_type'] = 1;
+                        break;
+                    case 'voogueme':
+                        $map['account_type'] = 2;
+                        break;
+                    case 'nihao':
+                        $map['account_type'] = 3;
+                        break;
+                }
+                unset($filter['account_type']);
+            }
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
