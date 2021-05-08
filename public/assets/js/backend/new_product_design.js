@@ -413,9 +413,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
                     if (value.label ==3){
                         table.bootstrapTable('showColumn','location_code');
-                        table.bootstrapTable('showColumn','platform');
                     }else {
                         table.bootstrapTable('hideColumn','location_code');
+                    }
+                    if (value.label ==3 || value.label ==2 || value.label ==4){
+                        table.bootstrapTable('showColumn','platform');
+                    }else {
                         table.bootstrapTable('hideColumn','platform');
                     }
                 }
