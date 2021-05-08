@@ -104,6 +104,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status,
                         },
                         {field: 'responsible_id', title: __('责任人')},
+                        {field: 'location_code', title: __('样品间库位号'),operate: false},
+                        {field: 'platform', title: __('站点'),operate: false},
                         {field: 'site', title: __('站点'), visible: false,
                             addclass:'plat_type',
                             searchList: {
@@ -408,6 +410,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         table.bootstrapTable('hideColumn','responsible_id');
                     }else{
                         table.bootstrapTable('showColumn','responsible_id');
+                    }
+                    if (value.label ==3){
+                        table.bootstrapTable('showColumn','location_code');
+                        table.bootstrapTable('showColumn','platform');
+                    }else {
+                        table.bootstrapTable('hideColumn','location_code');
+                        table.bootstrapTable('hideColumn','platform');
                     }
                 }
             });

@@ -2495,7 +2495,8 @@ class Item extends Backend
             ->setCellValue("I1", "SKU启用状态")
             ->setCellValue("J1", "是否新品");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建人")
-            ->setCellValue("L1", "创建时间");
+            ->setCellValue("L1", "创建时间")
+            ->setCellValue("M1", "大货/现货");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('商品SKU数据');
 
         foreach ($list as $key => $value) {
@@ -2542,6 +2543,14 @@ class Item extends Backend
             }
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['create_person']);
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['create_time']);
+            if (1 == $value['is_spot']) {
+                $value['is_spot'] = '大货';
+            } elseif (2 == $value['is_spot']) {
+                $value['is_spot'] = '现货';
+            }else{
+                $value['is_spot'] = '-';
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['is_spot']);
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
@@ -2556,6 +2565,7 @@ class Item extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(30);
         //设置边框
         $border = [
             'borders' => [
