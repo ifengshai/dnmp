@@ -935,8 +935,8 @@ class Test01 extends Backend
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $this->model = new \app\admin\model\itemmanage\Item;
         //时间
-        $start = '2021-05-06';
-        $end = '2021-05-06 23:59:59';
+        $start = '2021-05-05';
+        $end = '2021-05-05 23:59:59';
         //采购入库数量
         $instockWhere['s.status'] = 2;
         $instockWhere['s.type_id'] = 1;
@@ -1049,7 +1049,7 @@ class Test01 extends Backend
         $export_str = ['商品分类', '商品SKU', '出入库类型', '金额（元）', '数量（个）'];
         $file_title = implode(',', $export_str) . " \n";
         $file = $file_title . $file_content;
-        file_put_contents('/var/www/mojing/runtime/log/finance6.csv', $file);
+        file_put_contents('/var/www/mojing/runtime/log/finance5.csv', $file);
         exit;
     }
 }
