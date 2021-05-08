@@ -1430,12 +1430,12 @@ class OrderData extends Backend
         }
 
         //有PD无SPH和CYL
-        if (($params['pdcheck'] == 'on' || $params['pd']) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl && $str == '2')) {
+        if (($params['pdcheck'] == 'on' || $params['pd'] > 0) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl && $str == '2')) {
             $list['is_prescription_abnormal'] = 1;
         }
 
         //有SPH或CYL无PD
-        if (($params['pdcheck'] != 'on' && !$params['pd']) && ($od_sph || $os_sph || $od_cyl || $os_cyl) && $str == '3') {
+        if (($params['pdcheck'] != 'on' && $params['pd'] <= 0) && ($od_sph || $os_sph || $od_cyl || $os_cyl) && $str == '3') {
             $list['is_prescription_abnormal'] = 1;
         }
 
