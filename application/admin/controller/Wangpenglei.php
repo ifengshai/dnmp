@@ -1231,7 +1231,7 @@ class Wangpenglei extends Backend
     {
         $type = 1;
         $site = 'zeelool';
-        for ($i = 0; $i < 6; $i++) {
+        for ($i = 0; $i < 24; $i++) {
             $start = '2021-05-07T'.$i.':00:00Z';
             $end = '2021-05-07T'.$i.':59:59Z';
             try {
