@@ -961,12 +961,12 @@ class Test01 extends Backend
             $arr1[$i]['inOutFlag'] = '入库';//入库
             $instocks = $this->instock
                 ->alias('s')
-                ->join('fa_check_order c','c.id=s.check_id')
-                ->join('fa_purchase_order_item oi', 'c.purchase_id=oi.purchase_id')
+                ->join('fa_in_stock_item i','i.in_stock_id=s.id')
+                ->join('fa_purchase_order_item oi', 'i.purchase_id=oi.purchase_id')
                 ->join('fa_purchase_order o', 'oi.purchase_id=o.id')
                 ->where($instockWhere)
-                ->where('oi.sku',$inSku)
-                ->field('sum(o.purchase_total) purchase_total,sum(oi.purchase_num) purchase_num')
+                ->where('i.sku',$inSku)
+                ->field('sum(round(o.purchase_total/oi.purchase_num,2)*in_stock_num) purchase_total,sum(in_stock_num) purchase_num')
                 ->find();
             $arr1[$i]['total'] = $instocks['purchase_total'];//入库金额
             $arr1[$i]['num'] = $instocks['purchase_num'];//入库数量
@@ -997,10 +997,10 @@ class Test01 extends Backend
                 ->alias('i')
                 ->join('fa_purchase_order_item p', 'i.purchase_id=p.purchase_id and i.sku=p.sku')
                 ->join('fa_purchase_order o', 'p.purchase_id=o.id')
-                ->field('sum(o.purchase_total) purchase_total,sum(p.purchase_num) purchase_num')
+                ->field('sum(round(o.purchase_total/p.purchase_num,2)) purchase_total,count(*) purchase_num')
                 ->where($barWhere)
                 ->where('i.sku', $bar)
-                ->find();
+                ->select();
             $arr2[$j]['total'] = $barItems['purchase_total'];//出库金额
             $arr2[$j]['num'] = $barItems['purchase_num'];//出库数量
             $j++;
@@ -1033,7 +1033,7 @@ class Test01 extends Backend
                 ->join('fa_purchase_order o', 'p.purchase_id=o.id')
                 ->where($barWhere1)
                 ->where('i.sku', $bar1)
-                ->field('sum(o.purchase_total) purchase_total,sum(p.purchase_num) purchase_num')
+                ->field('sum(round(o.purchase_total/p.purchase_num,2)) purchase_total,count(*) purchase_num')
                 ->find();
             $arr3[$l]['total'] = $barItems1['purchase_total'];//出库金额
             $arr3[$l]['num'] = $barItems1['purchase_num'];//出库数量
@@ -1049,7 +1049,7 @@ class Test01 extends Backend
         $export_str = ['商品分类', '商品SKU', '出入库类型', '金额（元）', '数量（个）'];
         $file_title = implode(',', $export_str) . " \n";
         $file = $file_title . $file_content;
-        file_put_contents('/var/www/mojing/runtime/log/finance2.csv', $file);
+        file_put_contents('/var/www/mojing/runtime/log/finance6.csv', $file);
         exit;
     }
 }
