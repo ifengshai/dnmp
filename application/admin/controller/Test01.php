@@ -1000,7 +1000,7 @@ class Test01 extends Backend
                 ->field('sum(round(o.purchase_total/p.purchase_num,2)) purchase_total,count(*) purchase_num')
                 ->where($barWhere)
                 ->where('i.sku', $bar)
-                ->select();
+                ->find();
             $arr2[$j]['total'] = $barItems['purchase_total'];//出库金额
             $arr2[$j]['num'] = $barItems['purchase_num'];//出库数量
             $j++;
@@ -1049,7 +1049,7 @@ class Test01 extends Backend
         $export_str = ['商品分类', '商品SKU', '出入库类型', '金额（元）', '数量（个）'];
         $file_title = implode(',', $export_str) . " \n";
         $file = $file_title . $file_content;
-        file_put_contents('/var/www/mojing/runtime/log/finance5.csv', $file);
+        file_put_contents('/var/www/mojing/runtime/log/finance51.csv', $file);
         exit;
     }
 }
