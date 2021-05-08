@@ -999,7 +999,7 @@ class Test01 extends Backend
                 ->join('fa_purchase_order o', 'p.purchase_id=o.id')
                 ->field('sum(o.purchase_total) purchase_total,sum(p.purchase_num) purchase_num')
                 ->where($barWhere)
-                ->where('sku', $bar)
+                ->where('i.sku', $bar)
                 ->find();
             $arr2[$j]['total'] = $barItems['purchase_total'];//出库金额
             $arr2[$j]['num'] = $barItems['purchase_num'];//出库数量
@@ -1032,7 +1032,7 @@ class Test01 extends Backend
                 ->join('fa_purchase_order_item p', 'i.purchase_id=p.purchase_id and i.sku=p.sku')
                 ->join('fa_purchase_order o', 'p.purchase_id=o.id')
                 ->where($barWhere1)
-                ->where('sku', $bar1)
+                ->where('i.sku', $bar1)
                 ->field('sum(o.purchase_total) purchase_total,sum(p.purchase_num) purchase_num')
                 ->find();
             $arr3[$l]['total'] = $barItems1['purchase_total'];//出库金额
