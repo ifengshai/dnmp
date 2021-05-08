@@ -1366,14 +1366,18 @@ class OrderData extends Backend
             $os_cyl = (float)urldecode($params['os_cyl']);
             //判断是否为现片，其余为定制
             $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
+            $tempArr = [];
             foreach ($lensData as $v) {
-                if (($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'])
-                    && ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'])
-                    && ($os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end'])
-                    && ($od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end'])
-                ) {
-                    $arr['order_prescription_type'] = 2;
+                if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
+                    $tempArr['od'] = 1;
                 }
+                if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
+                    $tempArr['os'] = 1;
+                }
+            }
+
+            if ($tempArr['od'] == 1 && $tempArr['os'] = 1) {
+                $arr['order_prescription_type'] = 2;
             }
         }
 
