@@ -152,6 +152,8 @@ class NewProductDesign extends Backend
                 $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time']);
             }
             $list = collection($list)->toArray();
+            $itemPlatform = new ItemPlatformSku();
+            $platformType = ['0','Z','V','N','M','W','0','0','A','Es','De','Jp','Chic','Z_cn','Ali','Z_fr'];
             foreach ($list as $key=>$item){
                 $list[$key]['label'] = $map['status']?$map['status']:0;
                 if ($item['responsible_id'] !==null){
@@ -163,6 +165,11 @@ class NewProductDesign extends Backend
                 $list[$key]['item_status'] =$itemStatusIsNew->item_status;
                 $list[$key]['is_new'] = $itemStatusIsNew->is_new;
                 $list[$key]['operate_time'] = Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime') ? Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime'):$item['create_time'];
+                $list[$key]['location_code'] = Db::name('purchase_sample')->alias('a')->join(['fa_purchase_sample_location' => 'b'],'a.location_id=b.id')->where('a.sku',$item['sku'])->value('b.location');
+                $list[$key]['platform'] =$itemPlatform->where('sku',$item['sku'])->order('platform_type asc')->column('platform_type');
+                foreach ($list[$key]['platform'] as $k1=>$v1){
+                    $list[$key]['platform'][$k1] = $platformType[$v1];
+                }
             }
             $result = array("total" => $total,"label"=>$map['status']?$map['status']:0, "rows" => $list);
 
