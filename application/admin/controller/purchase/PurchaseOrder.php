@@ -2208,8 +2208,7 @@ class PurchaseOrder extends Backend
 
         [$where] = $this->buildparams();
         $list = $this->model->alias('purchase_order')
-            ->field('purchase_order.id,effect_time,type,logistics_info,receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,1688_number,
-            purchase_order.purchase_type,purchase_order.factory_type,purchase_order.pay_type')
+            ->field('purchase_order.id,effect_time,type,logistics_info,receiving_time,purchase_number,purchase_name,supplier_name,sku,supplier_sku,is_new_product,is_sample,product_total,purchase_freight,purchase_num,purchase_price,purchase_remark,b.purchase_total,purchase_order.create_person,purchase_order.createtime,arrival_time,receiving_time,1688_number,replenish_id,purchase_order.purchase_type,purchase_order.factory_type,purchase_order.pay_type')
             ->join(['fa_purchase_order_item' => 'b'], 'b.purchase_id=purchase_order.id')
             ->join(['fa_supplier' => 'c'], 'c.id=purchase_order.supplier_id')
             ->where($where)
@@ -2253,6 +2252,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("V1", "工厂类型");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("W1", "采购单类型");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("X1", "采购单付款类型");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Y1", "需求提出时间");
 
         $logistic = new \app\admin\model\warehouse\LogisticsInfo();
         foreach ($list as $key => $value) {
@@ -2325,6 +2325,8 @@ class PurchaseOrder extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("V".($key * 1 + 2), $factoryTypeName);
             $spreadsheet->getActiveSheet()->setCellValue("W".($key * 1 + 2), $purchaseTypeName);
             $spreadsheet->getActiveSheet()->setCellValue("X".($key * 1 + 2), $payTypeName);
+            $replenishAddTime = Db::name('new_product_replenish')->where('id',$value['replenish_id'])->value('create_time');
+            $spreadsheet->getActiveSheet()->setCellValue("Y".($key * 1 + 2), $replenishAddTime);
         }
 
         //设置宽度
@@ -2352,6 +2354,7 @@ class PurchaseOrder extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('W')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('X')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Y')->setWidth(30);
 
         //设置边框
         $border = [
