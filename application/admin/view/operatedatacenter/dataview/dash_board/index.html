@@ -1,3 +1,4 @@
+
 <style>
 
     .echart-style td {
@@ -302,10 +303,10 @@
                                         {foreach name="magentoplatformarr" item="vo" key="key"}
                                         <option value="{$key}" {if condition="$key == 0"}selected="selected"{/if}>{$vo}</option>
                                         {/foreach}
-<!--                                        <option value="1" selected="selected">Zeelool</option>-->
-<!--                                        <option value="2">Voogueme</option>-->
-<!--                                        <option value="3">Nihaooptical</option>-->
-<!--                                        <option value="4">全部</option>-->
+                                        <!--                                        <option value="1" selected="selected">Zeelool</option>-->
+                                        <!--                                        <option value="2">Voogueme</option>-->
+                                        <!--                                        <option value="3">Nihaooptical</option>-->
+                                        <!--                                        <option value="4">全部</option>-->
                                     </select>
                                 </div>
                             </div>
@@ -347,18 +348,18 @@
                                     <span class="question" tabindex="0" data-bs-toggle="tooltip" title="至少进行过一次会话的唯一身份用户数">
                                         <img src="/wenhao.jpg" alt="" class="wenhao">
                                     </span>
-                                <span class="extend">
+                                    <span class="extend">
                                     <div class="title">活跃用户数：<span style="color: red;" id="active_user_num">{$active_user_num.active_user_num}</span></div>
                                     <div class="rate_class">
 <!--                                        同比：<span-->
-<!--                                            id="same_active_user_num">-->
-<!--                                        {if (float)$active_user_num.same_active_user_num/100 < 0}-->
-<!--                                        <img src="/xiadie.png">-->
-<!--                                        {else /}-->
-<!--                                        <img style="transform:rotate(180deg);" src="/shangzhang.png">-->
-<!--                                        {/if}-->
-<!--                                        {$active_user_num.same_active_user_num}-->
-<!--                                    </span>-->
+                                        <!--                                            id="same_active_user_num">-->
+                                        <!--                                        {if (float)$active_user_num.same_active_user_num/100 < 0}-->
+                                        <!--                                        <img src="/xiadie.png">-->
+                                        <!--                                        {else /}-->
+                                        <!--                                        <img style="transform:rotate(180deg);" src="/shangzhang.png">-->
+                                        <!--                                        {/if}-->
+                                        <!--                                        {$active_user_num.same_active_user_num}-->
+                                        <!--                                    </span>-->
                                         环比：<span
                                             id="huan_active_user_num">
                                         {if (float)$active_user_num.huan_active_user_num/100 < 0}
@@ -375,18 +376,18 @@
                                     <span class="question" tabindex="0" data-bs-toggle="tooltip" title="当天新注册的用户数">
                                         <img src="/wenhao.jpg" alt="" class="wenhao">
                                     </span>
-                                <span class="extend">
+                                    <span class="extend">
                                     <div class="title">注册用户数：<span style="color: red;" id="register_user_num">{$register_user_num.register_user_num}</span></div>
                                     <div class="rate_class">
 <!--                                        同比：-->
-<!--                                        <span id="same_register_user_num">-->
-<!--                                        {if (float)$register_user_num.same_register_user_num/100 < 0}-->
-<!--                                        <img src="/xiadie.png">-->
-<!--                                        {else /}-->
-<!--                                        <img style="transform:rotate(180deg);"  src="/shangzhang.png">-->
-<!--                                        {/if}-->
-<!--                                        {$register_user_num.same_register_user_num}-->
-<!--                                    </span>-->
+                                        <!--                                        <span id="same_register_user_num">-->
+                                        <!--                                        {if (float)$register_user_num.same_register_user_num/100 < 0}-->
+                                        <!--                                        <img src="/xiadie.png">-->
+                                        <!--                                        {else /}-->
+                                        <!--                                        <img style="transform:rotate(180deg);"  src="/shangzhang.png">-->
+                                        <!--                                        {/if}-->
+                                        <!--                                        {$register_user_num.same_register_user_num}-->
+                                        <!--                                    </span>-->
 
                                         环比：<span id="huan_register_user_num">
                                         {if (float)$register_user_num.huan_register_user_num/100 < 0}
@@ -402,16 +403,16 @@
                                     <span class="question" tabindex="0" data-bs-toggle="tooltip" title="之前下过单，再次下单的用户数">
                                         <img src="/wenhao.jpg" alt="" class="wenhao">
                                     </span>
-                                <span class="extend">
+                                    <span class="extend">
                                     <div class="title">复购用户数：<span style="color: red;" id="again_user_num">{$again_user_num.again_user_num}</span></div>
                                     <div class="rate_class">
 <!--                                        同比：<span id="same_again_user_num">-->
-<!--                                        {if (float)$again_user_num.same_again_user_num/100 < 0}-->
-<!--                                        <img src="/xiadie.png">-->
-<!--                                        {else /}-->
-<!--                                        <img style="transform:rotate(180deg);"  src="/shangzhang.png">-->
-<!--                                        {/if}-->
-<!--                                        {$again_user_num.same_again_user_num}</span>-->
+                                        <!--                                        {if (float)$again_user_num.same_again_user_num/100 < 0}-->
+                                        <!--                                        <img src="/xiadie.png">-->
+                                        <!--                                        {else /}-->
+                                        <!--                                        <img style="transform:rotate(180deg);"  src="/shangzhang.png">-->
+                                        <!--                                        {/if}-->
+                                        <!--                                        {$again_user_num.same_again_user_num}</span>-->
                                         环比：<span
                                             id="huan_again_user_num">
                                         {if (float)$again_user_num.huan_again_user_num/100 < 0}
@@ -427,16 +428,16 @@
                                     <span class="question" tabindex="0" data-bs-toggle="tooltip" title="购买VIP的用户数">
                                         <img src="/wenhao.jpg" alt="" class="wenhao">
                                     </span>
-                                <span class="extend">
+                                    <span class="extend">
                                     <div class="title">VIP用户数：<span style="color: red;" id="vip_user_num">{$vip_user_num.vip_user_num}</span></div>
                                     <div class="rate_class">
 <!--                                        同比：<span id="same_vip_user_num">-->
-<!--                                        {if (float)$vip_user_num.same_vip_user_num/100 < 0}-->
-<!--                                        <img src="/xiadie.png">-->
-<!--                                        {else /}-->
-<!--                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">-->
-<!--                                        {/if}-->
-<!--                                        {$vip_user_num.same_vip_user_num}</span>-->
+                                        <!--                                        {if (float)$vip_user_num.same_vip_user_num/100 < 0}-->
+                                        <!--                                        <img src="/xiadie.png">-->
+                                        <!--                                        {else /}-->
+                                        <!--                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">-->
+                                        <!--                                        {/if}-->
+                                        <!--                                        {$vip_user_num.same_vip_user_num}</span>-->
                                         环比：<span id="huan_vip_user_num">
                                         {if (float)$vip_user_num.huan_vip_user_num/100 < 0}
                                         <img src="/xiadie.png">
@@ -452,17 +453,17 @@
                                     <span class="question" tabindex="0" data-bs-toggle="tooltip" title="支付成功的订单数">
                                         <img src="/wenhao.jpg" alt="" class="wenhao">
                                     </span>
-                                <span class="extend">
+                                    <span class="extend">
                                     <div class="title">订单数：<span style="color: red;" id="order_num">{$order_num.order_num}</span></div>
                                     <div class="rate_class">
 <!--                                        同比：<span-->
-<!--                                            id="same_order_num">-->
-<!--                                        {if (float)$order_num.same_order_num/100 < 0}-->
-<!--                                        <img src="/xiadie.png">-->
-<!--                                        {else /}-->
-<!--                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">-->
-<!--                                        {/if}-->
-<!--                                        {$order_num.same_order_num}%</span>-->
+                                        <!--                                            id="same_order_num">-->
+                                        <!--                                        {if (float)$order_num.same_order_num/100 < 0}-->
+                                        <!--                                        <img src="/xiadie.png">-->
+                                        <!--                                        {else /}-->
+                                        <!--                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">-->
+                                        <!--                                        {/if}-->
+                                        <!--                                        {$order_num.same_order_num}%</span>-->
                                         环比：<span
                                             id="huan_order_num">
                                         {if (float)$order_num.huan_order_num/100 < 0}
@@ -478,18 +479,18 @@
                                     <span class="question" tabindex="0" data-bs-toggle="tooltip" title="平均订单金额 （销售额/订单数）">
                                         <img src="/wenhao.jpg" alt="" class="wenhao">
                                     </span>
-                                <span class="extend">
+                                    <span class="extend">
                                     <div class="title">客单价：<span style="color: red;" id="order_unit_price">
 
                                         {$order_unit_price.order_unit_price}</span></div>
                                     <div class="rate_class">
 <!--                                        同比：<span id="same_order_unit_price">-->
-<!--                                        {if (float)$order_unit_price.same_order_unit_price/100 < 0}-->
-<!--                                        <img src="/xiadie.png">-->
-<!--                                        {else /}-->
-<!--                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">-->
-<!--                                        {/if}-->
-<!--                                        {$order_unit_price.same_order_unit_price}%</span>-->
+                                        <!--                                        {if (float)$order_unit_price.same_order_unit_price/100 < 0}-->
+                                        <!--                                        <img src="/xiadie.png">-->
+                                        <!--                                        {else /}-->
+                                        <!--                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">-->
+                                        <!--                                        {/if}-->
+                                        <!--                                        {$order_unit_price.same_order_unit_price}%</span>-->
                                         环比：<span
                                             id="huan_order_unit_price">
                                         {if (float)$order_unit_price.huan_order_unit_price/100 < 0}
@@ -505,16 +506,16 @@
                                     <span class="question" tabindex="0" data-bs-toggle="tooltip" title="最终支付金额总数">
                                         <img src="/wenhao.jpg" alt="" class="wenhao">
                                     </span>
-                                <span class="extend">
+                                    <span class="extend">
                                     <div class="title">销售额：<span style="color: red;" id="sales_total_money">{$sales_total_money.sales_total_money}</span></div>
                                     <div class="rate_class">
 <!--                                        同比：<span id="same_sales_total_money">-->
-<!--                                        {if (float)$sales_total_money.same_sales_total_money/100 < 0}-->
-<!--                                        <img src="/xiadie.png">-->
-<!--                                        {else /}-->
-<!--                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">-->
-<!--                                        {/if}-->
-<!--                                        {$sales_total_money.same_sales_total_money}%</span> -->
+                                        <!--                                        {if (float)$sales_total_money.same_sales_total_money/100 < 0}-->
+                                        <!--                                        <img src="/xiadie.png">-->
+                                        <!--                                        {else /}-->
+                                        <!--                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">-->
+                                        <!--                                        {/if}-->
+                                        <!--                                        {$sales_total_money.same_sales_total_money}%</span> -->
                                         环比：<span
                                             id="huan_sales_total_money">
                                         {if (float)$sales_total_money.huan_sales_total_money/100 < 0}
@@ -529,16 +530,16 @@
                                     <span class="question" tabindex="0" data-bs-toggle="tooltip" title="使用物流服务产生的费用">
                                         <img src="/wenhao.jpg" alt="" class="wenhao">
                                     </span>
-                                <span class="extend">
+                                    <span class="extend">
                                     <div class="title">邮费：<span style="color: red;" id="shipping_total_money">{$shipping_total_money.shipping_total_money}</span></div>
                                     <div class="rate_class">
 <!--                                        同比：<span id="same_shipping_total_money">-->
-<!--                                         {if (float)$shipping_total_money.same_shipping_total_money/100 < 0}-->
-<!--                                        <img src="/xiadie.png">-->
-<!--                                        {else /}-->
-<!--                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">-->
-<!--                                        {/if}-->
-<!--                                        {$shipping_total_money.same_shipping_total_money}%</span>  -->
+                                        <!--                                         {if (float)$shipping_total_money.same_shipping_total_money/100 < 0}-->
+                                        <!--                                        <img src="/xiadie.png">-->
+                                        <!--                                        {else /}-->
+                                        <!--                                        <img  style="transform:rotate(180deg);" src="/shangzhang.png">-->
+                                        <!--                                        {/if}-->
+                                        <!--                                        {$shipping_total_money.same_shipping_total_money}%</span>  -->
                                         环比：<span
                                             id="huan_shipping_total_money">
                                          {if (float)$shipping_total_money.huan_shipping_total_money/100 < 0}
@@ -568,14 +569,14 @@
                     </div>
                     <div id="echart1" style="height:800px;width:80%;margin-left: 200px;"></div>
                 </div>
-<!--                <div class="new-background">-->
-<!--                    <div class="row">-->
-<!--                        <div class="form-group">-->
-<!--                            <label class="control-label col-xs-4">活跃用户趋势统计</label>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div id="echart2" style="height:800px;width:80%;margin-left: 200px;"></div>-->
-<!--                </div>-->
+                <!--                <div class="new-background">-->
+                <!--                    <div class="row">-->
+                <!--                        <div class="form-group">-->
+                <!--                            <label class="control-label col-xs-4">活跃用户趋势统计</label>-->
+                <!--                        </div>-->
+                <!--                    </div>-->
+                <!--                    <div id="echart2" style="height:800px;width:80%;margin-left: 200px;"></div>-->
+                <!--                </div>-->
                 <div class="new-background">
                     <div class="row">
                         <div class="form-group">
