@@ -54,7 +54,7 @@ class AsyncCart extends BaseElasticsearch
             'entity_id'       => $value['entity_id'],
             'site'            => $value['site'],
             'status'          => $value['is_active'],
-            'update_time_day' => date('Ymd', $value['updated_at'] + 8*3600),
+            'update_time_day' => date('Ymd', $value['updated_at']),
             'update_time'     => $value['updated_at'],
             'create_time'     => $mergeData,
 
