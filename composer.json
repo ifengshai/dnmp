@@ -37,6 +37,7 @@
         "guzzlehttp/psr7": "1.7.0",
         "aws/aws-sdk-php": "^3.176",
         "facebook/php-business-sdk": "v10.0.1"
+        "elasticsearch/elasticsearch": "v7.12.0"
     },
     "config": {
         "preferred-install": "dist"
