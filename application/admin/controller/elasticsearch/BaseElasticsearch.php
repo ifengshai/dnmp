@@ -441,7 +441,7 @@ class BaseElasticsearch extends Backend
                 'type' => 'keyword',
             ],
             'delivery_time'      => [
-                'type' => 'date',
+                'type' => 'keyword',
             ],
             'delivery_error_flag'      => [
                 'type' => 'integer',
