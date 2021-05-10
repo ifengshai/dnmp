@@ -14,7 +14,6 @@ use app\admin\controller\zendesk\Notice;
 
 class Crasp extends Command
 {
-
     protected function configure()
     {
         $this
