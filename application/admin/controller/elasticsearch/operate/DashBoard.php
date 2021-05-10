@@ -35,13 +35,13 @@ class DashBoard extends BaseElasticsearch
         //查询对应平台权限
         $magentoplatformarr = $magentoplatformarr->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', '全部'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
         $this->view->assign(compact('web_site', 'time_str', 'magentoplatformarr'));
 
-        return $this->view->fetch('operatedatacenter/dataview/dash_board/index');
+        return $this->view->fetch();
     }
 
     /**
