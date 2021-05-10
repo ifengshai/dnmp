@@ -35,7 +35,7 @@ class Hour extends BaseElasticsearch
         }
         $this->view->assign(compact('web_site', 'time_str', 'magentoplatformarr'));
 
-        return $this->view->fetch('operatedatacenter/dataview/time_data/index');
+        return $this->view->fetch();
 
     }
 
