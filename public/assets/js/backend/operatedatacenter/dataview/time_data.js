@@ -124,11 +124,11 @@ function data_view() {
         var order_platform = ret.data.order_platform;
         var time_str = ret.data.time_str;
         var str = ret.data.str;
-  
+
         $('#order_platform').val(order_platform);
         $('#time_str').val(time_str);
         $('#table_data').html(str);
-   
+
         return true;
     }, function (data, ret) {
         Layer.alert(ret.msg);
