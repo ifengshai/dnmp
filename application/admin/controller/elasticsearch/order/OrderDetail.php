@@ -132,7 +132,7 @@ class OrderDetail extends BaseElasticsearch
                                 'terms' => [
                                     'status' => $this->status,
                                 ],
-                            ],
+                            ]
                         ],
                     ],
                 ],
