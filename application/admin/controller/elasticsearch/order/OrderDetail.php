@@ -35,7 +35,7 @@ class OrderDetail extends BaseElasticsearch
         }
         $this->view->assign(compact('web_site', 'time_str', 'magentoplatformarr'));
 
-        return $this->view->fetch('operatedatacenter/orderdata/order_data_view/index');
+        return $this->view->fetch();
     }
 
     /**
@@ -132,7 +132,7 @@ class OrderDetail extends BaseElasticsearch
                                 'terms' => [
                                     'status' => $this->status,
                                 ],
-                            ],
+                            ]
                         ],
                     ],
                 ],
