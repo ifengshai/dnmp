@@ -72,7 +72,7 @@ class AsyncOrder extends BaseElasticsearch
                 $value['shipping_method_type'] = 3;
             }
         }
-        $mergeData = $value['payment_time'] ?: $value['created_at'];
+        $mergeData = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] : $value['created_at'];
 
         return $this->formatDate($value, $mergeData);
     }
