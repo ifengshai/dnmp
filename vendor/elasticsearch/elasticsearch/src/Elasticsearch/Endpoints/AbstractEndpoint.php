@@ -1,119 +1,111 @@
 <?php
-/**
- * Elasticsearch PHP client
- *
- * @link      https://github.com/elastic/elasticsearch-php/
- * @copyright Copyright (c) Elasticsearch B.V (https://www.elastic.co)
- * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
- * @license   https://www.gnu.org/licenses/lgpl-2.1.html GNU Lesser General Public License, Version 2.1
- *
- * Licensed to Elasticsearch B.V under one or more agreements.
- * Elasticsearch B.V licenses this file to you under the Apache 2.0 License or
- * the GNU Lesser General Public License, Version 2.1, at your option.
- * See the LICENSE file in the project root for more information.
- */
-
-
-declare(strict_types = 1);
 
 namespace Elasticsearch\Endpoints;
 
 use Elasticsearch\Common\Exceptions\UnexpectedValueException;
-use Elasticsearch\Serializers\SerializerInterface;
 use Elasticsearch\Transport;
 use Exception;
 use GuzzleHttp\Ring\Future\FutureArrayInterface;
 
+/**
+ * Class AbstractEndpoint
+ *
+ * @category Elasticsearch
+ * @package  Elasticsearch\Endpoints
+ * @author   Zachary Tong <zachary.tong@elasticsearch.com>
+ * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
+ * @link     http://elasticsearch.org
+ */
 abstract class AbstractEndpoint
 {
-    /**
-     * @var array
-     */
-    protected $params =[];
+    /** @var array */
+    protected $params = [];
 
-    /**
-     * @var string
-     */
+    /** @var  string */
     protected $index = null;
 
-    /**
-     * @var string
-     */
+    /** @var  string */
     protected $type = null;
 
-    /**
-     * @var string|int
-     */
+    /** @var  string|int */
     protected $id = null;
 
-    /**
-     * @var string
-     */
+    /** @var  string */
     protected $method = null;
 
-    /**
-     * @var string|array
-     */
+    /** @var  array */
     protected $body = null;
 
-    /**
-     * @var array
-     */
-    private $options = [];
+    /** @var \Elasticsearch\Transport */
+    private $transport = null;
 
-    /**
-     * @var SerializerInterface
-     */
-    protected $serializer;
+    /** @var array */
+    private $options = [];
 
     /**
      * @return string[]
      */
-    abstract public function getParamWhitelist(): array;
+    abstract protected function getParamWhitelist();
 
     /**
      * @return string
      */
-    abstract public function getURI(): string;
+    abstract protected function getURI();
 
     /**
      * @return string
      */
-    abstract public function getMethod(): string;
+    abstract protected function getMethod();
 
+    /**
+     * @param Transport $transport
+     */
+    public function __construct($transport)
+    {
+        $this->transport = $transport;
+    }
+
+    /**
+     * @throws \Exception
+     * @return array
+     */
+    public function performRequest()
+    {
+        $promise = $this->transport->performRequest(
+            $this->getMethod(),
+            $this->getURI(),
+            $this->params,
+            $this->getBody(),
+            $this->options
+        );
+
+        return $promise;
+    }
 
     /**
      * Set the parameters for this endpoint
      *
-     * @param  string[] $params Array of parameters
+     * @param string[] $params Array of parameters
+     *
      * @return $this
      */
-    public function setParams(array $params)
+    public function setParams($params)
     {
-        $this->extractOptions($params);
+        if (is_object($params) === true) {
+            $params = (array)$params;
+        }
+
         $this->checkUserParams($params);
         $params = $this->convertCustom($params);
+        $this->extractOptions($params);
         $this->params = $this->convertArraysToStrings($params);
 
         return $this;
     }
 
-    public function getParams(): array
-    {
-        return $this->params;
-    }
-
-    public function getOptions(): array
-    {
-        return $this->options;
-    }
-
-    public function getIndex(): ?string
-    {
-        return $this->index;
-    }
-
     /**
+     * @param string $index
+     *
      * @return $this
      */
     public function setIndex($index)
@@ -133,18 +125,11 @@ abstract class AbstractEndpoint
     }
 
     /**
-     * @deprecated
+     * @param string $type
+     *
+     * @return $this
      */
-    public function getType(): ?string
-    {
-        return $this->type;
-    }
-
-    /**
-     * @deprecated
-     * @return     $this
-     */
-    public function setType(?string $type)
+    public function setType($type)
     {
         if ($type === null) {
             return $this;
@@ -165,41 +150,65 @@ abstract class AbstractEndpoint
      *
      * @return $this
      */
-    public function setId($docID)
+    public function setID($docID)
     {
         if ($docID === null) {
             return $this;
         }
 
-        if (is_int($docID)) {
-            $docID = (string) $docID;
-        }
-        
         $this->id = urlencode($docID);
 
         return $this;
     }
 
     /**
-     * @return array|string
+     * @param $result
+     *
+     * @return callable|array
      */
-    public function getBody()
+    public function resultOrFuture($result)
+    {
+        $response = null;
+        $async = isset($this->options['client']['future']) ? $this->options['client']['future'] : null;
+        if (is_null($async) || $async === false) {
+            do {
+                $result = $result->wait();
+            } while ($result instanceof FutureArrayInterface);
+
+            return $result;
+        } elseif ($async === true || $async === 'lazy') {
+            return $result;
+        }
+    }
+
+    /**
+     * @return array
+     */
+    protected function getBody()
     {
         return $this->body;
     }
 
-    protected function getOptionalURI(string $endpoint): string
+    /**
+     * @param string $endpoint
+     *
+     * @return string
+     */
+    protected function getOptionalURI($endpoint)
     {
         $uri = [];
         $uri[] = $this->getOptionalIndex();
         $uri[] = $this->getOptionalType();
         $uri[] = $endpoint;
-        $uri =  array_filter($uri);
+        $uri = array_filter($uri);
 
         return '/' . implode('/', $uri);
     }
 
-    private function getOptionalIndex(): string
+    /**
+     * @return string
+     */
+    private function getOptionalIndex()
     {
         if (isset($this->index) === true) {
             return $this->index;
@@ -208,7 +217,10 @@ abstract class AbstractEndpoint
         }
     }
 
-    private function getOptionalType(): string
+    /**
+     * @return string
+     */
+    private function getOptionalType()
     {
         if (isset($this->type) === true) {
             return $this->type;
@@ -220,52 +232,40 @@ abstract class AbstractEndpoint
     /**
      * @param array $params
      *
-     * @throws UnexpectedValueException
+     * @throws \Elasticsearch\Common\Exceptions\UnexpectedValueException
      */
-    private function checkUserParams(array $params)
+    private function checkUserParams($params)
     {
-        if (empty($params)) {
+        if (isset($params) !== true) {
             return; //no params, just return.
         }
 
-        $whitelist = array_merge(
-            $this->getParamWhitelist(),
-            [ 'pretty', 'human', 'error_trace', 'source', 'filter_path', 'opaqueId' ]
-        );
+        $whitelist = array_merge($this->getParamWhitelist(), ['client', 'custom', 'filter_path']);
 
-        $invalid = array_diff(array_keys($params), $whitelist);
-        if (count($invalid) > 0) {
-            sort($invalid);
-            sort($whitelist);
-            throw new UnexpectedValueException(
-                sprintf(
-                    (count($invalid) > 1 ? '"%s" are not valid parameters.' : '"%s" is not a valid parameter.').' Allowed parameters are "%s"',
-                    implode('", "', $invalid),
-                    implode('", "', $whitelist)
-                )
-            );
+        foreach ($params as $key => $value) {
+            if (array_search($key, $whitelist) === false) {
+                throw new UnexpectedValueException(
+                    sprintf(
+                        '"%s" is not a valid parameter. Allowed parameters are: "%s"',
+                        $key,
+                        implode('", "', $whitelist)
+                    )
+                );
+            }
         }
     }
 
     /**
-     * @param array $params Note: this is passed by-reference!
+     * @param $params       Note: this is passed by-reference!
      */
     private function extractOptions(&$params)
     {
         // Extract out client options, then start transforming
         if (isset($params['client']) === true) {
-            // Check if the opaqueId is populated and add the header
-            if (isset($params['client']['opaqueId']) === true) {
-                if (isset($params['client']['headers']) === false) {
-                    $params['client']['headers'] = [];
-                }
-                $params['client']['headers']['x-opaque-id'] = [trim($params['client']['opaqueId'])];
-                unset($params['client']['opaqueId']);
-            }
-
             $this->options['client'] = $params['client'];
             unset($params['client']);
         }
+
         $ignore = isset($this->options['client']['ignore']) ? $this->options['client']['ignore'] : null;
         if (isset($ignore) === true) {
             if (is_string($ignore)) {
@@ -278,7 +278,7 @@ abstract class AbstractEndpoint
         }
     }
 
-    private function convertCustom(array $params): array
+    private function convertCustom($params)
     {
         if (isset($params['custom']) === true) {
             foreach ($params['custom'] as $k => $v) {
@@ -290,7 +290,7 @@ abstract class AbstractEndpoint
         return $params;
     }
 
-    private function convertArraysToStrings(array $params): array
+    private function convertArraysToStrings($params)
     {
         foreach ($params as $key => &$value) {
             if (!($key === 'client' || $key == 'custom') && is_array($value) === true) {
@@ -303,7 +303,7 @@ abstract class AbstractEndpoint
         return $params;
     }
 
-    private function isNestedArray(array $a): bool
+    private function isNestedArray($a)
     {
         foreach ($a as $v) {
             if (is_array($v)) {

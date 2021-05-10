@@ -2,12 +2,10 @@
 
 namespace app\api\controller;
 
-use app\admin\controller\elasticsearch\async\AsyncCart;
 use app\admin\model\Admin;
 use app\admin\model\demand\ItWebDemand;
 use app\admin\model\demand\ItWebTask;
 use app\admin\model\demand\ItWebTaskItem;
-use app\admin\model\web\WebShoppingCart;
 use app\common\controller\Api;
 use Mpdf\Tag\A;
 use think\Db;
@@ -43,9 +41,6 @@ class Index extends Api
      */
     public function index()
     {
-        $cartData = WebShoppingCart::get(80);
-        (new AsyncCart())->runInsert($cartData->toArray(),80);
-        echo 1;die;
         $this->success('请求成功');
     }
     public function test()

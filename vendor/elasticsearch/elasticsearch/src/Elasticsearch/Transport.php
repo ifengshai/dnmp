@@ -1,20 +1,4 @@
 <?php
-/**
- * Elasticsearch PHP client
- *
- * @link      https://github.com/elastic/elasticsearch-php/
- * @copyright Copyright (c) Elasticsearch B.V (https://www.elastic.co)
- * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
- * @license   https://www.gnu.org/licenses/lgpl-2.1.html GNU Lesser General Public License, Version 2.1
- *
- * Licensed to Elasticsearch B.V under one or more agreements.
- * Elasticsearch B.V licenses this file to you under the Apache 2.0 License or
- * the GNU Lesser General Public License, Version 2.1, at your option.
- * See the LICENSE file in the project root for more information.
- */
-
-
-declare(strict_types = 1);
 
 namespace Elasticsearch;
 
@@ -22,9 +6,17 @@ use Elasticsearch\Common\Exceptions;
 use Elasticsearch\ConnectionPool\AbstractConnectionPool;
 use Elasticsearch\Connections\Connection;
 use Elasticsearch\Connections\ConnectionInterface;
-use GuzzleHttp\Ring\Future\FutureArrayInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Class Transport
+ *
+ * @category Elasticsearch
+ * @package  Elasticsearch
+ * @author   Zachary Tong <zachary.tong@elasticsearch.com>
+ * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
+ * @link     http://elasticsearch.org
+ */
 class Transport
 {
     /**
@@ -37,31 +29,25 @@ class Transport
      */
     private $log;
 
-    /**
-     * @var int
-     */
+    /** @var  int */
     public $retryAttempts = 0;
 
-    /**
-     * @var Connection
-     */
+    /** @var  Connection */
     public $lastConnection;
 
-    /**
-     * @var int
-     */
+    /** @var int  */
     public $retries;
 
     /**
      * Transport class is responsible for dispatching requests to the
      * underlying cluster connections
      *
-     * @param int                                   $retries
-     * @param bool                                  $sniffOnStart
+     * @param $retries
+     * @param bool $sniffOnStart
      * @param ConnectionPool\AbstractConnectionPool $connectionPool
-     * @param \Psr\Log\LoggerInterface              $log            Monolog logger object
+     * @param \Psr\Log\LoggerInterface $log    Monolog logger object
      */
-    public function __construct(int $retries, AbstractConnectionPool $connectionPool, LoggerInterface $log, bool $sniffOnStart = false)
+    public function __construct($retries, $sniffOnStart = false, AbstractConnectionPool $connectionPool, LoggerInterface $log)
     {
         $this->log            = $log;
         $this->connectionPool = $connectionPool;
@@ -76,8 +62,11 @@ class Transport
     /**
      * Returns a single connection from the connection pool
      * Potentially performs a sniffing step before returning
+     *
+     * @return ConnectionInterface Connection
      */
-    public function getConnection(): ConnectionInterface
+
+    public function getConnection()
     {
         return $this->connectionPool->nextConnection();
     }
@@ -85,15 +74,16 @@ class Transport
     /**
      * Perform a request to the Cluster
      *
-     * @param string $method  HTTP method to use
-     * @param string $uri     HTTP URI to send request to
-     * @param array  $params  Optional query parameters
-     * @param null   $body    Optional query body
-     * @param array  $options
+     * @param string $method     HTTP method to use
+     * @param string $uri        HTTP URI to send request to
+     * @param null $params     Optional query parameters
+     * @param null $body       Optional query body
+     * @param array $options
      *
      * @throws Common\Exceptions\NoNodesAvailableException|\Exception
+     * @return array
      */
-    public function performRequest(string $method, string $uri, array $params = [], $body = null, array $options = []): FutureArrayInterface
+    public function performRequest($method, $uri, $params = null, $body = null, $options = [])
     {
         try {
             $connection  = $this->getConnection();
@@ -102,7 +92,7 @@ class Transport
             throw $exception;
         }
 
-        $response             = [];
+        $response             = array();
         $caughtException      = null;
         $this->lastConnection = $connection;
 
@@ -114,7 +104,7 @@ class Transport
             $options,
             $this
         );
-        
+
         $future->promise()->then(
             //onSuccess
             function ($response) {
@@ -122,38 +112,24 @@ class Transport
                 // Note, this could be a 4xx or 5xx error
             },
             //onFailure
-            function ($response) {
-                $code = $response->getCode();
+            function (\Exception $response) {
                 // Ignore 400 level errors, as that means the server responded just fine
-                if ($code < 400 || $code >= 500) {
+                $code = $response->getCode();
+                if (!(isset($code) && $code >=400 && $code < 500)) {
                     // Otherwise schedule a check
                     $this->connectionPool->scheduleCheck();
                 }
-            }
-        );
+            });
 
         return $future;
     }
 
     /**
-     * @param FutureArrayInterface $result  Response of a request (promise)
-     * @param array                $options Options for transport
+     * @param $request
      *
-     * @return callable|array
+     * @return bool
      */
-    public function resultOrFuture(FutureArrayInterface $result, array $options = [])
-    {
-        $response = null;
-        $async = isset($options['client']['future']) ? $options['client']['future'] : null;
-        if (is_null($async) || $async === false) {
-            do {
-                $result = $result->wait();
-            } while ($result instanceof FutureArrayInterface);
-        }
-        return $result;
-    }
-
-    public function shouldRetry(array $request): bool
+    public function shouldRetry($request)
     {
         if ($this->retryAttempts < $this->retries) {
             $this->retryAttempts += 1;
@@ -167,8 +143,10 @@ class Transport
     /**
      * Returns the last used connection so that it may be inspected.  Mainly
      * for debugging/testing purposes.
+     *
+     * @return Connection
      */
-    public function getLastConnection(): ConnectionInterface
+    public function getLastConnection()
     {
         return $this->lastConnection;
     }

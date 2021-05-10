@@ -1,32 +1,25 @@
 <?php
-/**
- * Elasticsearch PHP client
- *
- * @link      https://github.com/elastic/elasticsearch-php/
- * @copyright Copyright (c) Elasticsearch B.V (https://www.elastic.co)
- * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
- * @license   https://www.gnu.org/licenses/lgpl-2.1.html GNU Lesser General Public License, Version 2.1
- *
- * Licensed to Elasticsearch B.V under one or more agreements.
- * Elasticsearch B.V licenses this file to you under the Apache 2.0 License or
- * the GNU Lesser General Public License, Version 2.1, at your option.
- * See the LICENSE file in the project root for more information.
- */
-
-
-declare(strict_types = 1);
 
 namespace Elasticsearch\Helper\Iterators;
 
 use Iterator;
 
-class SearchHitIterator implements Iterator, \Countable
-{
+/**
+ * Class SearchHitIterator
+ *
+ * @category Elasticsearch
+ * @package  Elasticsearch\Helper\Iterators
+ * @author   Arturo Mejia <arturo.mejia@kreatetechnology.com>
+ * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
+ * @link     http://elasticsearch.org
+ * @see      Iterator
+ */
+class SearchHitIterator implements Iterator, \Countable {
 
     /**
      * @var SearchResponseIterator
      */
-    private $search_responses;
+    private   $search_responses;
 
     /**
      * @var int
@@ -46,7 +39,7 @@ class SearchHitIterator implements Iterator, \Countable
     /**
      * @var int
      */
-    protected $count = 0;
+    protected $count;
 
     /**
      * Constructor
@@ -64,14 +57,14 @@ class SearchHitIterator implements Iterator, \Countable
      * @return void
      * @see    Iterator::rewind()
      */
-    public function rewind(): void
+    public function rewind()
     {
         $this->current_key = 0;
         $this->search_responses->rewind();
 
         // The first page may be empty. In that case, the next page is fetched.
         $current_page = $this->search_responses->current();
-        if ($this->search_responses->valid() && empty($current_page['hits']['hits'])) {
+        if($this->search_responses->valid() && empty($current_page['hits']['hits'])) {
             $this->search_responses->next();
         }
 
@@ -91,12 +84,12 @@ class SearchHitIterator implements Iterator, \Countable
      * @return void
      * @see    Iterator::next()
      */
-    public function next(): void
+    public function next()
     {
         $this->current_key++;
         $this->current_hit_index++;
         $current_page = $this->search_responses->current();
-        if (isset($current_page['hits']['hits'][$this->current_hit_index])) {
+        if(isset($current_page['hits']['hits'][$this->current_hit_index])) {
             $this->current_hit_data = $current_page['hits']['hits'][$this->current_hit_index];
         } else {
             $this->search_responses->next();
@@ -110,7 +103,7 @@ class SearchHitIterator implements Iterator, \Countable
      * @return bool
      * @see    Iterator::valid()
      */
-    public function valid(): bool
+    public function valid()
     {
         return is_array($this->current_hit_data);
     }
@@ -121,7 +114,7 @@ class SearchHitIterator implements Iterator, \Countable
      * @return array
      * @see    Iterator::current()
      */
-    public function current(): array
+    public function current()
     {
         return $this->current_hit_data;
     }
@@ -132,9 +125,9 @@ class SearchHitIterator implements Iterator, \Countable
      * @return int
      * @see    Iterator::key()
      */
-    public function key(): int
+    public function key()
     {
-        return $this->current_key;
+        return $this->current_hit_index;
     }
 
     /**
@@ -142,22 +135,27 @@ class SearchHitIterator implements Iterator, \Countable
      *
      * @internal
      */
-    private function readPageData(): void
+    private function readPageData()
     {
-        if ($this->search_responses->valid()) {
+        if($this->search_responses->valid()) {
             $current_page = $this->search_responses->current();
             $this->current_hit_index = 0;
             $this->current_hit_data = $current_page['hits']['hits'][$this->current_hit_index];
         } else {
             $this->current_hit_data = null;
         }
+
     }
 
     /**
      * {@inheritDoc}
      */
-    public function count(): int
+    public function count()
     {
+        if ($this->count === null) {
+            $this->rewind();
+        }
+
         return $this->count;
     }
 }
