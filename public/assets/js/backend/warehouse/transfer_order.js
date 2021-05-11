@@ -197,6 +197,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui'], function ($,
                 Controller.api.bindevent();
             })
 
+            $(document).on('click', '.btn-status', function () {
+                $('.status').val(1);
+                $('#status').val(1);
+            })
+
             //删除商品数据
             $(document).on('click', '.btn-del', function () {
                 var _this = $(this);

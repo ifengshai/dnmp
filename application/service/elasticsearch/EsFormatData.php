@@ -223,6 +223,8 @@ class EsFormatData
         }
         //获取活跃用户数
         $activeUserNum = $data['activeUserNum']['value'];
+        //获取会话数
+        $sessions = $data['sessions']['value'];
         //注册用户数
         $registerNum = $data['registerNum']['value'];
         //vip用户数
@@ -235,7 +237,6 @@ class EsFormatData
         $shippingTotalMoney = round($data['shippingTotalMoney']['value'], 2);
         //客单价
         $orderUnitPrice = $orderNum ? bcdiv($salesTotalMoney, $orderNum, 2) : 0;
-
 
         $compareActiveUserNumRate = $compareRegisterNumRate = $compareVipUserNuRate = $compareOrderNumRate = $compareSalesTotalMoneyRate = $compareShippingTotalMoneyRate = $compareOrderUnitPriceRate = 0;
 
@@ -276,6 +277,8 @@ class EsFormatData
         $detailNum = $data['detailNum']['value'];
         //加购数
         $cartNum = $data['cartNum']['value'];
+        //更新购物车数
+        $updateCartNum = $data['updateCartNum']['value'];
         //支付数
         $completeNum = $data['completeNum']['value'];
 
@@ -288,44 +291,103 @@ class EsFormatData
         $completeNumRate = !$cartNum ? '0%' : bcmul(bcdiv($completeNum, $cartNum, 4), 100, 2) . '%';
 
         $dayBuckets = $data['daySale']['buckets'];
-        $days = $dayBuckets ? array_column($dayBuckets, 'key') : [];
-        $dayActiveUserNum = $dayBuckets ? array_column($dayBuckets, 'activeUserNum') : [];
-        $dayOrderNum = $dayBuckets ? array_column($dayBuckets, 'orderNum') : [];
+        if($dayBuckets){
+            $list = [];
+            $i = 0;
+            foreach ($dayBuckets as $key=>$value){
+                $list[$i]['day_date'] = date('Y-m-d',strtotime($value['key']));
+                $list[$i]['sessions'] = $value['sessions']['value'];
+                $list[$i]['add_cart_rate'] = $value['addCartRate']['value'].'%';
+                $list[$i]['session_rate'] = $value['session_rate']['value'].'%';
+                $list[$i]['order_num'] = $value['orderNum']['value'];
+                $list[$i]['order_unit_price'] = round($value['order_unit_price']['value'],2);
+                $list[$i]['new_cart_num'] = $value['cartNum']['value'];
+                $list[$i]['update_cart_num'] = $value['update_cart_num']['value'];
+                $list[$i]['sales_total_money'] = round($value['salesTotalMoney']['value'],2);
+                $list[$i]['register_num'] = $value['registerNum']['value'];
+                $i++;
+            }
 
-        $dayChart = [
-            'xColumnName' => array_values($days),
-            'columnData'  => [
-                [
-                    'type'       => 'line',
-                    'data'       => array_values($dayActiveUserNum),
-                    'name'       => '活跃用户数',
-                    'yAxisIndex' => 0,
-                    'smooth'     => true //平滑曲线
+            $days = $list ? array_column($list, 'day_date') : [];
+            $dayActiveUserNum = $dayBuckets ? array_column($dayBuckets, 'activeUserNum') : [];
+            $dayOrderNum = $list ? array_column($list, 'order_num') : [];
+            $daySessions = $list ? array_column($list, 'sessions') : [];
+            $dayOrderTotal = $list ? array_column($list, 'sales_total_money') : [];
+            $dayCartNum = $list ? array_column($list, 'new_cart_num') : [];
+
+            $dayChart = [
+                'xColumnName' => array_values($days),
+                'columnData'  => [
+                    [
+                        'type'       => 'line',
+                        'data'       => array_values($dayActiveUserNum),
+                        'name'       => '活跃用户数',
+                        'yAxisIndex' => 0,
+                        'smooth'     => true //平滑曲线
+                    ],
+                    [
+                        'type'       => 'line',
+                        'data'       => array_values($dayOrderNum),
+                        'name'       => '订单数',
+                        'yAxisIndex' => 1,
+                        'smooth'     => true //平滑曲线
+                    ],
                 ],
-                [
-                    'type'       => 'line',
-                    'data'       => array_values($dayOrderNum),
-                    'name'       => '订单数',
-                    'yAxisIndex' => 1,
-                    'smooth'     => true //平滑曲线
+            ];
+
+            $dayChart1 = [
+                'xColumnName' => array_values($days),
+                'columnData'  => [
+                    [
+                        'type'       => 'line',
+                        'data'       => array_values($daySessions),
+                        'name'       => '会话数',
+                        'yAxisIndex' => 0,
+                        'smooth'     => true //平滑曲线
+                    ],
+                    [
+                        'type'       => 'line',
+                        'data'       => array_values($dayOrderTotal),
+                        'name'       => '销售额',
+                        'yAxisIndex' => 1,
+                        'smooth'     => true //平滑曲线
+                    ],
                 ],
-            ],
-        ];
+            ];
 
-        /**
-         * 转化漏斗
-         */
-        $funnel = [
-            'column'     => ['用户购买转化漏斗'],
-            'columnData' => [
-                ['value' => $landingNum, 'percent' => $landingNumRate, 'name' => '着陆页'],
-                ['value' => $detailNum, 'percent' => $detailNumRate, 'name' => '商品详情页'],
-                ['value' => $cartNum, 'percent' => $cartNumRate, 'name' => '加购物车'],
-                ['value' => $completeNum, 'percent' => $completeNumRate, 'name' => '支付转化'],
-            ],
-        ];
-
-        return compact('activeUserNum', 'registerNum', 'vipUserNum', 'orderNum', 'salesTotalMoney', 'shippingTotalMoney', 'orderUnitPrice', 'dayChart', 'funnel', 'compareActiveUserNumRate', 'compareRegisterNumRate', 'compareVipUserNuRate', 'compareOrderNumRate', 'compareSalesTotalMoneyRate', 'compareShippingTotalMoneyRate', 'compareOrderUnitPriceRate');
+            $dayChart2 = [
+                'xColumnName' => array_values($days),
+                'columnData'  => [
+                    [
+                        'type'       => 'line',
+                        'data'       => array_values($dayCartNum),
+                        'name'       => '购物车数量',
+                        'yAxisIndex' => 0,
+                        'smooth'     => true //平滑曲线
+                    ],
+                    [
+                        'type'       => 'line',
+                        'data'       => array_values($dayOrderNum),
+                        'name'       => '订单数量',
+                        'yAxisIndex' => 1,
+                        'smooth'     => true //平滑曲线
+                    ],
+                ],
+            ];
+            /**
+             * 转化漏斗
+             */
+            $funnel = [
+                'column'     => ['用户购买转化漏斗'],
+                'columnData' => [
+                    ['value' => $landingNum, 'percent' => $landingNumRate, 'name' => '着陆页'],
+                    ['value' => $detailNum, 'percent' => $detailNumRate, 'name' => '商品详情页'],
+                    ['value' => $cartNum, 'percent' => $cartNumRate, 'name' => '加购物车'],
+                    ['value' => $completeNum, 'percent' => $completeNumRate, 'name' => '支付转化'],
+                ],
+            ];
+        }
+        return compact('activeUserNum', 'registerNum', 'vipUserNum', 'orderNum', 'salesTotalMoney', 'shippingTotalMoney', 'orderUnitPrice','sessions','updateCartNum','cartNum', 'dayChart','dayChart1','dayChart2', 'funnel', 'compareActiveUserNumRate', 'compareRegisterNumRate', 'compareVipUserNuRate', 'compareOrderNumRate', 'compareSalesTotalMoneyRate', 'compareShippingTotalMoneyRate', 'compareOrderUnitPriceRate','list');
 
     }
 
@@ -640,10 +702,10 @@ class EsFormatData
             }
             foreach ($daySaleBuckets as $k => $v) {
                 $yData[$site]['salesTotalMoney'][] = $v['salesTotalMoney']['value'] ?: 0;
-                $yData[$site]['avgPrice'][] = $v['avgPrice']['value'] ?: 0;
+                $yData[$site]['avgPrice'][] = $v['avgPrice']['value'] ? round($v['avgPrice']['value'],2) : 0;
                 $yData[$site]['registerNum'][] = $v['registerNum']['value'] ?: 0;
                 $yData[$site]['cartNum'][] = $v['cartNum']['value'] ?: 0;
-                $yData[$site]['orderNum'][] = $v['orderNum']['value'] ?: 0;
+                $yData[$site]['orderCount'][] = $v['orderNum']['value'] ?: 0;
                 $yData[$site]['cartNumRate'][] = $v['orderNum']['value'] ? bcmul(bcdiv($v['cartNum']['value'], $v['orderNum']['value'], 4), 100) : 0;
             }
 

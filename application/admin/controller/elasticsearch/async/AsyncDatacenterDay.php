@@ -16,6 +16,7 @@ class AsyncDatacenterDay extends BaseElasticsearch
 {
     /**
      * datacenter day同步
+     *
      * @param $id
      *
      * @throws \think\Exception
@@ -27,15 +28,18 @@ class AsyncDatacenterDay extends BaseElasticsearch
      */
     public function runInsert($id)
     {
-        try{
-            $datacenterDay = DatacenterDay::where('id',$id)->find()->toArray();
-            $data = array_map(function($value) {
-                return $value === null ? 0 : $value;
-            },$datacenterDay);
-            $mergeData = strtotime($data['day_date']);
-            $insertData = $this->formatDate($data,$mergeData);
-            $this->esService->addToEs('mojing_datacenterday',$insertData);
-        }catch (\Exception $e) {
+        try {
+            $datacenterDay = DatacenterDay::where('id', $id)->find();
+            if($datacenterDay){
+                $data = array_map(function ($value) {
+                    return $value === null ? 0 : $value;
+                }, $datacenterDay->toArray());
+                $mergeData = strtotime($data['day_date']);
+                $insertData = $this->formatDate($data, $mergeData);
+                $this->esService->addToEs('mojing_datacenterday', $insertData);
+            }
+
+        } catch (\Exception $e) {
             echo $e->getMessage();
         }
     }

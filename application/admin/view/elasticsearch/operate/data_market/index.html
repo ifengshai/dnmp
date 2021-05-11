@@ -104,9 +104,9 @@
                                                 <option value="{$key}">{$vo}</option>
                                                 {/foreach}
                                             </select>
-
+                                           
                                         </div>
-
+                                       
                                     </div>
 
                                 </div>
@@ -369,13 +369,13 @@
 <script>
     var Orderdata = {
         column: {:json_encode($xData)},
-    zeeloolSalesNumList: {:json_encode($yData['zeelool']['orderNum'])},
-    vooguemeSalesNumList: {:json_encode($yData['voogueme']['orderNum'])},
-    nihaoSalesNumList: {:json_encode($yData['nihao']['orderNum'])},
-    meeloogSalesNumList: {:json_encode($yData['meeloog']['orderNum'])},
-    zeelool_esSalesNumList: {:json_encode($yData['zeelool_es']['orderNum'])},
-    zeelool_deSalesNumList: {:json_encode($yData['zeelool_de']['orderNum'])},
-    zeelool_jpSalesNumList: {:json_encode($yData['zeelool_jp']['orderNum'])},
+    zeeloolSalesNumList: {:json_encode($yData['zeelool']['orderCount'])},
+    vooguemeSalesNumList: {:json_encode($yData['voogueme']['orderCount'])},
+    nihaoSalesNumList: {:json_encode($yData['nihao']['orderCount'])},
+    meeloogSalesNumList: {:json_encode($yData['meeloog']['orderCount'])},
+    zeelool_esSalesNumList: {:json_encode($yData['zeelool_es']['orderCount'])},
+    zeelool_deSalesNumList: {:json_encode($yData['zeelool_de']['orderCount'])},
+    zeelool_jpSalesNumList: {:json_encode($yData['zeelool_jp']['orderCount'])},
     zeeloolSalesMoneyList : {:json_encode($yData['zeelool']['salesTotalMoney'])},
     vooguemeSalesMoneyList : {:json_encode($yData['voogueme']['salesTotalMoney'])},
     nihaoSalesMoneyList :{:json_encode($yData['nihao']['salesTotalMoney'])},
@@ -412,4 +412,5 @@
     zeelool_deRegisterCustomer :{:json_encode($yData['zeelool_de']['registerNum'])},
     zeelool_jpRegisterCustomer :{:json_encode($yData['zeelool_jp']['registerNum'])},
     };
+    console.log(Orderdata);
 </script>

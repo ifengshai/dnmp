@@ -1729,8 +1729,9 @@ class NewProduct extends Backend
             ->setCellValue("B1", "供应商SKU")
             ->setCellValue("C1", "供应商名称");   //利用setCellValues()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "单价")
-            ->setCellValue("E1", "选品状态");
-
+            ->setCellValue("E1", "选品状态")
+            ->setCellValue("F1", "商品名称");
+        $item = new Item();
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['supplier_sku']);
@@ -1747,7 +1748,9 @@ class NewProduct extends Backend
             } else {
                 $status = '新建';
             }
+            $skuName = $item->where('sku',$value['sku'])->value('name');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $status);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $skuName);
         }
 
         //设置宽度
@@ -1756,6 +1759,7 @@ class NewProduct extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(40);
 
         //设置边框
         $border = [

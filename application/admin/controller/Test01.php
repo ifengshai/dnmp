@@ -921,5 +921,135 @@ class Test01 extends Backend
         return $hours_min;
     }
 
+    /**
+     * 财务数据 -- 库存台账导出
+     * @author mjj
+     * @date   2021/5/7 17:15:44
+     */
+    public function financeExport()
+    {
+        set_time_limit(0);
+        $this->instock = new \app\admin\model\warehouse\Instock;
+        $this->outstock = new \app\admin\model\warehouse\Outstock;
+        $this->stockparameter = new \app\admin\model\financepurchase\StockParameter;
+        $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $this->model = new \app\admin\model\itemmanage\Item;
+        //时间
+        $start = '2021-05-06';
+        $end = '2021-05-06 23:59:59';
+        //采购入库数量
+        $instockWhere['s.status'] = 2;
+        $instockWhere['s.type_id'] = 1;
+        $instockWhere['s.check_time'] = ['between', [$start, $end]];
+        $inSkus = $this->instock
+            ->alias('s')
+            ->join('fa_in_stock_item i','i.in_stock_id=s.id')
+            ->where($instockWhere)
+            ->group('sku')
+            ->column('sku');
+        $arr1 = [];
+        $i = 0;
+        foreach ($inSkus as $inSku){
+            //获取入库sku类别
+            $category = $this->model
+                ->alias('i')
+                ->join('fa_item_category c','i.category_id=c.id')
+                ->where('sku',$inSku)
+                ->value('c.name');
+            $arr1[$i]['category'] = $category;
+            $arr1[$i]['sku'] = $inSku;
+            $arr1[$i]['inOutFlag'] = '入库';//入库
+            $instocks = $this->instock
+                ->alias('s')
+                ->join('fa_in_stock_item i','i.in_stock_id=s.id')
+                ->join('fa_purchase_order_item oi', 'i.purchase_id=oi.purchase_id')
+                ->join('fa_purchase_order o', 'oi.purchase_id=o.id')
+                ->where($instockWhere)
+                ->where('i.sku',$inSku)
+                ->field('sum(round(o.purchase_total/oi.purchase_num,2)*in_stock_num) purchase_total,sum(in_stock_num) purchase_num')
+                ->find();
+            $arr1[$i]['total'] = $instocks['purchase_total'];//入库金额
+            $arr1[$i]['num'] = $instocks['purchase_num'];//入库数量
+            $i++;
+        }
 
+        /*************出库单出库start**************/
+        $barWhere['out_stock_time'] = ['between', [$start, $end]];
+        $barWhere['out_stock_id'] = ['<>', 0];
+        $barWhere['library_status'] = 2;
+        $bars = $this->item
+            ->where($barWhere)
+            ->group('sku')
+            ->column('sku');
+        $arr2 = [];
+        $j = 0;
+        foreach ($bars as $bar) {
+            //获取出库sku类别
+            $category = $this->model
+                ->alias('i')
+                ->join('fa_item_category c','i.category_id=c.id')
+                ->where('sku',$bar)
+                ->value('c.name');
+            $arr2[$j]['category'] = $category;
+            $arr2[$j]['sku'] = $bar;
+            $arr2[$j]['inOutFlag'] = '出库';//出库单出库
+            $barItems = $this->item
+                ->alias('i')
+                ->join('fa_purchase_order_item p', 'i.purchase_id=p.purchase_id and i.sku=p.sku')
+                ->join('fa_purchase_order o', 'p.purchase_id=o.id')
+                ->field('sum(round(o.purchase_total/p.purchase_num,2)) purchase_total,count(*) purchase_num')
+                ->where($barWhere)
+                ->where('i.sku', $bar)
+                ->find();
+            $arr2[$j]['total'] = $barItems['purchase_total'];//出库金额
+            $arr2[$j]['num'] = $barItems['purchase_num'];//出库数量
+            $j++;
+        }
+        /*************出库单出库end**************/
+        /*************订单出库start**************/
+        $barWhere1['out_stock_time'] = ['between', [$start, $end]];
+        $barWhere1['out_stock_id'] = 0;
+        $barWhere1['item_order_number'] = ['<>', ''];
+        $barWhere1['library_status'] = 2;
+        $bars1 = $this->item
+            ->where($barWhere1)
+            ->group('sku')
+            ->column('sku');
+        $arr3 = [];
+        $l = 0;
+        foreach ($bars1 as $bar1){
+            //获取出库sku类别
+            $category = $this->model
+                ->alias('i')
+                ->join('fa_item_category c','i.category_id=c.id')
+                ->where('sku',$bar1)
+                ->value('c.name');
+            $arr3[$l]['category'] = $category;
+            $arr3[$l]['sku'] = $bar1;
+            $arr3[$l]['inOutFlag'] = '出库';//订单出库
+            $barItems1 = $this->item
+                ->alias('i')
+                ->join('fa_purchase_order_item p', 'i.purchase_id=p.purchase_id and i.sku=p.sku')
+                ->join('fa_purchase_order o', 'p.purchase_id=o.id')
+                ->where($barWhere1)
+                ->where('i.sku', $bar1)
+                ->field('sum(round(o.purchase_total/p.purchase_num,2)) purchase_total,count(*) purchase_num')
+                ->find();
+            $arr3[$l]['total'] = $barItems1['purchase_total'];//出库金额
+            $arr3[$l]['num'] = $barItems1['purchase_num'];//出库数量
+            $l++;
+        }
+        /*************订单出库end**************/
+        $arr = array_merge($arr1,$arr2,$arr3);
+        $file_content = '';
+        foreach ($arr as $key => $value) {
+            $file_content = $file_content . implode(',', $value) . "\n";
+            echo "{$value['sku']}:success\n";
+        }
+        $export_str = ['商品分类', '商品SKU', '出入库类型', '金额（元）', '数量（个）'];
+        $file_title = implode(',', $export_str) . " \n";
+        $file = $file_title . $file_content;
+        file_put_contents('/var/www/mojing/runtime/log/finance61.csv', $file);
+        exit;
+    }
 }

@@ -5,6 +5,7 @@ namespace app\admin\controller;
 use app\admin\controller\zendesk\Notice;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\lens\LensPrice;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\common\controller\Backend;
 use think\Db;
@@ -30,13 +31,35 @@ class Wangpenglei extends Backend
         $this->access_token = $this->facebook->access_token;
         $this->accounts = $this->facebook->accounts;
     }
+    public function select_sku()
+    {
+        $itemPlatformSku = new ItemPlatformSku();
+        $productbarcodeitem = new ProductBarCodeItem();
+        $skus = $itemPlatformSku
+            ->where('platform_sku', 'in', [])
+            ->field('sku')
+            ->group('sku')
+            ->select();
+        $skus = collection($skus)->toArray();
+        $arr = ['SX0019-05','OP527327-01','JS771317-01','CH672798-08','TT598617-05','OP449452-02','OP02048-03','OP421241-02','OI913496-02','OP01990-03','FM0361-01','WA034265-01','WA245023-03','ER134040-01','WA065152-01','WA192071-01','SX0019-03','SX0019-02','DM638949-01','OP358317-02','WA034265-01','Glasses Pocket-02'];
+
+        foreach ($arr as $k => $v) {
+            $list[$k]['sku'] = $v;
+            $list[$k]['stock'] = $productbarcodeitem
+                ->where(['library_status' => 1, 'item_order_number' => '', 'sku' => $v])
+                ->where('location_code_id','>',0)
+                ->count();
+        }
+        Db::name('zz_temp1')->insertAll($list);
+
+    }
 
     /************************跑库存数据用START*****勿删*****************************/
     //导入实时库存 第一步
     public function set_product_relstock()
     {
         $this->item = new \app\admin\model\itemmanage\Item;
-        $list = Db::table('fa_zz_temp2')->select();
+        $list = Db::table('fa_zz_temp1')->select();
         foreach ($list as $k => $v) {
             $p_map['sku'] = $v['sku'];
             $data['real_time_qty'] = $v['stock'];
@@ -62,7 +85,7 @@ class Wangpenglei extends Backend
         $this->item = new \app\admin\model\itemmanage\Item;
         // $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
 
-        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $skus = Db::table('fa_zz_temp1')->column('sku');
 
         foreach ($skus as $k => $v) {
             $map = [];
@@ -123,7 +146,7 @@ class Wangpenglei extends Backend
         $this->item = new \app\admin\model\itemmanage\Item;
         // $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
 
-        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $skus = Db::table('fa_zz_temp1')->column('sku');
         foreach ($skus as $k => $v) {
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
@@ -181,7 +204,7 @@ class Wangpenglei extends Backend
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
 
-        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $skus = Db::table('fa_zz_temp1')->column('sku');
         $list = $this->item->field('sku,stock,occupy_stock,available_stock,real_time_qty,distribution_occupy_stock')->where(['sku' => ['in', $skus]])->select();
         foreach ($list as $k => $v) {
             $data['stock'] = $v['real_time_qty'] + $v['distribution_occupy_stock'];
@@ -208,7 +231,7 @@ class Wangpenglei extends Backend
     {
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $skus = Db::table('fa_zz_temp2')->column('sku');
+        $skus = Db::table('fa_zz_temp1')->column('sku');
         // dump($skus);die;
         foreach ($skus as $k => $v) {
             // $v = 'OA01901-06';
@@ -1212,7 +1235,6 @@ class Wangpenglei extends Backend
             echo $diff.'ok'."\n";
         }
         echo 'all ok';
-//        exit;
     }
 
 
@@ -1231,8 +1253,8 @@ class Wangpenglei extends Backend
         $type = 1;
         $site = 'zeelool';
         for ($i = 0; $i < 24; $i++) {
-            $start = '2021-04-30T'.$i.':00:00Z';
-            $end = '2021-04-30T'.$i.':59:59Z';
+            $start = '2021-05-06T'.$i.':00:00Z';
+            $end = '2021-05-06T'.$i.':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(100000);
@@ -1241,5 +1263,63 @@ class Wangpenglei extends Backend
             }
 
         }
+    }
+
+
+    /**
+     * 判断定制现片逻辑
+     */
+    public function set_processing_type($params = [])
+    {
+        $arr = [];
+        //判断处方是否异常
+        $list = $this->is_prescription_abnormal($params);
+        $arr = array_merge($arr, $list);
+
+        //仅镜框
+        if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
+            $arr['order_prescription_type'] = 1;
+        } else {
+            $od_sph = (float)urldecode($params['od_sph']);
+            $os_sph = (float)urldecode($params['os_sph']);
+            $od_cyl = (float)urldecode($params['od_cyl']);
+            $os_cyl = (float)urldecode($params['os_cyl']);
+            //判断是否为现片，其余为定制
+            $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
+            foreach ($lensData as $v) {
+                if (($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'])
+                    && ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'])
+                    && ($os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end'])
+                    && ($od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end'])
+                ) {
+                    $arr['order_prescription_type'] = 2;
+                }
+            }
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 2) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        return $arr;
+    }
+
+    /**
+     * 测试镜片处方
+     * @author wpl
+     * @date   2021/5/6 13:54
+     */
+    public function test_lens()
+    {
+        $params['od_sph'] = '-2.50';
+        $params['os_sph'] = '-2.50';
+        $params['od_cyl'] = '-0.50';
+        $params['os_cyl'] = '-0.50';
+        $params['pd'] = 60;
+        $params['lens_number'] = 22100000;
+        $data = $this->set_processing_type($params);
+        dump($data);
+        die;
     }
 }

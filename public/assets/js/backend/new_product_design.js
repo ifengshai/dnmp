@@ -2,7 +2,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
     function viewTable(table, value) {
         //隐藏、显示搜索及按钮
         $('#responsible_id').parents('.form-group').hide();
-        $('#site').parents('.form-group').hide();
         $('#export_guanlian').hide();
         $('select[name="status"]').parents('.form-group').hide();
         if (0 == value) {
@@ -104,6 +103,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                             formatter: Table.api.formatter.status,
                         },
+                        {field: 'responsible_id', title: __('责任人')},
+                        {field: 'location_code', title: __('样品间库位号'),operate: false},
+                        {field: 'platform', title: __('站点'),operate: false},
                         {field: 'site', title: __('站点'), visible: false,
                             addclass:'plat_type',
                             searchList: {
@@ -113,7 +115,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             },
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'responsible_id', title: __('责任人')},
+                        {field: 'operate_time', title: __('操作时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime,operate: false},
                         {field: 'create_time', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange',sortable:true, formatter: Table.api.formatter.datetime},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
@@ -411,6 +413,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }else{
                         table.bootstrapTable('showColumn','responsible_id');
                     }
+                    if (value.label ==3){
+                        table.bootstrapTable('showColumn','location_code');
+                    }else {
+                        table.bootstrapTable('hideColumn','location_code');
+                    }
+                    if (value.label ==3 || value.label ==2 || value.label ==4){
+                        table.bootstrapTable('showColumn','platform');
+                    }else {
+                        table.bootstrapTable('hideColumn','platform');
+                    }
                 }
             });
 
@@ -443,7 +455,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var design_status= $('.design_status').val();
                 var plat_type = $('.plat_type').val();
                 var create_time = $('#create_time').val();
-                window.location.href=Config.moduleurl+'/new_product_design/export?design_status='+design_status+'&plat_type='+plat_type+'&create_time='+create_time;
+                window.location.href=Config.moduleurl+'/new_product_design/export?design_status='+design_status+'&plat_type='+plat_type;
             });
         },
         add: function () {

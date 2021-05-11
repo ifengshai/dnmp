@@ -166,6 +166,36 @@ class Zendesk extends Backend
             $list = collection($list)->toArray();
             $admin = Db::name('admin')->column('nickname','id');
             foreach($list as $k=>$v){
+                switch ($v['type']){
+                    case 1:
+                        $webModel = Db::connect('database.db_zeelool');
+                        break;
+                    case 2:
+                        $webModel = Db::connect('database.db_voogueme');
+                        break;
+                    case 3:
+                        $webModel = Db::connect('database.db_nihao');
+                        break;
+                }
+                //查询该用户的组别
+                $group = $webModel->table('customer_entity')
+                    ->where('email',$v['email'])
+                    ->value('group_id');
+                switch ($group){
+                    case 1:
+                        $groupName = '普通';
+                        break;
+                    case 2:
+                        $groupName = '批发';
+                        break;
+                    case 4:
+                        $groupName = 'VIP';
+                        break;
+                    default:
+                        $groupName = '-';
+                        break;
+                }
+                $list[$k]['group_name'] = $groupName;
                 $list[$k]['assign_id_nickname'] = $admin[$v['assign_id']];
                 $list[$k]['due_id_nickname'] = $admin[$v['due_id']];
             }
@@ -275,7 +305,12 @@ class Zendesk extends Backend
                     } 
                     if(strpos($sign,'</p>')!==false){
                         $sign = str_replace('</p>','</span>',$sign);
-                    } 
+                    }
+                    if($params['content']){
+                        if(strpos($params['content'],'{{agent.name}}')!==false){
+                            $params['content'] = str_replace('{{agent.name}}',$zendeskNickname,$params['content']);
+                        }
+                    }
                     
                     $priority = config('zendesk.priority')[$params['priority']];
                     if ($priority) {
@@ -438,7 +473,36 @@ class Zendesk extends Backend
         }
         //获取主的ticket
         $ticket = $this->model->where('id', $ids)->find();
-
+        switch ($ticket->type){
+            case 1:
+                $webModel = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $webModel = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $webModel = Db::connect('database.db_nihao');
+                break;
+        }
+        //查询该用户的组别
+        $group = $webModel->table('customer_entity')
+            ->where('email',$ticket->email)
+            ->value('group_id');
+        switch ($group){
+            case 1:
+                $groupName = '普通';
+                break;
+            case 2:
+                $groupName = '批发';
+                break;
+            case 4:
+                $groupName = 'VIP';
+                break;
+            default:
+                $groupName = '-';
+                break;
+        }
+        $ticket->groupName = $groupName;
 
         $siteName = 'zeelool';
         if($ticket->type == 2){
@@ -502,6 +566,11 @@ class Zendesk extends Backend
                     }
                     if(strpos($params['content'],'</p>')!==false){
                         $params['content'] = str_replace('</p>','</span>',$params['content']);
+                    }
+                    if($params['content']){
+                        if(strpos($params['content'],'{{agent.name}}')!==false){
+                            $params['content'] = str_replace('{{agent.name}}',$zendeskNickname,$params['content']);
+                        }
                     }
 
                     $priority = config('zendesk.priority')[$params['priority']];

@@ -4,7 +4,11 @@ namespace app\admin\controller;
 
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\warehouse\ProductBarCodeItem;
+use app\enum\OrderType;
+use fast\Excel;
 use fast\Http;
 use think\Controller;
 use app\Common\model\Auth;
@@ -12,6 +16,7 @@ use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use fast\Trackingmore;
+use think\Request;
 
 class Test4 extends Controller
 {
@@ -3142,5 +3147,328 @@ class Test4 extends Controller
                 echo $v['sku'].'更新失败'."\n";
             }
         }
+    }
+
+    public function batch_export_xls_account2()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $this->model = new NewOrderItemProcess();
+        $this->_work_order_change_sku = new WorkOrderChangeSku();
+        //默认展示3个月内的数据
+        //二月
+        $map['a.created_at'] = ['between', [1612108800,1614527999]];//128662
+//        $map['a.created_at'] = ['between', [1614528000,1617206399]];//173915
+//        $map['a.created_at'] = ['between', [1617206400,1619798399]];//162822
+//        $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
+        //站点列表
+        $siteList = [
+            1  => 'Zeelool',
+            2  => 'Voogueme',
+            3  => 'Nihao',
+            4  => 'Meeloog',
+            5  => 'Wesee',
+            8  => 'Amazon',
+            9  => 'Zeelool_es',
+            10 => 'Zeelool_de',
+            11 => 'Zeelool_jp',
+        ];
+        $headList = [
+            '子单号',
+            '站点',
+            '商品SKU',
+            '加工类型',
+            '订单状态',
+            '支付时间',
+            '创建时间'
+        ];
+        $itemSku = new ItemPlatformSku();
+        $skus =$itemSku->column('sku','platform_sku');
+        $path = '/uploads/';
+        $fileName = '用来分析丹阳仓库需要存储的商品SKU和数量'.time();
+        $count = $this->model
+            ->alias('a')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->where($map)
+            ->where('a.order_prescription_type','in',[2,3])
+            ->count();
+
+        for ($i = 0; $i < ceil($count / 50000); $i++) {
+            $list = $this->model
+                ->alias('a')
+                ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.status,b.site,a.created_at,b.payment_time')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->where($map)
+                ->where('a.order_prescription_type','in',[2,3])
+                ->page($i + 1, 50000)
+                ->order('a.created_at desc')
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            //获取更改镜框最新信息
+            $changeSku = $this->_work_order_change_sku
+                ->alias('f')
+                ->join(['fa_work_order_measure' => 'g'], 'f.measure_id=g.id')
+                ->where([
+                    'f.change_type'       => 1,
+                    'f.item_order_number' => ['in', array_column($list, 'item_order_number')],
+                    'g.operation_type'    => 1,
+                ])
+                ->column('f.change_sku', 'f.item_order_number');
+            foreach ($list as $key => &$value) {
+
+                switch ($value['order_prescription_type']) {
+                    case 1:
+                        $value['order_prescription_type'] = '仅镜架';
+                        break;
+                    case 2:
+                        $value['order_prescription_type'] = '现货处方镜';
+                        break;
+                    case 3:
+                        $value['order_prescription_type'] = '定制处方镜';
+                        break;
+                }
+                $data[$key]['item_order_number'] = $value['item_order_number'];//子单号
+                $data[$key]['site'] = $siteList[$value['site']];//站点
+                $data[$key]['sku'] =$skus[$changeSku[$value['item_order_number']] ?: $value['sku']];//sku
+                $data[$key]['order_prescription_type'] = $value['order_prescription_type'];//加工类型
+                $data[$key]['status'] = $value['status'];//订单状态
+                if (empty($value['payment_time'])) {
+                    $value['payment_time'] = '暂无';
+                } else {
+                    $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
+                }
+                $data[$key]['payment_time'] = $value['payment_time'];//支付时间
+                if (empty($value['created_at'])) {
+                    $value['created_at'] = '暂无';
+                } else {
+                    $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+                }
+                $data[$key]['created_at'] = $value['created_at'];//订单创建时间
+            }
+            if ($i > 0) {
+                $headList = [];
+            }
+            Excel::writeCsv($data,$headList,$path.$fileName);
+        }
+        //获取当前域名
+        $request = Request::instance();
+        $domain = $request->domain();
+        header('Location: '.$domain.$path.$fileName.'.csv');
+        die;
+    }
+    public function batch_export_xls_account3()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $this->model = new NewOrderItemProcess();
+        $this->_work_order_change_sku = new WorkOrderChangeSku();
+        //默认展示3个月内的数据
+        //3月
+        $map['a.created_at'] = ['between', [1614528000,1617206399]];//173915
+
+        //站点列表
+        $siteList = [
+            1  => 'Zeelool',
+            2  => 'Voogueme',
+            3  => 'Nihao',
+            4  => 'Meeloog',
+            5  => 'Wesee',
+            8  => 'Amazon',
+            9  => 'Zeelool_es',
+            10 => 'Zeelool_de',
+            11 => 'Zeelool_jp',
+        ];
+        $headList = [
+            '子单号',
+            '站点',
+            '商品SKU',
+            '加工类型',
+            '订单状态',
+            '支付时间',
+            '创建时间'
+        ];
+        $itemSku = new ItemPlatformSku();
+        $skus =$itemSku->column('sku','platform_sku');
+        $path = '/uploads/';
+        $fileName = '用来分析丹阳仓库需要存储的商品SKU和数量'.time();
+        $count = $this->model
+            ->alias('a')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->where($map)
+            ->where('a.order_prescription_type','in',[2,3])
+            ->count();
+
+        for ($i = 0; $i < ceil($count / 50000); $i++) {
+            $list = $this->model
+                ->alias('a')
+                ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.status,b.site,a.created_at,b.payment_time')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->where($map)
+                ->where('a.order_prescription_type','in',[2,3])
+                ->page($i + 1, 50000)
+                ->order('a.created_at desc')
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            //获取更改镜框最新信息
+            $changeSku = $this->_work_order_change_sku
+                ->alias('f')
+                ->join(['fa_work_order_measure' => 'g'], 'f.measure_id=g.id')
+                ->where([
+                    'f.change_type'       => 1,
+                    'f.item_order_number' => ['in', array_column($list, 'item_order_number')],
+                    'g.operation_type'    => 1,
+                ])
+                ->column('f.change_sku', 'f.item_order_number');
+            foreach ($list as $key => &$value) {
+
+                switch ($value['order_prescription_type']) {
+                    case 1:
+                        $value['order_prescription_type'] = '仅镜架';
+                        break;
+                    case 2:
+                        $value['order_prescription_type'] = '现货处方镜';
+                        break;
+                    case 3:
+                        $value['order_prescription_type'] = '定制处方镜';
+                        break;
+                }
+                $data[$key]['item_order_number'] = $value['item_order_number'];//子单号
+                $data[$key]['site'] = $siteList[$value['site']];//站点
+                $data[$key]['sku'] =$skus[$changeSku[$value['item_order_number']] ?: $value['sku']];//sku
+                $data[$key]['order_prescription_type'] = $value['order_prescription_type'];//加工类型
+                $data[$key]['status'] = $value['status'];//订单状态
+                if (empty($value['payment_time'])) {
+                    $value['payment_time'] = '暂无';
+                } else {
+                    $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
+                }
+                $data[$key]['payment_time'] = $value['payment_time'];//支付时间
+                if (empty($value['created_at'])) {
+                    $value['created_at'] = '暂无';
+                } else {
+                    $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+                }
+                $data[$key]['created_at'] = $value['created_at'];//订单创建时间
+            }
+            if ($i > 0) {
+                $headList = [];
+            }
+            Excel::writeCsv($data,$headList,$path.$fileName);
+        }
+        //获取当前域名
+        $request = Request::instance();
+        $domain = $request->domain();
+        header('Location: '.$domain.$path.$fileName.'.csv');
+        die;
+    }
+    public function batch_export_xls_account4()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $this->model = new NewOrderItemProcess();
+        $this->_work_order_change_sku = new WorkOrderChangeSku();
+        //默认展示3个月内的数据
+        //4月
+        $map['a.created_at'] = ['between', [1617206400,1619798399]];//162822
+        //站点列表
+        $siteList = [
+            1  => 'Zeelool',
+            2  => 'Voogueme',
+            3  => 'Nihao',
+            4  => 'Meeloog',
+            5  => 'Wesee',
+            8  => 'Amazon',
+            9  => 'Zeelool_es',
+            10 => 'Zeelool_de',
+            11 => 'Zeelool_jp',
+        ];
+        $headList = [
+            '子单号',
+            '站点',
+            '商品SKU',
+            '加工类型',
+            '订单状态',
+            '支付时间',
+            '创建时间'
+        ];
+        $itemSku = new ItemPlatformSku();
+        $skus =$itemSku->column('sku','platform_sku');
+        $path = '/uploads/';
+        $fileName = '用来分析丹阳仓库需要存储的商品SKU和数量'.time();
+        $count = $this->model
+            ->alias('a')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->where($map)
+            ->where('a.order_prescription_type','in',[2,3])
+            ->count();
+
+        for ($i = 0; $i < ceil($count / 50000); $i++) {
+            $list = $this->model
+                ->alias('a')
+                ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.created_at,b.status,b.site,a.created_at,b.payment_time')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->where($map)
+                ->where('a.order_prescription_type','in',[2,3])
+                ->page($i + 1, 50000)
+                ->order('a.created_at desc')
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            //获取更改镜框最新信息
+            $changeSku = $this->_work_order_change_sku
+                ->alias('f')
+                ->join(['fa_work_order_measure' => 'g'], 'f.measure_id=g.id')
+                ->where([
+                    'f.change_type'       => 1,
+                    'f.item_order_number' => ['in', array_column($list, 'item_order_number')],
+                    'g.operation_type'    => 1,
+                ])
+                ->column('f.change_sku', 'f.item_order_number');
+            foreach ($list as $key => &$value) {
+
+                switch ($value['order_prescription_type']) {
+                    case 1:
+                        $value['order_prescription_type'] = '仅镜架';
+                        break;
+                    case 2:
+                        $value['order_prescription_type'] = '现货处方镜';
+                        break;
+                    case 3:
+                        $value['order_prescription_type'] = '定制处方镜';
+                        break;
+                }
+                $data[$key]['item_order_number'] = $value['item_order_number'];//子单号
+                $data[$key]['site'] = $siteList[$value['site']];//站点
+                $data[$key]['sku'] =$skus[$changeSku[$value['item_order_number']] ?: $value['sku']];//sku
+                $data[$key]['order_prescription_type'] = $value['order_prescription_type'];//加工类型
+                $data[$key]['status'] = $value['status'];//订单状态
+                if (empty($value['payment_time'])) {
+                    $value['payment_time'] = '暂无';
+                } else {
+                    $value['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
+                }
+                $data[$key]['payment_time'] = $value['payment_time'];//支付时间
+                if (empty($value['created_at'])) {
+                    $value['created_at'] = '暂无';
+                } else {
+                    $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+                }
+                $data[$key]['created_at'] = $value['created_at'];//订单创建时间
+            }
+            if ($i > 0) {
+                $headList = [];
+            }
+            Excel::writeCsv($data,$headList,$path.$fileName);
+        }
+        //获取当前域名
+        $request = Request::instance();
+        $domain = $request->domain();
+        header('Location: '.$domain.$path.$fileName.'.csv');
+        die;
     }
 }

@@ -291,30 +291,36 @@ class TrackReg extends Backend
     public function zendeskUpateData($siteType, $type)
     {
 
-        $this->model = new \app\admin\model\zendesk\Zendesk;
-        $ticketIds = (new \app\admin\controller\zendesk\Notice(request(),
-            ['type' => $siteType]))->autoAsyncUpdate($siteType);
+        try{
+            $this->model = new \app\admin\model\zendesk\Zendesk;
+            $ticketIds = (new \app\admin\controller\zendesk\Notice(request(),
+                ['type' => $siteType]))->autoAsyncUpdate($siteType);
 
-        //判断是否存在
-        $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
+            //判断是否存在
+            $nowTicketsIds = $this->model->where("type", $type)->column('ticket_id');
 
-        //求交集的更新
-        $intersects = array_intersect($ticketIds, $nowTicketsIds);
-        //求差集新增
-        $diffs = array_diff($ticketIds, $nowTicketsIds);
-        //更新
-        foreach ($intersects as $intersect) {
-            (new \app\admin\controller\zendesk\Notice(request(),
-                ['type' => $siteType, 'id' => $intersect]))->auto_update();
-            echo $intersect.'is ok'."\n";
+            //求交集的更新
+            $intersects = array_intersect($ticketIds, $nowTicketsIds);
+            //求差集新增
+            $diffs = array_diff($ticketIds, $nowTicketsIds);
+            //更新
+            foreach ($intersects as $intersect) {
+                (new \app\admin\controller\zendesk\Notice(request(),
+                    ['type' => $siteType, 'id' => $intersect]))->auto_update();
+                echo $intersect.'is ok'."\n";
+            }
+            //新增
+            foreach ($diffs as $diff) {
+                (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->auto_create();
+                echo $diff.'ok'."\n";
+            }
+            echo 'all ok';
+            exit;
+        }catch (\Exception $e) {
+            file_put_contents('/var/www/mojing/runtime/log/zendesk.log', 'zendeskUpateData:站点：' . $type . ' 失败:' . $e->getMessage() . "\r\n", FILE_APPEND);
+            echo 'error';
         }
-        //新增
-        foreach ($diffs as $diff) {
-            (new \app\admin\controller\zendesk\Notice(request(), ['type' => $siteType, 'id' => $diff]))->auto_create();
-            echo $diff.'ok'."\n";
-        }
-        echo 'all ok';
-        exit;
+
     }
 
     /**
@@ -2413,11 +2419,6 @@ class TrackReg extends Backend
             'site'     => 11,
         ])->update($lastArr);
         usleep(100000);
-
-        if ($data['active_user_num'] == 0) {
-            $this->only_ga_data();
-        }
-
         echo "ok";
     }
 

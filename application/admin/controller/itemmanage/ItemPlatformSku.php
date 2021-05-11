@@ -32,7 +32,7 @@ class ItemPlatformSku extends Backend
     protected $platform = null;
     protected $relationSearch = true;
 
-    protected $noNeedRight = ['batch_export_xls'];
+    protected $noNeedRight = ['batch_export_xls','sku_has_imgs'];
 
     public function _initialize()
     {
@@ -682,22 +682,22 @@ class ItemPlatformSku extends Backend
             //审核通过把SKU同步到有映射关系的平台
             $uploadItemArr['sku'] = $itemPlatformRow['platform_sku'];
             $uploadItemArr['attribute_type'] = $attributeType;
-            $uploadItemArr['frame_height'] = $itemAttributeDetail['frame_height'];
-            $uploadItemArr['frame_width'] = $itemAttributeDetail['frame_width'];
-            $uploadItemArr['frame_length'] = $itemAttributeDetail['frame_length'];
-            $uploadItemArr['frame_temple_length'] = $itemAttributeDetail['frame_temple_length'];
-            $uploadItemArr['frame_bridge'] = $itemAttributeDetail['frame_bridge'];
-            $uploadItemArr['mirror_width'] = $itemAttributeDetail['mirror_width'];
+            $uploadItemArr['frame_height'] = intval($itemAttributeDetail['frame_height']);
+            $uploadItemArr['frame_width'] = intval($itemAttributeDetail['frame_width']);
+            $uploadItemArr['frame_length'] = intval($itemAttributeDetail['frame_length']);
+            $uploadItemArr['frame_temple_length'] = intval($itemAttributeDetail['frame_temple_length']);
+            $uploadItemArr['frame_bridge'] = intval($itemAttributeDetail['frame_bridge']);
+            $uploadItemArr['mirror_width'] = intval($itemAttributeDetail['mirror_width']);
             $uploadItemArr['frame_weight'] = $itemAttributeDetail['frame_weight'];
-            $uploadItemArr['earrings_height'] = $itemAttributeDetail['earrings_height'];
-            $uploadItemArr['earrings_width'] = $itemAttributeDetail['earrings_width'];
-            $uploadItemArr['necklace_perimeter'] = $itemAttributeDetail['necklace_perimeter'];
-            $uploadItemArr['necklace_chain'] = $itemAttributeDetail['necklace_chain'];
-            $uploadItemArr['eyeglasses_chain'] = $itemAttributeDetail['eyeglasses_chain'];
-            $uploadItemArr['box_height'] = $itemAttributeDetail['box_height'];
-            $uploadItemArr['box_width'] = $itemAttributeDetail['box_width'];
-            $uploadItemArr['silk_length'] = $itemAttributeDetail['silk_length'];
-            $uploadItemArr['silk_width'] = $itemAttributeDetail['silk_width'];
+            $uploadItemArr['earrings_height'] = intval($itemAttributeDetail['earrings_height']);
+            $uploadItemArr['earrings_width'] = intval($itemAttributeDetail['earrings_width']);
+            $uploadItemArr['necklace_perimeter'] = intval($itemAttributeDetail['necklace_perimeter']);
+            $uploadItemArr['necklace_chain'] = intval($itemAttributeDetail['necklace_chain']);
+            $uploadItemArr['eyeglasses_chain'] = intval($itemAttributeDetail['eyeglasses_chain']);
+            $uploadItemArr['box_height'] = intval($itemAttributeDetail['box_height']);
+            $uploadItemArr['box_width'] = intval($itemAttributeDetail['box_width']);
+            $uploadItemArr['silk_length'] =intval( $itemAttributeDetail['silk_length']);
+            $uploadItemArr['silk_width'] = intval($itemAttributeDetail['silk_width']);
             $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
             $uploadItemArr['status'] = $itemPlatformDetail['outer_sku_status'];
             $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];

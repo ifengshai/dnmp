@@ -25,40 +25,20 @@ class AsyncOrder extends BaseElasticsearch
      */
     public function runInsert($data, $id)
     {
-        try{
+        try {
             $data['id'] = $id;
 
             $insertData = $this->getData($data);;
 
             $this->esService->addToEs('mojing_order', $insertData);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             echo $e->getMessage();
         }
-    }
-
-    /**
-     * 更新订单
-     *
-     * @param $entityId
-     * @param  $site
-     *
-     * @author crasphb
-     * @date   2021/4/23 15:12
-     */
-    public function runUpdate($entityId, $site)
-    {
-        try{
-            $order = Order::where(['entity_id' => $entityId, 'site' => $site])->find()->toArray();
-            $updateData = $this->getData($order);
-            $this->esService->updateEs('mojing_order', $updateData);
-        }catch (\Exception $e) {
-            echo $e->getMessage();
-        }
-
     }
 
     /**
      * 格式化参数
+     *
      * @param $data
      *
      * @return array
@@ -92,7 +72,31 @@ class AsyncOrder extends BaseElasticsearch
                 $value['shipping_method_type'] = 3;
             }
         }
-        $mergeData = $value['payment_time'] ?: $value['created_at'];
+        $mergeData = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] : $value['created_at'];
+
         return $this->formatDate($value, $mergeData);
+    }
+
+    /**
+     * 更新订单
+     *
+     * @param  $entityId
+     * @param  $site
+     *
+     * @author crasphb
+     * @date   2021/4/23 15:12
+     */
+    public function runUpdate($entityId, $site)
+    {
+        try {
+            $order = Order::where(['entity_id' => $entityId, 'site' => $site])->find();
+            if($order) {
+                $updateData = $this->getData($order->toArray());
+                $this->esService->updateEs('mojing_order', $updateData);
+            }
+
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+        }
     }
 }

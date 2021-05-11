@@ -10,6 +10,7 @@ namespace app\service\elasticsearch;
 
 
 use Elasticsearch\Client;
+use think\Log;
 
 class EsService
 {
@@ -130,18 +131,18 @@ class EsService
             'index' => $indexName,
             'type'  => '_doc',
         ];
-        foreach($view as $key => $val) {
-            $params['body'][]=array(
-                'create' => array(    #注意create也可换成index
-                    '_id'=> $val['id']
-                ),
-            );
+        foreach ($view as $key => $val) {
+            $params['body'][] = [
+                'create' => [    #注意create也可换成index
+                    '_id' => $val['id'],
+                ],
+            ];
 
             $params['body'][] = $val;
         }
         try {
             return $this->esClient->bulk($params);
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             echo $e->getMessage();
         }
 
@@ -152,16 +153,22 @@ class EsService
      * @author mjj
      * @date   2021/4/22 15:35:50
      */
-    public function updateEs($indexName,$view){
+    public function updateEs($indexName, $view)
+    {
         $params = [
             'index' => $indexName,
             'type'  => '_doc',
             'id'    => $view['id'],
             'body'  => [
-                'doc'=>$view
+                'doc' => $view,
             ],
         ];
-        return $this->esClient->update($params);
+        try {
+            return $this->esClient->update($params);
+        } catch (\Exception $e) {
+            Log::error('es:' . $e->getMessage());
+        }
+
     }
     /**
      * es查询
@@ -174,8 +181,14 @@ class EsService
      */
     public function search($params)
     {
-        $results = $this->esClient->search($params);
-        return $results['aggregations'];
+        try {
+
+            $results = $this->esClient->search($params);
+
+            return $results['aggregations'];
+        } catch (\Exception $e) {
+            Log::error('es:' . $e->getMessage());
+        }
     }
 
     /**

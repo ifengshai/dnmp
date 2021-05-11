@@ -35,13 +35,13 @@ class DashBoard extends BaseElasticsearch
         //查询对应平台权限
         $magentoplatformarr = $magentoplatformarr->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', '全部'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
         $this->view->assign(compact('web_site', 'time_str', 'magentoplatformarr'));
 
-        return $this->view->fetch('operatedatacenter/dataview/dash_board/index');
+        return $this->view->fetch();
     }
 
     /**
@@ -61,7 +61,7 @@ class DashBoard extends BaseElasticsearch
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             $siteAll = $site == 4;
             if (!$timeStr) {
-                $start = date('Ymd', strtotime('-6 days'));
+                $start = date('Ymd', strtotime('-6 days') + 8*3600);
                 $end = date('Ymd');
             } else {
                 $createat = explode(' ', $timeStr);
@@ -70,7 +70,7 @@ class DashBoard extends BaseElasticsearch
             }
             $cacheStr = 'dash_board_' . $site . $timeStr . $compareTimeStr;
             $cacheData = Cache::get($cacheStr);
-            if(!$cacheData) {
+           // if(!$cacheData) {
                 $compareData = [];
                 if ($compareTimeStr) {
                     $compareTime = explode(' ', $compareTimeStr);
@@ -82,9 +82,9 @@ class DashBoard extends BaseElasticsearch
                 $result = $this->buildDashBoardSearch($site, $start, $end, $siteAll);
                 $allData = $this->esFormatData->formatDashBoardData($site, $result, $compareData, $siteAll);
                 Cache::set($cacheStr, $allData, 600);
-            }else{
-                $allData = $cacheData;
-            }
+//            }else{
+//                $allData = $cacheData;
+//            }
 
             switch ($type) {
                 case 1:
@@ -101,6 +101,12 @@ class DashBoard extends BaseElasticsearch
         }
 
     }
+
+    /**
+     * 复购用户数
+     * @author crasphb
+     * @date   2021/5/11 10:55
+     */
     public function getReBuyNum()
     {
         if ($this->request->isAjax()) {
@@ -238,6 +244,7 @@ class DashBoard extends BaseElasticsearch
                     'order' => [
                         '_key' => 'asc',
                     ],
+                    'size'  => '10000',
                 ],
                 'aggs'  => [
                     'orderNum'        => [

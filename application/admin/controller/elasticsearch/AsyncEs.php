@@ -13,6 +13,8 @@ use app\admin\model\operatedatacenter\Datacenter;
 use app\admin\model\operatedatacenter\DatacenterDay;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\OrderNode;
+use app\admin\model\web\WebShoppingCart;
+use app\admin\model\web\WebUsers;
 use think\Db;
 use think\Debug;
 
@@ -53,7 +55,8 @@ class AsyncEs extends BaseElasticsearch
                     if($value['base_shipping_amount'] == 0) $value['shipping_method_type'] = 2;
                     if($value['base_shipping_amount'] > 0) $value['shipping_method_type'] = 3;
                 }
-                $mergeData = $value['payment_time'] ?: $value['created_at'];
+                $mergeData = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] : $value['created_at'];
+                $value['payment_time'] = $mergeData;
                 return $this->formatDate($value,$mergeData);
             },collection($newOrder)->toArray());
             $this->esService->addMutilToEs('mojing_order',$data);
@@ -89,7 +92,7 @@ class AsyncEs extends BaseElasticsearch
      * @author crasphb
      * @date   2021/4/21 10:24
      */
-    public function asyncCart()
+    public function asyncCartMagento()
     {
         $i = 0;
         Db::connect('database.db_nihao')->table('sales_flat_quote')->chunk(1000,function($carts) use (&$i){
@@ -120,7 +123,7 @@ class AsyncEs extends BaseElasticsearch
      * @author crasphb
      * @date   2021/4/21 16:06
      */
-    public function asyncCustomer()
+    public function asyncCustomerMagento()
     {
         $i = 0;
         Db::connect('database.db_zeelool_de')->table('customer_entity')->chunk(10000,function($users) use (&$i){
@@ -150,6 +153,65 @@ class AsyncEs extends BaseElasticsearch
         });
     }
 
+    /**
+     * 同步购物车
+     * @author crasphb
+     * @date   2021/5/10 13:51
+     */
+    public function asyncCart()
+    {
+        WebShoppingCart::chunk(10000,function($carts){
+            $data = array_map(function($value) {
+                $value = array_map(function($v){
+                    return $v === null ? 0 : $v;
+                },$value);
+                $mergeData = $value['created_at'];
+                $insertData = [
+                    'id' => $value['id'],
+                    'site' => $value['site'],
+                    'status' => $value['is_active'],
+                    'update_time_day' => date('Ymd',$value['updated_at'] + 8*3600),
+                    'update_time' => $value['updated_at'],
+                    'create_time' => $mergeData,
+
+                ];
+                return $this->formatDate($insertData,$mergeData);
+            },collection($carts)->toArray());
+            $this->esService->addMutilToEs('mojing_cart',$data);
+        });
+    }
+
+    /**
+     * 同步用户数据
+     * @author crasphb
+     * @date   2021/5/10 13:58
+     */
+    public function asyncCustomer()
+    {
+        WebUsers::chunk(10000,function($carts){
+            $data = array_map(function($value) {
+                $value = array_map(function($v){
+                    return $v === null ? 0 : $v;
+                },$value);
+                $mergeData = $value['created_at'];
+                $insertData = [
+                    'id' => $value['id'],
+                    'site' => $value['site'],
+                    'email' => $value['email'],
+                    'update_time_day' => date('Ymd',$value['updated_at'] + 8*3600),
+                    'update_time' => $value['updated_at'],
+                    'create_time' => $mergeData,
+                    'is_vip' => $value['is_vip'] ?? 0,
+                    'group_id' => $value['group_id'],
+                    'store_id' => $value['store_id'],
+                    'resouce' => $value['resouce'] ?? 0,
+
+                ];
+                return $this->formatDate($insertData,$mergeData);
+            },collection($carts)->toArray());
+            $this->esService->addMutilToEs('mojing_customer',$data);
+        });
+    }
 
     /**
      * 同步物流数据到es

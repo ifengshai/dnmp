@@ -249,6 +249,7 @@ class Notice extends Controller
         } catch (Exception $e) {
             // file_put_contents('/var/www/mojing/runtime/log/a.txt',$id."\r\n",FILE_APPEND);
             // file_put_contents('/var/www/mojing/runtime/log/a.txt',$e->getMessage()."\r\n",FILE_APPEND);
+            file_put_contents('/var/www/mojing/runtime/log/zendesk.log', 'auto_update:站点：' . $type . ' 失败:' . $e->getMessage() . "\r\n", FILE_APPEND);
             return 'success';
             //echo $e->getMessage();
         }
@@ -1319,31 +1320,36 @@ class Notice extends Controller
      */
     public function autoAsyncUpdate($siteType)
     {
-        $params = 'type:ticket updated_at>=30minutes order_by:updated_at sort:asc';
+        try{
+            $params = 'type:ticket updated_at>=30minutes order_by:updated_at sort:asc';
 
-        //Get all tickets
-        $tickets = $this->client->search()->find($params);
+            //Get all tickets
+            $tickets = $this->client->search()->find($params);
 
-        $ticketIds = [];
-        if (!$tickets->count) {
-            return true;
-        }
+            $ticketIds = [];
+            if (!$tickets->count) {
+                return true;
+            }
 
-        if ($tickets->count > 1000) {
-            file_put_contents('/var/www/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 6 * 60) . "\r\n", FILE_APPEND);
-            file_put_contents('/var/www/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
-        }
+            if ($tickets->count > 1000) {
+                file_put_contents('/var/www/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败starttime:' . date('Y-m-d H:i:s', time() - 6 * 60) . "\r\n", FILE_APPEND);
+                file_put_contents('/var/www/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败endtime:' . date('Y-m-d H:i:s') . "\r\n", FILE_APPEND);
+            }
 
-        $page = ceil($tickets->count / 100);
-        if ($page >= 1) {
-            //获取后续的
-            for ($i = 1; $i <= $page; $i++) {
-                $search = $this->client->search()->find($params, ['page' => $i]);
-                foreach ($search->results as $ticket) {
-                    $ticketIds[] = $ticket->id;
+            $page = ceil($tickets->count / 100);
+            if ($page >= 1) {
+                //获取后续的
+                for ($i = 1; $i <= $page; $i++) {
+                    $search = $this->client->search()->find($params, ['page' => $i]);
+                    foreach ($search->results as $ticket) {
+                        $ticketIds[] = $ticket->id;
+                    }
                 }
             }
+            return array_filter($ticketIds);
+        }catch (\Exception $e) {
+            file_put_contents('/var/www/mojing/runtime/log/zendesk.log', '站点：' . $siteType . ' 失败:' . $e->getMessage() . "\r\n", FILE_APPEND);
         }
-        return array_filter($ticketIds);
+
     }
 }

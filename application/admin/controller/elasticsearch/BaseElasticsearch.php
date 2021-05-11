@@ -7,13 +7,13 @@
 
 namespace app\admin\controller\elasticsearch;
 
-use app\admin\controller\elasticsearch\async\AsyncOrder;
 use app\common\controller\Backend;
 use app\enum\Site;
 use app\service\elasticsearch\EsFormatData;
 use app\service\elasticsearch\EsService;
 use Elasticsearch\ClientBuilder;
 use think\Env;
+use think\Log;
 use think\Request;
 
 class BaseElasticsearch extends Backend
@@ -47,20 +47,21 @@ class BaseElasticsearch extends Backend
     {
         parent::__construct($request);
 
-        //es配置
-        $params = [
-            Env::get('es.es_host','http://127.0.0.1:9200')
-        ];
-        //获取es的实例
-        $this->esClient = ClientBuilder::create()->setHosts($params)->build();
-        $this->esService = new EsService($this->esClient);
-        $this->esFormatData = new EsFormatData();
+        try{
+            //es配置
+            $params = [
+                Env::get('es.es_host','127.0.0.1:9200')
+            ];
+            //获取es的实例
+            $this->esClient = ClientBuilder::create()->setHosts($params)->build();
+            $this->esService = new EsService($this->esClient);
+            $this->esFormatData = new EsFormatData();
+        }catch (\Exception $e){
+            Log::error('es:' . $e->getMessage());
+        }
+
     }
 
-    public function test()
-    {
-        (new AsyncOrder())->runUpdate('479653',1);
-    }
     /**
      * 订单的索引
      *
@@ -440,7 +441,7 @@ class BaseElasticsearch extends Backend
                 'type' => 'keyword',
             ],
             'delivery_time'      => [
-                'type' => 'date',
+                'type' => 'keyword',
             ],
             'delivery_error_flag'      => [
                 'type' => 'integer',
