@@ -305,7 +305,12 @@ class Zendesk extends Backend
                     } 
                     if(strpos($sign,'</p>')!==false){
                         $sign = str_replace('</p>','</span>',$sign);
-                    } 
+                    }
+                    if($params['content']){
+                        if(strpos($params['content'],'{{agent.name}}')!==false){
+                            $params['content'] = str_replace('{{agent.name}}',$zendeskNickname,$params['content']);
+                        }
+                    }
                     
                     $priority = config('zendesk.priority')[$params['priority']];
                     if ($priority) {
@@ -561,6 +566,11 @@ class Zendesk extends Backend
                     }
                     if(strpos($params['content'],'</p>')!==false){
                         $params['content'] = str_replace('</p>','</span>',$params['content']);
+                    }
+                    if($params['content']){
+                        if(strpos($params['content'],'{{agent.name}}')!==false){
+                            $params['content'] = str_replace('{{agent.name}}',$zendeskNickname,$params['content']);
+                        }
                     }
 
                     $priority = config('zendesk.priority')[$params['priority']];
