@@ -702,10 +702,10 @@ class EsFormatData
             }
             foreach ($daySaleBuckets as $k => $v) {
                 $yData[$site]['salesTotalMoney'][] = $v['salesTotalMoney']['value'] ?: 0;
-                $yData[$site]['avgPrice'][] = $v['avgPrice']['value'] ?: 0;
+                $yData[$site]['avgPrice'][] = $v['avgPrice']['value'] ? round($v['avgPrice']['value'],2) : 0;
                 $yData[$site]['registerNum'][] = $v['registerNum']['value'] ?: 0;
                 $yData[$site]['cartNum'][] = $v['cartNum']['value'] ?: 0;
-                $yData[$site]['orderNum'][] = $v['orderNum']['value'] ?: 0;
+                $yData[$site]['orderCount'][] = $v['orderNum']['value'] ?: 0;
                 $yData[$site]['cartNumRate'][] = $v['orderNum']['value'] ? bcmul(bcdiv($v['cartNum']['value'], $v['orderNum']['value'], 4), 100) : 0;
             }
 
