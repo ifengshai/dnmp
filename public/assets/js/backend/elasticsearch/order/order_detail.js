@@ -214,14 +214,18 @@ function order_data_view() {
         var replacement_order_num = ret.data.replacemenOrder.doc_count;
 
         var replacement_order_total = 0;
-        if(ret.data.replacemenOrder.length > 0) {
+        if(ret.data.replacemenOrder.doc_count > 0) {
             var replacement_order_total = ret.data.replacemenOrder.salesAmount.value;
+        }else{
+            replacement_order_num = 0;
         }
 
         var online_celebrity_order_num = ret.data.socialOrder.doc_count;
         var online_celebrity_order_total = 0;
-        if(ret.data.socialOrder.length > 0) {
+        if(ret.data.socialOrder.doc_count > 0) {
             var online_celebrity_order_total = ret.data.socialOrder.salesAmount.value;
+        }else{
+            online_celebrity_order_num = 0;
         }
 
         var price_ranges_data = ret.data.priceRangesData;
@@ -271,9 +275,9 @@ function order_data_view() {
         $('#huan_shipping_total_money').html(huan_rate4+compare_shipping_total_money_rate);
 
         $('#replacement_order_num').html(replacement_order_num);
-        $('#replacement_order_total').html(replacement_order_total);
+        $('#replacement_order_total').html(replacement_order_total.toFixed(2));
         $('#online_celebrity_order_num').html(online_celebrity_order_num);
-        $('#online_celebrity_order_total').html(online_celebrity_order_total);
+        $('#online_celebrity_order_total').html(online_celebrity_order_total.toFixed(2));
         //订单金额分布表数据
         var order_total0 = price_ranges_data[0];
         var order_total20 = price_ranges_data[20];
@@ -308,23 +312,37 @@ function order_data_view() {
             var flatrate_free = ship_type[0];
             $('#flatrate_free_order_num').text(flatrate_free.doc_count);
             $('#flatrate_free_rate').text(flatrate_free.rate);
+        }else{
+            $('#flatrate_free_order_num').text(0);
+            $('#flatrate_free_rate').text('0%');
         }
         if(ship_type[1]) {
             var flatrate_nofree = ship_type[1];
             $('#flatrate_nofree_order_num').text(flatrate_nofree.doc_count);
             $('#flatrate_nofree_rate').text(flatrate_nofree.rate);
-            $('#flatrate_nofree_order_total').text(flatrate_nofree.allShippingAmount.value);
+            $('#flatrate_nofree_order_total').text(flatrate_nofree.allShippingAmount.value.toFixed(2));
+        }else{
+            $('#flatrate_nofree_order_num').text(0);
+            $('#flatrate_nofree_rate').text('0%');
+            $('#flatrate_nofree_order_total').text(0);
         }
         if(ship_type[2]) {
             var tablerate_free = ship_type[2];
             $('#tablerate_free_order_num').text(tablerate_free.doc_count);
             $('#tablerate_free_rate').text(tablerate_free.rate);
+        }else{
+            $('#tablerate_free_order_num').text(0);
+            $('#tablerate_free_rate').text('0%');
         }
         if(ship_type[3]) {
             var tablerate_nofree = ship_type[3];
             $('#tablerate_nofree_order_num').text(tablerate_nofree.doc_count);
             $('#tablerate_nofree_rate').text(tablerate_nofree.rate);
-            $('#tablerate_nofree_order_total').text(tablerate_nofree.allShippingAmount.value);
+            $('#tablerate_nofree_order_total').text(tablerate_nofree.allShippingAmount.value.toFixed(2));
+        }else{
+            $('#tablerate_nofree_order_num').text(0);
+            $('#tablerate_nofree_rate').text('0%');
+            $('#tablerate_nofree_order_total').text(0);
         }
 
 
