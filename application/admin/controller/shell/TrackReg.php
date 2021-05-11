@@ -2419,11 +2419,6 @@ class TrackReg extends Backend
             'site'     => 11,
         ])->update($lastArr);
         usleep(100000);
-
-        if ($data['active_user_num'] == 0) {
-            $this->only_ga_data();
-        }
-
         echo "ok";
     }
 
