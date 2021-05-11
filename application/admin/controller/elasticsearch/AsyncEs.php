@@ -57,8 +57,6 @@ class AsyncEs extends BaseElasticsearch
                 }
                 $mergeData = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] : $value['created_at'];
                 $value['payment_time'] = $mergeData;
-                $a = $this->formatDate($value,$mergeData);
-                dump($a);die;
                 return $this->formatDate($value,$mergeData);
             },collection($newOrder)->toArray());
             $this->esService->addMutilToEs('mojing_order',$data);

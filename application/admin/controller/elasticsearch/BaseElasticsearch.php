@@ -495,7 +495,6 @@ class BaseElasticsearch extends Backend
      */
     public function formatDate($value,$date)
     {
-
         $format =  [
             'year'       => date('Y', $date),
             'month'      => date('m', $date),
