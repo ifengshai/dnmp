@@ -238,6 +238,14 @@ class OrderDetail extends BaseElasticsearch
         return $this->esService->search($params);
     }
 
+    /**
+     * @return \think\response\Json
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @author crasphb
+     * @date   2021/5/11 13:04
+     */
     public function ajaxGetPurchaseAna()
     {
         if ($this->request->isAjax()) {
@@ -245,7 +253,6 @@ class OrderDetail extends BaseElasticsearch
             $order_platform = $params['order_platform'];
             //查询时间段内每天的客单价,中位数，标准差
             $timeStr = $params['time_str'];
-            $timeStr = '2020-04-12 12:00:00 - 2020-04-18 00:00:00';
             if (!$timeStr) {
                 $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
                 $end = date('Y-m-d 23:59:59');
