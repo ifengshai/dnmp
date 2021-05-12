@@ -1160,7 +1160,7 @@ class Test01 extends Backend
                 }
             }
             /*************入库单冲减end**************/
-            $arr[] = array_merge($arr1,$arr2,$arr3,$arr4);
+            $arr = array_merge($arr,array_merge($arr1,$arr2,$arr3,$arr4));
         }
         $file_content = '';
         foreach ($arr as $key => $value) {
@@ -1170,7 +1170,7 @@ class Test01 extends Backend
         $export_str = ['日期', '商品分类', '商品sku', '出入库类型', '采购单号','入库单价（元）','入库数量','出库单价','出库数量'];
         $file_title = implode(',', $export_str) . " \n";
         $file = $file_title . $file_content;
-        file_put_contents('/var/www/mojing/runtime/log/finance.csv', $file);
+        file_put_contents('/var/www/mojing/runtime/log/finance2.csv', $file);
         exit;
     }
 }
