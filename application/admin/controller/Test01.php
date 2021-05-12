@@ -935,6 +935,7 @@ class Test01 extends Backend
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $this->model = new \app\admin\model\itemmanage\Item;
         //时间
+        $arr = array();
         for($t=1617206400;$t<=1619712000;$t+=24*3600){
             $start = date('Y-m-d',$t);
             $end = $start.' 23:59:59';
