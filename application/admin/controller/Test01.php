@@ -935,11 +935,13 @@ class Test01 extends Backend
         $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
         $this->model = new \app\admin\model\itemmanage\Item;
         //时间
-        $start = '2021-05-06';
-        $end = '2021-05-06 23:59:59';
-        //采购入库数量
+        $start = '2021-04-01';
+        $end = '2021-04-01 23:59:59';
+        $startTime = strtotime($start);
+        $endTime = strtotime($end);
+        /*************入库单出库start**************/
+        //入库数据
         $instockWhere['s.status'] = 2;
-        $instockWhere['s.type_id'] = 1;
         $instockWhere['s.check_time'] = ['between', [$start, $end]];
         $inSkus = $this->instock
             ->alias('s')
@@ -956,9 +958,6 @@ class Test01 extends Backend
                 ->join('fa_item_category c','i.category_id=c.id')
                 ->where('sku',$inSku)
                 ->value('c.name');
-            $arr1[$i]['category'] = $category;
-            $arr1[$i]['sku'] = $inSku;
-            $arr1[$i]['inOutFlag'] = '入库';//入库
             $instocks = $this->instock
                 ->alias('s')
                 ->join('fa_in_stock_item i','i.in_stock_id=s.id')
@@ -966,13 +965,26 @@ class Test01 extends Backend
                 ->join('fa_purchase_order o', 'oi.purchase_id=o.id')
                 ->where($instockWhere)
                 ->where('i.sku',$inSku)
-                ->field('sum(round(o.purchase_total/oi.purchase_num,2)*in_stock_num) purchase_total,sum(in_stock_num) purchase_num')
-                ->find();
-            $arr1[$i]['total'] = $instocks['purchase_total'];//入库金额
-            $arr1[$i]['num'] = $instocks['purchase_num'];//入库数量
-            $i++;
+                ->field('o.id,o.purchase_number,round(o.purchase_total/oi.purchase_num,2) purchase_total,sum(in_stock_num) in_stock_num,s.type_id')
+                ->group('o.purchase_number')
+                ->select();
+            foreach($instocks as $instock){
+                $arr1[$i]['day_date'] = $start;
+                $arr1[$i]['category'] = $category;
+                $arr1[$i]['sku'] = $inSku;
+                $typeName = Db::name('in_stock_type')
+                    ->where('id',$instock['type_id'])
+                    ->value('name');
+                $arr1[$i]['inOutFlag'] = $typeName;//入库
+                $arr1[$i]['purchase_number'] = $instock['purchase_number'];//采购单号
+                $arr1[$i]['instockPrice'] = $instock['purchase_total'];
+                $arr1[$i]['instock_num'] = $instock['in_stock_num'];
+                $arr1[$i]['outstockPrice'] = '-';
+                $arr1[$i]['outstock_num'] = '-';
+                $i++;
+            }
         }
-
+        /*************入库单出库end**************/
         /*************出库单出库start**************/
         $barWhere['out_stock_time'] = ['between', [$start, $end]];
         $barWhere['out_stock_id'] = ['<>', 0];
@@ -990,20 +1002,29 @@ class Test01 extends Backend
                 ->join('fa_item_category c','i.category_id=c.id')
                 ->where('sku',$bar)
                 ->value('c.name');
-            $arr2[$j]['category'] = $category;
-            $arr2[$j]['sku'] = $bar;
-            $arr2[$j]['inOutFlag'] = '出库';//出库单出库
             $barItems = $this->item
                 ->alias('i')
                 ->join('fa_purchase_order_item p', 'i.purchase_id=p.purchase_id and i.sku=p.sku')
                 ->join('fa_purchase_order o', 'p.purchase_id=o.id')
-                ->field('sum(round(o.purchase_total/p.purchase_num,2)) purchase_total,count(*) purchase_num')
+                ->join('fa_out_stock s', 'i.out_stock_id=s.id')
+                ->join('fa_out_stock_type t', 't.id=s.type_id')
+                ->field('round(o.purchase_total/p.purchase_num,2) purchase_total,count(*) purchase_num,o.purchase_number,t.name')
                 ->where($barWhere)
                 ->where('i.sku', $bar)
-                ->find();
-            $arr2[$j]['total'] = $barItems['purchase_total'];//出库金额
-            $arr2[$j]['num'] = $barItems['purchase_num'];//出库数量
-            $j++;
+                ->group('o.purchase_number,s.type_id')
+                ->select();
+            foreach ($barItems as $barItem){
+                $arr2[$j]['day_date'] = $start;
+                $arr2[$j]['category'] = $category;
+                $arr2[$j]['sku'] = $bar;
+                $arr2[$j]['inOutFlag'] = $barItem['name'];//出库类型
+                $arr2[$j]['purchase_number'] = $barItem['purchase_number'];//采购单单号
+                $arr2[$j]['instockPrice'] = '-';//入库单价
+                $arr2[$j]['instock_num'] = '-';//入库数量
+                $arr2[$j]['outstockPrice'] = $barItem['purchase_total'];//出库单价
+                $arr2[$j]['outstock_num'] = $barItem['purchase_num'];//出库数量
+                $j++;
+            }
         }
         /*************出库单出库end**************/
         /*************订单出库start**************/
@@ -1024,32 +1045,131 @@ class Test01 extends Backend
                 ->join('fa_item_category c','i.category_id=c.id')
                 ->where('sku',$bar1)
                 ->value('c.name');
-            $arr3[$l]['category'] = $category;
-            $arr3[$l]['sku'] = $bar1;
-            $arr3[$l]['inOutFlag'] = '出库';//订单出库
             $barItems1 = $this->item
                 ->alias('i')
                 ->join('fa_purchase_order_item p', 'i.purchase_id=p.purchase_id and i.sku=p.sku')
                 ->join('fa_purchase_order o', 'p.purchase_id=o.id')
                 ->where($barWhere1)
                 ->where('i.sku', $bar1)
-                ->field('sum(round(o.purchase_total/p.purchase_num,2)) purchase_total,count(*) purchase_num')
-                ->find();
-            $arr3[$l]['total'] = $barItems1['purchase_total'];//出库金额
-            $arr3[$l]['num'] = $barItems1['purchase_num'];//出库数量
-            $l++;
+                ->field('round(o.purchase_total/p.purchase_num,2) purchase_total,count(*) purchase_num,o.purchase_number')
+                ->group('o.purchase_number')
+                ->select();
+            foreach ($barItems1 as $barItem1){
+                $arr3[$l]['day_date'] = $start;
+                $arr3[$l]['category'] = $category;
+                $arr3[$l]['sku'] = $bar1;
+                $arr3[$l]['inOutFlag'] = '订单出库';//订单出库
+                $arr3[$l]['purchase_number'] = $barItem1['purchase_number'];//采购单单号
+                $arr3[$l]['instockPrice'] = '-';//采购单价
+                $arr3[$l]['instock_num'] = '-';//入库数量
+                $arr3[$l]['outstockPrice'] = $barItem1['purchase_total'];//采购单价
+                $arr3[$l]['outstock_num'] = $barItem1['purchase_num'];//出库数量
+                $l++;
+            }
         }
         /*************订单出库end**************/
-        $arr = array_merge($arr1,$arr2,$arr3);
+        /*************入库单冲减start**************/
+        //当天是否有冲减记录
+        $writeDownWhere['create_time'] = ['between',[$startTime,$endTime]];
+        $writeDownDatas = Db::name('finance_cost_error')
+            ->alias('r')
+            ->join('fa_purchase_order_item p', 'r.purchase_id=p.purchase_id')
+            ->join('fa_purchase_order o', 'p.purchase_id=o.id')
+            ->where($writeDownWhere)
+            ->field('r.purchase_id,r.create_time,p.actual_purchase_price,round(o.purchase_total/p.purchase_num,2) purchase_total,p.sku,o.purchase_number')
+            ->select();
+        $arr4 = [];
+        $m = 0;
+        foreach ($writeDownDatas as $writeDownData){
+            $category = $this->model
+                ->alias('i')
+                ->join('fa_item_category c','i.category_id=c.id')
+                ->where('sku',$writeDownData['sku'])
+                ->value('c.name');
+            //冲减入库记录
+            $inTimeWhere = [];
+            $inTimeWhere[] = ['exp', Db::raw("UNIX_TIMESTAMP(s.check_time)<".$writeDownData['create_time']."")];
+            $inStockCount = $this->instock
+                ->alias('s')
+                ->join('fa_in_stock_item i','i.in_stock_id=s.id')
+                ->where('s.status',2)
+                ->where($inTimeWhere)
+                ->where('i.purchase_id',$writeDownData['purchase_id'])
+                ->sum('in_stock_num');
+            if($inStockCount>0){
+                $arr4[$m]['day_date'] = $start;
+                $arr4[$m]['category'] = $category;
+                $arr4[$m]['sku'] = $writeDownData['sku'];
+                $arr4[$m]['inOutFlag'] = '采购结算入库冲减';//订单出库
+                $arr4[$m]['purchase_number'] = $writeDownData['purchase_number'];//采购单单号
+                $arr4[$m]['instockPrice'] = '-'.$writeDownData['purchase_total'];//采购单价
+                $arr4[$m]['instock_num'] = $inStockCount;//入库数量
+                $arr4[$m]['outstockPrice'] = '-';//采购单价
+                $arr4[$m]['outstock_num'] = '-';//出库数量
+                $m++;
+                $arr4[$m]['day_date'] = $start;
+                $arr4[$m]['category'] = $category;
+                $arr4[$m]['sku'] = $writeDownData['sku'];
+                $arr4[$m]['inOutFlag'] = '采购结算入库冲减';//订单出库
+                $arr4[$m]['purchase_number'] = $writeDownData['purchase_number'];//采购单单号
+                $arr4[$m]['instockPrice'] = $writeDownData['actual_purchase_price'];//入库单价
+                $arr4[$m]['instock_num'] = $inStockCount;//入库数量
+                $arr4[$m]['outstockPrice'] = '-';//出库单价
+                $arr4[$m]['outstock_num'] = '-';//出库数量
+                $m++;
+            }
+            //判断冲减之前是否有出库单出库记录
+            $outTimeWhere = [];
+            $outTimeWhere[] = ['exp', Db::raw("UNIX_TIMESTAMP(out_stock_time)<".$writeDownData['create_time']."")];
+            $outCount1 = $this->item
+                ->where($barWhere)
+                ->where('purchase_id',$writeDownData['purchase_id'])
+                ->where($outTimeWhere)
+                ->count();
+            //判断冲减之前是否有订单出库记录
+            $outCount2 = $this->item
+                ->where($barWhere1)
+                ->where('purchase_id',$writeDownData['purchase_id'])
+                ->where($outTimeWhere)
+                ->count();
+            $outCount = $outCount1+$outCount2;
+            if($outCount>0){
+                //增加冲减记录
+                $arr4[$m]['day_date'] = $start;
+                $arr4[$m]['category'] = $category;
+                $arr4[$m]['sku'] = $writeDownData['sku'];
+                $arr4[$m]['inOutFlag'] = '采购结算出库冲减';//订单出库
+                $arr4[$m]['purchase_number'] = $writeDownData['purchase_number'];//采购单单号
+                $arr4[$m]['instockPrice'] = '-';//采购单价
+                $arr4[$m]['instock_num'] = '-';//入库数量
+                $arr4[$m]['outstockPrice'] = '-'.$writeDownData['purchase_total'];//采购单价
+                $arr4[$m]['outstock_num'] = $outCount;//出库数量
+                $m++;
+                //增加冲减记录
+                $arr4[$m]['day_date'] = $start;
+                $arr4[$m]['category'] = $category;
+                $arr4[$m]['sku'] = $writeDownData['sku'];
+                $arr4[$m]['inOutFlag'] = '采购结算出库冲减';//订单出库
+                $arr4[$m]['purchase_number'] = $writeDownData['purchase_number'];//采购单单号
+                $arr4[$m]['instockPrice'] = '-';//采购单价
+                $arr4[$m]['instock_num'] = '-';//入库数量
+                $arr4[$m]['outstockPrice'] = $writeDownData['actual_purchase_price'];//采购单价
+                $arr4[$m]['outstock_num'] = $outCount;//出库数量
+                $m++;
+            }
+        }
+
+        /*************入库单冲减end**************/
+        $arr = array_merge($arr1,$arr2,$arr3,$arr4);
         $file_content = '';
         foreach ($arr as $key => $value) {
             $file_content = $file_content . implode(',', $value) . "\n";
             echo "{$value['sku']}:success\n";
         }
-        $export_str = ['商品分类', '商品SKU', '出入库类型', '金额（元）', '数量（个）'];
+        $export_str = ['日期', '商品分类', '商品sku', '出入库类型', '采购单号','入库单价（元）','入库数量','出库单价','出库数量'];
         $file_title = implode(',', $export_str) . " \n";
         $file = $file_title . $file_content;
-        file_put_contents('/var/www/mojing/runtime/log/finance61.csv', $file);
+        file_put_contents('/var/www/mojing/runtime/log/finance1.csv', $file);
         exit;
     }
 }
