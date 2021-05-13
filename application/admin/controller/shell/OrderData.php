@@ -1982,6 +1982,7 @@ class OrderData extends Backend
             $params[$k]['quote_id'] = $res[$v['entity_id']] ?? 0;
         }
         $this->order->saveAll($params);
+        usleep(100000);
         echo $site . 'ok';
     }
 
