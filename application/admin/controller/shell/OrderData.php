@@ -1529,7 +1529,7 @@ class OrderData extends Backend
                 }
 
                 $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
-                $item_params[$key]['order_id'] = $res->id;
+                $item_params[$key]['order_id'] = $res->id ?: 0;
             }
             //更新数据
             if ($item_params) {
@@ -1561,7 +1561,7 @@ class OrderData extends Backend
         foreach ($list as $k => $v) {
             $order_id = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->value('id');
             $params[$k]['id'] = $v['id'];
-            $params[$k]['order_id'] = $order_id;
+            $params[$k]['order_id'] = $order_id ?: 0;
             echo $v['id'] . "\n";
         }
         //更新数据
