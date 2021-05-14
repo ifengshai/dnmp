@@ -1563,7 +1563,6 @@ class OrderData extends Backend
      */
     public function create_wave_order()
     {
-        echo "ok";
         /**
          *
          * 生成规则
