@@ -83,9 +83,9 @@ class Wangpenglei extends Backend
         $arr = ['SX0019-05', 'OP527327-01', 'JS771317-01', 'CH672798-08', 'TT598617-05', 'OP449452-02', 'OP02048-03', 'OP421241-02', 'OI913496-02', 'OP01990-03', 'FM0361-01', 'WA034265-01', 'WA245023-03', 'ER134040-01', 'WA065152-01', 'WA192071-01', 'SX0019-03', 'SX0019-02', 'DM638949-01', 'OP358317-02', 'WA034265-01', 'Glasses Pocket-02'];
 
         foreach ($skus as $k => $v) {
-            $list[$k]['sku'] = $v;
+            $list[$k]['sku'] = $v['sku'];
             $list[$k]['stock'] = $productbarcodeitem
-                ->where(['library_status' => 1, 'item_order_number' => '', 'sku' => $v])
+                ->where(['library_status' => 1, 'item_order_number' => '', 'sku' => $v['sku']])
                 ->where('location_code_id', '>', 0)
                 ->count();
         }
