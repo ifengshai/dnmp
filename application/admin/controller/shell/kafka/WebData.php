@@ -370,35 +370,38 @@ class WebData extends Backend
     protected function process_viporder_data($site)
     {
         if ($site == 1) {
-            $entity_id = WebVipOrder::where(['web_id' => ['<', 10531], 'site' => 1])->max('web_id');
+            $entity_id = WebVipOrder::where(['web_id' => ['<', 10557], 'site' => 1])->max('web_id');
             $res = Db::connect('database.db_zeelool')->table('oc_vip_order')->where(['id' => ['>', $entity_id]])->limit(1000)->select();
         } elseif ($site == 2) {
-            $entity_id = WebVipOrder::where(['web_id' => ['<', 3134], 'site' => 2])->max('web_id');
+            $entity_id = WebVipOrder::where(['web_id' => ['<', 3136], 'site' => 2])->max('web_id');
             $res = Db::connect('database.db_voogueme')->table('oc_vip_order')->where(['id' => ['>', $entity_id]])->limit(1000)->select();
         }
         $res = collection($res)->toArray();
-        $params = [];
         foreach ($res as $k => $v) {
-            $params[$k]['web_id'] = $v['id'];
-            $params[$k]['customer_id'] = $v['customer_id'] ?: 0;
-            $params[$k]['customer_email'] = $v['customer_email'] ?: '';
-            $params[$k]['site'] = $site;
-            $params[$k]['order_number'] = $v['order_number'] ?: '';
-            $params[$k]['order_amount'] = $v['order_amount'] ?: 0;
-            $params[$k]['order_status'] = $v['order_status'] ?: 0;
-            $params[$k]['order_type'] = $v['order_type'] ?: 0;
-            $params[$k]['paypal_token'] = $v['paypal_token'] ?: '';
-            $params[$k]['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) : 0;
-            $params[$k]['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) : 0;
-            $params[$k]['is_active_status'] = $v['is_active_status'] ?: 0;
-            $params[$k]['created_at'] = time();
-            $params[$k]['updated_at'] = time();
-            $params[$k]['pay_status'] = $v['pay_status'] ?: 0;
-            $params[$k]['country_id'] = $v['country_id'] ?: 0;
+            $count = (new WebVipOrder)->where(['site' => $site, 'web_id' => $v['id']])->count();
+            if ($count > 0) {
+                continue;
+            }
+            $params = [];
+            $params['web_id'] = $v['id'];
+            $params['customer_id'] = $v['customer_id'] ?: 0;
+            $params['customer_email'] = $v['customer_email'] ?: '';
+            $params['site'] = $site;
+            $params['order_number'] = $v['order_number'] ?: '';
+            $params['order_amount'] = $v['order_amount'] ?: 0;
+            $params['order_status'] = $v['order_status'] ?: 0;
+            $params['order_type'] = $v['order_type'] ?: 0;
+            $params['paypal_token'] = $v['paypal_token'] ?: '';
+            $params['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) : 0;
+            $params['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) : 0;
+            $params['is_active_status'] = $v['is_active_status'] ?: 0;
+            $params['created_at'] = time();
+            $params['updated_at'] = time();
+            $params['pay_status'] = $v['pay_status'] ?: 0;
+            $params['country_id'] = $v['country_id'] ?: 0;
+            (new WebVipOrder)->insertGetId($params);
         }
-        (new WebVipOrder)->saveAll($params);
 
-        return true;
         echo $site . '--ok' . "\n";
     }
 
