@@ -1282,8 +1282,8 @@ class Wangpenglei extends Backend
     {
         $type = 1;
         $site = 'zeelool';
-        $start = '2021-04-26T23:00:00Z';
-        $end = '2021-04-26T23:59:59Z';
+        $start = '2021-05-14T13:00:00Z';
+        $end = '2021-05-16T23:59:59Z';
 
         $this->asyncTicketHttps($type, $site, $start, $end);
     }
@@ -1292,9 +1292,9 @@ class Wangpenglei extends Backend
     {
         $type = 1;
         $site = 'zeelool';
-        for ($i = 0; $i < 24; $i++) {
-            $start = '2021-05-06T' . $i . ':00:00Z';
-            $end = '2021-05-06T' . $i . ':59:59Z';
+        for ($i = 12; $i < 24; $i++) {
+            $start = '2021-05-14T' . $i . ':00:00Z';
+            $end = '2021-05-14T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(100000);
