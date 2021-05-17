@@ -85,6 +85,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 pageList: [10, 25, 50, 100, 300],
                 extend: {
                     index_url: 'order/distribution/index' + location.search + (location.search ? '&label=' + Config.label : '?label=' + Config.label),
+                    import_url: 'order/distribution/importOrder',
                     table: 'distribution'
                 }
             });
