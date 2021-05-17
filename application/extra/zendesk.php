@@ -65,7 +65,7 @@ return [
         3 => 'https://pc.nihaooptical.com/index.php/xiaomoshou/sales_order/view/order_id/',
     ],
     'check_order_info_url' =>
-        'http://test.mruilove.com/admin_1biSSnWyfW.php/saleaftermanage/order_return/search?ref=addtabs'
+        'https://mojing.nextmar.com/admin_1biSSnWyfW.php/saleaftermanage/order_return/search?ref=addtabs'
     ,
     'templates'            => [
         //自动回复判断性邮件
