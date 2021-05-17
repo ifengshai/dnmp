@@ -31,7 +31,8 @@ class SkuStockLog extends Migrator
         // create the table
         $table = $this->table('sku_stock_log', ['engine' => 'InnoDB']);
         $table->addColumn('sku', 'string', ['limit' => 50, 'default' => '', 'comment' => 'sku'])
-            ->addColumn('all_stock', 'integer', ['limit' => 6, 'default' => 0, 'comment' => '总库存'])
+            ->addColumn('all_stock', 'integer', ['limit' => 6, 'default' => 0, 'comment' => '实时库存'])
+            ->addColumn('distribution_occupy_stock', 'integer', ['limit' => 6, 'default' => 0, 'comment' => '配货占用库存'])
             ->addColumn('stock_money', 'decimal', ['precision' => 12, 'scale' => 4, 'default' => 0, 'comment' => '库存总金额'])
             ->addColumn('created_at', 'integer', ['limit' => 11, 'default' => 0, 'comment' => '创建时间'])
             ->addColumn('updated_at', 'integer', ['limit' => 11, 'default' => 0, 'comment' => '更新时间'])
