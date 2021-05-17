@@ -135,6 +135,9 @@ class StockSku extends Backend
                 if ($warehouse_area['type'] !== 2){
                     $map['sku'] = $params['sku'];
                 }
+                if (!$params['area_id']){
+                    $this->error('库区不能为空！！');
+                }
                 //判断选择的库位是否已存在
                 $map['store_id'] = $params['store_id'];//库位id
                 $map['is_del'] = 1;
@@ -212,6 +215,9 @@ class StockSku extends Backend
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 empty($params['sku']) && $this->error('sku不能为空！');
+                if (!$params['area_id']){
+                    $this->error('库区不能为空！！');
+                }
                 //判断选择的库位是否已存在
                 $map['store_id'] = $params['store_id'];
                 $map['id'] = ['<>', $row->id];
@@ -323,7 +329,7 @@ class StockSku extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['库区编码', '库位编码', 'SKU'];
+        $listName = ['库区编码', '库位编码', 'SKU','实体仓id'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -359,14 +365,14 @@ class StockSku extends Backend
         }
 
         foreach ($data as $k => $v) {
-            if (empty($v[2]) || empty($v[1]) || empty($v[0])) {
+            if (empty($v[3]) || empty($v[2]) || empty($v[1]) || empty($v[0])) {
                 $this->error('参数不能为空，请检查！！');
             }
-            $warehouse_area = Db::name('warehouse_area')->where('coding', $v[0])->find();
+            $warehouse_area = Db::name('warehouse_area')->where('coding', $v[0])->where('stock_id', $v[3])->find();
             if (empty($warehouse_area)) {
                 $this->error('sku:'.$v[2].'库区编码错误，请检查！！');
             }
-            $store_house = Db::name('store_house')->where('coding', $v[1])->where('area_id', $warehouse_area['id'])->find();
+            $store_house = Db::name('store_house')->where('coding', $v[1])->where('area_id', $warehouse_area['id'])->where('stock_id', $v[3])->find();
             if (empty($store_house)) {
                 $this->error('sku:'.$v[2].'库位编码错误，请检查！！');
             }
@@ -377,15 +383,16 @@ class StockSku extends Backend
             //判断选择的库位是否已存在
             $map['store_id'] = $store_house['id'];//库位id
             $map['is_del'] = 1;
+            $map['stock_id'] = $store_house['stock_id'];
             $count = Db::name('store_sku')->where($map)->count();
             if ($count > 0) {
                 $this->error('sku:'.$v[2].'库位已绑定！！');
             }
         }
         foreach ($data as $k => $v) {
-            $area_id = Db::name('warehouse_area')->where('coding', $v[0])->value('id');
-            $store_house = Db::name('store_house')->where('coding', $v[1])->where('area_id', $area_id)->find();
-            $result = Db::name('store_sku')->insert(['sku' => $v[2], 'store_id' => $store_house['id'], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
+            $area_id = Db::name('warehouse_area')->where('stock_id', $v[3])->where('coding', $v[0])->value('id');
+            $store_house = Db::name('store_house')->where('stock_id', $v[3])->where('coding', $v[1])->where('area_id', $area_id)->find();
+            $result = Db::name('store_sku')->insert(['sku' => $v[2], 'store_id' => $store_house['id'],'stock_id' =>$store_house['stock_id'],  'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
         }
         if ($result) {
             $this->success('导入成功！！');
