@@ -37,6 +37,7 @@ class StockHouse extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\StockHouse;
+        $this->assignconfig('warehourseStock',getStockHouse());
 
     }
 
@@ -79,6 +80,7 @@ class StockHouse extends Backend
                 ->where(['type' => 1])
                 ->where($where)
                 ->where($map)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->count();
 
@@ -86,6 +88,7 @@ class StockHouse extends Backend
                 ->where(['type' => 1])
                 ->where($where)
                 ->where($map)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();

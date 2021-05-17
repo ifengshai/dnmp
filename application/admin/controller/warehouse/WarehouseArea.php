@@ -37,6 +37,7 @@ class WarehouseArea extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\WarehouseArea;
+        $this->assignconfig('warehourseStock',getStockHouse());
 
     }
     
@@ -65,11 +66,13 @@ class WarehouseArea extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
