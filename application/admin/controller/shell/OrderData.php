@@ -78,6 +78,9 @@ class OrderData extends Backend
         // 设置将要消费消息的主题
         $topic = $this->topicName;
         $host = $this->topicIp;
+
+        echo $topic . "\n";
+        echo $host . "\n";
         $group_id = '0';
         $conf = new \RdKafka\Conf();
         // 当有新的消费进程加入或者退出消费组时，kafka 会自动重新分配分区给消费者进程，这里注册了一个回调函数，当分区被重新分配时触发
@@ -140,6 +143,7 @@ class OrderData extends Backend
                     case RD_KAFKA_RESP_ERR_NO_ERROR: //没有错误
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
+                        dump($payload);
                         //对该条message进行处理，比如用户数据同步， 记录日志
                         echo $payload['database'] . '-' . $payload['type'] . '-' . $payload['table'];
 
