@@ -155,7 +155,9 @@ class NewProductDesign extends Backend
                 ->field('a.*,b.addtime,b.design_id,b.id as bid')
                 ->where($where)
                 ->where($map)
-                ->where($whereLogIds)
+                ->where(function($query) use($whereLogIds) {
+                    $query->where($whereLogIds)->whereOr('b.id',null);
+                })
                 ->where($whereLogTime)
                 ->group('a.id')
                 ->order($sort, $order)
@@ -167,13 +169,15 @@ class NewProductDesign extends Backend
                 ->field('a.*,b.addtime,b.design_id,b.id as bid')
                 ->where($where)
                 ->where($map)
-                ->where($whereLogIds)
+                ->where(function($query) use($whereLogIds) {
+                    $query->where($whereLogIds)->whereOr('b.id',null);
+                })
                 ->where($whereLogTime)
                 ->group('a.id')
                 ->order($sort, $order)
                 ->order('b.id desc')
                 ->limit($offset, $limit)
-                ->select();
+                ->select(false);
             foreach ($list as $row) {
                 $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time','addtime']);
             }
