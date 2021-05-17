@@ -26,4 +26,5 @@ return [
     'app\admin\controller\shell\supply\TrackAsynData',
     'app\admin\controller\shell\service\zendeskAsynData',
     'app\admin\controller\shell\service\StockAsyncData',
+    'app\admin\controller\shell\supply\PurchaseAsynData',
 ];
