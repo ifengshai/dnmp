@@ -24,6 +24,12 @@ class PurchaseAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
+        //$this->purchaseDay();   //采购单每天的数据
+        $this->purchaseMonth();   //采购单每月的数据
+        $output->writeln("All is ok");
+    }
+    public function purchaseDay()
+    {
         $data = Db::name('warehouse_data')
             ->column('create_date','id');
         $map['is_del'] = 1;
@@ -41,7 +47,22 @@ class PurchaseAsynData extends Command
             echo $val." is ok"."\n";
             usleep(10000);
         }
-        $output->writeln("All is ok");
     }
-
+    public function purchaseMonth(){
+        $data = Db::name('datacenter_supply_month')
+            ->column('day_date','id');
+        foreach($data as $k=>$v){
+            $start =  $v.'-01';
+            $end = date('Y-m-t 23:59:59',strtotime($start));
+            $map['create_time'] = ['between',[$start,$end]];
+            $purchase_num = Db::name('warehouse_data')
+                ->where($map)
+                ->sum('all_purchase_num');
+            Db::name('datacenter_supply_month')
+                ->where('id',$k)
+                ->update(['purchase_num'=>$purchase_num]);
+            echo $v." is ok"."\n";
+            usleep(10000);
+        }
+    }
 }
