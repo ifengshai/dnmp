@@ -157,7 +157,7 @@ class NewProductDesign extends Backend
                 ->where($map)
                 ->where($whereLogIds)
                 ->where($whereLogTime)
-                ->group('b.design_id')
+                ->group('a.id')
                 ->order($sort, $order)
                 ->count();
 
@@ -169,7 +169,7 @@ class NewProductDesign extends Backend
                 ->where($map)
                 ->where($whereLogIds)
                 ->where($whereLogTime)
-                ->group('b.design_id')
+                ->group('a.id')
                 ->order($sort, $order)
                 ->order('b.id desc')
                 ->limit($offset, $limit)
