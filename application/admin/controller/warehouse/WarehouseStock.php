@@ -81,8 +81,8 @@ class WarehouseStock extends Backend
         }
         return $this->view->fetch();
     }
-    
-     /**
+
+    /**
      * 添加
      */
     public function add()
@@ -96,9 +96,9 @@ class WarehouseStock extends Backend
                 }
 
 
-                $map['name'] = $params['name'];
+                $map['coding'] = $params['coding'];
                 $count = $this->model->where($map)->count();
-                $count > 0 && $this->error('此仓库名称已存在！');
+                $count > 0 && $this->error('已存在此编码！');
 
                 $result = false;
                 Db::startTrans();
@@ -129,6 +129,8 @@ class WarehouseStock extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $type=[1=>'实体仓'];
+        $this->view->assign("type", $type);
         return $this->view->fetch();
     }
 
@@ -153,10 +155,10 @@ class WarehouseStock extends Backend
             if ($params) {
                 $params = $this->preExcludeFields($params);
 
+                $map['coding'] = $params['coding'];
                 $map['id'] = ['<>', $row->id];
-                $map['name'] = $params['name'];
                 $count = $this->model->where($map)->count();
-                $count > 0 && $this->error('此仓库名称已存在！');
+                $count > 0 && $this->error('已存在此编码！');
 
                 $result = false;
                 Db::startTrans();
@@ -188,6 +190,8 @@ class WarehouseStock extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+        $type=[1=>'实体仓'];
+        $this->view->assign("type", $type);
         $this->view->assign("row", $row);
         return $this->view->fetch();
     }

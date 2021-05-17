@@ -34,6 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
+                        { field: 'stock_name', title: __('仓库') },
                         {
                             field: 'shelf_number',
                             title: __('货架号'),
