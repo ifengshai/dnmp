@@ -117,7 +117,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             },
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'addtime', title: __('操作时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'addtime', title: __('操作时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime,sortable:true},
                         {field: 'create_time', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange',sortable:true, formatter: Table.api.formatter.datetime},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
