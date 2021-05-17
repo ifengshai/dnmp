@@ -34,8 +34,6 @@ class WebUsers extends Model
         if (!$data) {
             return false;
         }
-
-
         try {
             $params = [];
             foreach ($data as $k => $v) {
