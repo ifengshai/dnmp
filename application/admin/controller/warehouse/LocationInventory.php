@@ -41,6 +41,7 @@ class LocationInventory extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\StockSku;
+        $this->assignconfig('warehourseStock',getStockHouse());
     }
 
     /**
@@ -84,14 +85,14 @@ class LocationInventory extends Backend
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->with(['storehouse1'])
+                ->with(['storehouse1','warehouseStock'])
                 ->where($where)
                 ->where($maps)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['storehouse1'])
+                ->with(['storehouse1','warehouseStock'])
                 ->where($where)
                 ->where($maps)
                 ->order($sort, $order)
@@ -107,7 +108,7 @@ class LocationInventory extends Backend
                 $list[$k]['name'] = $arr[$row['sku']]['name'];
                 //在库 子单号为空 库位号 库区id都一致的库存作为此库位的库存
                 $list[$k]['stock'] = $productbarcodeitem
-                    ->where(['location_id'=>$row['storehouse']['area_id'],'location_code'=>$row['storehouse']['coding'],'library_status'=>1,'item_order_number'=>'','sku'=>$row['sku']])
+                    ->where(['location_id'=>$row['storehouse']['area_id'],'location_code'=>$row['storehouse']['coding'],'library_status'=>1,'item_order_number'=>'','sku'=>$row['sku'],'stock_id' => $row['stock_id']])
                     ->count();
                 $list[$k]['area_code'] = $area_list[$row['storehouse']['area_id']];
             }

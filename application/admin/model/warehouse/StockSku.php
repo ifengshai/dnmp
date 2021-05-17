@@ -57,4 +57,14 @@ class StockSku extends Model
         $list = $this->field('id,sku')->where(['store_id' => ['in', $store_id], 'is_del' => 1])->select();
         return collection($list)->toArray();
     }
+    /**
+     * 所属分仓
+     * @return \think\model\relation\BelongsTo
+     * @author crasphb
+     * @date   2021/5/17 14:13
+     */
+    public function warehouseStock()
+    {
+        return $this->belongsTo(WarehouseStock::class,'stock_id','id');
+    }
 }
