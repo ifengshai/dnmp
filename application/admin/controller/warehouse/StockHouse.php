@@ -63,10 +63,16 @@ class StockHouse extends Backend
             //自定义sku搜索
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['area_coding']) {
-                $area_id = Db::name('warehouse_area')->where('coding', $filter['area_coding'])->value('id');
-                $all_store_id = Db::name('store_house')->where('area_id', $area_id)->column('id');
-                $map['id'] = ['in', $all_store_id];
+                $areaId= Db::name('warehouse_area')->where('coding', $filter['area_coding'])->value('id');
+                $allStoreId= Db::name('store_house')->where('area_id', $areaId)->column('id');
+                $map['id'] = ['in', $allStoreId];
                 unset($filter['area_coding']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+            if ($filter['stock_name']) {
+                $stockId = Db::name('warehouse_stock')->where('name','like', '%'.$filter['stock_name'].'%')->column('id');
+                $map['stock_id'] = ['in', $stockId];
+                unset($filter['stock_name']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
             if (isset($filter['shelf_number'])) {
@@ -95,10 +101,12 @@ class StockHouse extends Backend
 
             $list = collection($list)->toArray();
             //所有库区编码id
-            $area_coding = Db::name('warehouse_area')->column('coding', 'id');
+            $areaCoding = Db::name('warehouse_area')->column('coding', 'id');
+            $stockName = Db::name('warehouse_stock')->column('name', 'id');
             //获得库位所属库区编码
             foreach ($list as $k => $v) {
-                $list[$k]['area_coding'] = $area_coding[$v['area_id']];
+                $list[$k]['area_coding'] = $areaCoding[$v['area_id']];
+                $list[$k]['stock_name'] = $stockName[$v['stock_id']];
             }
             $result = array("total" => $total, "rows" => $list);
 

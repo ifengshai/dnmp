@@ -10,6 +10,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     index_url: 'warehouse/warehouse_stock/index' + location.search,
                     add_url: 'warehouse/warehouse_stock/add?type=1',
                     edit_url: 'warehouse/warehouse_stock/edit?type=1',
+                    del_url: 'warehouse/warehouse_stock/del',
                     import_url: 'warehouse/warehouse_stock/import',
                     table: 'warehouse_area'
                 }
@@ -27,7 +28,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'coding', title: __('仓库编码') , operate: 'like' },
-                        { field: 'name', title: __('仓库名称') , operate: 'like' },
+                        { field: 'name', title: __('仓库') , operate: 'like' },
                         {
                             field: 'type', title: __('仓库类型'), custom: { 1: 'success', 2: 'danger' },
                             searchList: { 1: '实体仓'},

@@ -2,6 +2,7 @@
 
 namespace app\api\controller;
 
+use app\admin\model\warehouse\StockTransferOrder;
 use app\admin\model\warehouse\WarehouseTransferOrder;
 use app\admin\model\warehouse\WarehouseTransferOrderItem;
 use app\admin\model\warehouse\WarehouseTransferOrderItemCode;
@@ -231,6 +232,7 @@ class ScmWarehouse extends Scm
         $this->_store_house = new StockHouse();
         $this->_warehouse_transfer_order = new WarehouseTransferOrder();
         $this->_warehouse_transfer_order_item = new WarehouseTransferOrderItem();
+        $this->_stock_transfer_order = new StockTransferOrder();
     }
 
     /**
@@ -3660,4 +3662,186 @@ class ScmWarehouse extends Scm
     }
 
     /***************************************库内调拨单end******************************************/
+
+    /***************************************实体仓调拨单start******************************************/
+    /**
+     * 实体仓调拨单列表
+     * Interface stock_transfer_list
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/14 13:38:01
+     */
+    public function stock_transfer_list()
+    {
+        $query = $this->request->request('query');
+        $status = $this->request->request('status');
+        $start_time = $this->request->request('start_time');
+        $end_time = $this->request->request('end_time');
+        $page = $this->request->request('page');
+        $pageSize = $this->request->request('page_size');
+
+        empty($page) && $this->error(__('Page can not be empty'), '', 520);
+        empty($pageSize) && $this->error(__('Page size can not be empty'), '', 521);
+
+        $where = [];
+        if ($query) {
+            $where['transfer_order_number|create_person'] = ['like', '%' . $query . '%'];
+        }
+        if (isset($status)) {
+            $where['status'] = $status;
+        }
+        if ($start_time && $end_time) {
+            $where['create_time'] = ['between', [$start_time, $end_time]];
+        }
+
+        $offset = ($page - 1) * $pageSize;
+        $limit = $pageSize;
+
+        //获取库内调拨单列表数据
+        $list = $this->_stock_transfer_order
+            ->where($where)
+            ->order('create_time', 'desc')
+            ->limit($offset, $limit)
+            ->select();
+        $list = collection($list)->toArray();
+        $checkStatus = [0 => '新建', 1 => '待审核', 2 => '待配货', 3 => '待物流揽收', 4 => '待收货', 5 => '待入库', 6 => '已完成', 7 => '审核拒绝', 8 => '已取消'];
+        $allStock = Db::name('warehouse_stock')->column('name','id');
+        foreach ($list as $key => $value) {
+            $list[$key]['status'] = $checkStatus[$value['status']];
+            $list[$key]['out_stock_name'] = $allStock[$value['out_stock_id']];
+            $list[$key]['in_stock_name'] = $allStock[$value['in_stock_id']];
+            //按钮
+            $list[$key]['show_out'] = 2 == $value['status'] ? 1 : 0; //配货出库按钮 待配货状态有
+            $list[$key]['show_logistics'] = 3 == $value['status'] ? 1 : 0; //扫描物流单号按钮 待物流揽收状态有
+            $list[$key]['show_sign'] = 4 == $value['status'] ? 1 : 0; //待收货 有签收按钮
+            $list[$key]['show_in'] = 5 == $value['status'] ? 1 : 0; //待入库有入库按钮
+        }
+        $this->success('', ['list' => $list], 200);
+    }
+
+    /**
+     * 配货出库实体仓调拨单详情
+     * Interface stock_transfer_out
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/17 14:08:04
+     */
+    public function stock_transfer_out()
+    {
+        $id = $this->request->request("transfer_order_id");
+        if (empty($id)) {
+            $this->error(__('error，调拨单id为空'), '', 546);
+        }
+        $transferOrder = $this->_stock_transfer_order->where('id',$id)->find();
+        $transfer_order_item = $this->_stock_transfer_order_item->where('transfer_order_id', $id)->select();
+        $allStock = Db::name('warehouse_stock')->column('name','id');
+        $data['transfer_order_number'] = $transferOrder['transfer_order_number'];
+        $data['out_stock'] = $allStock[$transferOrder['out_stock_id']];
+        $data['in_stock'] = $allStock[$transferOrder['in_stock_id']];
+        $data['response_person'] = $allStock[$transferOrder['response_person']];
+        $data['item_list'] = collection($transfer_order_item)->toArray();
+        $this->success('', $data, 200);
+    }
+
+    /**
+     * 实体仓调拨中提交子单sku页面/保存/提交
+     * Interface stock_transfer_ing
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/17 10:24:31
+     */
+    public function stock_transfer_ing()
+    {
+        $id = $this->request->request("transfer_order_item_id");
+        $transfer_order_item = $this->_warehouse_transfer_order_item->where('id', $id)->find();
+        $area_all = $this->_warehouse_area->column('id', 'coding');
+        $num = $this->request->request("num");
+        $do_type = $this->request->request("do_type");
+        $sku_agg = $this->request->request("sku_agg");
+        $remove_agg = $this->request->request("remove_agg");
+        $sku_agg = html_entity_decode($sku_agg);
+        $sku_agg = array_filter(json_decode($sku_agg, true));
+        if ($remove_agg) {
+            $remove_agg = html_entity_decode($remove_agg);
+            $remove_agg = array_filter(json_decode($remove_agg, true));
+        }
+        if (count(array_filter($sku_agg)) < 1) {
+            $this->error(__('条形码数据不能为空！！'), '', 524);
+        }
+        $res = false;
+        $this->_product_bar_code_item->startTrans();
+        $this->_warehouse_transfer_order_item->startTrans();
+        try {
+            $this->_warehouse_transfer_order_item->where('id', $id)->update(['status' => $do_type]);
+            foreach ($sku_agg as $k => $v) {
+                //当前条形码详情
+                $detail = $this->_product_bar_code_item->where('code', $v['code'])->find();
+                if ($transfer_order_item['call_out_site'] != $detail['location_code']) {
+                    $this->error(__('条形码' . $v['code'] . '当前未在调出库位！！' . $transfer_order_item['call_out_site']), '', 546);
+                }
+                //调入仓库位id
+                $store_house_id = $this->_store_house->where(['coding' => $transfer_order_item['call_in_site'], 'area_id' => $area_all[$transfer_order_item['in_area']]])->value('id');
+                //判断调入库位是否有sku跟库位的绑定关系
+                $store_sku = $this->_store_sku->where('sku', $transfer_order_item['sku'])->where('store_id', $store_house_id)->find();
+                empty($store_sku) && $this->error(__('调入库位' . $transfer_order_item['call_in_site'] . '与sku：' . $transfer_order_item['sku'] . '没有绑定关系！！'), '', 546);
+                //更新条形码当前所属的库区库位
+                $this->_product_bar_code_item->where(['code' => $v['code']])->update(['location_code' => $transfer_order_item['call_in_site'], 'location_id' => $area_all[$transfer_order_item['inarea']]]);
+            }
+            if ($remove_agg) {
+                //调拨单移除条形码
+                foreach ($remove_agg as $k => $v) {
+                    //更新条形码当前所属的库区库位 移除条形码 此条形码应该再次回到调出的库区库位
+                    $this->_product_bar_code_item->where('code', $v['code'])->update(['location_code' => $transfer_order_item['call_out_site'], 'location_id' => $area_all[$transfer_order_item['outarea']]]);
+                }
+            }
+            //更新库内调拨单子单的调拨数量
+            $res = $this->_warehouse_transfer_order_item->where('id', $id)->update(['num' => $num]);
+            $this->_product_bar_code_item->commit();
+            $this->_warehouse_transfer_order_item->commit();
+        } catch (ValidateException $e) {
+            $this->_product_bar_code_item->rollback();
+            $this->_warehouse_transfer_order_item->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            $this->_product_bar_code_item->rollback();
+            $this->_warehouse_transfer_order_item->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            $this->_product_bar_code_item->rollback();
+            $this->_warehouse_transfer_order_item->rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
+        if ($res !== false) {
+            $this->success('调拨成功！！', '', 200);
+        } else {
+            $this->error(__('No rows were inserted'), '', 525);
+        }
+    }
+
+    /**
+     * 扫描条码返回信息
+     * Interface stock_code_review
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/17 11:26:54
+     */
+    public function stock_code_review()
+    {
+        $code = $this->request->request("code");
+        //当前条形码详情
+        $detail = $this->_product_bar_code_item->where('code', $code)->find();
+        if (empty($detail)) {
+            $this->error(__('条形码:' . $code.'信息不存在，请联系管理员'), '', 546);
+        }
+        if (empty($detail['location_id']) || empty($detail['location_code_id'])) {
+            $this->error(__('条形码没有库区或库位信息,条形码:' . $code), '', 546);
+        }
+        $arr['location'] = Db::name('warehouse_area')->where('id',$detail['location_id'])->value('coding');
+        $arr['location_id'] = $detail['location_id'];
+        $arr['location_code_id'] = $detail['location_code_id'];
+        $arr['location_code'] = $detail['location_code'];
+        $this->success('扫码成功！！',$arr, 200);
+    }
+
+    /***************************************实体仓调拨单end******************************************/
 }
