@@ -105,7 +105,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {field: 'responsible_id', title: __('责任人')},
                         {field: 'location_code', title: __('样品间库位号'),operate: false},
-                        {field: 'platform', title: __('站点'),operate: false},
+                        {field: 'platform', title: __('站点'),operate: false,visible: true},
                         {field: 'site', title: __('站点'), visible: false,
                             addclass:'plat_type selectpicker',
                             data: 'multiple',
@@ -364,6 +364,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                              // formatter: Table.api.formatter.operate
 
                             formatter: function (value, row, index) { //隐藏自定义的视频按钮
+                                console.log(Config);
                                 var that = $.extend({}, this);
                                 var table = $(that.table).clone(true);
                                 //权限判断
