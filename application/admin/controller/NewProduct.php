@@ -877,7 +877,9 @@ class NewProduct extends Backend
      */
     public function passAudit()
     {
+
         if ($this->request->isAjax()) {
+            $itemPlatformSku = new ItemPlatformSku();
             $ids = input('id');
             $site = input('site');
             //查询所选择的数据
@@ -889,6 +891,10 @@ class NewProduct extends Backend
             $row = $row->toArray();
             if ($row['item_status'] != 1 && $row['item_status'] != 2) {
                 $this->error('此状态不能同步');
+            }
+            $isExist = $itemPlatformSku->where('platform_type',$site)->where('sku',$row['sku'])->find();
+            if ($isExist['id'] > 0){
+                $this->error('此sku在相应站点已有映射关系'.$isExist['platform_sku'].'，请检查');
             }
             $map['id'] = $ids;
             $map['item_status'] = 1;
@@ -918,6 +924,7 @@ class NewProduct extends Backend
                     $this->itemAttribute->allowField(true)->save($attributeParams);
                 }
 
+
                 //添加对应平台映射关系
                 $skuParams['site'] = $site;
                 $skuParams['sku'] = $params['sku'];
@@ -925,7 +932,7 @@ class NewProduct extends Backend
                 $skuParams['name'] = $row['name'];
                 $skuParams['category_id'] = $row['category_id'];
 
-                $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+                $result =$itemPlatformSku->addPlatformSku($skuParams);
                 $this->success('审核成功');
             } else {
                 $this->error('审核失败');

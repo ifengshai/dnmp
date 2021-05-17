@@ -45,8 +45,8 @@ class WebVipOrder extends Model
                 $params[$k]['order_status'] = $v['order_status'] ?: 0;
                 $params[$k]['order_type'] = $v['order_type'] ?: 0;
                 $params[$k]['paypal_token'] = $v['paypal_token'] ?: '';
-                $params[$k]['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) + 28800 : 0;
-                $params[$k]['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) + 28800 : 0;
+                $params[$k]['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) : 0;
+                $params[$k]['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) : 0;
                 $params[$k]['is_active_status'] = $v['is_active_status'] ?: 0;
                 $params[$k]['created_at'] = time();
                 $params[$k]['updated_at'] = time();
@@ -87,8 +87,8 @@ class WebVipOrder extends Model
                 $params['order_status'] = $v['order_status'] ?: 0;
                 $params['order_type'] = $v['order_type'] ?: 0;
                 $params['paypal_token'] = $v['paypal_token'] ?: '';
-                $params['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) + 28800 : 0;
-                $params['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) + 28800 : 0;
+                $params['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) : 0;
+                $params['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) : 0;
                 $params['is_active_status'] = $v['is_active_status'] ?: 0;
                 $params['updated_at'] = time();
                 $params['pay_status'] = $v['pay_status'] ?: 0;

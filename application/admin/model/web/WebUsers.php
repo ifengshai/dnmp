@@ -35,21 +35,22 @@ class WebUsers extends Model
             return false;
         }
 
+
         try {
             $params = [];
             foreach ($data as $k => $v) {
                 $params['entity_id'] = $v['entity_id'];
-                $params['email'] = $v['email'];
+                $params['email'] = $v['email'] ?: '';
                 $params['site'] = $site;
-                $params['group_id'] = $v['group_id'];
-                $params['store_id'] = $v['store_id'];
-                $params['created_at'] = strtotime($v['created_at']) + 28800;
-                $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $params['resouce'] = $v['resouce'];
+                $params['group_id'] = $v['group_id'] ?: 0;
+                $params['store_id'] = $v['store_id'] ?: 0;
+                $params['created_at'] = strtotime($v['created_at']);
+                $params['updated_at'] = strtotime($v['updated_at']);
+                $params['resouce'] = $v['resouce'] ?: 0;
                 $params['is_vip'] = $v['is_vip'];
                 $userId = (new WebUsers)->insertGetId($params);
                 //新增用户信息
-                (new AsyncCustomer())->runInsert($params,$userId);
+                (new AsyncCustomer())->runInsert($params, $userId);
             }
 
             return true;
@@ -77,16 +78,16 @@ class WebUsers extends Model
         try {
             foreach ($data as $k => $v) {
                 $params = [];
-                $params['email'] = $v['email'];
-                $params['group_id'] = $v['group_id'];
-                $params['store_id'] = $v['store_id'];
-                $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $params['resouce'] = $v['resouce'];
-                $params['is_vip'] = $v['is_vip'];
+                $params['email'] = $v['email'] ?: '';
+                $params['group_id'] = $v['group_id'] ?: 0;
+                $params['store_id'] = $v['store_id'] ?: 0;
+                $params['updated_at'] = strtotime($v['updated_at']);
+                $params['resouce'] = $v['resouce'] ?: 0;
+                $params['is_vip'] = $v['is_vip'] ?: 0;
                 (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
 
                 $user = (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->find();
-                if($user) {
+                if ($user) {
                     //更新用户信息
                     (new AsyncCustomer())->runUpdate($user->toArray());
                 }
@@ -120,16 +121,16 @@ class WebUsers extends Model
             $params = [];
             foreach ($data as $k => $v) {
                 $params[$k]['entity_id'] = $v['id'];
-                $params[$k]['email'] = $v['email'];
+                $params[$k]['email'] = $v['email'] ?: '';
                 $params[$k]['site'] = $site;
-                $params[$k]['group_id'] = $v['group_id'];
-                $params[$k]['store_id'] = $v['store_id'];
-                $params[$k]['created_at'] = strtotime($v['created_at']) + 28800;
-                $params[$k]['updated_at'] = strtotime($v['updated_at']) + 28800;
+                $params[$k]['group_id'] = $v['group_id'] ?: 0;
+                $params[$k]['store_id'] = $v['store_id'] ?: 0;
+                $params[$k]['created_at'] = strtotime($v['created_at']);
+                $params[$k]['updated_at'] = strtotime($v['updated_at']);
                 $params[$k]['is_vip'] = $v['is_vip'];
                 $userId = (new WebUsers)->insertGetId($params);
                 //新增用户信息
-                (new AsyncCustomer())->runInsert($params,$userId);
+                (new AsyncCustomer())->runInsert($params, $userId);
             }
 
             return true;
@@ -158,15 +159,15 @@ class WebUsers extends Model
             foreach ($data as $k => $v) {
                 $params = [];
                 $params['email'] = $v['email'];
-                $params['group_id'] = $v['group_id'];
-                $params['store_id'] = $v['store_id'];
-                $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $params['is_vip'] = $v['is_vip'];
+                $params['group_id'] = $v['group_id'] ?: 0;
+                $params['store_id'] = $v['store_id'] ?: 0;
+                $params['updated_at'] = strtotime($v['updated_at']);
+                $params['is_vip'] = $v['is_vip'] ?: 0;
 
                 (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
 
                 $user = (new WebUsers())->where(['entity_id' => $v['entity_id'], 'site' => $site])->find();
-                if($user) {
+                if ($user) {
                     //更新用户信息
                     (new AsyncCustomer())->runUpdate($user->toArray());
                 }

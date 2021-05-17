@@ -16,6 +16,7 @@ use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use fast\Trackingmore;
+use think\Log;
 use think\Request;
 
 class Test4 extends Controller
@@ -3465,6 +3466,42 @@ class Test4 extends Controller
             }
             Excel::writeCsv($data,$headList,$path.$fileName);
         }
+        //获取当前域名
+        $request = Request::instance();
+        $domain = $request->domain();
+        header('Location: '.$domain.$path.$fileName.'.csv');
+        die;
+    }
+
+    public function get_same_skus()
+    {
+        $itemPlatform = new ItemPlatformSku();
+        $list = $itemPlatform->field('platform_sku,sku,platform_type')->select();
+        $list = collection($list)->toArray();
+        $arr = [];
+        foreach ($list as $k=>$v){
+            if ($arr[$v['sku']]){
+                array_push($arr[$v['sku']],$v['platform_type']);
+            }else{
+                $arr[$v['sku']] = [$v['platform_type']];
+            }
+        }
+        $data = [];
+        foreach ($arr as $k1=>$v1){
+            if (count($v1) != count(array_unique($v1))) {
+                array_push($data,$k1);
+            }
+        }
+        $skuData = [];
+        foreach ($data as $k2=>$v2){
+            $skuData[$k2]['sku'] = $v2;
+        }
+        $path = '/uploads/';
+        $fileName = 'sku存在重复映射关系的sku'.time();
+        $headList = [
+            'sku'
+        ];
+        Excel::writeCsv($skuData,$headList,$path.$fileName);
         //获取当前域名
         $request = Request::instance();
         $domain = $request->domain();
