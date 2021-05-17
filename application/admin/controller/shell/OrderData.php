@@ -143,7 +143,6 @@ class OrderData extends Backend
                     case RD_KAFKA_RESP_ERR_NO_ERROR: //没有错误
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
-                        dump($payload);
                         //对该条message进行处理，比如用户数据同步， 记录日志
                         echo $payload['database'] . '-' . $payload['type'] . '-' . $payload['table'];
 
