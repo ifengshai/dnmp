@@ -90,17 +90,17 @@ class NewProductDesign extends Backend
             if ($filter['label']) {
                 if ($filter['label'] == 5 || $filter['label'] == 6){
                     $adminId = session('admin.id');
-                    $map['responsible_id'] = ['eq',$adminId];
+                    $map['a.responsible_id'] = ['eq',$adminId];
                 }
-                $map['status'] = $filter['label'];
+                $map['a.status'] = $filter['label'];
             }
             if ($filter['sku']) {
-                $map['sku'] = ['like','%'.$filter['sku'].'%'];
+                $map['a.sku'] = ['like','%'.$filter['sku'].'%'];
             }
 
             if ($filter['site'] || $filter['item_status'] || $filter['is_new']){
                 if ($filter['site']){
-                    $cat['b.platform_type'] = ['eq',$filter['site']];
+                    $cat['b.platform_type'] = ['in',$filter['site']];
                     unset($filter['site']);
                 }
                 if ($filter['item_status']){
@@ -116,16 +116,16 @@ class NewProductDesign extends Backend
                     ->where($cat)
                     ->column('a.sku');
                 $sku = array_unique($sku);
-                $map['sku'] = ['in',$sku];
+                $map['a.sku'] = ['in',$sku];
             }
             unset($filter['label']);
             if ($filter['responsible_id']){
                 $wheLike['nickname'] = ['like','%'.$filter['responsible_id'].'%'];
                 $responsibleId =  $admin->where($wheLike)->column('id');
                 if ($responsibleId){
-                    $map['responsible_id'] = ['in',$responsibleId];
+                    $map['a.responsible_id'] = ['in',$responsibleId];
                 }else{
-                    $map['responsible_id'] = ['eq','999999999'];
+                    $map['a.responsible_id'] = ['eq','999999999'];
                 }
             }
             unset($filter['responsible_id']);
@@ -137,19 +137,28 @@ class NewProductDesign extends Backend
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
+                ->alias('a')
+                ->join('new_product_design_log b','b.design_id=a.id ','left')
+                ->field('a.*,b.addtime,b.design_id,b.id as bid')
                 ->where($where)
                 ->where($map)
+                ->group('b.design_id')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
+                ->alias('a')
+                ->join('new_product_design_log b','b.design_id=a.id ','left')
+                ->field('a.*,b.addtime,b.design_id,b.id as bid')
                 ->where($where)
                 ->where($map)
+                ->group('b.design_id')
                 ->order($sort, $order)
+                ->order('b.id desc')
                 ->limit($offset, $limit)
                 ->select();
             foreach ($list as $row) {
-                $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time']);
+                $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time','addtime']);
             }
             $list = collection($list)->toArray();
             $itemPlatform = new ItemPlatformSku();
@@ -164,7 +173,7 @@ class NewProductDesign extends Backend
                 $itemStatusIsNew = $Item->where(['sku'=>$item['sku']])->field('item_status,is_new')->find();
                 $list[$key]['item_status'] =$itemStatusIsNew->item_status;
                 $list[$key]['is_new'] = $itemStatusIsNew->is_new;
-                $list[$key]['operate_time'] = Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime') ? Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime'):$item['create_time'];
+//                $list[$key]['operate_time'] = Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime') ? Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime'):$item['create_time'];
                 $list[$key]['location_code'] = Db::name('purchase_sample')->alias('a')->join(['fa_purchase_sample_location' => 'b'],'a.location_id=b.id')->where('a.sku',$item['sku'])->value('b.location');
                 $list[$key]['platform'] =$itemPlatform->where('sku',$item['sku'])->order('platform_type asc')->column('platform_type');
                 foreach ($list[$key]['platform'] as $k1=>$v1){
