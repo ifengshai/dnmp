@@ -177,7 +177,7 @@ class NewProductDesign extends Backend
                 ->order($sort, $order)
                 ->order('b.id desc')
                 ->limit($offset, $limit)
-                ->select(false);
+                ->select();
             foreach ($list as $row) {
                 $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time','addtime']);
             }
