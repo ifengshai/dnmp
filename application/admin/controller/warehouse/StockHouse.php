@@ -106,7 +106,6 @@ class StockHouse extends Backend
             //获得库位所属库区编码
             foreach ($list as $k => $v) {
                 $list[$k]['area_coding'] = $areaCoding[$v['area_id']];
-                $list[$k]['stock_name'] = $stockName[$v['stock_id']];
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -141,6 +140,7 @@ class StockHouse extends Backend
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
                 $map['area_id'] = $params['area_id'];
+                $map['stock_id'] = $params['stock_id'];
                 $count = $this->model->where($map)->count();
                 $count > 0 && $this->error('当前库区已存在此编码！');
 
@@ -226,6 +226,7 @@ class StockHouse extends Backend
                 $map['coding'] = $params['coding'];
                 $map['id'] = ['<>', $row->id];
                 $map['area_id'] = $params['area_id'];
+                $map['stock_id'] = $params['stock_id'];
                 $count = $this->model->where($map)->count();
                 $count > 0 && $this->error('当前库区已存在此编码！');
 
@@ -310,12 +311,14 @@ class StockHouse extends Backend
             $total = $this->model
                 ->where(['type' => 2])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where(['type' => 2])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -344,12 +347,14 @@ class StockHouse extends Backend
             $total = $this->model
                 ->where(['type' => 3])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where(['type' => 3])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -378,12 +383,14 @@ class StockHouse extends Backend
             $total = $this->model
                 ->where(['type' => 4])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where(['type' => 4])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();

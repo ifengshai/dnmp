@@ -29,6 +29,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
+                        { field: 'warehouse_stock.name', title: __('实体仓名称'), operate: 'like' },
+                        {
+                            field: 'stock_id', title: __('实体仓名称'), custom: Config.warehourseStock,
+                            searchList: Config.warehourseStock,
+                            formatter: Table.api.formatter.status,
+                            visible:false
+                        },
                         { field: 'area_coding', title: __('库区编码'), operate: 'like' },
                         { field: 'storehouse.coding', title: __('库位编码'), operate: 'like' },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
@@ -115,5 +122,44 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
             }
         }
     };
+    $('.warehouse_stock').on('change',function() {
+        var id = $(this).val();
+        $.ajax({
+            url: "warehouse/warehouse_stock/getWarehouseArea",
+            async: false,
+            data: {stock_id:id},
+            success: function (obj) {
+                var html = [];
+                html.push("<select class='form-control area' name='row[area_id]'>");
+                html.push("<option value=''>请选择</option>");
+                for (var i = 0; i < obj.length; i++) {
+                    var stock = obj[i]
+                    console.log(stock.id)
+                    html.push("<option value='" + stock.id + "'>" + stock.name + "</option>");
+                }
+                html.push("</select>");
+                $('#area').html(html.join(""));
+            }
+        })
+    })
+    $(document).on('change','.area',function() {
+        var id = $(this).val();
+        $.ajax({
+            url: "warehouse/warehouse_area/getStockHouse",
+            async: false,
+            data: {area_id:id},
+            success: function (obj) {
+                var html = [];
+                html.push("<select class='form-control store selectpicker' data-live-search = true name='row[store_id]'>");
+                for (var i = 0; i < obj.length; i++) {
+                    var house = obj[i]
+                    console.log(house.id)
+                    html.push("<option value='" + house.id + "'>" + house.coding + "</option>");
+                }
+                html.push("</select>");
+                $('#area').html(html.join(""));
+            }
+        })
+    })
     return Controller;
 });

@@ -31,7 +31,7 @@ class WarehouseStock extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['print_label'];
+    protected $noNeedRight = ['print_label','getWarehouseArea'];
 
     public function _initialize()
     {
@@ -212,6 +212,21 @@ class WarehouseStock extends Backend
             $this->success();
         } else {
             $this->error('修改失败！！');
+        }
+    }
+
+    /**
+     * 获取仓库对应的库区
+     * @return \think\response\Json
+     * @author crasphb
+     * @date   2021/5/17 14:42
+     */
+    public function getWarehouseArea()
+    {
+        if ($this->request->isAjax()) {
+            $stock_id = input('stock_id','');
+            $area = \app\admin\model\warehouse\WarehouseArea::where('stock_id',$stock_id)->field('coding','id')->select();
+            return json($area);
         }
     }
 
