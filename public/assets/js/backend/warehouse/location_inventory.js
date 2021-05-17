@@ -23,6 +23,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
+                        { field: 'warehouse_stock.name', title: __('实体仓名称'), operate: 'like' },
+                        {
+                            field: 'stock_id', title: __('实体仓名称'), custom: Config.warehourseStock,
+                            searchList: Config.warehourseStock,
+                            formatter: Table.api.formatter.status,
+                            visible:false
+                        },
                         { field: 'storehouse1.coding', title: __('库位编码'), operate: 'like' },
                         { field: 'area_code', title: __('库区编码'), operate: 'like' },
                         { field: 'sku', title: __('Sku'), operate: 'like' },
