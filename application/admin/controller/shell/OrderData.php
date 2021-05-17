@@ -1447,6 +1447,7 @@ class OrderData extends Backend
         $list = $this->is_prescription_abnormal($params);
         $arr = array_merge($arr, $list);
 
+        $arr['order_prescription_type'] = 0;
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
