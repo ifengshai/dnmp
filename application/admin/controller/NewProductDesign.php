@@ -181,7 +181,7 @@ class NewProductDesign extends Backend
             $itemPlatform = new ItemPlatformSku();
             $platformType = ['0','Z','V','N','M','W','0','0','A','Es','De','Jp','Chic','Z_cn','Ali','Z_fr'];
             foreach ($list as $key=>$item){
-                $list[$key]['label'] = $map['status']?$map['status']:0;
+                $list[$key]['label'] = $map['a.status']?$map['a.status']:0;
                 if ($item['responsible_id'] !==null){
                     $list[$key]['responsible_id'] = $admin->where('id',$item['responsible_id'])->value('nickname');
                 }else{
@@ -197,7 +197,7 @@ class NewProductDesign extends Backend
                     $list[$key]['platform'][$k1] = $platformType[$v1];
                 }
             }
-            $result = array("total" => $total,"label"=>$map['status']?$map['status']:0, "rows" => $list);
+            $result = array("total" => $total,"label"=>$map['a.status']?$map['a.status']:0, "rows" => $list);
 
             return json($result);
         }
