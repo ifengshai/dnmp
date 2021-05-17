@@ -85,4 +85,14 @@ class StockHouse extends Model
 
         return $list ?: [];
     }
+    /**
+     * 所属分仓
+     * @return \think\model\relation\BelongsTo
+     * @author crasphb
+     * @date   2021/5/17 14:13
+     */
+    public function warehouseStock()
+    {
+        return $this->belongsTo(WarehouseStock::class,'stock_id','id');
+    }
 }

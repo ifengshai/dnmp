@@ -31,12 +31,13 @@ class WarehouseArea extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['print_label'];
+    protected $noNeedRight = ['print_label','getStockHouse'];
 
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\WarehouseArea;
+        $this->assignconfig('warehourseStock',getStockHouse());
 
     }
     
@@ -62,60 +63,21 @@ class WarehouseArea extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            //自定义sku搜索
-            $filter = json_decode($this->request->get('filter'), true);
-            if ($filter['id']) {
-                $map['a.id'] = ['=',$filter['id']];
-                unset($filter['id']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
-            if ($filter['stock']) {
-                $stockId = Db::name('warehouse_stock')->where('name','like',$filter['stock'])->column('id');
-                $map['a.stock_id'] = ['in',$stockId];
-                unset($filter['stock']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
-            if ($filter['coding']) {
-                $map['a.coding'] = ['like','%'.$filter['coding'].'%'];
-                unset($filter['coding']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
-            if ($filter['name']) {
-                $map['a.name'] = ['like','%'.$filter['name'].'%'];
-                unset($filter['name']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
-            if ($filter['type']) {
-                $map['a.type'] = ['=',$filter['type']];
-                unset($filter['type']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
-            if ($filter['status']) {
-                $map['a.status'] = ['=',$filter['status']];
-                unset($filter['status']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
-                ->alias('a')
-                ->join(['fa_warehouse_stock' => 'b'],'a.stock_id=b.id')
-                ->where($map)
                 ->where($where)
-                ->order('a.id', $order)
+                ->with('warehouseStock')
+                ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->alias('a')
-                ->join(['fa_warehouse_stock' => 'b'],'a.stock_id=b.id')
-                ->field('a.*,b.name as stock')
-                ->where($map)
                 ->where($where)
-                ->order('a.id', $order)
+                ->with('warehouseStock')
+                ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
-
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -172,8 +134,6 @@ class WarehouseArea extends Backend
         }
         $type=[1=>'存储库区',2=>'拣货库区'];
         $this->view->assign("type", $type);
-        $warehouseStock = Db::name('warehouse_stock')->column('name','id');
-        $this->view->assign("warehouse_stock", $warehouseStock);
         return $this->view->fetch();
     }
 
@@ -236,8 +196,6 @@ class WarehouseArea extends Backend
         $type=[1=>'存储库区',2=>'拣货库区'];
         $this->view->assign("type", $type);
         $this->view->assign("row", $row);
-        $warehouseStock = Db::name('warehouse_stock')->column('name','id');
-        $this->view->assign("warehouse_stock", $warehouseStock);
         return $this->view->fetch();
     }
 
@@ -259,6 +217,20 @@ class WarehouseArea extends Backend
             $this->error('修改失败！！');
         }
     }
+    /**
+     * 获取库区对应的库位
+     * @return \think\response\Json
+     * @author crasphb
+     * @date   2021/5/17 14:42
+     */
+    public function getStockHouse()
+    {
+        if ($this->request->isAjax()) {
+            $area_id = input('area_id','');
 
+            $area = \app\admin\model\warehouse\StockHouse::where('area_id',$area_id)->where('status', '=', 1)->field('coding,id')->select();
+            return json($area);
+        }
+    }
 
 }

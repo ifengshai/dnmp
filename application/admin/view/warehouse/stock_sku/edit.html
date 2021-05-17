@@ -8,15 +8,21 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('库区')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('所属分仓')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {:build_select('row[area_id]', $data1 ,$row['area_id'], ['class'=>'form-control selectpicker', 'data-live-search' => true])}
+            {:build_select('row[stock_id]', getStockHouse() ,$row['stock_id'], ['class'=>'form-control warehouse_stock selectpicker', 'data-live-search' => true ,'data-title'=>'请选择'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('库区编码')}:</label>
+        <div class="col-xs-12 col-sm-8" id="area">
+            {:build_select('row[area_id]', $data1 ,$row['area_id'], ['class'=>'form-control selectpicker', 'data-live-search' => true ,'data-title'=>'请选择'])}
         </div>
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Store_id')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            {:build_select('row[store_id]', $data , $row['store_id'] , ['class'=>'form-control selectpicker','data-live-search' => true])}
+        <div class="col-xs-12 col-sm-8" id="store">
+            {:build_select('row[store_id]', $data , $row['store_id'] , ['class'=>'form-control store selectpicker','data-live-search' => true])}
         </div>
     </div>
 

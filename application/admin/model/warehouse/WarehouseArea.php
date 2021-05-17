@@ -39,4 +39,15 @@ class WarehouseArea extends Model
         $list = $this->where('status', 1)->where($where)->field('id,coding,name,type')->select();
         return collection($list)->toArray();
     }
+
+    /**
+     * 所属分仓
+     * @return \think\model\relation\BelongsTo
+     * @author crasphb
+     * @date   2021/5/17 14:13
+     */
+    public function warehouseStock()
+    {
+        return $this->belongsTo(WarehouseStock::class,'stock_id','id');
+    }
 }
