@@ -132,8 +132,8 @@ class NewProductDesign extends Backend
             $logIds = Db::name('new_product_design_log')->field('max(id) as mid')->group('design_id')->select();
             if($logIds) {
                 $logIds = array_column($logIds,'mid');
+                $whereLogIds['b.id'] = ['in',$logIds];
             }
-            $whereLogIds['b.id'] = ['in',$logIds];
             $whereLogTime = [];
             if ($filter['addtime']){
                 $time = explode(' ', $filter['addtime']);
