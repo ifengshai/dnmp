@@ -129,7 +129,7 @@ class OrderData extends Backend
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
                         //对该条message进行处理，比如用户数据同步， 记录日志
-                        echo $payload['database'].'-'.$payload['type'].'-'.$payload['table'];
+                        echo $payload['database'] . '-' . $payload['type'] . '-' . $payload['table'];
 
                         if ($payload) {
                             //根据库名判断站点
@@ -415,6 +415,10 @@ class OrderData extends Backend
                                     $options['index_price'] = $v['lens_total_price'];
                                     $options['frame_color'] = $v['goods_color'];
                                     $options['goods_type'] = $v['goods_type'];
+                                    $options['base_original_price'] = $v['base_goods_price'];
+                                    $options['base_discount_amount'] = $v['base_goods_discounts_price'];
+                                    $options['single_base_original_price'] = round($v['base_goods_price'] / $v['goods_count'], 4);
+                                    $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
                                     $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
 
@@ -463,6 +467,12 @@ class OrderData extends Backend
                                     $options['sku'] = $this->getTrueSku($v['goods_sku']);
                                     $options['qty'] = $v['goods_count'];
                                     $options['base_row_total'] = $v['original_total_price'];
+
+                                    $options['base_original_price'] = $v['base_goods_price'];
+                                    $options['base_discount_amount'] = $v['base_goods_discounts_price'];
+                                    $options['single_base_original_price'] = round($v['base_goods_price'] / $v['goods_count'], 4);
+                                    $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
+
                                     $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     $order_prescription_type = $options['order_prescription_type'];
@@ -509,6 +519,13 @@ class OrderData extends Backend
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
                                     $options['product_id'] = $v['product_id'];
+
+                                    $options['base_original_price'] = $v['base_original_price'];
+                                    $options['base_discount_amount'] = $v['base_discount_amount'];
+                                    $options['single_base_original_price'] = round($v['base_original_price'] / $v['qty_ordered'], 4);
+                                    $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
+
+
                                     $order_prescription_type = $options['order_prescription_type'];
                                     $is_prescription_abnormal = $options['is_prescription_abnormal'];
                                     unset($options['order_prescription_type']);
@@ -560,6 +577,10 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
+                                    $options['base_original_price'] = $v['base_original_price'];
+                                    $options['base_discount_amount'] = $v['base_discount_amount'];
+                                    $options['single_base_original_price'] = round($v['base_original_price'] / $v['qty_ordered'], 4);
+                                    $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
@@ -1428,7 +1449,7 @@ class OrderData extends Backend
     /**
      * 判断处方是否异常
      *
-     * @param  array  $params
+     * @param array $params
      *
      * @author wpl
      * @date   2021/4/23 9:31
@@ -1852,8 +1873,8 @@ class OrderData extends Backend
 
         $order_params = [];
         foreach ($list as $k => $v) {
-            $count = $this->order->where('site='.$site.' and entity_id='.$v['entity_id'])->count();
-            echo $this->order->getLastSql()."\n";
+            $count = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->count();
+            echo $this->order->getLastSql() . "\n";
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['site'] = $site;
@@ -1887,13 +1908,13 @@ class OrderData extends Backend
             if (isset($v['payment_time'])) {
                 $params['payment_time'] = strtotime($v['payment_time']) + 28800;
             }
-            echo $count."\n";
+            echo $count . "\n";
             if ($count > 0) {
                 $this->order->where(['site' => $site, 'entity_id' => $v['entity_id']])->update($params);
             } else {
                 //插入订单主表
                 $order_id = $this->order->insertGetId($params);
-                echo $order_id."\n";
+                echo $order_id . "\n";
                 $order_params[$k]['site'] = $site;
                 $order_params[$k]['order_id'] = $order_id;
                 $order_params[$k]['entity_id'] = $v['entity_id'];
