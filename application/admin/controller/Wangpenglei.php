@@ -1225,6 +1225,7 @@ class Wangpenglei extends Backend
         $list = $barcode
             ->field('sku,count(1) as num')
             ->where(['library_status' => 1])
+            ->where(['location_code_id' => ['>', 0]])
             ->where("item_order_number=''")
             ->group('sku')
             ->select();
