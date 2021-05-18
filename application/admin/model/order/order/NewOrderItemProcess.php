@@ -22,6 +22,6 @@ class NewOrderItemProcess extends Model
 
     // 追加属性
     protected $append = [];
-    
-    
+
+
 }

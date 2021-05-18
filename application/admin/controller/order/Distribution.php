@@ -2,40 +2,40 @@
 
 namespace app\admin\controller\order;
 
+use app\admin\model\DistributionAbnormal;
 use app\admin\model\DistributionLog;
+use app\admin\model\itemmanage\Item;
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\Order;
+use app\admin\model\order\order\LensData;
+use app\admin\model\order\order\NewOrder;
+use app\admin\model\order\order\NewOrderItemOption;
+use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderList;
+use app\admin\model\saleaftermanage\WorkOrderMeasure;
+use app\admin\model\StockLog;
+use app\admin\model\warehouse\Inventory;
 use app\admin\model\warehouse\Outstock;
 use app\admin\model\warehouse\OutStockItem;
+use app\admin\model\warehouse\ProductBarCodeItem;
+use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
 use app\enum\OrderType;
 use fast\Excel;
-use fast\Random;
+use GuzzleHttp\Client;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
-use think\Request;
-use think\exception\PDOException;
-use think\Exception;
-use think\Loader;
-use think\Db;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use app\admin\model\order\order\NewOrderItemProcess;
-use app\admin\model\warehouse\StockHouse;
-use app\admin\model\DistributionAbnormal;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use app\admin\model\order\order\NewOrder;
-use app\admin\model\order\order\NewOrderItemOption;
-use app\admin\model\itemmanage\ItemPlatformSku;
-use app\admin\model\itemmanage\Item;
-use app\admin\model\order\order\NewOrderProcess;
-use app\admin\model\StockLog;
-use app\admin\model\order\order\LensData;
-use app\admin\model\saleaftermanage\WorkOrderMeasure;
-use app\admin\model\warehouse\ProductBarCodeItem;
-use GuzzleHttp\Client;
-use app\admin\model\warehouse\Inventory;
+use think\Db;
+use think\db\Query;
+use think\Exception;
+use think\exception\PDOException;
+use think\Loader;
+use think\Request;
 
 
 /**
@@ -3660,58 +3660,110 @@ class Distribution extends Backend
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
         $listName = ['订单号'];
-        try {
-            if (!$PHPExcel = $reader->load($filePath)) {
-                $this->error(__('Unknown data format'));
+        if (!$PHPExcel = $reader->load($filePath)) {
+            $this->error(__('Unknown data format'));
+        }
+        $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+        $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+        $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+        $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+        $fields = [];
+        for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+            for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                $fields[] = $val;
             }
-            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
-            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
-            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
-            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
-
-            $fields = [];
-            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $fields[] = $val;
-                }
-            }
-
-            //模板文件不正确
-            if ($listName !== $fields) {
-                throw new Exception("模板文件不正确！！");
-            }
-
-            $data = [];
-            $increment_id = [];
-            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
-                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
-                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
-                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
-                    $increment_id[] = is_null($val) ? '' : $val;
-                }
-            }
-
-            $list = $this->order
-                ->alias('a')
-                ->where(['a.increment_id' => ['in', $increment_id]])
-                ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
-                ->column('b.sku,a.id,a.site', 'increment_id');
-
-            dump($list);
-            die;
-            foreach ($list as $k => $v) {
-                $sku = $this->_item_platform_sku->getTrueSku($v['sku'], $v['site']);
-
-            }
-
-
-        } catch (Exception $exception) {
-            $this->error($exception->getMessage());
         }
 
+        //模板文件不正确
+        if ($listName !== $fields) {
+            throw new Exception("模板文件不正确！！");
+        }
 
-        echo 'ok';
+        $data = [];
+        $increment_id = [];
+        for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+            for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                $increment_id[] = is_null($val) ? '' : $val;
+            }
+        }
+
+        //查询导入订单的所有子单
+        $list = $this->_new_order
+            ->field('id,entity_id,increment_id,site')
+            ->where(['increment_id' => ['in', $increment_id]])
+            ->with([
+                'newOrderItemProcess' => function (Query $query) {
+                    $query->field('order_id,sku,site');
+                },
+            ])
+            ->select();
+        $list = collection($list)->toArray();
+        //提取平台SKU
+        $skus = [];
+        foreach ($list as $v) {
+            foreach ($v['new_order_item_process'] as &$val) {
+                $skus[] = $val['sku'];
+            }
+        };
+        //查询所有商品SKU
+        $goodsSku = $this->_item_platform_sku->where(['platform_sku' => ['in', $skus]])->column('sku', 'platform_sku');
+
+        //查询SKU对应条形码数量 - 实时库存
+        $stockData = $this->_product_bar_code_item
+            ->field('count(id) as num,sku,stock_id')
+            ->where(['sku' => ['in', array_unique(array_values($goodsSku))], 'library_status' => 1, 'location_code_id' => ['>', 0]])
+            ->group('stock_id,sku')
+            ->select();
+        $stockData = collection($stockData)->toArray();
+        $skuStockData = [];
+        foreach ($stockData as $v) {
+            $skuStockData[$v['stock_id']][$v['sku']] = $v['num'];
+        }
+        $incompatibleOrder = '';
+        foreach ($list as $v) {
+            $i = 0;
+            foreach ($v['new_order_item_process'] as $val) {
+                $stock = $skuStockData[2][$goodsSku[$val['sku']]]; //丹阳仓库存
+                if ($stock < 10) {
+                    $i++;
+                    break;
+                }
+            }
+            //此订单不符合改仓条件
+            if ($i > 0) {
+                $incompatibleOrder .= $v['increment_id'] . "<br>";
+                continue;
+            }
+
+            //符合条件则走改仓逻辑
+            $this->setOrderStockId($v['id'], $v['site']);
+        };
+
+        if ($incompatibleOrder) {
+            $this->success('存在不符合改仓条件的订单号：' . $incompatibleOrder);
+        } else {
+            $this->success('导入成功');
+        }
+
+    }
+
+    /**
+     * 修改订单所属仓库
+     *
+     * @param null $orderId 订单ID
+     * @param null $site    站点
+     *
+     * @author wpl
+     * @date   2021/5/18 11:00
+     */
+    protected function setOrderStockId($orderId = null, $site = null)
+    {
+        $this->_new_order->where(['id' => $orderId, 'site' => $site])->update(['stock_id' => 2, 'updated_at' => time() + 28800]);
+        $this->_new_order_process->where(['order_id' => $orderId, 'site' => $site])->update(['stock_id' => 2, 'wave_order_id' => 0]);
     }
 
 
