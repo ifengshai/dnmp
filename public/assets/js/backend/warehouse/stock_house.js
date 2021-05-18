@@ -34,6 +34,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
+                        { field: 'warehouse_stock.name', title: __('实体仓名称'), operate: 'like' },
+                        {
+                            field: 'stock_id', title: __('实体仓名称'), custom: Config.warehourseStock,
+                            searchList: Config.warehourseStock,
+                            formatter: Table.api.formatter.status,
+                            visible:false
+                        },
                         {
                             field: 'shelf_number',
                             title: __('货架号'),
@@ -130,6 +137,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
+                        { field: 'warehouse_stock.name', title: __('实体仓名称'), operate: 'like' },
+                        {
+                            field: 'stock_id', title: __('实体仓名称'), custom: Config.warehourseStock,
+                            searchList: Config.warehourseStock,
+                            formatter: Table.api.formatter.status,
+                            visible:false
+                        },
                         {
                             field: 'subarea', title: __('合单分区'),
                             searchList: { 'A': 'A', 'B': 'B', 'C': 'C', 'D': 'D' }
@@ -230,6 +244,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
+                        { field: 'warehouse_stock.name', title: __('实体仓名称'), operate: 'like' },
+                        {
+                            field: 'stock_id', title: __('实体仓名称'), custom: Config.warehourseStock,
+                            searchList: Config.warehourseStock,
+                            formatter: Table.api.formatter.status,
+                            visible:false
+                        },
                         { field: 'coding', title: __('Coding'), operate: 'like' },
                         { field: 'library_name', title: __('Library_name') },
                         {
@@ -295,6 +316,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
+                        { field: 'warehouse_stock.name', title: __('实体仓名称'), operate: 'like' },
+                        {
+                            field: 'stock_id', title: __('实体仓名称'), custom: Config.warehourseStock,
+                            searchList: Config.warehourseStock,
+                            formatter: Table.api.formatter.status,
+                            visible:false
+                        },
                         { field: 'coding', title: __('Coding'), operate: 'like' },
                         { field: 'library_name', title: __('Library_name') },
                         {
@@ -341,5 +369,24 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
             }
         }
     };
+    $('.warehouse_stock').on('change',function() {
+        var id = $(this).val();
+        $.ajax({
+            url: "warehouse/warehouse_stock/getWarehouseArea",
+            async: false,
+            data: {stock_id:id},
+            success: function (obj) {
+                var html = [];
+                html.push("<select class='form-control' name='row[area_id]'>");
+                for (var i = 0; i < obj.length; i++) {
+                    var stock = obj[i]
+                    console.log(stock.id)
+                    html.push("<option value='" + stock.id + "'>" + stock.name + "</option>");
+                }
+                html.push("</select>");
+                $('#area').html(html.join(""));
+            }
+        })
+    })
     return Controller;
 });

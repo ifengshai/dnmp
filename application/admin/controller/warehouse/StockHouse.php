@@ -37,6 +37,7 @@ class StockHouse extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\StockHouse;
+        $this->assignconfig('warehourseStock',getStockHouse());
 
     }
 
@@ -62,10 +63,16 @@ class StockHouse extends Backend
             //自定义sku搜索
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['area_coding']) {
-                $area_id = Db::name('warehouse_area')->where('coding', $filter['area_coding'])->value('id');
-                $all_store_id = Db::name('store_house')->where('area_id', $area_id)->column('id');
-                $map['id'] = ['in', $all_store_id];
+                $areaId= Db::name('warehouse_area')->where('coding', $filter['area_coding'])->value('id');
+                $allStoreId= Db::name('store_house')->where('area_id', $areaId)->column('id');
+                $map['id'] = ['in', $allStoreId];
                 unset($filter['area_coding']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+            if ($filter['stock_name']) {
+                $stockId = Db::name('warehouse_stock')->where('name','like', '%'.$filter['stock_name'].'%')->column('id');
+                $map['stock_id'] = ['in', $stockId];
+                unset($filter['stock_name']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
             if (isset($filter['shelf_number'])) {
@@ -79,6 +86,7 @@ class StockHouse extends Backend
                 ->where(['type' => 1])
                 ->where($where)
                 ->where($map)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->count();
 
@@ -86,16 +94,18 @@ class StockHouse extends Backend
                 ->where(['type' => 1])
                 ->where($where)
                 ->where($map)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
 
             $list = collection($list)->toArray();
             //所有库区编码id
-            $area_coding = Db::name('warehouse_area')->column('coding', 'id');
+            $areaCoding = Db::name('warehouse_area')->column('coding', 'id');
+            $stockName = Db::name('warehouse_stock')->column('name', 'id');
             //获得库位所属库区编码
             foreach ($list as $k => $v) {
-                $list[$k]['area_coding'] = $area_coding[$v['area_id']];
+                $list[$k]['area_coding'] = $areaCoding[$v['area_id']];
             }
             $result = array("total" => $total, "rows" => $list);
 
@@ -130,6 +140,7 @@ class StockHouse extends Backend
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
                 $map['area_id'] = $params['area_id'];
+                $map['stock_id'] = $params['stock_id'];
                 $count = $this->model->where($map)->count();
                 $count > 0 && $this->error('当前库区已存在此编码！');
 
@@ -215,6 +226,7 @@ class StockHouse extends Backend
                 $map['coding'] = $params['coding'];
                 $map['id'] = ['<>', $row->id];
                 $map['area_id'] = $params['area_id'];
+                $map['stock_id'] = $params['stock_id'];
                 $count = $this->model->where($map)->count();
                 $count > 0 && $this->error('当前库区已存在此编码！');
 
@@ -299,12 +311,14 @@ class StockHouse extends Backend
             $total = $this->model
                 ->where(['type' => 2])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where(['type' => 2])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -333,12 +347,14 @@ class StockHouse extends Backend
             $total = $this->model
                 ->where(['type' => 3])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where(['type' => 3])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -367,12 +383,14 @@ class StockHouse extends Backend
             $total = $this->model
                 ->where(['type' => 4])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where(['type' => 4])
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -705,7 +723,7 @@ EOF;
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['货架号', '库区编码', '库位编码', '库容', '库位名称', '备注', '拣货顺序'];
+        $listName = ['货架号', '库区编码', '库位编码', '库容', '库位名称', '备注', '拣货顺序','实体仓id'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -745,21 +763,21 @@ EOF;
             $this->error('库位编码有重复！！请仔细核对库位编码');
         }
         foreach ($data as $k => $v) {
-            if (empty($v[2]) || empty($v[1])) {
+            if (empty($v[2]) || empty($v[1]) || empty($v[7])) {
                 $this->error('库位编码不能为空，请检查！！');
             }
-            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->value('id');
+            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->where('stock_id',$v[7])->value('id');
             if (empty($area_id)) {
                 $this->error('库区编码错误，请检查！！');
             }
-            $is_exist_coding = $this->model->where('coding', $v[2])->where('area_id', $area_id)->find();
+            $is_exist_coding = $this->model->where('coding', $v[2])->where('area_id', $area_id)->where('stock_id',$v[7])->find();
             if (!empty($is_exist_coding)) {
                 $this->error('当前库区已存在此库位编码，请检查！！');
             }
         }
         foreach ($data as $k => $v) {
-            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->value('id');
-            $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3], 'picking_sort' => $v[6]]);
+            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->where('stock_id',$v[7])->value('id');
+            $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3], 'picking_sort' => $v[6],'stock_id' => $v[7]]);
         }
         if ($result) {
             $this->success('导入成功！！');

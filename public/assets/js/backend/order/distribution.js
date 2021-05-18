@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to', 'template'], function ($, undefined, Backend, Table, Form, Template) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to', 'template', 'upload'], function ($, undefined, Backend, Table, Form, undefined, Template, Upload) {
     function viewTable(table, value) {
         //隐藏、显示列
         -1 != $.inArray(value, [3, 7, 8]) ? table.bootstrapTable('showColumn', 'stock_house_num') : table.bootstrapTable('hideColumn', 'stock_house_num');
@@ -85,6 +85,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 pageList: [10, 25, 50, 100, 300],
                 extend: {
                     index_url: 'order/distribution/index' + location.search + (location.search ? '&label=' + Config.label : '?label=' + Config.label),
+
                     table: 'distribution'
                 }
             });
@@ -729,6 +730,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     }
                 );
             });
+
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, row) {
+                Fast.api.ajax({
+                    url: 'order/distribution/importOrder',
+                    data: {file: data.url},
+                }, function (data, ret) {
+                    layer.alert(ret.msg, function () {
+                        layer.closeAll();
+                        table.bootstrapTable('refresh');
+                    });
+
+                });
+            });
+
+
         },
         wave_order_list: function () {
             // 初始化表格参数配置

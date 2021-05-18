@@ -473,7 +473,7 @@ class OrderData extends Backend
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                         if ($order_prescription_type == 3) {
-                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1]);
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
                                             $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                         }
                                     }
@@ -514,7 +514,7 @@ class OrderData extends Backend
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                         if ($order_prescription_type == 3) {
-                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1]);
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
                                             $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                         }
                                     }
@@ -574,7 +574,7 @@ class OrderData extends Backend
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                         if ($order_prescription_type == 3) {
-                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1]);
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
                                             $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                         }
                                     }
@@ -619,7 +619,7 @@ class OrderData extends Backend
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                         if ($order_prescription_type == 3) {
-                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1]);
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
                                             $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                         }
                                     }
