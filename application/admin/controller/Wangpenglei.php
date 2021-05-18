@@ -1309,7 +1309,7 @@ class Wangpenglei extends Backend
     }
 
     /**
-     * 每天 1点同步 UTC时间前一天的数据
+     * 每天 凌晨 1点同步 UTC时间前一天的数据
      * @author crasphb
      * @date   2021/5/18 17:26
      */
@@ -1317,34 +1317,29 @@ class Wangpenglei extends Backend
     {
         $type = 1;
         $site = 'zeelool';
-        $dayBefore = date('Y-m-d',strtotime('-1 day'));
-        $dayNow = date('Y-m-d');
-        echo date('Y-m-d H:i:s') . PHP_EOL;
+        $dayBefore = date('Y-m-d',strtotime('-2 day'));
+        $dayNow = date('Y-m-d',strtotime('-1 day'));
         //UTC时间前一天的数据
         for ($i = 16; $i < 24; $i++) {
             $start = $dayBefore.'T' . $i . ':00:00Z';
             $end = $dayBefore.'T' . $i . ':59:59Z';
-            echo $start. PHP_EOL;
-            echo $end . PHP_EOL;
-//            try {
-//                $this->asyncTicketHttps($type, $site, $start, $end);
-//                usleep(10000);
-//            } catch (Exception $e) {
-//                echo $e->getMessage();
-//            }
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
         }
         //同步当天0点到16点的
         for ($i = 0; $i < 16; $i++) {
             $start = $dayNow.'T' . $i . ':00:00Z';
             $end = $dayNow.'T' . $i . ':59:59Z';
-            echo $start. PHP_EOL;
-            echo $end . PHP_EOL;
-//            try {
-//                $this->asyncTicketHttps($type, $site, $start, $end);
-//                usleep(10000);
-//            } catch (Exception $e) {
-//                echo $e->getMessage();
-//            }
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
         }
     }
     /**
