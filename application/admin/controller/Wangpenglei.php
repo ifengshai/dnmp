@@ -1220,13 +1220,16 @@ class Wangpenglei extends Backend
 
         $item = new Item();
         $data = $item
-            ->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])
+            ->where(['is_del' => 1, 'category_id' => ['<>', 43]])
             ->column('stock,distribution_occupy_stock', 'sku');
         $list = $barcode
+            ->alias('a')
             ->field('sku,count(1) as num')
-            ->where(['library_status' => 1])
-            ->where(['location_code_id' => ['>', 0]])
-            ->where("item_order_number=''")
+            ->where(['a.library_status' => 1])
+            ->where(['b.status' => 2])
+            ->where(['a.location_code_id' => ['>', 0]])
+            ->join(['fa_in_stock' => 'b'], 'a.in_stock_id=b.id')
+            ->where("a.item_order_number=''")
             ->group('sku')
             ->select();
         $list = collection($list)->toArray();
@@ -1236,10 +1239,9 @@ class Wangpenglei extends Backend
                 unset($list[$k]);
             }
         }
-
-        $headlist = ['sku', '在库实时库存', '系统实时库存'];
-        Excel::writeCsv(array_values($list), $headlist, '库存', true);
-        die;
+        $list = array_values($list);
+        Db::table('fa_zz_temp1')->query('truncate table fa_zz_temp1');
+        Db::table('fa_zz_temp1')->insertAll($list);
     }
 
     public function test002()
