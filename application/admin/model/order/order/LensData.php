@@ -10,7 +10,7 @@ class LensData extends Model
     protected $connection = 'database.db_mojing_order';
 
     // 表名
-    protected $name = 'lens_data';
+    protected $name = 'lens_price';
 
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;
