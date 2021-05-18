@@ -3740,7 +3740,9 @@ class ScmWarehouse extends Scm
         $transfer_order_item = $this->_stock_transfer_order_item->where('transfer_order_id', $id)->select();
         $allStock = Db::name('warehouse_stock')->column('name','id');
         $data['transfer_order_number'] = $transferOrder['transfer_order_number'];
+        $data['out_stock_id'] = $transferOrder['out_stock_id'];
         $data['out_stock'] = $allStock[$transferOrder['out_stock_id']];
+        $data['in_stock_id'] = $transferOrder['in_stock_id'];
         $data['in_stock'] = $allStock[$transferOrder['in_stock_id']];
         $data['response_person'] = $transferOrder['response_person'];
         $data['item_list'] = collection($transfer_order_item)->toArray();
@@ -3968,5 +3970,52 @@ class ScmWarehouse extends Scm
             $this->error(__('No rows were inserted'), '', 525);
         }
     }
+
+    /**
+     * 扫描物流单号
+     * Interface scan_logistics_number
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/18 16:38:58
+     */
+    public function scan_logistics_number()
+    {
+        $number = $this->request->request("logistics_number");
+        $id = $this->request->request("transfer_order_id");
+        $detail = $this->_stock_transfer_order->where('id', $id)->find();
+        if (empty($detail)) {
+            $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
+        }
+        $res = $this->_stock_transfer_order->where('id', $id)->update(['logistics_number'=>$number,'status'=>4]);
+        if ($res){
+            $this->success('扫描物流单号成功！！','', 200);
+        }else{
+            $this->error(__('扫描物流单号失败'),'', 403);
+        }
+    }
+
+    /**
+     * 签收
+     * Interface sign_stock_transfer_order
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/18 16:51:30
+     */
+    public function sign_stock_transfer_order()
+    {
+        $id = $this->request->request("transfer_order_id");
+        //当前条形码详情
+        $detail = $this->_stock_transfer_order->where('id', $id)->find();
+        if (empty($detail)) {
+            $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
+        }
+        $res = $this->_stock_transfer_order->where('id', $id)->update(['status'=>5]);
+        if ($res){
+            $this->success('签收成功！！','', 200);
+        }else{
+            $this->error(__('签收失败'),'', 403);
+        }
+    }
+
     /***************************************实体仓调拨单end******************************************/
 }
