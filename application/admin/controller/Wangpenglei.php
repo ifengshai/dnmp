@@ -1296,20 +1296,52 @@ class Wangpenglei extends Backend
     {
         $type = 1;
         $site = 'zeelool';
-        for ($i = 0; $i < 24; $i++) {
-            $start = '2021-05-17T' . $i . ':00:00Z';
-            $end = '2021-05-17T' . $i . ':59:59Z';
+        for ($i = 0; $i < 9; $i++) {
+            $start = '2021-05-18T' . $i . ':00:00Z';
+            $end = '2021-05-18T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(100000);
             } catch (Exception $e) {
                 echo $e->getMessage();
             }
-
         }
     }
 
-
+    /**
+     * 每天 1点同步 UTC时间前一天的数据
+     * @author crasphb
+     * @date   2021/5/18 17:26
+     */
+    public function asyncZendeskZeeloolDay()
+    {
+        $type = 1;
+        $site = 'zeelool';
+        $dayBefore = date('Y-m-d',strtotime('-1 day'));
+        $dayNow = date('Y-m-d');
+        //UTC时间前一天的数据
+        for ($i = 16; $i < 24; $i++) {
+            $start = $dayBefore.'T' . $i . ':00:00Z';
+            $end = $dayBefore.'T' . $i . ':59:59Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+        }
+        //同步当天0点到16点的
+        for ($i = 0; $i < 16; $i++) {
+            $start = $dayNow.'T' . $i . ':00:00Z';
+            $end = $dayNow.'T' . $i . ':59:59Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+        }
+    }
     /**
      * 判断定制现片逻辑
      */
