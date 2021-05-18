@@ -1301,7 +1301,7 @@ class Wangpenglei extends Backend
             $end = '2021-05-18T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
-                usleep(100000);
+                usleep(10000);
             } catch (Exception $e) {
                 echo $e->getMessage();
             }
