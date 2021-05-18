@@ -1230,12 +1230,15 @@ class Wangpenglei extends Backend
             ->group('sku')
             ->select();
         $list = collection($list)->toArray();
-        foreach ($list as $k => $v) {
-            $list[$k]['stock'] = $data[$v['sku']]['stock'] - $data[$v['sku']]['distribution_occupy_stock'];
+        foreach ($list as $k => &$v) {
+            $v['stock'] = $data[$v['sku']]['stock'] - $data[$v['sku']]['distribution_occupy_stock'];
+            if ($v['num'] == $v['stock']) {
+                unset($list[$k]);
+            }
         }
 
         $headlist = ['sku', '在库实时库存', '系统实时库存'];
-        Excel::writeCsv($list, $headlist, '库存', true);
+        Excel::writeCsv(array_values($list), $headlist, '库存', true);
         die;
     }
 
