@@ -1224,7 +1224,7 @@ class Wangpenglei extends Backend
             ->column('stock,distribution_occupy_stock', 'sku');
         $list = $barcode
             ->alias('a')
-            ->field('sku,count(1) as num')
+            ->field('sku,count(1) as stock')
             ->where(['a.library_status' => 1])
             ->where(['b.status' => 2])
             ->where(['a.location_code_id' => ['>', 0]])
@@ -1234,10 +1234,11 @@ class Wangpenglei extends Backend
             ->select();
         $list = collection($list)->toArray();
         foreach ($list as $k => &$v) {
-            $v['stock'] = $data[$v['sku']]['stock'] - $data[$v['sku']]['distribution_occupy_stock'];
-            if ($v['num'] == $v['stock']) {
+            $v['real_stock'] = $data[$v['sku']]['stock'] - $data[$v['sku']]['distribution_occupy_stock'];
+            if ($v['real_stock'] == $v['stock']) {
                 unset($list[$k]);
             }
+            unset($v['real_stock']);
         }
         $list = array_values($list);
         Db::table('fa_zz_temp1')->query('truncate table fa_zz_temp1');
