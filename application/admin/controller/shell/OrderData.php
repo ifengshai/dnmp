@@ -504,7 +504,7 @@ class OrderData extends Backend
                                     } elseif ($site == 12) {
                                         $options = $this->voogueme_acc_prescription_analysis($v['product_options']);
                                     } elseif ($site == 15) {
-                                        $options = $this->voogueme_acc_prescription_analysis($v['product_options']);
+                                        $options = $this->zeelool_fr_prescription_analysis($v['product_options']);
                                     }
 
                                     $options['item_id'] = $v['item_id'];
@@ -560,6 +560,8 @@ class OrderData extends Backend
                                         $options = $this->zeelool_jp_prescription_analysis($v['product_options']);
                                     } elseif ($site == 12) {
                                         $options = $this->voogueme_acc_prescription_analysis($v['product_options']);
+                                    } elseif ($site == 15) {
+                                        $options = $this->zeelool_fr_prescription_analysis($v['product_options']);
                                     }
 
                                     $options['sku'] = $v['sku'];
