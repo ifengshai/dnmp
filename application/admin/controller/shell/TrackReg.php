@@ -397,11 +397,11 @@ class TrackReg extends Backend
                 'createtime' => ['<', $date],
             ])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->order('createtime desc')->select();
             //90天总销量
-            $params['sales_num_90days'] = $days90_data[0]->sales_num;
+            $params['sales_num_90days'] = $days90_data[0]->sales_num ?: 0;
             //90天日均销量
             $sales_num_90days = $days90_data[0]->num > 0 ? round($days90_data[0]->sales_num / $days90_data[0]->num) : 0;
             //90天日均销量
-            $params['average_90days_sales_num'] = $sales_num_90days;
+            $params['average_90days_sales_num'] = $sales_num_90days ?: 0;
             //计算等级 30天预估销量
             $num = round($sales_num_90days * 1 * 30);
             if ($num >= 300) {
