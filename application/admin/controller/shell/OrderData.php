@@ -1655,10 +1655,10 @@ class OrderData extends Backend
                 $wave_time_type = 8;
             }
 
-            if ($v['is_custom_lens'] == 1) {
-                $warehouseType = 2; //丹阳仓
-            } else {
+            if ($v['stock_id'] == 1) {
                 $warehouseType = 1; //郑州仓
+            } else {
+                $warehouseType = 2; //丹阳仓
             }
 
             $id = $waveOrder
