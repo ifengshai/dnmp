@@ -378,7 +378,6 @@ class TrackReg extends Backend
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $date = date('Y-m-d 00:00:00');
         $list = $itemPlatformSku->field('id,sku,platform_type as site')->where([
-            'outer_sku_status' => 1,
             'platform_type'    => ['<>', 8],
         ])->select();
         $list = collection($list)->toArray();
@@ -423,6 +422,9 @@ class TrackReg extends Backend
                 $params['grade'] = 'F';
             }
             $itemPlatformSku->where('id', $v['id'])->update($params);
+
+            echo $v['sku'] . "\n";
+            usleep(20000);
         }
 
         echo "ok";
