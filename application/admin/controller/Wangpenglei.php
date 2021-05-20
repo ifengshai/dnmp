@@ -1261,13 +1261,12 @@ class Wangpenglei extends Backend
         $list = $barcode
             ->alias('a')
             ->where(['a.library_status' => 1])
-            ->where(['b.status' => 2, 'a.sku' => ['in', $skus]])
+            ->where(['a.sku' => ['in', $skus]])
             ->where(['a.location_code_id' => ['>', 0]])
-            ->join(['fa_in_stock' => 'b'], 'a.in_stock_id=b.id')
             ->where("a.item_order_number=''")
             ->column('count(1) as stock', 'sku');
         foreach ($skus as $v) {
-            Db::table('fa_zz_temp1')->where(['sku' => $v])->update(['stock' => $list[$v]]);
+            Db::table('fa_zz_temp1')->where(['sku' => $v])->update(['stock' => $list[$v] ?: 0]);
         }
     }
 
