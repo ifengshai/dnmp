@@ -2974,8 +2974,9 @@ class ScmWarehouse extends Scm
     public function inventory_warehouse_area()
     {
         if ($this->request->isPost()) {
-            $area_name = $this->request->request('area_name'); //库区名称
-            $list = $this->_warehouse_area->getRowsData($area_name);
+            $areaName = $this->request->request('area_name'); //库区名称
+            $stockId = $this->request->request('stock_id'); //仓库id
+            $list = $this->_warehouse_area->getRowsData($areaName,$stockId);
             $this->success('获取成功', $list, 200);
         }
         $this->error('网络异常', '', 401);
@@ -3602,15 +3603,19 @@ class ScmWarehouse extends Scm
      */
     public function area_warehouse_sku()
     {
-        $area_id = $this->request->request("area_id");
-        $store_id = $this->request->request("store_id");
+        $areaId = $this->request->request("area_id");
+        $stockId = $this->request->request("stock_id");
+        $storeId = $this->request->request("store_id");
         $sku = $this->request->request("sku");
         $where = [];
-        if ($area_id) {
-            $where['b.area_id'] = $area_id;
+        if ($areaId) {
+            $where['b.area_id'] = $areaId;
         }
-        if ($store_id) {
-            $where['b.id'] = $store_id;
+        if ($stockId) {
+            $where['a.stock_id'] = $stockId;
+        }
+        if ($storeId) {
+            $where['b.id'] = $storeId;
         }
         if ($sku) {
             $where['a.sku'] = ['like', '%' . $sku . '%'];
@@ -3619,7 +3624,8 @@ class ScmWarehouse extends Scm
             ->alias('a')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id', 'left')
             ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
-            ->field('a.sku,b.coding,c.name,a.id as bind_id,c.id as area_id,a.store_id as location_id,c.coding as area')
+            ->join(['fa_warehouse_stock' => 'd'], 'b.stock_id=d.id')
+            ->field('a.sku,b.coding,c.name,a.id as bind_id,c.id as area_id,a.store_id as location_id,c.coding as area,d.id as stock_id,d.name as stock_name')
             ->where('is_del', 1)
             ->where($where)
             ->select();
@@ -3751,7 +3757,9 @@ class ScmWarehouse extends Scm
         $transfer_order_item = $this->_stock_transfer_order_item->where('transfer_order_id', $id)->select();
         $allStock = Db::name('warehouse_stock')->column('name','id');
         $data['transfer_order_number'] = $transferOrder['transfer_order_number'];
+        $data['out_stock_id'] = $transferOrder['out_stock_id'];
         $data['out_stock'] = $allStock[$transferOrder['out_stock_id']];
+        $data['in_stock_id'] = $transferOrder['in_stock_id'];
         $data['in_stock'] = $allStock[$transferOrder['in_stock_id']];
         $data['response_person'] = $transferOrder['response_person'];
         $data['item_list'] = collection($transfer_order_item)->toArray();
@@ -3979,5 +3987,126 @@ class ScmWarehouse extends Scm
             $this->error(__('No rows were inserted'), '', 525);
         }
     }
+
+    /**
+     * 扫描物流单号
+     * Interface scan_logistics_number
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/18 16:38:58
+     */
+    public function scan_logistics_number()
+    {
+        $number = $this->request->request("logistics_number");
+        $id = $this->request->request("transfer_order_id");
+        $detail = $this->_stock_transfer_order->where('id', $id)->find();
+        if (empty($detail)) {
+            $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
+        }
+        $res = $this->_stock_transfer_order->where('id', $id)->update(['logistics_number'=>$number,'status'=>4]);
+        if ($res){
+            $this->success('扫描物流单号成功！！','', 200);
+        }else{
+            $this->error(__('扫描物流单号失败'),'', 403);
+        }
+    }
+
+    /**
+     * 签收
+     * Interface sign_stock_transfer_order
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/18 16:51:30
+     */
+    public function sign_stock_transfer_order()
+    {
+        $id = $this->request->request("transfer_order_id");
+        //当前条形码详情
+        $detail = $this->_stock_transfer_order->where('id', $id)->find();
+        if (empty($detail)) {
+            $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
+        }
+        $res = $this->_stock_transfer_order->where('id', $id)->update(['status'=>5]);
+        if ($res){
+            $this->success('签收成功！！','', 200);
+        }else{
+            $this->error(__('签收失败'),'', 403);
+        }
+    }
+
+    /**
+     * 入库扫码提交
+     * Interface stock_code_instcok_add
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/19 9:41:17
+     */
+    public function stock_code_instock_add()
+    {
+        $transferOrderItemId = $this->request->request('transfer_order_item_id');
+        $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id',$transferOrderItemId)->find();
+        $transferOrderDetail = $this->_stock_transfer_order->where('id',$transferOrderItemDetail['transfer_order_id'])->find();
+        if (empty($transferOrderItemDetail)){
+            $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
+        }
+        $codeAgg = $this->request->request("item_data");
+        $codeAgg = html_entity_decode($codeAgg);
+        $codeAgg = array_filter(json_decode($codeAgg, true));
+        $arr = [];
+        $key = 0;
+        foreach ($codeAgg as $k => $v) {
+            foreach ($v['sku_agg'] as $k1=>$v1){
+                if (count(array_filter($v1)) < 1) {
+                    $this->error(__('条形码数据不能为空！！'), '', 524);
+                }
+                //判断当前条码是否在调出合集中
+                $codeStatus = $this->_stock_transfer_order_item_code->where(['code'=>$v1['code'],'status'=>1,'transfer_order_item_id'=>$transferOrderItemId])->find();
+                if (empty($codeStatus)){
+                    $this->error(__($v1['code'] . '不在调出合集中，请检查！！'), '', 524);
+                }
+                //判断调入库位是否有sku跟库位的绑定关系
+                $storeSku = $this->_store_sku->where('sku', $v['sku'])->where(['store_id'=>$v['location_code_id'],'stock_id'=>$transferOrderDetail['in_stock_id']])->find();
+                //调入库位号
+                $inStore = Db::name('store_house')->where('id',$v['location_code_id'])->value('coding');
+                empty($storeSku) && $this->error(__('调入库位' . $inStore . '与sku：' . $v['sku'] . '没有绑定关系！！'), '', 546);
+                //实体仓调拨单子表的子表（条形码明细表）插入数据
+                $arr[$key]['code'] = $v1['code'];
+                $arr[$key]['transfer_order_item_id'] = $transferOrderItemId;
+                $arr[$key]['sku'] = $v['sku'];
+                $arr[$key]['area_id'] = $v['location_id'];
+                $arr[$key]['location_id'] = $v['location_code_id'];
+                $arr[$key]['status'] = 2;
+                $key += 1;
+            }
+        }
+        $realInstokcNum = count($arr);
+        $res = false;
+        $this->_stock_transfer_order_item->startTrans();
+        $this->_stock_transfer_order_item_code->startTrans();
+        try {
+            $res = $this->_stock_transfer_order_item_code->insertAll($arr);
+            $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->setInc('real_instock_num',$realInstokcNum);
+            $this->_stock_transfer_order_item->commit();
+            $this->_stock_transfer_order_item_code->commit();
+        } catch (ValidateException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
+        if ($res !== false) {
+            $this->success('提交成功', '', 200);
+        } else {
+            $this->error(__('No rows were inserted'), '', 525);
+        }
+    }
+
     /***************************************实体仓调拨单end******************************************/
 }
