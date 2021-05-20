@@ -3951,7 +3951,7 @@ class ScmWarehouse extends Scm
         if (empty($transferOrderItemDetail)){
             $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
         }
-        if (!empty($transferOrderItemCodeDetail)){
+        if (empty($transferOrderItemCodeDetail)){
             $this->error(__('当前库区库位下没有此sku可编辑的条码'), '', 524);
         }
         if (empty($areaId)){
