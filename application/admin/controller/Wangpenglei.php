@@ -1220,7 +1220,7 @@ class Wangpenglei extends Backend
 
         $item = new Item();
         $data = $item
-            ->where(['is_del' => 1, 'category_id' => ['<>', 43]])
+            ->where(['is_del' => 1, 'category_id' => ['<>', 43], 'sku' => 'FP0044-09'])
             ->column('stock,distribution_occupy_stock', 'sku');
         $list = $barcode
             ->alias('a')
