@@ -1272,10 +1272,20 @@ class Wangpenglei extends Backend
 
     public function test002()
     {
-        $c_url = '';
-        $frist = substr($c_url, 0, 1);
-        echo $frist;
-        die;
+        $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $list = $barcode
+            ->alias('a')
+            ->field('a.id,a.check_id')
+            ->where(['a.in_stock_id' => 0, 'a.check_id' => ['>', 0], 'b.status' => 2, 'b.is_stock' => 1, 'a.library_status' => 1])
+            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id')
+            ->select();
+
+        foreach ($list as $k => $v) {
+            $id = Db::table('fa_in_stock')->where(['check_id' => $v['check_id']])->value('id');
+            $barcode->where(['id' => $v['id']])->update(['in_stock_id' => $id]);
+            echo $k . "\n";
+        }
+        echo "ok";
     }
 
 
