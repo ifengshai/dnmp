@@ -1809,7 +1809,9 @@ DOC;
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "是否客服发出");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "kf首次回复时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "回复模板");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "组别");
         foreach ($list as $key => $value) {
+
             $arr=explode(",",$value['tags']);
             $tags_name="";
             foreach ($arr as $arrK=>$arrV){
@@ -1823,12 +1825,15 @@ DOC;
             switch ($value['type']) {
                 case 1:
                     $value['site_type'] = 'Zeelool';
+                    $webModel = Db::connect('database.db_zeelool');
                     break;
                 case 2:
                     $value['site_type'] = 'Voogueme';
+                    $webModel = Db::connect('database.db_voogueme');
                     break;
                 case 3:
                     $value['site_type'] = 'Nihao';
+                    $webModel = Db::connect('database.db_nihao');
                     break;
                 case 4:
                     $value['site_type'] = 'meeloog';
@@ -1853,7 +1858,25 @@ DOC;
                     break;
             }
 
-
+            //查询该用户的组别
+            $group = $webModel->table('customer_entity')
+                ->where('email',$value['email'])
+                ->value('group_id');
+            switch ($group){
+                case 1:
+                    $groupName = '普通';
+                    break;
+                case 2:
+                    $groupName = '批发';
+                    break;
+                case 4:
+                    $groupName = 'VIP';
+                    break;
+                default:
+                    $groupName = '-';
+                    break;
+            }
+            $value['group_name'] = $groupName;
             switch ($value['priority']) {
                 case 0:
                     $value['priority_name'] = '无';
@@ -1963,6 +1986,7 @@ DOC;
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['is_admin']);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['fist_time']);
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['template_info']);
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['group_name']);
         }
 
         //设置宽度
@@ -1985,6 +2009,7 @@ DOC;
         $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(10);
         $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
 
 
         //设置边框

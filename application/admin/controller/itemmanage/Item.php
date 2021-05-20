@@ -927,26 +927,30 @@ class Item extends Backend
             if ($filter['platform_type']) {
                 unset($map['platform_type']);
             }
+
             $itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku();
             //如果选择的是全部
             if ($platform_type == 100) {
                 //如果选择sku查询
                 if ($filter['sku']) {
-                    $skus = explode(' ',trim($filter['sku']));
+                    $skus = explode(' ', trim($filter['sku']));
                     $countSkus = count($skus);
-                    if ($countSkus == 1){
+                    if ($countSkus == 1) {
                         $map['sku'] = ['LIKE', '%' . $filter['sku'] . '%'];
-                    }else{
+                    } else {
                         $map['sku'] = ['in', $skus];
                     }
                     unset($filter['sku']);
                 }
+
+                if ($filter['is_open']) {
+                    $map['is_open'] = $filter['is_open'];
+                    unset($filter['is_open']);
+                }
                 unset($filter['platform_type']);
                 unset($map['platform_type']);
                 $this->request->get(['filter' => json_encode($filter)]);
-                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-
-                $map['is_open'] = 1;
+                [$where, $sort, $order, $offset, $limit] = $this->buildparams();
                 $map['is_del'] = 1;
                 $total = $this->model
                     ->where($where)
@@ -981,18 +985,23 @@ class Item extends Backend
             } else {
                 //如果选择的是站点 那么主表变为映射关系表
                 if ($filter['sku']) {
-                    $skus = explode(' ',trim($filter['sku']));
+                    $skus = explode(' ', trim($filter['sku']));
                     $countSkus = count($skus);
-                    if ($countSkus == 1){
+                    if ($countSkus == 1) {
                         $map['a.sku'] = ['LIKE', '%' . $filter['sku'] . '%'];
-                    }else{
+                    } else {
                         $map['a.sku'] = ['in', $skus];
                     }
                     unset($filter['sku']);
                 }
+
+                if ($filter['is_open']) {
+                    $map['is_open'] = $filter['is_open'];
+                    unset($filter['is_open']);
+                }
                 $this->request->get(['filter' => json_encode($filter)]);
 
-                list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+                [$where, $sort, $order, $offset, $limit] = $this->buildparams();
                 // dump($where);
                 $map['is_open'] = 1;
                 $map['is_del'] = 1;
@@ -1016,17 +1025,6 @@ class Item extends Backend
                     ->select();
                 $list = collection($list)->toArray();
 
-                // foreach ($list as $k=>$v){
-                //     $now_onway_stock = 0;
-                //     $replenish = new NewProductReplenishList();
-                //     $replenish_list = $replenish->where('sku',$v['sku'])->where('real_dis_num','>',0)->field('replenish_id,real_dis_num')->select();
-                //     $replenish_list = collection($replenish_list)->toArray();
-                //     foreach ($replenish_list as $kk=>$vv){
-                //         $rate = Db::name('new_product_mapping')->where(['website_type'=>$v['platform_type'],'sku'=>$v['sku'],'replenish_id'=>$vv['replenish_id']])->value('rate');
-                //         $now_onway_stock += ($v['on_way_stock']*$rate);
-                //     }
-                //     $list[$k]['on_way_stock'] = $now_onway_stock;
-                // }
             }
 
 

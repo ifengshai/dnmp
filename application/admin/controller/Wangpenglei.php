@@ -31,23 +31,62 @@ class Wangpenglei extends Backend
         $this->access_token = $this->facebook->access_token;
         $this->accounts = $this->facebook->accounts;
     }
+
     public function select_sku()
     {
         $itemPlatformSku = new ItemPlatformSku();
         $productbarcodeitem = new ProductBarCodeItem();
         $skus = $itemPlatformSku
-            ->where('platform_sku', 'in', [])
+            ->where('platform_sku', 'in', [
+                'DTT089380-01',
+                'NDA283634-01',
+                'ACC566389-01',
+                'ZOX063349-03',
+                'VFP0248-01',
+                'GACC566389-01',
+                'GACC6041-02',
+                'GTT598617-05',
+                'ZGM947526-01',
+                'GOX742171-01',
+                'VFP0263-01',
+                'GOM427874-02',
+                'ZOA02083-02',
+                'GOT668795-01',
+                'GOX272286-01',
+                'GACC6032-02',
+                'ZGX322474-02',
+                'ZWA071469-03',
+                'ZE20031-1',
+                'ZER015738-01',
+                'ZE20037-1',
+                'GOP01912-06',
+                'GACC285895-01',
+                'GOP375333-02',
+                'GOP006896-01',
+                'OT668795-01',
+                'OT668795-02',
+                'VFP0248-01',
+                'ZWA583669-01',
+                'ZWM706044-01',
+                'ZOA02083-02',
+                'GOT703228-01',
+                'GOT668795-01',
+                'ZGA329222-01',
+                'GOX272286-01',
+                'GOX963140-01',
+                'GOX742171-01',
+            ])
             ->field('sku')
             ->group('sku')
             ->select();
         $skus = collection($skus)->toArray();
-        $arr = ['SX0019-05','OP527327-01','JS771317-01','CH672798-08','TT598617-05','OP449452-02','OP02048-03','OP421241-02','OI913496-02','OP01990-03','FM0361-01','WA034265-01','WA245023-03','ER134040-01','WA065152-01','WA192071-01','SX0019-03','SX0019-02','DM638949-01','OP358317-02','WA034265-01','Glasses Pocket-02'];
+        $arr = ['SX0019-05', 'OP527327-01', 'JS771317-01', 'CH672798-08', 'TT598617-05', 'OP449452-02', 'OP02048-03', 'OP421241-02', 'OI913496-02', 'OP01990-03', 'FM0361-01', 'WA034265-01', 'WA245023-03', 'ER134040-01', 'WA065152-01', 'WA192071-01', 'SX0019-03', 'SX0019-02', 'DM638949-01', 'OP358317-02', 'WA034265-01', 'Glasses Pocket-02'];
 
-        foreach ($arr as $k => $v) {
-            $list[$k]['sku'] = $v;
+        foreach ($skus as $k => $v) {
+            $list[$k]['sku'] = $v['sku'];
             $list[$k]['stock'] = $productbarcodeitem
-                ->where(['library_status' => 1, 'item_order_number' => '', 'sku' => $v])
-                ->where('location_code_id','>',0)
+                ->where(['library_status' => 1, 'item_order_number' => '', 'sku' => $v['sku']])
+                ->where('location_code_id', '>', 0)
                 ->count();
         }
         Db::name('zz_temp1')->insertAll($list);
@@ -1099,7 +1138,7 @@ class Wangpenglei extends Backend
     /**
      * 判断处方是否异常
      *
-     * @param  array  $params
+     * @param array $params
      *
      * @author wpl
      * @date   2021/4/23 9:31
@@ -1181,22 +1220,29 @@ class Wangpenglei extends Backend
 
         $item = new Item();
         $data = $item
-            ->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])
+            ->where(['is_del' => 1, 'category_id' => ['<>', 43]])
             ->column('stock,distribution_occupy_stock', 'sku');
         $list = $barcode
-            ->field('sku,count(1) as num')
-            ->where(['library_status' => 1])
-            ->where("item_order_number=''")
+            ->alias('a')
+            ->field('sku,count(1) as stock')
+            ->where(['a.library_status' => 1])
+            ->where(['b.status' => 2])
+            ->where(['a.location_code_id' => ['>', 0]])
+            ->join(['fa_in_stock' => 'b'], 'a.in_stock_id=b.id')
+            ->where("a.item_order_number=''")
             ->group('sku')
             ->select();
         $list = collection($list)->toArray();
-        foreach ($list as $k => $v) {
-            $list[$k]['stock'] = $data[$v['sku']]['stock'] - $data[$v['sku']]['distribution_occupy_stock'];
+        foreach ($list as $k => &$v) {
+            $v['real_stock'] = $data[$v['sku']]['stock'] - $data[$v['sku']]['distribution_occupy_stock'];
+            if ($v['real_stock'] == $v['stock']) {
+                unset($list[$k]);
+            }
+            unset($v['real_stock']);
         }
-
-        $headlist = ['sku', '在库实时库存', '系统实时库存'];
-        Excel::writeCsv($list, $headlist, '库存', true);
-        die;
+        $list = array_values($list);
+        Db::table('fa_zz_temp1')->query('truncate table fa_zz_temp1');
+        Db::table('fa_zz_temp1')->insertAll($list);
     }
 
     public function test002()
@@ -1210,7 +1256,7 @@ class Wangpenglei extends Backend
 
     public function asyncTicketHttps($type, $site, $start, $end)
     {
-        echo $start.'-'.$end."\n";
+        echo $start . '-' . $end . "\n";
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $ticketIds = (new Notice(request(), ['type' => $site]))->asyncUpdate($start, $end);
 
@@ -1228,12 +1274,12 @@ class Wangpenglei extends Backend
         //$diffs = array('144352','144349');//测试是否新增
         foreach ($intersects as $intersect) {
             (new Notice(request(), ['type' => $site, 'id' => $intersect]))->update();
-            echo $intersect.'is ok'."\n";
+            echo $intersect . 'is ok' . "\n";
         }
         //新增
         foreach ($diffs as $diff) {
             (new Notice(request(), ['type' => $site, 'id' => $diff]))->create();
-            echo $diff.'ok'."\n";
+            echo $diff . 'ok' . "\n";
         }
         echo 'all ok';
     }
@@ -1243,8 +1289,8 @@ class Wangpenglei extends Backend
     {
         $type = 1;
         $site = 'zeelool';
-        $start = '2021-04-26T23:00:00Z';
-        $end = '2021-04-26T23:59:59Z';
+        $start = '2021-05-14T13:00:00Z';
+        $end = '2021-05-16T23:59:59Z';
 
         $this->asyncTicketHttps($type, $site, $start, $end);
     }
@@ -1253,20 +1299,52 @@ class Wangpenglei extends Backend
     {
         $type = 1;
         $site = 'zeelool';
-        for ($i = 0; $i < 24; $i++) {
-            $start = '2021-05-06T'.$i.':00:00Z';
-            $end = '2021-05-06T'.$i.':59:59Z';
+        for ($i = 0; $i < 9; $i++) {
+            $start = '2021-05-18T' . $i . ':00:00Z';
+            $end = '2021-05-18T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
-                usleep(100000);
+                usleep(10000);
             } catch (Exception $e) {
                 echo $e->getMessage();
             }
-
         }
     }
 
-
+    /**
+     * 每天 凌晨 1点同步 UTC时间前一天的数据
+     * @author crasphb
+     * @date   2021/5/18 17:26
+     */
+    public function asyncZendeskZeeloolDay()
+    {
+        $type = 1;
+        $site = 'zeelool';
+        $dayBefore = date('Y-m-d',strtotime('-2 day'));
+        $dayNow = date('Y-m-d',strtotime('-1 day'));
+        //UTC时间前一天的数据
+        for ($i = 16; $i < 24; $i++) {
+            $start = $dayBefore.'T' . $i . ':00:00Z';
+            $end = $dayBefore.'T' . $i . ':59:59Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+        }
+        //同步当天0点到16点的
+        for ($i = 0; $i < 16; $i++) {
+            $start = $dayNow.'T' . $i . ':00:00Z';
+            $end = $dayNow.'T' . $i . ':59:59Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+        }
+    }
     /**
      * 判断定制现片逻辑
      */
