@@ -1260,18 +1260,15 @@ class Wangpenglei extends Backend
         $skus = Db::table('fa_zz_temp1')->column('sku');
         $list = $barcode
             ->alias('a')
-            ->field('sku,count(1) as stock')
             ->where(['a.library_status' => 1])
             ->where(['b.status' => 2, 'a.sku' => ['in', $skus]])
             ->where(['a.location_code_id' => ['>', 0]])
             ->join(['fa_in_stock' => 'b'], 'a.in_stock_id=b.id')
             ->where("a.item_order_number=''")
-            ->group('sku')
-            ->select();
-        $list = collection($list)->toArray();
-        $list = array_values($list);
-        Db::table('fa_zz_temp1')->query('truncate table fa_zz_temp1');
-        Db::table('fa_zz_temp1')->insertAll($list);
+            ->column('count(1) as stock', 'sku');
+        foreach ($skus as $v) {
+            Db::table('fa_zz_temp1')->where(['sku' => $v])->update(['stock' => $list[$v]]);
+        }
     }
 
     public function test002()
