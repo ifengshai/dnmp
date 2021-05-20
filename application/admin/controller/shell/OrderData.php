@@ -527,7 +527,7 @@ class OrderData extends Backend
                                             $data[$i]['site'] = $site;
                                             $data[$i]['option_id'] = $options_id;
                                             $data[$i]['sku'] = $v['sku'];
-                                            $data[$i]['order_prescription_type'] = $order_prescription_type;
+                                            $data[$i]['order_prescription_type'] = $order_prescription_type ?: '';
                                             $data[$i]['is_prescription_abnormal'] = $is_prescription_abnormal;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
@@ -567,7 +567,7 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
-                                    $order_prescription_type = $options['order_prescription_type'];
+                                    $order_prescription_type = $options['order_prescription_type'] ?: '';
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
                                     if ($options) {
