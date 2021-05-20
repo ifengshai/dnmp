@@ -2096,14 +2096,17 @@ class OrderData extends Backend
      */
     public function order_item_data_shell()
     {
-        $this->order_item_shell(15);
+        $this->order_item_shell(2);
     }
 
     protected function order_item_shell($site)
     {
-        if ($site == 15) {
+        if ($site == 2) {
             // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_zeelool_fr')->table('sales_flat_order_item')->select();
+            $list = Db::connect('database.db_voogueme')
+                ->table('sales_flat_order_item')
+                ->where(['order_id' => ['in', '440276', '440277', '440278']])
+                ->select();
         }
 
         foreach ($list as $k => $v) {
@@ -2113,8 +2116,8 @@ class OrderData extends Backend
             }
             $options = [];
             //处方解析 不同站不同字段
-            if ($site == 15) {
-                $options = $this->zeelool_fr_prescription_analysis($v['product_options']);
+            if ($site == 2) {
+                $options = $this->voogueme_prescription_analysis($v['product_options']);
             }
 
             $options['item_id'] = $v['item_id'];
