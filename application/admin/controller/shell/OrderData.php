@@ -2105,7 +2105,7 @@ class OrderData extends Backend
             // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
             $list = Db::connect('database.db_voogueme')
                 ->table('sales_flat_order_item')
-                ->where(['order_id' => ['in', '440276', '440277', '440278']])
+                ->where(['order_id' => ['in', ['440276', '440277', '440278']]])
                 ->select();
         }
 
