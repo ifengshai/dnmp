@@ -3767,7 +3767,7 @@ class ScmWarehouse extends Scm
     }
 
     /**
-     * 配货出库提交
+     * 配货出库保存/提交
      * Interface stock_transfer_out_add
      * @package app\api\controller
      * @author  jhh
@@ -3783,7 +3783,9 @@ class ScmWarehouse extends Scm
             //提交进入下一步 该扫描物流单号了
             $status = 3;
         }
-        //当前条形码详情
+        $allItemIds = $this->_stock_transfer_order_item->where('transfer_order_id',$id)->column('id');
+        $allCodes = $this->_stock_transfer_order_item_code->where('transfer_order_item_id','in',$allItemIds)->column('code');
+        //当前实体仓调拨单详情
         $detail = $this->_stock_transfer_order->where('id', $id)->find();
         if (empty($detail)) {
             $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
@@ -3791,8 +3793,27 @@ class ScmWarehouse extends Scm
         if ($detail['status'] !== 2) {
             $this->error(__('调拨单非待配货状态'), '', 546);
         }
-        $res = $this->_stock_transfer_order->where('id', $id)->update(['status'=>$status]);
-
+        $res = false;
+        $this->_product_bar_code_item->startTrans();
+        $this->_stock_transfer_order->startTrans();
+        try {
+            $res = $this->_stock_transfer_order->where('id', $id)->update(['status'=>$status]);
+            $res = $this->_product_bar_code_item->where('code','in',$allCodes)->update(['library_status'=>2]);
+            $this->_product_bar_code_item->commit();
+            $this->_stock_transfer_order->commit();
+        } catch (ValidateException $e) {
+            $this->_product_bar_code_item->rollback();
+            $this->_stock_transfer_order->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            $this->_product_bar_code_item->rollback();
+            $this->_stock_transfer_order->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            $this->_product_bar_code_item->rollback();
+            $this->_stock_transfer_order->rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
         if ($res !== false) {
             $this->success('提交成功', '', 200);
         } else {
@@ -4129,22 +4150,34 @@ class ScmWarehouse extends Scm
         $realInstokcNum = count($arr);
         $res = false;
         $this->_stock_transfer_order_item->startTrans();
+        $this->_product_bar_code_item->startTrans();
         $this->_stock_transfer_order_item_code->startTrans();
         try {
+            //插入实体仓调拨单 子表的子表也就是条码表 数据为实际入库的条码调拨子单id、sku、库区id、库位id、status为2表示是入库条码 为1表示是出库条码
             $res = $this->_stock_transfer_order_item_code->insertAll($arr);
+            //更新实体仓调拨单子单的实际入库数量
             $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->setInc('real_instock_num',$realInstokcNum);
+            foreach ($arr as $k=>$v){
+                //更新条形码表 仓库id 库区id 库位id 库位号 在库状态
+                $v['location_code'] = $this->_store_house->where('id',$v['location_id'])->value('coding');
+                $this->_product_bar_code_item->where('code',$v['code'])->update(['stock_id'=>$transferOrderDetail['in_stock_id'],'location_id'=>$v['area_id'],'location_code_id'=>$v['location_id'],'location_code'=>$v['location_code'],'library_status'=>1]);
+            }
             $this->_stock_transfer_order_item->commit();
+            $this->_product_bar_code_item->commit();
             $this->_stock_transfer_order_item_code->commit();
         } catch (ValidateException $e) {
             $this->_stock_transfer_order_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->_stock_transfer_order_item_code->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (PDOException $e) {
             $this->_stock_transfer_order_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->_stock_transfer_order_item_code->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (Exception $e) {
             $this->_stock_transfer_order_item->rollback();
+            $this->_product_bar_code_item->rollback();
             $this->_stock_transfer_order_item_code->rollback();
             $this->error($e->getMessage(), [], 444);
         }

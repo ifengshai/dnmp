@@ -1536,7 +1536,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id,abnormal_house_id')
+            ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id,abnormal_house_id,stock_id')
             ->find();
         //查询订单号
         $order_info = $this->_new_order
@@ -1624,7 +1624,10 @@ class ScmDistribution extends Scm
 
         //查询预库位占用
         $fictitious_time = time();
-        $fictitious_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['>', $fictitious_time], 'order_id' => $item_process_info['order_id']])->find();
+        $fictitious_store_house_info = $this->_stock_house
+            ->field('id,coding,subarea')
+            ->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['>', $fictitious_time], 'order_id' => $item_process_info['order_id'], 'stock_id' => $item_process_info['stock_id']])
+            ->find();
 
         //如果预占用信息不为空。返回预占用库位
         if (empty($fictitious_store_house_info)) {
@@ -1632,7 +1635,7 @@ class ScmDistribution extends Scm
             //未合单，首次扫描
             if (!$order_process_info['store_house_id']) {
                 //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
-                $store_house_where = ['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]];
+                $store_house_where = ['stock_id' => $item_process_info['stock_id'], 'status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]];
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where($store_house_where)->find();
                 if ($order_process_info['order_prescription_type'] == 1) { //仅镜架优先分配B开头的货架
                     $store_house_where['subarea'] = 'B';
@@ -1690,7 +1693,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,distribution_status,order_id,item_id,site')
+            ->field('id,distribution_status,order_id,item_id,site,stock_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
         !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
@@ -1715,7 +1718,7 @@ class ScmDistribution extends Scm
         if ($order_process_info['store_house_id'] != $store_house_id) {
             if ($store_house_info['occupy'] && empty($order_process_info['store_house_id'])) {
                 //主单无绑定库位，且分配的库位被占用，重新分配合单库位后再次提交确认放入新分配合单架
-                $new_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0])->find();
+                $new_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['stock_id' => $item_process_info['stock_id'], 'status' => 1, 'type' => 2, 'occupy' => 0])->find();
                 empty($new_store_house_info) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 403);
 
                 $info['store_id'] = $new_store_house_info['id'];
@@ -1914,19 +1917,10 @@ class ScmDistribution extends Scm
         $where = [];
         if (1 == $type) {
             $where['combine_status'] = 1; //合单完成状态
-            //$where['store_house_id'] = ['>', 0];
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if ($query) {
-                //线上不允许跨库联合查询，拆分，wang导与产品静确认去除SKU搜索
+                //线上不允许跨库联合查询，拆分
                 $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%']])->column('id');
-                /* $order_id = $this->_new_order_item_process->where(['sku'=> ['like', '%' . $query . '%']])->column('order_id');
-                 $order_id = array_unique($order_id);
-                 $store_house_id_sku = [];
-                 if($order_id) {
-                     $store_house_id_sku = $this->_new_order_process->where(['order_id'=> ['in', $order_id]])->column('store_house_id');
-                 }
-                 $store_house_ids = array_merge(array_filter($store_house_id_store), array_filter($store_house_id_sku));
-                 if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];*/
                 if ($store_house_id_store) {
                     $where['store_house_id'] = ['in', $store_house_id_store];
                 } else {
@@ -1983,24 +1977,6 @@ class ScmDistribution extends Scm
                 } else {
                     $where['b.store_house_id'] = -1;
                 }
-                /*if ($store_house_ids) {
-                    $where['a.id'] = ['in', $item_ids];
-                    $where['b.store_house_id'] = ['in', $store_house_ids];
-                    $item_order_number_store = $this->_new_order_item_process
-                        ->where(['abnormal_house_id' => ['in', $store_house_ids]])
-                        ->column('id');
-                }
-                $item_ids = $this->_new_order_item_process
-                    ->where(['item_order_number' => ['like', $query . '%']])
-                    ->column('id');
-                if (!empty($item_order_number_store)) {
-                        $item_ids = array_merge($item_ids, $item_order_number_store);
-                }
-                if ($item_ids) {
-                    $where['a.id'] = ['in', $item_ids];
-                } else {
-                    $where['a.id'] = -1;
-                }*/
             }
             if ($site) {
                 $where['b.site'] = ['=', $site];
