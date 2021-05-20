@@ -3777,6 +3777,9 @@ class ScmWarehouse extends Scm
         if (empty($detail)) {
             $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
         }
+        if ($detail['status'] !== 2) {
+            $this->error(__('调拨单非待配货状态'), '', 546);
+        }
         $res = $this->_stock_transfer_order->where('id', $id)->update(['status'=>$status]);
 
         if ($res !== false) {
@@ -4030,6 +4033,9 @@ class ScmWarehouse extends Scm
         if (empty($detail)) {
             $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
         }
+        if ($detail['status'] !== 3) {
+            $this->error(__('调拨单非待揽收状态'), '', 546);
+        }
         $res = $this->_stock_transfer_order->where('id', $id)->update(['logistics_number'=>$number,'status'=>4]);
         if ($res){
             $this->success('扫描物流单号成功！！','', 200);
@@ -4052,6 +4058,9 @@ class ScmWarehouse extends Scm
         $detail = $this->_stock_transfer_order->where('id', $id)->find();
         if (empty($detail)) {
             $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
+        }
+        if ($detail['status'] !== 4) {
+            $this->error(__('调拨单非待收货状态'), '', 546);
         }
         $res = $this->_stock_transfer_order->where('id', $id)->update(['status'=>5]);
         if ($res){
