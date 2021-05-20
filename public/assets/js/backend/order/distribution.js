@@ -193,6 +193,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'stock_id',
+                            title: __('仓库'),
+                            addClass: 'selectpicker',
+                            searchList: {
+                                1: '郑州仓',
+                                2: '丹阳仓'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'order_type',
                             title: __('订单类型'),
                             addClass: 'selectpicker',
@@ -818,6 +828,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'stock_id',
+                            title: __('仓库'),
+                            addClass: 'selectpicker',
+                            searchList: {
+                                1: '郑州仓',
+                                2: '丹阳仓'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'status',
                             title: __('打印状态'),
                             addClass: 'selectpicker',
@@ -845,7 +865,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             table: table,
                             events: Table.api.events.operate,
                             buttons: [
-
                                 {
                                     name: 'detail',
                                     text: '详情',

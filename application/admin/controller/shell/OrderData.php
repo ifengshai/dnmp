@@ -1679,16 +1679,16 @@ class OrderData extends Backend
             }
 
             if ($v['stock_id'] == 1) {
-                $warehouseType = 1; //郑州仓
+                $stockId = 1; //郑州仓
             } else {
-                $warehouseType = 2; //丹阳仓
+                $stockId = 2; //丹阳仓
             }
 
             $id = $waveOrder
                 ->where([
                     'type'           => $type,
                     'wave_time_type' => $wave_time_type,
-                    'warehouse_type' => $warehouseType,//丹阳仓
+                    'stock_id'       => $stockId,//丹阳仓
                     'order_date'     => ['between', [strtotime(date('Y-m-d 00:00:00', $time)), strtotime(date('Y-m-d 23:59:59', $time))]],
                 ])
                 ->value('id');
@@ -1698,7 +1698,7 @@ class OrderData extends Backend
                 $params['wave_order_number'] = 'BC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $params['type'] = $type;
                 $params['wave_time_type'] = $wave_time_type;
-                $params['warehouse_type'] = $warehouseType;
+                $params['stock_id'] = $stockId;
                 $params['order_date'] = $time;
                 $params['createtime'] = time();
                 $id = $waveOrder->insertGetId($params);
@@ -1712,7 +1712,7 @@ class OrderData extends Backend
             $where['b.area_id'] = 3;//默认拣货区
             $where['b.status'] = 1;//启用状态
             $where['a.is_del'] = 1;//正常状态
-            $where['b.stock_id'] = $warehouseType;//查询对应仓库
+            $where['b.stock_id'] = $stockId;//查询对应仓库
             $location_data = $stockSku->alias('a')->where($where)->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->find();
             $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' => $location_data['picking_sort']]);
         }

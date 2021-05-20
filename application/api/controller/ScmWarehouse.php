@@ -3767,6 +3767,36 @@ class ScmWarehouse extends Scm
     }
 
     /**
+     * 配货出库提交
+     * Interface stock_transfer_out_add
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/20 14:18:40
+     */
+    public function stock_transfer_out_add()
+    {
+        $id = $this->request->request("transfer_order_id");
+        $type = $this->request->request('type');
+        if ($type == 1){
+            $status = 2;
+        }else{
+            //提交进入下一步 该扫描物流单号了
+            $status = 3;
+        }
+        //当前条形码详情
+        $detail = $this->_stock_transfer_order->where('id', $id)->find();
+        if (empty($detail)) {
+            $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
+        }
+        $res = $this->_stock_transfer_order->where('id', $id)->update(['status'=>$status]);
+
+        if ($res !== false) {
+            $this->success('提交成功', '', 200);
+        } else {
+            $this->error(__('No rows were inserted'), '', 525);
+        }
+    }
+    /**
      * 调出sku信息
      * Interface stock_transfer_out_sku
      * @package app\api\controller

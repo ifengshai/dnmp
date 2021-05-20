@@ -1010,29 +1010,28 @@ class ScmDistribution extends Scm
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
         empty($barcode) && $this->error(__('商品条形码不能为空'), [], 403);
 
+        //获取子单sku
+        $order_item_info = $this->_new_order_item_process
+            ->field('sku,site,id,stock_id')
+            ->where('item_order_number', $item_order_number)
+            ->find();
+        $order_item_true_sku = $order_item_info['sku'];
+        $order_item_id = $order_item_info['id'];
+        empty($order_item_info) && $this->error(__('订单不存在'), [], 403);
+
         /*****************限制如果有盘点单未结束不能操作配货完成*******************/
         //配货完成时判断
         //拣货区盘点时不能操作
         //查询条形码库区库位
         $barcodedata = $this->_product_bar_code_item->where(['code' => $barcode])->find();
         $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3, 'library_name' => $barcodedata->location_code])
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'b.stock_id' => $order_item_info['stock_id'], 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3, 'library_name' => $barcodedata->location_code])
             ->count();
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法配货'), [], 403);
         }
         /****************************end*****************************************/
 
-        //子订单号获取平台platform_sku
-        $order_item_id = $this->_new_order_item_process->where('item_order_number', $item_order_number)->value('id');
-        empty($order_item_id) && $this->error(__('订单不存在'), [], 403);
-
-        //获取子单sku
-        $order_item_info = $this->_new_order_item_process
-            ->field('sku,site')
-            ->where('item_order_number', $item_order_number)
-            ->find();
-        $order_item_true_sku = $order_item_info['sku'];
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku

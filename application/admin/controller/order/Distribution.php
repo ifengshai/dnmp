@@ -350,6 +350,12 @@ class Distribution extends Backend
                 unset($filter['site']);
             }
 
+            //筛选站点
+            if ($filter['stock_id']) {
+                $map['a.stock_id'] = $filter['stock_id'];
+                unset($filter['stock_id']);
+            }
+
             //加工类型筛选
             if (isset($filter['order_prescription_type'])) {
                 $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
@@ -429,7 +435,7 @@ class Distribution extends Backend
             //combine_time  合单时间  delivery_time 打印时间 check_time审单时间  update_time更新时间  created_at创建时间
             $list = $this->model
                 ->alias('a')
-                ->field('b.is_custom_lens,a.id,a.is_prescription_abnormal,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.check_time,b.payment_time')
+                ->field('a.stock_id,b.is_custom_lens,a.id,a.is_prescription_abnormal,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.check_time,b.payment_time')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
