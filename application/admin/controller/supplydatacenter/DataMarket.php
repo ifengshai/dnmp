@@ -837,7 +837,7 @@ class DataMarket extends Backend
             $arr['day_date'] = date('Y-m');
             $map['createtime'] = ['between', [date('Y-m-01') . ' 00:00:00', date('Y-m-t') . ' 23:59:59']];
             $map['is_del'] = 1;
-            $map['purchase_status'] = ['in', [2, 5, 6, 7]];
+            $map['purchase_status'] = ['in', [2, 5, 6, 7, 8, 9, 10]];
             $purchase_num = $this->purchase->alias('a')->where($map)->join(['fa_purchase_order_item' => 'b'],
                 'a.id=b.purchase_id')->sum('b.purchase_num');
             $arr['purchase_num'] = $purchase_num;

@@ -340,7 +340,7 @@ class PurchaseOrder extends Model
         }
 
         $where['is_del'] = 1;
-        $where['purchase_status'] = ['in', [2, 5, 6, 7]];
+        $where['purchase_status'] = ['in', [2, 5, 6, 7, 8, 9, 10]];
 
         return $this->alias('a')->where($where)->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->sum('b.purchase_num');
     }
