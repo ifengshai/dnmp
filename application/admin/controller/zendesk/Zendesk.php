@@ -1764,7 +1764,7 @@ DOC;
             unset($filter['content']);
         }
         $this->request->get(['filter' => json_encode($filter)]);
-        list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+        [$where, $sort, $order, $offset, $limit] = $this->buildparams();
         //默认使用
         $orderSet = 'zendesk_update_time asc';
         if ($me_task == 2) {
@@ -1860,9 +1860,9 @@ DOC;
 
             //查询该用户的组别
             $group = $webModel->table('customer_entity')
-                ->where('email',$value['email'])
+                ->where('email', $value['email'])
                 ->value('group_id');
-            switch ($group){
+            switch ($group) {
                 case 1:
                     $groupName = '普通';
                     break;

@@ -524,13 +524,10 @@ class OrderData extends Backend
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
                                     $options['product_id'] = $v['product_id'];
-
                                     $options['base_original_price'] = $v['base_original_price'];
                                     $options['base_discount_amount'] = $v['base_discount_amount'];
                                     $options['single_base_original_price'] = round($v['base_original_price'] / $v['qty_ordered'], 4);
                                     $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
-
-
                                     $order_prescription_type = $options['order_prescription_type'];
                                     $is_prescription_abnormal = $options['is_prescription_abnormal'];
                                     unset($options['order_prescription_type']);
@@ -544,7 +541,7 @@ class OrderData extends Backend
                                             $data[$i]['site'] = $site;
                                             $data[$i]['option_id'] = $options_id;
                                             $data[$i]['sku'] = $v['sku'];
-                                            $data[$i]['order_prescription_type'] = $order_prescription_type;
+                                            $data[$i]['order_prescription_type'] = $order_prescription_type ?: '';
                                             $data[$i]['is_prescription_abnormal'] = $is_prescription_abnormal;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
@@ -588,7 +585,7 @@ class OrderData extends Backend
                                     $options['base_discount_amount'] = $v['base_discount_amount'];
                                     $options['single_base_original_price'] = round($v['base_original_price'] / $v['qty_ordered'], 4);
                                     $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
-                                    $order_prescription_type = $options['order_prescription_type'];
+                                    $order_prescription_type = $options['order_prescription_type'] ?: '';
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
                                     if ($options) {

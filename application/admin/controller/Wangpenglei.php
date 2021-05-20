@@ -1320,12 +1320,12 @@ class Wangpenglei extends Backend
     {
         $type = 1;
         $site = 'zeelool';
-        $dayBefore = date('Y-m-d',strtotime('-2 day'));
-        $dayNow = date('Y-m-d',strtotime('-1 day'));
+        $dayBefore = date('Y-m-d', strtotime('-2 day'));
+        $dayNow = date('Y-m-d', strtotime('-1 day'));
         //UTC时间前一天的数据
         for ($i = 16; $i < 24; $i++) {
-            $start = $dayBefore.'T' . $i . ':00:00Z';
-            $end = $dayBefore.'T' . $i . ':59:59Z';
+            $start = $dayBefore . 'T' . $i . ':00:00Z';
+            $end = $dayBefore . 'T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(10000);
@@ -1335,8 +1335,8 @@ class Wangpenglei extends Backend
         }
         //同步当天0点到16点的
         for ($i = 0; $i < 16; $i++) {
-            $start = $dayNow.'T' . $i . ':00:00Z';
-            $end = $dayNow.'T' . $i . ':59:59Z';
+            $start = $dayNow . 'T' . $i . ':00:00Z';
+            $end = $dayNow . 'T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(10000);
@@ -1345,6 +1345,7 @@ class Wangpenglei extends Backend
             }
         }
     }
+
     /**
      * 判断定制现片逻辑
      */
