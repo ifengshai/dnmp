@@ -1298,6 +1298,9 @@ class Distribution extends Backend
                 case 12:
                     $model = Db::connect('database.db_voogueme_acc');
                     break;
+                case 15:
+                    $model = Db::connect('database.db_zeelool_fr');
+                    break;
                 default:
                     break;
             }
@@ -1521,6 +1524,7 @@ class Distribution extends Backend
             9  => 'Zeelool_es',
             10 => 'Zeelool_de',
             11 => 'Zeelool_jp',
+            15 => 'Zeelool_fr',
         ];
 
         //子单号状态
