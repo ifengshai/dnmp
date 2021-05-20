@@ -514,6 +514,10 @@ class OrderData extends Backend
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
                                     $options['product_id'] = $v['product_id'];
+                                    $options['base_original_price'] = $v['base_original_price'];
+                                    $options['base_discount_amount'] = $v['base_discount_amount'];
+                                    $options['single_base_original_price'] = round($v['base_original_price'] / $v['qty_ordered'], 4);
+                                    $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
                                     $order_prescription_type = $options['order_prescription_type'];
                                     $is_prescription_abnormal = $options['is_prescription_abnormal'];
                                     unset($options['order_prescription_type']);
@@ -567,6 +571,10 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
+                                    $options['base_original_price'] = $v['base_original_price'];
+                                    $options['base_discount_amount'] = $v['base_discount_amount'];
+                                    $options['single_base_original_price'] = round($v['base_original_price'] / $v['qty_ordered'], 4);
+                                    $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
                                     $order_prescription_type = $options['order_prescription_type'] ?: '';
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
