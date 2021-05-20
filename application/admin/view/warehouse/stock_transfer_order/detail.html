@@ -100,6 +100,8 @@
                 <tr>
                     <th>SKU</td>
                     <th>期望调拨数量</td>
+                    <th>实际调拨数量</td>
+                    <th>实际入库数量</td>
                 </tr>
                 {foreach $item as $k => $v}
                 <tr>
@@ -108,6 +110,8 @@
                         <input class="form-control sku" name="sku[]" value="{$v.sku}" type="text">
                     </td>
                     <td><input class="form-control num" name="num[]" type="text" value="{$v.hope_num}"></td>
+                    <td><input class="form-control num" name="num[]" type="text" value="{$v.real_num}"></td>
+                    <td><input class="form-control num" name="num[]" type="text" value="{$v.real_instock_num}"></td>
                 </tr>
                 {/foreach}
             </table>

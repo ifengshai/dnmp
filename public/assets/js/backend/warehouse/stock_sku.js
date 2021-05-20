@@ -140,8 +140,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 html.push("</select>");
                 $('#area').html(html.join(""));
             }
-        })
-    })
+        });
+    });
     $(document).on('change','.area',function() {
         var id = $(this).val();
         $.ajax({
@@ -157,9 +157,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                     html.push("<option value='" + house.id + "'>" + house.coding + "</option>");
                 }
                 html.push("</select>");
-                $('#area').html(html.join(""));
+                // $('#store').html(html.join(""));
             }
-        })
+        });
     })
     return Controller;
 });
