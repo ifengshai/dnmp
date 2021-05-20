@@ -2025,7 +2025,7 @@ class OrderData extends Backend
                 $params['firstname'] = $v['firstname'];
                 $params['lastname'] = $v['lastname'];
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 12])->update($params);
+                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 15])->update($params);
             }
         }
     }
@@ -2133,7 +2133,7 @@ class OrderData extends Backend
                     $data[$i]['site'] = $site;
                     $data[$i]['option_id'] = $options_id;
                     $data[$i]['sku'] = $v['sku'];
-                    $data[$i]['order_prescription_type'] = $order_prescription_type;
+                    $data[$i]['order_prescription_type'] = $order_prescription_type ?: '';
                     $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                     $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                 }
