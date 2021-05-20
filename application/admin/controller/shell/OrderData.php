@@ -1963,6 +1963,7 @@ class OrderData extends Backend
             $params['status'] = $v['status'] ?: '';
             $params['store_id'] = $v['store_id'];
             $params['base_grand_total'] = $v['base_grand_total'];
+            $params['grand_total'] = $v['grand_total'];
             $params['total_item_count'] = $v['total_item_count'];
             $params['total_qty_ordered'] = $v['total_qty_ordered'];
             $params['order_type'] = $v['order_type'];
@@ -1984,13 +1985,17 @@ class OrderData extends Backend
             $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
             $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
             $params['base_shipping_amount'] = $v['base_shipping_amount'];
+            $params['quote_id'] = $v['quote_id'];
             $params['created_at'] = strtotime($v['created_at']) + 28800;
             $params['updated_at'] = strtotime($v['updated_at']) + 28800;
             if (isset($v['payment_time'])) {
                 $params['payment_time'] = strtotime($v['payment_time']) + 28800;
             }
+
             //插入订单主表
             $order_id = $this->order->insertGetId($params);
+            //es同步订单数据，插入
+            $this->asyncOrder->runInsert($params, $order_id);
             $order_params[$k]['site'] = $site;
             $order_params[$k]['order_id'] = $order_id;
             $order_params[$k]['entity_id'] = $v['entity_id'];
@@ -2119,6 +2124,10 @@ class OrderData extends Backend
             $options['qty'] = $v['qty_ordered'];
             $options['base_row_total'] = $v['base_row_total'];
             $options['product_id'] = $v['product_id'];
+            $options['base_original_price'] = $v['base_original_price'];
+            $options['base_discount_amount'] = $v['base_discount_amount'];
+            $options['single_base_original_price'] = round($v['base_original_price'] / $v['qty_ordered'], 4);
+            $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
             $order_prescription_type = $options['order_prescription_type'];
             $is_prescription_abnormal = $options['is_prescription_abnormal'];
             unset($options['order_prescription_type']);
@@ -2132,7 +2141,7 @@ class OrderData extends Backend
                     $data[$i]['site'] = $site;
                     $data[$i]['option_id'] = $options_id;
                     $data[$i]['sku'] = $v['sku'];
-                    $data[$i]['order_prescription_type'] = $order_prescription_type;
+                    $data[$i]['order_prescription_type'] = $order_prescription_type ?: '';
                     $data[$i]['is_prescription_abnormal'] = $is_prescription_abnormal;
                     $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                     $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
