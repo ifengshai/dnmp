@@ -1905,6 +1905,7 @@ class ScmDistribution extends Scm
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $site = $this->request->request('site');
+        $stockId = $this->request->request('stock_id');
         $shelf_number = $this->request->request('shelf_number');
         $order_prescription_type = $this->request->request('order_prescription_type'); //订单处方分类 1 仅镜架 2 现货处方镜 3 定制处方镜 ',
         $page = $this->request->request('page');
@@ -1920,7 +1921,7 @@ class ScmDistribution extends Scm
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if ($query) {
                 //线上不允许跨库联合查询，拆分
-                $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%']])->column('id');
+                $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%'], 'stock_id' => $stockId])->column('id');
                 if ($store_house_id_store) {
                     $where['store_house_id'] = ['in', $store_house_id_store];
                 } else {
@@ -1940,8 +1941,14 @@ class ScmDistribution extends Scm
                     $where['order_prescription_type'] = ['in', [2, 3]];
                 }
             }
+
+            //所属仓库
+            if ($stockId) {
+                $where['stock_id'] = $stockId;
+            }
+
             if ($shelf_number) {
-                $shelf_number_arr = $this->_stock_house->where(['type' => 2, 'subarea' => $shelf_number])->column('id');
+                $shelf_number_arr = $this->_stock_house->where(['type' => 2, 'subarea' => $shelf_number, 'stock_id' => $stockId])->column('id');
                 if ($query && !empty($store_house_id_store)) {
                     $shelf_number_arr_intersect = array_intersect($where['store_house_id'], $shelf_number_arr);
                 }
@@ -1971,7 +1978,7 @@ class ScmDistribution extends Scm
             //异常待处理列表
             if ($query) {
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
-                $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%']])->column('id');
+                $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%'], 'stock_id' => $stockId])->column('id');
                 if ($store_house_id_store) {
                     $where['b.store_house_id'] = ['in', $store_house_id_store];
                 } else {
@@ -1999,6 +2006,12 @@ class ScmDistribution extends Scm
                     $where['b.store_house_id'] = ['in', $shelf_number_arr];
                 }
             }
+
+            //所属仓库
+            if ($stockId) {
+                $where['a.stock_id'] = $stockId;
+            }
+
             $list = $this->_new_order_item_process
                 ->alias('a')
                 ->where($where)
@@ -2247,7 +2260,7 @@ class ScmDistribution extends Scm
                 //查询给所有子单标记异常异常库位是否足够
                 $stock_house_info = $this->_stock_house
                     ->field('id,coding')
-                    ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000 - count($all_item_order_number)]])
+                    ->where(['status' => 1, 'type' => 4, 'stock_id' => $row->stock_id, 'occupy' => ['<', 10000 - count($all_item_order_number)]])
                     ->order('occupy', 'desc')
                     ->find();
                 if (empty($stock_house_info)) {
