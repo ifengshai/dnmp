@@ -310,4 +310,71 @@ class StockTransferOrder extends Backend
         }
     }
 
+    /**
+     * 实体仓调拨单异常列表
+     * Interface danger_list
+     * @package app\admin\controller\warehouse
+     * @author  jhh
+     * @date    2021/5/21 9:57:06
+     */
+    public function danger_list()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $allIds = Db::name('stock_transfer_order_item')
+                ->where('real_instock_num','>',0)
+                ->where('real_num','>',0)
+                ->where('`real_instock_num`<`real_num`')
+                ->group('transfer_order_id')
+                ->column('transfer_order_id');
+            $map['id'] = ['in',$allIds];
+            $total = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->count();
+
+            $list = $this->model
+                ->where($where)
+                ->where($map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+
+            $list = collection($list)->toArray();
+            $result = array("total" => $total, "rows" => $list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * 异常详情
+     * Interface danger_detail
+     * @package app\admin\controller\warehouse
+     * @author  jhh
+     * @date    2021/5/21 10:28:53
+     */
+    public function danger_detail($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        $this->view->assign("row", $row);
+        //查询产品信息
+        $map['transfer_order_id'] = $ids;
+        $item = Db::name('stock_transfer_order_item')->where($map)->select();
+        $this->assign('item', $item);
+        $allStock = Db::name('warehouse_stock')->column('name','id');
+        $this->assign('all_stock', $allStock);
+        return $this->view->fetch();
+    }
 }
