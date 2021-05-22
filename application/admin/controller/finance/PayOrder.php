@@ -32,7 +32,7 @@ class PayOrder extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['print'];
+    protected $noNeedRight = ['print','getSupplier'];
 
     /*
      * 付款单列表
