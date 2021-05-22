@@ -3886,11 +3886,15 @@ class ScmWarehouse extends Scm
         $this->_stock_transfer_order->startTrans();
         $this->_item->startTrans();
         $this->_item_platform_sku->startTrans();
+        $this->_stock_transfer_out_order->startTrans();
+        $this->_stock_transfer_in_order_item->startTrans();
         try {
             /****************库存逻辑开始**********************/
             //提交的时候操作库存 以及更新条形码状态为出库
             if($status == 3){
                 foreach ($allItemDetail as $sk=>$sv){
+                    $StockTransferOutOrderItem[$sk]['sku'] = $sv['sku'];
+                    $StockTransferOutOrderItem[$sk]['out_num'] = $sv['real_num'];
                     //同步对应SKU库存 更新商品表商品总库存 总库存
                     $itemMap['sku'] = $sv['sku'];
                     $itemMap['is_del'] = 1;
@@ -4028,6 +4032,14 @@ class ScmWarehouse extends Scm
                 }
                 //条形码全部改为出库状态
                 $res = $this->_product_bar_code_item->where('code', 'in', $allCodes)->update(['library_status' => 2]);
+                $transferOutOrderId = $this->_stock_transfer_out_order
+                    ->insertGetId(['transfer_out_order_number'=>'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999),'stock_transfer_order_id'=>$id,'create_person'=> $this->auth->nickname,'create_time'=>time()]);
+                $arrArr = ['transfer_out_order_id' => $transferOutOrderId];
+                array_walk($StockTransferOutOrderItem, function (&$value1, $key, $arrArr) {
+                    $value1 = array_merge($value1, $arrArr);
+                },$arrArr);
+                $this->_stock_transfer_in_order_item
+                    ->insertAll($StockTransferOutOrderItem);
             }
             /****************库存逻辑结束**********************/
             //更新仓库调拨单状态为待物流揽收
@@ -4036,23 +4048,31 @@ class ScmWarehouse extends Scm
             $this->_stock_transfer_order->commit();
             $this->_item->commit();
             $this->_item_platform_sku->commit();
+            $this->_stock_transfer_out_order->commit();
+            $this->_stock_transfer_in_order_item->commit();
         } catch (ValidateException $e) {
             $this->_product_bar_code_item->rollback();
             $this->_stock_transfer_order->rollback();
             $this->_item->rollback();
             $this->_item_platform_sku->rollback();
+            $this->_stock_transfer_out_order->rollback();
+            $this->_stock_transfer_in_order_item->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (PDOException $e) {
             $this->_product_bar_code_item->rollback();
             $this->_stock_transfer_order->rollback();
             $this->_item->rollback();
             $this->_item_platform_sku->rollback();
+            $this->_stock_transfer_out_order->rollback();
+            $this->_stock_transfer_in_order_item->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (Exception $e) {
             $this->_product_bar_code_item->rollback();
             $this->_stock_transfer_order->rollback();
             $this->_item->rollback();
             $this->_item_platform_sku->rollback();
+            $this->_stock_transfer_out_order->rollback();
+            $this->_stock_transfer_in_order_item->rollback();
             $this->error($e->getMessage(), [], 444);
         }
         if ($res !== false) {
