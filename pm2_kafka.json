@@ -1,0 +1,6 @@
+{
+  "name": "pm2_kafka",
+  "args": "config/server.properties",
+  "script": "bin/kafka-server-start.sh",
+  "cwd": "/usr/local/kafka/"
+}

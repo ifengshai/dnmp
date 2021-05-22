@@ -2,7 +2,9 @@
 /**
  * 运营统计--用户复购率分析脚本
  */
+
 namespace app\admin\controller\shell\supply;
+
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
@@ -20,6 +22,7 @@ class TrackAsynData extends Command
     protected $str35 = 'Attempted for delivery but failed, this may due to several reasons. Please contact the carrier for clarification.'; //投递失败
     protected $str40 = 'Delivered successfully.'; //投递成功
     protected $str50 = 'Item might undergo unusual shipping condition, this may due to several reasons, most likely item was returned to sender, customs issue etc.'; //可能异常
+
     public function __construct()
     {
         parent::__construct();
@@ -40,111 +43,22 @@ class TrackAsynData extends Command
     public function dealData()
     {
         $trackingConnector = new TrackingConnector($this->apiKey);
-        $orderNumber = [
-            "430344760",
-            "400611602",
-            "100251522",
-            "660012715",
-            "660012701",
-            "100251436",
-            "660012595",
-            "660012583",
-            "660012578",
-            "600152582",
-            "100251160",
-            "660012560",
-            "100251100",
-            "660012555",
-            "600152557",
-            "430342657",
-            "660012520",
-            "660012510",
-            "600152497",
-            "660012486",
-            "360002653",
-            "130111517",
-            "360002650",
-            "360002586",
-            "660012430",
-            "660012417",
-            "430342318",
-            "660012414",
-            "130111477",
-            "130111470",
-            "130111464",
-            "300050636",
-            "660012410",
-            "430341938",
-            "130111376",
-            "400608092",
-            "430341775",
-            "430341750",
-            "400607927",
-            "600152360",
-            "130111292",
-            "430341691",
-            "660012369",
-            "400607667",
-            "600152292",
-            "130111230",
-            "430341540",
-            "430341526",
-            "100250273",
-            "660012338",
-            "100250256",
-            "100130606",
-            "430341450",
-            "400606233",
-            "130110984",
-            "660012281",
-            "400606023",
-            "660012266",
-            "430340702",
-            "660012256",
-            "130110946",
-            "600152039",
-            "360002576",
-            "130110758",
-            "360002569",
-            "660012172",
-            "100248928",
-            "300050450",
-            "360002543",
-            "430339326",
-            "430338876",
-            "400602009",
-            "100248332",
-            "600151492",
-            "660011978",
-            "660011974",
-            "100248014",
-            "100247999",
-            "660011955",
-            "360002491",
-            "360002489",
-            "430338030",
-            "600151184",
-            "660011858",
-            "100247488",
-            "500034158",
-            "400578708",
-            "130106511"
-        ];
+        $where = [];
+        $where[] = ['exp', Db::raw("signing_time<delivery_time")];
         //查询有问题的订单物流数据
         $track = Db::name('order_node')
-            ->where(['order_number' => ['in', $orderNumber]])
-//            ->where('order_number','430321223')
+            ->where($where)
+            ->where('order_node', 4)
+            ->where('node_type', 40)
             ->order('delivery_time desc')
+            ->limit(12)
             ->select();
-
-        foreach ($track as $value){
+        foreach ($track as $value) {
             $carrier = $this->getCarrier(strtolower($value['shipment_type']));
-
-            $trackingConnector->registerMulti(array($value['track_number']));
-            $trackInfo = $trackingConnector->getTrackInfo($value['track_number'],$carrier);
+            $trackInfo = $trackingConnector->getTrackInfo($value['track_number'], $carrier);
             //删除courier表中的数据
             Db::name('order_node_courier')
-                ->where('order_number',$value['order_number'])
+                ->where('track_number', $value['track_number'])
                 ->delete();
             $add['site'] = $value['site'];
             $add['order_id'] = $value['order_id'];
@@ -152,19 +66,20 @@ class TrackAsynData extends Command
             $add['shipment_type'] = $value['shipment_type'];
             $add['shipment_data_type'] = $value['shipment_data_type'];
             $add['track_number'] = $value['track_number'];
-            $this->total_track_data($trackInfo['track'],$add,$value['id']);
+            $this->total_track_data($trackInfo['track'], $add, $value['id']);
             echo $value['track_number'].'--'.$value['id'].' is ok'."\n";
             usleep(10000);
         }
     }
-    public function total_track_data($data, $add,$id)
+
+    public function total_track_data($data, $add, $id)
     {
         //删除detail表中的签收数据
         Db::name('order_node_detail')
             ->where('track_number', $add['track_number'])
             ->where('shipment_type', $add['shipment_type'])
-            ->where('order_node',4)
-            ->where('node_type',40)
+            ->where('order_node', 4)
+            ->where('node_type', 40)
             ->delete();
 
         $trackdetail = array_reverse($data['z1']);
@@ -201,8 +116,8 @@ class TrackAsynData extends Command
                     //更新上网
                     $order_node_date = Db::name('order_node_detail')
                         ->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])
-                        ->where('order_node',3)
-                        ->where('node_type',8)
+                        ->where('order_node', 3)
+                        ->where('node_type', 8)
                         ->find();
                     $update_order_node['order_node'] = 3;
                     $update_order_node['node_type'] = 8;
@@ -216,9 +131,9 @@ class TrackAsynData extends Command
                         $order_node_detail['content'] = $this->str1;
                         $order_node_detail['create_time'] = $v['a'];
                         Db::name('order_node_detail')
-                            ->where('id',$order_node_date['id'])
+                            ->where('id', $order_node_date['id'])
                             ->update($order_node_detail); //插入节点字表
-                    }else{
+                    } else {
                         $order_node_detail['node_type'] = 8;
                         $order_node_detail['content'] = $this->str1;
                         $order_node_detail['create_time'] = $v['a'];
@@ -230,8 +145,8 @@ class TrackAsynData extends Command
                     //更新运输
                     $order_node_date = Db::name('order_node_detail')
                         ->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])
-                        ->where('order_node',3)
-                        ->where('node_type',10)
+                        ->where('order_node', 3)
+                        ->where('node_type', 10)
                         ->find();
                     $update_order_node['order_node'] = 3;
                     $update_order_node['node_type'] = 10;
@@ -247,7 +162,7 @@ class TrackAsynData extends Command
                         Db::name('order_node_detail')
                             ->where('id', $order_node_date['id'])
                             ->update($order_node_detail); //插入节点字表
-                    }else{
+                    } else {
                         $order_node_detail['node_type'] = 10;
                         $order_node_detail['content'] = $this->str3;
                         $order_node_detail['create_time'] = $v['a'];
@@ -258,11 +173,11 @@ class TrackAsynData extends Command
                 }
 
                 //结果
-                if($all_num - 1 == $k){
+                if ($all_num - 1 == $k) {
                     if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
-                        if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10)||($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
+                        if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) || ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
                             $update_order_node['order_node'] = 4;
                             $update_order_node['node_type'] = $data['e'];
                             $update_order_node['update_time'] = $v['a'];
@@ -324,15 +239,18 @@ class TrackAsynData extends Command
                     $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
                     $update_order_node = [];
                     $update_order_node['update_time'] = $v['a'];
-                    $update_order_node['shipment_last_msg'] =  $v['z'];
+                    $update_order_node['shipment_last_msg'] = $v['z'];
                     Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                 }
             }
         }
     }
+
     /**
      * 获取快递号
+     *
      * @param $title
+     *
      * @return mixed|string
      */
     protected function getCarrier($title)
@@ -349,6 +267,7 @@ class TrackAsynData extends Command
             'cod'       => '100040',
             'tnt'       => '100004',
         ];
+
         return $carrier[$title];
     }
 }

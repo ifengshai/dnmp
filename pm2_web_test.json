@@ -1,0 +1,6 @@
+{
+  "name": "pm2_web_test",
+  "args": "",
+  "script": "php /www/wwwroot/mojing/public/admin_1biSSnWyfW.php shell/kafka/web_data/syc_data",
+  "max_memory_restart": "100M"
+}

@@ -2181,6 +2181,17 @@ class Distribution extends Backend
             $v['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
             $v['img_url'] = $img_url;
 
+            $skuDir = ROOT_PATH."public".DS."uploads".DS."printOrder".DS."distribution".DS."new".DS."sku".DS;
+            $sku = str_replace(strrchr($v['sku'], "-"), "", $v['sku']);
+            $skuFileName = $sku.".png";
+            if (!file_exists($skuDir)) {
+                mkdir($skuDir, 0777, true);
+            }
+            $sku_url = "/uploads/printOrder/distribution/new/sku/$skuFileName";
+            $this->generate_barcode_new($sku, $skuDir.$skuFileName);
+            //生成SKU条形码
+            $v['sku_url'] = $sku_url;
+
             //序号
             $serial = explode('-', $item_order_number);
             $v['serial'] = $serial[1];

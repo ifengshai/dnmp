@@ -344,8 +344,16 @@ class ZendeskMailTemplate extends Backend
             $template = $this->model
                 ->where('id',$id)
                 ->find();
+
             //获取邮件的信息
             $ticket = \app\admin\model\zendesk\Zendesk::where('ticket_id',$ticket_id)->where('type',$template['template_platform'])->find();
+            //获取发件人的名称
+            $zendeskAgentInfo = Db::name('zendesk_agents')
+                ->where('type',$ticket->type)
+                ->where('admin_id',session('admin.id'))
+                ->field('nickname,account_level')
+                ->find();
+            $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : '';
             if($ticket->type == 1){
                 $orderModel = new \app\admin\model\order\order\Zeelool;
             }elseif($ticket->type == 2){
@@ -389,7 +397,7 @@ class ZendeskMailTemplate extends Backend
             }
 
             //替换模板内容
-            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg}}','{{increment_id}}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],$order_node_message['complete_time'],$shipment_last_msg,$increment_id],$template['template_content']);
+            $template['template_content'] = str_replace(['{{username}}','{{email}}','{{ticket_id}}','{{track_number}}','{{complete_time}}','{{shipment_last_msg}}','{{increment_id}}','{{agent.name}}'],[$ticket->username,$ticket->email,$ticket->ticket_id,$order_node_message['track_number'],$order_node_message['complete_time'],$shipment_last_msg,$increment_id,$zendeskNickname],$template['template_content']);
             //tags合并
             $template['mail_tag'] = array_filter(array_merge(explode(',',$template['mail_tag']),explode(',',$ticket->tags)));
             //使用次数+1

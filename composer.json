@@ -15,7 +15,7 @@
         }
     ],
     "require": {
-        "php": ">=5.6.0",
+        "php": ">=7.1",
         "topthink/framework": "~5.0.24",
         "overtrue/wechat": "~3.1",
         "endroid/qr-code": "^1.9",
@@ -33,6 +33,9 @@
         "league/html-to-markdown": "^4.9",
         "sch-group/17track": "^1.7",
         "google/apiclient": "^2.0",
+        "guzzlehttp/promises": "1.4.0",
+        "guzzlehttp/psr7": "1.7.0",
+        "elasticsearch/elasticsearch": "v7.12.0"
         "guzzlehttp/promises": "1.4.0",
         "guzzlehttp/psr7": "1.7.0",
         "aws/aws-sdk-php": "^3.176",

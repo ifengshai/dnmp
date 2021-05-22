@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\shell\service;
 
+use app\admin\model\itemmanage\Item;
 use app\admin\model\SkuStockLog;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use think\console\Command;
@@ -39,6 +40,13 @@ class StockAsyncData extends Command
             $skuMoneyData[$v['sku']] = $v['money'];
         }
 
+        //查询配货占用库存
+        $item = new Item();
+        $skus = $item
+            ->where(['is_del' => 1, 'is_open' => 1, 'category_id' => ['<>', 43]])
+            ->column('distribution_occupy_stock', 'sku');
+
+
         //统计sku实时库存
         $list = $productBarCode
             ->field('sku,count(1) as all_stock')
@@ -49,6 +57,7 @@ class StockAsyncData extends Command
 
         foreach ($list as $k => &$v) {
             $v['stock_money'] = $skuMoneyData[$v['sku']] ?: 0;
+            $v['distribution_occupy_stock'] = $skus[$v['sku']] ?: 0;
             $v['created_at'] = time();
             $v['updated_at'] = time();
         }

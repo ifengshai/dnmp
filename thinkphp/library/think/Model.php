@@ -12,7 +12,10 @@
 namespace think;
 
 use BadMethodCallException;
+use fast\Excel;
 use InvalidArgumentException;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use think\db\Query;
 use think\exception\ValidateException;
 use think\model\Collection as ModelCollection;

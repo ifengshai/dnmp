@@ -1993,6 +1993,7 @@ class WorkOrderList extends Backend
                 $itemPlatFormSkuWhere = ['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $siteType];
             }
             $res = $itemPlatFormSku->where($itemPlatFormSkuWhere)->find();
+
             //判断是否开启预售
             if ($res['stock'] >= 0 && $res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
                 $stock = $res['stock'] + $res['presell_residue_num'];
@@ -2007,6 +2008,7 @@ class WorkOrderList extends Backend
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
                 return ['result' => false, 'msg' => $sku . '库存不足！！'];
             }
+
             //判断此sku是否在第三方平台
             if ($siteType == 13 || $siteType == 14) {
                 $res = $this->model->httpRequest($siteType, 'api/mojing/check_sku', ['sku' =>$sku,'platform_order' =>$platform_order], 'POST');
@@ -2017,6 +2019,7 @@ class WorkOrderList extends Backend
                     return ['result' => false, 'msg' => $sku . '库存不足！！'];
                 }
             }
+
         }
         return ['result' => true, 'msg' => ''];
     }
@@ -2050,6 +2053,7 @@ class WorkOrderList extends Backend
 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
@@ -3476,7 +3480,6 @@ class WorkOrderList extends Backend
                                             $this->error("序号为".$i."的sku(".$change_sku.")，在库状态为否");
                                         }
                                     }
-                                    
                                     if ($bar_code_info['sku'] != $platform_info_sku) {
                                         $this->error("序号为".$i."的sku(".$change_sku.")，条形码所绑定的sku与赠品sku不一致");
                                     }
@@ -4103,6 +4106,8 @@ EOF;
             $arr[$k]['platform_type'] = $v['platform_type'];
         }
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+
+
         //根据平台sku转sku
         $notEnough = [];
         foreach (array_filter($arr) as $v) {
@@ -4123,6 +4128,7 @@ EOF;
             } else {
                 $stock = $res['stock'];
             }
+
             //判断可用库存
             if ($stock < $v['original_number']) {
                 //判断没库存情况下 是否开启预售 并且预售时间是否满足 并且预售数量是否足够
