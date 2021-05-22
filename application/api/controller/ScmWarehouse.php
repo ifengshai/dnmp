@@ -3897,7 +3897,7 @@ class ScmWarehouse extends Scm
             $this->error(__('error，调拨单id为空'), '', 546);
         }
         $transferOrderItem = $this->_stock_transfer_order_item->where('id', $id)->find();
-        $transferOrderItemCode = $this->_stock_transfer_order_item_code->where('transfer_order_item_id', $id)->select();
+        $transferOrderItemCode = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id'=>$id,'status'=>1])->select();
         $transferOrderItemCode = collection($transferOrderItemCode)->toArray();
         $arr = [];
         foreach ($transferOrderItemCode as $k => $v) {
@@ -3915,7 +3915,6 @@ class ScmWarehouse extends Scm
         }
         $data['sku'] = $transferOrderItem['sku'];
         $data['item_list'] = array_values($arr);
-//        $data['all_list'] = $transferOrderItemCode;
         $this->success('', $data, 200);
     }
 
