@@ -3859,7 +3859,11 @@ class ScmWarehouse extends Scm
             //提交进入下一步 该扫描物流单号了
             $status = 3;
         }
-        $allItemIds = $this->_stock_transfer_order_item->where('transfer_order_id', $id)->column('id');
+        $allItemDetail = $this->_stock_transfer_order_item
+            ->where('transfer_order_id', $id)
+            ->field('sku,id,real_num')
+            ->select();
+        $allItemIds = array_column($allItemDetail,'id');
         $allCodes = $this->_stock_transfer_order_item_code->where('transfer_order_item_id', 'in', $allItemIds)->column('code');
         //当前实体仓调拨单详情
         $detail = $this->_stock_transfer_order->where('id', $id)->find();
@@ -3872,22 +3876,172 @@ class ScmWarehouse extends Scm
         $res = false;
         $this->_product_bar_code_item->startTrans();
         $this->_stock_transfer_order->startTrans();
+        $this->_item->startTrans();
+        $this->_item_platform_sku->startTrans();
         try {
+            /****************库存逻辑开始**********************/
+            foreach ($allItemDetail as $sk=>$sv){
+                //同步对应SKU库存 更新商品表商品总库存 总库存
+                $itemMap['sku'] = $sv['sku'];
+                $itemMap['is_del'] = 1;
+                $skuItem = $this->_item->where($itemMap)->field('stock,available_stock,sample_num,wait_instock_num,occupy_stock,distribution_occupy_stock')->find();
+                if ($sv['sku']) {
+                    //扣减sku总库存 可用库存
+                    $stock = $this->_item->where($itemMap)->dec('stock', $sv['real_num'])->dec('available_stock', $sv['real_num'])->update();
+                    //插入日志表
+                    (new StockLog())->setData([
+                        'type'                   => 2,
+                        'site'                   => 0,
+                        'modular'                => 14,//实体仓调拨
+                        'change_type'            => 23,//实体仓调拨出库
+                        'sku'                    => $sv['sku'],
+                        'order_number'           => $id,//实体仓调拨单id
+                        'source'                 => 2,
+                        'stock_before'           => $skuItem['stock'],
+                        'stock_change'           => -$sv['real_num'],
+                        'available_stock_before' => $skuItem['available_stock'],
+                        'available_stock_change' => -$sv['real_num'],
+                        'create_person'          => $this->auth->nickname,
+                        'create_time'            => time(),
+                        'number_type'            => 7,//实体仓调拨单
+                    ]);
+                    //实体仓调拨出库的同时要对虚拟库存进行一定的操作
+                    //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
+                    $itemPlatformSku = $this->_item_platform_sku->where('sku', $sv['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                    $allNum = count($itemPlatformSku);
+                    $wholeNum = $this->_item_platform_sku
+                        ->where('sku', $sv['sku'])
+                        ->field('stock')
+                        ->select();
+                    $numNum = 0;
+                    foreach ($wholeNum as $kk => $vv) {
+                        $numNum += abs($vv['stock']);
+                    }
+                    //sku实际调拨的数量
+                    $stockNum= $sv['real_num'];
+                    //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
+                    $stockAllNum = array_sum(array_column($itemPlatformSku, 'stock'));
+                    if ($stockAllNum == 0) {
+                        $rateRate = 1 / $allNum;
+                        foreach ($itemPlatformSku as $key => $val) {
+                            //最后一个站点 剩余数量分给最后一个站
+                            if (($allNum - $key) == 1) {
+                                $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stockNum)->update();
+                                //插入日志表
+                                (new StockLog())->setData([
+                                    'type'              => 2,
+                                    'site'              => $val['platform_type'],
+                                    'modular'           => 14,//实体仓调拨
+                                    'change_type'       => 23,//实体仓调拨出库
+                                    'sku'               => $sv['sku'],
+                                    'order_number'      => $id,
+                                    'source'            => 2,
+                                    'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                    'fictitious_change' => -$stockNum,
+                                    'create_person'     => $this->auth->nickname,
+                                    'create_time'       => time(),
+                                    'number_type'       => 7,//实体仓调拨单
+                                ]);
+                            } else {
+                                $num = round($sv['real_num'] * $rateRate);
+                                $stockNum -= $num;
+                                $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
+                                //插入日志表
+                                (new StockLog())->setData([
+                                    'type'              => 2,
+                                    'site'              => $val['platform_type'],
+                                    'modular'           => 14,//实体仓调拨
+                                    'change_type'       => 23,//实体仓调拨出库
+                                    'sku'               => $sv['sku'],
+                                    'order_number'      => $id,
+                                    'source'            => 2,
+                                    'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                    'fictitious_change' => -$num,
+                                    'create_person'     => $this->auth->nickname,
+                                    'create_time'       => time(),
+                                    'number_type'       => 7,//实体仓调拨单
+                                ]);
+                            }
+                        }
+                    } else {
+                        foreach ($itemPlatformSku as $key => $val) {
+                            //最后一个站点 剩余数量分给最后一个站
+                            if (($allNum - $key) == 1) {
+                                $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stockNum)->update();
+                                //插入日志表
+                                (new StockLog())->setData([
+                                    'type'              => 2,
+                                    'site'              => $val['platform_type'],
+                                    'modular'           => 14,//实体仓调拨
+                                    'change_type'       => 23,//实体仓调拨出库
+                                    'sku'               => $sv['sku'],
+                                    'order_number'      => $id,
+                                    'source'            => 2,
+                                    'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                    'fictitious_change' => -$stockNum,
+                                    'create_person'     => $this->auth->nickname,
+                                    'create_time'       => time(),
+                                    'number_type'       => 7,//实体仓调拨单
+                                ]);
+                            } else {
+                                $num = round($sv['real_num'] * abs($val['stock']) / $numNum);
+                                $stockNum -= $num;
+                                $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
+                                //插入日志表
+                                (new StockLog())->setData([
+                                    'type'              => 2,
+                                    'site'              => $val['platform_type'],
+                                    'modular'           => 14,//实体仓调拨
+                                    'change_type'       => 23,//实体仓调拨出库
+                                    'sku'               => $sv['sku'],
+                                    'order_number'      => $id,
+                                    'source'            => 2,
+                                    'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                    'fictitious_change' => -$num,
+                                    'create_person'     => $this->auth->nickname,
+                                    'create_time'       => time(),
+                                    'number_type'       => 7,//实体仓调拨单
+                                ]);
+                            }
+                        }
+                    }
+                }
+
+                //修改库存结果为真
+                if ($stock === false) {
+                    throw new Exception('同步库存失败,请检查SKU=>' . $sv['sku']);
+                }
+            }
+            /****************库存逻辑结束**********************/
+            //更新仓库调拨单状态为待物流揽收
             $res = $this->_stock_transfer_order->where('id', $id)->update(['status' => $status]);
+            //条形码全部改为出库状态
             $res = $this->_product_bar_code_item->where('code', 'in', $allCodes)->update(['library_status' => 2]);
             $this->_product_bar_code_item->commit();
             $this->_stock_transfer_order->commit();
+            $this->_item->commit();
+            $this->_item_platform_sku->commit();
         } catch (ValidateException $e) {
             $this->_product_bar_code_item->rollback();
             $this->_stock_transfer_order->rollback();
+            $this->_item->rollback();
+            $this->_item_platform_sku->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (PDOException $e) {
             $this->_product_bar_code_item->rollback();
             $this->_stock_transfer_order->rollback();
+            $this->_item->rollback();
+            $this->_item_platform_sku->rollback();
             $this->error($e->getMessage(), [], 444);
         } catch (Exception $e) {
             $this->_product_bar_code_item->rollback();
             $this->_stock_transfer_order->rollback();
+            $this->_item->rollback();
+            $this->_item_platform_sku->rollback();
             $this->error($e->getMessage(), [], 444);
         }
         if ($res !== false) {
@@ -4054,14 +4208,14 @@ class ScmWarehouse extends Scm
         if (empty($transferOrderItemDetail)) {
             $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
         }
-        if (empty($transferOrderItemCodeDetail)) {
-            $this->error(__('当前库区库位下没有此sku可编辑的条码'), '', 524);
-        }
         if (empty($areaId)) {
             $this->error(__('库区id为空，请检查！！'), '', 524);
         }
         if (empty($locationId)) {
             $this->error(__('库位id为空，请检查！！'), '', 524);
+        }
+        if (empty($transferOrderItemCodeDetail)) {
+            $this->error(__('当前库区库位下没有此sku可编辑的条码'), '', 524);
         }
         $codeAgg = $this->request->request("sku_agg");
         $codeAgg = html_entity_decode($codeAgg);
