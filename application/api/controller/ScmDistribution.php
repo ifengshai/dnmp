@@ -846,7 +846,7 @@ class ScmDistribution extends Scm
                     'order_number'              => $item_order_number,
                     'distribution_stock_before' => $item_before['distribution_occupy_stock'],
                     'distribution_stock_change' => 1,
-                    'create_person'             => $this->auth->nickname,
+                    'create_person'             => $this->auth->nickname ?: '',
                     'create_time'               => time(),
                 ]);
 
