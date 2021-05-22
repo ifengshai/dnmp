@@ -107,15 +107,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'location_code', title: __('样品间库位号'),operate: false},
                         {field: 'platform', title: __('站点'),operate: false},
                         {field: 'site', title: __('站点'), visible: false,
-                            addclass:'plat_type',
+                            addclass:'plat_type selectpicker',
+                            data: 'multiple',
+                            operate: 'IN',
                             searchList: {
-                            1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',
-                            8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',
-                            12: 'voogmechic',13:'zeelool_cn',14:'alibaba',15:'zeelool_fr'
+                                1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',
+                                8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',
+                                12: 'voogmechic',13:'zeelool_cn',14:'alibaba',15:'zeelool_fr'
                             },
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'operate_time', title: __('操作时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime,operate: false},
+                        {field: 'addtime', title: __('操作时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime,sortable:true},
                         {field: 'create_time', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange',sortable:true, formatter: Table.api.formatter.datetime},
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
@@ -358,6 +360,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
+
+
                             ],
                              // formatter: Table.api.formatter.operate
 

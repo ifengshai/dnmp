@@ -170,7 +170,6 @@ class EsService
         }
 
     }
-
     /**
      * es查询
      *
@@ -190,7 +189,6 @@ class EsService
         } catch (\Exception $e) {
             Log::error('es:' . $e->getMessage());
         }
-
     }
 
     /**

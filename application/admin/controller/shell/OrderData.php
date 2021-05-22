@@ -174,11 +174,34 @@ class OrderData extends Backend
                                 case Env::get('site_table.voogueme_acc'):
                                     $site = Site::VOOGUEME_ACC;
                                     break;
+                                case Env::get('site_table.zeelool_fr'):
+                                    $site = 15;
                             }
                             //主表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
                                 $order_params = [];
                                 foreach ($payload['data'] as $k => $v) {
+
+
+                                    $order_ids = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
+                                    $order_ids2 = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->value('id');
+                                    if ($order_ids) {
+                                        $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+                                        $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
+
+                                        //删除子订单表
+                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
+
+                                    }
+
+                                    if ($order_ids2) {
+                                        $this->orderprocess->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
+                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
+                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
+                                    }
+
                                     $params = [];
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
@@ -1424,6 +1447,7 @@ class OrderData extends Backend
         $list = $this->is_prescription_abnormal($params);
         $arr = array_merge($arr, $list);
 
+        $arr['order_prescription_type'] = 0;
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
@@ -1540,7 +1564,7 @@ class OrderData extends Backend
                 }
 
                 $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
-                $item_params[$key]['order_id'] = $res->id;
+                $item_params[$key]['order_id'] = $res->id ?: 0;
             }
             //更新数据
             if ($item_params) {
@@ -1572,7 +1596,7 @@ class OrderData extends Backend
         foreach ($list as $k => $v) {
             $order_id = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->value('id');
             $params[$k]['id'] = $v['id'];
-            $params[$k]['order_id'] = $order_id;
+            $params[$k]['order_id'] = $order_id ?: 0;
             echo $v['id'] . "\n";
         }
         //更新数据
@@ -1617,7 +1641,7 @@ class OrderData extends Backend
         $where['b.wave_order_id'] = 0;
         $where['b.is_prescription_abnormal'] = 0;
         $where['a.status'] = ['in', ['processing']];
-        $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,a.updated_at,entity_id,a.site,a.is_custom_lens')
+        $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,a.updated_at,entity_id,a.site,a.is_custom_lens,a.stock_id')
             ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
             ->order('id desc')
             ->select();

@@ -319,9 +319,9 @@ class RepurchaseAsynData extends Command
                 'old_usernum_sequential'=>$oldSequential,
                 'new_usernum_sequential'=>$newSequential,
             );
-            if($isExist){
+            if ($isExist) {
                 Db::name('datacenter_supply_month_web')
-                    ->where('id',$isExist)
+                    ->where('id', $isExist)
                     ->update($arr);
                 echo '站点：'.$site.' '.$v." update is ok"."\n";
                 usleep(10000);
@@ -330,7 +330,7 @@ class RepurchaseAsynData extends Command
                 $arr['site'] = $site;
                 Db::name('datacenter_supply_month_web')
                     ->insert($arr);
-                echo '站点：' . $site . ' ' . $v . " is ok" . "\n";
+                echo '站点：'.$site.' '.$v." is ok"."\n";
                 usleep(10000);
             }
         }
@@ -338,7 +338,9 @@ class RepurchaseAsynData extends Command
 
     /**
      * 更新用户新老数据
+     *
      * @param $site
+     *
      * @author mjj
      * @date   2021/4/1 11:22:13
      */
@@ -360,14 +362,14 @@ class RepurchaseAsynData extends Command
             $lastMonthNewUser = $lastData['usernum'] - $lastData['old_usernum'];
             $newSequential = $lastMonthNewUser ? round(($newUserCount / $lastMonthNewUser - 1) * 100, 2) : 0;
             //判断是否有当月数据
-            $arr = array(
+            $arr = [
                 'old_usernum_sequential' => $oldSequential,
                 'new_usernum_sequential' => $newSequential,
-            );
+            ];
             Db::name('datacenter_supply_month_web')
                 ->where('id', $v['id'])
                 ->update($arr);
-            echo $v['id'] . '站点：' . $v['site'] . ' ' . $v['day_date'] . " update is ok" . "\n";
+            echo $v['id'].'站点：'.$v['site'].' '.$v['day_date']." update is ok"."\n";
             usleep(10000);
         }
     }

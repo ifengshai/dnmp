@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\operatedatacenter\dataview;
 
+use app\admin\controller\elasticsearch\async\AsyncOrder;
 use app\admin\model\platformManage\MagentoPlatform;
 use app\common\controller\Backend;
 use think\Cache;
