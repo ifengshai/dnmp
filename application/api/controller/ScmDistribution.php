@@ -1025,7 +1025,7 @@ class ScmDistribution extends Scm
         //查询条形码库区库位
         $barcodedata = $this->_product_bar_code_item->where(['code' => $barcode])->find();
         $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'b.stock_id' => $order_item_info['stock_id'], 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3, 'library_name' => $barcodedata->location_code])
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.stock_id' => $order_item_info['stock_id'], 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3, 'library_name' => $barcodedata->location_code])
             ->count();
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法配货'), [], 403);
