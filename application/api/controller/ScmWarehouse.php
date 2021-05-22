@@ -3915,7 +3915,7 @@ class ScmWarehouse extends Scm
         }
         $data['sku'] = $transferOrderItem['sku'];
         $data['item_list'] = array_values($arr);
-        $data['all_list'] = $transferOrderItemCode;
+//        $data['all_list'] = $transferOrderItemCode;
         $this->success('', $data, 200);
     }
 
