@@ -9,9 +9,6 @@ class StockSku extends Model
 {
 
 
-
-
-
     // 表名
     protected $name = 'store_sku';
 
@@ -31,6 +28,7 @@ class StockSku extends Model
     {
         return $this->belongsTo('app\admin\model\warehouse\StockHouse', 'store_id', 'id', [], 'LEFT')->setEagerlyType(0);
     }
+
     public function storehouse1()
     {
         return $this->belongsTo('app\admin\model\warehouse\StockHouse', 'store_id', 'id', [], 'RIGHT')->setEagerlyType(0);
@@ -48,15 +46,22 @@ class StockSku extends Model
      * @Description
      * @author wpl
      * @since 2021/03/03 13:52:32 
-     * @param [type] $store_id 库位id
-     * @param [type] $sku s
+     *
+     * @param     [type] $store_id 库位id
+     * @param     [type] $stockId 仓库id
+     *
      * @return void
      */
-    public function getRowsData($store_id)
+    public function getRowsData($store_id, $stockId = null)
     {
-        $list = $this->field('id,sku')->where(['store_id' => ['in', $store_id], 'is_del' => 1])->select();
+        if ($stockId) {
+            $where['stock_id'] = $stockId;
+        }
+        $list = $this->field('id,sku')->where($where)->where(['store_id' => ['in', $store_id], 'is_del' => 1])->select();
+
         return collection($list)->toArray();
     }
+
     /**
      * 所属分仓
      * @return \think\model\relation\BelongsTo
@@ -65,6 +70,6 @@ class StockSku extends Model
      */
     public function warehouseStock()
     {
-        return $this->belongsTo(WarehouseStock::class,'stock_id','id');
+        return $this->belongsTo(WarehouseStock::class, 'stock_id', 'id');
     }
 }
