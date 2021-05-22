@@ -164,7 +164,7 @@ class ScmDistribution extends Scm
         empty($type) && $this->error(__('异常类型不能为空'), [], 403);
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
-            ->field('id,abnormal_house_id')
+            ->field('id,abnormal_house_id,stock_id')
             ->where('item_order_number', $item_order_number)
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
@@ -244,7 +244,7 @@ class ScmDistribution extends Scm
         empty($type) && $this->error(__('异常类型不能为空'), [], 403);
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
-            ->field('id,abnormal_house_id')
+            ->field('id,abnormal_house_id,stock_id')
             ->where('item_order_number', $item_order_number)
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
