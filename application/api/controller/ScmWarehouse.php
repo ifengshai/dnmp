@@ -3001,6 +3001,18 @@ class ScmWarehouse extends Scm
     }
 
     /**
+     * 获取所有仓库
+     * Interface get_all_stock
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/21 14:28:13
+     */
+    public function get_all_stock()
+    {
+        $allStock = Db::name('warehouse_stock')->field('name,id')->select();
+        $this->success('获取成功', $allStock, 200);
+    }
+    /**
      * 获取库区
      *
      * @Description
@@ -3880,16 +3892,18 @@ class ScmWarehouse extends Scm
         foreach ($transferOrderItemCode as $k => $v) {
             if (!empty($arr[$v['location_id']])) {
                 $arr[$v['location_id']]['num'] += 1;
+                array_push($arr[$v['location_id']]['code_agg'],$v['code']);
             } else {
                 $arr[$v['location_id']]['area_id'] = $v['area_id'];
                 $arr[$v['location_id']]['location_id'] = $v['location_id'];
                 $arr[$v['location_id']]['area'] = Db::name('warehouse_area')->where('id', $v['area_id'])->value('coding');
                 $arr[$v['location_id']]['location'] = Db::name('store_house')->where('id', $v['location_id'])->value('coding');
                 $arr[$v['location_id']]['num'] += 1;
+                $arr[$v['location_id']]['code_agg'] = [$v['code']];
             }
         }
         $data['sku'] = $transferOrderItem['sku'];
-        $data['item_list'] = $arr;
+        $data['item_list'] = array_values($arr);
         $data['all_list'] = $transferOrderItemCode;
         $this->success('', $data, 200);
     }
