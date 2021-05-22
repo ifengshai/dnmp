@@ -3817,6 +3817,10 @@ class ScmWarehouse extends Scm
         }
         $transferOrder = $this->_stock_transfer_order->where('id', $id)->find();
         $transfer_order_item = $this->_stock_transfer_order_item->where('transfer_order_id', $id)->select();
+        foreach ($transfer_order_item as $k=>$v){
+            $transfer_order_item[$k]['transfer_order_item_id'] = $v['id'];
+            unset($transfer_order_item[$k]['id']);
+        }
         $allStock = Db::name('warehouse_stock')->column('name', 'id');
         $data['transfer_order_number'] = $transferOrder['transfer_order_number'];
         $data['out_stock_id'] = $transferOrder['out_stock_id'];
@@ -3824,7 +3828,7 @@ class ScmWarehouse extends Scm
         $data['in_stock_id'] = $transferOrder['in_stock_id'];
         $data['in_stock'] = $allStock[$transferOrder['in_stock_id']];
         $data['response_person'] = $transferOrder['response_person'];
-        $data['item_list'] = collection($transfer_order_item)->toArray();
+        $data['item_list'] = $transfer_order_item;
         $this->success('', $data, 200);
     }
 
