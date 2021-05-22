@@ -64,8 +64,8 @@ class PurchasePay extends Backend
                 $map['id'] = ['in', $finance_purchase_id];
             } else {
                 //审核人可以看所有的 其他人只能看自己创建的
-                $audit = ['1','50','56','232','154'];
-                if (!in_array($userid,$audit)){
+                $audit = ['1', '50', '56', '232', '154'];
+                if (!in_array($userid, $audit)) {
                     //创建人
                     $map['create_person'] = session('admin.nickname');
                 }
@@ -100,7 +100,7 @@ class PurchasePay extends Backend
 
             unset($filter['label']);
             $this->request->get(['filter' => json_encode($filter)]);
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($map)
@@ -114,18 +114,18 @@ class PurchasePay extends Backend
                 ->select();
             $list = collection($list)->toArray();
             $admin = new \app\admin\model\Admin();
-            $userlist = $admin->where(['status' => 'normal'])->column('nickname','id');
+            $userlist = $admin->where(['status' => 'normal'])->column('nickname', 'id');
             foreach ($list as $k => $v) {
                 $list[$k]['supplier_name'] = $this->supplier->where('id', $v['supplier_id'])->value('supplier_name');
                 //查询待审核人
-                $userid = Db::name('finance_purchase_workflow_records')->where(['finance_purchase_id'=> $v['id'], 'audit_status' => 0])->value('assignee_id');
+                $userid = Db::name('finance_purchase_workflow_records')->where(['finance_purchase_id' => $v['id'], 'audit_status' => 0])->value('assignee_id');
                 $list[$k]['check_user_nickname'] = $userlist[$userid];
-                if ($v['pay_type'] == 3){
+                if ($v['pay_type'] == 3) {
                     $list[$k]['1688_number'] = '';
                     $list[$k]['purchase_num'] = '';
                     $list[$k]['purchase_name'] = '';
                     $list[$k]['purchase_number'] = '';
-                }else{
+                } else {
                     $purchaseData = Db::name('purchase_order')->where(['id' => $v['purchase_id']])->find();
                     $list[$k]['1688_number'] = $purchaseData['1688_number'];
                     $list[$k]['purchase_num'] = Db::name('purchase_order_item')->where(['purchase_id' => $v['purchase_id']])->value('purchase_num');
@@ -133,12 +133,14 @@ class PurchasePay extends Backend
                     $list[$k]['purchase_number'] = $purchaseData['purchase_number'];
                 }
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
         $this->assign('label', 0);
         $label_list = ['全部', '我的待审批'];
         $this->assign('label_list', $label_list);
+
         return $this->view->fetch();
     }
 
@@ -274,6 +276,7 @@ class PurchasePay extends Backend
             $order_number = 'PR' . date('YmdHis') . rand(100, 999) . rand(100, 999);
             $this->assign('order_number', $order_number);
             $this->assignconfig('newdatetime', date('Y-m-d H:i:s'));
+
             return $this->view->fetch();
         }
         //结算单页面过来的创建付款申请单
@@ -320,6 +323,7 @@ class PurchasePay extends Backend
             $this->assign('order_number', $order_number);
             $this->assign('id', $ids);
             $this->assignconfig('newdatetime', date('Y-m-d H:i:s'));
+
             return $this->view->fetch('add_statement');
         }
     }
@@ -404,6 +408,7 @@ class PurchasePay extends Backend
         //采购单id
         $ids = input('ids');
         $this->assign('ids', $ids);
+
         return $this->view->fetch();
     }
 
@@ -429,7 +434,7 @@ class PurchasePay extends Backend
             }
             foreach ($list as $k => $v) {
                 //判断采购单状态是否为已审核、待发货、待收货
-                if (!in_array($v['purchase_status'], [2, 5, 6])) {
+                if (!in_array($v['purchase_status'], [2, 5, 6, 7, 9, 10])) {
                     $this->error('存在非已审核状态采购单,单号：' . $v['purchase_number']);
                 }
 
@@ -553,6 +558,7 @@ class PurchasePay extends Backend
             $this->assign('id', $ids);
             $this->assign('row', $row);
             $this->assign('order_number', $row['order_number']);
+
             return $this->view->fetch('edit_statement');
         } else {
             //采购单对应的付款申请单
@@ -586,6 +592,7 @@ class PurchasePay extends Backend
             $this->assign('supplier', $data);
             $this->assign('row', $row);
             $this->view->assign("row", $row);
+
             return $this->view->fetch();
         }
     }
@@ -641,6 +648,7 @@ class PurchasePay extends Backend
             $this->assign('supplier', $data);
             $this->assign('order_number', $row['order_number']);
             $this->assign('row', $row);
+
             return $this->view->fetch('detail_statement');
         } else {
             $purchase_order = $this->purchase_order->where('id', $row['purchase_id'])->find();
@@ -673,6 +681,7 @@ class PurchasePay extends Backend
             $this->assign('supplier', $data);
             $this->assign('row', $row);
             $this->view->assign("row", $row);
+
             return $this->view->fetch();
         }
     }
@@ -683,7 +692,9 @@ class PurchasePay extends Backend
      * @Description
      * @author wpl
      * @since 2021/03/06 18:39:57 
-     * @param [type] $ids
+     *
+     * @param     [type] $ids
+     *
      * @return void
      */
     public function check_detail($ids = null)
@@ -700,7 +711,7 @@ class PurchasePay extends Backend
             if ($ids) {
                 $map['finance_purchase_id'] = $ids;
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($map)
@@ -719,10 +730,12 @@ class PurchasePay extends Backend
                 $list[$k]['assignee_id'] = $adminList[$v['assignee_id']];
                 $list[$k]['handle_date'] = $v['handle_date'] ? date('Y-m-d H:i:s', $v['handle_date']) : '';
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
         $this->assignconfig('ids', $ids);
+
         return $this->view->fetch();
     }
 
@@ -901,6 +914,7 @@ class PurchasePay extends Backend
         }
         $ids = input('ids');
         $this->assign('ids', $ids);
+
         return $this->view->fetch('check');
     }
 
@@ -909,6 +923,7 @@ class PurchasePay extends Backend
     {
         $item_category = new ItemCategory();
         $sku_category = $item_category->where('id', $category_id)->find();
+
         return $sku_category['name'];
     }
 }
