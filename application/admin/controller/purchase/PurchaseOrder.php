@@ -45,7 +45,7 @@ class PurchaseOrder extends Backend
      * 无需登录的方法,同时也就不需要鉴权了
      * @var array
      */
-    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback','export_sku_many_type'];
+    protected $noNeedLogin = ['getAlibabaPurchaseOrder', 'callback', 'export_sku_many_type'];
 
     /**
      * 无需鉴权的方法,但需要登录
@@ -85,7 +85,7 @@ class PurchaseOrder extends Backend
             $map['purchase_order.is_in_stock'] = 0;
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['sku']) {
-                $smap['sku'] = ['like', '%'.$filter['sku'].'%'];
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
                 $ids = $this->purchase_order_item->where($smap)->column('purchase_id');
                 $map['purchase_order.id'] = ['in', $ids];
                 unset($filter['sku']);
@@ -119,9 +119,13 @@ class PurchaseOrder extends Backend
                     //不能创建
                     $list[$k]['can_create_pay'] = 0;
                 } else {
-                    //能创建
-                    $list[$k]['can_create_pay'] = 1;
+                    if (in_array($v['purchase_status'], [2, 5, 6, 7, 9, 10])) //能创建
+                    {
+                        $list[$k]['can_create_pay'] = 1;
+                    }
                 }
+
+
             }
             $result = ["total" => $total, "rows" => $list];
 
@@ -182,15 +186,15 @@ class PurchaseOrder extends Backend
                     //是否采用模型验证
                     if ($this->modelValidate) {
                         $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name.'.add' : $name) : $this->modelValidate;
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
 
                     $sku = $this->request->post("sku/a");
-                    foreach (array_filter($sku) as $k => $v){
+                    foreach (array_filter($sku) as $k => $v) {
                         $item = new \app\admin\model\itemmanage\Item();
-                        $itemDetail = $item->where('sku',$v)->find();
-                        if (!$itemDetail){
+                        $itemDetail = $item->where('sku', $v)->find();
+                        if (!$itemDetail) {
                             $this->error('提报的商品不存在');
                         }
                     }
@@ -211,7 +215,7 @@ class PurchaseOrder extends Backend
                         $arr = [];
                         foreach ($arrivalNum as $k => $v) {
                             foreach ($v as $key => $val) {
-                                if (empty($val) || !is_numeric($val)){
+                                if (empty($val) || !is_numeric($val)) {
                                     $this->error('分批到货数量不能为空且不能为非数字');
                                 }
                                 $arr[$key] += $val;
@@ -345,7 +349,7 @@ class PurchaseOrder extends Backend
         $this->assign('contract_data', $contractData);
 
         //生成采购编号
-        $purchaseNumber= 'PO'.date('YmdHis').rand(100, 999).rand(100, 999);
+        $purchaseNumber = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('purchase_number', $purchaseNumber);
         $this->assignconfig('newdatetime', date('Y-m-d H:i:s'));
 
@@ -378,7 +382,7 @@ class PurchaseOrder extends Backend
             if ($row['is_new_product'] == 0) {
                 foreach ($list as $v) {
                     if (!in_array($v['sku'], $skus)) {
-                        $this->error('此sku:'.$v['sku'].'不存在！！');
+                        $this->error('此sku:' . $v['sku'] . '不存在！！');
                     }
                 }
             }
@@ -468,15 +472,15 @@ class PurchaseOrder extends Backend
                     //是否采用模型验证
                     if ($this->modelValidate) {
                         $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name.'.edit' : $name) : $this->modelValidate;
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
 
                     $sku = $this->request->post("sku/a");
-                    foreach (array_filter($sku) as $k => $v){
+                    foreach (array_filter($sku) as $k => $v) {
                         $item = new \app\admin\model\itemmanage\Item();
-                        $itemDetail = $item->where('sku',$v)->find();
-                        if (!$itemDetail){
+                        $itemDetail = $item->where('sku', $v)->find();
+                        if (!$itemDetail) {
                             $this->error('提报的商品不存在');
                         }
                     }
@@ -736,7 +740,7 @@ class PurchaseOrder extends Backend
                     //是否采用模型验证
                     if ($this->modelValidate) {
                         $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name.'.edit' : $name) : $this->modelValidate;
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
                     $params['is_add_logistics'] = 1;
@@ -1052,7 +1056,7 @@ class PurchaseOrder extends Backend
                     //是否采用模型验证
                     if ($this->modelValidate) {
                         $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name.'.edit' : $name) : $this->modelValidate;
+                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                         $row->validateFailException(true)->validate($validate);
                     }
                     $result = $row->allowField(true)->save($params);
@@ -1326,7 +1330,7 @@ class PurchaseOrder extends Backend
             $this->error(__('No Results were found'));
         }
 
-        $cacheIndex = 'logisticsDetail_purchase_number'.$row['purchase_number'];
+        $cacheIndex = 'logisticsDetail_purchase_number' . $row['purchase_number'];
         $data = Cache::get($cacheIndex);
         if (!$data) {
             foreach ($list as $k => $v) {
@@ -1517,8 +1521,8 @@ class PurchaseOrder extends Backend
          * @todo 后面添加采集时间段
          */
         $params = [
-            'createStartTime' => date('YmdHis', strtotime("-10 day")).'000+0800',
-            'createEndTime'   => date('YmdHis').'000+0800',
+            'createStartTime' => date('YmdHis', strtotime("-10 day")) . '000+0800',
+            'createEndTime'   => date('YmdHis') . '000+0800',
         ];
 
         set_time_limit(0);
@@ -1678,7 +1682,7 @@ class PurchaseOrder extends Backend
      * 快递100回调地址
      * @Description
      * @return Json
-     * @since: 2021/4/1 9:54
+     * @since : 2021/4/1 9:54
      * @author: wpl
      */
     public function callback(): Json
@@ -1828,7 +1832,7 @@ class PurchaseOrder extends Backend
             //自定义sku搜索
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['sku']) {
-                $smap['sku'] = ['like', '%'.$filter['sku'].'%'];
+                $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
                 $ids = $this->check_item->where($smap)->column('check_id');
                 $map['check.id'] = ['in', $ids];
                 unset($filter['sku']);
@@ -1876,7 +1880,7 @@ class PurchaseOrder extends Backend
         if (!$file) {
             $this->error(__('Parameter %s can not be empty', 'file'));
         }
-        $filePath = ROOT_PATH.DS.'public'.DS.$file;
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
         if (!is_file($filePath)) {
             $this->error(__('No results were found'));
         }
@@ -1897,9 +1901,9 @@ class PurchaseOrder extends Backend
                     $line = mb_convert_encoding($line, 'utf-8', $encoding);
                 }
                 if ($n == 0 || preg_match('/^".*"$/', $line)) {
-                    fwrite($fp, $line."\n");
+                    fwrite($fp, $line . "\n");
                 } else {
-                    fwrite($fp, '"'.str_replace(['"', ','], ['""', '","'], $line)."\"\n");
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
                 }
                 $n++;
             }
@@ -1967,10 +1971,10 @@ class PurchaseOrder extends Backend
 
             $row = $this->model->where(['1688_number' => $v[0]])->find();
             if (!$row) {
-                $this->error('导入失败！！,1688单号'.$v[0].'未查询到记录');
+                $this->error('导入失败！！,1688单号' . $v[0] . '未查询到记录');
             }
             if ($row->purchase_status != 2) {
-                $this->error('导入失败！！,1688单号'.$v[0].'订单状态必须是已审核');
+                $this->error('导入失败！！,1688单号' . $v[0] . '订单状态必须是已审核');
             }
             //拆分物流单号和物流公司
             $logistics_data = explode(':', $v[1]);
@@ -2011,7 +2015,7 @@ class PurchaseOrder extends Backend
         //自定义sku搜索
         $filter = json_decode($this->request->get('filter'), true);
         if ($filter['sku']) {
-            $smap['sku'] = ['like', '%'.$filter['sku'].'%'];
+            $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
             $ids = $this->check_item->where($smap)->column('check_id');
             $map['check.id'] = ['in', $ids];
             unset($filter['sku']);
@@ -2019,13 +2023,13 @@ class PurchaseOrder extends Backend
         }
         if ($filter['createtime']) {
             $arr = explode(' ', $filter['createtime']);
-            $map['check.createtime'] = ['between', [$arr[0].' '.$arr[1], $arr[3].' '.$arr[4]]];
+            $map['check.createtime'] = ['between', [$arr[0] . ' ' . $arr[1], $arr[3] . ' ' . $arr[4]]];
             unset($filter['createtime']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
         //添加供货商名称搜索
         if ($filter['supplier.supplier_name']) {
-            $map['s.supplier_name'] = ['like', '%'.$filter['supplier.supplier_name'].'%'];
+            $map['s.supplier_name'] = ['like', '%' . $filter['supplier.supplier_name'] . '%'];
             unset($filter['supplier.supplier_name']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
@@ -2085,23 +2089,23 @@ class PurchaseOrder extends Backend
 
         foreach ($list as $key => $value) {
 
-            $spreadsheet->getActiveSheet()->setCellValue("A".($key * 1 + 2), $value['check_order_number']);
-            $spreadsheet->getActiveSheet()->setCellValue("B".($key * 1 + 2), $value['type'] == 1 ? '采购质检' : '退货质检');
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("C".($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $spreadsheet->getActiveSheet()->setCellValue("D".($key * 1 + 2), $value['person']);
-            $spreadsheet->getActiveSheet()->setCellValue("E".($key * 1 + 2), '');
-            $spreadsheet->getActiveSheet()->setCellValue("F".($key * 1 + 2), $supplier_data[$value['supplier_id']]);
-            $spreadsheet->getActiveSheet()->setCellValue("G".($key * 1 + 2), $value['purchase_remark']);
-            $spreadsheet->getActiveSheet()->setCellValue("H".($key * 1 + 2), $value['remark']);
-            $spreadsheet->getActiveSheet()->setCellValue("I".($key * 1 + 2), $value['sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("J".($key * 1 + 2), $value['supplier_sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("K".($key * 1 + 2), $value['purchase_price']);
-            $spreadsheet->getActiveSheet()->setCellValue("L".($key * 1 + 2), $value['purchase_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("M".($key * 1 + 2), $value['arrivals_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("N".($key * 1 + 2), $value['quantity_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("O".($key * 1 + 2), $value['unqualified_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("P".($key * 1 + 2), $value['create_person']);
-            $spreadsheet->getActiveSheet()->setCellValue("Q".($key * 1 + 2), $value['createtime']);
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['check_order_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['type'] == 1 ? '采购质检' : '退货质检');
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("C" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['person']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), '');
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $supplier_data[$value['supplier_id']]);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchase_remark']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['remark']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['supplier_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['purchase_price']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['purchase_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['arrivals_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['quantity_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['unqualified_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['createtime']);
         }
 
         //设置宽度
@@ -2137,16 +2141,16 @@ class PurchaseOrder extends Backend
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
 
-        $setBorder = 'A1:'.$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow();
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:Q'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
 
         $spreadsheet->setActiveSheetIndex(0);
         // return exportExcel($spreadsheet, 'xls', '登陆日志');
         $format = 'xlsx';
-        $savename = '质检单数据'.date("YmdHis", time());;
+        $savename = '质检单数据' . date("YmdHis", time());;
         // dump($spreadsheet);
 
         // if (!$spreadsheet) return false;
@@ -2161,7 +2165,7 @@ class PurchaseOrder extends Backend
         }
 
         //输出名称
-        header('Content-Disposition: attachment;filename="'.$savename.'.'.$format.'"');
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
@@ -2175,7 +2179,7 @@ class PurchaseOrder extends Backend
      *
      * @Description
      * @return void
-     * @since 2020/02/28 14:45:39
+     * @since  2020/02/28 14:45:39
      * @author wpl
      */
     public function batch_export_xls()
@@ -2192,7 +2196,7 @@ class PurchaseOrder extends Backend
         //自定义sku搜索
         $filter = json_decode($this->request->get('filter'), true);
         if ($filter['sku']) {
-            $smap['sku'] = ['like', '%'.$filter['sku'].'%'];
+            $smap['sku'] = ['like', '%' . $filter['sku'] . '%'];
             $ids = $this->purchase_order_item->where($smap)->column('purchase_id');
             $map['purchase_order.id'] = ['in', $ids];
             unset($filter['sku']);
@@ -2201,7 +2205,7 @@ class PurchaseOrder extends Backend
 
         //添加供货商名称搜索
         if ($filter['supplier.supplier_name']) {
-            $map['c.supplier_name'] = ['like', '%'.$filter['supplier.supplier_name'].'%'];
+            $map['c.supplier_name'] = ['like', '%' . $filter['supplier.supplier_name'] . '%'];
             unset($filter['supplier.supplier_name']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
@@ -2258,20 +2262,20 @@ class PurchaseOrder extends Backend
         foreach ($list as $key => $value) {
             $logistics_info = [];
             $readly_logistics_info = [];
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("A".($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $spreadsheet->getActiveSheet()->setCellValue("B".($key * 1 + 2), $value['purchase_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("C".($key * 1 + 2), $value['supplier_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("D".($key * 1 + 2), $value['sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("E".($key * 1 + 2), $value['supplier_sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("F".($key * 1 + 2), $value['purchase_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("G".($key * 1 + 2), $value['purchase_price']);
-            $spreadsheet->getActiveSheet()->setCellValue("H".($key * 1 + 2), $value['purchase_remark']);
-            $spreadsheet->getActiveSheet()->setCellValue("I".($key * 1 + 2), $value['purchase_freight']);
-            $spreadsheet->getActiveSheet()->setCellValue("J".($key * 1 + 2), $value['create_person']);
-            $spreadsheet->getActiveSheet()->setCellValue("K".($key * 1 + 2), $value['createtime']);
-            $spreadsheet->getActiveSheet()->setCellValue("L".($key * 1 + 2), $info[$value['sku']] ?: 7);
-            $spreadsheet->getActiveSheet()->setCellValue("M".($key * 1 + 2), $value['arrival_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("N".($key * 1 + 2), $value['receiving_time']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['purchase_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['supplier_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['supplier_sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['purchase_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['purchase_price']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['purchase_remark']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['purchase_freight']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['createtime']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $info[$value['sku']] ?: 7);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['arrival_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['receiving_time']);
             if ($value['is_new_product'] == 1) {
                 $is_new_product = '是';
             } else {
@@ -2287,7 +2291,7 @@ class PurchaseOrder extends Backend
             } else {
                 $is_sample = '否';
             }
-            $payTypeName='未知';
+            $payTypeName = '未知';
             switch ($value['pay_type']) {
                 case 1:
                     $payTypeName = '预付款';
@@ -2315,18 +2319,18 @@ class PurchaseOrder extends Backend
 
             //查询揽收时间
             $collect_time = $logistic->where(['purchase_id' => $value['id']])->value('collect_time');
-            $spreadsheet->getActiveSheet()->setCellValue("O".($key * 1 + 2), $is_new_product);
-            $spreadsheet->getActiveSheet()->setCellValue("P".($key * 1 + 2), $is_sample);
-            $spreadsheet->getActiveSheet()->setCellValue("Q".($key * 1 + 2), $value['purchase_total']);
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("R".($key * 1 + 2), $value['1688_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $spreadsheet->getActiveSheet()->setCellValue("S".($key * 1 + 2), $value['type']);
-            $spreadsheet->getActiveSheet()->setCellValue("T".($key * 1 + 2), $collect_time);
-            $spreadsheet->getActiveSheet()->setCellValue("U".($key * 1 + 2), $value['effect_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("V".($key * 1 + 2), $factoryTypeName);
-            $spreadsheet->getActiveSheet()->setCellValue("W".($key * 1 + 2), $purchaseTypeName);
-            $spreadsheet->getActiveSheet()->setCellValue("X".($key * 1 + 2), $payTypeName);
-            $replenishAddTime = Db::name('new_product_replenish')->where('id',$value['replenish_id'])->value('create_time');
-            $spreadsheet->getActiveSheet()->setCellValue("Y".($key * 1 + 2), $replenishAddTime);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $is_new_product);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $is_sample);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['purchase_total']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("R" . ($key * 1 + 2), $value['1688_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['type']);
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $collect_time);
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['effect_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 1 + 2), $factoryTypeName);
+            $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 1 + 2), $purchaseTypeName);
+            $spreadsheet->getActiveSheet()->setCellValue("X" . ($key * 1 + 2), $payTypeName);
+            $replenishAddTime = Db::name('new_product_replenish')->where('id', $value['replenish_id'])->value('create_time');
+            $spreadsheet->getActiveSheet()->setCellValue("Y" . ($key * 1 + 2), $replenishAddTime);
         }
 
         //设置宽度
@@ -2369,14 +2373,14 @@ class PurchaseOrder extends Backend
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
 
-        $setBorder = 'A1:'.$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow();
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:X'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:X' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        $savename = '采购单数据'.date("YmdHis", time());;
+        $savename = '采购单数据' . date("YmdHis", time());;
 
         if ($format == 'xls') {
             //输出Excel03版本
@@ -2389,7 +2393,7 @@ class PurchaseOrder extends Backend
         }
 
         //输出名称
-        header('Content-Disposition: attachment;filename="'.$savename.'.'.$format.'"');
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
@@ -2403,7 +2407,7 @@ class PurchaseOrder extends Backend
      *
      * @Description
      * @return void
-     * @since 2020/02/28 14:45:39
+     * @since  2020/02/28 14:45:39
      * @author wpl
      */
     public function batch_export_test()
@@ -2434,12 +2438,12 @@ class PurchaseOrder extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "备注");
 
         foreach ($list as $key => $value) {
-            $spreadsheet->getActiveSheet()->setCellValueExplicit("A".($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
-            $spreadsheet->getActiveSheet()->setCellValue("B".($key * 1 + 2), $value['sku']);
-            $spreadsheet->getActiveSheet()->setCellValue("C".($key * 1 + 2), $value['purchase_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("D".($key * 1 + 2), $value['in_stock_num']);
-            $spreadsheet->getActiveSheet()->setCellValue("E".($key * 1 + 2), $value['check_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("F".($key * 1 + 2), $value['purchase_remark']);
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['purchase_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['purchase_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['in_stock_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['check_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['purchase_remark']);
         }
 
         //设置宽度
@@ -2464,14 +2468,14 @@ class PurchaseOrder extends Backend
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
 
 
-        $setBorder = 'A1:'.$spreadsheet->getActiveSheet()->getHighestColumn().$spreadsheet->getActiveSheet()->getHighestRow();
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:F'.$spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:F' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        $savename = '采购单数据'.date("YmdHis", time());;
+        $savename = '采购单数据' . date("YmdHis", time());;
 
         if ($format == 'xls') {
             //输出Excel03版本
@@ -2484,7 +2488,7 @@ class PurchaseOrder extends Backend
         }
 
         //输出名称
-        header('Content-Disposition: attachment;filename="'.$savename.'.'.$format.'"');
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
         //禁止缓存
         header('Cache-Control: max-age=0');
         $writer = new $class($spreadsheet);
@@ -2523,7 +2527,7 @@ class PurchaseOrder extends Backend
                 }
                 if ($filter['pay_time']) {
                     $time = explode(' ', $filter['pay_time']);
-                    $mapTime['create_time'] = ['between', [$time[0].' '.$time[1], $time[3].' '.$time[4]]];
+                    $mapTime['create_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
                     $measuerWorkIds = Purchase_order_pay::where($mapTime)->column('purchase_id');
                     if (!empty($whereCondition['id'])) {
                         $newWorkIds = array_intersect($workIds, $measuerWorkIds);
@@ -2531,7 +2535,7 @@ class PurchaseOrder extends Backend
                     } else {
                         $whereCondition['purchase_order.id'] = ['in', $measuerWorkIds];
                     }
-                    $whereConditionOr['purchase_order.payment_time'] = ['between', [$time[0].' '.$time[1], $time[3].' '.$time[4]]];
+                    $whereConditionOr['purchase_order.payment_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
                     unset($filter['pay_time']);
                 }
                 $this->request->get(['filter' => json_encode($filter)]);
@@ -2716,7 +2720,7 @@ class PurchaseOrder extends Backend
         $path = "/uploads/";
         $fileName = '导出所有SKU数据';
 
-        Excel::writeCsv($data, $headlist, $path.$fileName);
+        Excel::writeCsv($data, $headlist, $path . $fileName);
     }
 
     //所有的 仓库SKU、最近一次采购单中对应的大货/现货
@@ -2728,7 +2732,7 @@ class PurchaseOrder extends Backend
         foreach ($purchase_order_item as $key => $item) {
             $where['b.sku'] = ['eq', $item];
             $where['a.type'] = 2;
-            $count = Db::name('purchase_order')->alias('a')->join(['fa_purchase_order_item' => 'b'],'a.id=b.purchase_id')->where($where)->count();
+            $count = Db::name('purchase_order')->alias('a')->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')->where($where)->count();
             $data[$key]['id'] = $key;
             if ($count > 0) {
                 $data[$key]['type'] = '大货';
@@ -2738,11 +2742,11 @@ class PurchaseOrder extends Backend
             $data[$key]['sku'] = $item;
         }
         $data = array_values($data);
-        $headlist = ['id', '类型','SKU'];
+        $headlist = ['id', '类型', 'SKU'];
         $path = "/uploads/";
         $fileName = '导出所有SKU对应的大货现货数据';
 
-        Excel::writeCsv($data, $headlist, $path.$fileName);
+        Excel::writeCsv($data, $headlist, $path . $fileName);
     }
 
 
