@@ -1264,6 +1264,7 @@ class Wangpenglei extends Backend
             ->where(['a.sku' => ['in', $skus]])
             ->where(['a.location_code_id' => ['>', 0]])
             ->where("a.item_order_number=''")
+            ->group('sku')
             ->column('count(1) as stock', 'sku');
         foreach ($skus as $v) {
             Db::table('fa_zz_temp1')->where(['sku' => $v])->update(['stock' => $list[$v] ?: 0]);
