@@ -2,9 +2,13 @@
 
 namespace app\api\controller;
 
+use app\admin\model\warehouse\StockTransferInOrder;
+use app\admin\model\warehouse\StockTransferInOrderItem;
 use app\admin\model\warehouse\StockTransferOrder;
 use app\admin\model\warehouse\StockTransferOrderItem;
 use app\admin\model\warehouse\StockTransferOrderItemCode;
+use app\admin\model\warehouse\StockTransferOutOrder;
+use app\admin\model\warehouse\StockTransferOutOrderItem;
 use app\admin\model\warehouse\WarehouseTransferOrder;
 use app\admin\model\warehouse\WarehouseTransferOrderItem;
 use app\admin\model\warehouse\WarehouseTransferOrderItemCode;
@@ -237,6 +241,10 @@ class ScmWarehouse extends Scm
         $this->_stock_transfer_order = new StockTransferOrder();
         $this->_stock_transfer_order_item = new StockTransferOrderItem();
         $this->_stock_transfer_order_item_code = new StockTransferOrderItemCode();
+        $this->_stock_transfer_in_order = new StockTransferInOrder();
+        $this->_stock_transfer_out_order = new StockTransferOutOrder();
+        $this->_stock_transfer_in_order_item = new StockTransferInOrderItem();
+        $this->_stock_transfer_out_order_item = new StockTransferOutOrderItem();
     }
 
     /**
@@ -3880,7 +3888,7 @@ class ScmWarehouse extends Scm
         $this->_item_platform_sku->startTrans();
         try {
             /****************库存逻辑开始**********************/
-            //提交的时候操作
+            //提交的时候操作库存 以及更新条形码状态为出库
             if($status == 3){
                 foreach ($allItemDetail as $sk=>$sv){
                     //同步对应SKU库存 更新商品表商品总库存 总库存
@@ -3895,7 +3903,7 @@ class ScmWarehouse extends Scm
                             'type'                   => 2,
                             'site'                   => 0,
                             'modular'                => 14,//实体仓调拨
-                            'change_type'            => 23,//实体仓调拨出库
+                            'change_type'            => 24,//实体仓调拨出库
                             'sku'                    => $sv['sku'],
                             'order_number'           => $id,//实体仓调拨单id
                             'source'                 => 2,
@@ -3905,7 +3913,7 @@ class ScmWarehouse extends Scm
                             'available_stock_change' => -$sv['real_num'],
                             'create_person'          => $this->auth->nickname,
                             'create_time'            => time(),
-                            'number_type'            => 7,//实体仓调拨单
+                            'number_type'            => 8,//实体仓调拨单
                         ]);
                         //实体仓调拨出库的同时要对虚拟库存进行一定的操作
                         //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
@@ -3935,7 +3943,7 @@ class ScmWarehouse extends Scm
                                         'type'              => 2,
                                         'site'              => $val['platform_type'],
                                         'modular'           => 14,//实体仓调拨
-                                        'change_type'       => 23,//实体仓调拨出库
+                                        'change_type'       => 24,//实体仓调拨出库
                                         'sku'               => $sv['sku'],
                                         'order_number'      => $id,
                                         'source'            => 2,
@@ -3943,7 +3951,7 @@ class ScmWarehouse extends Scm
                                         'fictitious_change' => -$stockNum,
                                         'create_person'     => $this->auth->nickname,
                                         'create_time'       => time(),
-                                        'number_type'       => 7,//实体仓调拨单
+                                        'number_type'       => 8,//实体仓调拨单
                                     ]);
                                 } else {
                                     $num = round($sv['real_num'] * $rateRate);
@@ -3955,7 +3963,7 @@ class ScmWarehouse extends Scm
                                         'type'              => 2,
                                         'site'              => $val['platform_type'],
                                         'modular'           => 14,//实体仓调拨
-                                        'change_type'       => 23,//实体仓调拨出库
+                                        'change_type'       => 24,//实体仓调拨出库
                                         'sku'               => $sv['sku'],
                                         'order_number'      => $id,
                                         'source'            => 2,
@@ -3963,7 +3971,7 @@ class ScmWarehouse extends Scm
                                         'fictitious_change' => -$num,
                                         'create_person'     => $this->auth->nickname,
                                         'create_time'       => time(),
-                                        'number_type'       => 7,//实体仓调拨单
+                                        'number_type'       => 8,//实体仓调拨单
                                     ]);
                                 }
                             }
@@ -3978,7 +3986,7 @@ class ScmWarehouse extends Scm
                                         'type'              => 2,
                                         'site'              => $val['platform_type'],
                                         'modular'           => 14,//实体仓调拨
-                                        'change_type'       => 23,//实体仓调拨出库
+                                        'change_type'       => 24,//实体仓调拨出库
                                         'sku'               => $sv['sku'],
                                         'order_number'      => $id,
                                         'source'            => 2,
@@ -3986,7 +3994,7 @@ class ScmWarehouse extends Scm
                                         'fictitious_change' => -$stockNum,
                                         'create_person'     => $this->auth->nickname,
                                         'create_time'       => time(),
-                                        'number_type'       => 7,//实体仓调拨单
+                                        'number_type'       => 8,//实体仓调拨单
                                     ]);
                                 } else {
                                     $num = round($sv['real_num'] * abs($val['stock']) / $numNum);
@@ -3998,7 +4006,7 @@ class ScmWarehouse extends Scm
                                         'type'              => 2,
                                         'site'              => $val['platform_type'],
                                         'modular'           => 14,//实体仓调拨
-                                        'change_type'       => 23,//实体仓调拨出库
+                                        'change_type'       => 24,//实体仓调拨出库
                                         'sku'               => $sv['sku'],
                                         'order_number'      => $id,
                                         'source'            => 2,
@@ -4006,7 +4014,7 @@ class ScmWarehouse extends Scm
                                         'fictitious_change' => -$num,
                                         'create_person'     => $this->auth->nickname,
                                         'create_time'       => time(),
-                                        'number_type'       => 7,//实体仓调拨单
+                                        'number_type'       => 8,//实体仓调拨单
                                     ]);
                                 }
                             }
@@ -4018,12 +4026,12 @@ class ScmWarehouse extends Scm
                         throw new Exception('同步库存失败,请检查SKU=>' . $sv['sku']);
                     }
                 }
+                //条形码全部改为出库状态
+                $res = $this->_product_bar_code_item->where('code', 'in', $allCodes)->update(['library_status' => 2]);
             }
             /****************库存逻辑结束**********************/
             //更新仓库调拨单状态为待物流揽收
             $res = $this->_stock_transfer_order->where('id', $id)->update(['status' => $status]);
-            //条形码全部改为出库状态
-            $res = $this->_product_bar_code_item->where('code', 'in', $allCodes)->update(['library_status' => 2]);
             $this->_product_bar_code_item->commit();
             $this->_stock_transfer_order->commit();
             $this->_item->commit();
