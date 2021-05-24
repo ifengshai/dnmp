@@ -356,6 +356,35 @@ class WebData extends Backend
     }
 
 
+    public function process_users_data_wesee()
+    {
+        $webUsers = new WebUsers();
+        $entity_id = $webUsers->where(['site' => 5])->max('entity_id');
+        $res = Db::connect('database.db_weseeoptical')->table('users')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
+        $res = collection($res)->toArray();
+        foreach ($res as $k => $v) {
+            $count = $webUsers->where(['site' => 5, 'entity_id' => $v['entity_id']])->count();
+            if ($count > 0) {
+                continue;
+            }
+            $params = [];
+            $params['entity_id'] = $v['entity_id'];
+            $params['email'] = $v['email'] ?: '';
+            $params['site'] = 5;
+            $params['group_id'] = $v['group_id'] ?: 0;
+            $params['store_id'] = $v['store_id'] ?: 0;
+            $params['created_at'] = strtotime($v['created_at']);
+            $params['updated_at'] = strtotime($v['updated_at']);
+            $params['resouce'] = $v['resouce'] ?: 0;
+            $params['is_vip'] = $v['is_vip'];
+            $webUsers->insertGetId($params);
+
+            echo $v['entity_id'] . "\n";
+        }
+        echo 5 . '--ok' . "\n";
+    }
+
+
     public function process_list_viporder()
     {
         $this->process_viporder_data(1);
