@@ -312,25 +312,25 @@ class WebData extends Backend
         $webUsers = new WebUsers();
         if ($site == 1) {
             $entity_id = $webUsers->where(['site' => 1, 'entity_id' => ['<', 1189398]])->max('entity_id');
-            $res = Db::connect('database.db_zeelool')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(10)->select();
+            $res = Db::connect('database.db_zeelool')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
         } elseif ($site == 2) {
             $entity_id = $webUsers->where(['site' => 2, 'entity_id' => ['<', 438280]])->max('entity_id');
-            $res = Db::connect('database.db_voogueme')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(10)->select();
+            $res = Db::connect('database.db_voogueme')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
         } elseif ($site == 3) {
             $entity_id = $webUsers->where(['site' => 3, 'entity_id' => ['<', 75714]])->max('entity_id');
-            $res = Db::connect('database.db_nihao')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $res = Db::connect('database.db_nihao')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
         } elseif ($site == 9) {
             $entity_id = $webUsers->where(['site' => 9, 'entity_id' => ['<', 1092]])->max('entity_id');
-            $res = Db::connect('database.db_zeelool_es')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $res = Db::connect('database.db_zeelool_es')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
         } elseif ($site == 10) {
             $entity_id = $webUsers->where(['site' => 10, 'entity_id' => ['<', 12247]])->max('entity_id');
-            $res = Db::connect('database.db_zeelool_de')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $res = Db::connect('database.db_zeelool_de')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
         } elseif ($site == 11) {
             $entity_id = $webUsers->where(['site' => 11, 'entity_id' => ['<', 9388]])->max('entity_id');
-            $res = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $res = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
         } elseif ($site == 12) {
             $entity_id = $webUsers->where(['site' => 12, 'entity_id' => ['<', 423]])->max('entity_id');
-            $res = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(1000)->select();
+            $res = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
         }
         $res = collection($res)->toArray();
         foreach ($res as $k => $v) {
