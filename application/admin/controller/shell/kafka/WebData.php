@@ -242,7 +242,6 @@ class WebData extends Backend
 
     public function process_list_de()
     {
-        $this->process_data(9);
         $this->process_data(10);
         $this->process_data(11);
         $this->process_data(12);
@@ -275,15 +274,15 @@ class WebData extends Backend
             $entity_id = $entity_id ?: 0;
             $res = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(2000)->select();
         } elseif ($site == 10) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 66661], 'site' => 10])->order('entity_id desc')->value('entity_id');
+            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 66640], 'site' => 10])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
             $res = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(2000)->select();
         } elseif ($site == 11) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 34701], 'site' => 11])->order('entity_id desc')->value('entity_id');
+            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 34692], 'site' => 11])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
             $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(2000)->select();
         } elseif ($site == 12) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 183968], 'site' => 12])->order('entity_id desc')->value('entity_id');
+            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 183917], 'site' => 12])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
             $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->limit(2000)->select();
         }
