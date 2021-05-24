@@ -4489,6 +4489,8 @@ class ScmWarehouse extends Scm
             $res = $this->_stock_transfer_order_item_code->insertAll($arr);
             //更新实体仓调拨单子单的实际入库数量
             $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->setInc('real_instock_num', $realInstokcNum);
+            //更新子单为已入库
+            $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->update(['status'=>2]);
             foreach ($arr as $k => $v) {
                 //更新条形码表 仓库id 库区id 库位id 库位号 在库状态
                 $v['location_code'] = $this->_store_house->where('id', $v['location_id'])->value('coding');
