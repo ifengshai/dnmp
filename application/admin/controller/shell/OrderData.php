@@ -2302,7 +2302,7 @@ class OrderData extends Backend
     {
         $item_order_number = [];
         $orderItemOption = new \app\admin\model\order\OrderItemOption();
-        $list = $orderItemOption->where('base_original_price is null')->limit(1000)->select();
+        $list = $orderItemOption->where('base_original_price is null')->limit(4000)->select();
         $option_params = [];
         foreach ($list as $k => $v) {
             $site = $v['site'];
@@ -2336,8 +2336,8 @@ class OrderData extends Backend
             $params = [];
             $params['base_original_price'] = $item_data[$v['item_id']]['base_original_price'];
             $params['base_discount_amount'] = $item_data[$v['item_id']]['base_discount_amount'];
-            $params['single_base_original_price'] = round($item_data[$v['item_id']]['base_original_price'] / $item_data[$v['item_id']]['qty_ordered'], 4);
-            $params['single_base_discount_amount'] = round($item_data[$v['item_id']]['base_discount_amount'] / $item_data[$v['item_id']]['qty_ordered'], 4);
+            $params['single_base_original_price'] = $item_data[$v['item_id']]['qty_ordered'] > 0 ? round($item_data[$v['item_id']]['base_original_price'] / $item_data[$v['item_id']]['qty_ordered'], 4) : 0;
+            $params['single_base_discount_amount'] = $item_data[$v['item_id']]['qty_ordered'] > 0 ? round($item_data[$v['item_id']]['base_discount_amount'] / $item_data[$v['item_id']]['qty_ordered'], 4) : 0;
             $orderItemOption->where(['id' => $v['id']])->update($params);
 
             echo $v['id'] . "\n";
