@@ -294,8 +294,20 @@ class WebData extends Backend
     public function process_list_user()
     {
         $this->process_users_data(1);
+    }
+
+    public function process_list_user_v()
+    {
         $this->process_users_data(2);
+    }
+
+    public function process_list_user_n()
+    {
         $this->process_users_data(3);
+    }
+
+    public function process_list_user_de()
+    {
         $this->process_users_data(10);
         $this->process_users_data(11);
     }
@@ -352,7 +364,7 @@ class WebData extends Backend
             $params['created_at'] = strtotime($v['created_at']);
             $params['updated_at'] = strtotime($v['updated_at']);
             $params['resouce'] = $v['resouce'] ?: 0;
-            $params['is_vip'] = $v['is_vip'];
+            $params['is_vip'] = $v['is_vip'] ?: 0;
             $userId = $webUsers->insertGetId($params);
 
             echo $v['entity_id'] . "\n";
@@ -383,7 +395,7 @@ class WebData extends Backend
             $params['created_at'] = strtotime($v['created_at']);
             $params['updated_at'] = strtotime($v['updated_at']);
             $params['resouce'] = $v['resouce'] ?: 0;
-            $params['is_vip'] = $v['is_vip'];
+            $params['is_vip'] = $v['is_vip'] ?: 0;
             $webUsers->insertGetId($params);
 
             echo $v['entity_id'] . "\n";
