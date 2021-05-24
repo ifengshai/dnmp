@@ -4433,6 +4433,9 @@ class ScmWarehouse extends Scm
         $transferOrderItemId = $this->request->request('transfer_order_item_id');
         $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
         $transferOrderDetail = $this->_stock_transfer_order->where('id', $transferOrderItemDetail['transfer_order_id'])->find();
+        if ($transferOrderDetail['status'] !== 5) {
+            $this->error(__('实体仓调拨单非待入库状态，禁止提交！！'), '', 524);
+        }
         if (empty($transferOrderItemDetail)) {
             $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
         }
