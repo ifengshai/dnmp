@@ -281,6 +281,7 @@ class WebData extends Backend
             $params['updated_at'] = strtotime($v['updated_at']) ?: 0;
             $cartId = (new WebShoppingCart())->insertGetId($params);
             echo $v['entity_id'] . "\n";
+            usleep(10000);
         }
         echo $site . '--ok' . "\n";
     }
@@ -342,6 +343,7 @@ class WebData extends Backend
             $userId = $webUsers->insertGetId($params);
 
             echo $v['entity_id'] . "\n";
+            usleep(10000);
         }
         echo $site . '--ok' . "\n";
     }
@@ -367,6 +369,7 @@ class WebData extends Backend
             $webUsers->insertGetId($params);
 
             echo $v['entity_id'] . "\n";
+            usleep(10000);
         }
         echo 5 . '--ok' . "\n";
     }
