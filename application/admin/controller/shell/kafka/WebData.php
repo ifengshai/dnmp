@@ -222,15 +222,33 @@ class WebData extends Backend
     public function process_list()
     {
         $this->process_data(1);
+        echo "ok";
+    }
+
+    public function process_list_v()
+    {
+
         $this->process_data(2);
+
+        echo "ok";
+    }
+
+    public function process_list_n()
+    {
+
         $this->process_data(3);
+        echo "ok";
+    }
+
+    public function process_list_de()
+    {
         $this->process_data(9);
         $this->process_data(10);
         $this->process_data(11);
         $this->process_data(12);
-
         echo "ok";
     }
+
 
     /**
      * 处理购物车旧数据
