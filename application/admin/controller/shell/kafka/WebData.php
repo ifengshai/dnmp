@@ -354,10 +354,6 @@ class WebData extends Backend
         $res = Db::connect('database.db_weseeoptical')->table('users')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
         $res = collection($res)->toArray();
         foreach ($res as $k => $v) {
-            $count = $webUsers->where(['site' => 5, 'entity_id' => $v['entity_id']])->count();
-            if ($count > 0) {
-                continue;
-            }
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['email'] = $v['email'] ?: '';
