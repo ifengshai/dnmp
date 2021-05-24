@@ -199,6 +199,8 @@ class OrderData extends Backend
                                     $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
+                                    $params['base_discount_amount'] = $v['base_discount_amount'];
+                                    $params['customer_id'] = $v['customer_id'];
                                     $params['quote_id'] = $v['quote_id'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
@@ -239,6 +241,8 @@ class OrderData extends Backend
                                     $params['customer_email'] = $v['email'];
                                     $params['base_to_order_rate'] = $v['rate'];
                                     $params['base_shipping_amount'] = $v['freight_price'];
+                                    $params['base_discount_amount'] = $v['base_discounts_price'];
+                                    $params['customer_id'] = $v['user_id'];
                                     $params['payment_method'] = $v['payment_type'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
@@ -280,6 +284,7 @@ class OrderData extends Backend
                                     $params['base_to_order_rate'] = $v['rate'];
                                     $params['payment_method'] = $v['payment_type'];
                                     $params['base_shipping_amount'] = $v['freight_price'];
+                                    $params['base_discount_amount'] = $v['base_discounts_price'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     $params['last_trans_id'] = $v['payment_order_no'];
                                     if (isset($v['payment_time'])) {
@@ -344,6 +349,8 @@ class OrderData extends Backend
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
                                     $params['quote_id'] = $v['quote_id'];
+                                    $params['base_discount_amount'] = $v['base_discount_amount'];
+                                    $params['customer_id'] = $v['customer_id'];
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
