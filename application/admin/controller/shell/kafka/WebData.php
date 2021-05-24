@@ -264,10 +264,6 @@ class WebData extends Backend
         }
         $res = collection($res)->toArray();
         foreach ($res as $k => $v) {
-            $count = $webShoppingCart->where(['site' => $site, 'entity_id' => $v['entity_id']])->count();
-            if ($count > 0) {
-                continue;
-            }
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['store_id'] = $v['store_id'] ?: 0;
@@ -285,6 +281,7 @@ class WebData extends Backend
             $params['updated_at'] = strtotime($v['updated_at']) ?: 0;
             $cartId = (new WebShoppingCart())->insertGetId($params);
             echo $v['entity_id'] . "\n";
+            usleep(10000);
         }
         echo $site . '--ok' . "\n";
     }
@@ -333,10 +330,6 @@ class WebData extends Backend
         }
         $res = collection($res)->toArray();
         foreach ($res as $k => $v) {
-            $count = $webUsers->where(['site' => $site, 'entity_id' => $v['entity_id']])->count();
-            if ($count > 0) {
-                continue;
-            }
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['email'] = $v['email'] ?: '';
@@ -350,6 +343,7 @@ class WebData extends Backend
             $userId = $webUsers->insertGetId($params);
 
             echo $v['entity_id'] . "\n";
+            usleep(10000);
         }
         echo $site . '--ok' . "\n";
     }
@@ -362,10 +356,6 @@ class WebData extends Backend
         $res = Db::connect('database.db_weseeoptical')->table('users')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
         $res = collection($res)->toArray();
         foreach ($res as $k => $v) {
-            $count = $webUsers->where(['site' => 5, 'entity_id' => $v['entity_id']])->count();
-            if ($count > 0) {
-                continue;
-            }
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['email'] = $v['email'] ?: '';
@@ -379,6 +369,7 @@ class WebData extends Backend
             $webUsers->insertGetId($params);
 
             echo $v['entity_id'] . "\n";
+            usleep(10000);
         }
         echo 5 . '--ok' . "\n";
     }
