@@ -264,10 +264,6 @@ class WebData extends Backend
         }
         $res = collection($res)->toArray();
         foreach ($res as $k => $v) {
-            $count = $webShoppingCart->where(['site' => $site, 'entity_id' => $v['entity_id']])->count();
-            if ($count > 0) {
-                continue;
-            }
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['store_id'] = $v['store_id'] ?: 0;
@@ -333,10 +329,6 @@ class WebData extends Backend
         }
         $res = collection($res)->toArray();
         foreach ($res as $k => $v) {
-            $count = $webUsers->where(['site' => $site, 'entity_id' => $v['entity_id']])->count();
-            if ($count > 0) {
-                continue;
-            }
             $params = [];
             $params['entity_id'] = $v['entity_id'];
             $params['email'] = $v['email'] ?: '';
