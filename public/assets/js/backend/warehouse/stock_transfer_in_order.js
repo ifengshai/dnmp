@@ -26,7 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
-                        {field: 'transfer_out_order_number', title: __('实体仓调拨入库单号'), operate: 'like'},
+                        {field: 'transfer_in_order_number', title: __('实体仓调拨入库单号'), operate: 'like'},
                         {field: 'create_person', title: __('创建人'), operate: 'like'},
                         {
                             field: 'create_time',
