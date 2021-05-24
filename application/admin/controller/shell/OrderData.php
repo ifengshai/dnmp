@@ -2039,14 +2039,25 @@ class OrderData extends Backend
         }
     }
 
-
     public function order_data_shell()
     {
-
         $this->order_data(1);
+    }
+
+    public function order_data_shell_v()
+    {
         $this->order_data(2);
+
+    }
+
+    public function order_data_shell_n()
+    {
         $this->order_data(3);
-        $this->order_data(4);
+    }
+
+    public function order_data_shell_de()
+    {
+        $this->order_data(5);
         $this->order_data(9);
         $this->order_data(10);
         $this->order_data(11);
@@ -2063,30 +2074,31 @@ class OrderData extends Backend
      */
     protected function order_data($site)
     {
-        $list = $this->order->where('quote_id = 0 and site = ' . $site)->limit(4000)->select();
+        $list = $this->order->field('id,entity_id')->where('base_discount_amount is null and site = ' . $site)->limit(4000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('quote_id', 'entity_id');
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('base_discount_amount,customer_id', 'entity_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('quote_id', 'entity_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('base_discount_amount,customer_id', 'entity_id');
         } elseif ($site == 3) {
-            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('quote_id', 'entity_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('base_discount_amount,customer_id', 'entity_id');
         } elseif ($site == 4) {
-            $res = Db::connect('database.db_meeloog')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('quote_id', 'entity_id');
+            $res = Db::connect('database.db_weseeoptical')->table('orders')->where(['id' => ['in', $entity_id]])->column('base_discounts_price as base_discount_amount,user_id as customer_id', 'entity_id');
         } elseif ($site == 9) {
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('quote_id', 'entity_id');
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('base_discount_amount,customer_id', 'entity_id');
         } elseif ($site == 10) {
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('quote_id', 'entity_id');
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('base_discount_amount,customer_id', 'entity_id');
         } elseif ($site == 11) {
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('quote_id', 'entity_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('base_discount_amount,customer_id', 'entity_id');
         } elseif ($site == 12) {
-            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('quote_id', 'entity_id');
+            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->column('base_discount_amount,customer_id', 'entity_id');
         }
         $params = [];
         foreach ($list as $k => $v) {
             $params[$k]['id'] = $v['id'];
-            $params[$k]['quote_id'] = $res[$v['entity_id']] ?? 0;
+            $params[$k]['base_discount_amount'] = $res[$v['entity_id']]['base_discount_amount'] ?? 0;
+            $params[$k]['customer_id'] = $res[$v['entity_id']]['customer_id'] ?? 0;
         }
         $this->order->saveAll($params);
         usleep(100000);
