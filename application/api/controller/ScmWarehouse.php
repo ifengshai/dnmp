@@ -3208,8 +3208,6 @@ class ScmWarehouse extends Scm
         if (count(array_filter($item_sku)) < 1) {
             $this->error(__('调拨单子数据集合不能为空！！'), '', 524);
         }
-
-
         $codes = array_column($item_sku, 'call_out_site');
         $call_in_site_id = array_column($item_sku, 'call_in_site_id');
 
@@ -3224,7 +3222,19 @@ class ScmWarehouse extends Scm
                 $this->error(__('此数据下对应库位正在盘点,暂无法进行出入库操作'), '', 525);
             }
         }
-
+        //实体分仓导致库内调拨单新逻辑 判断调出库区及调入库区是否为同一仓库的
+        foreach ($item_sku as $k => $v) {
+            $outStockId = Db::name('warehouse_area')->where('id', $v['outarea_id'])->value('stock_id'); //调出库区仓库id
+            $inStockId = Db::name('warehouse_area')->where('id', $v['inarea_id'])->value('stock_id'); //调出库区仓库id
+            if ($outStockId !== $inStockId){
+                $this->error(__('调出库区与调入库区非同一仓库'), '', 525);
+            }
+            $outStockId1 = Db::name('store_house')->where('id', $v['call_out_site_id'])->value('stock_id'); //调出库位仓库id
+            $inStockId1 = Db::name('store_house')->where('id', $v['call_in_site_id'])->value('stock_id'); //调出库位仓库id
+            if ($outStockId1 !== $inStockId1){
+                $this->error(__('调出库位与调入库位非同一仓库'), '', 525);
+            }
+        }
 
         if (!empty($number) && !$id) {
             //有调拨单号没有调拨单id说明是第一次保存
