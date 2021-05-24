@@ -1537,9 +1537,10 @@ class WorkOrderList extends Model
                 $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
-            $postDatas  = json_encode($postData);
+            $postDatas  = serialize($postData);
             Log::write("补发单创建请求");
             Log::write($postDatas);
+            Log::write("补发单创建请求two");
             if (!empty($postData)) {
                 try {
                     $pathinfo = 'magic/order/createOrder';
