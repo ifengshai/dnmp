@@ -2341,7 +2341,7 @@ class OrderData extends Backend
 //                $options = $this->zeelool_jp_prescription_analysis($item_data[$v['item_id']]);
             }
             $params = [];
-            $params['base_original_price'] = $item_data[$v['item_id']]['base_original_price'];
+            $params['base_original_price'] = $item_data[$v['item_id']]['base_original_price'] ?: 0;
             $params['base_discount_amount'] = $item_data[$v['item_id']]['base_discount_amount'];
             $params['single_base_original_price'] = $item_data[$v['item_id']]['qty_ordered'] > 0 ? round($item_data[$v['item_id']]['base_original_price'] / $item_data[$v['item_id']]['qty_ordered'], 4) : 0;
             $params['single_base_discount_amount'] = $item_data[$v['item_id']]['qty_ordered'] > 0 ? round($item_data[$v['item_id']]['base_discount_amount'] / $item_data[$v['item_id']]['qty_ordered'], 4) : 0;
