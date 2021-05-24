@@ -3983,7 +3983,7 @@ class ScmWarehouse extends Scm
                                     //最后一个站点 剩余数量分给最后一个站
                                     if (($allNum - $key) == 1) {
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
-                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stockNum)->update();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stockNum)->update();
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
