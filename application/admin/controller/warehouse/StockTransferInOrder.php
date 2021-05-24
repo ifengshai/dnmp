@@ -104,7 +104,7 @@ class StockTransferInOrder extends Backend
         }
         $this->view->assign("row", $row);
         //查询产品信息
-        $map['transfer_out_order_id'] = $ids;
+        $map['transfer_in_order_id'] = $ids;
         $item = Db::name('stock_transfer_in_order_item')->where($map)->select();
         $this->assign('item', $item);
         return $this->view->fetch();
