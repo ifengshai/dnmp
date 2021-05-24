@@ -12,6 +12,7 @@ use think\Cache;
 use think\Db;
 use think\exception\PDOException;
 use think\Exception;
+use think\Log;
 use think\Model;
 use think\View;
 use Util\NihaoPrescriptionDetailHelper;
@@ -1536,6 +1537,9 @@ class WorkOrderList extends Model
                 $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
+            $postDatas  = json_encode($postData);
+            Log::write("补发单创建请求");
+            Log::write($postDatas);
             if (!empty($postData)) {
                 try {
                     $pathinfo = 'magic/order/createOrder';
