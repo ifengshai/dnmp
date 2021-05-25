@@ -2411,4 +2411,20 @@ class OrderData extends Backend
         $this->order->saveAll($params);
         echo $site . 'ok';
     }
+    public function batch_payment_time()
+    {
+        $model = Db::connect('database.db_weseeoptical');
+        $orders = $model->table('orders')
+            ->field('order_no,payment_time')
+            ->select();
+        foreach ($orders as $value){
+            $time = strtotime($value['payment_time'])+8*3600;
+            $this->order
+                ->where('site',5)
+                ->where('increment_id',$value['order_no'])
+                ->update(['payment_time'=>$time]);
+            echo $value['order_no'].' is ok'."\n";
+            usleep(10000);
+        }
+    }
 }

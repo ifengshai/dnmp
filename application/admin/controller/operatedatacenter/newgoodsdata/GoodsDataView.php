@@ -118,7 +118,7 @@ class GoodsDataView extends Backend
             $json['columnData'] = [
                 [
                     'type' => 'line',
-                    'data' => array_column($dataCenterDay,'sales_total_money'),
+                    'data' => array_column($dataCenterDay,'glass_num'),
                     'name' => '镜框销量',
                     'yAxisIndex' => 0,
                     'smooth' => true //平滑曲线
@@ -274,8 +274,10 @@ class GoodsDataView extends Backend
                 ->group('goods_grade')
                 ->field('site,goods_grade,count(*) sku_num,sum(glass_num) sales_num,sum(sku_row_total) sales_total')
                 ->select();
+            $sort = ['A+' => 1, 'A' => 2, 'B' => 3, 'C+' => 4, 'C' => 5, 'D' => 6, 'E' => 7, 'F' => 8, 'Z' => 9];
             foreach($dataCenterDay as $key=>$value){
                 $dataCenterDay[$key]['grade'] = $value['goods_grade'];
+                $dataCenterDay[$key]['sort'] = $sort[$value['goods_grade']];
                 $dataCenterDay[$key]['sku_num'] = $value['sku_num'];
                 $dataCenterDay[$key]['sku_num_rate'] = $sumData['sku_num'] ? round($value['sku_num']/$sumData['sku_num']*100,2) : 0;
                 $dataCenterDay[$key]['sales_num'] = $value['sales_num'];
@@ -296,6 +298,8 @@ class GoodsDataView extends Backend
                 $dataCenterDay[$key]['real_time_stock_rate'] = $stockSum['real_time_stock'] ? round($stockInfo['real_time_stock']/$stockSum['real_time_stock']*100,2) : 0;
                 $dataCenterDay[$key]['stock'] = $stockInfo['stock'];
             }
+            $dataCenterDay = array_column($dataCenterDay,null,'sort');
+            ksort($dataCenterDay);
             $dataCenterDay[] = array(
                 'grade' => '合计',
                 'sku_num' => $sumData['sku_num'],
