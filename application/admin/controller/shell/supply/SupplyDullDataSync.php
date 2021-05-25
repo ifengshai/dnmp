@@ -64,7 +64,7 @@ class SupplyDullDataSync extends Command
                 'turnover_days' => $turnoverDays
             ];
 //            呆滞库存
-            if ($turnoverDays > 120) {
+            if ($turnoverDays > 120 || $platformSkus['grade'] == 'F') {
                 $item['dull_stock'] = $platformSkus['stock'];
 //                    呆滞价格
                 $item['price'] = bcmul($itemPrices[$platformSkus['sku']], $platformSkus['stock'], 2);
@@ -266,7 +266,6 @@ class SupplyDullDataSync extends Command
             $items = array_merge($items, $data);
         }
         dump("end: ".date('Y-m-d H:i:s'));
-        file_put_contents('a.json', json_encode($items));
         DullStockSite::insertAll($items);
     }
 
