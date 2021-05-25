@@ -425,10 +425,12 @@ class TrackReg extends Backend
                 $params['grade'] = 'F';
             }
             //自然日120天销量
-            $days120SalesNum = (new NewOrder())->getSkuSalesNum120days($v['sku'], $v['site']);
+            $days120SalesNum = (new NewOrder())->getSkuSalesNum120days($v['platform_sku'], $v['site']);
 
             $status = 0;
-            if ($v['stock'] > 0 && $days120SalesNum > 0) {
+            if ($v['grade'] == 'F') {
+                $status = 2;
+            }elseif ($v['stock'] > 0 && $days120SalesNum > 0) {
                 $stateHealth = floatval(bcdiv($v['stock'], $days120SalesNum, 1));
                 /**
                  * 正常            [0,1)
@@ -481,23 +483,18 @@ class TrackReg extends Backend
                 if ($isStockNew == 2) {
                     $status = 5;
                 } else {
-//                    高风险
-                    if ($v['grade'] == 'F') {
+//                    正常
+                    if ($stateHealth >= 0 && $stateHealth < 1) {
+                        $status = 1;
+                    } elseif ($stateHealth >= 1 && $stateHealth < 1.2) {
+//                        高风险
                         $status = 2;
-                    } else {
-//                        正常
-                        if ($stateHealth >= 0 && $stateHealth < 1) {
-                            $status = 1;
-                        } elseif ($stateHealth >= 1 && $stateHealth < 1.2) {
-//                            高风险
-                            $status = 2;
-                        } elseif ($stateHealth >= 1.2 && $stateHealth < 1.4) {
-//                            中风险
-                            $status = 3;
-                        } elseif ($stateHealth >= 1.4) {
-//                            低风险
-                            $status = 4;
-                        }
+                    } elseif ($stateHealth >= 1.2 && $stateHealth < 1.4) {
+//                        中风险
+                        $status = 3;
+                    } elseif ($stateHealth >= 1.4) {
+//                        低风险
+                        $status = 4;
                     }
                 }
             }
@@ -506,7 +503,6 @@ class TrackReg extends Backend
             $itemPlatformSku->where('id', $v['id'])->update($params);
 
             echo $v['sku'] . "\n";
-            usleep(20000);
         }
 
         echo "ok";
