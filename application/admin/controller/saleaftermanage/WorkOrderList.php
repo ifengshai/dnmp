@@ -188,6 +188,10 @@ class WorkOrderList extends Backend
                 $map['id'] = ['in', $workIds];
                 unset($filter['recept_person']);
             }
+            if ($filter['stock_id']) {
+                $map['stock_id'] = ['=', $filter['stock_id']];
+                unset($filter['stock_id']);
+            }
             //筛选措施
             if ($filter['measure_choose_id']) {
                 $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
@@ -1537,7 +1541,7 @@ class WorkOrderList extends Backend
                         $params['order_sku'] = $order_sku;
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
-
+                        $params['stock_id'] = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id',$params['platform_order'])->value('stock_id');
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) throw new Exception("添加失败！！");
                         $work_id = $this->model->id;
