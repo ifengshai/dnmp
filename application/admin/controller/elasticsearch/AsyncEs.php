@@ -63,6 +63,7 @@ class AsyncEs extends BaseElasticsearch
                         unset($value[$key]);
                     }
                 }
+                echo $value['id'] . PHP_EOL;
                 return $this->formatDate($value,$mergeData);
             },collection($newOrder)->toArray());
             $this->esService->addMutilToEs('mojing_order',$data);
@@ -182,6 +183,7 @@ class AsyncEs extends BaseElasticsearch
                     'create_time' => $mergeData,
 
                 ];
+                echo $value['id'] . PHP_EOL;
                 return $this->formatDate($insertData,$mergeData);
             },collection($carts)->toArray());
             $this->esService->addMutilToEs('mojing_cart',$data);
@@ -214,6 +216,7 @@ class AsyncEs extends BaseElasticsearch
                     'resouce' => $value['resouce'] ?? 0,
 
                 ];
+                echo $value['id'] . PHP_EOL;
                 return $this->formatDate($insertData,$mergeData);
             },collection($carts)->toArray());
             $this->esService->addMutilToEs('mojing_customer',$data);
