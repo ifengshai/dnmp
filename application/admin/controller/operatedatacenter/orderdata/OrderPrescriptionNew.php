@@ -284,7 +284,6 @@ class OrderPrescriptionNew extends Backend
         $createat = explode(' ', $timeStr);
         $begin = strtotime($createat[0]);
         $end = strtotime($createat[3] . ' 23:59:59');
-
         return Db::connect('database.db_mojing_order')->table('fa_order_item_option')
             ->alias('a')
             ->join(['fa_order' => 'b'], 'b.id= a.order_id')
@@ -302,7 +301,7 @@ class OrderPrescriptionNew extends Backend
     function prescrtion_num($flag = '', $data)
     {
         $count = 0;
-        foreach($flag as $key => $val) {
+        foreach($data as $key => $val) {
             if($flag) {
                 if($val['prescription_type'] == $flag){
                     return $val['count'];
