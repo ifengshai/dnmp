@@ -203,7 +203,7 @@ class StockData extends Backend
      */
     public function stockHealthStatus(Request $request)
     {
-        $platform = $request->post('platform', 1);
+        $platform = $request->get('platform', 1);
         $stockHealthStatus = ItemPlatformSku::group('stock_health_status')
             ->where('outer_sku_status', '=', 1)
             ->whereIn('stock_health_status', [1, 2, 3, 4, 5])
