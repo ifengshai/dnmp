@@ -162,7 +162,7 @@ class OperationAnalysis extends Model
             $order_success_where['status'] = ['in', [2,3,4,9,10]];
             $yestime_where['created_at'] = ['between', [$date_time_start,$date_time_end]];
             $model->table('orders')->query("set time_zone='+8:00'");
-            $today_order_success_rs = $model->table('orders')->where($order_success_where)->where($order_success_where)->field('count(id) as count')->find();
+            $today_order_success_rs = $model->table('orders')->where($yestime_where)->where($order_success_where)->field('count(id) as count')->find();
             $today_order_success_data    = $today_order_success_rs['count'];
         }else {
             //今日订单支付成功数sql
