@@ -29,5 +29,6 @@ return [
     'app\admin\controller\shell\supply\PurchaseAsynData',
     'app\admin\controller\shell\operate\skuDayAsynData',
     'app\admin\controller\shell\operate\skuTypeDayAsynData',
-    'app\admin\controller\shell\supply\SupplyDullDataSync'
+    'app\admin\controller\shell\supply\SupplyDullDataSync',
+    'app\admin\controller\shell\operate\skuDayDataAsynData',
 ];
