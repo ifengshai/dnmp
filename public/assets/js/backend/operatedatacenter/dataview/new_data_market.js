@@ -13,6 +13,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     table: 'dash_board',
                 }
             });
+            get_order_detail();
             order_data_view();
             Controller.api.formatter.daterangepicker($("div[role=form]"));
             //订单数据概况折线图
@@ -25,6 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             
             $("#stock_submit").click(function () {
                 stock_data();
+                get_order_detail();
             });
             $("#sku_submit").click(function () {
                 var time_str = $("#time_str").val();
@@ -32,12 +34,15 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                     Layer.alert('请选择时间');
                     return false;
                 }
+
+
                 order_data_view();
                 Controller.api.formatter.line_chart1();
                 // Controller.api.formatter.user_chart();
                 Controller.api.formatter.user_change_chart();
                 re_buy_num();
                 customer_num();
+                get_order_detail();
             });
             $("#sku_reset").click(function () {
                 $("#order_platform").val(1);
@@ -359,6 +364,21 @@ function customer_num()
         data: {order_platform: order_platform, time_str: time_str, compare_time_str: compare_time_str}
     }, function (data, ret) {
        $('#customer_info').html(ret.data)
+        return false;
+    }, function (data, ret) {
+        Layer.alert(ret.msg);
+        return false;
+    });
+}
+function get_order_detail()
+{
+    var order_platform = $('#site').val();
+    $('#order_info').html()
+    Backend.api.ajax({
+        url: 'operatedatacenter/dataview/new_data_market/ajaxGetData',
+        data: {order_platform: order_platform}
+    }, function (data, ret) {
+        $('#order_info').html(ret.data)
         return false;
     }, function (data, ret) {
         Layer.alert(ret.msg);
