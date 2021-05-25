@@ -322,9 +322,10 @@ function re_buy_num()
 {
     var order_platform = $('#order_platform').val();
     var time_str = $('#time_str').val();
+    var compare_time_str = $('#compare_time_str').val();
     Backend.api.ajax({
         url: 'elasticsearch/customer/order/all_data/getReBuyNum',
-        data: {order_platform: order_platform, time_str: time_str,}
+        data: {order_platform: order_platform, time_str: time_str, compare_time_str: compare_time_str}
     }, function (data, ret) {
         var again_user_num = ret.data.again_user_num;
         var compare_again_user_num_rate = ret.data.contrast_again_user_num;
@@ -332,7 +333,7 @@ function re_buy_num()
         if (parseInt(compare_again_user_num_rate) < 0) {
             $('#huan_again_user_num').html("<img src='/xiadie.png'>" + compare_again_user_num_rate+ '%');
         } else {
-            $('#compare_again_user_num_rate').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_again_user_num_rate + '%');
+            $('#huan_again_user_num').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_again_user_num_rate + '%');
         }
         var huan_again_user_num_rate = ret.data.again_user_num_rate;
         var compare_huan_again_user_num_rate = ret.data.all_contrast_again_user_num;
