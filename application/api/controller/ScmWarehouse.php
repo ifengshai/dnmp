@@ -3169,7 +3169,7 @@ class ScmWarehouse extends Scm
             $list[$key]['show_detail'] = 6 == $value['status'] ? 1 : 0; //详情按钮
             $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0; //审核按钮
             $list[$key]['show_trans'] = 5 == $value['status'] ? 1 : 0; //调拨中编辑按钮
-            $list[$key]['stock_name'] = $this->warehouse_stock->where('id',$value['stock_id'])->value('name');
+            $list[$key]['stock_name'] = Db::name('warehouse_stock')->where('id',$value['stock_id'])->value('name');
         }
         $this->success('', ['list' => $list], 200);
     }
