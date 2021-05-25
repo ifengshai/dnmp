@@ -1919,34 +1919,34 @@ class ScmDistribution extends Scm
 
         $where = [];
         if (1 == $type) {
-            $where['combine_status'] = 1; //合单完成状态
+            $where['a.combine_status'] = 1; //合单完成状态
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if ($query) {
                 //线上不允许跨库联合查询，拆分
                 $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%'], 'stock_id' => $stockId])->column('id');
                 if ($store_house_id_store) {
-                    $where['store_house_id'] = ['in', $store_house_id_store];
+                    $where['a.store_house_id'] = ['in', $store_house_id_store];
                 } else {
-                    $where['store_house_id'] = ['=', -1];
+                    $where['a.store_house_id'] = ['=', -1];
                 }
             }
             if ($start_time && $end_time) {
-                $where['combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
+                $where['a.combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
             }
             if ($site) {
-                $where['site'] = ['=', $site];
+                $where['a.site'] = ['=', $site];
             }
             if ($order_prescription_type == 1) {
-                $where['order_prescription_type'] = ['=', $order_prescription_type];
+                $where['a.order_prescription_type'] = ['=', $order_prescription_type];
             } else {
                 if ($order_prescription_type == 2) {
-                    $where['order_prescription_type'] = ['in', [2, 3]];
+                    $where['a.order_prescription_type'] = ['in', [2, 3]];
                 }
             }
 
             //所属仓库
             if ($stockId) {
-                $where['stock_id'] = $stockId;
+                $where['b.stock_id'] = $stockId;
             }
 
             if ($shelf_number) {
@@ -1955,17 +1955,19 @@ class ScmDistribution extends Scm
                     $shelf_number_arr_intersect = array_intersect($where['store_house_id'], $shelf_number_arr);
                 }
                 if (!empty($shelf_number_arr_intersect)) {
-                    $where['store_house_id'] = ['in', $shelf_number_arr_intersect];
+                    $where['a.store_house_id'] = ['in', $shelf_number_arr_intersect];
                 } elseif (!empty($shelf_number_arr)) {
-                    $where['store_house_id'] = ['in', $shelf_number_arr];
+                    $where['a.store_house_id'] = ['in', $shelf_number_arr];
                 }
             }
             //print_r($where);die;
             $list = $this->_new_order_process
+                ->alias('a')
                 ->where($where)
-                ->where(['store_house_id' => ['>', 0]])
-                ->field('order_id,store_house_id,combine_time,order_prescription_type')
-                ->group('order_id')
+                ->where(['a.store_house_id' => ['>', 0]])
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->field('a.order_id,a.store_house_id,a.combine_time,a.order_prescription_type')
+                ->group('a.order_id')
                 ->limit($offset, $limit)
                 ->order('order_prescription_type')
                 ->select();
