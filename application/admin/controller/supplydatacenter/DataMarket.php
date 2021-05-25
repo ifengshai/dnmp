@@ -1246,10 +1246,10 @@ class DataMarket extends Backend
                     $value['site'] = 'voogueme';
                     break;
                 case 3:
-                    $value['site'] = 'nihao';
+                    $value['site'] = 'meeloog';
                     break;
                 case 4:
-                    $value['site'] = 'meeloog';
+                    $value['site'] = 'vicmoo';
                     break;
                 case 5:
                     $value['site'] = 'wesee';
