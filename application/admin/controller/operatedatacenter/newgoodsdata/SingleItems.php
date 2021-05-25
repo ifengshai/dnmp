@@ -106,7 +106,8 @@ class SingleItems extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             //站点
-            $where['o.site'] = $map['o.site'] = $params['order_platform'] ? $params['order_platform'] : 1;
+            $site = $params['order_platform'] ? $params['order_platform'] : 1;
+            $where['o.site'] = $map['o.site'] = $site;
             //时间
             $time_str = $params['time_str'] ? $params['time_str'] : '';
             $createat = explode(' ', $time_str);
@@ -166,6 +167,7 @@ class SingleItems extends Backend
             $glassWhere2[] = ['exp', Db::raw("entity_id in " . $glassSql)];
             $wholePrice = $this->order
                 ->where($glassWhere2)
+                ->where('site',$site)
                 ->sum('base_grand_total');
             //订单客单价
             $everyPrice = $total == 0 ? 0 : round($wholePrice / $total, 2);
@@ -188,6 +190,7 @@ class SingleItems extends Backend
             $orderIdsWhere[] = ['exp', Db::raw("magento_order_id in " . $orderIds)];
             $arraySku = $this->orderitemoption
                 ->where($orderIdsWhere)
+                ->where('site',$site)
                 ->where('sku','not like',$sku . '%')
                 ->group('sku')
                 ->order('count desc')
