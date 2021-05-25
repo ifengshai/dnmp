@@ -96,10 +96,11 @@ class skuDayAsynData extends Command
                 $frame_money = $frame_money ? round($frame_money, 2) : 0;
                 $sku_data[$k]['sku_grand_total'] = $frame_money_price;
                 $sku_data[$k]['sku_row_total'] = $frame_money;
-                $sku_data[$k]['now_pricce'] = Db::connect('database.db_weseeoptical')
+                $now_pricce = Db::connect('database.db_weseeoptical')
                     ->table('goods') //为了获取现价找的表
                     ->where('sku',  $v['platform_sku'])
                     ->value('IF(special_price,special_price,price) price');
+                $sku_data[$k]['now_pricce'] = $now_pricce ? $now_pricce : 0;
                 unset($sku_data[$k]['stock']);
                 unset($sku_data[$k]['grade']);
                 unset($sku_data[$k]['plat_on_way_stock']);

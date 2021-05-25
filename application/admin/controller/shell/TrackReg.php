@@ -7,7 +7,6 @@
 namespace app\admin\controller\shell;
 
 use app\admin\controller\elasticsearch\async\AsyncDatacenterDay;
-use app\admin\model\operatedatacenter\Zeelool;
 use app\admin\model\order\order\NewOrder;
 use app\common\controller\Backend;
 use app\enum\Site;
@@ -16,7 +15,6 @@ use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use think\Hook;
-use think\Model;
 use app\admin\model\purchase\SupplierSku;
 
 class TrackReg extends Backend
@@ -368,144 +366,149 @@ class TrackReg extends Backend
 
     /**
      * 统计有效天数日均销量 并按30天预估销量分级 - 按站点区分
+     * 统计SKU库存健康状态
      *
      * @Description
-     * @author wpl
-     * @since 2020/08/01 15:29:23 
+     * @author wpl
+     * @since 2020/08/01 15:29:23
      * @return void
      */
     public function get_days_sales_num()
     {
-        $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $skuSalesNum = new \app\admin\model\SkuSalesNum();
-        $date = date('Y-m-d 00:00:00');
-        $list = $itemPlatformSku->field('id,sku,platform_type as site,stock,platform_sku,grade')->where([
-            'outer_sku_status' => 1,
-            'platform_type'    => ['<>', 8],
-        ])->select();
-        $list = collection($list)->toArray();
+        try {
+            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $skuSalesNum = new \app\admin\model\SkuSalesNum();
+            $date = date('Y-m-d 00:00:00');
+            $list = $itemPlatformSku->field('id,sku,platform_type as site,stock,platform_sku,grade')->where([
+                'outer_sku_status' => 1,
+                'platform_type' => ['<>', 8],
+            ])->select();
+            $list = collection($list)->toArray();
 
-        foreach ($list as $k => $v) {
-            //15天日均销量
-            $days15_data = $skuSalesNum->where([
-                'sku'        => $v['sku'],
-                'site'       => $v['site'],
-                'createtime' => ['<', $date],
-            ])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->order('createtime desc')->select();
-            $params['sales_num_15days'] = $days15_data[0]->num > 0 ? round($days15_data[0]->sales_num / $days15_data[0]->num) : 0;
+            foreach ($list as $k => $v) {
+                //15天日均销量
+                $days15_data = $skuSalesNum->where([
+                    'sku' => $v['sku'],
+                    'site' => $v['site'],
+                    'createtime' => ['<', $date],
+                ])->field("sum(sales_num) as sales_num,count(*) as num")->limit(15)->order('createtime desc')->select();
+                $params['sales_num_15days'] = $days15_data[0]->num > 0 ? round($days15_data[0]->sales_num / $days15_data[0]->num) : 0;
 
-            $days90_data = $skuSalesNum->where([
-                'sku'        => $v['sku'],
-                'site'       => $v['site'],
-                'createtime' => ['<', $date],
-            ])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->order('createtime desc')->select();
-            //90天总销量
-            $params['sales_num_90days'] = $days90_data[0]->sales_num ?: 0;
-            //90天日均销量
-            $sales_num_90days = $days90_data[0]->num > 0 ? round($days90_data[0]->sales_num / $days90_data[0]->num) : 0;
-            //90天日均销量
-            $params['average_90days_sales_num'] = $sales_num_90days ?: 0;
-            //计算等级 30天预估销量
-            $num = round($sales_num_90days * 1 * 30);
-            if ($num >= 300) {
-                $params['grade'] = 'A+';
-            } elseif ($num >= 150 && $num < 300) {
-                $params['grade'] = 'A';
-            } elseif ($num >= 90 && $num < 150) {
-                $params['grade'] = 'B';
-            } elseif ($num >= 60 && $num < 90) {
-                $params['grade'] = 'C+';
-            } elseif ($num >= 30 && $num < 60) {
-                $params['grade'] = 'C';
-            } elseif ($num >= 15 && $num < 30) {
-                $params['grade'] = 'D';
-            } elseif ($num >= 1 && $num < 15) {
-                $params['grade'] = 'E';
-            } else {
-                $params['grade'] = 'F';
-            }
-            //自然日120天销量
-            $days120SalesNum = (new NewOrder())->getSkuSalesNum120days($v['platform_sku'], $v['site']);
-
-            $status = 0;
-            if ($v['grade'] == 'F') {
-                $status = 2;
-            }elseif ($v['stock'] > 0 && $days120SalesNum > 0) {
-                $stateHealth = floatval(bcdiv($v['stock'], $days120SalesNum, 1));
-                /**
-                 * 正常            [0,1)
-                 * 高风险         [1,1.2)   F级的放入高风险中
-                 * 中风险         [1.2,1.4)
-                 * 低风险         [1.4+)
-                 * 运营新品：  入库但是未上架的sku
-                 */
-
-                $isStockNew = 0;
-                switch ($v['site']) {
-                    case Site::ZEELOOL:
-                        $isStockNew = Db::connect('database.db_zeelool_online')
-                            ->name('catalog_product_entity')
-                            ->where('sku', '=', $v['platform_sku'])
-                            ->value('is_stock_new');
-                        break;
-                    case Site::VOOGUEME:
-                        $isStockNew = Db::connect('database.db_voogueme_online')
-                            ->name('catalog_product_entity')
-                            ->where('sku', '=', $v['platform_sku'])
-                            ->value('is_stock_new');;
-                        break;
-                    case Site::NIHAO:
-                        $isStockNew = Db::connect('database.db_nihao_online')
-                            ->name('catalog_product_entity')
-                            ->where('sku', '=', $v['platform_sku'])
-                            ->value('is_stock_new');;
-                        break;
-                    case Site::ZEELOOL_DE:
-                        $isStockNew = Db::connect('database.db_zeelool_de_online')
-                            ->name('catalog_product_entity')
-                            ->where('sku', '=', $v['platform_sku'])
-                            ->value('is_stock_new');;
-                        break;
-                    case Site::ZEELOOL_JP:
-                        $isStockNew = Db::connect('database.db_zeelool_jp_online')
-                            ->name('catalog_product_entity')
-                            ->where('sku', '=', $v['platform_sku'])
-                            ->value('is_stock_new');;
-                        break;
-                    case Site::WESEEOPTICAL:
-                        $isStockNew = Db::connect('database.db_weseeoptical_online')
-                            ->name('goods')
-                            ->where('sku', '=', $v['platform_sku'])
-                            ->value('is_stock_new');
-                        break;
-                }
-//                判断运营新品
-                if ($isStockNew == 2) {
-                    $status = 5;
+                $days90_data = $skuSalesNum->where([
+                    'sku' => $v['sku'],
+                    'site' => $v['site'],
+                    'createtime' => ['<', $date],
+                ])->field("sum(sales_num) as sales_num,count(*) as num")->limit(90)->order('createtime desc')->select();
+                //90天总销量
+                $params['sales_num_90days'] = $days90_data[0]->sales_num ?: 0;
+                //90天日均销量
+                $sales_num_90days = $days90_data[0]->num > 0 ? round($days90_data[0]->sales_num / $days90_data[0]->num) : 0;
+                //90天日均销量
+                $params['average_90days_sales_num'] = $sales_num_90days ?: 0;
+                //计算等级 30天预估销量
+                $num = round($sales_num_90days * 1 * 30);
+                if ($num >= 300) {
+                    $params['grade'] = 'A+';
+                } elseif ($num >= 150 && $num < 300) {
+                    $params['grade'] = 'A';
+                } elseif ($num >= 90 && $num < 150) {
+                    $params['grade'] = 'B';
+                } elseif ($num >= 60 && $num < 90) {
+                    $params['grade'] = 'C+';
+                } elseif ($num >= 30 && $num < 60) {
+                    $params['grade'] = 'C';
+                } elseif ($num >= 15 && $num < 30) {
+                    $params['grade'] = 'D';
+                } elseif ($num >= 1 && $num < 15) {
+                    $params['grade'] = 'E';
                 } else {
+                    $params['grade'] = 'F';
+                }
+                //自然日120天销量
+                $days120SalesNum = (new NewOrder())->getSkuSalesNum120days($v['platform_sku'], $v['site']);
+
+                $status = 0;
+                if ($v['grade'] == 'F') {
+                    $status = 2;
+                } elseif ($v['stock'] > 0 && $days120SalesNum > 0) {
+                    $stateHealth = floatval(bcdiv($v['stock'], $days120SalesNum, 1));
+                    /**
+                     * 正常            [0,1)
+                     * 高风险         [1,1.2)   F级的放入高风险中
+                     * 中风险         [1.2,1.4)
+                     * 低风险         [1.4+)
+                     * 运营新品：  入库但是未上架的sku
+                     */
+
+                    $isStockNew = 0;
+                    switch ($v['site']) {
+                        case Site::ZEELOOL:
+                            $isStockNew = Db::connect('database.db_zeelool_online')
+                                ->name('catalog_product_entity')
+                                ->where('sku', '=', $v['platform_sku'])
+                                ->value('is_stock_new');
+                            break;
+                        case Site::VOOGUEME:
+                            $isStockNew = Db::connect('database.db_voogueme_online')
+                                ->name('catalog_product_entity')
+                                ->where('sku', '=', $v['platform_sku'])
+                                ->value('is_stock_new');;
+                            break;
+                        case Site::NIHAO:
+                            $isStockNew = Db::connect('database.db_nihao_online')
+                                ->name('catalog_product_entity')
+                                ->where('sku', '=', $v['platform_sku'])
+                                ->value('is_stock_new');;
+                            break;
+                        case Site::ZEELOOL_DE:
+                            $isStockNew = Db::connect('database.db_zeelool_de_online')
+                                ->name('catalog_product_entity')
+                                ->where('sku', '=', $v['platform_sku'])
+                                ->value('is_stock_new');;
+                            break;
+                        case Site::ZEELOOL_JP:
+                            $isStockNew = Db::connect('database.db_zeelool_jp_online')
+                                ->name('catalog_product_entity')
+                                ->where('sku', '=', $v['platform_sku'])
+                                ->value('is_stock_new');;
+                            break;
+                        case Site::WESEEOPTICAL:
+                            $isStockNew = Db::connect('database.db_weseeoptical')
+                                ->name('goods')
+                                ->where('sku', '=', $v['platform_sku'])
+                                ->value('is_stock_new');
+                            break;
+                    }
+//                判断运营新品
+                    if ($isStockNew == 2) {
+                        $status = 5;
+                    } else {
 //                    正常
-                    if ($stateHealth >= 0 && $stateHealth < 1) {
-                        $status = 1;
-                    } elseif ($stateHealth >= 1 && $stateHealth < 1.2) {
+                        if ($stateHealth >= 0 && $stateHealth < 1) {
+                            $status = 1;
+                        } elseif ($stateHealth >= 1 && $stateHealth < 1.2) {
 //                        高风险
-                        $status = 2;
-                    } elseif ($stateHealth >= 1.2 && $stateHealth < 1.4) {
+                            $status = 2;
+                        } elseif ($stateHealth >= 1.2 && $stateHealth < 1.4) {
 //                        中风险
-                        $status = 3;
-                    } elseif ($stateHealth >= 1.4) {
+                            $status = 3;
+                        } elseif ($stateHealth >= 1.4) {
 //                        低风险
-                        $status = 4;
+                            $status = 4;
+                        }
                     }
                 }
+
+                $params['stock_health_status'] = $status;
+                $itemPlatformSku->where('id', $v['id'])->update($params);
+
+                echo $v['sku']."\n";
             }
 
-            $params['stock_health_status'] = $status;
-            $itemPlatformSku->where('id', $v['id'])->update($params);
-
-            echo $v['sku'] . "\n";
+            echo "ok";
+        } catch (\Throwable $exception) {
+            echo "Error Message：".$exception->getMessage().PHP_EOL."Error Line：".$exception->getLine().PHP_EOL;
         }
-
-        echo "ok";
     }
 
 
