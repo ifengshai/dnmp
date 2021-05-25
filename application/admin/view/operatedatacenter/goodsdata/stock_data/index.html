@@ -82,8 +82,7 @@
                                 <select data-rule="required" class="form-control"
                                         name="platform" id="platform">
                                     {foreach name="magentoPlatforms" item="vo" key="key"}
-                                    <option value="{$vo.id}" {if condition="$key == 0" }selected{
-                                    /if}>{$vo.name}</option>
+                                    <option value="{$vo.id}" {if condition="$key == 0" }selected{/if}>{$vo.name}</option>
                                     {/foreach}
                                 </select>
                             </div>
