@@ -3814,6 +3814,7 @@ class ScmWarehouse extends Scm
         $allStock = Db::name('warehouse_stock')->column('name', 'id');
         foreach ($list as $key => $value) {
             $list[$key]['status'] = $checkStatus[$value['status']];
+            $list[$key]['create_time'] = date("Y-m-d H:i:s",$value['create_time']);
             $list[$key]['out_stock_name'] = $allStock[$value['out_stock_id']];
             $list[$key]['in_stock_name'] = $allStock[$value['in_stock_id']];
             //按钮
