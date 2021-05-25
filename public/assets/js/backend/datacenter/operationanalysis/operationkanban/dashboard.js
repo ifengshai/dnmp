@@ -27,7 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [__('Z站销量额'), __('V站销量额'), __('Nihao站销量额'),__('Meeloog站销量额'),__('Zeelool_es站销售额'),__('Zeelool_de站销售额')]
+                    data: [__('Z站销量额'), __('V站销量额'), __('Meeloog站销量额'), __('Vicmoo站销量额'), __('Zeelool_es站销售额'), __('Zeelool_de站销售额')]
                 },
                 toolbox: {
                     show: false,
@@ -76,32 +76,32 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     },
                     data: Orderdata.vooguemeSalesMoneyList
                 },
-                {
-                    name: __('Nihao站销售额'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Meeloog站销售额'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.nihaoSalesMoneyList
                 },
-                {
-                    name: __('Meeloog站销售额'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Vicmoo站销售额'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.meeloogSalesMoneyList
                 },
                 {
@@ -143,7 +143,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [__('Z站订单支付成功数'), __('V站订单支付成功数'), __('Nihao站订单支付成功数'),__('Meeloog站订单支付成功数'),__('Zeelool_es站订单支付成功数'),__('Zeelool_de站订单支付成功数')]
+                    data: [__('Z站订单支付成功数'), __('V站订单支付成功数'), __('Meeloog站订单支付成功数'), __('Vicmoo站订单支付成功数'), __('Zeelool_es站订单支付成功数'), __('Zeelool_de站订单支付成功数')]
                 },
                 toolbox: {
                     show: false,
@@ -197,32 +197,32 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     },
                     data: Orderdata.vooguemeSalesNumList
                 },
-                {
-                    name: __('Nihao站订单支付成功数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Meeloog站订单支付成功数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.nihaoSalesNumList
                 },
-                {
-                    name: __('Meeloog站订单支付成功数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Vicmoo站订单支付成功数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.meeloogSalesNumList
                 },
                 {
@@ -264,7 +264,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [__('Z站客单价'), __('V站客单价'), __('Nihao站客单价'),__('Meeloog站客单价'),__('Zeelool_es站客单价'),__('Zeelool_de站客单价')]
+                    data: [__('Z站客单价'), __('V站客单价'), __('Meeloog站客单价'), __('Vicmoo站客单价'), __('Zeelool_es站客单价'), __('Zeelool_de站客单价')]
                 },
                 toolbox: {
                     show: false,
@@ -312,32 +312,32 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     },
                     data: Orderdata.vooguemeUnitPriceList
                 },
-                {
-                    name: __('Nihao站客单价'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Meeloog站客单价'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.nihaoUnitPriceList
                 },
-                {
-                    name: __('Meeloog站客单价'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Vicmoo站客单价'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.meeloogUnitPriceList
                 },
                 {
@@ -379,7 +379,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [__('Z站购物车数'), __('V站购物车数'), __('Nihao站购物车数'),__('Meeloog站购物车数'),__('Zeelool_es站购物车数'),__('Zeelool_de站购物车数')]
+                    data: [__('Z站购物车数'), __('V站购物车数'), __('Meeloog站购物车数'), __('Vicmoo站购物车数'), __('Zeelool_es站购物车数'), __('Zeelool_de站购物车数')]
                 },
                 toolbox: {
                     show: false,
@@ -427,32 +427,32 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     },
                     data: Orderdata.vooguemeShoppingcartTotal
                 },
-                {
-                    name: __('Nihao站购物车数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Meeloog站购物车数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.nihaoShoppingcartTotal
                 },
-                {
-                    name: __('Meeloog站购物车数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Vicmoo站购物车数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.meeloogShoppingcartTotal
                 },
                 {
@@ -494,7 +494,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [__('Z站购物车转化率'), __('V站购物车数转化率'), __('Nihao站购物车数转化率'), __('Meeloog站购物车数转化率'),__('Zeelool_es站购物车数转化率'),__('Zeelool_de站购物车数转化率')]
+                    data: [__('Z站购物车转化率'), __('V站购物车数转化率'), __('Meeloog站购物车数转化率'), __('Vicmoo站购物车数转化率'), __('Zeelool_es站购物车数转化率'), __('Zeelool_de站购物车数转化率')]
                 },
                 toolbox: {
                     show: false,
@@ -542,32 +542,32 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     },
                     data: Orderdata.vooguemeShoppingcartConversion
                 },
-                {
-                    name: __('Nihao站购物车数转化率'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Meeloog站购物车数转化率'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.nihaoShoppingcartConversion
                 },
-                {
-                    name: __('Meeloog站购物车数转化率'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Vicmoo站购物车数转化率'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.meeloogShoppingcartConversion
                 },
                 {
@@ -609,7 +609,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [__('Z站注册用户数'), __('V站注册用户数'), __('Nihao站注册用户数'),__('Meeloog站注册用户数'),__('Zeelool_es站注册用户数'),__('Zeelool_de站注册用户数')]
+                    data: [__('Z站注册用户数'), __('V站注册用户数'), __('Meeloog站注册用户数'), __('Vicmoo站注册用户数'), __('Zeelool_es站注册用户数'), __('Zeelool_de站注册用户数')]
                 },
                 toolbox: {
                     show: false,
@@ -657,32 +657,32 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     },
                     data: Orderdata.vooguemeRegisterCustomer
                 },
-                {
-                    name: __('Nihao站注册用户数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Meeloog站注册用户数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.nihaoRegisterCustomer
                 },
-                {
-                    name: __('Meeloog站注册用户数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Vicmoo站注册用户数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.meeloogRegisterCustomer
                 },
                 {

@@ -21,12 +21,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 columns: [
                     [
                         {checkbox: true},
-                        {field: 'id', title: __('ID'),operate:false},
+                        {field: 'id', title: __('ID'), operate: false},
                         {field: 'increment_id', title: __('订单号'),},
-                        {field: 'track_number', title: __('运单号'),operate:false},
-                        {field: 'platform_shop_name', title: __('平台'),searchList: { 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee', 8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',8003:"加诺头程", },formatter: Table.api.formatter.status},
-                        {field: 'fi_actual_payment_fee', title: __('邮费'),operate:false},
-                        {field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime}
+                        {field: 'track_number', title: __('运单号'), operate: false},
+                        {
+                            field: 'platform_shop_name',
+                            title: __('平台'),
+                            searchList: {
+                                1: 'zeelool',
+                                2: 'voogueme',
+                                3: 'meeloog',
+                                4: 'vicmoo',
+                                5: 'wesee',
+                                8: 'amazon',
+                                9: 'zeelool_es',
+                                10: 'zeelool_de',
+                                11: 'zeelool_jp',
+                                8003: "加诺头程",
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {field: 'fi_actual_payment_fee', title: __('邮费'), operate: false},
+                        {
+                            field: 'created_at',
+                            title: __('创建时间'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            formatter: Table.api.formatter.datetime
+                        }
                     ]
                 ]
             });

@@ -154,8 +154,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             searchList: {
                                 1: 'Zeelool',
                                 2: 'Voogueme',
-                                3: 'Nihao',
-                                4: 'Meeloog',
+                                3: 'Meeloog',
+                                4: 'Vicmoo',
                                 5: 'Wesee',
                                 8: 'Amazon',
                                 9: 'Zeelool_es',
@@ -999,8 +999,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             searchList: {
                                 1: 'Zeelool',
                                 2: 'Voogueme',
-                                3: 'Nihao',
-                                4: 'Meeloog',
+                                3: 'Meeloog',
+                                4: 'Vicmoo',
                                 5: 'Wesee',
                                 8: 'Amazon',
                                 9: 'Zeelool_es',

@@ -1909,7 +1909,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
+                        {checkbox: true},
                         {
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
@@ -1918,13 +1918,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        { field: 'id', title: __('Id'), operate: false, visible: false },
-                        { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao',4:'Meeloog',9:'ZeeloolEs',10:'ZeeloolDe',11:'ZeeloolJp' }, formatter: Table.api.formatter.status },
-                        { field: 'platform_order', title: __('订单号') },
-                        { field: 'coupon_describe', title: __('优惠券名称'), operate: 'like' },
-                        { field: 'coupon_str', title: __('优惠码'), operate: false },
-                        { field: 'create_user_name', title: __('申请人'), operate: 'like' },
-                        { field: 'create_time', title: __('申请时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        {field: 'id', title: __('Id'), operate: false, visible: false},
+                        {
+                            field: 'work_platform',
+                            title: __('平台'),
+                            custom: {1: 'blue', 2: 'danger', 3: 'orange'},
+                            searchList: {
+                                1: 'Zeelool',
+                                2: 'Voogueme',
+                                3: 'Meeloog',
+                                4: 'Vicmoo',
+                                9: 'ZeeloolEs',
+                                10: 'ZeeloolDe',
+                                11: 'ZeeloolJp'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {field: 'platform_order', title: __('订单号')},
+                        {field: 'coupon_describe', title: __('优惠券名称'), operate: 'like'},
+                        {field: 'coupon_str', title: __('优惠码'), operate: false},
+                        {field: 'create_user_name', title: __('申请人'), operate: 'like'},
+                        {
+                            field: 'create_time',
+                            title: __('申请时间'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            formatter: Table.api.formatter.datetime
+                        },
 
                     ]
                 ]

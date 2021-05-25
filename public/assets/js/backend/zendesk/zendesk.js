@@ -49,24 +49,57 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {
                             field: 'tags', title: __('Tags'), searchList: function (column) {
                                 return Template('tagstpl', {});
-                            },visible: false
+                            }, visible: false
                         },
                         {
-                            field: 'status_type', title: __('类型'),custom: { 1: 'danger', 2: 'success', 3: 'blue', 4: 'orange' }, searchList: { 1: '待处理', 2: '新增', 3: '已处理', 4: '待分配' }, formatter: Table.api.formatter.status,visible:false
+                            field: 'status_type',
+                            title: __('类型'),
+                            custom: {1: 'danger', 2: 'success', 3: 'blue', 4: 'orange'},
+                            searchList: {1: '待处理', 2: '新增', 3: '已处理', 4: '待分配'},
+                            formatter: Table.api.formatter.status,
+                            visible: false
                         },
-                        {field: 'priority', title: __('priority'), custom: { 0: 'success', 1: 'gray', 2: 'yellow', 3: 'blue', 4: 'danger' }, searchList: { 0: '无', 1: 'Low', 2: 'Normal', 3: 'High', 4: 'Urgent' }, formatter: Table.api.formatter.status },
+                        {
+                            field: 'priority',
+                            title: __('priority'),
+                            custom: {0: 'success', 1: 'gray', 2: 'yellow', 3: 'blue', 4: 'danger'},
+                            searchList: {0: '无', 1: 'Low', 2: 'Normal', 3: 'High', 4: 'Urgent'},
+                            formatter: Table.api.formatter.status
+                        },
                         {field: 'channel', title: __('Channel')},
-                        {field: 'type', title: __('type'), custom: { 1: 'yellow', 2: 'blue' ,3: 'danger'}, searchList: { 1: 'Zeelool', 2: 'Voogueme' ,3: 'Nihao'}, formatter: Table.api.formatter.status },
-                        {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
-                        {field: 'zendesk_update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange',sortable: true},
-                        {field: 'group_name', title: __('组别'),operate:false},
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            field: 'type',
+                            title: __('type'),
+                            custom: {1: 'yellow', 2: 'blue', 3: 'danger'},
+                            searchList: {1: 'Zeelool', 2: 'Voogueme', 3: 'Meeloog'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'create_time',
+                            title: __('Create_time'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            sortable: true
+                        },
+                        {
+                            field: 'zendesk_update_time',
+                            title: __('Update_time'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            sortable: true
+                        },
+                        {field: 'group_name', title: __('组别'), operate: false},
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
                                 {
                                     name: 'edit',
-                                    text:'回复',
-                                    hidden:function(row){
-                                        return row.status==5 ? true : false;
+                                    text: '回复',
+                                    hidden: function (row) {
+                                        return row.status == 5 ? true : false;
                                     },
                                     title: function (row) {
                                         return __('Answer') + '【' + row.ticket_id + '】' + row.subject;

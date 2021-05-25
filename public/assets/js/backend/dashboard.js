@@ -15,7 +15,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                     trigger: 'axis'
                 },
                 legend: {
-                    data: [__('Z站销量'), __('V站销量'), __('Nihao站销量'), __('ZeeloolDe站销量'), __('ZeeloolJp站销量')]
+                    data: [__('Z站销量'), __('V站销量'), __('Meeloog站销量'), __('ZeeloolDe站销量'), __('ZeeloolJp站销量')]
                 },
                 toolbox: {
                     show: false,
@@ -64,18 +64,18 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'echarts', 'echart
                     },
                     data: Orderdata.vooguemeSalesNumList
                 },
-                {
-                    name: __('Nihao站销量'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
+                    {
+                        name: __('Meeloog站销量'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
                     data: Orderdata.nihaoSalesNumList
                 },
                 // {

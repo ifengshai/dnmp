@@ -135,7 +135,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             data: 'multiple',
                             operate: 'IN',
                             searchList: {
-                                1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',
+                                1: 'zeelool', 2: 'voogueme', 3: 'meeloog', 4: 'vicmoo', 5: 'wesee',
                                 8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',
                                 12: 'voogmechic', 13: 'zeelool_cn', 14: 'alibaba', 15: 'zeelool_fr'
                             },
