@@ -55,7 +55,7 @@ define(['jquery', 'bootstrap', 'backend', 'echartsobj'], function ($, undefined,
                     var options = {
                         url: 'operatedatacenter/goodsdata/stock_data/stockHealthStatus',
                         data: {
-                            'order_platform': $("#platform").val(),
+                            'platform': $("#platform").val(),
                         }
 
                     };
