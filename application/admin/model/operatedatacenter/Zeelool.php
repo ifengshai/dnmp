@@ -339,7 +339,7 @@ class Zeelool extends Model
             ->having('count(customer_id)<=1')
             ->column('customer_id');
         $again_buy_num2 = 0;
-        $again_buy_num2 = $order_model->where($order_where)->where('customer_id','in',$again_buy_data2)->where($map)->count();
+        $again_buy_num2 = $order_model->field('customer_id')->distinct(true)->where($order_where)->where('customer_id','in',$again_buy_data2)->where($map)->count();
 //        foreach ($again_buy_data2 as $v){
 //            //查询时间段内是否进行购买行为
 //            $order_where_arr['customer_id'] = $v;
