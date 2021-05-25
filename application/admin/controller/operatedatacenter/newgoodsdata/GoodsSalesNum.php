@@ -105,6 +105,7 @@ class GoodsSalesNum extends Backend
             $productInfo = $this->item->getSkuInfo();
             $list = $list ?? [];
             $i = 0;
+            $nowDate = date('Y-m-d H:i:s');
             foreach ($list as $k => $v) {
                 $result[$i]['platformsku'] = $k;
                 $result[$i]['sku'] = $skus[trim($k)]['sku'];
@@ -125,16 +126,20 @@ class GoodsSalesNum extends Backend
                 //在线状态（实时）
                 $stockInfo = $itemPlatformSku
                     ->where(['platform_type'=>$params['site'],'platform_sku'=>$k])
-                    ->field('outer_sku_status,presell_status,stock')
+                    ->field('stock,outer_sku_status,presell_status,presell_start_time,presell_end_time,presell_num')
                     ->find();
                 if($stockInfo['outer_sku_status'] == 1){
-                    if($stockInfo['presell_status'] == 1){
+                    if($stockInfo['stock'] > 0){
                         $result[$i]['online_status'] = 1;  //在线
                     }else{
-                        if($stockInfo['stock'] == 0){
-                            $result[$i]['online_status'] = 2;  //售罄
+                        if($stockInfo['presell_status'] == 1 && $nowDate >= $stockInfo['presell_start_time'] && $nowDate <= $stockInfo['presell_end_time']){
+                            if($stockInfo['presell_num'] > 0){
+                                $result[$i]['online_status'] = 1;  //在线
+                            }else{
+                                $result[$i]['online_status'] = 2;  //售罄
+                            }
                         }else{
-                            $result[$i]['online_status'] = 1;  //在线
+                            $result[$i]['online_status'] = 2;  //售罄
                         }
                     }
                 }else{
@@ -180,6 +185,7 @@ class GoodsSalesNum extends Backend
                 ->select();
             $list = [];
             $i = 0;
+            $nowDate = date('Y-m-d H:i:s');
             foreach($skus as $k=>$value){
                 $skuInfo = $itemPlatformSku->getSkuInfo($params['site'],$value['platform_sku']);
                 $skuTimeWhere['payment_time'] = ['between',[$value['shelves_time'],time()]];
@@ -201,13 +207,17 @@ class GoodsSalesNum extends Backend
                 $list[$i]['sales_num_day'] = $list[$i]['online_day'] ? round($list[$i]['sales_num']/$list[$i]['online_day'],2) : 0;
                 //在线状态（实时）
                 if($skuInfo['outer_sku_status'] == 1){
-                    if($skuInfo['presell_status'] == 1){
+                    if($skuInfo['stock'] > 0){
                         $list[$i]['online_status'] = 1;  //在线
                     }else{
-                        if($skuInfo['stock'] == 0){
-                            $list[$i]['online_status'] = 2;  //售罄
+                        if($skuInfo['presell_status'] == 1 && $nowDate >= $skuInfo['presell_start_time'] && $nowDate <= $skuInfo['presell_end_time']){
+                            if($skuInfo['presell_num'] > 0){
+                                $list[$i]['online_status'] = 1;  //在线
+                            }else{
+                                $list[$i]['online_status'] = 2;  //售罄
+                            }
                         }else{
-                            $list[$i]['online_status'] = 1;  //在线
+                            $list[$i]['online_status'] = 2;  //售罄
                         }
                     }
                 }else{

@@ -44,25 +44,9 @@ class GoodsDataDetail extends Backend
             if($filter['goods_grade']){
                 $map['p.grade'] = $filter['goods_grade'];
             }
-            if($filter['sales_status']){
-                switch ($filter['sales_status']){
-                    case 1:
-                        $statusWhere = [];
-                        $statusWhere[] = ['exp', Db::raw("(p.outer_sku_status=1 and p.stock!=0 and p.presell_status != 1) or (p.presell_status = 1)")];
-                        break;
-                    case 2:
-                        $statusWhere = [];
-                        $statusWhere[] = ['exp', Db::raw("p.outer_sku_status = 1 and p.presell_status != 1 and p.stock = 0")];
-                        break;
-                    case 3:
-                        $map['p.outer_sku_status'] = ['neq',1];
-                        break;
-                }
-            }
             unset($filter['order_platform']);
             unset($filter['sku']);
             unset($filter['type']);
-            unset($filter['sales_status']);
             unset($filter['goods_grade']);
             $this->request->get(['filter' => json_encode($filter)]);
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
@@ -73,7 +57,6 @@ class GoodsDataDetail extends Backend
                 ->join('fa_item i','i.sku=p.sku','left')
                 ->where($where)
                 ->where($map)
-                ->where($statusWhere)
                 ->count();
             $list = $this->itemPlatformSku
                 ->alias('p')
@@ -82,26 +65,30 @@ class GoodsDataDetail extends Backend
                 ->alias('p')
                 ->where($where)
                 ->where($map)
-                ->where($statusWhere)
-                ->field('c.name,p.sku,c.attribute_group_id,p.outer_sku_status,p.presell_status,p.stock,i.is_spot,p.platform_type,p.platform_sku,p.grade,p.stock_health_status')
+                ->field('c.name,p.sku,c.attribute_group_id,p.outer_sku_status,p.presell_status,p.stock,i.is_spot,p.platform_type,p.platform_sku,p.grade,p.stock_health_status,p.presell_start_time,p.presell_end_time,p.presell_num')
                 ->limit($offset,$limit)
                 ->order($sort, $order)
                 ->select();
             $list = collection($list)->toArray();
             $start = strtotime(date('Y-m-d 00:00:00', strtotime('-30 day')));
             $end = time();
+            $nowDate = date('Y-m-d H:i:s');
             foreach ($list as $key=>$value){
                 $list[$key]['sku'] = $value['sku'];
                 $list[$key]['type'] = $value['attribute_group_id'];
                 $list[$key]['goods_type'] = $value['name'];
                 if($value['outer_sku_status'] == 1){
-                    if($value['presell_status'] == 1){
+                    if($value['stock'] > 0){
                         $list[$key]['status'] = 1;
                     }else{
-                        if($value['stock'] == 0){
-                            $list[$key]['status'] = 2;
+                        if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                            if($value['presell_num'] > 0){
+                                $list[$key]['status'] = 1;
+                            }else{
+                                $list[$key]['status'] = 2;
+                            }
                         }else{
-                            $list[$key]['status'] = 1;
+                            $list[$key]['status'] = 2;
                         }
                     }
                 }else{
@@ -178,7 +165,6 @@ class GoodsDataDetail extends Backend
         $site = input('order_platform') ? input('order_platform') : 1;
         $sku = input('sku');
         $type = input('type');
-        $sales_status = input('sales_status');
         $goods_grade = input('goods_grade');
         $field = input('field');
         $field_arr = explode(',',$field);
@@ -243,31 +229,16 @@ class GoodsDataDetail extends Backend
         if($goods_grade){
             $map['p.grade'] = $goods_grade;
         }
-        if($sales_status){
-            switch ($sales_status){
-                case 1:
-                    $statusWhere = [];
-                    $statusWhere[] = ['exp', Db::raw("(p.outer_sku_status=1 and p.stock!=0 and p.presell_status != 1) or (p.presell_status = 1)")];
-                    break;
-                case 2:
-                    $statusWhere = [];
-                    $statusWhere[] = ['exp', Db::raw("p.outer_sku_status = 1 and p.presell_status != 1 and p.stock = 0")];
-                    break;
-                case 3:
-                    $map['p.outer_sku_status'] = ['neq',1];
-                    break;
-            }
-        }
         $total_export_count = $this->itemPlatformSku
             ->alias('p')
             ->join('fa_item_category c','c.id=p.category_id','left')
             ->join('fa_item i','i.sku=p.sku','left')
             ->where($map)
-            ->where($statusWhere)
             ->count();
         $startTime = strtotime(date('Y-m-d 00:00:00', strtotime('-30 day')));
         $endTime = time();
         $pre_count = 5000;
+        $nowDate = date('Y-m-d H:i:s');
         for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
             $start = $i*$pre_count;
             //切割每份数据
@@ -276,8 +247,7 @@ class GoodsDataDetail extends Backend
                 ->join('fa_item_category c','c.id=p.category_id')
                 ->join('fa_item i','i.sku=p.sku')
                 ->where($map)
-                ->where($statusWhere)
-                ->field('c.name,p.sku,c.attribute_group_id,p.outer_sku_status,p.presell_status,p.stock,i.is_spot,p.platform_type,p.platform_sku,p.grade,p.stock_health_status')
+                ->field('c.name,p.sku,c.attribute_group_id,p.outer_sku_status,p.presell_status,p.stock,i.is_spot,p.platform_type,p.platform_sku,p.grade,p.stock_health_status,p.presell_start_time,p.presell_end_time,p.presell_num')
                 ->limit($start,$pre_count)
                 ->select();
             $list = collection($list)->toArray();
@@ -306,13 +276,17 @@ class GoodsDataDetail extends Backend
                 }
                 if (in_array('status', $column_name)) {
                     if($val['outer_sku_status'] == 1){
-                        if($val['presell_status'] == 1){
+                        if($val['stock'] > 0){
                             $status = '上架';
                         }else{
-                            if($val['stock'] == 0){
-                                $status = '售罄';
+                            if($val['presell_status'] == 1 && $nowDate >= $val['presell_start_time'] && $nowDate <= $val['presell_end_time']){
+                                if($val['presell_num'] > 0){
+                                    $status = '上架';
+                                }else{
+                                    $status = '售罄';
+                                }
                             }else{
-                                $status = '上架';
+                                $status = '售罄';
                             }
                         }
                     }else{

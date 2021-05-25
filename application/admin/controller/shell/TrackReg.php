@@ -1318,16 +1318,77 @@ class TrackReg extends Backend
         $site_where['platform_type'] = $arr['site'];
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
-        $goodsWhere = [];
-        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0  and presell_status != 1) or (presell_status=1))")];
-        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
-        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $webSkus = $model
+            ->where($map_where)
+            ->where($site_where)
+            ->select();
+        $onSalesNum = 0;  //在售
+        $SalesOutNum = 0;  //售罄
+        $downShelvesNum = 0;  //下架
+        $nowDate = date('Y-m-d H:i:s');
+        foreach($webSkus as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum++;
+                        }else{
+                            $SalesOutNum++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum++;
+            }
+        }
+        $arr['glass_in_sale_num'] = $onSalesNum;  //在售
+        $arr['glass_shelves_num'] = $downShelvesNum;  //下架
+        $arr['glass_presell_num'] = $SalesOutNum;  //售罄
         $skus1 = $item->getOrnamentsSku();
         $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
-        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $webSkus1 = $model
+            ->where($map_where1)
+            ->where($site_where)
+            ->select();
+        $onSalesNum1 = 0;  //在售
+        $SalesOutNum1 = 0;  //售罄
+        $downShelvesNum1 = 0;  //下架
+        foreach($webSkus1 as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum1++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum1++;
+                        }else{
+                            $SalesOutNum1++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum1++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum1++;
+            }
+        }
+        $arr['box_in_sale_num'] = $onSalesNum1;
+        $arr['box_shelves_num'] = $downShelvesNum1;
+        $arr['box_presell_num'] = $SalesOutNum1;
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
@@ -1492,16 +1553,77 @@ class TrackReg extends Backend
         $site_where['platform_type'] = $arr['site'];
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
-        $goodsWhere = [];
-        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0 and presell_status != 1) or (presell_status=1))")];
-        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
-        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $webSkus = $model
+            ->where($map_where)
+            ->where($site_where)
+            ->select();
+        $onSalesNum = 0;  //在售
+        $SalesOutNum = 0;  //售罄
+        $downShelvesNum = 0;  //下架
+        $nowDate = date('Y-m-d H:i:s');
+        foreach($webSkus as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum++;
+                        }else{
+                            $SalesOutNum++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum++;
+            }
+        }
+        $arr['glass_in_sale_num'] = $onSalesNum;  //在售
+        $arr['glass_shelves_num'] = $downShelvesNum;  //下架
+        $arr['glass_presell_num'] = $SalesOutNum;  //售罄
         $skus1 = $item->getOrnamentsSku();
         $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
-        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $webSkus1 = $model
+            ->where($map_where1)
+            ->where($site_where)
+            ->select();
+        $onSalesNum1 = 0;  //在售
+        $SalesOutNum1 = 0;  //售罄
+        $downShelvesNum1 = 0;  //下架
+        foreach($webSkus1 as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum1++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum1++;
+                        }else{
+                            $SalesOutNum1++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum1++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum1++;
+            }
+        }
+        $arr['box_in_sale_num'] = $onSalesNum1;
+        $arr['box_shelves_num'] = $downShelvesNum1;
+        $arr['box_presell_num'] = $SalesOutNum1;
         //插入数据
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
@@ -1660,16 +1782,77 @@ class TrackReg extends Backend
         $site_where['platform_type'] = $arr['site'];
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
-        $goodsWhere = [];
-        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0  and presell_status != 1) or (presell_status=1))")];
-        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
-        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $webSkus = $model
+            ->where($map_where)
+            ->where($site_where)
+            ->select();
+        $onSalesNum = 0;  //在售
+        $SalesOutNum = 0;  //售罄
+        $downShelvesNum = 0;  //下架
+        $nowDate = date('Y-m-d H:i:s');
+        foreach($webSkus as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum++;
+                        }else{
+                            $SalesOutNum++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum++;
+            }
+        }
+        $arr['glass_in_sale_num'] = $onSalesNum;  //在售
+        $arr['glass_shelves_num'] = $downShelvesNum;  //下架
+        $arr['glass_presell_num'] = $SalesOutNum;  //售罄
         $skus1 = $item->getOrnamentsSku();
         $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
-        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $webSkus1 = $model
+            ->where($map_where1)
+            ->where($site_where)
+            ->select();
+        $onSalesNum1 = 0;  //在售
+        $SalesOutNum1 = 0;  //售罄
+        $downShelvesNum1 = 0;  //下架
+        foreach($webSkus1 as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum1++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum1++;
+                        }else{
+                            $SalesOutNum1++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum1++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum1++;
+            }
+        }
+        $arr['box_in_sale_num'] = $onSalesNum1;
+        $arr['box_shelves_num'] = $downShelvesNum1;
+        $arr['box_presell_num'] = $SalesOutNum1;
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time."\n";
@@ -1818,16 +2001,77 @@ class TrackReg extends Backend
         $site_where['platform_type'] = $arr['site'];
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
-        $goodsWhere = [];
-        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0 and presell_status != 1) or (presell_status=1))")];
-        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
-        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $webSkus = $model
+            ->where($map_where)
+            ->where($site_where)
+            ->select();
+        $onSalesNum = 0;  //在售
+        $SalesOutNum = 0;  //售罄
+        $downShelvesNum = 0;  //下架
+        $nowDate = date('Y-m-d H:i:s');
+        foreach($webSkus as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum++;
+                        }else{
+                            $SalesOutNum++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum++;
+            }
+        }
+        $arr['glass_in_sale_num'] = $onSalesNum;  //在售
+        $arr['glass_shelves_num'] = $downShelvesNum;  //下架
+        $arr['glass_presell_num'] = $SalesOutNum;  //售罄
         $skus1 = $item->getOrnamentsSku();
         $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
-        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $webSkus1 = $model
+            ->where($map_where1)
+            ->where($site_where)
+            ->select();
+        $onSalesNum1 = 0;  //在售
+        $SalesOutNum1 = 0;  //售罄
+        $downShelvesNum1 = 0;  //下架
+        foreach($webSkus1 as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum1++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum1++;
+                        }else{
+                            $SalesOutNum1++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum1++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum1++;
+            }
+        }
+        $arr['box_in_sale_num'] = $onSalesNum1;
+        $arr['box_shelves_num'] = $downShelvesNum1;
+        $arr['box_presell_num'] = $SalesOutNum1;
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
@@ -1977,16 +2221,77 @@ class TrackReg extends Backend
         $site_where['platform_type'] = $arr['site'];
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
-        $goodsWhere = [];
-        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0 and presell_status != 1) or (presell_status=1))")];
-        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
-        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $webSkus = $model
+            ->where($map_where)
+            ->where($site_where)
+            ->select();
+        $onSalesNum = 0;  //在售
+        $SalesOutNum = 0;  //售罄
+        $downShelvesNum = 0;  //下架
+        $nowDate = date('Y-m-d H:i:s');
+        foreach($webSkus as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum++;
+                        }else{
+                            $SalesOutNum++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum++;
+            }
+        }
+        $arr['glass_in_sale_num'] = $onSalesNum;  //在售
+        $arr['glass_shelves_num'] = $downShelvesNum;  //下架
+        $arr['glass_presell_num'] = $SalesOutNum;  //售罄
         $skus1 = $item->getOrnamentsSku();
         $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
-        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $webSkus1 = $model
+            ->where($map_where1)
+            ->where($site_where)
+            ->select();
+        $onSalesNum1 = 0;  //在售
+        $SalesOutNum1 = 0;  //售罄
+        $downShelvesNum1 = 0;  //下架
+        foreach($webSkus1 as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum1++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum1++;
+                        }else{
+                            $SalesOutNum1++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum1++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum1++;
+            }
+        }
+        $arr['box_in_sale_num'] = $onSalesNum1;
+        $arr['box_shelves_num'] = $downShelvesNum1;
+        $arr['box_presell_num'] = $SalesOutNum1;
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
@@ -1998,80 +2303,121 @@ class TrackReg extends Backend
     //运营数据中心  小站
     public function other_day_data()
     {
-        $model = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $item = new \app\admin\model\itemmanage\Item();
-        $skus = $item->getFrameSku();
-        $map_where['sku'] = ['in', $skus];
-        $skus1 = $item->getOrnamentsSku();
-        $map_where1['sku'] = ['in', $skus1];
-
-        $map_where = [];
-
-        $date_time = date('Y-m-d', strtotime("-1 day"));
-        //meeloog
-        $site_where['platform_type'] = $platform_where['platform_type'] = 4;
-        $where['i.category_id'] = ['<>', 43];
-        $where['i.is_del'] = 1;
-        $where['i.is_open'] = 1;
-        $goodsWhere = [];
-        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0 and presell_status != 1) or (presell_status=1))")];
-
-        $arr = [];
-        $arr['site'] = 4;
-        $arr['day_date'] = $date_time;
-        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
-            'p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
-        //在售，预售，下架
-        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
-        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
-        $skus1 = $item->getOrnamentsSku();
-        $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
-        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
-        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
-        //同步es数据
-        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
-
         //亚马逊
-        $site_where['platform_type'] = $platform_where['platform_type'] = 8;
-        $arr['site'] = 8;
-        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
-            'p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
-        //在售，预售，下架
-        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
-        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
-        $skus1 = $item->getOrnamentsSku();
-        $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
-        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $arr = $this->getGoodsStatus(8);
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
 
         //zeelool_es
-        $site_where['platform_type'] = $platform_where['platform_type'] = 9;
-        $arr['site'] = 9;
-        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
-            'p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
-        //在售，预售，下架
-        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
-        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
-        $skus1 = $item->getOrnamentsSku();
-        $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
-        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
-        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $arr = $this->getGoodsStatus(9);
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
 
         echo date("Y-m-d H:i:s")."\n";
         echo "all is ok"."\n";
+    }
+
+    /**
+     * 获取商品各状态的数量
+     * @param $site
+     * @author mjj
+     * @date   2021/5/25 17:35:23
+     */
+    public function getGoodsStatus($site)
+    {
+        $model = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $item = new \app\admin\model\itemmanage\Item();
+        $date_time = date('Y-m-d', strtotime("-1 day"));
+        $skus = $item->getFrameSku();
+        $map_where['sku'] = ['in', $skus];
+        $skus1 = $item->getOrnamentsSku();
+        $map_where1['sku'] = ['in', $skus1];
+        $site_where['platform_type'] = $platform_where['platform_type'] = $site;
+        $where['i.category_id'] = ['<>', 43];
+        $where['i.is_del'] = 1;
+        $where['i.is_open'] = 1;
+        $arr['site'] = $site;
+        $arr['day_date'] = $date_time;
+        $arr['virtual_stock'] = $model
+            ->alias('p')
+            ->join('fa_item i', 'p.sku=i.sku')
+            ->where($where)
+            ->where($platform_where)
+            ->sum('p.stock');
+        $webSkus = $model
+            ->where($map_where)
+            ->where($site_where)
+            ->select();
+        $onSalesNum = 0;  //在售
+        $SalesOutNum = 0;  //售罄
+        $downShelvesNum = 0;  //下架
+        $nowDate = date('Y-m-d H:i:s');
+        foreach($webSkus as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum++;
+                        }else{
+                            $SalesOutNum++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum++;
+            }
+        }
+        $arr['glass_in_sale_num'] = $onSalesNum;  //在售
+        $arr['glass_shelves_num'] = $downShelvesNum;  //下架
+        $arr['glass_presell_num'] = $SalesOutNum;  //售罄
+        $skus1 = $item->getOrnamentsSku();
+        $map_where1['sku'] = ['in', $skus1];
+        $webSkus1 = $model
+            ->where($map_where1)
+            ->where($site_where)
+            ->select();
+        $onSalesNum1 = 0;  //在售
+        $SalesOutNum1 = 0;  //售罄
+        $downShelvesNum1 = 0;  //下架
+        foreach($webSkus1 as $value){
+            if($value['outer_sku_status'] == 1){
+                //上架
+                if($value['stock']>0){
+                    //在售
+                    $onSalesNum1++;
+                }else{
+                    if($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']){
+                        //开预售
+                        if($value['presell_num'] > 0){
+                            $onSalesNum1++;
+                        }else{
+                            $SalesOutNum1++;
+                        }
+                    }else{
+                        //未开预售
+                        $SalesOutNum1++;
+                    }
+                }
+            }else{
+                //下架
+                $downShelvesNum1++;
+            }
+        }
+        $arr['box_in_sale_num'] = $onSalesNum1;
+        $arr['box_shelves_num'] = $downShelvesNum1;
+        $arr['box_presell_num'] = $SalesOutNum1;
+        return $arr;
     }
     //运营数据中心 wesee
     public function wesee_day_data()
