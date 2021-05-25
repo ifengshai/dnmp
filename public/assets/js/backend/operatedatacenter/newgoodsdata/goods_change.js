@@ -47,6 +47,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             // 为表格绑定事件
             Table.api.bindevent(table);
             $("#sku_submit").click(function () {
+                var order_platform = $('#order_platform').val();
+                if(order_platform == 5){
+                    table.bootstrapTable("hideColumn", 'cart_num');
+                    table.bootstrapTable("hideColumn", 'update_cart_rate');
+                    table.bootstrapTable("hideColumn", 'cart_change');
+                }else{
+                    table.bootstrapTable("showColumn", 'cart_num');
+                    table.bootstrapTable("showColumn", 'update_cart_rate');
+                    table.bootstrapTable("showColumn", 'cart_change');
+                }
                 var params = table.bootstrapTable('getOptions')
                 params.queryParams = function (params) {
 
@@ -70,18 +80,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 var sku = $('#sku').val();
                 var order_platform = $('#order_platform').val();
                 window.location.href=Config.moduleurl+'/operatedatacenter/newgoodsdata/goods_change/export?sku='+sku+'&time_str='+time_str+'&order_platform='+order_platform;
-            });
-            $('#order_platform').on('change',function(){
-                var order_platform = $('#order_platform').val();
-                if(order_platform == 5){
-                    table.bootstrapTable("hideColumn", 'cart_num');
-                    table.bootstrapTable("hideColumn", 'update_cart_rate');
-                    table.bootstrapTable("hideColumn", 'cart_change');
-                }else{
-                    table.bootstrapTable("showColumn", 'cart_num');
-                    table.bootstrapTable("showColumn", 'update_cart_rate');
-                    table.bootstrapTable("showColumn", 'cart_change');
-                }
             });
             $("#sku_reset").click(function () {
                 $("#order_platform").val(1);
