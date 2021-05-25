@@ -4223,6 +4223,7 @@ class ScmWarehouse extends Scm
         $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
         $transferOrderDetail = $this->_stock_transfer_order->where('id', $transferOrderItemDetail['transfer_order_id'])->find();
         $transferOrderItemCodeDetail = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId])->find();
+        $allStock = Db::name('warehouse_stock')->column('name','id');
         if (!empty($transferOrderItemCodeDetail)) {
             $this->error(__('实体仓调拨单子单sku' . $transferOrderItemDetail['sku'] . '已提交过,只可编辑单个sku，请检查！！'), '', 524);
         }
@@ -4249,7 +4250,7 @@ class ScmWarehouse extends Scm
                 $this->error(__('条形码sku与调拨sku不一致，请检查！！'), '', 524);
             }
             if ($codeStatus['stock_id'] !== $transferOrderDetail['out_stock_id']) {
-                $this->error(__($v['code'] . '当前不在调出库区：库区id：'.$transferOrderDetail['out_stock_id'].'！！'), '', 524);
+                $this->error(__($v['code'] . '当前不在调出仓库：'.$allStock[$transferOrderDetail['out_stock_id']].'！！'), '', 524);
             }
             //实体仓调拨单子表的子表（条形码明细表）插入数据
             $arr[$k]['code'] = $v['code'];
@@ -4300,7 +4301,9 @@ class ScmWarehouse extends Scm
         $areaId = $this->request->request('area_id');
         $locationId = $this->request->request('location_id');
         $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
+        $transferOrderDetail = $this->_stock_transfer_order->where('id', $transferOrderItemDetail['transfer_order_id'])->find();
         $transferOrderItemCodeDetail = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->find();
+        $allStock = Db::name('warehouse_stock')->column('name','id');
         if (empty($transferOrderItemDetail)) {
             $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
         }
@@ -4331,6 +4334,9 @@ class ScmWarehouse extends Scm
             }
             if ($codeStatus['sku'] !== $transferOrderItemDetail['sku']) {
                 $this->error(__('条形码sku与调拨sku不一致，请检查！！'), '', 524);
+            }
+            if ($codeStatus['stock_id'] !== $transferOrderDetail['out_stock_id']) {
+                $this->error(__($v['code'] . '当前不在调出仓库：'.$allStock[$transferOrderDetail['out_stock_id']].'！！'), '', 524);
             }
         }
         $res = false;
