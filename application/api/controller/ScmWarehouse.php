@@ -3385,7 +3385,7 @@ class ScmWarehouse extends Scm
         empty($id) && $this->error(__('调拨单id不能为空！！'), '', 523);
         $list['transfer_order_number'] = $this->_warehouse_transfer_order->where('id', $id)->value('transfer_order_number');
         $list['stock_id'] = $this->_warehouse_transfer_order->where('id', $id)->value('stock_id');
-        $list['stock_name'] = $this->_warehouse_stock->where('id', $list['stock_id'])->value('name');
+        $list['stock_name'] = $this->warehouse_stock->where('id', $list['stock_id'])->value('name');
         $list['item_list'] = $this->_warehouse_transfer_order->where('id', $id)->select();
         foreach ($list['item_list'] as $k => $v) {
             $area_id = Db::name('warehouse_area')->where('coding', $v['outarea'])->value('id');
