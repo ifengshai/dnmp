@@ -2,6 +2,7 @@
 
 namespace app\admin\model\order\order;
 
+use app\enum\OrderType;
 use think\Model;
 
 class NewOrder extends Model
@@ -156,7 +157,7 @@ class NewOrder extends Model
         ];
         $map['a.payment_time'] = ['>', strtotime('-120 day')];
         $map['a.site'] = $site;
-        $map['a.order_type'] = $site;
+        $map['a.order_type'] = OrderType::REGULAR_ORDER;
 
         return $this->where($map)
             ->alias('a')
