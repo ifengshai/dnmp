@@ -196,7 +196,7 @@ class ConversionRate extends BaseElasticsearch
                                     'field' => 'register_num',
                                 ],
                             ],
-                            'LoginNum'        => [
+                            'loginNum'        => [
                                 'sum' => [
                                     'field' => 'login_user_num',
                                 ],

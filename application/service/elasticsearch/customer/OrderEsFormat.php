@@ -179,7 +179,7 @@ class OrderEsFormat extends BaseEsFormatData
         $daySaleDataReverse = array_reverse($daySaleData);
         foreach ($daySaleDataReverse as $key => $val) {
             $date = date('Y-m-d',strtotime($val['key']));
-            $session = $val['session']['value'] ?: 0;
+            $session = $val['sessions']['value'] ?: 0;
             $orderNum = $val['orderNum']['value'] ?: 0;
             $avgPrice = $val['avgPrice']['value'] ?: 0.00;
             $addToCartNum = $val['addToCartNum']['value'] ?: 0;
