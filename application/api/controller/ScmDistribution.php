@@ -1031,7 +1031,9 @@ class ScmDistribution extends Scm
             $this->error(__('此库位正在盘点,暂无法配货'), [], 403);
         }
         /****************************end*****************************************/
-
+        if ($barcodedata['stock_id'] != $order_item_info['stock_id']) {
+            $this->error(__('条码不在此仓库'), [], 403);
+        }
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
