@@ -174,7 +174,7 @@ class SingleItems extends Backend
                 ->alias('o')
                 ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
                 ->where($map)
-                ->value('sum(base_original_price-base_discount_amount) as price');
+                ->value('sum(base_original_price-i.base_discount_amount) as price');
             //平均每副订单金额
             $everyMoney = $total ? round($sumSkuTotal/$wholeGlass,2) : 0;
             //关联购买
