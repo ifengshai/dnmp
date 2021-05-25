@@ -8,7 +8,9 @@ namespace app\admin\controller\shell;
 
 use app\admin\controller\elasticsearch\async\AsyncDatacenterDay;
 use app\admin\model\operatedatacenter\Zeelool;
+use app\admin\model\order\order\NewOrder;
 use app\common\controller\Backend;
+use app\enum\Site;
 use fast\Excel;
 use GuzzleHttp\Client;
 use think\Db;
@@ -377,7 +379,8 @@ class TrackReg extends Backend
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $skuSalesNum = new \app\admin\model\SkuSalesNum();
         $date = date('Y-m-d 00:00:00');
-        $list = $itemPlatformSku->field('id,sku,platform_type as site')->where([
+        $list = $itemPlatformSku->field('id,sku,platform_type as site,stock,platform_sku,grade')->where([
+            'outer_sku_status' => 1,
             'platform_type'    => ['<>', 8],
         ])->select();
         $list = collection($list)->toArray();
@@ -421,6 +424,85 @@ class TrackReg extends Backend
             } else {
                 $params['grade'] = 'F';
             }
+            //自然日120天销量
+            $days120SalesNum = (new NewOrder())->getSkuSalesNum120days($v['sku'], $v['site']);
+
+            $status = 0;
+            if ($v['stock'] > 0 && $days120SalesNum > 0) {
+                $stateHealth = floatval(bcdiv($v['stock'], $days120SalesNum, 1));
+                /**
+                 * 正常            [0,1)
+                 * 高风险         [1,1.2)   F级的放入高风险中
+                 * 中风险         [1.2,1.4)
+                 * 低风险         [1.4+)
+                 * 运营新品：  入库但是未上架的sku
+                 */
+
+                $isStockNew = 0;
+                switch ($v['site']) {
+                    case Site::ZEELOOL:
+                        $isStockNew = Db::connect('database.db_zeelool_online')
+                            ->name('catalog_product_entity')
+                            ->where('sku', '=', $v['platform_sku'])
+                            ->value('is_stock_new');
+                        break;
+                    case Site::VOOGUEME:
+                        $isStockNew = Db::connect('database.db_voogueme_online')
+                            ->name('catalog_product_entity')
+                            ->where('sku', '=', $v['platform_sku'])
+                            ->value('is_stock_new');;
+                        break;
+                    case Site::NIHAO:
+                        $isStockNew = Db::connect('database.db_nihao_online')
+                            ->name('catalog_product_entity')
+                            ->where('sku', '=', $v['platform_sku'])
+                            ->value('is_stock_new');;
+                        break;
+                    case Site::ZEELOOL_DE:
+                        $isStockNew = Db::connect('database.db_zeelool_de_online')
+                            ->name('catalog_product_entity')
+                            ->where('sku', '=', $v['platform_sku'])
+                            ->value('is_stock_new');;
+                        break;
+                    case Site::ZEELOOL_JP:
+                        $isStockNew = Db::connect('database.db_zeelool_jp_online')
+                            ->name('catalog_product_entity')
+                            ->where('sku', '=', $v['platform_sku'])
+                            ->value('is_stock_new');;
+                        break;
+                    case Site::WESEEOPTICAL:
+                        $isStockNew = Db::connect('database.db_weseeoptical_online')
+                            ->name('goods')
+                            ->where('sku', '=', $v['platform_sku'])
+                            ->value('is_stock_new');
+                        break;
+                }
+//                判断运营新品
+                if ($isStockNew == 2) {
+                    $status = 5;
+                } else {
+//                    高风险
+                    if ($v['grade'] == 'F') {
+                        $status = 2;
+                    } else {
+//                        正常
+                        if ($stateHealth >= 0 && $stateHealth < 1) {
+                            $status = 1;
+                        } elseif ($stateHealth >= 1 && $stateHealth < 1.2) {
+//                            高风险
+                            $status = 2;
+                        } elseif ($stateHealth >= 1.2 && $stateHealth < 1.4) {
+//                            中风险
+                            $status = 3;
+                        } elseif ($stateHealth >= 1.4) {
+//                            低风险
+                            $status = 4;
+                        }
+                    }
+                }
+            }
+
+            $params['stock_health_status'] = $status;
             $itemPlatformSku->where('id', $v['id'])->update($params);
 
             echo $v['sku'] . "\n";
@@ -1095,7 +1177,6 @@ class TrackReg extends Backend
     {
         $model = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
         $zeelool_model = Db::connect('database.db_zeelool_online');
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
@@ -1103,6 +1184,7 @@ class TrackReg extends Backend
         $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
+        $date_time = '2020-08-28';
         //查询时间
         $arr = [];
         $arr['site'] = 1;
@@ -1117,8 +1199,7 @@ class TrackReg extends Backend
         //总的订单数
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$date_time."'")];
-        $arr['sum_order_num'] = $zeelool_model->table('sales_flat_order')->where($order_where)->where('order_type',
-            1)->count();
+        $arr['sum_order_num'] = $zeelool_model->table('sales_flat_order')->where($order_where)->where('order_type',1)->count();
         //登录用户数
         $customer_where = [];
         $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '".$date_time."'")];
@@ -1168,10 +1249,6 @@ class TrackReg extends Backend
         //补发销售额
         $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',
             3)->sum('base_grand_total');
-        //会话
-        // $arr['sessions'] = $this->google_session(1, $date_time);
-        //会话转化率
-        // $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
         //新建购物车数量
         $cart_where1 = [];
         $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$date_time."'")];
@@ -1182,10 +1259,6 @@ class TrackReg extends Backend
         $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '".$date_time."'")];
         $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total',
             'gt', 0)->count();
-        //新增加购率
-        // $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
-        //更新加购率
-        // $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
         //新增购物车转化率
         $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
         //更新购物车转化率
@@ -1242,24 +1315,19 @@ class TrackReg extends Backend
             'p.sku=i.sku')->where($virtual_where)->sum('p.stock');
         //在售，预售，下架
         $item = new \app\admin\model\itemmanage\Item();
-        $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $site_where['platform_type'] = $arr['site'];
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
-        $arr['glass_in_sale_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['glass_shelves_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['glass_presell_num'] = $item_platform->where($map_where)->where($site_where)->where('presell_status',
-            1)->count();
+        $goodsWhere = [];
+        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0  and presell_status != 1) or (presell_status=1))")];
+        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
+        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $skus1 = $item->getOrnamentsSku();
         $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['box_shelves_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
-            1)->count();
+        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
+        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
@@ -1277,7 +1345,6 @@ class TrackReg extends Backend
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
         $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
@@ -1422,24 +1489,19 @@ class TrackReg extends Backend
         //在售，预售，下架
         //在售，预售，下架
         $item = new \app\admin\model\itemmanage\Item();
-        $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $site_where['platform_type'] = $arr['site'];
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
-        $arr['glass_in_sale_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['glass_shelves_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['glass_presell_num'] = $item_platform->where($map_where)->where($site_where)->where('presell_status',
-            1)->count();
+        $goodsWhere = [];
+        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0 and presell_status != 1) or (presell_status=1))")];
+        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
+        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $skus1 = $item->getOrnamentsSku();
         $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['box_shelves_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
-            1)->count();
+        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
+        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         //插入数据
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
@@ -1458,7 +1520,6 @@ class TrackReg extends Backend
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
         $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
@@ -1546,14 +1607,6 @@ class TrackReg extends Backend
         //更新购物车转化率
         $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100,
             2) : 0;
-        //着陆页数据
-        // $arr['landing_num'] = $zeelool_data->google_landing(3, $date_time);
-        //产品详情页
-        // $arr['detail_num'] = $zeelool_data->google_target13(3, $date_time);
-        //加购
-        // $arr['cart_num'] = $zeelool_data->google_target1(3, $date_time);
-        //交易次数
-        // $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
         //当天创建的用户当天产生订单的转化率
         $status_where['status'] = [
             'in',
@@ -1604,24 +1657,19 @@ class TrackReg extends Backend
             'p.sku=i.sku')->where($virtual_where)->sum('p.stock');
         //在售，预售，下架
         $item = new \app\admin\model\itemmanage\Item();
-        $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $site_where['platform_type'] = $arr['site'];
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
-        $arr['glass_in_sale_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['glass_shelves_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['glass_presell_num'] = $item_platform->where($map_where)->where($site_where)->where('presell_status',
-            1)->count();
+        $goodsWhere = [];
+        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0  and presell_status != 1) or (presell_status=1))")];
+        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
+        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $skus1 = $item->getOrnamentsSku();
         $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['box_shelves_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
-            1)->count();
+        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
+        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         //插入数据
         Db::name('datacenter_day')->insert($arr);
         echo $date_time."\n";
@@ -1767,24 +1815,19 @@ class TrackReg extends Backend
             'p.sku=i.sku')->where($virtual_where)->sum('p.stock');
         //在售，预售，下架
         $item = new \app\admin\model\itemmanage\Item();
-        $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $site_where['platform_type'] = $arr['site'];
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
-        $arr['glass_in_sale_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['glass_shelves_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['glass_presell_num'] = $item_platform->where($map_where)->where($site_where)->where('presell_status',
-            1)->count();
+        $goodsWhere = [];
+        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0 and presell_status != 1) or (presell_status=1))")];
+        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
+        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $skus1 = $item->getOrnamentsSku();
         $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['box_shelves_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
-            1)->count();
+        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
+        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
@@ -1931,24 +1974,19 @@ class TrackReg extends Backend
             'p.sku=i.sku')->where($virtual_where)->sum('p.stock');
         //在售，预售，下架
         $item = new \app\admin\model\itemmanage\Item();
-        $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $site_where['platform_type'] = $arr['site'];
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
-        $arr['glass_in_sale_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['glass_shelves_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['glass_presell_num'] = $item_platform->where($map_where)->where($site_where)->where('presell_status',
-            1)->count();
+        $goodsWhere = [];
+        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0 and presell_status != 1) or (presell_status=1))")];
+        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
+        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $skus1 = $item->getOrnamentsSku();
         $map_where1['sku'] = ['in', $skus1];
-        $arr['box_in_sale_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['box_shelves_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
-            1)->count();
+        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
+        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
@@ -1962,7 +2000,6 @@ class TrackReg extends Backend
     {
         $model = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $item_platform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $skus = $item->getFrameSku();
         $map_where['sku'] = ['in', $skus];
         $skus1 = $item->getOrnamentsSku();
@@ -1976,6 +2013,8 @@ class TrackReg extends Backend
         $where['i.category_id'] = ['<>', 43];
         $where['i.is_del'] = 1;
         $where['i.is_open'] = 1;
+        $goodsWhere = [];
+        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0 and presell_status != 1) or (presell_status=1))")];
 
         $arr = [];
         $arr['site'] = 4;
@@ -1983,40 +2022,14 @@ class TrackReg extends Backend
         $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
             'p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
         //在售，预售，下架
-        $arr['glass_in_sale_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['glass_shelves_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['glass_presell_num'] = $item_platform->where($map_where)->where($site_where)->where('presell_status',
-            1)->count();
-        $arr['box_in_sale_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['box_shelves_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
-            1)->count();
-        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
-        //同步es数据
-        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
-
-        //批发站
-        $site_where['platform_type'] = $platform_where['platform_type'] = 5;
-        $arr['site'] = 5;
-        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
-            'p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
-        //在售，预售，下架
-        $arr['glass_in_sale_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['glass_shelves_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['glass_presell_num'] = $item_platform->where($map_where)->where($site_where)->where('presell_status',
-            1)->count();
-        $arr['box_in_sale_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['box_shelves_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
-            1)->count();
+        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
+        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $skus1 = $item->getOrnamentsSku();
+        $map_where1['sku'] = ['in', $skus1];
+        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
+        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
@@ -2027,18 +2040,14 @@ class TrackReg extends Backend
         $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
             'p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
         //在售，预售，下架
-        $arr['glass_in_sale_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['glass_shelves_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['glass_presell_num'] = $item_platform->where($map_where)->where($site_where)->where('presell_status',
-            1)->count();
-        $arr['box_in_sale_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['box_shelves_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
-            1)->count();
+        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
+        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $skus1 = $item->getOrnamentsSku();
+        $map_where1['sku'] = ['in', $skus1];
+        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
+        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
@@ -2049,24 +2058,151 @@ class TrackReg extends Backend
         $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
             'p.sku=i.sku')->where($where)->where($platform_where)->sum('p.stock');
         //在售，预售，下架
-        $arr['glass_in_sale_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['glass_shelves_num'] = $item_platform->where($map_where)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['glass_presell_num'] = $item_platform->where($map_where)->where($site_where)->where('presell_status',
-            1)->count();
-        $arr['box_in_sale_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            1)->count();
-        $arr['box_shelves_num'] = $item_platform->where($map_where1)->where($site_where)->where('outer_sku_status',
-            2)->count();
-        $arr['box_presell_num'] = $item_platform->where($map_where1)->where($site_where)->where('presell_status',
-            1)->count();
+        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
+        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $skus1 = $item->getOrnamentsSku();
+        $map_where1['sku'] = ['in', $skus1];
+        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
+        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
 
         echo date("Y-m-d H:i:s")."\n";
         echo "all is ok"."\n";
+    }
+    //运营数据中心 wesee
+    public function wesee_day_data()
+    {
+        $model = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $wesee = new \app\admin\model\order\order\NewWeseeoptical();
+        $wesee_data = new \app\admin\model\operatedatacenter\Weseeoptical();
+        $wesee_model = Db::connect('database.db_weseeoptical');
+        $wesee_model->table('users')->query("set time_zone='+8:00'");
+        $wesee_model->table('orders')->query("set time_zone='+8:00'");
+
+        $date_time = date('Y-m-d', strtotime("-1 day"));
+        $date_time_start = date('Y-m-d 00:00:00', strtotime("-1 day"));
+        $date_time_end = date('Y-m-d 23:59:59', strtotime("-1 day"));
+        //查询时间
+        $arr = [];
+        $arr['site'] = 5;
+        $arr['day_date'] = $date_time;
+        //活跃用户数
+        // $arr['active_user_num'] = $this->google_active_user(1, $date_time);
+        //注册用户数
+        $register_where = [];
+        $arr['register_num'] = $wesee_model->table('users')->where('created_at','between',[$date_time_start,$date_time_end])->count();
+
+        //总的订单数
+        $order_where = [];
+        $arr['sum_order_num'] = $wesee_model->table('orders')->where('created_at','between',[$date_time_start,$date_time_end])->where('order_type',
+            1)->count();
+        //登录用户数
+        $customer_where = [];
+        $arr['login_user_num'] = $wesee_model->table('users')->where('updated_at','between',[$date_time_start,$date_time_end])->count();
+
+        //新增vip用户数
+        $arr['vip_user_num'] = 0;
+        //支付成功的订单数
+
+        $arr['order_num'] = $wesee->where('status','in',[2,3,4,9,10])->where('updated_at','between',[$date_time_start,$date_time_end])->where('order_type', 1)->count();
+        //销售额
+        $arr['sales_total_money'] = $wesee->where('status','in',[2,3,4,9,10])->where('updated_at','between',[$date_time_start,$date_time_end])->where('order_type',
+            1)->sum('base_actual_amount_paid');
+        //邮费
+        $arr['shipping_total_money'] = $wesee->where('status','in',[2,3,4,9,10])->where('updated_at','between',[$date_time_start,$date_time_end])->where('order_type',
+            1)->sum('base_freight_price');
+        //客单价
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
+        //中位数
+        $sales_total_money = $wesee->where('status','in',[2,3,4,9,10])->where('updated_at','between',[$date_time_start,$date_time_end])->where('order_type', 1)->column('base_actual_amount_paid');
+        $arr['order_total_midnum'] = $this->median($sales_total_money);
+        //标准差
+        $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+        //补发订单数
+        $arr['replacement_order_num'] = $wesee->where('status','in',[2,3,4,9,10])->where('updated_at','between',[$date_time_start,$date_time_end])->where('order_type', 4)->count();
+        //补发销售额
+        $arr['replacement_order_total'] = $wesee->where('status','in',[2,3,4,9,10])->where('updated_at','between',[$date_time_start,$date_time_end])->where('order_type',
+            4)->sum('base_actual_amount_paid');
+        //网红订单数
+        $arr['online_celebrity_order_num'] = 0;
+        //补发销售额
+        $arr['online_celebrity_order_total'] = 0;
+        //新建购物车数量
+        $arr['new_cart_num'] = 0;
+        //更新购物车数量
+        $arr['update_cart_num'] = 0;
+        //新增购物车转化率
+        $arr['cart_rate'] = 0;
+        //更新购物车转化率
+        $arr['update_cart_cart'] = 0;
+        //当天创建的用户当天产生订单的转化率
+        $status_where['status'] = [
+            'in',
+            [
+                2,3,4,9,10
+            ],
+        ];
+        $status_where['order_type'] = 1;
+        //当天注册用户数
+        $register_userids = $wesee_model->table('users')->where('created_at','between',[$date_time_start,$date_time_end])->column('id');
+        $register_num = count($register_userids);
+        //当天注册用户在当天下单的用户数
+        $order_user_count1 = 0;
+        foreach ($register_userids as $register_userid) {
+            //判断当前用户在当天是否下单
+            $order = $wesee->where('created_at','between',[$date_time_start,$date_time_end])->where($status_where)->where('user_id',
+                $register_userid)->value('id');
+            if ($order) {
+                $order_user_count1++;
+            }
+        }
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
+        //当天更新用户当天产生订单的转化率
+        $update_userids = $wesee_model->table('users')->where('updated_at','between',[$date_time_start,$date_time_end])->column('id');
+        $update_num = count($update_userids);
+        //当天活跃更新用户数在当天是否下单
+        $order_user_count2 = 0;
+        foreach ($update_userids as $update_userid) {
+            //判断活跃用户在当天下单的用户数
+            $order = $wesee->where('created_at','between',[$date_time_start,$date_time_end])->where($status_where)->where('user_id',
+                $update_userid)->value('id');
+            if ($order) {
+                $order_user_count2++;
+            }
+        }
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
+        //虚拟库存
+        $virtual_where['platform_type'] = 5;
+        $virtual_where['i.category_id'] = ['<>', 43];
+        $virtual_where['i.is_del'] = 1;
+        $virtual_where['i.is_open'] = 1;
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
+            'p.sku=i.sku')->where($virtual_where)->sum('p.stock');
+        //在售，预售，下架
+        $item = new \app\admin\model\itemmanage\Item();
+        $site_where['platform_type'] = $arr['site'];
+        $skus = $item->getFrameSku();
+        $map_where['sku'] = ['in', $skus];
+        $goodsWhere = [];
+        $goodsWhere[] = ['exp', Db::raw("((outer_sku_status=1 and stock!=0  and presell_status != 1) or (presell_status=1))")];
+        $arr['glass_in_sale_num'] = $model->where($map_where)->where($site_where)->where($goodsWhere)->count();
+        $arr['glass_shelves_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['glass_presell_num'] = $model->where($map_where)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $skus1 = $item->getOrnamentsSku();
+        $map_where1['sku'] = ['in', $skus1];
+        $arr['box_in_sale_num'] = $model->where($map_where1)->where($site_where)->where($goodsWhere)->count();
+        $arr['box_shelves_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',2)->count();
+        $arr['box_presell_num'] = $model->where($map_where1)->where($site_where)->where('outer_sku_status',1)->where('stock',0)->count();
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
+        echo $date_time."\n";
+        echo date("Y-m-d H:i:s")."\n";
+        usleep(100000);
     }
 
     //订单发出时间计划任务
@@ -2141,7 +2277,7 @@ class TrackReg extends Backend
         ];
         $where['o.site'] = $site;
         $order = $this->order->alias('o')->join('fa_order_item_option i',
-            'o.entity_id=i.order_id')->field('i.sku,count(*) as count')->where($where)->group('i.sku')->select();
+            'o.entity_id=i.magento_order_id')->field('i.sku,count(*) as count')->where($where)->group('i.sku')->select();
         $grade1 = 0;
         $grade2 = 0;
         $grade3 = 0;
@@ -2493,6 +2629,43 @@ class TrackReg extends Backend
         } else {
             echo 'nihao站配饰不ok';
         }
+
+        $res51 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(5, 1));
+        if ($res51) {
+            echo 'wesee站平光镜ok';
+        } else {
+            echo 'wesee站平光镜不ok';
+        }
+        $res52 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(5, 2));
+        if ($res52) {
+            echo 'wesee站太阳镜ok';
+        } else {
+            echo 'wesee站太阳镜不ok';
+        }
+        $res53 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(5, 3));
+        if ($res53) {
+            echo 'wesee站老花镜ok';
+        } else {
+            echo 'wesee站老花镜不ok';
+        }
+        $res54 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(5, 4));
+        if ($res54) {
+            echo 'wesee站儿童镜ok';
+        } else {
+            echo 'wesee站儿童镜不ok';
+        }
+        $res55 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(5, 5));
+        if ($res55) {
+            echo 'wesee站运动镜ok';
+        } else {
+            echo 'wesee站运动镜不ok';
+        }
+        $res56 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(5, 6));
+        if ($res56) {
+            echo 'wesee站配饰ok';
+        } else {
+            echo 'wesee站配饰不ok';
+        }
         $res12 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center(10, 1));
         if ($res12) {
             echo 'de站平光镜ok';
@@ -2534,63 +2707,30 @@ class TrackReg extends Backend
     //统计昨天各品类镜框的销量
     public function goods_type_day_center($plat, $goods_type)
     {
+        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
         $start = date('Y-m-d', strtotime('-1 day'));
         $seven_days = $start.' 00:00:00 - '.$start.' 23:59:59';
         $createat = explode(' ', $seven_days);
-        $itemMap['m.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-        //判断站点
-        switch ($plat) {
-            case 1:
-                $model = Db::connect('database.db_zeelool');
-                break;
-            case 2:
-                $model = Db::connect('database.db_voogueme');
-                break;
-            case 3:
-                $model = Db::connect('database.db_nihao');
-                break;
-            case 10:
-                $model = Db::connect('database.db_zeelool_de');
-                break;
-            case 11:
-                $model = Db::connect('database.db_zeelool_jp');
-                break;
-            default:
-                $model = false;
-                break;
-        }
-        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-        $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        //$whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
-        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
-        //某个品类眼镜的销售副数
-        $frame_sales_num = $model->table('sales_flat_order_item m')
-            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-            ->where('p.goods_type', '=', $goods_type)
-            ->where($whereItem)
-            ->where($itemMap)
-            ->sum('m.qty_ordered');
-        //求出眼镜的销售额 base_price  base_discount_amount
-        $frame_money_price = $model->table('sales_flat_order_item m')
-            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-            ->where($whereItem)
-            ->where('p.goods_type', '=', $goods_type)
-            ->where($itemMap)
-            ->sum('m.base_price');
-        //眼镜的折扣价格
-        $frame_money_discount = $model->table('sales_flat_order_item m')
-            ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-            ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-            ->where($whereItem)
-            ->where('p.goods_type', '=', $goods_type)
-            ->where($itemMap)
-            ->sum('m.base_discount_amount');
-        //眼镜的实际销售额
-        $frame_money = round(($frame_money_price - $frame_money_discount), 2);
+        $where['o.payment_time'] = ['between', [strtotime($createat[0].' '.$createat[1]), strtotime($createat[3].' '.$createat[4])]];
+        $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $where['order_type'] = 1;
+        $where['o.site'] = $plat;
+        $where['goods_type'] = $goods_type;
 
+        //某个品类眼镜的销售副数
+        $frame_sales_num = $this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
+            ->where($where)
+            ->sum('i.qty');
+        //眼镜的折扣价格
+        $frame_money = $this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
+            ->where($where)
+            ->value('sum(base_original_price-i.base_discount_amount) as price');
+        $frame_money = $frame_money ? round($frame_money, 2) :0;
         $arr['day_date'] = $start;
         $arr['site'] = $plat;
         $arr['goods_type'] = $goods_type;
@@ -2784,108 +2924,47 @@ class TrackReg extends Backend
     public function sku_day_data_ga()
     {
         set_time_limit(0);
+        $this->getSkuDayData(1);
+        $this->getSkuDayData(2);
+        $this->getSkuDayData(3);
+        $this->getSkuDayData(5);
+        $this->getSkuDayData(10);
+        $this->getSkuDayData(11);
+
+        echo "ok";
+    }
+
+    /**
+     * 获取sku每日数据中的基础数据
+     * @param $site   站点
+     * @author mjj
+     * @date   2021/5/17 09:26:25
+     */
+    public function getSkuDayData($site)
+    {
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
-        // $data = '2020-11-11';
+        //$data = '2020-11-01';
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $sku_data = $_item_platform_sku
             ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 1, 'outer_sku_status' => 1])
+            ->where(['platform_type' => $site, 'outer_sku_status' => 1])
             ->select();
 
         //当前站点的所有sku映射关系
         $sku_data = collection($sku_data)->toArray();
         foreach ($sku_data as $k => $v) {
             $sku_data[$k]['unique_pageviews'] = 0;
-            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
+            $sku_data[$k]['goods_grade'] = $v['grade'];
             $sku_data[$k]['day_date'] = $data;
-            $sku_data[$k]['site'] = 1;
-            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
-            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
+            $sku_data[$k]['site'] = $site;
+            $sku_data[$k]['day_stock'] = $v['stock'];
+            $sku_data[$k]['day_onway_stock'] = $v['plat_on_way_stock'];
             unset($sku_data[$k]['stock']);
             unset($sku_data[$k]['grade']);
             unset($sku_data[$k]['plat_on_way_stock']);
             Db::name('datacenter_sku_day')->insert($sku_data[$k]);
         }
-
-        $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 2, 'outer_sku_status' => 1])
-            ->select();
-        //当前站点的所有sku映射关系
-        $sku_data = collection($sku_data)->toArray();
-        foreach ($sku_data as $k => $v) {
-            $sku_data[$k]['unique_pageviews'] = 0;
-            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
-            $sku_data[$k]['day_date'] = $data;
-            $sku_data[$k]['site'] = 2;
-            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
-            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
-            unset($sku_data[$k]['stock']);
-            unset($sku_data[$k]['grade']);
-            unset($sku_data[$k]['plat_on_way_stock']);
-            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
-        }
-
-        $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 3, 'outer_sku_status' => 1])
-            ->select();
-        //当前站点的所有sku映射关系
-        $sku_data = collection($sku_data)->toArray();
-
-        foreach ($sku_data as $k => $v) {
-            $sku_data[$k]['unique_pageviews'] = 0;
-            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
-            $sku_data[$k]['day_date'] = $data;
-            $sku_data[$k]['site'] = 3;
-            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
-            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
-            unset($sku_data[$k]['stock']);
-            unset($sku_data[$k]['grade']);
-            unset($sku_data[$k]['plat_on_way_stock']);
-            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
-        }
-
-        $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 10, 'outer_sku_status' => 1])
-            ->select();
-        //当前站点的所有sku映射关系
-        $sku_data = collection($sku_data)->toArray();
-        foreach ($sku_data as $k => $v) {
-            $sku_data[$k]['unique_pageviews'] = 0;
-            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
-            $sku_data[$k]['day_date'] = $data;
-            $sku_data[$k]['site'] = 10;
-            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
-            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
-            unset($sku_data[$k]['stock']);
-            unset($sku_data[$k]['grade']);
-            unset($sku_data[$k]['plat_on_way_stock']);
-            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
-        }
-
-        $sku_data = $_item_platform_sku
-            ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
-            ->where(['platform_type' => 11, 'outer_sku_status' => 1])
-            ->select();
-        //当前站点的所有sku映射关系
-        $sku_data = collection($sku_data)->toArray();
-        foreach ($sku_data as $k => $v) {
-            $sku_data[$k]['unique_pageviews'] = 0;
-            $sku_data[$k]['goods_grade'] = $sku_data[$k]['grade'];
-            $sku_data[$k]['day_date'] = $data;
-            $sku_data[$k]['site'] = 11;
-            $sku_data[$k]['day_stock'] = $sku_data[$k]['stock'];
-            $sku_data[$k]['day_onway_stock'] = $sku_data[$k]['plat_on_way_stock'];
-            unset($sku_data[$k]['stock']);
-            unset($sku_data[$k]['grade']);
-            unset($sku_data[$k]['plat_on_way_stock']);
-            Db::name('datacenter_sku_day')->insert($sku_data[$k]);
-        }
-
-        echo "ok";
     }
 
     //跑sku每天唯一身份浏览量
@@ -2901,6 +2980,8 @@ class TrackReg extends Backend
             $ga_skus = array_column($ga_skus, 'uniquePageviews', 'ga:pagePath');
             if ($value['site'] == 2) {
                 $model = Db::connect('database.db_voogueme_online');
+            } elseif ($value['site'] == 5) {
+                $model = Db::connect('database.db_weseeoptical');
             } elseif ($value['site'] == 10) {
                 $model = Db::connect('database.db_zeelool_de_online');
             } else {
@@ -2933,522 +3014,169 @@ class TrackReg extends Backend
     public function sku_day_data_order()
     {
         set_time_limit(0);
-        Db::connect('database.db_zeelool')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        Db::connect('database.db_zeelool')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-        Db::connect('database.db_zeelool')->table('sales_flat_order')->query("set time_zone='+8:00'");
-        //统计昨天的数据
+        $this->getSkuDayDataOrder(1);
+        $this->getSkuDayDataOrder(2);
+        $this->getSkuDayDataOrder(3);
+        $this->getSkuDayDataOrder(5);
+        $this->getSkuDayDataOrder(10);
+        $this->getSkuDayDataOrder(11);
+    }
+
+    /**
+     * 获取sku每日数据中的订单数据
+     * @param $site  站点
+     * @author mjj
+     * @date   2021/5/17 10:03:58
+     */
+    public function getSkuDayDataOrder($site){
+        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
         $data = date('Y-m-d', strtotime('-1 day'));
-        // $data = '2020-11-11';
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 1])->select();
-        foreach ($z_sku_list as $k => $v) {
-            $map['sku'] = ['like', $v['platform_sku'].'%'];
-            $map['a.status'] = [
-                'in',
-                [
-                    'free_processing',
-                    'processing',
-                    'complete',
-                    'paypal_reversed',
-                    'payment_review',
-                    'paypal_canceled_reversal',
-                    'delivered',
-                ],
-            ];
-            $map['a.order_type'] = ['=', 1];
-            $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '".$data."'")];
-            //某个sku当天的订单数
-            $z_sku_list[$k]['order_num'] = Db::connect('database.db_zeelool')->table('sales_flat_order')
-                ->where($map)
-                ->where($time_where)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->group('order_id')
-                ->field('entity_id,sku,a.created_at,a.order_type,a.status')
-                ->count();
-            //sku销售总副数
-            $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$data."'")];
-
-            //统计错误 弃用此方法
-            // $z_sku_list[$k]['glass_num'] = Db::connect('database.db_zeelool')
-            //     ->table('sales_flat_order_item')
-            //     ->where('sku', 'like', $v['platform_sku'] . '%')
-            //     ->where($time_where1)
-            //     ->sum('qty_ordered');
-            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_zeelool')->table('sales_flat_order')
-                ->where($map)
-                ->where($time_where)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->sum('qty_ordered');
-
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
-            $whereItem1 = " o.order_type = 1";
-            $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '".$data."'")];
-            //求出眼镜的销售额 base_price  base_discount_amount
-            $frame_money_price = Db::connect('database.db_zeelool')->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where($whereItem)
-                ->where($whereItem1)
-                ->where($itemMap)
-                ->where('p.sku', 'like', $v['platform_sku'].'%')
-                ->sum('m.base_price');
-            //眼镜的折扣价格
-            $frame_money_discount = Db::connect('database.db_zeelool')->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where($whereItem)
-                ->where($whereItem1)
-                ->where($itemMap)
-                ->where('p.sku', 'like', $v['platform_sku'].'%')
-                ->sum('m.base_discount_amount');
-            //眼镜的实际销售额
-            $frame_money = round(($frame_money_price - $frame_money_discount), 2);
-            $z_sku_list[$k]['sku_grand_total'] = $frame_money_price;
-            $z_sku_list[$k]['sku_row_total'] = $frame_money;
-            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
-            echo $z_sku_list[$k]['sku']."\n";
-            echo '<br>';
-        }
-
-        //v站
-        Db::connect('database.db_voogueme')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        Db::connect('database.db_voogueme')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-        Db::connect('database.db_voogueme')->table('sales_flat_order')->query("set time_zone='+8:00'");
+        $start = strtotime($data);
+        $end = strtotime(date('Y-m-d 23:59:59', strtotime('-1 day')));
+        $orderWhere['o.payment_time'] = ['between',[$start,$end]];
+        $orderWhere['o.site'] = $site;
+        $orderWhere['o.order_type'] = 1;
+        $orderWhere['o.status'] = ['in',['free_processing','processing', 'complete', 'paypal_reversed', 'payment_review','paypal_canceled_reversal', 'delivered']];
         //统计昨天的数据
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 2])->select();
-        foreach ($z_sku_list as $k => $v) {
-            $map['sku'] = ['like', $v['platform_sku'].'%'];
-            $map['a.status'] = [
-                'in',
-                [
-                    'free_processing',
-                    'processing',
-                    'complete',
-                    'paypal_reversed',
-                    'payment_review',
-                    'paypal_canceled_reversal',
-                    'delivered',
-                ],
-            ];
-            $map['a.order_type'] = ['=', 1];
-            $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '".$data."'")];
+        $list = Db::name('datacenter_sku_day')
+            ->where(['day_date' => $data, 'site' => $site])
+            ->select();
+        foreach ($list as $k => $v) {
+            $map['i.sku'] = ['like', $v['platform_sku'].'%'];
             //某个sku当天的订单数
-            $z_sku_list[$k]['order_num'] = Db::connect('database.db_voogueme')->table('sales_flat_order')
+            $list[$k]['order_num'] = $this->order
+                ->alias('o')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->where($orderWhere)
                 ->where($map)
-                ->where($time_where)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->group('order_id')
-                ->field('entity_id,sku,a.created_at,a.order_type,a.status')
-                ->count();
+                ->count('distinct magento_order_id');
             //sku销售总副数
-            $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$data."'")];
-            // $z_sku_list[$k]['glass_num'] = Db::connect('database.db_voogueme')
-            //     ->table('sales_flat_order_item')
-            //     ->where('sku', 'like', $v['platform_sku'] . '%')
-            //     ->where($time_where1)
-            //     ->sum('qty_ordered');
-            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_voogueme')->table('sales_flat_order')
+            $list[$k]['glass_num'] = $this->order
+                ->alias('o')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->where($orderWhere)
                 ->where($map)
-                ->where($time_where)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
-            $whereItem1 = " o.order_type = 1";
-            $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '".$data."'")];
-            //求出眼镜的销售额 base_price  base_discount_amount
-            $frame_money_price = Db::connect('database.db_voogueme')->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where($whereItem)
-                ->where($whereItem1)
-                ->where($itemMap)
-                ->where('p.sku', 'like', $v['platform_sku'].'%')
-                ->sum('m.base_price');
-            //眼镜的折扣价格
-            $frame_money_discount = Db::connect('database.db_voogueme')->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where($whereItem)
-                ->where($whereItem1)
-                ->where($itemMap)
-                ->where('p.sku', 'like', $v['platform_sku'].'%')
-                ->sum('m.base_discount_amount');
+                ->sum('i.qty');
+            //求出眼镜的销售额
+            $frame_money_price = $this->orderitemoption
+                ->alias('i')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
+                ->where($orderWhere)
+                ->where($map)
+                ->sum('base_original_price');
+            //sku付费镜片的数量
+            $lensWhere = [];
+            $lensWhere[] = ['exp', Db::raw("(i.index_price>0 || i.coating_price>0)")];
+            $list[$k]['pay_lens_num'] = $this->orderitemoption
+                ->alias('i')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
+                ->where($orderWhere)
+                ->where($map)
+                ->where($lensWhere)
+                ->sum('i.qty');
+            //眼镜的实际支付金额
+            $frame_money = $this->orderitemoption
+                ->alias('i')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
+                ->where($orderWhere)
+                ->where($map)
+                ->value('(sum(base_original_price-i.base_discount_amount)) total');
             //眼镜的实际销售额
-            $frame_money = round(($frame_money_price - $frame_money_discount), 2);
-            $z_sku_list[$k]['sku_grand_total'] = $frame_money_price;
-            $z_sku_list[$k]['sku_row_total'] = $frame_money;
-            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
-            echo $z_sku_list[$k]['sku']."\n";
-            echo '<br>';
-        }
-
-        //nihao站
-        Db::connect('database.db_nihao')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        Db::connect('database.db_nihao')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-        Db::connect('database.db_nihao')->table('sales_flat_order')->query("set time_zone='+8:00'");
-        //统计昨天的数据
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 3])->select();
-        foreach ($z_sku_list as $k => $v) {
-            $map['sku'] = ['like', $v['platform_sku'].'%'];
-            $map['a.status'] = [
-                'in',
-                [
-                    'free_processing',
-                    'processing',
-                    'complete',
-                    'paypal_reversed',
-                    'payment_review',
-                    'paypal_canceled_reversal',
-                    'delivered',
-                ],
-            ];
-            $map['a.order_type'] = ['=', 1];
-            $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '".$data."'")];
-            //某个sku当天的订单数
-            $z_sku_list[$k]['order_num'] = Db::connect('database.db_nihao')->table('sales_flat_order')
-                ->where($map)
-                ->where($time_where)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->group('order_id')
-                ->field('entity_id,sku,a.created_at,a.order_type,a.status')
-                ->count();
-            //sku销售总副数
-            $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$data."'")];
-            // $z_sku_list[$k]['glass_num'] = Db::connect('database.db_nihao')
-            //     ->table('sales_flat_order_item')
-            //     ->where('sku', 'like', $v['platform_sku'] . '%')
-            //     ->where($time_where1)
-            //     ->sum('qty_ordered');
-            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_voogueme')->table('sales_flat_order')
-                ->where($map)
-                ->where($time_where)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
-            $whereItem1 = " o.order_type = 1";
-            $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '".$data."'")];
-            //求出眼镜的销售额 base_price  base_discount_amount
-            $frame_money_price = Db::connect('database.db_nihao')->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where($whereItem)
-                ->where($whereItem1)
-                ->where($itemMap)
-                ->where('p.sku', 'like', $v['platform_sku'].'%')
-                ->sum('m.base_price');
-            //眼镜的折扣价格
-            $frame_money_discount = Db::connect('database.db_nihao')->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where($whereItem)
-                ->where($whereItem1)
-                ->where($itemMap)
-                ->where('p.sku', 'like', $v['platform_sku'].'%')
-                ->sum('m.base_discount_amount');
-            //眼镜的实际销售额
-            $frame_money = round(($frame_money_price - $frame_money_discount), 2);
-            $z_sku_list[$k]['sku_grand_total'] = $frame_money_price;
-            $z_sku_list[$k]['sku_row_total'] = $frame_money;
-            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
-            echo $z_sku_list[$k]['sku']."\n";
-            echo '<br>';
-        }
-
-        //de站
-        Db::connect('database.db_zeelool_de')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        Db::connect('database.db_zeelool_de')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-        Db::connect('database.db_zeelool_de')->table('sales_flat_order')->query("set time_zone='+8:00'");
-        //统计昨天的数据
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 10])->select();
-        foreach ($z_sku_list as $k => $v) {
-            $map['sku'] = ['like', $v['platform_sku'].'%'];
-            $map['a.status'] = [
-                'in',
-                [
-                    'free_processing',
-                    'processing',
-                    'complete',
-                    'paypal_reversed',
-                    'payment_review',
-                    'paypal_canceled_reversal',
-                    'delivered',
-                ],
-            ];
-            $map['a.order_type'] = ['=', 1];
-            $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '".$data."'")];
-            //某个sku当天的订单数
-            $z_sku_list[$k]['order_num'] = Db::connect('database.db_zeelool_de')->table('sales_flat_order')
-                ->where($map)
-                ->where($time_where)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->group('order_id')
-                ->field('entity_id,sku,a.created_at,a.order_type,a.status')
-                ->count();
-            //sku销售总副数
-            $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$data."'")];
-            // $z_sku_list[$k]['glass_num'] = Db::connect('database.db_voogueme')
-            //     ->table('sales_flat_order_item')
-            //     ->where('sku', 'like', $v['platform_sku'] . '%')
-            //     ->where($time_where1)
-            //     ->sum('qty_ordered');
-            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_zeelool_de')->table('sales_flat_order')
-                ->where($map)
-                ->where($time_where)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
-            $whereItem1 = " o.order_type = 1";
-            $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '".$data."'")];
-            //求出眼镜的销售额 base_price  base_discount_amount
-            $frame_money_price = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where($whereItem)
-                ->where($whereItem1)
-                ->where($itemMap)
-                ->where('p.sku', 'like', $v['platform_sku'].'%')
-                ->sum('m.base_price');
-            //眼镜的折扣价格
-            $frame_money_discount = Db::connect('database.db_zeelool_de')->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where($whereItem)
-                ->where($whereItem1)
-                ->where($itemMap)
-                ->where('p.sku', 'like', $v['platform_sku'].'%')
-                ->sum('m.base_discount_amount');
-            //眼镜的实际销售额
-            $frame_money = round(($frame_money_price - $frame_money_discount), 2);
-            $z_sku_list[$k]['sku_grand_total'] = $frame_money_price;
-            $z_sku_list[$k]['sku_row_total'] = $frame_money;
-            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
-            echo $z_sku_list[$k]['sku']."\n";
-            echo '<br>';
-        }
-
-        //jp站
-        Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-        Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->query("set time_zone='+8:00'");
-        //统计昨天的数据
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 11])->select();
-        foreach ($z_sku_list as $k => $v) {
-            $map['sku'] = ['like', $v['platform_sku'].'%'];
-            $map['a.status'] = [
-                'in',
-                [
-                    'free_processing',
-                    'processing',
-                    'complete',
-                    'paypal_reversed',
-                    'payment_review',
-                    'paypal_canceled_reversal',
-                    'delivered',
-                ],
-            ];
-            $map['a.order_type'] = ['=', 1];
-            $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '".$data."'")];
-            //某个sku当天的订单数
-            $z_sku_list[$k]['order_num'] = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')
-                ->where($map)
-                ->where($time_where)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->group('order_id')
-                ->field('entity_id,sku,a.created_at,a.order_type,a.status')
-                ->count();
-            //sku销售总副数
-            $time_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '".$data."'")];
-            // $z_sku_list[$k]['glass_num'] = Db::connect('database.db_voogueme')
-            //     ->table('sales_flat_order_item')
-            //     ->where('sku', 'like', $v['platform_sku'] . '%')
-            //     ->where($time_where1)
-            //     ->sum('qty_ordered');
-            $z_sku_list[$k]['glass_num'] = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')
-                ->where($map)
-                ->where($time_where)
-                ->alias('a')
-                ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-                ->sum('qty_ordered');
-            $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
-            $whereItem1 = " o.order_type = 1";
-            $itemMap[] = ['exp', Db::raw("DATE_FORMAT(m.created_at, '%Y-%m-%d') = '".$data."'")];
-            //求出眼镜的销售额 base_price  base_discount_amount
-            $frame_money_price = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where($whereItem)
-                ->where($whereItem1)
-                ->where($itemMap)
-                ->where('p.sku', 'like', $v['platform_sku'].'%')
-                ->sum('m.base_price');
-            //眼镜的折扣价格
-            $frame_money_discount = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where($whereItem)
-                ->where($whereItem1)
-                ->where($itemMap)
-                ->where('p.sku', 'like', $v['platform_sku'].'%')
-                ->sum('m.base_discount_amount');
-            //眼镜的实际销售额
-            $frame_money = round(($frame_money_price - $frame_money_discount), 2);
-            $z_sku_list[$k]['sku_grand_total'] = $frame_money_price;
-            $z_sku_list[$k]['sku_row_total'] = $frame_money;
-            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
-            echo $z_sku_list[$k]['sku']."\n";
+            $frame_money = $frame_money ? round($frame_money, 2) : 0;
+            $list[$k]['sku_grand_total'] = $frame_money_price;
+            $list[$k]['sku_row_total'] = $frame_money;
+            Db::name('datacenter_sku_day')->update($list[$k]);
+            echo $list[$k]['sku']."\n";
             echo '<br>';
         }
     }
 
     public function sku_day_data_other()
     {
-        //z站
         set_time_limit(0);
-        //购物车数量
-        $zeelool_model = Db::connect('database.db_zeelool_online');
-        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $this->getSkuDayDataOther(1);  //z站
+        $this->getSkuDayDataOther(2);  //v站
+        $this->getSkuDayDataOther(3);  //nihao站
+        $this->getSkuDayDataOther(10); //de站
+        $this->getSkuDayDataOther(11); //jp站
+
+        //wesee站
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 1])->select();
-        foreach ($z_sku_list as $k => $v) {
-            $cart_where1 = [];
-            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '".$data."'")];
-            $cart_where1['b.sku'] = ['like', $v['platform_sku'].'%'];
-            $z_sku_list[$k]['cart_num'] = $zeelool_model->table('sales_flat_quote')
-                ->alias('a')
-                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
-                ->where($cart_where1)
-                ->where('base_grand_total', 'gt', 0)
-                ->field('b.sku,a.base_grand_total,a.created_at')
-                ->count();
-            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_online')
-                ->table('catalog_product_index_price') //为了获取现价找的表
-                ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
-                ->where('b.sku', 'like', $v['platform_sku'].'%')
-                ->value('a.final_price');
-            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
-            echo $z_sku_list[$k]['sku']."\n";
-            echo '<br>';
-        }
-        //v站
-        //购物车数量
-        $zeelool_model = Db::connect('database.db_voogueme_online');
-        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        //统计昨天的数据
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 2])->select();
-        foreach ($z_sku_list as $k => $v) {
-            $cart_where1 = [];
-            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '".$data."'")];
-            $cart_where1['b.sku'] = ['like', $v['platform_sku'].'%'];
-            $z_sku_list[$k]['cart_num'] = $zeelool_model->table('sales_flat_quote')
-                ->alias('a')
-                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
-                ->where($cart_where1)
-                ->where('base_grand_total', 'gt', 0)
-                ->field('b.sku,a.base_grand_total,a.created_at')
-                ->count();
-            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_voogueme_online')
-                ->table('catalog_product_index_price') //为了获取现价找的表
-                ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
-                ->where('b.sku', 'like', $v['platform_sku'].'%')
-                ->value('a.final_price');
-            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
-            echo $z_sku_list[$k]['sku']."\n";
-            echo '<br>';
-        }
-        //nihao站
-        //购物车数量
-        $zeelool_model = Db::connect('database.db_nihao_online');
-        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        //统计昨天的数据
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 3])->select();
-        foreach ($z_sku_list as $k => $v) {
-            $cart_where1 = [];
-            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '".$data."'")];
-            $cart_where1['b.sku'] = ['like', $v['platform_sku'].'%'];
-            $z_sku_list[$k]['cart_num'] = $zeelool_model->table('sales_flat_quote')
-                ->alias('a')
-                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
-                ->where($cart_where1)
-                ->where('base_grand_total', 'gt', 0)
-                ->field('b.sku,a.base_grand_total,a.created_at')
-                ->count();
-            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_nihao_online')
-                ->table('catalog_product_index_price') //为了获取现价找的表
-                ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
-                ->where('b.sku', 'like', $v['platform_sku'].'%')
-                ->value('a.final_price');
-            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
-            echo $z_sku_list[$k]['sku']."\n";
-            echo '<br>';
-        }
-        //de站
-        //购物车数量
-        $zeelool_model = Db::connect('database.db_zeelool_de_online');
-        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        //统计昨天的数据
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 10])->select();
-        foreach ($z_sku_list as $k => $v) {
-            $cart_where1 = [];
-            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '".$data."'")];
-            $cart_where1['b.sku'] = ['like', $v['platform_sku'].'%'];
-            $z_sku_list[$k]['cart_num'] = $zeelool_model->table('sales_flat_quote')
-                ->alias('a')
-                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
-                ->where($cart_where1)
-                ->where('base_grand_total', 'gt', 0)
-                ->field('b.sku,a.base_grand_total,a.created_at')
-                ->count();
-            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_de_online')
-                ->table('catalog_product_index_price') //为了获取现价找的表
-                ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
-                ->where('b.sku', 'like', $v['platform_sku'].'%')
-                ->value('a.final_price');
-            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
-            echo $z_sku_list[$k]['sku']."\n";
-            echo '<br>';
-        }
-        //jp站
-        //购物车数量
-        $zeelool_model = Db::connect('database.db_zeelool_jp_online');
-        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        //统计昨天的数据
-        $z_sku_list = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 11])->select();
-        foreach ($z_sku_list as $k => $v) {
-            $cart_where1 = [];
-            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '".$data."'")];
-            $cart_where1['b.sku'] = ['like', $v['platform_sku'].'%'];
-            $z_sku_list[$k]['cart_num'] = $zeelool_model->table('sales_flat_quote')
-                ->alias('a')
-                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
-                ->where($cart_where1)
-                ->where('base_grand_total', 'gt', 0)
-                ->field('b.sku,a.base_grand_total,a.created_at')
-                ->count();
-            $z_sku_list[$k]['now_pricce'] = Db::connect('database.db_zeelool_jp_online')
-                ->table('catalog_product_index_price') //为了获取现价找的表
-                ->alias('a')
-                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
-                ->where('b.sku', 'like', $v['platform_sku'].'%')
-                ->value('a.final_price');
-            Db::name('datacenter_sku_day')->update($z_sku_list[$k]);
-            echo $z_sku_list[$k]['sku']."\n";
+        $skuList = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 5])->select();
+        foreach ($skuList as $k => $v) {
+            $skuList[$k]['now_pricce'] = Db::connect('database.db_weseeoptical')
+                ->table('goods') //为了获取现价找的表
+                ->where('sku',  $v['platform_sku'])
+                ->value('IF(special_price,special_price,price) price');
+            Db::name('datacenter_sku_day')->update($skuList[$k]);
+            echo $skuList[$k]['sku']."\n";
             echo '<br>';
         }
     }
 
+    /**
+     * 获取sku每日数据中的其他数据
+     * @param $site
+     * @author mjj
+     * @date   2021/5/17 10:05:18
+     */
+    public function getSkuDayDataOther($site)
+    {
+        switch ($site){
+            case 1:
+                $model = Db::connect('database.db_zeelool_online');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme_online');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao_online');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de_online');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp_online');
+                break;
+        }
+        //购物车数量
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        //统计昨天的数据
+        $data = date('Y-m-d', strtotime('-1 day'));
+        $start = $data;
+        $end = date('Y-m-d 23:59:59', strtotime('-1 day'));
+        $createTimeWhere['a.created_at'] = $updateTimeWhere['a.updated_at'] = ['between',[$start,$end]];
+        $skuList = Db::name('datacenter_sku_day')
+            ->where(['day_date' => $data, 'site' => $site])
+            ->select();
+        foreach ($skuList as $k => $v) {
+            $cartWhere['b.sku'] = ['like', $v['platform_sku'].'%'];
+            $cartWhere['a.base_grand_total'] = ['>',0];
+            $skuList[$k]['cart_num'] = $model->table('sales_flat_quote')
+                ->alias('a')
+                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
+                ->where($createTimeWhere)
+                ->where($cartWhere)
+                ->count();
+            $skuList[$k]['update_cart_num'] = $model->table('sales_flat_quote')
+                ->alias('a')
+                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
+                ->where($updateTimeWhere)
+                ->where($cartWhere)
+                ->count();
+            $now_pricce = $model->table('catalog_product_index_price') //为了获取现价找的表
+                ->alias('a')
+                ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
+                ->where('b.sku', 'like', $v['platform_sku'].'%')
+                ->value('a.final_price');
+            $skuList[$k]['now_pricce'] = $now_pricce ? $now_pricce : 0;
+            Db::name('datacenter_sku_day')->update($skuList[$k]);
+            echo $skuList[$k]['sku']."\n";
+            echo '<br>';
+        }
+    }
     //ga的数据单独摘出来跑 防止ga接口数据报错 2020.11.2防止了ga的数据报错
     public function only_ga_data_01_09()
     {
@@ -4076,6 +3804,61 @@ class TrackReg extends Backend
             }
         }
         echo "ok";
+    }
+
+    /**
+     * 所有上架商品的上架时间
+     * @author mjj
+     * @date   2021/5/13 15:11:02
+     */
+    public function batch_goods_shelves_time(){
+        $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $skus = $platform
+            ->where('outer_sku_status',1)
+            ->field('sku,platform_sku,platform_type')
+            ->select();
+        foreach ($skus as $value){
+            switch($value['platform_type']){
+                case 1:
+                    $model = Db::connect('database.db_zeelool_online');
+                    break;
+                case 2:
+                    $model = Db::connect('database.db_voogueme_online');
+                    break;
+                case 3:
+                    $model = Db::connect('database.db_nihao_online');
+                    break;
+                case 5:
+                    $model = Db::connect('database.db_weseeoptical');
+                    break;
+                case 10:
+                    $model = Db::connect('database.db_zeelool_de_online');
+                    break;
+                case 11:
+                    $model = Db::connect('database.db_zeelool_jp_online');
+                    break;
+            }
+            if($value['platform_type'] == 5){
+                $createdAt = $model->table('goods')
+                    ->where('sku',$value['platform_sku'])
+                    ->value('created_at');
+            }else{
+                $createdAt = $model->table('catalog_product_entity')
+                    ->where('sku',$value['platform_sku'])
+                    ->value('created_at');
+            }
+            $arr = array(
+                'site' => $value['platform_type'],
+                'sku' => $value['sku'],
+                'platform_sku' => $value['platform_sku'],
+                'shelves_time' => strtotime($createdAt)+8*3600,
+                'created_at' => time()
+            );
+            Db::name('sku_shelves_time')->insert($arr);
+            echo '站点'.$value['platform_type'].'--sku:'.$value['sku']."\n";
+            usleep(10000);
+        }
+
     }
 }
 

@@ -132,6 +132,38 @@ class NewOrder extends Model
         return $count;
     }
 
+    /**
+     * 根据SKU统计订单SKU最近120天有效销量
+     *
+     * @Description
+     * @param [type] $sku sku
+     * @param [type] $site 站点
+     * @return int|string
+     * @throws \think\Exception
+     * @author wpl
+     * @since 2020/08/01 11:57:38
+     */
+    public function getSkuSalesNum120days($sku, $site)
+    {
+        if ($sku) {
+            $map['b.sku'] = $sku;
+        } else {
+            $map['b.sku'] = ['not like', '%Price%'];
+        }
+        $map['a.status'] = [
+            'in',
+            ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']
+        ];
+        $map['a.payment_time'] = ['>', strtotime('-120 day')];
+        $map['a.site'] = $site;
+        $map['a.order_type'] = $site;
+
+        return $this->where($map)
+            ->alias('a')
+            ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+            ->count('a.id');
+    }
+
 
     /**
      * 统计订单SKU销量
@@ -163,5 +195,10 @@ class NewOrder extends Model
             $sales_num_list[$v['site']][$v['sku']] = $v['num'];
         }
         return $sales_num_list;
+    }
+
+    public function item()
+    {
+        return $this->hasMany(NewOrderItemOption::class, 'order_id', 'id');
     }
 }

@@ -47,10 +47,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             $("#sku_submit").click(function(){
                 var sku = $("#sku").val();
                 var time_str = $("#time_str").val();
-                if(sku.length <= 0){
-                    Layer.alert('请填写平台sku');
-                    return false;
-                }
+                // if(sku.length <= 0){
+                //     Layer.alert('请填写平台sku');
+                //     return false;
+                // }
                 if(time_str.length <= 0){
                     Layer.alert('请选择时间');
                     return false;

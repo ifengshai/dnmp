@@ -1,0 +1,600 @@
+<style type="text/css">
+    .echart-style td{
+        width:60px;
+    }
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+    .margin-div{
+        margin-top: 30px;
+    }
+    .btn-div {
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 10px;
+        margin-left: 10px;
+        width: 23%;
+    }
+    .title{
+        font-size: 18px;
+        color: rgb(127, 127, 127);
+    }
+    .rate_class{
+        font-size: 12px;
+        display: none;
+    }
+
+    /*第一块*/
+    .new-form-group{
+        margin-top: 2%;
+        float: left;
+        min-width: 25%;
+        height: 30px;
+        line-height: 30px;
+    }
+    .new-form-group label{
+        text-align: right;
+    }
+    .col-xs-4{
+        width: 30%;
+    }
+    .new-col-xs-8{
+        width: 60%;
+    }
+    .new-background{
+        border-radius:2px;
+        margin-bottom:10px;
+        background:#f5f5f5;
+        padding:20px;
+    }
+    /*表格*/
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+        text-align: center;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.altrowstable tr:nth-child(odd){
+        background:#E9F1F4;
+        background: #F5F5F5;
+    }
+    table.altrowstable tr:nth-child(even){
+        background: #fff;
+        background: #eee;
+    }
+
+    table.new-altrowstable{
+        float: left;
+        margin: 0 auto;
+        width: 48%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    table.new-altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+        text-align: center;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.new-altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.new-altrowstable tr:nth-child(odd){
+        background:#E9F1F4;
+        background: #F5F5F5;
+    }
+    table.new-altrowstable tr:nth-child(even){
+        background: #fff;
+        background: #eee;
+    }
+    table.height-table td{
+        height: 76.5px;
+    }
+    .wenhao {
+        width: 20px;
+        float: right;
+    }
+    .wenhao1 {
+        width: 12px;
+        float: right;
+    }
+    .wenhao-class{
+        width: 12px;
+        float: right;
+    }
+    .sales-div {
+        float: left;
+        width: 33%;
+        height: 100%;
+        font-family: "微软雅黑 Regular", 微软雅黑, sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        font-size: 20px;
+        line-height: 36px;
+
+    }
+</style>
+
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div class="tab-pane fade active in">
+            <div class="widget-body no-padding">
+                <div class="new-background">
+                    <div class="row">
+                        <div class="form-group new-form-group" >
+                            <label class="control-label col-xs-4">平台：</label>
+                            <div class="col-xs-8 new-col-xs-8">
+                                <select data-rule="required" class="form-control" id="site">
+                                    {foreach name="magentoplatformarr" item="vo" key="key"}
+                                    <option value="{$key}" {if condition="$key == 0"}selected="selected"{/if}>{$vo}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group new-form-group">
+                            <div class="col-xs-8 new-col-xs-8">
+                                <input type="submit" class="btn btn-success" id="stock_submit" value="提交">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:40px;">
+                <div class="row">
+                    <div id="toolbar4" class="">
+                        <p style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 700;font-size: 18px;'>
+                            <<库存概况</p>
+                        <div class="btn btn-div" style="width: 100%;height:177px">
+                            <div class="sales-div">
+                                <div style="margin-top: 20px;line-height: 60px;">
+                                    <div>
+                                        <p><span>虚拟仓库存（个）</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="stock">{$stock.stock}</span></p>
+                                    </div>
+                                    <div>
+                                        <p><span>呆滞库存量（个）</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="dull_stock">{$stock.dull_stock}</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="float:left;width: 2px;height: 145px; background: rgb(228, 228, 228);margin-top: 10px"></div>
+                            <div class="sales-div">
+                                <div style="margin-top: 20px;line-height: 60px;">
+                                    <div>
+                                        <p><span>虚拟仓库存金额</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="stock_total">{$stock.stock_total}</span></p>
+                                    </div>
+                                    <div>
+                                        <p><span>呆滞库存金额</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="dull_stock_total">{$stock.dull_stock_total}</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="float:left;width: 2px;height: 145px; background: rgb(228, 228, 228);margin-top: 10px"></div>
+                            <div class="sales-div">
+                                <div style="margin-top: 55px;line-height: 60px;">
+                                    <div>
+                                        <p><span style="">周转月数</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="turn_month">{$stock.turn_month}</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:40px;">
+                <div class="row">
+                    <div>
+                        <p style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 700;font-size: 18px;'>
+                            <<新品销量概况</p>
+                        <div class="btn btn-div" style="width: 100%;height:177px">
+                            <div class="sales-div">
+                                <div style="margin-top: 24px;line-height: 60px;">
+                                    <div>
+                                        <p><span style="">过去30天上架的SKU数</span></p>
+                                        <p><span style="color:#F04844;" id="shelves_sales_num_thirty">{$stock.shelves_sales_num_thirty}</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="float:left;width: 2px;height: 145px; background: rgb(228, 228, 228);margin-top: 10px"></div>
+                            <div class="sales-div">
+                                <div style="margin-top: 24px;line-height: 60px;">
+                                    <div>
+                                        <p><span style="">SKU销量（30天内）</span></p>
+                                        <p><span style="color:#F04844;" id="sales_num_thirty">{$stock.sales_num_thirty}</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="float:left;width: 2px;height: 145px; background: rgb(228, 228, 228);margin-top: 10px"></div>
+                            <div class="sales-div">
+                                <div style="margin-top: 24px;line-height: 60px;">
+                                    <div>
+                                        <p><span style="">销量占比</span></p>
+                                        <p><span style="color:#F04844;" id="sales_num_rate">{$stock.sales_num_rate}%</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="widget-body no-padding" style="wight: 400px; overflow:scroll">
+                <table id="order-info-list" class="altrowstable"
+                       data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                       data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                       width="100%">
+                    <thead>
+                    <tr>
+                        <th style="text-align: center; vertical-align: middle;">日期</th>
+                        <th style="text-align: center; vertical-align: middle;">销售额</th>
+                        <th style="text-align: center; vertical-align: middle;">订单数</th>
+                        <th style="text-align: center; vertical-align: middle;">订单支付成功数</th>
+                        <th style="text-align: center; vertical-align: middle;">客单价
+                            <span tabindex="0" data-bs-toggle="tooltip" title="平均订单金额 （销售额/订单数）">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span>
+                        </th>
+                        <th style="text-align: center; vertical-align: middle;">新增购物车
+                            <span tabindex="0" data-bs-toggle="tooltip" title="用户购物车从0到1，数量+1">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                        <th style="text-align: center; vertical-align: middle;">新增购物车转化率(%)
+                            <span tabindex="0" data-bs-toggle="tooltip" title="从新增购物车生成的订单数/新增购物车数">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                        <th style="text-align: center; vertical-align: middle;">更新购物车数
+                            <span tabindex="0" data-bs-toggle="tooltip" title="用户购物车有变更时，数量+1">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                        <th style="text-align: center; vertical-align: middle;">更新购物车转化率(%)
+                            <span tabindex="0" data-bs-toggle="tooltip" title="订单数/更新购物车数">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                        <th style="text-align: center; vertical-align: middle;">新增注册用户数</th>
+                        <th style="text-align: center; vertical-align: middle;">登录用户数</th>
+                    </tr>
+                    </thead>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">今天</td>
+                        <td id='today_sales_money'         style="text-align: center; vertical-align: middle;">{$zeelool_data.today_sales_money}</td>
+                        <td id='today_order_num'           style="text-align: center; vertical-align: middle;">{$zeelool_data.today_order_num}</td>
+                        <td id='today_order_success'       style="text-align: center; vertical-align: middle;">{$zeelool_data.today_order_success}</td>
+                        <td id='today_unit_price'          style="text-align: center; vertical-align: middle;">{$zeelool_data.today_unit_price}</td>
+                        <td id='today_shoppingcart_total'  style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_total}</td>
+                        <td id='today_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_conversion}</td>
+                        <td id='today_shoppingcart_new'        style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_new}</td>
+                        <td id='today_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.today_shoppingcart_newconversion}</td>
+                        <td id='today_register_customer'     style="text-align: center; vertical-align: middle;">{$zeelool_data.today_register_customer}</td>
+                        <td id='today_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.today_sign_customer}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">昨天</td>
+                        <td id='yesterday_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_sales_money}</td>
+                        <td id='yesterday_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_order_num}</td>
+                        <td id='yesterday_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_order_success}</td>
+                        <td id='yesterday_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_unit_price}</td>
+                        <td id='yesterday_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_shoppingcart_total}</td>
+                        <td id='yesterday_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_shoppingcart_conversion}</td>
+                        <td id='yesterday_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_shoppingcart_new}</td>
+                        <td id='yesterday_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_shoppingcart_newconversion}</td>
+                        <td id='yesterday_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_register_customer}</td>
+                        <td id='yesterday_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.yesterday_sign_customer}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">过去7天</td>
+                        <td id='pastsevenday_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_sales_money}</td>
+                        <td id='pastsevenday_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_order_num}</td>
+                        <td id='pastsevenday_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_order_success}</td>
+                        <td id='pastsevenday_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_unit_price}</td>
+                        <td id='pastsevenday_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_shoppingcart_total}</td>
+                        <td id='pastsevenday_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_shoppingcart_conversion}</td>
+                        <td id='pastsevenday_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_shoppingcart_new}</td>
+                        <td id='pastsevenday_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_shoppingcart_newconversion}</td>
+                        <td id='pastsevenday_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_register_customer}</td>
+                        <td id='pastsevenday_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastsevenday_sign_customer}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">过去30天</td>
+                        <td id='pastthirtyday_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_sales_money}</td>
+                        <td id='pastthirtyday_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_order_num}</td>
+                        <td id='pastthirtyday_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_order_success}</td>
+                        <td id='pastthirtyday_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_unit_price}</td>
+                        <td id='pastthirtyday_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_shoppingcart_total}</td>
+                        <td id='pastthirtyday_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_shoppingcart_conversion}</td>
+                        <td id='pastthirtyday_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_shoppingcart_new}</td>
+                        <td id='pastthirtyday_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_shoppingcart_newconversion}</td>
+                        <td id='pastthirtyday_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_register_customer}</td>
+                        <td id='pastthirtyday_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.pastthirtyday_sign_customer}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">当月</td>
+                        <td id='thismonth_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_sales_money}</td>
+                        <td id='thismonth_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_order_num}</td>
+                        <td id='thismonth_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_order_success}</td>
+                        <td id='thismonth_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_unit_price}</td>
+                        <td id='thismonth_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_shoppingcart_total}</td>
+                        <td id='thismonth_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_shoppingcart_conversion}</td>
+                        <td id='thismonth_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_shoppingcart_new}</td>
+                        <td id='thismonth_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_shoppingcart_newconversion}</td>
+                        <td id='thismonth_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_register_customer}</td>
+                        <td id='thismonth_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.thismonth_sign_customer}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">上月</td>
+                        <td id='lastmonth_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_sales_money}</td>
+                        <td id='lastmonth_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_order_num}</td>
+                        <td id='lastmonth_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_order_success}</td>
+                        <td id='lastmonth_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_unit_price}</td>
+                        <td id='lastmonth_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_shoppingcart_total}</td>
+                        <td id='lastmonth_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_shoppingcart_conversion}</td>
+                        <td id='lastmonth_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_shoppingcart_new}</td>
+                        <td id='lastmonth_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_shoppingcart_newconversion}</td>
+                        <td id='lastmonth_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_register_customer}</td>
+                        <td id='lastmonth_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastmonth_sign_customer}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">今年</td>
+                        <td id='thisyear_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_sales_money}</td>
+                        <td id='thisyear_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_order_num}</td>
+                        <td id='thisyear_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_order_success}</td>
+                        <td id='thisyear_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_unit_price}</td>
+                        <td id='thisyear_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_shoppingcart_total}</td>
+                        <td id='thisyear_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_shoppingcart_conversion}</td>
+                        <td id='thisyear_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_shoppingcart_new}</td>
+                        <td id='thisyear_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_shoppingcart_newconversion}</td>
+                        <td id='thisyear_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_register_customer}</td>
+                        <td id='thisyear_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.thisyear_sign_customer}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">去年</td>
+                        <td id='lastyear_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_sales_money}</td>
+                        <td id='lastyear_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_order_num}</td>
+                        <td id='lastyear_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_order_success}</td>
+                        <td id='lastyear_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_unit_price}</td>
+                        <td id='lastyear_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_shoppingcart_total}</td>
+                        <td id='lastyear_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_shoppingcart_conversion}</td>
+                        <td id='lastyear_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_shoppingcart_new}</td>
+                        <td id='lastyear_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_shoppingcart_newconversion}</td>
+                        <td id='lastyear_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_register_customer}</td>
+                        <td id='lastyear_sign_customer'style="text-align: center; vertical-align: middle;">{$zeelool_data.lastyear_sign_customer}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">总计</td>
+                        <td id='total_sales_money' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_sales_money}</td>
+                        <td id='total_order_num' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_order_num}</td>
+                        <td id='total_order_success' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_order_success}</td>
+                        <td id='total_unit_price' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_unit_price}</td>
+                        <td id='total_shoppingcart_total' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_shoppingcart_total}</td>
+                        <td id='total_shoppingcart_conversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_shoppingcart_conversion}</td>
+                        <td id='total_shoppingcart_new' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_shoppingcart_new}</td>
+                        <td id='total_shoppingcart_newconversion' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_shoppingcart_newconversion}</td>
+                        <td id='total_register_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_register_customer}</td>
+                        <td id='total_sign_customer' style="text-align: center; vertical-align: middle;">{$zeelool_data.total_sign_customer}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group new-form-group" >
+                                <label class="control-label col-xs-4">平台：</label>
+                                <div class="col-xs-8 new-col-xs-8">
+                                    <select data-rule="required" class="form-control" id="order_platform">
+                                        {foreach name="magentoplatformarr" item="vo" key="key"}
+                                        <option value="{$key}" {if condition="$key == 0"}selected="selected"{/if}>{$vo}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group new-form-group" >
+                                <label class="control-label col-xs-4" >时间：</label>
+                                <div class="col-xs-8 new-col-xs-8" id="timetime" role="form">
+                                    <input type="hidden" class="form-control operate" name="one_time-operate" data-name="time_str" value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange" name="time_str"  id="time_str" value="{$time_str}" data-index="14">
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-12 col-sm-6 col-md-3">
+                                <label class="control-label col-xs-4">对比时间：</label>
+                                <div class="col-xs-8 new-col-xs-8" id="compare_tme" role="form">
+                                    <input type="hidden" class="form-control operate" name="one_time-operate"
+                                           data-name="time_str"
+                                           value="RANGE" readonly="">
+                                    <input type="text" autocomplete="off" class="form-control datetimerange"
+                                           name="time_str"
+                                           id="compare_time_str" value="" data-index="14">
+                                </div>
+                            </div>
+                            <div class="form-group new-form-group">
+                                <div class="col-xs-8 new-col-xs-8">
+                                    <input type="submit" class="btn btn-success" id="sku_submit" value="提交">
+                                    <input type="reset" class="btn btn-default reset" id="sku_reset" value="重置">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" >
+                                <label class="control-label col-xs-4">销售额/订单数</label>
+                            </div>
+                        </div>
+
+                        <div class="row" style="background-color: rgba(255, 255, 255, 1);margin: 20px 40px 20px 40px;">
+                            <div id="echart1" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                        </div>
+                    </div>
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="margin-div" style="text-align: center">
+                                <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="至少进行过一次会话的唯一身份用户数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
+                                    <span class="extend">
+                                    <div class="title">活跃用户数：<span style="color: red;" id="active_user_num"></span></div>
+                                    <div class="rate_class">
+                                        环比：<span
+                                            id="huan_active_user_num">
+
+                                    </span>
+                                    </div>
+                                </span>
+                                </div>
+                                <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="当天新注册的用户数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
+                                    <span class="extend">
+                                    <div class="title">注册用户数：<span style="color: red;" id="register_user_num"></span></div>
+                                    <div class="rate_class">
+
+                                        环比：<span id="huan_register_user_num"></span>
+                                    </div>
+                                </span>
+                                </div>
+                                <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="之前下过单，再次下单的用户数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
+                                    <span class="extend">
+                                    <div class="title">复购用户数：<span style="color: red;" id="again_user_num"></span></div>
+                                    <div class="rate_class">
+                                        环比：<span
+                                            id="huan_again_user_num">
+                                        </span>
+                                    </div>
+                                </span>
+                                </div>
+                                <div class="btn btn-div">
+                                    <span class="question" tabindex="0" data-bs-toggle="tooltip" title="购买VIP的用户数">
+                                        <img src="/wenhao.jpg" alt="" class="wenhao">
+                                    </span>
+                                    <span class="extend">
+                                    <div class="title">复购用户占比：<span style="color: red;" id="huan_again_user_num_rate"></span></div>
+                                    <div class="rate_class">
+                                        环比：<span id="compare_again_user_num_rate">
+                                       </span>
+                                    </div>
+                                </span>
+                                </div>
+                                <br>
+                            </div>
+
+
+                        </div>
+                        <div class="row">
+                            <div class="form-group" >
+                                <label class="control-label col-xs-4">活跃用户数/会话数</label>
+                            </div>
+                        </div>
+
+                        <div class="row" style="background-color: rgba(255, 255, 255, 1);margin: 20px 40px 20px 40px;">
+                            <div id="echart2" style="height:300px;margin: 10px 0px 10px 0px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="widget-body no-padding">
+                    <div class="new-background">
+                        <div class="row">
+                            <div class="form-group" >
+                                <label class="control-label col-xs-4">数据概览</label>
+                            </div>
+                        </div>
+
+                        <table id="order-store-list" class="altrowstable" width="100%">
+                            <thead>
+                            <tr>
+                                <th>用户分类</th>
+                                <th>用户数</th>
+                                <th>用户占比</th>
+                                <th>销售额</th>
+                                <th>销售占比</th>
+                            </tr>
+                            </thead>
+                            <tbody id="customer_info">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

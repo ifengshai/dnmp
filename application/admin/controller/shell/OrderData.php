@@ -44,6 +44,7 @@ class OrderData extends Backend
         $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
         $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
         $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->asyncOrder = new AsyncOrder();
         $this->topicName = Env::get('topic.orderTopicName');
         $this->topicIp = Env::get('topic.topicIp');
         $this->asyncOrder = new AsyncOrder();

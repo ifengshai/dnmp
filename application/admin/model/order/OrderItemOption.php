@@ -26,5 +26,9 @@ class OrderItemOption extends Model
     // 追加属性
     protected $append = [];
 
-    
+    public function order()
+    {
+        return $this->belongsTo(Order::class,'order_id','id')->bind('increment_id,customer_email,payment_time');
+    }
+
 }

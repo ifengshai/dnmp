@@ -1,0 +1,190 @@
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], function ($, undefined, Backend, Table, Form, EchartObj) {
+
+    var Controller = {
+        index: function () {
+            Controller.api.bindevent();
+            // 初始化表格参数配置
+            Table.api.init({
+                commonSearch: false,
+                search: false,
+                showExport: false,
+                showColumns: false,
+                showToggle: false,
+                extend: {
+                    index_url: 'operatedatacenter/newgoodsdata/goods_change/index' + location.search,
+                    table: 'goods_change',
+                }
+            });
+
+            var table = $("#table");
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                search:false,
+                columns: [
+                    [
+                        {field: 'platform_sku', title: __('SKU'),operate: false},
+                        {field: 'cart_num', title: __('购物车数量'),operate: false},
+                        {field: 'order_num', title: __('订单成功数'),operate: false},
+                        {field: 'sku_grand_total', title: __('订单金额'),operate: false},
+                        {field: 'update_cart_rate', title: __('更新购物车转化率'),operate: false},
+                        {field: 'cart_change', title: __('新增购物车转化率'),operate: false},
+                        {field: 'pay_lens_rate', title: __('付费镜片占比'),operate: false},
+                        {field: 'now_pricce', title: __('售价'),operate: false},
+                        {field: 'status', title: __('在售状态（实时）'),
+                            custom: { 1: 'success', 2: 'danger',3: 'blue'},
+                            searchList: { 1: '上架', 2: '售罄',3:'下架'},operate: false,
+                            formatter: Table.api.formatter.status},
+                        {field: 'glass_num', title: __('销售副数'),operate: false},
+                        {field: 'sku_row_total', title: __('实际支付的销售额'),operate: false},
+                        {field: 'single_price', title: __('副单价'),operate: false},
+                        {field: 'stock', title: __('虚拟库存'),operate: false},
+                    ]
+                ]
+            });
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+            $("#sku_submit").click(function () {
+                var params = table.bootstrapTable('getOptions')
+                params.queryParams = function (params) {
+
+                    //定义参数
+                    var filter = {};
+                    //遍历form 组装json
+                    $.each($("#form").serializeArray(), function (i, field) {
+                        filter[field.name] = field.value;
+                    });
+
+                    //参数转为json字符串
+                    params.filter = JSON.stringify(filter)
+                    console.info(params);
+                    return params;
+                }
+
+                table.bootstrapTable('refresh', params);
+            });
+            $('#export').click(function () {
+                var time_str = $('#time_str').val();
+                var sku = $('#sku').val();
+                var order_platform = $('#order_platform').val();
+                window.location.href=Config.moduleurl+'/operatedatacenter/newgoodsdata/goods_change/export?sku='+sku+'&time_str='+time_str+'&order_platform='+order_platform;
+            });
+            $('#order_platform').on('change',function(){
+                var order_platform = $('#order_platform').val();
+                if(order_platform == 5){
+                    table.bootstrapTable("hideColumn", 'cart_num');
+                    table.bootstrapTable("hideColumn", 'update_cart_rate');
+                    table.bootstrapTable("hideColumn", 'cart_change');
+                }else{
+                    table.bootstrapTable("showColumn", 'cart_num');
+                    table.bootstrapTable("showColumn", 'update_cart_rate');
+                    table.bootstrapTable("showColumn", 'cart_change');
+                }
+            });
+            $("#sku_reset").click(function () {
+                $("#order_platform").val(1);
+                $("#time_str").val('');
+                $("#sku").val('');
+            });
+
+        },
+        add: function () {
+            Controller.api.bindevent();
+        },
+        edit: function () {
+            Controller.api.bindevent();
+        },
+        api: {
+            formatter: {
+
+            },
+            bindevent: function () {
+                Form.api.bindevent($("form[role=form]"));
+            }
+        }
+    };
+    return Controller;
+});
+function order_data_view() {
+    var order_platform = $('#order_platform').val();
+    var time_str = $('#time_str').val();
+    // var order_platform = 1;
+    // var time_str = '2020-09-30 00:00:00 2020-10-30 23:59:59';
+    Backend.api.ajax({
+        url: 'operatedatacenter/newgoodsdata/goods_change/sku_grade_data',
+        data: {order_platform: order_platform, time_str: time_str}
+    }, function (data, ret) {
+        var a_plus = ret.data.a_plus;
+        var aa = ret.data.aa;
+        var bb = ret.data.bb;
+        var cc = ret.data.cc;
+        var c_plus = ret.data.c_plus;
+        var dd = ret.data.ddd;
+        var ee = ret.data.ee;
+        // alert(a_plus.a_plus_num)
+        // var again_user_num = ret.data.again_user_num;
+        // var vip_user_num = ret.data.vip_user_num;
+        $('#a_plus_num').text(a_plus.a_plus_num);
+        $('#a_plus_session_num').text(a_plus.a_plus_session_num);
+        $('#a_plus_cart_num').text(a_plus.a_plus_cart_num);
+        $('#a_plus_session_change').text(a_plus.a_plus_session_change);
+        $('#a_plus_order_num').text(a_plus.a_plus_order_num);
+        $('#a_plus_cart_change').text(a_plus.a_plus_cart_change);
+        $('#a_plus_sku_total').text(a_plus.a_plus_sku_total);
+
+        $('#a_num').text(aa.a_num);
+        $('#a_session_num').text(aa.a_session_num);
+        $('#a_cart_num').text(aa.a_cart_num);
+        $('#a_session_change').text(aa.a_session_change);
+        $('#a_order_num').text(aa.a_order_num);
+        $('#a_cart_change').text(aa.a_cart_change);
+        $('#a_sku_total').text(aa.a_sku_total);
+
+        $('#b_num').text(bb.b_num);
+        $('#b_session_num').text(bb.b_session_num);
+        $('#b_cart_num').text(bb.b_cart_num);
+        $('#b_session_change').text(bb.b_session_change);
+        $('#b_order_num').text(bb.b_order_num);
+        $('#b_cart_change').text(bb.b_cart_change);
+        $('#b_sku_total').text(bb.b_sku_total);
+
+        $('#c_num').text(cc.c_num);
+        $('#c_session_num').text(cc.c_session_num);
+        $('#c_cart_num').text(cc.c_cart_num);
+        $('#c_session_change').text(cc.c_session_change);
+        $('#c_order_num').text(cc.c_order_num);
+        $('#c_cart_change').text(cc.c_cart_change);
+        $('#c_sku_total').text(cc.c_sku_total);
+
+        $('#c_plus_num').text(c_plus.c_plus_num);
+        $('#c_plus_session_num').text(c_plus.c_plus_session_num);
+        $('#c_plus_cart_num').text(c_plus.c_plus_cart_num);
+        $('#c_plus_session_change').text(c_plus.c_plus_session_change);
+        $('#c_plus_order_num').text(c_plus.c_plus_order_num);
+        $('#c_plus_cart_change').text(c_plus.c_plus_cart_change);
+        $('#c_plus_sku_total').text(c_plus.c_plus_sku_total);
+
+        $('#d_num').text(dd.d_num);
+        $('#d_session_num').text(dd.d_session_num);
+        $('#d_cart_num').text(dd.d_cart_num);
+        $('#d_session_change').text(dd.d_session_change);
+        $('#d_order_num').text(dd.d_order_num);
+        $('#d_cart_change').text(dd.d_cart_change);
+        $('#d_sku_total').text(dd.d_sku_total);
+
+        $('#e_num').text(ee.e_num);
+        $('#e_session_num').text(ee.e_session_num);
+        $('#e_cart_num').text(ee.e_cart_num);
+        $('#e_session_change').text(ee.e_session_change);
+        $('#e_order_num').text(ee.e_order_num);
+        $('#e_cart_change').text(ee.e_cart_change);
+        $('#e_sku_total').text(ee.e_sku_total);
+
+        return false;
+    }, function (data, ret) {
+        Layer.alert(ret.msg);
+        return false;
+    });
+}
