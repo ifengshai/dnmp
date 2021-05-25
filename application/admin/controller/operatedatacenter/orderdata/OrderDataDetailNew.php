@@ -138,7 +138,7 @@ class OrderDataDetailNew extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             if($site == 5) {
-                $order_model = Db::connect('database.db_weseeoptical');
+                $order_model = Db::connect('database.db_wesee_temp');
                 $order_model->table('order')->query("set time_zone='+8:00'");
                 $sort = 'o.id';
                 $list = $order_model->table('orders')->alias('o')
