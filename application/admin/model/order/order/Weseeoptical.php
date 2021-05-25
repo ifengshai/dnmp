@@ -79,42 +79,15 @@ class Weseeoptical extends Model
         }
         return $result;
     }
-    /**
-     * 统计订单SKU销量(弃用)
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/02/06 16:42:25 
-     * @param [type] $sku 筛选条件
-     * @return object
-     */
-    public function getOrderSalesNumTop30_OLD($sku, $where)
-    {
-        if ($sku) {
-            $map['sku'] = ['in', $sku];
-        }
-        $map['sku'] = ['not like', '%Price%'];
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $res = $this
-            ->where($map)
-            ->where($where)
-            ->alias('a')
-            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-            ->group('sku')
-            ->order('num desc')
-            ->limit(15)
-            ->column('round(sum(b.qty_ordered)) as num', 'sku');
-        return $res;
-    }
     //新的信息都从mojing_base获取
     public function getOrderSalesNumTop30($sku, $where)
     {
-        $where['a.created_at'] = ['between', [strtotime($where['a.created_at'][1][0]),strtotime($where['a.created_at'][1][1])]];
+        $where['a.payment_time'] = ['between', [strtotime($where['a.created_at'][1][0]),strtotime($where['a.created_at'][1][1])]];
         if ($sku) {
             $map['b.sku'] = ['in', $sku];
         }
         $map['b.sku'] = ['not like', '%Price%'];
-        $map['b.site'] = ['=',5];
+        $map['b.site'] = 5;
         $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
         $res = Db::connect('database.db_mojing_order')->table('fa_order')
             ->where($map)
@@ -125,33 +98,6 @@ class Weseeoptical extends Model
             ->order('num desc')
             ->limit(15)
             ->column('round(sum(b.qty)) as num', 'sku');
-        return $res;
-    }
-        /**
-     * 统计订单SKU销量(弃用)
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/02/06 16:42:25 
-     * @param [type] $sku 筛选条件
-     * @return object
-     */
-    public function getOrderSalesNumOLD($sku, $where)
-    {
-        if ($sku) {
-            $map['sku'] = ['in', $sku];
-        } else {
-            $map['sku'] = ['not like', '%Price%'];
-        }
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
-        $res = $this
-            ->where($map)
-            ->where($where)
-            ->alias('a')
-            ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id')
-            ->group('sku')
-            ->order('num desc')
-            ->column('round(sum(b.qty_ordered)) as num', 'sku');
         return $res;
     }
     //新的信息都从mojing_base获取

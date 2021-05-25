@@ -26,12 +26,17 @@ class SupplyData extends Backend
         $this->productAllStockLog = new \app\admin\model\ProductAllStock();
         $this->dullstock = new \app\admin\model\supplydatacenter\DullStock();
         $this->outstock = new \app\admin\model\warehouse\Outstock;
+        $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
     }
     /**
      * 呆滞数据
      */
     public function dull_stock(){
-        $count = 0;   //总数量
+        $num = 0;   //总sku数量
+        $num1 = 0;   //低
+        $num2 = 0;   //中
+        $num3 = 0;    //高
+        $count = 0;   //总库存量
         $count1 = 0;   //低
         $count2 = 0;   //中
         $count3 = 0;    //高
@@ -39,6 +44,8 @@ class SupplyData extends Backend
         $total1 = 0;     //低
         $total2 = 0;     //中
         $total3 = 0;     //高
+        $glass_stock = 0; //镜框库存量
+        $box_stock = 0;  //饰品库存量
         $arr1 = array();   //A+
         $arr2 = array();   //A
         $arr3 = array();
@@ -49,6 +56,12 @@ class SupplyData extends Backend
         $arr8 = array();
         $grades = Db::name('product_grade')->field('true_sku,grade')->select();
         foreach ($grades as $key=>$value){
+            //查询该商品的类型
+            $glass_box_type = $this->itemPlatformSku
+                ->alias('p')
+                ->join('fa_item_category c','p.category_id=c.id')
+                ->where('p.sku',$value['true_sku'])
+                ->value('c.attribute_group_id');
             //该品实时库存
             $real_time_stock = $this->model->where('sku',$value['true_sku'])->where('is_del',1)->where('is_open',1)->value('sum(stock)-sum(distribution_occupy_stock) as result');
             //该品库存金额
@@ -57,135 +70,207 @@ class SupplyData extends Backend
             $sku_info  = $this->getSkuSales($value['true_sku']);
             $actual_day = $sku_info['days']!=0 && $sku_info['count']!=0 ? round($real_time_stock/($sku_info['count']/$sku_info['days']),2) : 0;
             if($value['grade'] == 'F'){
+                $num++;
                 $count += $real_time_stock;
                 $total += $sku_amount;
                 $count3 += $real_time_stock;
                 $total3 += $sku_amount;
+                $num3++;
                 $arr8['stock'] += $real_time_stock;
                 $arr8['total'] += $sku_amount;
+                $arr8['sku_num'] ++;
+                $arr8['high_sku_num'] ++;
                 $arr8['high_stock'] += $real_time_stock;
                 $arr8['high_total'] += $sku_amount;
+                if($glass_box_type == 1){
+                    $glass_stock += $real_time_stock;
+                }elseif ($glass_box_type == 3){
+                    $box_stock += $real_time_stock;
+                }
             }
             if($actual_day >120 && $actual_day<=144){
+                $num++;
+                $num1++;
                 $count += $real_time_stock;
                 $total += $sku_amount;
                 $count1 += $real_time_stock;
                 $total1 += $sku_amount;
+                if($glass_box_type == 1){
+                    $glass_stock += $real_time_stock;
+                }elseif ($glass_box_type == 3){
+                    $box_stock += $real_time_stock;
+                }
                 if($value['grade'] == 'A+'){
                     $arr1['stock'] += $real_time_stock;
                     $arr1['total'] += $sku_amount;
+                    $arr1['sku_num']++;
+                    $arr1['low_sku_num']++;
                     $arr1['low_stock'] += $real_time_stock;
                     $arr1['low_total'] += $sku_amount;
                 }elseif($value['grade'] == 'A'){
                     $arr2['stock'] += $real_time_stock;
                     $arr2['total'] += $sku_amount;
+                    $arr2['sku_num']++;
+                    $arr2['low_sku_num']++;
                     $arr2['low_stock'] += $real_time_stock;
                     $arr2['low_total'] += $sku_amount;
                 }elseif($value['grade'] == 'B'){
                     $arr3['stock'] += $real_time_stock;
                     $arr3['total'] += $sku_amount;
+                    $arr3['sku_num']++;
+                    $arr3['low_sku_num']++;
                     $arr3['low_stock'] += $real_time_stock;
                     $arr3['low_total'] += $sku_amount;
                 }elseif($value['grade'] == 'C+'){
                     $arr4['stock'] += $real_time_stock;
                     $arr4['total'] += $sku_amount;
+                    $arr4['sku_num']++;
+                    $arr4['low_sku_num']++;
                     $arr4['low_stock'] += $real_time_stock;
                     $arr4['low_total'] += $sku_amount;
                 }elseif($value['grade'] == 'C'){
                     $arr5['stock'] += $real_time_stock;
                     $arr5['total'] += $sku_amount;
+                    $arr5['sku_num']++;
+                    $arr5['low_sku_num']++;
                     $arr5['low_stock'] += $real_time_stock;
                     $arr5['low_total'] += $sku_amount;
                 }elseif($value['grade'] == 'D'){
                     $arr6['stock'] += $real_time_stock;
                     $arr6['total'] += $sku_amount;
+                    $arr6['sku_num']++;
+                    $arr6['low_sku_num']++;
                     $arr6['low_stock'] += $real_time_stock;
                     $arr6['low_total'] += $sku_amount;
                 }elseif($value['grade'] == 'E'){
                     $arr7['stock'] += $real_time_stock;
                     $arr7['total'] += $sku_amount;
+                    $arr7['sku_num']++;
+                    $arr7['low_sku_num']++;
                     $arr7['low_stock'] += $real_time_stock;
                     $arr7['low_total'] += $sku_amount;
                 }
             }elseif($actual_day > 144 && $actual_day<=168){
+                $num++;
+                $num2++;
                 $count += $real_time_stock;
                 $total += $sku_amount;
                 $count2 += $real_time_stock;
                 $total2 += $sku_amount;
+                if($glass_box_type == 1){
+                    $glass_stock += $real_time_stock;
+                }elseif ($glass_box_type == 3){
+                    $box_stock += $real_time_stock;
+                }
                 if($value['grade'] == 'A+'){
                     $arr1['stock'] += $real_time_stock;
                     $arr1['total'] += $sku_amount;
+                    $arr1['sku_num']++;
+                    $arr1['center_sku_num']++;
                     $arr1['center_stock'] += $real_time_stock;
                     $arr1['center_total'] += $sku_amount;
                 }elseif($value['grade'] == 'A'){
                     $arr2['stock'] += $real_time_stock;
                     $arr2['total'] += $sku_amount;
+                    $arr2['sku_num']++;
+                    $arr2['center_sku_num']++;
                     $arr2['center_stock'] += $real_time_stock;
                     $arr2['center_total'] += $sku_amount;
                 }elseif($value['grade'] == 'B'){
                     $arr3['stock'] += $real_time_stock;
                     $arr3['total'] += $sku_amount;
+                    $arr3['sku_num']++;
+                    $arr3['center_sku_num']++;
                     $arr3['center_stock'] += $real_time_stock;
                     $arr3['center_total'] += $sku_amount;
                 }elseif($value['grade'] == 'C+'){
                     $arr4['stock'] += $real_time_stock;
                     $arr4['total'] += $sku_amount;
+                    $arr4['sku_num']++;
+                    $arr4['center_sku_num']++;
                     $arr4['center_stock'] += $real_time_stock;
                     $arr4['center_total'] += $sku_amount;
                 }elseif($value['grade'] == 'C'){
                     $arr5['stock'] += $real_time_stock;
                     $arr5['total'] += $sku_amount;
+                    $arr5['sku_num']++;
+                    $arr5['center_sku_num']++;
                     $arr5['center_stock'] += $real_time_stock;
                     $arr5['center_total'] += $sku_amount;
                 }elseif($value['grade'] == 'D'){
                     $arr6['stock'] += $real_time_stock;
                     $arr6['total'] += $sku_amount;
+                    $arr6['sku_num']++;
+                    $arr6['center_sku_num']++;
                     $arr6['center_stock'] += $real_time_stock;
                     $arr6['center_total'] += $sku_amount;
                 }elseif($value['grade'] == 'E'){
                     $arr7['stock'] += $real_time_stock;
                     $arr7['total'] += $sku_amount;
+                    $arr7['sku_num']++;
+                    $arr7['center_sku_num']++;
                     $arr7['center_stock'] += $real_time_stock;
                     $arr7['center_total'] += $sku_amount;
                 }
             }elseif($actual_day>168){
+                $num++;
+                $num3++;
                 $count += $real_time_stock;
                 $total += $sku_amount;
                 $count3 += $real_time_stock;
                 $total3 += $sku_amount;
+                if($glass_box_type == 1){
+                    $glass_stock += $real_time_stock;
+                }elseif ($glass_box_type == 3){
+                    $box_stock += $real_time_stock;
+                }
                 if($value['grade'] == 'A+'){
                     $arr1['stock'] += $real_time_stock;
                     $arr1['total'] += $sku_amount;
+                    $arr1['sku_num']++;
+                    $arr1['high_sku_num']++;
                     $arr1['high_stock'] += $real_time_stock;
                     $arr1['high_total'] += $sku_amount;
                 }elseif($value['grade'] == 'A'){
                     $arr2['stock'] += $real_time_stock;
                     $arr2['total'] += $sku_amount;
+                    $arr2['sku_num']++;
+                    $arr2['high_sku_num']++;
                     $arr2['high_stock'] += $real_time_stock;
                     $arr2['high_total'] += $sku_amount;
                 }elseif($value['grade'] == 'B'){
                     $arr3['stock'] += $real_time_stock;
                     $arr3['total'] += $sku_amount;
+                    $arr3['sku_num']++;
+                    $arr3['high_sku_num']++;
                     $arr3['high_stock'] += $real_time_stock;
                     $arr3['high_total'] += $sku_amount;
                 }elseif($value['grade'] == 'C+'){
                     $arr4['stock'] += $real_time_stock;
                     $arr4['total'] += $sku_amount;
+                    $arr4['sku_num']++;
+                    $arr4['high_sku_num']++;
                     $arr4['high_stock'] += $real_time_stock;
                     $arr4['high_total'] += $sku_amount;
                 }elseif($value['grade'] == 'C'){
                     $arr5['stock'] += $real_time_stock;
                     $arr5['total'] += $sku_amount;
+                    $arr5['sku_num']++;
+                    $arr5['high_sku_num']++;
                     $arr5['high_stock'] += $real_time_stock;
                     $arr5['high_total'] += $sku_amount;
                 }elseif($value['grade'] == 'D'){
                     $arr6['stock'] += $real_time_stock;
                     $arr6['total'] += $sku_amount;
+                    $arr6['sku_num']++;
+                    $arr6['high_sku_num']++;
                     $arr6['high_stock'] += $real_time_stock;
                     $arr6['high_total'] += $sku_amount;
                 }elseif($value['grade'] == 'E'){
                     $arr7['stock'] += $real_time_stock;
                     $arr7['total'] += $sku_amount;
+                    $arr7['sku_num']++;
+                    $arr7['high_sku_num']++;
                     $arr7['high_stock'] += $real_time_stock;
                     $arr7['high_total'] += $sku_amount;
                 }
@@ -237,6 +322,8 @@ class SupplyData extends Backend
         $sum['center_total'] = round($total2,2);
         $sum['high_stock'] = $count3;
         $sum['high_total'] = round($total3,2);
+        $sum['glass_stock'] = $glass_stock;
+        $sum['box_stock'] = $box_stock;
         Db::name('supply_dull_stock')->insert($sum);
         echo 'ALL IS OK';
     }

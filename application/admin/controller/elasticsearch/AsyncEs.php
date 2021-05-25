@@ -57,6 +57,12 @@ class AsyncEs extends BaseElasticsearch
                 }
                 $mergeData = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] : $value['created_at'];
                 $value['payment_time'] = $mergeData;
+                //删除无用字段
+                foreach($value as $key => $val) {
+                    if(!in_array($key,['id','site','customer_id','increment_id','quote_id','status','store_id','base_grand_total','total_qty_ordered','order_type','order_prescription_type','shipping_method','shipping_title','shipping_method_type','country_id','region','region_id','payment_method','mw_rewardpoint_discount','mw_rewardpoint','base_shipping_amount','payment_time'])){
+                        unset($value[$key]);
+                    }
+                }
                 return $this->formatDate($value,$mergeData);
             },collection($newOrder)->toArray());
             $this->esService->addMutilToEs('mojing_order',$data);
@@ -170,6 +176,7 @@ class AsyncEs extends BaseElasticsearch
                     'id' => $value['id'],
                     'site' => $value['site'],
                     'status' => $value['is_active'],
+                    'base_grand_total'=> $value['base_grand_total'],
                     'update_time_day' => date('Ymd',$value['updated_at'] + 8*3600),
                     'update_time' => $value['updated_at'],
                     'create_time' => $mergeData,

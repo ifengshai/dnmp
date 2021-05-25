@@ -141,28 +141,36 @@ class MagentoPlatform extends Model
         // dump($arr);die;
         return $arr ?? [];
     }
+
     /**
      * 获取站点权限
      *
-     * @Description
-     * @author wpl
-     * @since 2020/07/14 11:10:53 
-     * @return void
+     * @param  array  $only
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @return bool|\PDOStatement|string|\think\Collection
+     * @author fangke
+     * @date   5/17/21 12:23 PM
      */
-    public function getAuthSite()
+    public function getAuthSite(array $only = [])
     {
         $this->auth = Auth::instance();
         //查询对应平台
-        $magentoplatformarr = $this->field('name,id')->select();
-        foreach ($magentoplatformarr as $k => $v) {
+        $magentoPlatforms = $this->field('name,id')->select();
+        foreach ($magentoPlatforms as $k => $v) {
             //判断当前用户拥有的站点权限
-            if (!$this->auth->check('dashboard/' . $v['name'])) {
-                unset($magentoplatformarr[$k]);
+            if (!$this->auth->check('dashboard/'.$v['name'])) {
+                unset($magentoPlatforms[$k]);
+            }
+
+            if (!empty($only) && !in_array($v['name'], $only)) {
+                unset($magentoPlatforms[$k]);
             }
         }
-        return array_values($magentoplatformarr);
+        return array_values($magentoPlatforms);
     }
-    
+
     /**
      * 获取站点权限(适合下拉框列表)-公用站点方法-禁止修改
      *

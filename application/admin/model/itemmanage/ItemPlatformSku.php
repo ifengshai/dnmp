@@ -31,6 +31,12 @@ class ItemPlatformSku extends Model
         return $this->belongsTo('app\admin\model\itemmanage\Item', 'sku', 'sku')->setEagerlyType(0);
     }
 
+    //关联category
+    public function category()
+    {
+        return $this->belongsTo('app\admin\model\itemmanage\ItemCategory', 'category_id', 'id');
+    }
+
     //添加商品平台sku
     public function addPlatformSku($row)
     {
@@ -216,6 +222,15 @@ class ItemPlatformSku extends Model
     {
         $map['platform_type'] = $platform_type;
         return $this->where($map)->column('sku,outer_sku_status,stock,grade', 'platform_sku');
+    }
+
+    public function getSkuInfo($site,$platform_sku){
+        $map['p.platform_type'] = $site;
+        $map['p.platform_sku'] = $site;
+        return $this->alias('p')
+            ->join('fa_item_category c','c.id=p.category_id')
+            ->field('c.name,p.stock,p.sku,p.outer_sku_status,p.presell_status')
+            ->find();
     }
 
 

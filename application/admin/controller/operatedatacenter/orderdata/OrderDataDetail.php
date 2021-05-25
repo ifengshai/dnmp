@@ -262,19 +262,6 @@ class OrderDataDetail extends Backend
                 $arr[$i]['work_list_num'] = $work_list_num;
                 $i++;
             }
-            /*if ($refund > 0){
-                if($refund == 1){
-                    $refund1 = '有';
-                }else{
-                    $refund1 = '无';
-                }
-                foreach ($list as $k=>$v){
-                    if ($v['is_refund'] != $refund1){
-                        unset($list[$k]);
-                    }
-                }
-                sort($list);
-            }*/
             $result = array("total" => $total, "rows" => $arr);
 
             return json($result);
