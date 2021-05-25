@@ -384,6 +384,7 @@ class ScmWarehouse extends Scm
             }
 
             $info['item_data'] = $itemData;
+            $info['stock_name'] = $info['stock_id'] == 2 ? '丹阳仓' : '郑州仓';
         } else {
             $info = [
                 'out_stock_number' => 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999),
@@ -398,6 +399,7 @@ class ScmWarehouse extends Scm
         $info['location_area'] = Db::name('warehouse_area')->where('id', $kuquKuwei['location_id'])->value('coding');
         $info['location_code_id'] = $kuquKuwei['location_code_id'];
         $info['location_code'] = $kuquKuwei['location_code'];
+
         //获取出库分类数据
         $typeList = $this->_out_stock_type
             ->field('id,name')
@@ -2459,7 +2461,6 @@ class ScmWarehouse extends Scm
         //获取盘点单数据
         $_inventory_info = $this->_inventory->get($inventory_id);
         empty($_inventory_info) && $this->error(__('盘点单不存在'), [], 531);
-        //        $inventory_item_info = $_inventory_item->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')->where(['inventory_id'=>$inventory_id])->select();
 
         $inventory_item_info = $this->_inventory_item
             ->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock,warehouse_name,area_id,library_name,sku_agg')
@@ -2468,38 +2469,17 @@ class ScmWarehouse extends Scm
             ->select();
         $item_list = collection($inventory_item_info)->toArray();
 
-        //获取条形码数据
-        // $bar_code_list = $this->_product_bar_code_item
-        //     ->where(['inventory_id' => $inventory_id])
-        //     ->field('sku,code')
-        //     ->select();
-        // $bar_code_list = collection($bar_code_list)->toArray();
-
         foreach (array_filter($item_list) as $key => $value) {
             $item_list[$key]['stock'] = $this->_item->where('sku', $value['sku'])->value('stock');
-            //            $stock = $this->_item->where('sku',$value['sku'])->value('stock');
-            // $sku = $value['sku'];
-            //条形码列表
-            // $sku_agg = array_filter($bar_code_list, function ($v) use ($sku) {
-            //     if ($v['sku'] == $sku) {
-            //         return $v;
-            //     }
-            // });
-
-            // if (!empty($sku_agg)) {
-            //     array_walk($sku_agg, function (&$value, $k, $p) {
-            //         $value = array_merge($value, $p);
-            //     }, ['is_new' => 0]);
-            // }
-
             $item_list[$key]['sku_agg'] = unserialize($value['sku_agg']) ?: [];
         }
 
         //盘点单所需数据
         $info = [
             'inventory_id'     => $_inventory_info['id'],
+            'stock_id'     => $_inventory_info['stock_id'],
+            'stock_name'     => $_inventory_info['stock_id'] == 2 ? '丹阳仓' : '郑州仓',
             'inventory_number' => $_inventory_info['number'],
-            //            'status'=>$_inventory_info['status'],
             'item_list'        => !empty($item_list) ? $item_list : [],
         ];
 
