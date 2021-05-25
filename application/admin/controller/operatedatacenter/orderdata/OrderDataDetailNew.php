@@ -201,6 +201,8 @@ class OrderDataDetailNew extends Backend
                     $arr[$i]['coupon_rule_name'] = $order_model->table('user_coupons')->alias('a')
                     ->join('discount_coupons b','b.id=a.discount_coupon_id')->field('b.*')->value('b.name');
                     $arr[$i]['shipping_method'] = $value['shipping_method'];  //快递类别
+                    $value['firstname'] = mb_convert_encoding( $value['firstname'], 'UTF-8', 'UTF-8,GBK,GB2312,BIG5' );
+                    $value['lastname'] = mb_convert_encoding( $value['lastname'], 'UTF-8', 'UTF-8,GBK,GB2312,BIG5' );
                     //收货信息
                     $arr[$i]['shipping_name'] = $value['firstname'].''.$value['lastname'];  //收货姓名
                     $arr[$i]['customer_email'] = $value['customer_email'];   //支付邮箱
