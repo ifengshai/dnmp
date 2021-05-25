@@ -303,6 +303,10 @@ class BaseElasticsearch extends Backend
             'site'            => [
                 'type' => 'integer',
             ],
+            'base_grand_total'        => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 10000,
+            ],
             'status'          => [
                 'type' => 'keyword',
             ],
