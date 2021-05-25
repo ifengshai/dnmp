@@ -3126,6 +3126,7 @@ class ScmWarehouse extends Scm
     public function transfer_order_list()
     {
         $query = $this->request->request('query');
+        $stockId = $this->request->request('stock_id');
         $status = $this->request->request('status');
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
@@ -3138,6 +3139,9 @@ class ScmWarehouse extends Scm
         $where = [];
         if ($query) {
             $where['transfer_order_number|create_person'] = ['like', '%' . $query . '%'];
+        }
+        if ($stockId) {
+            $where['stock_id'] = $stockId;
         }
         if (isset($status)) {
             $where['status'] = $status;
@@ -3165,6 +3169,7 @@ class ScmWarehouse extends Scm
             $list[$key]['show_detail'] = 6 == $value['status'] ? 1 : 0; //详情按钮
             $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0; //审核按钮
             $list[$key]['show_trans'] = 5 == $value['status'] ? 1 : 0; //调拨中编辑按钮
+            $list[$key]['stock_name'] = $this->warehouse_stock->where('id',$value['stock_id'])->value('name');
         }
         $this->success('', ['list' => $list], 200);
     }
@@ -3183,6 +3188,10 @@ class ScmWarehouse extends Scm
         $number = $this->request->request("number");
         $type = $this->request->request("type");
         $id = $this->request->request("transfer_order_id");
+        $stockId = $this->request->request("stock_id");
+        if (!$stockId){
+            $this->error(__('仓库id不能为空'), '', 524);
+        }
         $item_sku = html_entity_decode($item_sku);
         $item_sku = array_filter(json_decode($item_sku, true));
         if (count(array_filter($item_sku)) < 1) {
@@ -3206,6 +3215,9 @@ class ScmWarehouse extends Scm
         foreach ($item_sku as $k => $v) {
             $outStockId = Db::name('warehouse_area')->where('id', $v['outarea_id'])->value('stock_id'); //调出库区仓库id
             $inStockId = Db::name('warehouse_area')->where('id', $v['inarea_id'])->value('stock_id'); //调出库区仓库id
+            if ($outStockId !== $stockId || $inStockId !== $stockId){
+                $this->error(__('仓库不一致'), '', 525);
+            }
             if ($outStockId !== $inStockId){
                 $this->error(__('调出库区与调入库区非同一仓库'), '', 525);
             }
@@ -3227,6 +3239,7 @@ class ScmWarehouse extends Scm
                 $arr['transfer_order_number'] = $number;
                 $arr['create_person'] = $this->auth->nickname;
                 $arr['status'] = $type;
+                $arr['stock_id'] = $stockId;
                 $arr['create_time'] = date('Y-m-d H:i:s', time());
                 $result = $this->_warehouse_transfer_order->allowField(true)->save($arr);
                 if ($result) {
@@ -3351,7 +3364,9 @@ class ScmWarehouse extends Scm
         $id = $this->request->request("transfer_order_id");
         empty($id) && $this->error(__('调拨单id不能为空！！'), '', 523);
         $list['transfer_order_number'] = $this->_warehouse_transfer_order->where('id', $id)->value('transfer_order_number');
-        $list['item_list'] = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->select();
+        $list['stock_id'] = $this->_warehouse_transfer_order->where('id', $id)->value('stock_id');
+        $list['stock_name'] = $this->warehouse_stock->where('id', $list['stock_id'])->value('name');
+        $list['item_list'] = $this->_warehouse_transfer_order->where('id', $id)->select();
         foreach ($list['item_list'] as $k => $v) {
             $area_id = Db::name('warehouse_area')->where('coding', $v['outarea'])->value('id');
             $store_id = Db::name('store_house')->where('coding', $v['call_out_site'])->where('area_id', $area_id)->value('id');
