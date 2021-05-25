@@ -423,7 +423,7 @@ class OrderDataDetailNew extends Backend
             }
 
             $result = array("total" => count($arr), "rows" => $arr);
-
+            file_put_contents('./a.json',json($arr));
             return json($result);
         }
         //查询对应平台权限
