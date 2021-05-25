@@ -75,7 +75,7 @@ class OrderEsFormat extends BaseEsFormatData
                 'avgPrice'       => $val['avgPrice']['value'] ?? 0,
                 'orderNum'       => $val['doc_count'],
             ];
-            $storeDataStr .= '<tr><td>' . $val['key'] . '</td><td>' . $siteName . '</td><td>' . $storeName . '</td><td>' . $storeData['daySalesAmount'] . '</td><td>' . $val['doc_count'] . '</td><td>' . $storeData['orderNum'] . '</td></tr>';
+            $storeDataStr .= '<tr><td>' . $val['key'] . '</td><td>' . $siteName . '</td><td>' . $storeName . '</td><td>' . $storeData['daySalesAmount'] . '</td><td>' . $storeData['orderNum'] . '</td><td>' . $storeData['avgPrice'] . '</td></tr>';
         }
         //订单类型
         //0 ，平邮免邮
