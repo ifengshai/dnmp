@@ -267,6 +267,7 @@ class OrderDataDetailNew extends Backend
                     $arr[$i]['work_list_num'] = $work_list_num;
                     $i++;
                 }
+                dump($list);die;
             }else{
                 $web_model->table('customer_entity')->query("set time_zone='+8:00'");
                 $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
