@@ -39,6 +39,7 @@ class SupplyDullDataSync extends Command
                     Site::ZEELOOL, Site::VOOGUEME, Site::NIHAO, Site::ZEELOOL_DE, Site::ZEELOOL_JP,
                     Site::WESEEOPTICAL
                 ])
+            ->where('grade', '<>', '')
             ->field('sku,platform_type,stock,grade')
             ->select();
         $itemPlatformSkus = collection($itemPlatformSkus)->toArray();

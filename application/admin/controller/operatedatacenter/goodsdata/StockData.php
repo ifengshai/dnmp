@@ -132,9 +132,18 @@ class StockData extends Backend
         }
         $allSalesLast30Days = bcadd($frameSalesLast30Days, $accSalesLast30Days);
 
-        $frameTurnoverMonths = bcdiv($frameStockNum, $frameSalesLast30Days, 1);
-        $accTurnoverMonths = bcdiv($accStockNum, $accSalesLast30Days, 1);
-        $allTurnoverMonths = bcdiv($allStockNum, $allSalesLast30Days, 1);
+        $frameTurnoverMonths = 0;
+        $accTurnoverMonths = 0;
+        $allTurnoverMonths = 0;
+        if ($frameStockNum > 0 && $frameSalesLast30Days > 0) {
+            $frameTurnoverMonths = bcdiv($frameStockNum, $frameSalesLast30Days, 1);
+        }
+        if ($accStockNum > 0 && $accSalesLast30Days > 0) {
+            $accTurnoverMonths = bcdiv($accStockNum, $accSalesLast30Days, 1);
+        }
+        if ($allStockNum > 0 && $allSalesLast30Days > 0) {
+            $allTurnoverMonths = bcdiv($allStockNum, $allSalesLast30Days, 1);
+        }
 
         //呆滞库存量
         $dullStocks = DullStockSite::where('site', '=', $platform)
@@ -148,11 +157,21 @@ class StockData extends Backend
         $frameDullStock = array_sum(array_column($dullStocks, 'frame_dull_stock'));
         $accDullStock = array_sum(array_column($dullStocks, 'acc_dull_stock'));
 
-        $frameDullStockRatio = bcmul(bcdiv($frameDullStock, $frameStockNum, 2), 100, 2);
-        $accDullStockRatio = bcmul(bcdiv($accDullStock, $accStockNum, 2), 100, 2);
+        $frameDullStockRatio = 0;
+        $accDullStockRatio = 0;
+        $allDullStockRatio = 0;
+
+        if ($frameDullStock > 0 && $frameStockNum > 0) {
+            $frameDullStockRatio = bcmul(bcdiv($frameDullStock, $frameStockNum, 2), 100, 2);
+        }
+        if ($accDullStock > 0 && $accStockNum > 0) {
+            $accDullStockRatio = bcmul(bcdiv($accDullStock, $accStockNum, 2), 100, 2);
+        }
 
         $allDullStock = bcadd($frameDullStock, $accDullStock);
-        $allDullStockRatio = bcmul(bcdiv($allDullStock, $allStockNum, 2), 100, 2);
+        if ($allDullStock > 0 && $allStockNum > 0) {
+            $allDullStockRatio = bcmul(bcdiv($allDullStock, $allStockNum, 2), 100, 2);
+        }
         $result = [
             [
                 'category' => '镜框', 'sku_num' => $frameSkuNum, 'stock' => $frameStockNum,
