@@ -29,7 +29,7 @@ class skuDayAsynData extends Command
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
-        $tStart = strtotime('2020-01-01');
+        $tStart = strtotime('2021-05-01');
         $tend = time();
         for($i = $tStart;$i<$tend;$i+=3600*24){
             $data = date('Y-m-d', $i);
