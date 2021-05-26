@@ -162,15 +162,15 @@ class StockData extends Backend
         $allDullStockRatio = 0;
 
         if ($frameDullStock > 0 && $frameStockNum > 0) {
-            $frameDullStockRatio = bcmul(bcdiv($frameDullStock, $frameStockNum, 2), 100, 2);
+            $frameDullStockRatio = bcmul(bcdiv($frameDullStock, $frameStockNum, 4), 100, 2);
         }
         if ($accDullStock > 0 && $accStockNum > 0) {
-            $accDullStockRatio = bcmul(bcdiv($accDullStock, $accStockNum, 2), 100, 2);
+            $accDullStockRatio = bcmul(bcdiv($accDullStock, $accStockNum, 4), 100, 2);
         }
 
         $allDullStock = bcadd($frameDullStock, $accDullStock);
         if ($allDullStock > 0 && $allStockNum > 0) {
-            $allDullStockRatio = bcmul(bcdiv($allDullStock, $allStockNum, 2), 100, 2);
+            $allDullStockRatio = bcmul(bcdiv($allDullStock, $allStockNum, 4), 100, 2);
         }
         $result = [
             [
