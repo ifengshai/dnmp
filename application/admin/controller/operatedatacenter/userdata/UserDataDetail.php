@@ -110,7 +110,7 @@ class UserDataDetail extends Backend
                     $list[$key]['created_at'] = $value['created_at'];  //注册时间
                     $order_where['user_id'] = $value['id'];
                     $order_status_where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-                    $order = $web_model->table('orders')->where($order_where)->where($order_status_where)->field('count(*) count,sum(actual_amount_paid) total')->select();
+                    $order = $web_model->table('orders')->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_actual_amount_paid) total')->select();
                     $list[$key]['order_num'] = $order[0]['count'];  //总支付订单数
                     $list[$key]['order_amount'] = $order[0]['total'];//总订单金额
                     $list[$key]['point'] = 0;  //积分
@@ -382,7 +382,7 @@ class UserDataDetail extends Backend
                     }
                     if (in_array('order_amount', $column_name)) {
                         $index = array_keys($column_name, 'order_amount');
-                        $tmpRow[$index[0]] = $order_model->where($order_where)->where($order_status_where)->sum('actual_amount_paid');//总订单金额
+                        $tmpRow[$index[0]] = $order_model->where($order_where)->where($order_status_where)->sum('base_actual_amount_paid');//总订单金额
                     }
                     if (in_array('point', $column_name)) {
                         $index = array_keys($column_name, 'point');

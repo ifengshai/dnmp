@@ -215,16 +215,16 @@ class UserData extends BaseElasticsearch
             $map_where['o.order_status'] =  ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
 
             $count = $model->table("orders")->alias('o')->join('users c ','o.user_id=c.id','left')
-                ->field("count( DISTINCT o.user_id) as userNumber,count(actual_amount_paid) as baseNumber ")
+                ->field("count( DISTINCT o.user_id) as userNumber,count(base_actual_amount_paid) as baseNumber ")
                 ->where($map_where)
                 ->select();  //总订单 ->field
             $resultData=array();
             //拼装数据
-            $resultData[0]['userType']="用户";//用户类型
+            $resultData[0]['userType']="普通用户";//用户类型
             $resultData[0]['userNumber']=$count['userNumber']?$count['userNumber']:0;//用户数
-            $resultData[0]['userNumberRatio']="";//用户数占比
+            $resultData[0]['userNumberRatio']="100%";//用户数占比
             $resultData[0]['userSale']=$count['baseNumber']?$count['baseNumber']:0;//销售额
-            $resultData[0]['userSaleRatio']="";//销售额占比
+            $resultData[0]['userSaleRatio']="100%";//销售额占比
 
             return $resultData;
         }
@@ -250,22 +250,28 @@ class UserData extends BaseElasticsearch
         $resultData=array();
         //拼装数据
         $resultData[0]['userType']="普通用户";//用户类型
-        $resultData[0]['userNumber']=$count1['userNumber']?$count1['userNumber']:0;//用户数
-        $resultData[0]['userNumberRatio']=$count1['userNumber']!=0? $count1['userNumber']/$count['userNumber']:0;//用户数占比
-        $resultData[0]['userSale']=$count1['baseNumber']?$count1['baseNumber']:0;//销售额
-        $resultData[0]['userSaleRatio']=$count1['baseNumber']?$count1['baseNumber']/$count['baseNumber']:0;//销售额占比
+        $resultData[0]['userNumber']=$count1[0]['userNumber']?$count1[0]['userNumber']:0;//用户数
+        //($count1['userNumber']!=0? $count1['userNumber']/$count['userNumber']:0)."%";
+        $resultData[0]['userNumberRatio']=bcmul(bcdiv($count1[0]['userNumber'], $count[0]['userNumber'],4),100,2).'%' ;//用户数占比
+        $resultData[0]['userSale']=$count1[0]['baseNumber']?$count1[0]['baseNumber']:0;//销售额
+        //($count1['baseNumber']?$count1['baseNumber']/$count['baseNumber']:0)."%";
+        $resultData[0]['userSaleRatio']=bcmul(bcdiv($count1[0]['baseNumber'], $count[0]['baseNumber'],4),100,2).'%';//销售额占比
 
         $resultData[1]['userType']="VIP用户";//用户类型
-        $resultData[1]['userNumber']=$count2['userNumber']?$count2['userNumber']:0;//用户数
-        $resultData[1]['userNumberRatio']=$count2['userNumber']!=0? $count2['userNumber']/$count['userNumber']:0;//用户数占比
-        $resultData[1]['userSale']=$count2['baseNumber']?$count2['baseNumber']:0;//销售额
-        $resultData[1]['userSaleRatio']=$count2['baseNumber']?$count2['baseNumber']/$count['baseNumber']:0;//销售额占比
+        $resultData[1]['userNumber']=$count2[0]['userNumber']?$count2[0]['userNumber']:0;//用户数
+        //$count2['userNumber']!=0? $count2['userNumber']/$count['userNumber']:0;
+        $resultData[1]['userNumberRatio']=bcmul(bcdiv($count2[0]['userNumber'], $count[0]['userNumber'],4),100,2).'%' ;//用户数占比
+        $resultData[1]['userSale']=$count2[0]['baseNumber']?$count2[0]['baseNumber']:0;//销售额
+        //$count2['baseNumber']?$count2['baseNumber']/$count['baseNumber']:0;
+        $resultData[1]['userSaleRatio']=bcmul(bcdiv($count2[0]['baseNumber'], $count[0]['baseNumber'],4),100,2).'%';//销售额占比
 
         $resultData[2]['userType']="批发用户";//用户类型
-        $resultData[2]['userNumber']=$count3['userNumber']?$count3['userNumber']:0;//用户数
-        $resultData[2]['userNumberRatio']=$count3['userNumber']!=0? $count3['userNumber']/$count['userNumber']:0;//用户数占比
+        $resultData[2]['userNumber']=$count3[0]['userNumber']?$count3[0]['userNumber']:0;//用户数
+        //$count3['userNumber']!=0? $count3['userNumber']/$count['userNumber']:0;
+        $resultData[2]['userNumberRatio']=bcmul(bcdiv($count3[0]['userNumber'], $count[0]['userNumber'],4),100,2).'%' ;//用户数占比
         $resultData[2]['userSale']=$count3['baseNumber']?$count3['baseNumber']:0;//销售额
-        $resultData[2]['userSaleRatio']=$count3['baseNumber']?$count3['baseNumber']/$count['baseNumber']:0;//销售额占比
+        //$count3['baseNumber']?$count3['baseNumber']/$count['baseNumber']:0;
+        $resultData[2]['userSaleRatio']=bcmul(bcdiv($count3[0]['baseNumber'], $count[0]['baseNumber'],4),100,2).'%';//销售额占比
 
 
         return $resultData;
