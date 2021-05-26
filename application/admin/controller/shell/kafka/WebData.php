@@ -291,7 +291,7 @@ class WebData extends Backend
                 $params[$key]['updated_at'] = strtotime($v['updated_at']) ?: 0;
                 echo $v['entity_id'] . PHP_EOL;
             }
-            Db::name('web_shopping_cart_copy1')->insertAll($params);
+            Db::name('web_shopping_cart')->insertAll($params);
         });
     }
 
