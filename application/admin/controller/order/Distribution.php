@@ -1991,29 +1991,6 @@ class Distribution extends Backend
         $ids = input('id_params/a');
         !$ids && $this->error('请选择要标记的数据');
 
-        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-        //拣货区盘点时不能操作
-        //查询条形码库区库位
-        $sku = $this->model->where(['id' => ['in', $ids]])->column('sku');
-        $wheSku['platform_sku'] = ['in', $sku];
-        //转换sku
-        $itemPlatformSku = new ItemPlatformSku();
-        $trueSku = $itemPlatformSku->where($wheSku)->column('sku');
-        $whe['sku'] = ['in', $trueSku];
-        $whe['library_status'] = 1;
-        $barcodeData = $this->_product_bar_code_item->where($whe)->column('location_code');
-        if (!empty($barcodeData)) {
-            $count = $this->_inventory->alias('a')
-                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
-                ->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodeData], 'area_id' => '3'])
-                ->count();
-            if ($count > 0) {
-                $this->error(__('存在正在盘点的单据,暂无法审核'));
-            }
-        }
-        /****************************end*****************************************/
-
-
         //检测子订单状态
         $where = [
             'id'                  => ['in', $ids],
@@ -2077,28 +2054,6 @@ class Distribution extends Backend
         ob_start();
         $ids = input('ids');
         !$ids && $this->error('缺少参数', url('index?ref=addtabs'));
-
-        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-        //拣货区盘点时不能操作
-        //查询条形码库区库位
-        $sku = $this->model->where(['id' => ['in', $ids]])->column('sku');
-        $wheSku['platform_sku'] = ['in', $sku];
-        //转换sku
-        $itemPlatformSku = new ItemPlatformSku();
-        $trueSku = $itemPlatformSku->where($wheSku)->column('sku');
-        $whe['sku'] = ['in', $trueSku];
-        $whe['library_status'] = 1;
-        $barcodeData = $this->_product_bar_code_item->where($whe)->column('location_code');
-        if (!empty($barcodeData)) {
-            $count = $this->_inventory->alias('a')
-                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
-                ->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodeData], 'area_id' => '3'])
-                ->count();
-            if ($count > 0) {
-                $this->error(__('存在正在盘点的单据,暂无法审核'));
-            }
-        }
-        /****************************end*****************************************/
 
         //获取子订单列表
         $list = $this->model
