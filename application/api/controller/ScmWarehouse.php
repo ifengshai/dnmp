@@ -3215,8 +3215,11 @@ class ScmWarehouse extends Scm
         foreach ($item_sku as $k => $v) {
             $outStockId = Db::name('warehouse_area')->where('id', $v['outarea_id'])->value('stock_id'); //调出库区仓库id
             $inStockId = Db::name('warehouse_area')->where('id', $v['inarea_id'])->value('stock_id'); //调出库区仓库id
-            if ($outStockId !== $stockId || $inStockId !== $stockId){
-                $this->error(__('仓库不一致'), '', 525);
+            if ($outStockId !== $stockId){
+                $this->error(__('调出库区id'.$v['outarea_id'].'的仓库id'.$outStockId.'与当前调拨单仓库仓库id'.$stockId.'不一致'), '', 525);
+            }
+            if ($inStockId !== $stockId){
+                $this->error(__('调出库区id'.$v['inarea_id'].'的仓库id'.$inStockId.'与当前调拨单仓库仓库id'.$stockId.'不一致'), '', 525);
             }
             if ($outStockId !== $inStockId){
                 $this->error(__('调出库区与调入库区非同一仓库'), '', 525);
