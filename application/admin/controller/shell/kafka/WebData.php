@@ -258,7 +258,7 @@ class WebData extends Backend
     {
         $webShoppingCart = new WebShoppingCart();
         if ($site == 1) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 19582846], 'site' => 1])->value('entity_id');
+            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 19582846], 'site' => 1])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
             $res = Db::connect('database.db_zeelool')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
         } elseif ($site == 2) {
