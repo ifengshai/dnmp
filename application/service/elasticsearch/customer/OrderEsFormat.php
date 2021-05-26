@@ -174,6 +174,7 @@ class OrderEsFormat extends BaseEsFormatData
         $dayChartsSession = array_column($daySaleData,'sessions');
         $dayChartsSales = array_column($daySaleData,'salesTotalMoney');
         $dayChartsUpdateCartNum = array_column($daySaleData,'updateCartNum');
+        $dayChartsCreateCartNum = array_column($daySaleData,'newCartNum');
         $dayChartsOrderNum = array_column($daySaleData,'orderNum');
         $daySaleStr = '';
         $daySaleDataReverse = array_reverse($daySaleData);
@@ -211,7 +212,7 @@ class OrderEsFormat extends BaseEsFormatData
         //购物侧后-订单趋势
         $ydataCartOrder = [
             [
-                'value' => array_values(array_column($dayChartsUpdateCartNum,'value')),
+                'value' => array_values(array_column($dayChartsCreateCartNum,'value')),
                 'name' => '购物车数目',
             ],
             [
