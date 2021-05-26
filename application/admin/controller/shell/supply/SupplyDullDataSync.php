@@ -96,7 +96,7 @@ class SupplyDullDataSync extends Command
 
         dump(3);
         $items = [];
-        $date = date('Y-m-d', time());
+        $date = date('Y-m-d', strtotime('-1 day'));
         $sort = ['A+' => 1, 'A' => 2, 'B' => 3, 'C+' => 4, 'C' => 5, 'D' => 6, 'E' => 7, 'F' => 8, 'Z' => 9];
 
         foreach ($result as $platformType => $grades) {
