@@ -171,7 +171,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCart()
     {
-        WebShoppingCart::field('id,site,is_active,base_grand_total,updated_at,updated_at,created_at')->chunk(10000,function($carts){
+        WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,updated_at,created_at')->chunk(10000,function($carts){
             $data = array_map(function($value) {
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
@@ -180,6 +180,7 @@ class AsyncEs extends BaseElasticsearch
                 $insertData = [
                     'id' => $value['id'],
                     'site' => $value['site'],
+                    'entity_id' => $value['entity_id'],
                     'status' => $value['is_active'],
                     'base_grand_total'=> $value['base_grand_total'],
                     'update_time_day' => date('Ymd',$value['updated_at'] + 8*3600),

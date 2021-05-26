@@ -300,6 +300,9 @@ class BaseElasticsearch extends Backend
             'id'              => [
                 'type' => 'integer',
             ],
+            'entity_id'            => [
+                'type' => 'keyword',
+            ],
             'site'            => [
                 'type' => 'integer',
             ],
