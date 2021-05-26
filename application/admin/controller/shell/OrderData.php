@@ -1709,14 +1709,20 @@ class OrderData extends Backend
             //根据sku查询库位排序
             $stockSku = new StockSku();
             $where = [];
-            $where['b.area_id'] = 3;//默认拣货区
+            $where['b.type'] = 2;//默认拣货区
             $where['b.status'] = 1;//启用状态
             $where['a.is_del'] = 1;//正常状态
             $where['b.stock_id'] = $stockId;//查询对应仓库
-            $location_data = $stockSku->alias('a')->where($where)->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->find();
+            $location_data = $stockSku
+                ->alias('a')
+                ->where($where)
+                ->where(['a.sku' => $sku])
+                ->field('b.coding,b.picking_sort')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
+                ->find();
             $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' => $location_data['picking_sort']]);
         }
-
         echo "ok";
     }
 
