@@ -147,7 +147,7 @@ class StockData extends Backend
 
         //呆滞库存量
         $dullStocks = DullStockSite::where('site', '=', $platform)
-            ->where('day_date', '=', date('Y-m-d', time()))
+            ->where('day_date', '=', date('Y-m-d', strtotime('-1 day')))
             ->where('grade', '<>', 'Z')
             ->field('grade,frame_dull_stock,frame_dull_stock_ratio,acc_dull_stock,acc_dull_stock_ratio')
             ->select();
@@ -205,7 +205,7 @@ class StockData extends Backend
         $platform = $request->post('platform', 1);
 
         $dullStocks = DullStockSite::where('site', '=', $platform)
-            ->where('day_date', '=', date('Y-m-d', time()))
+            ->where('day_date', '=', date('Y-m-d', strtotime('-1 day')))
             ->order('sort')
             ->field('grade,sku_num,sku_ratio,stock,stock_ratio,dull_stock,dull_stock_sku_num,dull_stock_ratio,high_risk_dull_stock,high_risk_dull_stock_sku,medium_risk_dull_stock,medium_risk_dull_stock_sku,low_risk_dull_stock,low_risk_dull_stock_sku')
             ->select();
