@@ -1438,4 +1438,13 @@ class Wangpenglei extends Backend
         dump($data);
         die;
     }
+
+    public function test02()
+    {
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
+        $today_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status";
+        echo $today_sales_money_sql;
+        die;
+    }
 }

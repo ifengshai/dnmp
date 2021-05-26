@@ -85,19 +85,19 @@ class OperationAnalysis extends Model
         $order_status = $this->order_status;
         $model = $this->get_model_by_id($id);
         $where['order_platform'] = $id;
-        if($id == 5) {
-            $date_time_start = date('Y-m-d 00:00:00');
-            $date_time_end = date('Y-m-d 23:59:59');
-            $order_success_where['status'] = ['in', [2,3,4,9,10]];
-            $yestime_where['created_at'] = ['between', [$date_time_start,$date_time_end]];
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
+        if ($id == 5) {
+            $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
+            $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('orders')->query("set time_zone='+8:00'");
             $today_sales_money_data = $model->table('orders')->where($yestime_where)->where($order_success_where)->sum('base_actual_amount_paid');
-        }else{
+        } else {
             //今日销售额sql
-            $today_sales_money_sql   = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status";
+            $today_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status";
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             //今日销售额
-            $today_sales_money_rs    = $model->query($today_sales_money_sql);
+            $today_sales_money_rs = $model->query($today_sales_money_sql);
             $today_sales_money_data  = $today_sales_money_rs[0]['base_grand_total'];
         }
 
@@ -120,16 +120,16 @@ class OperationAnalysis extends Model
         //     return $cacheData;
         // }
         $model = $this->get_model_by_id($id);
-        if($id == 5) {
-            $date_time_start = date('Y-m-d 00:00:00');
-            $date_time_end = date('Y-m-d 23:59:59');
-            $yestime_where['created_at'] = ['between', [$date_time_start,$date_time_end]];
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
+        if ($id == 5) {
+            $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('orders')->query("set time_zone='+8:00'");
             $today_order_num_rs = $model->table('orders')->where($yestime_where)->field('count(id) as count')->find();
-            $today_order_num_data    = $today_order_num_rs['count'];
-        }else {
+            $today_order_num_data = $today_order_num_rs['count'];
+        } else {
             //今日订单数sql
-            $today_order_num_sql     = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW())";
+            $today_order_num_sql = "SELECT count(*) counter FROM sales_flat_order WHERE  created_at between '$date_time_start' and '$date_time_end'";
             $model->query("set time_zone='+8:00'");
             //今日订单数
             $today_order_num_rs      = $model->query($today_order_num_sql);
@@ -156,17 +156,17 @@ class OperationAnalysis extends Model
         // }
         $order_status = $this->order_status;
         $model = $this->get_model_by_id($id);
-        if($id == 5) {
-            $date_time_start = date('Y-m-d 00:00:00');
-            $date_time_end = date('Y-m-d 23:59:59');
-            $order_success_where['status'] = ['in', [2,3,4,9,10]];
-            $yestime_where['created_at'] = ['between', [$date_time_start,$date_time_end]];
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
+        if ($id == 5) {
+            $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
+            $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('orders')->query("set time_zone='+8:00'");
             $today_order_success_rs = $model->table('orders')->where($yestime_where)->where($order_success_where)->field('count(id) as count')->find();
-            $today_order_success_data    = $today_order_success_rs['count'];
-        }else {
+            $today_order_success_data = $today_order_success_rs['count'];
+        } else {
             //今日订单支付成功数sql
-            $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status";
+            $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE  created_at between '$date_time_start' and '$date_time_end' $order_status";
             $model->query("set time_zone='+8:00'");
             //今日订单支付成功数
             $today_order_success_rs = $model->query($today_order_success_sql);
@@ -186,21 +186,24 @@ class OperationAnalysis extends Model
     public function get_today_shoppingcart_total($id)
     {
         //批发站无购物车
-        if($id == 5) {
+        if ($id == 5) {
             return 0;
         }
-        $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_total_'.$id);
-        if($cacheData){
-           // return $cacheData;
+        $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_total_' . $id);
+        if ($cacheData) {
+            // return $cacheData;
         }
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
         $model = $this->get_model_by_id($id);
         //今日购物车总数sql
-        $today_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND TO_DAYS(created_at) = TO_DAYS(NOW())";
+        $today_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND created_at between '$date_time_start' and '$date_time_end'";
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //今日购物车总数
-        $today_shoppingcart_total_rs    = $model->query($today_shoppingcart_total_sql);
-        $today_shoppingcart_total_data  = $today_shoppingcart_total_rs[0]['counter'];
-        Cache::set('operationAnalysis_get_today_shoppingcart_total_'.$id,$today_shoppingcart_total_data,360);
+        $today_shoppingcart_total_rs = $model->query($today_shoppingcart_total_sql);
+        $today_shoppingcart_total_data = $today_shoppingcart_total_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_shoppingcart_total_' . $id, $today_shoppingcart_total_data, 360);
+
         return $today_shoppingcart_total_data;
 
     }
@@ -214,21 +217,24 @@ class OperationAnalysis extends Model
      */
     public function get_today_shoppingcart_new($id)
     {
-        if($id == 5) {
+        if ($id == 5) {
             return 0;
         }
-        $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_new_'.$id);
-        if($cacheData){
+        $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_new_' . $id);
+        if ($cacheData) {
             return $cacheData;
         }
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
         $model = $this->get_model_by_id($id);
         //今日新增购物车sql
-        $today_shoppingcart_new_sql   = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND TO_DAYS(updated_at) = TO_DAYS(NOW())";
+        $today_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND created_at between '$date_time_start' and '$date_time_end'";
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //今日新增购物车总数
-        $today_shoppingcart_new_rs     = $model->query($today_shoppingcart_new_sql);
-        $today_shoppingcart_new_data   = $today_shoppingcart_new_rs[0]['counter'];
-        Cache::set('operationAnalysis_get_today_shoppingcart_new_'.$id,$today_shoppingcart_new_data,3600);
+        $today_shoppingcart_new_rs = $model->query($today_shoppingcart_new_sql);
+        $today_shoppingcart_new_data = $today_shoppingcart_new_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_shoppingcart_new_' . $id, $today_shoppingcart_new_data, 3600);
+
         return $today_shoppingcart_new_data;
     }   
     /**
@@ -241,21 +247,21 @@ class OperationAnalysis extends Model
      */
     public function get_today_register_customer($id)
     {
-        $cacheData = Cache::get('operationAnalysis_get_today_register_customer_'.$id);
-        if($cacheData){
+        $cacheData = Cache::get('operationAnalysis_get_today_register_customer_' . $id);
+        if ($cacheData) {
             return $cacheData;
         }
         $model = $this->get_model_by_id($id);
-        if($id == 5) {
-            $date_time_start = date('Y-m-d 00:00:00');
-            $date_time_end = date('Y-m-d 23:59:59');
-            $yestime_where['created_at'] = ['between', [$date_time_start,$date_time_end]];
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
+        if ($id == 5) {
+            $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('users')->query("set time_zone='+8:00'");
             $today_register_customer_rs = $model->table('users')->where($yestime_where)->field('count(id) as count')->find();
-            $today_register_customer_data    = $today_register_customer_rs['count'];
-        }else {
+            $today_register_customer_data = $today_register_customer_rs['count'];
+        } else {
             //今日新增注册用户数
-            $today_register_customer_sql  = "SELECT count(*) counter from customer_entity where TO_DAYS(created_at) = TO_DAYS(NOW())";
+            $today_register_customer_sql = "SELECT count(*) counter from customer_entity where created_at between '$date_time_start' and '$date_time_end'";
             $model->table('customer_entity')->query("set time_zone='+8:00'");
             //今日新增注册用户数
             $today_register_customer_rs    = $model->query($today_register_customer_sql);
@@ -276,21 +282,21 @@ class OperationAnalysis extends Model
      */
     public function get_today_sign_customer($id)
     {
-        $cacheData = Cache::get('operationAnalysis_get_today_sign_customer_'.$id);
-        if($cacheData){
+        $cacheData = Cache::get('operationAnalysis_get_today_sign_customer_' . $id);
+        if ($cacheData) {
             return $cacheData;
         }
         $model = $this->get_model_by_id($id);
-        if($id == 5) {
-            $date_time_start = date('Y-m-d 00:00:00');
-            $date_time_end = date('Y-m-d 23:59:59');
-            $yestime_where['updated_at'] = ['between', [$date_time_start,$date_time_end]];
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
+        if ($id == 5) {
+            $yestime_where['updated_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('users')->query("set time_zone='+8:00'");
             $today_sign_customer_rs = $model->table('users')->where($yestime_where)->field('count(id) as count')->find();
-            $today_sign_customer_data    = $today_sign_customer_rs['count'];
-        }else {
+            $today_sign_customer_data = $today_sign_customer_rs['count'];
+        } else {
             //今日新增登录用户数
-            $today_sign_customer_sql = "SELECT count(*) counter from customer_entity where TO_DAYS(updated_at) = TO_DAYS(NOW())";
+            $today_sign_customer_sql = "SELECT count(*) counter from customer_entity where created_at between '$date_time_start' and '$date_time_end'";
             $model->table('customer_entity')->query("set time_zone='+8:00'");
             //今日登录用户数
             $today_sign_customer_rs  = $model->query($today_sign_customer_sql);
@@ -316,26 +322,28 @@ class OperationAnalysis extends Model
         $today_order_num_data                   = $this->get_today_order_num($id);
         $today_order_success_data               = $this->get_today_order_success($id);
         //新增购物车数
-        $today_shoppingcart_total_data          = $this->get_today_shoppingcart_total($id);
-        $today_shoppingcart_new_data            = $this->get_today_shoppingcart_new($id);
-        $today_register_customer_data           = $this->get_today_register_customer($id);
-        $today_sign_customer_data               = $this->get_today_sign_customer($id);
-        if(false != $today_order_success_data){
-            $today_unit_price_data              = round(($today_sales_money_data/$today_order_success_data),2);
-        }else{
+        $today_shoppingcart_total_data = $this->get_today_shoppingcart_total($id);
+        $today_shoppingcart_new_data = $this->get_today_shoppingcart_new($id);
+        $today_register_customer_data = $this->get_today_register_customer($id);
+        $today_sign_customer_data = $this->get_today_sign_customer($id);
+        if (false != $today_order_success_data) {
+            $today_unit_price_data = round(($today_sales_money_data / $today_order_success_data), 2);
+        } else {
             $today_unit_price_data = 0;
         }
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
         //新增购物车传化率 2020-11-25要改成 新增购物车产生的订单/新增的购物车数量 现在的计算方法是 订单支付成功数/新增购物车的数量
-        if(false != $today_shoppingcart_total_data){
+        if (false != $today_shoppingcart_total_data) {
             //今日所有购物车的ids
-            $today_shoppingcart_total_sql = "SELECT entity_id from sales_flat_quote where base_grand_total>0 AND TO_DAYS(created_at) = TO_DAYS(NOW())";
+            $today_shoppingcart_total_sql = "SELECT entity_id from sales_flat_quote where base_grand_total>0 AND created_at between '$date_time_start' and '$date_time_end'";
             $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-            $today_shoppingcart_total_ids  = $model->query($today_shoppingcart_total_sql);
-            $today_shoppingcart_total_ids = implode(',',array_column($today_shoppingcart_total_ids,'entity_id'));
+            $today_shoppingcart_total_ids = $model->query($today_shoppingcart_total_sql);
+            $today_shoppingcart_total_ids = implode(',', array_column($today_shoppingcart_total_ids, 'entity_id'));
 
             //今天新增购物车产生的订单
             $order_status = $this->order_status;
-            $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE TO_DAYS(created_at) = TO_DAYS(NOW()) $order_status and quote_id in ({$today_shoppingcart_total_ids})";
+            $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and quote_id in ({$today_shoppingcart_total_ids})";
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             $today_order_success_rs = $model->query($today_order_success_sql);
             $today_order_success_data_cart = $today_order_success_rs[0]['counter'];
