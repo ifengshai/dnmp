@@ -256,62 +256,44 @@ class WebData extends Backend
      */
     public function process_data($site)
     {
-        $webShoppingCart = new WebShoppingCart();
         if ($site == 1) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 19582846], 'site' => 1])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_quote')->where(['entity_id' => ['<', 19582846]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_zeelool');
         } elseif ($site == 2) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 2099806], 'site' => 2])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_quote')->where(['entity_id' => ['<', 2099806]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_voogueme');
         } elseif ($site == 3) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 2658466], 'site' => 3])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_nihao')->table('sales_flat_quote')->where(['entity_id' => ['<', 2658466]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_nihao');
         } elseif ($site == 9) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 5863], 'site' => 9])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where(['entity_id' => ['<', 5863]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_zeelool_es');
         } elseif ($site == 10) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 66640], 'site' => 10])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where(['entity_id' => ['<', 66640]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_zeelool_de');
         } elseif ($site == 11) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 34692], 'site' => 11])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where(['entity_id' => ['<', 34692]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_zeelool_jp');
         } elseif ($site == 12) {
-            $entity_id = $webShoppingCart->where(['entity_id' => ['<', 183917], 'site' => 12])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_quote')->where(['entity_id' => ['<', 183917]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_voogueme_acc');
         }
-        $res = collection($res)->toArray();
-        foreach ($res as $k => $v) {
-            $count = $webShoppingCart->where(['site' => $site, 'entity_id' => $v['entity_id']])->count();
-            if ($count > 0) {
-                continue;
-            }
+        Db::connect('database.db_zeelool')->table('sales_flat_quote')->field('entity_id,is_active,base_grand_total,updated_at,created_at')->where('created_at','<=','2021-05-25 00:00:00')->chunk(10000,function($carts) use ($site) {
+            $carts = collection($carts)->toArray();
             $params = [];
-            $params['entity_id'] = $v['entity_id'];
-            $params['store_id'] = $v['store_id'] ?: 0;
-            $params['is_active'] = $v['is_active'] ?: 0;
-            $params['site'] = $site;
-            $params['items_count'] = $v['items_count'] ?: 0;
-            $params['items_qty'] = $v['items_qty'] ?: 0;
-            $params['base_currency_code'] = $v['base_currency_code'] ?: 0;
-            $params['quote_currency_code'] = $v['quote_currency_code'] ?: 0;
-            $params['grand_total'] = $v['grand_total'] ?: 0;
-            $params['base_grand_total'] = $v['base_grand_total'] ?: 0;
-            $params['customer_id'] = $v['customer_id'] ?: 0;
-            $params['customer_email'] = $v['customer_email'] ?: '';
-            $params['created_at'] = strtotime($v['created_at']) ?: 0;
-            $params['updated_at'] = strtotime($v['updated_at']) ?: 0;
-            $cartId = (new WebShoppingCart())->insertGetId($params);
-            echo $v['entity_id'] . "\n";
-            usleep(10000);
-        }
-        echo $site . '--ok' . "\n";
+            foreach($carts as $key => $v){
+                $params[$key]['entity_id'] = $v['entity_id'];
+                $params[$key]['store_id'] = $v['store_id'] ?: 0;
+                $params[$key]['is_active'] = $v['is_active'] ?: 0;
+                $params[$key]['site'] = $site;
+                $params[$key]['items_count'] = $v['items_count'] ?: 0;
+                $params[$key]['items_qty'] = $v['items_qty'] ?: 0;
+                $params[$key]['base_currency_code'] = $v['base_currency_code'] ?: 0;
+                $params[$key]['quote_currency_code'] = $v['quote_currency_code'] ?: 0;
+                $params[$key]['grand_total'] = $v['grand_total'] ?: 0;
+                $params[$key]['base_grand_total'] = $v['base_grand_total'] ?: 0;
+                $params[$key]['customer_id'] = $v['customer_id'] ?: 0;
+                $params[$key]['customer_email'] = $v['customer_email'] ?: '';
+                $params[$key]['created_at'] = strtotime($v['created_at']) ?: 0;
+                $params[$key]['updated_at'] = strtotime($v['updated_at']) ?: 0;
+                echo $v['entity_id'] . PHP_EOL;
+            }
+            (new WebShoppingCart())->insertAll($params);
+
+        });
     }
 
 

@@ -102,26 +102,27 @@ class AsyncEs extends BaseElasticsearch
     public function asyncCartMagento()
     {
         $i = 0;
-        Db::connect('database.db_nihao')->table('sales_flat_quote')->chunk(1000,function($carts) use (&$i){
-            array_map(function($value) use ($i) {
+        Db::connect('database.db_zeelool')->table('sales_flat_quote')->field('entity_id,is_active,base_grand_total,updated_at,created_at')->where('created_at','<=','2021-05-25 00:00:00')->chunk(10000,function($carts) use (&$i){
+            $data = array_map(function($value) use ($i) {
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
                 },$value);
+                dump($value);die;
                 $mergeData = strtotime($value['created_at']);
                 $insertData = [
-                    'id' => $value['entity_id'],
-                    'site' => 3,
-                    'status' => $value['is_active'],
+                    'entity_id'       => $value['entity_id'],
+                    'site'            => 1,
+                    'status'          => $value['is_active'],
+                    'base_grand_total'=> $value['base_grand_total'],
                     'update_time_day' => date('Ymd',strtotime($value['updated_at'])),
-                    'update_time' => strtotime($value['updated_at']),
-                    'create_time' => $mergeData,
-
+                    'update_time'     => strtotime($value['updated_at']),
+                    'create_time'     => $mergeData,
                 ];
-                $i++;
-                $this->esService->addToEs('mojing_cart',$this->formatDate($insertData,$mergeData));
-                echo $i . PHP_EOL;
+
+                return $this->formatDate($insertData,$mergeData);
             },collection($carts)->toArray());
-        });
+            $this->esService->addMutilToEs('mojing_cart',$data);
+        },'entity_id','desc');
     }
 
     /**
