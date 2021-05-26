@@ -2312,9 +2312,7 @@ class ScmWarehouse extends Scm
                 $sku_area_id[] = $v;
             }
 
-            if ($sku_arr) {
-                $where['sku'] = ['not in', $sku_arr];
-            }
+
             if ($sku_area_id) {
                 $where['b.area_id'] = ['not in', $sku_area_id];
             }
@@ -2349,6 +2347,10 @@ class ScmWarehouse extends Scm
             }
             $offset = ($page - 1) * $page_size;
             $limit = $page_size;
+
+            if ($sku_arr) {
+                $where['sku'] = ['not in', $sku_arr];
+            }
 
             //获取SKU库位绑定表（fa_store_sku）数据列表
             $list = $this->_store_sku
