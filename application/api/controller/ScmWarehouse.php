@@ -3919,7 +3919,7 @@ class ScmWarehouse extends Scm
                                 'modular'                => 14,//实体仓调拨
                                 'change_type'            => 25,//实体仓调拨出库
                                 'sku'                    => $sv['sku'],
-                                'order_number'           => $id,//实体仓调拨单id
+                                'order_number'           => $detail['transfer_order_number'],//实体仓调拨单id
                                 'source'                 => 2,
                                 'stock_before'           => $skuItem['stock'],
                                 'stock_change'           => -$sv['real_num'],
@@ -3959,7 +3959,7 @@ class ScmWarehouse extends Scm
                                             'modular'           => 14,//实体仓调拨
                                             'change_type'       => 25,//实体仓调拨出库
                                             'sku'               => $sv['sku'],
-                                            'order_number'      => $id,
+                                            'order_number'      => $detail['transfer_order_number'],
                                             'source'            => 2,
                                             'fictitious_before' => $itemPlatformSkuDetail['stock'],
                                             'fictitious_change' => -$stockNum,
@@ -3979,7 +3979,7 @@ class ScmWarehouse extends Scm
                                             'modular'           => 14,//实体仓调拨
                                             'change_type'       => 25,//实体仓调拨出库
                                             'sku'               => $sv['sku'],
-                                            'order_number'      => $id,
+                                            'order_number'      => $detail['transfer_order_number'],
                                             'source'            => 2,
                                             'fictitious_before' => $itemPlatformSkuDetail['stock'],
                                             'fictitious_change' => -$num,
@@ -4002,7 +4002,7 @@ class ScmWarehouse extends Scm
                                             'modular'           => 14,//实体仓调拨
                                             'change_type'       => 25,//实体仓调拨出库
                                             'sku'               => $sv['sku'],
-                                            'order_number'      => $id,
+                                            'order_number'      => $detail['transfer_order_number'],
                                             'source'            => 2,
                                             'fictitious_before' => $itemPlatformSkuDetail['stock'],
                                             'fictitious_change' => -$stockNum,
@@ -4022,7 +4022,7 @@ class ScmWarehouse extends Scm
                                             'modular'           => 14,//实体仓调拨
                                             'change_type'       => 25,//实体仓调拨出库
                                             'sku'               => $sv['sku'],
-                                            'order_number'      => $id,
+                                            'order_number'      => $detail['transfer_order_number'],
                                             'source'            => 2,
                                             'fictitious_before' => $itemPlatformSkuDetail['stock'],
                                             'fictitious_change' => -$num,
@@ -4128,7 +4128,7 @@ class ScmWarehouse extends Scm
                                 'modular'                => 14,//实体仓调拨
                                 'change_type'            => 26,//实体仓调拨入库
                                 'sku'                    => $sv['sku'],
-                                'order_number'           => $id,//实体仓调拨单id
+                                'order_number'           => $detail['transfer_order_number'],//实体仓调拨单id
                                 'source'                 => 2,
                                 'stock_before'           => $skuItem['stock'],
                                 'stock_change'           => $sv['real_instock_num'],
@@ -4168,7 +4168,7 @@ class ScmWarehouse extends Scm
                                             'modular'           => 14,//实体仓调拨
                                             'change_type'       => 26,//实体仓调拨出库
                                             'sku'               => $sv['sku'],
-                                            'order_number'      => $id,
+                                            'order_number'      => $detail['transfer_order_number'],
                                             'source'            => 2,
                                             'fictitious_before' => $itemPlatformSkuDetail['stock'],
                                             'fictitious_change' => $stockNum,
@@ -4188,7 +4188,7 @@ class ScmWarehouse extends Scm
                                             'modular'           => 14,//实体仓调拨
                                             'change_type'       => 26,//实体仓调拨出库
                                             'sku'               => $sv['sku'],
-                                            'order_number'      => $id,
+                                            'order_number'      => $detail['transfer_order_number'],
                                             'source'            => 2,
                                             'fictitious_before' => $itemPlatformSkuDetail['stock'],
                                             'fictitious_change' => $num,
@@ -4211,7 +4211,7 @@ class ScmWarehouse extends Scm
                                             'modular'           => 14,//实体仓调拨
                                             'change_type'       => 26,//实体仓调拨出库
                                             'sku'               => $sv['sku'],
-                                            'order_number'      => $id,
+                                            'order_number'      => $detail['transfer_order_number'],
                                             'source'            => 2,
                                             'fictitious_before' => $itemPlatformSkuDetail['stock'],
                                             'fictitious_change' => $stockNum,
@@ -4231,7 +4231,7 @@ class ScmWarehouse extends Scm
                                             'modular'           => 14,//实体仓调拨
                                             'change_type'       => 26,//实体仓调拨出库
                                             'sku'               => $sv['sku'],
-                                            'order_number'      => $id,
+                                            'order_number'      => $detail['transfer_order_number'],
                                             'source'            => 2,
                                             'fictitious_before' => $itemPlatformSkuDetail['stock'],
                                             'fictitious_change' => $num,
