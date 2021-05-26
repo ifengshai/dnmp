@@ -3219,7 +3219,7 @@ class ScmWarehouse extends Scm
                 $this->error(__('调出库区id'.$v['outarea_id'].'的仓库id'.$outStockId.'与当前调拨单仓库仓库id'.$stockId.'不一致'), '', 525);
             }
             if ($inStockId !== $stockId){
-                $this->error(__('调出库区id'.$v['inarea_id'].'的仓库id'.$inStockId.'与当前调拨单仓库仓库id'.$stockId.'不一致'), '', 525);
+                $this->error(__('调入库区id'.$v['inarea_id'].'的仓库id'.$inStockId.'与当前调拨单仓库仓库id'.$stockId.'不一致'), '', 525);
             }
             if ($outStockId !== $inStockId){
                 $this->error(__('调出库区与调入库区非同一仓库'), '', 525);
