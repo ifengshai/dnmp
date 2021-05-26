@@ -163,7 +163,7 @@ class OrderEsFormat extends BaseEsFormatData
         $allUpdateCartNum = $data['allUpdateCartNum']['value'];
 
         //加购率
-        $allAddToCartRate = $this->getDecimal($allOrderNum,$allAddToCartNum);
+        $allAddToCartRate = $this->getDecimal($allNewCartNum,$allSessions);
         //回话转化率
         $allSessionRate = $this->getDecimal($allOrderNum,$allSessions);
 
@@ -190,7 +190,7 @@ class OrderEsFormat extends BaseEsFormatData
             $loginNum = $val['loginNum']['value'] ?: 0;
             $salesTotalMoney = $val['salesTotalMoney']['value'] ?: 0.00;
             //加购率
-            $addToCartRate = $this->getDecimal($orderNum,$addToCartNum);
+            $addToCartRate = $this->getDecimal($newCartNum,$session);
             //回话转化率
             $sessionRate = $this->getDecimal($orderNum,$session);
             $daySaleStr .= '<tr><td>' . $date . '</td><td>' . $loginNum . '</td><td>' . $session . '</td><td>' . $addToCartRate . '</td><td>' . $sessionRate . '</td><td>' . $orderNum . '</td><td>' . $avgPrice . '</td><td>' . $newCartNum . '</td><td>' . $updateCartNum . '</td><td>' . $salesTotalMoney . '</td><td>' . $registerNum . '</td></td></tr>';
