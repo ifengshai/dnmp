@@ -45,7 +45,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'big_spot_goods',
                             title: __('大货/现货'),
                             custom: {1: 'danger', 2: 'success'},
-                            searchList: {1: '大货', 2: '现货'},
+                            searchList: {0:'-',1: '大货', 2: '现货'},
                             formatter: Table.api.formatter.status,
                             visible: false,
                             operate: false

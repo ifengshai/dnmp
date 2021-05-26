@@ -53,15 +53,15 @@ class GoodsDataDetail extends Backend
             $sort = 'p.id';
             $total = $this->itemPlatformSku
                 ->alias('p')
-                ->join('fa_item_category c','c.id=p.category_id','left')
                 ->join('fa_item i','i.sku=p.sku','left')
+                ->join('fa_item_category c','c.id=i.category_id','left')
                 ->where($where)
                 ->where($map)
                 ->count();
             $list = $this->itemPlatformSku
                 ->alias('p')
-                ->join('fa_item_category c','c.id=p.category_id','left')
                 ->join('fa_item i','i.sku=p.sku','left')
+                ->join('fa_item_category c','c.id=i.category_id','left')
                 ->alias('p')
                 ->where($where)
                 ->where($map)
