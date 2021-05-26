@@ -95,7 +95,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                 ]
             });
            Table.api.bindevent(table);
-           
+
             $("#sku_submit").click(function () {
                 Controller.api.formatter.new_sales_num_line();   //新品销量排行
                 var params = table.bootstrapTable('getOptions')
@@ -184,7 +184,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                         }
                     };
                     var time = $('#create_time').val();
-                    var site = $('.active').attr('data');
+                    var site = $("#order_platform").val();
                     var options = {
                         type: 'post',
                         url: 'operatedatacenter/newgoodsdata/goods_sales_num/sales_num_line',
@@ -215,7 +215,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                         }
                     };
                     var time = $('#create_time').val();
-                    var site = $('.active').attr('data');
+                    var site = $("#order_platform").val();
                     var options = {
                         type: 'post',
                         url: 'operatedatacenter/newgoodsdata/goods_sales_num/sales_num_line',
