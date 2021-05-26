@@ -1926,8 +1926,6 @@ class ScmDistribution extends Scm
                 $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%'], 'stock_id' => $stockId])->column('id');
                 if ($store_house_id_store) {
                     $where['a.store_house_id'] = ['in', $store_house_id_store];
-                } else {
-                    $where['a.store_house_id'] = ['=', -1];
                 }
             }
             if ($start_time && $end_time) {
