@@ -1184,7 +1184,6 @@ class TrackReg extends Backend
         $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
-        $date_time = '2020-08-28';
         //查询时间
         $arr = [];
         $arr['site'] = 1;
