@@ -58,6 +58,9 @@ class UserData extends BaseElasticsearch
             //时间
             $timeStr = $params['time_str'];
             $compareTimeStr = $params['time_str2'];
+            if (!$timeStr){
+                $timeStr = date('Y-m-d', strtotime('-6 days')) . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+            }
             $arr = $this->getReBuyNum($site, $timeStr, $compareTimeStr);
 
             $table=$this->getUserTypeNum($site, $timeStr);
@@ -68,14 +71,9 @@ class UserData extends BaseElasticsearch
 
 
             $type = $params['type'];
-            if (!$timeStr) {
-                $start = date('Ymd', strtotime('-6 days') + 8 * 3600);
-                $end = date('Ymd');
-            } else {
-                $createat = explode(' ', $timeStr);
-                $start = date('Ymd', strtotime($createat[0]));
-                $end = date('Ymd', strtotime($createat[3]));
-            }
+            $createat = explode(' ', $timeStr);
+            $start = date('Ymd', strtotime($createat[0]));
+            $end = date('Ymd', strtotime($createat[3]));
             //基础数据
             $commontData = $this->getUserDataEsSearch($site, $start, $end);
 
@@ -186,9 +184,7 @@ class UserData extends BaseElasticsearch
 
     public function getUserTypeNum($site,$timeStr){
         if (!$timeStr) {
-            $start = date('Y-m-d', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
-            $timeStr = $start .' 00:00:00 - ' .$end;
+            $timeStr = date('Y-m-d', strtotime('-6 days')) . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
         }
         $createat = explode(' ', $timeStr);
         $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
