@@ -405,10 +405,11 @@ class GoodsDataView extends Backend
         //求出饰品的所有sku
         $decoration_sku = $this->itemPlatformSku->getDifferencePlatformSku(3, $platform);
         if($platform == 5){
+            $itemMap['o.site'] = $platform;
             //求出眼镜的销售额
             $frame_money_discount = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where($whereItem)
                 ->where('sku', 'in', $frame_sku)
                 ->where($itemMap)
@@ -418,7 +419,7 @@ class GoodsDataView extends Backend
             //眼镜的销售副数
             $frame_sales_num = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where('sku', 'in', $frame_sku)
                 ->where($whereItem)
                 ->where($itemMap)
@@ -428,7 +429,7 @@ class GoodsDataView extends Backend
             //求出配饰的销售额
             $decoration_money_discount = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where($whereItem)
                 ->where('sku', 'in', $decoration_sku)
                 ->where($itemMap)
@@ -438,7 +439,7 @@ class GoodsDataView extends Backend
             //配饰的销售副数
             $decoration_sales_num = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where('sku', 'in', $decoration_sku)
                 ->where($whereItem)
                 ->where($itemMap)
@@ -452,7 +453,7 @@ class GoodsDataView extends Backend
             //眼镜动销数
             $frame_in_print_num = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where('sku', 'in', $frame_sku)
                 ->where($whereItem)
                 ->where($itemMap)
@@ -462,7 +463,7 @@ class GoodsDataView extends Backend
             //配饰动销数
             $decoration_in_print_num = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where('sku', 'in', $decoration_sku)
                 ->where($whereItem)
                 ->where($itemMap)
@@ -476,7 +477,7 @@ class GoodsDataView extends Backend
             //求出新品眼镜的销售额
             $frame_new_money_price = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where($whereItem)
                 ->where('i.sku', 'in', $frame_new_sku)
                 ->where($itemMap)
@@ -486,7 +487,7 @@ class GoodsDataView extends Backend
             //求出新品配饰的销售额
             $decoration_new_money_price = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where($whereItem)
                 ->where('i.sku', 'in', $decoration_new_sku)
                 ->where($itemMap)
@@ -496,7 +497,7 @@ class GoodsDataView extends Backend
             //眼镜下单客户数
             $frame_order_customer = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where($whereItem)
                 ->where('m.sku', 'in', $frame_sku)
                 ->where($itemMap)
@@ -506,7 +507,7 @@ class GoodsDataView extends Backend
             //配饰下单客户数
             $decoration_order_customer = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where($whereItem)
                 ->where('m.sku', 'in', $decoration_sku)
                 ->where($itemMap)
@@ -519,7 +520,7 @@ class GoodsDataView extends Backend
             //新品眼镜动销数
             $frame_new_in_print_num = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where($whereItem)
                 ->where($itemMap)
                 ->where('i.sku', 'in', $frame_new_sku)
@@ -529,7 +530,7 @@ class GoodsDataView extends Backend
             //新品饰品动销数
             $decoration_new_in_print_num = $this->orderitemoption
                 ->alias('i')
-                ->join('fa_order o', 'i.order_id=o.entity_id', 'left')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where($whereItem)
                 ->where($itemMap)
                 ->where('i.sku', 'in', $decoration_new_sku)
