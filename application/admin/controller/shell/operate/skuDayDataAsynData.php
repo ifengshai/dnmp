@@ -54,7 +54,7 @@ class skuDayDataAsynData extends Command
                 $map['i.sku'] = ['like', $v['platform_sku'].'%'];
                 //sku付费镜片的数量
                 $lensWhere = [];
-                $lensWhere[] = ['exp', Db::raw("(i.index_price>0 || i.coating_price>0)")];
+                $lensWhere[] = ['exp', Db::raw("(i.lens_price>0 || i.coating_price>0)")];
                 $pay_lens_num = $this->orderitemoption
                     ->alias('i')
                     ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
