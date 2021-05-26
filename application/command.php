@@ -31,4 +31,5 @@ return [
     'app\admin\controller\shell\operate\skuTypeDayAsynData',
     'app\admin\controller\shell\supply\SupplyDullDataSync',
     'app\admin\controller\shell\operate\skuDayDataAsynData',
+    'app\admin\controller\shell\operate\RepurchaseTemp',
 ];
