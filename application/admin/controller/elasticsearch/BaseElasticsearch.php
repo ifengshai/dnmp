@@ -320,7 +320,7 @@ class BaseElasticsearch extends Backend
                 'type' => 'date',
             ],
             'update_time_hour' => [
-                'type' => 'date',
+                'type' => 'keyword',
             ],
 
         ];
