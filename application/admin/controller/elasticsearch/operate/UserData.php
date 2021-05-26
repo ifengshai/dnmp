@@ -195,8 +195,7 @@ class UserData extends BaseElasticsearch
 
 
         // 用户概述表格数据
-        $map_where['o.status'] = $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-        $map_where['o.order_type'] = $order_where['order_type'] = 1;
+        $map_where['o.order_type'] = 1;
 
         if ($site == 2) {
             $model = Db::connect('database.db_voogueme');
@@ -213,8 +212,10 @@ class UserData extends BaseElasticsearch
         }
 
         if ($site==5){
-            $count = $model->table("orders")->alias('o')->join('users  c ','o.user_id=c.id','left')
-                ->field("count( DISTINCT c.user_id) as userNumber,count(actual_amount_paid) as baseNumber ")
+            $map_where['o.order_status'] =  ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+
+            $count = $model->table("orders")->alias('o')->join('users c ','o.user_id=c.id','left')
+                ->field("count( DISTINCT o.user_id) as userNumber,count(actual_amount_paid) as baseNumber ")
                 ->where($map_where)
                 ->select();  //总订单 ->field
             $resultData=array();
@@ -227,6 +228,8 @@ class UserData extends BaseElasticsearch
 
             return $resultData;
         }
+        $map_where['o.status']  = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+
         $count = $model->table("sales_flat_order")->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')
             ->field("count( DISTINCT c.entity_id) as userNumber,count(base_grand_total) as baseNumber ")
             ->where($map_where)->where('c.group_id in (1,4,2)')
