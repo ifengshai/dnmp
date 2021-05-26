@@ -319,6 +319,9 @@ class BaseElasticsearch extends Backend
             'update_time_day' => [
                 'type' => 'date',
             ],
+            'update_time_hour' => [
+                'type' => 'date',
+            ],
 
         ];
 

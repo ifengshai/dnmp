@@ -180,6 +180,7 @@ class AsyncEs extends BaseElasticsearch
                     'status' => $value['is_active'],
                     'base_grand_total'=> $value['base_grand_total'],
                     'update_time_day' => date('Ymd',$value['updated_at']),
+                    'update_time_hour' => date('H',$value['updated_at']),
                     'update_time' => $value['updated_at'],
                     'create_time' => $mergeData,
 
