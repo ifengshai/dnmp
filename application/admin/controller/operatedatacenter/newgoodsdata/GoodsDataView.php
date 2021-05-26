@@ -260,6 +260,7 @@ class GoodsDataView extends Backend
                 ->column('sku');
             $stockSum = $this->model
                 ->where(['is_open'=>1,'is_del'=>1])
+                ->where('category_id','neq',43)
                 ->where('sku','in',$skusSum)
                 ->field('sum(stock-distribution_occupy_stock) real_time_stock,sum(stock) stock')
                 ->find();
@@ -291,6 +292,7 @@ class GoodsDataView extends Backend
                     ->column('sku');
                 $stockInfo = $this->model
                     ->where(['is_open'=>1,'is_del'=>1])
+                    ->where('category_id','neq',43)
                     ->where('sku','in',$skus)
                     ->field('sum(stock-distribution_occupy_stock) real_time_stock,sum(stock) stock')
                     ->find();
@@ -348,7 +350,11 @@ class GoodsDataView extends Backend
             $time_str = explode(' ',$time_str);
             $start = strtotime($time_str[0].' '.$time_str[1]);
             $end = strtotime($time_str[3].' '.$time_str[4]);
-            $where['payment_time'] = ['between',[$start,$end]];
+            if($order_platform == 5){
+                $where['payment_time'] = ['between',[$start,$end]];
+            }else{
+                $where['payment_time'] = ['between',[$time_str[0].' '.$time_str[1],$time_str[3].' '.$time_str[4]]];
+            }
             $data = $this->platformOrderInfo($order_platform,$where);
             $this->success('', '', $data);
         }
@@ -538,6 +544,7 @@ class GoodsDataView extends Backend
                 ->where($itemMap)
                 ->where('m.sku', 'in', $frame_sku)
                 ->sum('m.base_price');
+
             //眼镜的折扣价格
             $frame_money_discount = $model->table('sales_flat_order_item m')
                 ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')

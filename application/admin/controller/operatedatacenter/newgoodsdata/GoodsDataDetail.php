@@ -231,8 +231,8 @@ class GoodsDataDetail extends Backend
         }
         $total_export_count = $this->itemPlatformSku
             ->alias('p')
-            ->join('fa_item_category c','c.id=p.category_id','left')
             ->join('fa_item i','i.sku=p.sku','left')
+            ->join('fa_item_category c','c.id=i.category_id','left')
             ->where($map)
             ->count();
         $startTime = strtotime(date('Y-m-d 00:00:00', strtotime('-30 day')));
@@ -244,8 +244,8 @@ class GoodsDataDetail extends Backend
             //切割每份数据
             $list = $this->itemPlatformSku
                 ->alias('p')
-                ->join('fa_item_category c','c.id=p.category_id')
-                ->join('fa_item i','i.sku=p.sku')
+                ->join('fa_item i','i.sku=p.sku','left')
+                ->join('fa_item_category c','c.id=i.category_id','left')
                 ->where($map)
                 ->field('c.name,p.sku,c.attribute_group_id,p.outer_sku_status,p.presell_status,p.stock,i.is_spot,p.platform_type,p.platform_sku,p.grade,p.stock_health_status,p.presell_start_time,p.presell_end_time,p.presell_num')
                 ->limit($start,$pre_count)
@@ -263,7 +263,7 @@ class GoodsDataDetail extends Backend
                         case 1:
                             $type = '眼镜';
                             break;
-                        case 2:
+                        case 3:
                             $type = '饰品';
                             break;
                     }
@@ -351,6 +351,9 @@ class GoodsDataDetail extends Backend
                             break;
                         case 2:
                             $isSpot = '现货';
+                            break;
+                        default:
+                            $isSpot = '-';
                             break;
                     }
                     $index = array_keys($column_name,'big_spot_goods');
