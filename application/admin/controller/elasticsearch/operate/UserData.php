@@ -58,6 +58,9 @@ class UserData extends BaseElasticsearch
             //时间
             $timeStr = $params['time_str'];
             $compareTimeStr = $params['time_str2'];
+            if (!$timeStr){
+                $timeStr = date('Y-m-d', strtotime('-6 days')) . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+            }
             $arr = $this->getReBuyNum($site, $timeStr, $compareTimeStr);
 
             $table=$this->getUserTypeNum($site, $timeStr);
@@ -68,14 +71,9 @@ class UserData extends BaseElasticsearch
 
 
             $type = $params['type'];
-            if (!$timeStr) {
-                $start = date('Ymd', strtotime('-6 days') + 8 * 3600);
-                $end = date('Ymd');
-            } else {
-                $createat = explode(' ', $timeStr);
-                $start = date('Ymd', strtotime($createat[0]));
-                $end = date('Ymd', strtotime($createat[3]));
-            }
+            $createat = explode(' ', $timeStr);
+            $start = date('Ymd', strtotime($createat[0]));
+            $end = date('Ymd', strtotime($createat[3]));
             //基础数据
             $commontData = $this->getUserDataEsSearch($site, $start, $end);
 
@@ -186,9 +184,7 @@ class UserData extends BaseElasticsearch
 
     public function getUserTypeNum($site,$timeStr){
         if (!$timeStr) {
-            $start = date('Y-m-d', strtotime('-6 day'));
-            $end   = date('Y-m-d 23:59:59');
-            $timeStr = $start .' 00:00:00 - ' .$end;
+            $timeStr = date('Y-m-d', strtotime('-6 days')) . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
         }
         $createat = explode(' ', $timeStr);
         $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
@@ -212,70 +208,95 @@ class UserData extends BaseElasticsearch
         }
 
         if ($site==5){
-            $map_where['o.order_status'] =  ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
-
-            $count = $model->table("orders")->alias('o')->join('users c ','o.user_id=c.id','left')
-                ->field("count( DISTINCT o.user_id) as userNumber,count(actual_amount_paid) as baseNumber ")
-                ->where($map_where)
-                ->select();  //总订单 ->field
+            $customerWhere['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+            $orderWhere['status'] = ['in', [2,3,4,9,10]];
+            $orderWhere['order_type'] = 1;
+            //用户统计
+            $customerCount = Db::connect('database.db_weseeoptical')
+                ->table('users')
+                ->where('name','<>','visitor')
+                ->where($customerWhere)
+                ->count();
+            $orderCount = Db::connect('database.db_weseeoptical')
+                ->table('orders')
+                ->where($customerWhere)
+                ->where($orderWhere)
+                ->sum('base_actual_amount_paid');
             $resultData=array();
             //拼装数据
-            $resultData[0]['userType']="用户";//用户类型
-            $resultData[0]['userNumber']=$count['userNumber']?$count['userNumber']:0;//用户数
-            $resultData[0]['userNumberRatio']="";//用户数占比
-            $resultData[0]['userSale']=$count['baseNumber']?$count['baseNumber']:0;//销售额
-            $resultData[0]['userSaleRatio']="";//销售额占比
+            $resultData[0]['userType']="普通用户";//用户类型
+            $resultData[0]['userNumber']=$customerCount;//用户数
+            $resultData[0]['userNumberRatio']="100%";//用户数占比
+            $resultData[0]['userSale']=$orderCount;//销售额
+            $resultData[0]['userSaleRatio']="100%";//销售额占比
 
             return $resultData;
         }
-        $map_where['o.status']  = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
 
-        $count = $model->table("sales_flat_order")->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')
-            ->field("count( DISTINCT c.entity_id) as userNumber,count(base_grand_total) as baseNumber ")
-            ->where($map_where)->where('c.group_id in (1,4,2)')
-            ->select();  //总订单 ->field
-        $count1 = $model->table("sales_flat_order")->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')
-            ->field("count( DISTINCT c.entity_id) as userNumber,count(base_grand_total) as baseNumber ")
-            ->where($map_where)->where('c.group_id',1)
-            ->select();  //普通用户人数
-        $count2 = $model->table("sales_flat_order")->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')
-            ->field("count( DISTINCT c.entity_id) as userNumber,count(base_grand_total) as baseNumber ")
-            ->where($map_where)->where('c.group_id',4)
-            ->select();  //普通用户人数
-        $count3 = $model->table("sales_flat_order")->alias('o')->join('customer_entity c ','o.customer_id=c.entity_id','left')
-            ->field("count( DISTINCT c.entity_id) as userNumber,count(base_grand_total) as baseNumber ")
-            ->where($map_where)->where('c.group_id',2)
-            ->select();  //普通用户人数
-
-        $resultData=array();
-        //拼装数据
-        $resultData[0]['userType']="普通用户";//用户类型
-        $resultData[0]['userNumber']=$count1['userNumber']?$count1['userNumber']:0;//用户数
-        $resultData[0]['userNumberRatio']=$count1['userNumber']!=0? $count1['userNumber']/$count['userNumber']:0;//用户数占比
-        $resultData[0]['userSale']=$count1['baseNumber']?$count1['baseNumber']:0;//销售额
-        $resultData[0]['userSaleRatio']=$count1['baseNumber']?$count1['baseNumber']/$count['baseNumber']:0;//销售额占比
-
-        $resultData[1]['userType']="VIP用户";//用户类型
-        $resultData[1]['userNumber']=$count2['userNumber']?$count2['userNumber']:0;//用户数
-        $resultData[1]['userNumberRatio']=$count2['userNumber']!=0? $count2['userNumber']/$count['userNumber']:0;//用户数占比
-        $resultData[1]['userSale']=$count2['baseNumber']?$count2['baseNumber']:0;//销售额
-        $resultData[1]['userSaleRatio']=$count2['baseNumber']?$count2['baseNumber']/$count['baseNumber']:0;//销售额占比
-
-        $resultData[2]['userType']="批发用户";//用户类型
-        $resultData[2]['userNumber']=$count3['userNumber']?$count3['userNumber']:0;//用户数
-        $resultData[2]['userNumberRatio']=$count3['userNumber']!=0? $count3['userNumber']/$count['userNumber']:0;//用户数占比
-        $resultData[2]['userSale']=$count3['baseNumber']?$count3['baseNumber']:0;//销售额
-        $resultData[2]['userSaleRatio']=$count3['baseNumber']?$count3['baseNumber']/$count['baseNumber']:0;//销售额占比
-
+        $customerWhere['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+        $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $orderWhere['order_type'] = 1;
+        //用户统计
+        $customer = $model
+            ->table('customer_entity')
+            ->field('count(*) as count,group_id')
+            ->where($customerWhere)
+            ->group('group_id')
+            ->select();
+        $customerCount = $model
+            ->table('customer_entity')
+            ->where($customerWhere)
+            ->count();
+        $order = $model
+            ->table('sales_flat_order')
+            ->field('customer_group_id,sum(base_grand_total) as total')
+            ->group('customer_group_id')
+            ->where('customer_group_id','>',0)
+            ->where($customerWhere)
+            ->where($orderWhere)
+            ->select();
+        $orderCount = $model
+            ->table('sales_flat_order')
+            ->where($customerWhere)
+            ->where($orderWhere)
+            ->sum('base_grand_total');
+        $resultData = [];
+        foreach($customer as $key => $val) {
+            foreach($order as $k => $v){
+                if($val['group_id'] == $v['customer_group_id']) {
+                    switch($v['customer_group_id']) {
+                        case 1:
+                            $name = '普通用户';
+                            break;
+                        case 2:
+                            $name = '批发用户';
+                            break;
+                        case 4:
+                            $name = 'VIP';
+                            break;
+                        default:
+                            $name = "其余非游客用户";
+                    }
+                    $resultData[$key] = [
+                        'userNumber' => $val['count'],
+                        'userType' => $name,
+                        'userSale'  => round($v['total'],2),
+                        'userSaleRatio' => bcmul(bcdiv($v['total'], $orderCount,4),100,2).'%',
+                        'userNumberRatio' => bcmul(bcdiv($val['count'], $customerCount,4),100,2).'%',
+                    ];
+                }
+            }
+        }
 
         return $resultData;
-
 
     }
 
     public function getReBuyNum($site, $timeStr, $compareTimeStr)
     {
-        $nowDay = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+        if (!$timeStr) {
+            $nowDay = date('Y-m-d', strtotime('-6 days')) . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+        }
         switch ($site) {
             case Site::ZEELOOL:
                 $model = new Zeelool();
