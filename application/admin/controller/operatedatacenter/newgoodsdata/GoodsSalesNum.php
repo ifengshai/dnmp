@@ -268,6 +268,7 @@ class GoodsSalesNum extends Backend
                         $skuSalesNum = $this->getOrderSalesNum($params['site'],$skuTimeWhere,[],$sku);
                         $res[$sku] = $skuSalesNum['data'][$sku] ?? 0;
                     }
+                    $res = array_diff($res, [0]);
                     arsort($res);
                     $cacheData['data'] = $res;
                     $cacheData['name'] = '新品销售排行榜';
