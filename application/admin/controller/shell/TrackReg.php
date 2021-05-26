@@ -3385,47 +3385,42 @@ class TrackReg extends Backend
         //统计昨天的数据
         $list = Db::name('datacenter_sku_day')
             ->where(['day_date' => $data, 'site' => $site])
+            ->field('id,platform_sku')
             ->select();
+        $list = collection($list)->toArray();
+        $skuDatas = $this->order
+            ->alias('o')
+            ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+            ->where($orderWhere)
+            ->whereIn('sku',array_column($list,'platform_sku'))
+            ->field('sku,magento_order_id,qty,base_original_price,base_original_price,i.base_discount_amount,i.lens_price,i.coating_price')
+            ->select();
+        $skuArr = [];
+        foreach ($skuDatas as $key=>$value){
+            $skuArr[$value['sku']]['order_num'][] = $value['magento_order_id'];
+            $skuArr[$value['sku']]['glass_num'] += $value['qty'];
+            if($value['lens_price']>0 || $value['coating_price']>0){
+                $skuArr[$value['sku']]['pay_lens_num'] += $value['qty'];
+            }
+            $skuArr[$value['sku']]['sku_grand_total'] += $value['base_original_price'];
+            $skuArr[$value['sku']]['sku_row_total'] += $value['base_original_price'] - $value['base_discount_amount'];
+        }
         foreach ($list as $k => $v) {
-            $map['i.sku'] = ['like', $v['platform_sku'].'%'];
-            //某个sku当天的订单数
-            $list[$k]['order_num'] = $this->order
-                ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
-                ->where($orderWhere)
-                ->where($map)
-                ->count('distinct magento_order_id');
+            if(!empty($skuArr[$v['platform_sku']]['order_num'])){
+                $orderNum = array_unique($skuArr[$v['platform_sku']]['order_num']);
+                //某个sku当天的订单数
+                $list[$k]['order_num'] = count($orderNum);
+            }else{
+                $list[$k]['order_num'] = 0;
+            }
             //sku销售总副数
-            $list[$k]['glass_num'] = $this->order
-                ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
-                ->where($orderWhere)
-                ->where($map)
-                ->sum('i.qty');
+            $list[$k]['glass_num'] = $skuArr[$v['platform_sku']]['glass_num'] ? $skuArr[$v['platform_sku']]['glass_num'] : 0;
             //求出眼镜的销售额
-            $frame_money_price = $this->orderitemoption
-                ->alias('i')
-                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
-                ->where($orderWhere)
-                ->where($map)
-                ->sum('base_original_price');
+            $frame_money_price = $skuArr[$v['platform_sku']]['sku_grand_total'] ? $skuArr[$v['platform_sku']]['sku_grand_total'] : 0;
             //sku付费镜片的数量
-            $lensWhere = [];
-            $lensWhere[] = ['exp', Db::raw("(i.index_price>0 || i.coating_price>0)")];
-            $list[$k]['pay_lens_num'] = $this->orderitemoption
-                ->alias('i')
-                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
-                ->where($orderWhere)
-                ->where($map)
-                ->where($lensWhere)
-                ->sum('i.qty');
+            $list[$k]['pay_lens_num'] = $skuArr[$v['platform_sku']]['pay_lens_num'] ? $skuArr[$v['platform_sku']]['pay_lens_num'] : 0;
             //眼镜的实际支付金额
-            $frame_money = $this->orderitemoption
-                ->alias('i')
-                ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
-                ->where($orderWhere)
-                ->where($map)
-                ->value('(sum(base_original_price-i.base_discount_amount)) total');
+            $frame_money = $skuArr[$v['platform_sku']]['sku_row_total'];
             //眼镜的实际销售额
             $frame_money = $frame_money ? round($frame_money, 2) : 0;
             $list[$k]['sku_grand_total'] = $frame_money_price;
