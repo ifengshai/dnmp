@@ -280,8 +280,8 @@ function order_data_view() {
             var tablerate_nofree = ship_type[3];
             $('#tablerate_nofree_order_num').text(tablerate_nofree.doc_count);
             $('#tablerate_nofree_rate').text(tablerate_nofree.rate);
-            var nofreeallShippingAmount = tablerate_nofree.allShippingAmount.value
-            $('#tablerate_nofree_order_total').text(nofreeallShippingAmount.toFixed(2);
+            var nofreeallShippingAmount = tablerate_nofree.allShippingAmount.value;
+            $('#tablerate_nofree_order_total').text(nofreeallShippingAmount.toFixed(2))
         }
 
 
