@@ -271,7 +271,7 @@ class WebData extends Backend
         } elseif ($site == 12) {
             $res = Db::connect('database.db_voogueme_acc');
         }
-        Db::connect('database.db_zeelool')->table('sales_flat_quote')->field('entity_id,is_active,base_grand_total,updated_at,created_at')->where('created_at','<=','2021-05-25 00:00:00')->chunk(10000,function($carts) use ($site) {
+        $res->table('sales_flat_quote')->field('entity_id,store_id,is_active,items_count,items_qty,base_currency_code,quote_currency_code,grand_total,base_grand_total,customer_email,customer_id,updated_at,created_at')->chunk(10000,function($carts) use ($site) {
             $carts = collection($carts)->toArray();
             $params = [];
             foreach($carts as $key => $v){
@@ -291,8 +291,7 @@ class WebData extends Backend
                 $params[$key]['updated_at'] = strtotime($v['updated_at']) ?: 0;
                 echo $v['entity_id'] . PHP_EOL;
             }
-            (new WebShoppingCart())->insertAll($params);
-
+            Db::name('web_shopping_cart_copy1')->insertAll($params);
         });
     }
 
