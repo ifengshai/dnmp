@@ -218,12 +218,19 @@ class OrderPrescriptionNew extends Backend
         $createat = explode(' ', $timeStr);
         $begin = strtotime($createat[0]);
         $end = strtotime($createat[3] . ' 23:59:59');
-        $coatingNum = OrderItemOption::field('count(id) as count,coating_id')->with([
-            'order' => function ($query) use ($begin, $end) {
-                $query->where(['payment_time' => ['between', [$begin, $end]]])->where(['status' => ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']]])->where('order_type', 1);
-            },
-        ])->where('site', $site)->where('coating_id', 'in', ['coating_1', 'coating_2', 'coating_3'])->group('coating_id')->select();
-        $coatingNumArr = collection($coatingNum)->toArray();
+        $coatingNumArr = Db::connect('database.db_mojing_order')->table('fa_order_item_option')
+            ->alias('a')
+            ->join(['fa_order' => 'b'], 'b.id= a.order_id')
+            ->where([
+                'b.payment_time' => ['between', [$begin, $end]],
+                'b.status'       => ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']],
+                'b.order_type'   => 1,
+            ])
+            ->where(['a.site' => $site])
+            ->where('coating_id', 'in', ['coating_1', 'coating_2', 'coating_3'])
+            ->field('count(a.id) as count,coating_id')
+            ->group('coating_id')
+            ->select();
         $coatingRate1 = $coatingRate2 = $coatingRate3 = '0%';
         $coatingNum = $coatingNum1 = $coatingNum2 = $coatingNum3 = '0';
         foreach ($coatingNumArr as $key => $val) {

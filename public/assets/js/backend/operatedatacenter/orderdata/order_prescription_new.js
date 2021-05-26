@@ -45,6 +45,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             $('#order_platform').change(function () {
                 getData();
             })
+            $('#change_submit_form').submit(function(){
+                getData();
+                return false;
+            })
         },
         add: function () {
             Controller.api.bindevent();
