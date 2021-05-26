@@ -79,8 +79,12 @@ class GoodsChange extends Backend
                 ->order('id', 'desc')
                 ->limit($offset, $limit)
                 ->select();
+            $nowDate = date('Y-m-d H:i:s');
             foreach ($list as $k => $v) {
-                $skuStockInfo = $this->item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $order_platform])->field('stock,outer_sku_status,presell_status')->find();
+                $skuStockInfo = $this->item_platform_sku
+                    ->where(['sku' => $v['sku'], 'platform_type' => $order_platform])
+                    ->field('stock,outer_sku_status,presell_status,presell_start_time,presell_end_time,presell_num')
+                    ->find();
                 $list[$k]['single_price'] = $v['glass_num'] != 0 ? round($v['sku_row_total'] / $v['glass_num'], 2) : 0;
                 //商品现价
                 $list[$k]['now_pricce'] = Db::name('datacenter_sku_day')
@@ -89,13 +93,17 @@ class GoodsChange extends Backend
                     ->value('now_pricce');
                 //上下架状态
                 if($skuStockInfo['outer_sku_status'] == 1){
-                    if($skuStockInfo['presell_status'] == 1){
+                    if($skuStockInfo['stock'] > 0){
                         $status = 1; //上架
                     }else{
-                        if($skuStockInfo['stock'] == 0){
-                            $status = 2; //售罄
+                        if($skuStockInfo['presell_status'] == 1 && $nowDate >= $skuStockInfo['presell_start_time'] && $nowDate <= $skuStockInfo['presell_end_time']){
+                            if($skuStockInfo['presell_num'] > 0){
+                                $status = 1; //上架
+                            }else{
+                                $status = 2; //售罄
+                            }
                         }else{
-                            $status = 1; //上架
+                            $status = 2; //售罄
                         }
                     }
                 }else{
@@ -150,7 +158,7 @@ class GoodsChange extends Backend
             ->where($map)
             ->group('platform_sku')
             ->count();
-
+        $nowDate = date('Y-m-d H:i:s');
         $pre_count = 5000;
         for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
             $start = $i*$pre_count;
@@ -179,20 +187,24 @@ class GoodsChange extends Backend
                     ->value('now_pricce');//售价
                 $skuStockInfo = $this->item_platform_sku
                     ->where(['sku' => $v['sku'], 'platform_type' => $order_platform])
-                    ->field('stock,outer_sku_status,presell_status')
+                    ->field('stock,outer_sku_status,presell_status,presell_start_time,presell_end_time,presell_num')
                     ->find();
                 if($skuStockInfo['outer_sku_status'] == 1){
-                    if($skuStockInfo['presell_status'] == 1){
-                        $status = '上架'; //上架
+                    if($skuStockInfo['stock'] > 0){
+                        $status = 1; //上架
                     }else{
-                        if($skuStockInfo['stock'] == 0){
-                            $status = '售罄'; //售罄
+                        if($skuStockInfo['presell_status'] == 1 && $nowDate >= $skuStockInfo['presell_start_time'] && $nowDate <= $skuStockInfo['presell_end_time']){
+                            if($skuStockInfo['presell_num'] > 0){
+                                $status = 1; //上架
+                            }else{
+                                $status = 2; //售罄
+                            }
                         }else{
-                            $status = '上架'; //上架
+                            $status = 2; //售罄
                         }
                     }
                 }else{
-                    $status = '下架';  //下架
+                    $status = 3;  //下架
                 }
                 $tmpRow['status'] = $status;
                 $tmpRow['glass_num'] =$v['glass_num'];//销售副数
