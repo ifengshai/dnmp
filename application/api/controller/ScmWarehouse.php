@@ -2282,41 +2282,24 @@ class ScmWarehouse extends Scm
             empty($page) && $this->error(__('Page can not be empty'), [], 522);
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
 
-
             if ($query) {
                 $cat['a.sku'] = ['like', '%' . $query . '%'];
                 $cat['a.inventory_id'] = ['neq', 0];
                 if ($stockId) {
                     $cat['b.stock_id'] = $stockId;
                 }
-
-                //通过盘点明细表+库存盘点单 过滤对应库位编码
-                $library_name = Db::table('fa_inventory_item')
-                    ->alias('a')
-                    ->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
-                    ->where(['b.is_del' => 1, 'b.check_status' => ['in', [0, 1]]])
-                    ->where($cat)
-                    ->column('a.library_name');
-                if ($library_name) {
-                    $where['b.coding'] = ['not in', array_unique($library_name)];
-                }
-
-            }
-            //排除待盘点sku
-            $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
-                ->where(['b.status' => ['in', [0, 1]]])
-                ->where(['a.sku' => ['not like', '%' . $query . '%']])
-                ->column('sku');
-            foreach ($sku_arr as $k => $v) {
-                $sku_arr_sku[] = $k;
-                $sku_area_id[] = $v;
             }
 
-
-            if ($sku_area_id) {
-                $where['b.area_id'] = ['not in', $sku_area_id];
+            //通过盘点明细表+库存盘点单 过滤对应库位编码
+            $library_name = Db::table('fa_inventory_item')
+                ->alias('a')
+                ->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
+                ->where(['b.is_del' => 1, 'b.check_status' => ['in', [0, 1]]])
+                ->where($cat)
+                ->column('a.library_name');
+            if ($library_name) {
+                $where['b.coding'] = ['not in', array_unique($library_name)];
             }
-
             //库存范围
             if ($start_stock && $end_stock) {
                 $item_where = [
@@ -2347,11 +2330,6 @@ class ScmWarehouse extends Scm
             }
             $offset = ($page - 1) * $page_size;
             $limit = $page_size;
-
-            if ($sku_arr) {
-                $where['sku'] = ['not in', $sku_arr];
-            }
-
             //获取SKU库位绑定表（fa_store_sku）数据列表
             $list = $this->_store_sku
                 ->alias('a')
