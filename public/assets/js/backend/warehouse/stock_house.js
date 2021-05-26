@@ -34,7 +34,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'warehouse_stock.name', title: __('实体仓名称'), operate: 'like' },
                         {
                             field: 'stock_id', title: __('实体仓名称'), custom: Config.warehourseStock,
                             searchList: Config.warehourseStock,
@@ -137,7 +136,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'warehouse_stock.name', title: __('实体仓名称'), operate: 'like' },
+                        
                         {
                             field: 'stock_id', title: __('实体仓名称'), custom: Config.warehourseStock,
                             searchList: Config.warehourseStock,
@@ -244,7 +243,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'warehouse_stock.name', title: __('实体仓名称'), operate: 'like' },
+                        
                         {
                             field: 'stock_id', title: __('实体仓名称'), custom: Config.warehourseStock,
                             searchList: Config.warehourseStock,
@@ -316,7 +315,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
-                        { field: 'warehouse_stock.name', title: __('实体仓名称'), operate: 'like' },
+                        
                         {
                             field: 'stock_id', title: __('实体仓名称'), custom: Config.warehourseStock,
                             searchList: Config.warehourseStock,
