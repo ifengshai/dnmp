@@ -136,7 +136,7 @@ class UserValueRfm extends Backend
             $arr_where = [];
             $arr_where[] = ['exp', Db::raw("user_id in " . $sql1)];
 
-            $sql2 = $web_model->table('orders')->alias('t1')->field('sum( actual_amount_paid ) AS total')->where($where)->where($arr_where)->group('user_id')->buildSql();
+            $sql2 = $web_model->table('orders')->alias('t1')->field('sum( base_actual_amount_paid ) AS total')->where($where)->where($arr_where)->group('user_id')->buildSql();
 
             $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 300, 1, 0 ) ) AS i,sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS h,sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS g,sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS f,sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS e,sum( IF ( total >= 30 AND total < 40, 1, 0 ) ) AS d,sum( IF ( total >= 20 AND total < 30, 1, 0 ) ) AS c,sum( IF ( total >= 10 AND total < 20, 1, 0 ) ) AS b')->select();
 
