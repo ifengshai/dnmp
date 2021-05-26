@@ -29,7 +29,7 @@ class skuDayAsynData extends Command
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
-        $tStart = strtotime('2021-05-01');
+        $tStart = strtotime('2021-01-01');
         $tend = time();
         for($i = $tStart;$i<$tend;$i+=3600*24){
             $data = date('Y-m-d', $i);
@@ -50,13 +50,13 @@ class skuDayAsynData extends Command
                 ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
                 ->where($orderWhere)
                 ->whereIn('sku',array_column($sku_data,'platform_sku'))
-                ->field('sku,magento_order_id,qty,base_original_price,base_original_price,i.base_discount_amount,i.index_price,i.coating_price')
+                ->field('sku,magento_order_id,qty,base_original_price,base_original_price,i.base_discount_amount,i.lens_price,i.coating_price')
                 ->select();
             $skuArr = [];
             foreach ($skuDatas as $key=>$value){
                 $skuArr[$value['sku']]['order_num'][] = $value['magento_order_id'];
                 $skuArr[$value['sku']]['glass_num'] += $value['qty'];
-                if($value['index_price']>0 || $value['coating_price']>0){
+                if($value['lens_price']>0 || $value['coating_price']>0){
                     $skuArr[$value['sku']]['pay_lens_num'] += $value['qty'];
                 }
                 $skuArr[$value['sku']]['sku_grand_total'] += $value['base_original_price'];
@@ -98,7 +98,7 @@ class skuDayAsynData extends Command
                 unset($sku_data[$k]['stock']);
                 unset($sku_data[$k]['grade']);
                 unset($sku_data[$k]['plat_on_way_stock']);
-                Db::name('datacenter_sku_day_bak')->insert($sku_data[$k]);
+                Db::name('datacenter_sku_day')->insert($sku_data[$k]);
                 echo $v['platform_sku'].' is ok'."\n";
                 usleep(10000);
             }
