@@ -7,7 +7,10 @@ use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\operatedatacenter\Datacenter;
 use app\admin\model\operatedatacenter\Nihao;
 use app\admin\model\operatedatacenter\Voogueme;
+use app\admin\model\operatedatacenter\Weseeoptical;
 use app\admin\model\operatedatacenter\Zeelool;
+use app\admin\model\operatedatacenter\ZeeloolDe;
+use app\admin\model\operatedatacenter\ZeeloolJp;
 use app\enum\Site;
 use think\Cache;
 use think\Db;
@@ -280,8 +283,14 @@ class UserData extends BaseElasticsearch
             case Site::NIHAO:
                 $model = new Nihao();
                 break;
-            case 4:
-                $model = new Datacenter();
+            case Site::ZEELOOL_DE:
+                $model = new ZeeloolDe();
+                break;
+            case Site::ZEELOOL_JP:
+                $model = new ZeeloolJp();
+                break;
+            case Site::WESEEOPTICAL:
+                $model = new Weseeoptical();
                 break;
         }
         //时间
