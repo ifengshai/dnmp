@@ -168,7 +168,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCart()
     {
-        $a = '1621997489';
+        $a = 1621997489;
         echo date('Ymd',$value['updated_at']).PHP_EOL;
         echo date('H',$value['updated_at']).PHP_EOL;
        DIE;
