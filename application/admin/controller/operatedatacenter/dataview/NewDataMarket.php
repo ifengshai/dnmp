@@ -222,6 +222,7 @@ class NewDataMarket extends Backend
             ->alias('s')
             ->join('fa_item i','s.sku=i.sku')
             ->where('s.platform_type',$site)
+            ->where('i.category_id','neq',43)
             ->field('sum(s.stock) stock,sum(s.stock*i.purchase_price) price')
             ->find();
         $arr['stock'] = $stock['stock'];
