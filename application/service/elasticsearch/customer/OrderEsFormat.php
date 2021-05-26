@@ -344,7 +344,7 @@ class OrderEsFormat extends BaseEsFormatData
      * @author crasphb
      * @date   2021/5/14 9:14
      */
-    public function formatHourChartsData($orderData,$compartOrderData)
+    public function formatHourChartsData($orderData,$compartOrderData,$today)
     {
         $hourSale = $orderData['hourSale']['buckets'];
         $hourSaleFormat = array_combine(array_column($hourSale, 'key'), $hourSale);
@@ -353,8 +353,8 @@ class OrderEsFormat extends BaseEsFormatData
             $comparthourSale = $compartOrderData['hourSale']['buckets'];
             $comparthourSaleFormat = array_combine(array_column($comparthourSale, 'key'), $comparthourSale);
         }
-        $orderDataFormat = $this->getChartData($hourSaleFormat);
-        $compareOrderDataFormat = $this->getChartData($comparthourSaleFormat);
+        $orderDataFormat = $this->getChartData($hourSaleFormat,$today);
+        $compareOrderDataFormat = $this->getChartData($comparthourSaleFormat,$today);
         $orderArr = $this->getHourEcharts($orderDataFormat);
         $compareOrderArr = $this->getHourEcharts($compareOrderDataFormat);
         $xData = array_values($orderArr['hourStr']);

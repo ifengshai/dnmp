@@ -70,6 +70,9 @@ class Hour extends BaseElasticsearch
                 $createat = explode(' ', $timeStr);
                 $start = date('Ymd', strtotime($createat[0]));
                 $end = date('Ymd', strtotime($createat[3]));
+                if($start == $end && $start == $nowDate) {
+                    $today = true;
+                }
             }
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             $time = $start . '-' . $end;
@@ -85,7 +88,7 @@ class Hour extends BaseElasticsearch
                 }
                 $hourOrderData = $this->buildHourOrderChatsSearch($site, $start, $end);
 
-                $allData = $this->esFormat->formatHourChartsData($hourOrderData, $compareData);
+                $allData = $this->esFormat->formatHourChartsData($hourOrderData, $compareData,$today);
                 Cache::set($cacheStr, $allData, 600);
             } else {
                 $allData = $cacheData;
