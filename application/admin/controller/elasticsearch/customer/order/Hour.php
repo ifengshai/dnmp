@@ -232,7 +232,7 @@ class Hour extends BaseElasticsearch
             $time = $start . '-' . $end;
             $cacheStr = 'day_hour_order_quote_' . $site . $time;
             $cacheData = Cache::get($cacheStr);
-            if (!$cacheData) {
+            //if (!$cacheData) {
                 $hourOrderData = $this->buildHourOrderSearch($site, $start, $end);
                 $hourCreateCartData = $this->buildHourCreateCartSearch($site, $start, $end);
                 $hourUpdateCartData = $this->buildHourUpdateCartSearch($site, $start, $end);
@@ -241,9 +241,9 @@ class Hour extends BaseElasticsearch
 
                 $allData = $this->esFormat->formatHourData($hourOrderData, $hourCreateCartData, $hourUpdateCartData, $gaData, $today);
                 Cache::set($cacheStr, $allData, 600);
-            } else {
-                $allData = $cacheData;
-            }
+//            } else {
+//                $allData = $cacheData;
+//            }
 
             $str = '';
             foreach ($allData['arr'] as $key => $val) {
@@ -391,6 +391,13 @@ class Hour extends BaseElasticsearch
                                     ],
                                 ],
                             ],
+                            [
+                                'range' => [
+                                    'base_grand_total' => [
+                                        'gt' => 0
+                                    ],
+                                ],
+                            ],
                             //in查询
                             [
                                 'terms' => [
@@ -458,6 +465,13 @@ class Hour extends BaseElasticsearch
                                     'update_time_day' => [
                                         'gte' => $start,
                                         'lte' => $end,
+                                    ],
+                                ],
+                            ],
+                            [
+                                'range' => [
+                                    'base_grand_total' => [
+                                        'gt' => 0
                                     ],
                                 ],
                             ],

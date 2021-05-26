@@ -237,8 +237,9 @@ class OrderEsFormat extends BaseEsFormatData
         $hourUpdateCartFormat = array_combine(array_column($hourUpdateCart, 'key'), $hourUpdateCart);
         $finalLists = $this->formatHour($today);
         //时段销量数据
-        $allSession = $allCreateCartToOrderNum = $allUpdateCartToOrderNum = 0;
+        $allSession = $allCreateCartToOrderNum = $allUpdateCartToOrderNum = $createCartToOrderNum = $updateCartToOrderNum = 0;
         $arr = [];
+
         foreach ($finalLists as $key => $finalList) {
             foreach ($gaData as $gaKey => $gaValue) {
                 if ((int)$finalList['hour'] == (int)substr($gaValue['ga:dateHour'], 8)) {

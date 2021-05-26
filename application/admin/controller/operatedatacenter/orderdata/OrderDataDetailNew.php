@@ -284,6 +284,14 @@ class OrderDataDetailNew extends Backend
                     ->limit($offset, $limit)
                     ->field('o.entity_id,o.increment_id,o.created_at,o.coupon_rule_name,o.order_type,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount,o.payment_time')
                     ->select();
+                $count = $order_model->alias('o')
+                    ->join('customer_entity c', 'o.customer_id=c.entity_id', 'left')
+                    ->where($where)
+                    ->where($map)
+                    ->order($sort, $order)
+                    ->limit($offset, $limit)
+                    ->field('o.entity_id,o.increment_id,o.created_at,o.coupon_rule_name,o.order_type,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount,o.payment_time')
+                    ->count();
                 $list = collection($list)->toArray();
                 $arr = array();
                 $i = 0;
@@ -424,8 +432,7 @@ class OrderDataDetailNew extends Backend
                 }
             }
 
-            $result = array("total" => count($arr), "rows" => $arr);
-            file_put_contents('./a.json',json($arr));
+            $result = array("total" => $count, "rows" => $arr);
             return json($result);
         }
         //查询对应平台权限
