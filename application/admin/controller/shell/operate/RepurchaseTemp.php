@@ -18,8 +18,8 @@ class RepurchaseTemp extends Command
 
     protected function configure()
     {
-        $this->setName('wessrepurchase')
-            ->setDescription('repurchase rate run');
+        $this->setName('repurchase_temp')
+            ->setDescription('repurchase_temp rate run');
     }
 
     protected function execute(Input $input, Output $output)
