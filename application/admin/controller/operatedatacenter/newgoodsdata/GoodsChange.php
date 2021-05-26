@@ -133,9 +133,16 @@ class GoodsChange extends Backend
         $order_platform = input('order_platform') ? input('order_platform') : 1;
 
         // 将中文标题转换编码，否则乱码
-        $field_arr = array(
-            'SKU','购物车数量','订单成功数','订单金额','更新购物车转化率','新增购物车转化率','付费镜片占比','售价','在售状态（实时）','销售副数','实际支付的销售额','副单价','虚拟库存'
-        );
+        if($order_platform == 5){
+            $field_arr = array(
+                'SKU','订单成功数','订单金额','付费镜片占比','售价','在售状态（实时）','销售副数','实际支付的销售额','副单价','虚拟库存'
+            );
+        }else{
+            $field_arr = array(
+                'SKU','购物车数量','订单成功数','订单金额','更新购物车转化率','新增购物车转化率','付费镜片占比','售价','在售状态（实时）','销售副数','实际支付的销售额','副单价','虚拟库存'
+            );
+        }
+
         foreach ($field_arr as $i => $v) {
             $field_arr[$i] = iconv('utf-8', 'GB18030', $v);
         }
@@ -175,11 +182,15 @@ class GoodsChange extends Backend
             foreach ($list as &$v) {
                 $tmpRow = [];
                 $tmpRow['platform_sku'] =$v['platform_sku'];//sku
-                $tmpRow['cart_num'] =$v['cart_num'];//购物车数量
+                if($order_platform != 5){
+                    $tmpRow['cart_num'] =$v['cart_num'];//购物车数量
+                }
                 $tmpRow['order_num'] =$v['order_num'];//订单成功数
                 $tmpRow['sku_grand_total'] =$v['sku_grand_total'];//订单金额
-                $tmpRow['update_cart_rate'] =$v['update_cart_num'] ? round($v['order_num']/$v['update_cart_num']*100,2).'%' : '0%';//更新购物车转化率
-                $tmpRow['cart_change'] = $v['cart_num'] ? round($v['order_num'] / $v['cart_num'] * 100, 2) . '%' : '0%';//新增购物车转化率
+                if($order_platform != 5){
+                    $tmpRow['update_cart_rate'] =$v['update_cart_num'] ? round($v['order_num']/$v['update_cart_num']*100,2).'%' : '0%';//更新购物车转化率
+                    $tmpRow['cart_change'] = $v['cart_num'] ? round($v['order_num'] / $v['cart_num'] * 100, 2) . '%' : '0%';//新增购物车转化率
+                }
                 $tmpRow['pay_lens_rate'] = $v['glass_num'] ? round($v['pay_lens_num'] / $v['glass_num'] * 100, 2) . '%' : '0%';//付费镜片占比
                 $tmpRow['now_pricce'] =Db::name('datacenter_sku_day')
                     ->where(['sku'=>$v['sku'],'site'=>$order_platform])
