@@ -268,7 +268,8 @@ function order_data_view() {
             var flatrate_nofree = ship_type[1];
             $('#flatrate_nofree_order_num').text(flatrate_nofree.doc_count);
             $('#flatrate_nofree_rate').text(flatrate_nofree.rate);
-            $('#flatrate_nofree_order_total').text(flatrate_nofree.allShippingAmount.value);
+            var allShippingAmount = flatrate_nofree.allShippingAmount.value
+            $('#flatrate_nofree_order_total').text(allShippingAmount.toFixed(2));
         }
         if(ship_type[2]) {
             var tablerate_free = ship_type[2];
@@ -279,7 +280,8 @@ function order_data_view() {
             var tablerate_nofree = ship_type[3];
             $('#tablerate_nofree_order_num').text(tablerate_nofree.doc_count);
             $('#tablerate_nofree_rate').text(tablerate_nofree.rate);
-            $('#tablerate_nofree_order_total').text(tablerate_nofree.allShippingAmount.value);
+            var nofreeallShippingAmount = tablerate_nofree.allShippingAmount.value;
+            $('#tablerate_nofree_order_total').text(nofreeallShippingAmount.toFixed(2))
         }
 
 
