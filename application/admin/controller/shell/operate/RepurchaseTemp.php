@@ -18,21 +18,15 @@ class Repurchase extends Command
 
     protected function configure()
     {
-        $this->setName('repurchase')
+        $this->setName('wessrepurchase')
             ->setDescription('repurchase rate run');
     }
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getUserRepurchase(1);  //zeelool复购数据
-        $this->getUserRepurchase(2);  //voogueme复购数据
-        $this->getUserRepurchase(3);  //nihao复购数据
         $this->getUserRepurchase(5);  //批发站复购数据
         $this->getUserRepurchase(10);  //德语复购数据
         $this->getUserRepurchase(11);  //西语复购数据
-        $this->getOldNewUser(1);  //zeelool新老用户数据
-        $this->getOldNewUser(2);  //voogueme新老用户数据
-        $this->getOldNewUser(3);  //nihao新老用户数据
         $output->writeln("All is ok");
     }
     /**
