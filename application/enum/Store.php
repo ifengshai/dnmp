@@ -12,6 +12,7 @@ namespace app\enum;
 class Store
 {
     const PC = 1;
+    const WAP_WESEE = 2;
     const WAP = 4;
     const IOS = 5;
     const ANDROID = 6;

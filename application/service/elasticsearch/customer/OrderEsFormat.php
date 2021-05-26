@@ -67,6 +67,9 @@ class OrderEsFormat extends BaseEsFormatData
                 case Store::ANDROID:
                     $storeName = 'ANDROID';
                     break;
+                case Store::WAP_WESEE:
+                    $storeName = '移动端';
+                    break;
             }
             $storeData = [
                 'siteName'       => $siteName,

@@ -45,7 +45,7 @@ class OrderPrescriptionNew extends Backend
     {
         $time_str = input('time_str');
         if (!$time_str) {
-            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $start = date('Y-m-d 00:00:00', strtotime('-30 day'));
             $end = date('Y-m-d 23:59:59');
             $time_between = $start . ' - ' . $end;
             $time_show = '';
@@ -63,7 +63,7 @@ class OrderPrescriptionNew extends Backend
     function prescrtion_data($site = 1, $time_str = '')
     {
         if (!$time_str) {
-            $start = date('Y-m-d', strtotime('-6 day'));
+            $start = date('Y-m-d', strtotime('-30 day'));
             $end = date('Y-m-d 23:59:59');
             $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
         }
@@ -211,7 +211,7 @@ class OrderPrescriptionNew extends Backend
             $type = [0, 5, 9];
         }
         if (!$timeStr) {
-            $start = date('Y-m-d', strtotime('-6 day'));
+            $start = date('Y-m-d', strtotime('-30 day'));
             $end = date('Y-m-d 23:59:59');
             $timeStr = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
         }
