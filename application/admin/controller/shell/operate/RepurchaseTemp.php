@@ -8,7 +8,7 @@ use think\console\Input;
 use think\console\Output;
 use think\Db;
 
-class Repurchase extends Command
+class RepurchaseTemp extends Command
 {
     public function __construct()
     {
