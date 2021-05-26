@@ -27,7 +27,7 @@ class AsyncCart extends BaseElasticsearch
         try {
             $data['id'] = $id;
             $insertData = $this->getData($data);
-            //$this->esService->addToEs('mojing_cart', $insertData);
+            $this->esService->addToEs('mojing_cart', $insertData);
         } catch (\Exception $e) {
             echo $e->getMessage();
         }
@@ -78,7 +78,7 @@ class AsyncCart extends BaseElasticsearch
         try {
             $updateData = $this->getData($data);
 
-            //$this->esService->updateEs('mojing_cart', $updateData);
+            $this->esService->updateEs('mojing_cart', $updateData);
         } catch (\Exception $e) {
             echo $e->getMessage();
         }
