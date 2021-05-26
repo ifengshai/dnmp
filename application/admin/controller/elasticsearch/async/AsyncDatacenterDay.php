@@ -34,7 +34,7 @@ class AsyncDatacenterDay extends BaseElasticsearch
                 $data = array_map(function ($value) {
                     return $value === null ? 0 : $value;
                 }, $datacenterDay->toArray());
-                $mergeData = strtotime($data['day_date']);
+                $mergeData = strtotime($data['day_date']) + 8*3600;
                 $insertData = $this->formatDate($data, $mergeData);
                 $this->esService->addToEs('mojing_datacenterday', $insertData);
             }

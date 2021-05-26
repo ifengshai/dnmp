@@ -48,16 +48,16 @@ class AsyncCart extends BaseElasticsearch
         $value = array_map(function ($v) {
             return $v === null ? 0 : $v;
         }, $data);
-        $mergeData = $value['created_at'];
+        $mergeData = $value['created_at'] + 8*3600;
         $insertData = [
             'id'              => $data['id'],
             'entity_id'       => $value['entity_id'],
             'site'            => $value['site'],
             'status'          => $value['is_active'],
             'base_grand_total'=> $value['base_grand_total'],
-            'update_time_day' => date('Ymd', $value['updated_at']),
-            'update_time_hour' => date('H', $value['updated_at']),
-            'update_time'     => $value['updated_at'],
+            'update_time_day' => date('Ymd', $value['updated_at'] + 8*3600),
+            'update_time_hour' => date('H', $value['updated_at'] + 8*3600),
+            'update_time'     => $value['updated_at'] + 8*3600,
             'create_time'     => $mergeData,
 
         ];
