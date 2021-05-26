@@ -330,6 +330,7 @@ class Hour extends BaseElasticsearch
                             "quoteIds"        => [
                                 "terms" => [
                                     'field' => 'quote_id',
+                                    'size'  => 1000000,
                                 ],
                             ],
                             "daySalesAmount"  => [
@@ -419,7 +420,7 @@ class Hour extends BaseElasticsearch
                         "aggs"  => [
                             "ids" => [
                                 "terms" => [
-                                    'field' => 'entity_id.keyword',
+                                    'field' => 'entity_id',
                                     'size'  => 1000000,
                                 ],
                             ],
@@ -496,7 +497,7 @@ class Hour extends BaseElasticsearch
                         "aggs"  => [
                             "ids" => [
                                 "terms" => [
-                                    'field' => 'entity_id.keyword',
+                                    'field' => 'entity_id',
                                     'size'  => 1000000,
                                 ],
                             ],

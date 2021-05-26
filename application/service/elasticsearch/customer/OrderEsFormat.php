@@ -241,7 +241,7 @@ class OrderEsFormat extends BaseEsFormatData
         $finalLists = $this->formatHour($today);
         //时段销量数据
         $allSession = $allCreateCartToOrderNum = $allUpdateCartToOrderNum = $createCartToOrderNum = $updateCartToOrderNum = 0;
-        $arr = [];
+        $arr = $allCartCreateIds = $allCartUpdateIds = $allOrderDataIds = [];
 
         foreach ($finalLists as $key => $finalList) {
             foreach ($gaData as $gaKey => $gaValue) {
@@ -284,6 +284,10 @@ class OrderEsFormat extends BaseEsFormatData
             $hourOrderDataIds = $hourOrderData['quoteIds']['buckets'];
             $hourOrderDataIdsArr = array_column($hourOrderDataIds,'key');
 
+            $allCartCreateIds = array_merge($allCartCreateIds,$hourCreateCartDataIdsArr);
+            $allCartUpdateIds = array_merge($allCartUpdateIds,$hourUpdateCartDataIdsArr);
+            $allOrderDataIds = array_merge($allOrderDataIds,$hourOrderDataIdsArr);
+
             //求新增购物车产生的订单数
             $createCartToOrderNum = count(array_intersect($hourOrderDataIdsArr,$hourCreateCartDataIdsArr));
             //求更新购物车产生的订单数
@@ -310,9 +314,9 @@ class OrderEsFormat extends BaseEsFormatData
             //总回话数
             $allSession += $arr[$key]['sessions'];
             //总新增购物车产生的订单数
-            $allCreateCartToOrderNum += $createCartToOrderNum;
-            //总更新购物车产生的订单数
-            $allUpdateCartToOrderNum += $updateCartToOrderNum;
+//            $allCreateCartToOrderNum += $createCartToOrderNum;
+//            //总更新购物车产生的订单数
+//            $allUpdateCartToOrderNum += $updateCartToOrderNum;
         }
 
         //总订单数
@@ -330,9 +334,13 @@ class OrderEsFormat extends BaseEsFormatData
 
         //加购率
         $addCartRate = $allSession ? bcmul(bcdiv($allHourCreateCart, $allSession, 4),100,2) . '%' : '0%';
+        //求新增购物车产生的订单数
+        $allCreateCartToOrderNum = count(array_intersect($allOrderDataIds,$allCartCreateIds));
+        //求更新购物车产生的订单数
+        $allUpdateCartToOrderNum = count(array_intersect($allOrderDataIds,$allCartUpdateIds));
         //新增购物车转化率
-        $createCartRate = $allHourCreateCart ? bcmul(bcdiv($allCreateCartToOrderNum, $allHourCreateCart, 4),100,2) . '%' : '0%';
-        $updateCartRate = $allHourUpdateCart ? bcmul(bcdiv($allUpdateCartToOrderNum, $allHourUpdateCart, 4),100,2) . '%' : '0%';
+        $createCartRate = $allCartCreateIds ? bcmul(bcdiv($allCreateCartToOrderNum, count($allCartCreateIds), 4),100,2) . '%' : '0%';
+        $updateCartRate = $allCartUpdateIds ? bcmul(bcdiv($allUpdateCartToOrderNum, count($allCartUpdateIds), 4),100,2) . '%' : '0%';
         //回话转化率
         $sessionRate = $allSession ? bcmul(bcdiv($allOrderCount, $allSession, 4),100,2) . '%' : '0%';
 
