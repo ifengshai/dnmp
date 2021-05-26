@@ -299,7 +299,7 @@ class GoodsSalesNum extends Backend
             if(isset($pages['offset'])){
                 $res['data'] = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option p','o.entity_id=p.order_id')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                     ->where($map)
                     ->where($timeWhere)
                     ->group('sku')
@@ -308,14 +308,14 @@ class GoodsSalesNum extends Backend
                     ->column('sum(p.qty) as num', 'p.sku');
                 $res['count'] = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option p','o.entity_id=p.order_id')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                     ->where($map)
                     ->where($timeWhere)
                     ->count('distinct sku');
             }else{
                 $res['data'] = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option p','o.entity_id=p.order_id')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                     ->where($map)
                     ->where($timeWhere)
                     ->group('sku')
@@ -324,7 +324,7 @@ class GoodsSalesNum extends Backend
                     ->column('sum(p.qty) as num', 'p.sku');
                 $res['count'] = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option p','o.entity_id=p.order_id')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                     ->where($map)
                     ->where($timeWhere)
                     ->count('distinct sku');
@@ -332,7 +332,7 @@ class GoodsSalesNum extends Backend
         }else{
             $res['data'] = $this->order
                 ->alias('o')
-                ->join('fa_order_item_option p','o.entity_id=p.order_id')
+                ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                 ->where($map)
                 ->where($timeWhere)
                 ->where('sku',$sku)
