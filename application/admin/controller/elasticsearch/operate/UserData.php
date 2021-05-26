@@ -298,7 +298,9 @@ class UserData extends BaseElasticsearch
 
     public function getReBuyNum($site, $timeStr, $compareTimeStr)
     {
-        $nowDay = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+        if (!$timeStr) {
+            $nowDay = date('Y-m-d', strtotime('-6 days')) . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+        }
         switch ($site) {
             case Site::ZEELOOL:
                 $model = new Zeelool();
