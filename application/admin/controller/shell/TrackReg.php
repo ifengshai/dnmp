@@ -3504,14 +3504,20 @@ class TrackReg extends Backend
         //wesee站
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
-        $skuList = Db::name('datacenter_sku_day')->where(['day_date' => $data, 'site' => 5])->select();
+        $skuList = Db::name('datacenter_sku_day')
+            ->where(['day_date' => $data, 'site' => 5])
+            ->field('id,platform_sku')
+            ->select();
+        $nowPrice = Db::connect('database.db_weseeoptical')
+            ->table('goods') //为了获取现价找的表
+            ->whereIn('sku',array_column($skuList,'platform_sku'))
+            ->column('IF(special_price,special_price,price) price','sku');
         foreach ($skuList as $k => $v) {
-            $skuList[$k]['now_pricce'] = Db::connect('database.db_weseeoptical')
-                ->table('goods') //为了获取现价找的表
-                ->where('sku',  $v['platform_sku'])
-                ->value('IF(special_price,special_price,price) price');
-            Db::name('datacenter_sku_day')->update($skuList[$k]);
-            echo $skuList[$k]['sku']."\n";
+            $now_pricce = $nowPrice[$v['platform_sku']] ?? 0;
+            Db::name('datacenter_sku_day')
+                ->where('id',$v['id'])
+                ->update(['now_pricce'=>$now_pricce]);
+            echo $v['id']."\n";
             echo '<br>';
         }
     }

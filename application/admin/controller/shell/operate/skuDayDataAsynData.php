@@ -47,21 +47,25 @@ class skuDayDataAsynData extends Command
             $orderWhere['o.status'] = ['in',['free_processing','processing', 'complete', 'paypal_reversed', 'payment_review','paypal_canceled_reversal', 'delivered']];
             $sku_data = Db::name('datacenter_sku_day')
                 ->where(['site' => $site,'day_date'=>$data])
+                ->field('id,platform_sku')
                 ->select();
-            //当前站点的所有sku映射关系
             $sku_data = collection($sku_data)->toArray();
+            $skuDatas = $this->order
+                ->alias('o')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->where($orderWhere)
+                ->whereIn('sku',array_column($sku_data,'platform_sku'))
+                ->field('sku,qty,i.lens_price,i.coating_price')
+                ->select();
+            $skuArr = [];
+            foreach ($skuDatas as $key=>$value){
+                if($value['lens_price']>0 || $value['coating_price']>0){
+                    $skuArr[$value['sku']]['pay_lens_num'] += $value['qty'];
+                }
+            }
+            //当前站点的所有sku映射关系
             foreach ($sku_data as $k => $v) {
-                $map['i.sku'] = ['like', $v['platform_sku'].'%'];
-                //sku付费镜片的数量
-                $lensWhere = [];
-                $lensWhere[] = ['exp', Db::raw("(i.lens_price>0 || i.coating_price>0)")];
-                $pay_lens_num = $this->orderitemoption
-                    ->alias('i')
-                    ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
-                    ->where($orderWhere)
-                    ->where($map)
-                    ->where($lensWhere)
-                    ->sum('i.qty');
+                $pay_lens_num = $skuArr[$v['platform_sku']]['pay_lens_num'] ? $skuArr[$v['platform_sku']]['pay_lens_num'] : 0;
                 Db::name('datacenter_sku_day')
                     ->where('id',$v['id'])
                     ->update(['pay_lens_num'=>$pay_lens_num]);
