@@ -212,8 +212,8 @@ class OrderEsFormat extends BaseEsFormatData
         //购物侧后-订单趋势
         $ydataCartOrder = [
             [
-                'value' => array_values(array_column($dayChartsCreateCartNum,'value')),
-                'name' => '购物车数目',
+                'value' => array_values(array_column($dayChartsUpdateCartNum,'value')),
+                'name' => '更新购物车数目',
             ],
             [
                 'value' => array_values(array_column($dayChartsOrderNum,'value')),

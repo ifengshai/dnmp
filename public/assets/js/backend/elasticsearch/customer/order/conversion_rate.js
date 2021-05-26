@@ -191,7 +191,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             legend: { //图例配置
                                 padding: 5,
                                 top: '2%',
-                                data: ['购物车数目', '订单数量']
+                                data: ['更新购物车数目', '订单数量']
                             },
                             xAxis: [
                                 {
@@ -201,7 +201,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             yAxis: [
                                 {
                                     type: 'value',
-                                    name: '购物车数目',
+                                    name: '更新购物车数目',
                                     axisLabel: {
                                         formatter: '{value} '
                                     }
