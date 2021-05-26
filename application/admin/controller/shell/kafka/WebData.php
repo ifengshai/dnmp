@@ -260,31 +260,31 @@ class WebData extends Backend
         if ($site == 1) {
             $entity_id = $webShoppingCart->where(['entity_id' => ['<', 19582846], 'site' => 1])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_quote')->where(['entity_id' => ['<', 19582846]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
         } elseif ($site == 2) {
             $entity_id = $webShoppingCart->where(['entity_id' => ['<', 2099806], 'site' => 2])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_quote')->where(['entity_id' => ['<', 2099806]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
         } elseif ($site == 3) {
             $entity_id = $webShoppingCart->where(['entity_id' => ['<', 2658466], 'site' => 3])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_nihao')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_nihao')->table('sales_flat_quote')->where(['entity_id' => ['<', 2658466]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
         } elseif ($site == 9) {
             $entity_id = $webShoppingCart->where(['entity_id' => ['<', 5863], 'site' => 9])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_zeelool_es')->table('sales_flat_quote')->where(['entity_id' => ['<', 5863]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
         } elseif ($site == 10) {
             $entity_id = $webShoppingCart->where(['entity_id' => ['<', 66640], 'site' => 10])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_quote')->where(['entity_id' => ['<', 66640]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
         } elseif ($site == 11) {
             $entity_id = $webShoppingCart->where(['entity_id' => ['<', 34692], 'site' => 11])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_quote')->where(['entity_id' => ['<', 34692]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
         } elseif ($site == 12) {
             $entity_id = $webShoppingCart->where(['entity_id' => ['<', 183917], 'site' => 12])->order('entity_id desc')->value('entity_id');
             $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_quote')->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
+            $res = Db::connect('database.db_voogueme_acc')->table('sales_flat_quote')->where(['entity_id' => ['<', 183917]])->where(['entity_id' => ['>', $entity_id]])->order('entity_id desc')->limit(4000)->select();
         }
         $res = collection($res)->toArray();
         foreach ($res as $k => $v) {
