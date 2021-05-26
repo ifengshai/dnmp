@@ -46,47 +46,25 @@ class GoodsSalesNum extends Backend
     public function index()
     {
         $create_time = input('create_time');
-        //查询对应平台权限
-        $magentoplatformarr = $this->magentoplatform->getAuthSite();
-        foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','wesee','zeelool_de','zeelool_jp'])) {
-                unset($magentoplatformarr[$key]);
-            }
-        }
-        $this->view->assign('magentoplatformarr', $magentoplatformarr);
-        $this->assign('create_time', $create_time);
-        return $this->view->fetch();
-    }
-
-    /**
-     * 总体销量排行榜
-     * @author mjj
-     * @date   2021/5/14 14:33:55
-     */
-    public function table1()
-    {
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            $params = $this->request->param();
-            $params['site'] = $params['site'] ? $params['site'] : 1;
+            $params['site'] = $filter['order_platform'] ? $filter['order_platform'] : 1;
             //默认当天
-            if ($params['time']) {
-                $time = explode(' ', $params['time']);
+            if ($filter['create_time']) {
+                $time = explode(' ', $filter['create_time']);
                 $start = strtotime($time[0] . ' ' . $time[1]);
                 $end = strtotime($time[3] . ' ' . $time[4]);
             } else {
                 $start = strtotime(date('Y-m-d 00:00:00', strtotime('-6 day')));
                 $end = strtotime(date('Y-m-d H:i:s', time()));
             }
-            /*$start = strtotime('2021-04-01');
-            $end = strtotime('2021-04-01 01:0:0');*/
             $map['payment_time'] = ['between', [$start, $end]];
             unset($filter['create_time-operate']);
-            unset($filter['time']);
-            unset($filter['site']);
+            unset($filter['create_time']);
+            unset($filter['order_platform']);
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $pageArr = array(
@@ -150,31 +128,33 @@ class GoodsSalesNum extends Backend
             $data = array("total" => $total, "rows" => $result);
             return json($data);
         }
+
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key => $val) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','wesee','zeelool_de','zeelool_jp'])) {
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign('magentoplatformarr', $magentoplatformarr);
+        $this->assign('create_time', $create_time);
+        return $this->view->fetch();
     }
-    /**
-     * 新品销量排行榜
-     * @author mjj
-     * @date   2021/5/14 11:22:08
-     */
-    public function table2()
+    public function index1()
     {
         $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $create_time = input('create_time');
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            $params = $this->request->param();
-            $params['site'] = $params['site'] ? $params['site'] : 1;
+            $params['site'] = $filter['order_platform'] ? $filter['order_platform'] : 1;
             unset($filter['create_time-operate']);
-            unset($filter['time']);
-            unset($filter['site']);
+            unset($filter['create_time']);
+            unset($filter['order_platform']);
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
-            $pageArr = array(
-                'limit'=>$limit,
-                'offset'=>$offset
-            );
             $startTime = strtotime(date('Y-m-d 00:00:00', strtotime('-30 day')));  //过去30天时间
             $total = Db::name('sku_shelves_time')
                 ->where('shelves_time','>=',$startTime)
@@ -182,6 +162,7 @@ class GoodsSalesNum extends Backend
             $skus = Db::name('sku_shelves_time')
                 ->where('shelves_time','>=',$startTime)
                 ->field('platform_sku,shelves_time,sku')
+                ->limit($offset,$limit)
                 ->select();
             $list = [];
             $i = 0;
@@ -228,7 +209,19 @@ class GoodsSalesNum extends Backend
             $data = array("total" => $total, "rows" => $list);
             return json($data);
         }
+
+        //查询对应平台权限
+        $magentoplatformarr = $this->magentoplatform->getAuthSite();
+        foreach ($magentoplatformarr as $key => $val) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','wesee','zeelool_de','zeelool_jp'])) {
+                unset($magentoplatformarr[$key]);
+            }
+        }
+        $this->view->assign('magentoplatformarr', $magentoplatformarr);
+        $this->assign('create_time', $create_time);
+        return $this->view->fetch('operatedatacenter/newgoodsdata/goods_sales_num/index1');
     }
+
 
 
     /**
@@ -250,13 +243,11 @@ class GoodsSalesNum extends Backend
                 $start = strtotime(date('Y-m-d 00:00:00', strtotime('-6 day')));
                 $end = strtotime(date('Y-m-d H:i:s', time()));
             }
-           /* $start = strtotime('2021-04-01');
-            $end = strtotime('2021-04-01 02:0:0');*/
             $map['payment_time'] = ['between', [$start, $end]];
             /***********图表*************/
-            $cachename = 'goodsSalesNum_line_' . md5(serialize($map)) . '_' . $params['site'].$params['type'];
-            $cacheData = cache($cachename);
-            if (!$cacheData) {
+            //$cachename = 'goodsSalesNum_line_' . md5(serialize($map)) . '_' . $params['site'].$params['type'];
+            //$cacheData = cache($cachename);
+            //if (!$cacheData) {
                 if($params['type'] == 1){
                     //总体销量排行榜
                     $pageArr['limit'] = 50;
@@ -271,17 +262,19 @@ class GoodsSalesNum extends Backend
                         ->where('shelves_time','>=',$startTime)
                         ->column('platform_sku','shelves_time');
                     $res = [];
+
                     foreach($skus as $k=>$sku){
                         $skuTimeWhere['payment_time'] = ['between',[$k,time()]];
                         $skuSalesNum = $this->getOrderSalesNum($params['site'],$skuTimeWhere,[],$sku);
-                        $res[$sku] = $skuSalesNum['data'][$sku];
+                        $res[$sku] = $skuSalesNum['data'][$sku] ?? 0;
                     }
+                    $res = array_diff($res, [0]);
                     arsort($res);
                     $cacheData['data'] = $res;
                     $cacheData['name'] = '新品销售排行榜';
                 }
-                cache($cachename, $cacheData, 7200);
-            }
+                //cache($cachename, $cacheData, 7200);
+//            }
             $json['xColumnName'] = $cacheData['data'] ? array_keys($cacheData['data']) : [];
             $json['columnData'] = [
                 'type' => 'bar',
@@ -304,35 +297,35 @@ class GoodsSalesNum extends Backend
         $map['o.site'] = $site;
         $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
         if($pages['limit']){
-            if($pages['offset']){
+            if(isset($pages['offset'])){
                 $res['data'] = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option p','o.entity_id=p.order_id')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                     ->where($map)
                     ->where($timeWhere)
                     ->group('sku')
                     ->order('num desc')
                     ->limit($pages['offset'],$pages['limit'])
-                    ->column('round(sum(p.qty)) as num', 'p.sku');
+                    ->column('sum(p.qty) as num', 'p.sku');
                 $res['count'] = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option p','o.entity_id=p.order_id')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                     ->where($map)
                     ->where($timeWhere)
                     ->count('distinct sku');
             }else{
                 $res['data'] = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option p','o.entity_id=p.order_id')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                     ->where($map)
                     ->where($timeWhere)
                     ->group('sku')
                     ->order('num desc')
                     ->limit($pages['limit'])
-                    ->column('round(sum(p.qty)) as num', 'p.sku');
+                    ->column('sum(p.qty) as num', 'p.sku');
                 $res['count'] = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option p','o.entity_id=p.order_id')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                     ->where($map)
                     ->where($timeWhere)
                     ->count('distinct sku');
@@ -340,13 +333,13 @@ class GoodsSalesNum extends Backend
         }else{
             $res['data'] = $this->order
                 ->alias('o')
-                ->join('fa_order_item_option p','o.entity_id=p.order_id')
+                ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                 ->where($map)
                 ->where($timeWhere)
                 ->where('sku',$sku)
                 ->group('sku')
                 ->order('num desc')
-                ->column('round(sum(p.qty)) as num', 'p.sku');
+                ->column('sum(p.qty) as num', 'p.sku');
         }
         return $res;
     }

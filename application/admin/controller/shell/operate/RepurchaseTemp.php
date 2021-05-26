@@ -8,7 +8,7 @@ use think\console\Input;
 use think\console\Output;
 use think\Db;
 
-class Repurchase extends Command
+class RepurchaseTemp extends Command
 {
     public function __construct()
     {
@@ -18,21 +18,15 @@ class Repurchase extends Command
 
     protected function configure()
     {
-        $this->setName('repurchase')
-            ->setDescription('repurchase rate run');
+        $this->setName('repurchase_temp')
+            ->setDescription('repurchase_temp rate run');
     }
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getUserRepurchase(1);  //zeelool复购数据
-        $this->getUserRepurchase(2);  //voogueme复购数据
-        $this->getUserRepurchase(3);  //nihao复购数据
         $this->getUserRepurchase(5);  //批发站复购数据
         $this->getUserRepurchase(10);  //德语复购数据
         $this->getUserRepurchase(11);  //西语复购数据
-        $this->getOldNewUser(1);  //zeelool新老用户数据
-        $this->getOldNewUser(2);  //voogueme新老用户数据
-        $this->getOldNewUser(3);  //nihao新老用户数据
         $output->writeln("All is ok");
     }
     /**
