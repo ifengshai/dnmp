@@ -2,30 +2,44 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
 
     var Controller = {
         index: function () {
-            Controller.api.bindevent();
             Controller.api.formatter.daterangepicker($("form[role=form1]"));
-            Controller.api.formatter.sales_num_line();   //销量排行
-            Controller.api.formatter.new_sales_num_line();   //新品销量排行
-            // 初始化表格参数配置
-            // 初始化表格参数配置
-            Table.api.init();
-            
-            //绑定事件
-            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                var panel = $($(this).attr("href"));
-                if (panel.size() > 0) {
-                    Controller.table[panel.attr("id")].call(this);
-                    $(this).on('click', function (e) {
-                        $($(this).attr("href")).find(".btn-refresh").trigger("click");
-                    });
+            Controller.api.bindevent();
+            Table.api.init({
+                extend: {
+                    index_url: 'operatedatacenter/newgoodsdata/goods_sales_num/index'+ location.search,
                 }
-                //移除绑定的事件
-                $(this).unbind('shown.bs.tab');
             });
             
-            //必须默认触发shown.bs.tab事件
-            $('ul.nav-tabs li.active a[data-toggle="tab"]').trigger("shown.bs.tab");
+            Controller.api.formatter.sales_num_line();   //销量排行
+    
+            var table = $("#table1");
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                sortName: 'id',
+                search: false,
+                columns: [
+                    [
+                        { field: 'platformsku', title: __('平台SKU'), operate: false },
+                        { field: 'sku', title: __('SKU'), operate: false },
+                        { field: 'shelves_date', title: __('上架时间'), operate: false },
+                        { field: 'type_name', title: __('分类'), operate: false },
+                        { field: 'available_stock', title: __('虚拟仓库存'), sortable: true,operate: false },
+                        { field: 'sales_num', title: __('销量'), operate: false },
+                        { field: 'online_day', title: __('在线天数'), operate: false },
+                        { field: 'sales_num_day', title: __('日均销量'), operate: false },
+                        {
+                            field: 'online_status', title: __('在售状态（实时）'), operate: false,
+                            custom: { 1: 'success', 2: 'danger',3:'blue' },
+                            searchList: { 1: '上架', 2: '售罄' ,3:'下架'},
+                            formatter: Table.api.formatter.status
+                        },
+                    ]
+                ]
+            });
 
+           // 为表格1绑定事件
+           Table.api.bindevent(table);
+        
             $("#sku_submit").click(function () {
                 Controller.api.formatter.sales_num_line();   //销量排行
                 var params = table.bootstrapTable('getOptions')
@@ -48,69 +62,62 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
             });
 
         },
-        table: {
-            first: function () {
-                // 表格1
-                var table1 = $("#table1");
-                table1.bootstrapTable({
-                    url: 'operatedatacenter/newgoodsdata/goods_sales_num/table1',
-                    toolbar: '#toolbar1',
-                    sortName: 'id',
-                    search: false,
-                    columns: [
-                        [
-                            { field: 'platformsku', title: __('平台SKU'), operate: false },
-                            { field: 'sku', title: __('SKU'), operate: false },
-                            { field: 'shelves_date', title: __('上架时间'), operate: false },
-                            { field: 'type_name', title: __('分类'), operate: false },
-                            { field: 'available_stock', title: __('虚拟仓库存'), sortable: true,operate: false },
-                            { field: 'sales_num', title: __('销量'), operate: false },
-                            { field: 'online_day', title: __('在线天数'), operate: false },
-                            { field: 'sales_num_day', title: __('日均销量'), operate: false },
-                            {
-                                field: 'online_status', title: __('在售状态（实时）'), operate: false,
-                                custom: { 1: 'success', 2: 'danger',3:'blue' },
-                                searchList: { 1: '上架', 2: '售罄' ,3:'下架'},
-                                formatter: Table.api.formatter.status
-                            },
-                        ]
+        index1: function () {
+            Controller.api.bindevent();
+            Controller.api.formatter.daterangepicker($("form[role=form]"));
+            Controller.api.formatter.new_sales_num_line();   //新品销量排行
+            // 初始化表格参数配置
+            Table.api.init();
+            
+            // 表格1
+            var table = $("#table2");
+            table.bootstrapTable({
+                url: 'operatedatacenter/newgoodsdata/goods_sales_num/index1'+ location.search,
+                sortName: 'id',
+                search: false,
+                columns: [
+                    [
+                        { field: 'platformsku', title: __('平台SKU'), operate: false },
+                        { field: 'sku', title: __('SKU'), operate: false },
+                        { field: 'shelves_date', title: __('上架时间'), operate: false },
+                        { field: 'type_name', title: __('分类'), operate: false },
+                        { field: 'available_stock', title: __('虚拟仓库存'), sortable: true,operate: false },
+                        { field: 'sales_num', title: __('销量'), operate: false },
+                        { field: 'online_day', title: __('在线天数'), operate: false },
+                        { field: 'sales_num_day', title: __('日均销量'), operate: false },
+                        {
+                            field: 'online_status', title: __('在售状态（实时）'), operate: false,
+                            custom: { 1: 'success', 2: 'danger',3:'blue' },
+                            searchList: { 1: '上架', 2: '售罄' ,3:'下架'},
+                            formatter: Table.api.formatter.status
+                        },
                     ]
-                });
+                ]
+            });
+           Table.api.bindevent(table);
+           
+            $("#sku_submit").click(function () {
+                Controller.api.formatter.new_sales_num_line();   //新品销量排行
+                var params = table.bootstrapTable('getOptions')
+                params.queryParams = function (params) {
 
-                // 为表格1绑定事件
-                Table.api.bindevent(table1);
-            },
-            second: function () {
-                // 表格2
-                var table2 = $("#table2");
-                table2.bootstrapTable({
-                    url: 'operatedatacenter/newgoodsdata/goods_sales_num/table2',
-                    toolbar: '#toolbar2',
-                    sortName: 'id',
-                    search: false,
-                    columns: [
-                        [
-                            { field: 'platformsku', title: __('平台SKU'), operate: false },
-                            { field: 'sku', title: __('SKU'), operate: false },
-                            { field: 'shelves_date', title: __('上架时间'), operate: false },
-                            { field: 'type_name', title: __('分类'), operate: false },
-                            { field: 'available_stock', title: __('虚拟仓库存'), sortable: true,operate: false },
-                            { field: 'sales_num', title: __('销量'), operate: false },
-                            { field: 'online_day', title: __('在线天数'), operate: false },
-                            { field: 'sales_num_day', title: __('日均销量'), operate: false },
-                            {
-                                field: 'online_status', title: __('在售状态（实时）'), operate: false,
-                                custom: { 1: 'success', 2: 'danger',3:'blue' },
-                                searchList: { 1: '上架', 2: '售罄' ,3:'下架'},
-                                formatter: Table.api.formatter.status
-                            },
-                        ]
-                    ]
-                });
+                    //定义参数
+                    var filter = {};
+                    //遍历form 组装json
+                    $.each($("#form").serializeArray(), function (i, field) {
+                        filter[field.name] = field.value;
+                    });
 
-                // 为表格2绑定事件
-                Table.api.bindevent(table2);
-            }
+                    //参数转为json字符串
+                    params.filter = JSON.stringify(filter)
+                    console.info(params);
+                    return params;
+                }
+
+                table.bootstrapTable('refresh', params);
+            });
+
+
         },
         api: {
             formatter: {
