@@ -192,7 +192,7 @@ class AllData extends BaseElasticsearch
             $compareTimeStr = $params['compare_time_str'] ?: '';
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if (!$timeStr) {
-                $nowDay = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+                $nowDay = date('Y-m-d', strtotime('-6 days')) . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
             }
             switch ($site) {
                 case Site::ZEELOOL:
@@ -218,13 +218,13 @@ class AllData extends BaseElasticsearch
             $timeStr = $timeStr ? $timeStr : $nowDay;
             $cacheStr = 'alldata_dash_board_rebuy_' . $site . $timeStr . $compareTimeStr;
             $cacheData = Cache::get($cacheStr);
-            //if(!$cacheData) {
+            if(!$cacheData) {
                 //复购用户数
                 $againUserNum = $model->getAgainUser($timeStr, $compareTimeStr);
                 Cache::set($cacheStr,$againUserNum,600);
-//            }else{
-//                $againUserNum = $cacheData;
-//            }
+            }else{
+                $againUserNum = $cacheData;
+            }
 
             $this->success('', '', $againUserNum);
         }
