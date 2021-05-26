@@ -163,7 +163,7 @@ class OrderEsFormat extends BaseEsFormatData
         $allUpdateCartNum = $data['allUpdateCartNum']['value'];
 
         //加购率
-        $allAddToCartRate = $this->getDecimal($allOrderNum,$allAddToCartNum);
+        $allAddToCartRate = $this->getDecimal($allNewCartNum,$allSessions);
         //回话转化率
         $allSessionRate = $this->getDecimal($allOrderNum,$allSessions);
 
@@ -174,6 +174,7 @@ class OrderEsFormat extends BaseEsFormatData
         $dayChartsSession = array_column($daySaleData,'sessions');
         $dayChartsSales = array_column($daySaleData,'salesTotalMoney');
         $dayChartsUpdateCartNum = array_column($daySaleData,'updateCartNum');
+        $dayChartsCreateCartNum = array_column($daySaleData,'newCartNum');
         $dayChartsOrderNum = array_column($daySaleData,'orderNum');
         $daySaleStr = '';
         $daySaleDataReverse = array_reverse($daySaleData);
@@ -189,7 +190,7 @@ class OrderEsFormat extends BaseEsFormatData
             $loginNum = $val['loginNum']['value'] ?: 0;
             $salesTotalMoney = $val['salesTotalMoney']['value'] ?: 0.00;
             //加购率
-            $addToCartRate = $this->getDecimal($orderNum,$addToCartNum);
+            $addToCartRate = $this->getDecimal($newCartNum,$session);
             //回话转化率
             $sessionRate = $this->getDecimal($orderNum,$session);
             $daySaleStr .= '<tr><td>' . $date . '</td><td>' . $loginNum . '</td><td>' . $session . '</td><td>' . $addToCartRate . '</td><td>' . $sessionRate . '</td><td>' . $orderNum . '</td><td>' . $avgPrice . '</td><td>' . $newCartNum . '</td><td>' . $updateCartNum . '</td><td>' . $salesTotalMoney . '</td><td>' . $registerNum . '</td></td></tr>';
@@ -211,7 +212,7 @@ class OrderEsFormat extends BaseEsFormatData
         //购物侧后-订单趋势
         $ydataCartOrder = [
             [
-                'value' => array_values(array_column($dayChartsUpdateCartNum,'value')),
+                'value' => array_values(array_column($dayChartsCreateCartNum,'value')),
                 'name' => '购物车数目',
             ],
             [
