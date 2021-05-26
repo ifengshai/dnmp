@@ -67,7 +67,7 @@ class AsyncEs extends BaseElasticsearch
                 return $this->formatDate($value,$mergeData);
             },collection($newOrder)->toArray());
             $this->esService->addMutilToEs('mojing_order',$data);
-        });
+        },'id','desc');
         Debug::remark('end');
         echo Debug::getRangeTime('begin','end').'s';
     }
@@ -168,7 +168,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCart()
     {
-        WebShoppingCart::chunk(10000,function($carts){
+        WebShoppingCart::field('id,site,is_active,base_grand_total,updated_at,updated_at,created_at')->chunk(50000,function($carts){
             $data = array_map(function($value) {
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
@@ -179,7 +179,7 @@ class AsyncEs extends BaseElasticsearch
                     'site' => $value['site'],
                     'status' => $value['is_active'],
                     'base_grand_total'=> $value['base_grand_total'],
-                    'update_time_day' => date('Ymd',$value['updated_at'] + 8*3600),
+                    'update_time_day' => date('Ymd',$value['updated_at']),
                     'update_time' => $value['updated_at'],
                     'create_time' => $mergeData,
 
@@ -188,7 +188,7 @@ class AsyncEs extends BaseElasticsearch
                 return $this->formatDate($insertData,$mergeData);
             },collection($carts)->toArray());
             $this->esService->addMutilToEs('mojing_cart',$data);
-        });
+        },'id','desc');
     }
 
     /**
@@ -198,7 +198,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCustomer()
     {
-        WebUsers::chunk(10000,function($carts){
+        WebUsers::chunk(50000,function($carts){
             $data = array_map(function($value) {
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
@@ -221,7 +221,7 @@ class AsyncEs extends BaseElasticsearch
                 return $this->formatDate($insertData,$mergeData);
             },collection($carts)->toArray());
             $this->esService->addMutilToEs('mojing_customer',$data);
-        });
+        },'id','desc');
     }
 
     /**
@@ -258,7 +258,7 @@ class AsyncEs extends BaseElasticsearch
                 return $this->formatDate($insertData,$mergeData);
             },collection($track)->toArray());
             $this->esService->addMutilToEs('mojing_track',$data);
-        });
+        },'id','desc');
 
     }
 
