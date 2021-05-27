@@ -1852,7 +1852,9 @@ class TrackReg extends Backend
         $arr['box_shelves_num'] = $downShelvesNum1;
         $arr['box_presell_num'] = $SalesOutNum1;
         //插入数据
-        Db::name('datacenter_day')->insert($arr);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
         echo $date_time."\n";
         echo date("Y-m-d H:i:s")."\n";
         usleep(100000);
@@ -2779,6 +2781,9 @@ class TrackReg extends Backend
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(1, $date_time);
         Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 1])->update($arr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time, 'site' => 1];
+        (new AsyncDatacenterDay())->runUpdate($updateData);
 
         //更新前天的会话数 防止ga数据误差
         $lastArr['sessions'] = $date_time_behind_sessions_z;
@@ -2788,6 +2793,9 @@ class TrackReg extends Backend
             'day_date' => $date_time_behind,
             'site'     => 1,
         ])->update($lastArr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time_behind, 'site' => 1];
+        (new AsyncDatacenterDay())->runUpdate($updateData);
         usleep(100000);
 
         //v站
@@ -2824,6 +2832,9 @@ class TrackReg extends Backend
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(2, $date_time);
         Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 2])->update($arr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time, 'site' => 2];
+        (new AsyncDatacenterDay())->runUpdate($updateData);
         $lastArr['sessions'] = $date_time_behind_sessions_v;
         $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num']/$lastArr['sessions'])*100,2) : 0;
         $lastArr['session_rate'] = $lastArr['sessions'] ? round(($lastData['order_num']/$lastArr['sessions'])*100,2) : 0;
@@ -2831,6 +2842,9 @@ class TrackReg extends Backend
             'day_date' => $date_time_behind,
             'site'     => 2,
         ])->update($lastArr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time_behind, 'site' => 2];
+        (new AsyncDatacenterDay())->runUpdate($updateData);
         usleep(100000);
 
         //nihao站
@@ -2866,6 +2880,9 @@ class TrackReg extends Backend
         //交易次数
         $arr['complete_num'] = $zeelool_data->google_target_end(3, $date_time);
         Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 3])->update($arr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time, 'site' => 3];
+        (new AsyncDatacenterDay())->runUpdate($updateData);
         $lastArr['sessions'] = $date_time_behind_sessions_n;
         $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num']/$lastArr['sessions'])*100,2) : 0;
         $lastArr['session_rate'] = $lastArr['sessions'] ? round(($lastData['order_num']/$lastArr['sessions'])*100,2) : 0;
@@ -2873,6 +2890,9 @@ class TrackReg extends Backend
             'day_date' => $date_time_behind,
             'site'     => 3,
         ])->update(['sessions' => $date_time_behind_sessions_n]);
+        //同步es数据
+        $updateData = ['day_date' => $date_time_behind, 'site' => 3];
+        (new AsyncDatacenterDay())->runUpdate($updateData);
         usleep(100000);
 
         //de站
@@ -2909,6 +2929,9 @@ class TrackReg extends Backend
         //交易次数
         $arr['complete_num'] = $zeeloolde_data->google_target_end(10, $date_time);
         Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 10])->update($arr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time, 'site' => 10];
+        (new AsyncDatacenterDay())->runUpdate($updateData);
         $lastArr['sessions'] = $date_time_behind_sessions_de;
         $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num']/$lastArr['sessions'])*100,2) : 0;
         $lastArr['session_rate'] = $lastArr['sessions'] ? round(($lastData['order_num']/$lastArr['sessions'])*100,2) : 0;
@@ -2917,6 +2940,9 @@ class TrackReg extends Backend
             'day_date' => $date_time_behind,
             'site'     => 10,
         ])->update($lastArr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time_behind, 'site' => 10];
+        (new AsyncDatacenterDay())->runUpdate($updateData);
         usleep(100000);
 
         //jp站
@@ -2953,6 +2979,9 @@ class TrackReg extends Backend
         //交易次数
         $arr['complete_num'] = $zeelooljp_data->google_target_end(11, $date_time);
         $update = Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => 11])->update($arr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time, 'site' => 11];
+        (new AsyncDatacenterDay())->runUpdate($updateData);
         //更新前天的会话数 防止ga数据误差
         $lastArr['sessions'] = $date_time_behind_sessions_jp;
         $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num']/$lastArr['sessions'])*100,2) : 0;
@@ -2961,6 +2990,9 @@ class TrackReg extends Backend
             'day_date' => $date_time_behind,
             'site'     => 11,
         ])->update($lastArr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time_behind, 'site' => 11];
+        (new AsyncDatacenterDay())->runUpdate($updateData);
         usleep(100000);
         echo "ok";
     }

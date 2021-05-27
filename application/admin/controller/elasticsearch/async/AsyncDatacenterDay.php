@@ -43,4 +43,29 @@ class AsyncDatacenterDay extends BaseElasticsearch
             echo $e->getMessage();
         }
     }
+
+    /**
+     * 更新datacenter
+     * @param $data
+     *
+     * @author crasphb
+     * @date   2021/5/27 9:06
+     */
+    public function runUpdate($data)
+    {
+        try {
+            $datacenterDay = DatacenterDay::where(['day_date' => $data['data'], 'site' => $data['site']])->find();
+            if($datacenterDay){
+                $data = array_map(function ($value) {
+                    return $value === null ? 0 : $value;
+                }, $datacenterDay->toArray());
+                $mergeData = strtotime($data['day_date']) + 8*3600;
+                $updateData = $this->formatDate($data, $mergeData);
+                $this->esService->updateEs('mojing_datacenterday', $updateData);
+            }
+
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+        }
+    }
 }
