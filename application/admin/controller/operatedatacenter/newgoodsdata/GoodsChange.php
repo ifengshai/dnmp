@@ -29,6 +29,7 @@ class GoodsChange extends Backend
 
     public function index()
     {
+        $lastDay = strtotime(date('Y-m-d', strtotime('-1 day')));
         $start = date('Y-m-d', strtotime('-6 day'));
         $end = date('Y-m-d 23:59:59');
         $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
@@ -60,6 +61,10 @@ class GoodsChange extends Backend
             $order_platform = $filter['order_platform'] ? $filter['order_platform'] : 1;
             $map['site'] = $order_platform;
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $orderWhere['o.site'] = $order_platform;
+            $orderWhere['o.order_type'] = $order_platform;
+            $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+            $orderWhere['o.payment_time'] = ['between', [strtotime($createat[0]), $lastDay]];
             unset($filter['time_str']);
             unset($filter['create_time-operate']);
             unset($filter['sku']);
@@ -75,7 +80,7 @@ class GoodsChange extends Backend
                 ->where($where)
                 ->where($map)
                 ->group('platform_sku')
-                ->field('platform_sku,sku,sum(cart_num) as cart_num,sum(update_cart_num) as update_cart_num,sum(pay_lens_num) as pay_lens_num,day_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(sku_grand_total) as sku_grand_total')
+                ->field('platform_sku,sku,sum(cart_num) as cart_num,sum(update_cart_num) as update_cart_num,sum(pay_lens_num) as pay_lens_num,day_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total')
                 ->order('id', 'desc')
                 ->limit($offset, $limit)
                 ->select();
@@ -86,6 +91,17 @@ class GoodsChange extends Backend
                     ->field('stock,outer_sku_status,presell_status,presell_start_time,presell_end_time,presell_num')
                     ->find();
                 $list[$k]['single_price'] = $v['glass_num'] != 0 ? round($v['sku_row_total'] / $v['glass_num'], 2) : 0;
+                //订单金额
+                $orderIds = $this->order
+                    ->alias('o')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
+                    ->where($orderWhere)
+                    ->where('i.sku',$v['platform_sku'])
+                    ->column('distinct entity_id');
+                $orderTotal = $this->order
+                    ->where('entity_id','in',$orderIds)
+                    ->sum('base_grand_total');
+                $list[$k]['sku_grand_total'] = $orderTotal ?? 0;
                 //商品现价
                 $list[$k]['now_pricce'] = Db::name('datacenter_sku_day')
                     ->where(['sku'=>$v['sku'],'site'=>$order_platform])
