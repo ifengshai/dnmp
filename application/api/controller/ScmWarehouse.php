@@ -523,6 +523,7 @@ class ScmWarehouse extends Scm
                     'stock_id'         => $stockId,
                     'location_id'      => $warehouse_area_id,
                     'area_id'          => $area_id,
+                    'status'           => 1 == $do_type ?: 0,
                     'create_person'    => $this->auth->nickname,
                     'createtime'       => date('Y-m-d H:i:s'),
                 ];
@@ -4604,6 +4605,9 @@ class ScmWarehouse extends Scm
         $codeAgg = $this->request->request("item_data");
         $codeAgg = html_entity_decode($codeAgg);
         $codeAgg = array_filter(json_decode($codeAgg, true));
+        if (empty($codeAgg)) {
+            $this->error(__('调入数据不能为空，请检查！！'), '', 524);
+        }
         $arr = [];
         $key = 0;
         foreach ($codeAgg as $k => $v) {
