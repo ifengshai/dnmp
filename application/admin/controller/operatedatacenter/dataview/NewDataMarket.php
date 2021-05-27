@@ -259,7 +259,7 @@ class NewDataMarket extends Backend
             ->where($orderWhere)
             ->sum('i.qty');
         //周转月数
-        $turn_month = $salesNum ? round($stock['stock']/$salesNum,2) : 0;
+        $turn_month = $salesNum ? round($stock/$salesNum,2) : 0;
         $arr['turn_month'] = $turn_month;
         //过去30天上架的SKU数
         $skuNum = Db::name('sku_shelves_time')
