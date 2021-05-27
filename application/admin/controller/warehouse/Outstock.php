@@ -79,8 +79,6 @@ class Outstock extends Backend
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
-
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['outstocktype'])
@@ -450,20 +448,21 @@ class Outstock extends Backend
 
         $this->assign('type', $type);
 
-        $barCodeItem = new ProductBarCodeItem();
-        $ared = $barCodeItem->where('out_stock_id', $row->id)->field('location_id,location_code,stock_id')->find();
+        $location_code = Db::name('store_house')->where('id', $row['location_id'])->value('coding');
+
+        $area_id = $row->area_id;
 
         //查询库区
         $warehouse = new \app\admin\model\warehouse\WarehouseArea();
-        $warehouseName = $warehouse->where(['id' => $ared->location_id])->value('name');
+        $warehouseName = $warehouse->where(['id' => $area_id])->value('name');
         /***********查询出库商品信息***************/
         //查询入库单商品信息
         $item_map['out_stock_id'] = $ids;
         $item = $this->item->where($item_map)->select();
         $this->assign('item', $item);
         $this->assign('warehouseName', $warehouseName);
+        $this->assign('location_code', $location_code);
         $this->view->assign("row", $row);
-        $this->view->assign("ared", $ared);
 
         return $this->view->fetch();
     }

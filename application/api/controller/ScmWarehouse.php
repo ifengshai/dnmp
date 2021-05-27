@@ -342,7 +342,7 @@ class ScmWarehouse extends Scm
         $outStockId = $this->request->request('out_stock_id');
         if ($outStockId) {
             $info = $this->_out_stock
-                ->field('out_stock_number,type_id,platform_id,stock_id')
+                ->field('out_stock_number,type_id,platform_id,stock_id,location_id as location_code_id,area_id as location_id')
                 ->where('id', $outStockId)
                 ->find();
 
@@ -393,12 +393,10 @@ class ScmWarehouse extends Scm
                 'item_data'        => [],
             ];
         }
-        $kuquKuwei = $this->_product_bar_code_item->where(['out_stock_id' => $outStockId])->find();
+
         //出库单所需数据
-        $info['location_id'] = $kuquKuwei['location_id'];
-        $info['location_area'] = Db::name('warehouse_area')->where('id', $kuquKuwei['location_id'])->value('coding');
-        $info['location_code_id'] = $kuquKuwei['location_code_id'];
-        $info['location_code'] = $kuquKuwei['location_code'];
+        $info['location_area'] = Db::name('warehouse_area')->where('id', $info['location_id'])->value('coding');
+        $info['location_code'] = Db::name('store_house')->where('id', $info['location_code_id'])->value('coding');
 
         //获取出库分类数据
         $typeList = $this->_out_stock_type
@@ -498,6 +496,8 @@ class ScmWarehouse extends Scm
                 $out_stock_data = [
                     'type_id'     => $type_id,
                     'platform_id' => $platform_id,
+                    'location_id' => $warehouse_area_id ?? $row->location_id,
+                    'area_id'     => $area_id ?? $row->area_id,
                     'status'      => 1 == $do_type ?: 0,
                 ];
                 $result = $this->_out_stock->allowField(true)->save($out_stock_data, ['id' => $get_out_stock_id]);
@@ -521,7 +521,8 @@ class ScmWarehouse extends Scm
                     'type_id'          => $type_id,
                     'platform_id'      => $platform_id,
                     'stock_id'         => $stockId,
-                    'status'           => 1 == $do_type ?: 0,
+                    'location_id'      => $warehouse_area_id,
+                    'area_id'          => $area_id,
                     'create_person'    => $this->auth->nickname,
                     'createtime'       => date('Y-m-d H:i:s'),
                 ];
@@ -1051,9 +1052,6 @@ class ScmWarehouse extends Scm
 
         //入库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
-        Log::write("入库库位详情");
-        Log::write($warehouse_area);
-
         /*****************限制如果有盘点单未结束不能操作配货完成*******************/
         //配货完成时判断
         //拣货区盘点时不能操作
@@ -1061,7 +1059,6 @@ class ScmWarehouse extends Scm
         $count = $this->_inventory->alias('a')
             ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'], 'area_id' => $area_id])
             ->count();
-        Log::write($count);
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法入库提交'), [], 403);
         }
@@ -1114,8 +1111,10 @@ class ScmWarehouse extends Scm
                 }
                 //更新数据组装
                 $_in_stock_data = [
-                    'type_id' => $type_id,
-                    'status'  => 1 == $do_type ? 1 : 0,
+                    'type_id'     => $type_id,
+                    'status'      => 1 == $do_type ? 1 : 0,
+                    'location_id' => $warehouse_area_id ?? $_in_stock_info->location_id,
+                    'area_id'     => $area_id ?? $_in_stock_info->area_id,
                 ];
 
                 if ($platform_id) {
@@ -1227,6 +1226,8 @@ class ScmWarehouse extends Scm
                 }
 
                 //组装新增数据
+                $params['location_id'] = $warehouse_area_id;
+                $params['area_id'] = $area_id;
                 $params['in_stock_number'] = $in_stock_number;
                 $params['type_id'] = $type_id;
                 $params['status'] = 1 == $do_type ? 1 : 0;
@@ -1552,14 +1553,13 @@ class ScmWarehouse extends Scm
             $in_stock_type_list = $in_stock_type;
         }
 
-        $kuqu_kuwei = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->find();
         //入库单所需数据
         $info['in_stock_id'] = $_in_stock_info['id'];
         $info['in_stock_number'] = $_in_stock_info['in_stock_number'];
-        $info['location_id'] = $kuqu_kuwei['location_id'];
-        $info['location_area'] = Db::name('warehouse_area')->where('id', $kuqu_kuwei['location_id'])->value('name');
-        $info['location_code_id'] = $kuqu_kuwei['location_code_id'];
-        $info['location_code'] = $kuqu_kuwei['location_code'];
+        $info['location_id'] = $_in_stock_info['area_id'];
+        $info['location_area'] = Db::name('warehouse_area')->where('id', $_in_stock_info['area_id'])->value('name');
+        $info['location_code_id'] = $_in_stock_info['location_id'];
+        $info['location_code'] = Db::name('store_house')->where('id', $_in_stock_info['location_code_id'])->value('coding');
         $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
         $info['in_stock_type'] = $in_stock_type_list;
         $info['item_list'] = $item_list;
@@ -2457,8 +2457,8 @@ class ScmWarehouse extends Scm
         //盘点单所需数据
         $info = [
             'inventory_id'     => $_inventory_info['id'],
-            'stock_id'     => $_inventory_info['stock_id'],
-            'stock_name'     => $_inventory_info['stock_id'] == 2 ? '丹阳仓' : '郑州仓',
+            'stock_id'         => $_inventory_info['stock_id'],
+            'stock_name'       => $_inventory_info['stock_id'] == 2 ? '丹阳仓' : '郑州仓',
             'inventory_number' => $_inventory_info['number'],
             'item_list'        => !empty($item_list) ? $item_list : [],
         ];
@@ -3001,6 +3001,7 @@ class ScmWarehouse extends Scm
         $allStock = Db::name('warehouse_stock')->field('name,id')->select();
         $this->success('获取成功', $allStock, 200);
     }
+
     /**
      * 获取库区
      *
@@ -3149,7 +3150,7 @@ class ScmWarehouse extends Scm
             $list[$key]['show_detail'] = 6 == $value['status'] ? 1 : 0; //详情按钮
             $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0; //审核按钮
             $list[$key]['show_trans'] = 5 == $value['status'] ? 1 : 0; //调拨中编辑按钮
-            $list[$key]['stock_name'] = Db::name('warehouse_stock')->where('id',$value['stock_id'])->value('name');
+            $list[$key]['stock_name'] = Db::name('warehouse_stock')->where('id', $value['stock_id'])->value('name');
         }
         $this->success('', ['list' => $list], 200);
     }
@@ -3169,7 +3170,7 @@ class ScmWarehouse extends Scm
         $type = $this->request->request("type");
         $id = $this->request->request("transfer_order_id");
         $stockId = $this->request->request("stock_id");
-        if (!$stockId){
+        if (!$stockId) {
             $this->error(__('仓库id不能为空'), '', 524);
         }
         $item_sku = html_entity_decode($item_sku);
@@ -3197,18 +3198,18 @@ class ScmWarehouse extends Scm
         foreach ($item_sku as $k => $v) {
             $outStockId = Db::name('warehouse_area')->where('id', $v['outarea_id'])->value('stock_id'); //调出库区仓库id
             $inStockId = Db::name('warehouse_area')->where('id', $v['inarea_id'])->value('stock_id'); //调出库区仓库id
-            if ($outStockId != $stockId){
-                $this->error(__('调出库区id'.$v['outarea_id'].'的仓库id'.$outStockId.'与当前调拨单仓库仓库id'.$stockId.'不一致'), '', 525);
+            if ($outStockId != $stockId) {
+                $this->error(__('调出库区id' . $v['outarea_id'] . '的仓库id' . $outStockId . '与当前调拨单仓库仓库id' . $stockId . '不一致'), '', 525);
             }
-            if ($inStockId != $stockId){
-                $this->error(__('调入库区id'.$v['inarea_id'].'的仓库id'.$inStockId.'与当前调拨单仓库仓库id'.$stockId.'不一致'), '', 525);
+            if ($inStockId != $stockId) {
+                $this->error(__('调入库区id' . $v['inarea_id'] . '的仓库id' . $inStockId . '与当前调拨单仓库仓库id' . $stockId . '不一致'), '', 525);
             }
-            if ($outStockId != $inStockId){
+            if ($outStockId != $inStockId) {
                 $this->error(__('调出库区与调入库区非同一仓库'), '', 525);
             }
             $outStockId1 = Db::name('store_house')->where('id', $v['call_out_site_id'])->value('stock_id'); //调出库位仓库id
             $inStockId1 = Db::name('store_house')->where('id', $v['call_in_site_id'])->value('stock_id'); //调出库位仓库id
-            if ($outStockId1 !== $inStockId1){
+            if ($outStockId1 !== $inStockId1) {
                 $this->error(__('调出库位与调入库位非同一仓库'), '', 525);
             }
         }
@@ -3350,7 +3351,7 @@ class ScmWarehouse extends Scm
         empty($id) && $this->error(__('调拨单id不能为空！！'), '', 523);
         $list['transfer_order_number'] = $this->_warehouse_transfer_order->where('id', $id)->value('transfer_order_number');
         $list['stock_id'] = $this->_warehouse_transfer_order->where('id', $id)->value('stock_id');
-        $list['stock_name'] = Db::name('warehouse_stock')->where('id',$list['stock_id'])->value('name');
+        $list['stock_name'] = Db::name('warehouse_stock')->where('id', $list['stock_id'])->value('name');
         $list['item_list'] = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->select();
         foreach ($list['item_list'] as $k => $v) {
             $area_id = Db::name('warehouse_area')->where('coding', $v['outarea'])->value('id');
@@ -3799,7 +3800,7 @@ class ScmWarehouse extends Scm
         $allStock = Db::name('warehouse_stock')->column('name', 'id');
         foreach ($list as $key => $value) {
             $list[$key]['status'] = $checkStatus[$value['status']];
-            $list[$key]['create_time'] = date("Y-m-d H:i:s",$value['create_time']);
+            $list[$key]['create_time'] = date("Y-m-d H:i:s", $value['create_time']);
             $list[$key]['out_stock_name'] = $allStock[$value['out_stock_id']];
             $list[$key]['in_stock_name'] = $allStock[$value['in_stock_id']];
             //按钮
@@ -3827,7 +3828,7 @@ class ScmWarehouse extends Scm
         }
         $transferOrder = $this->_stock_transfer_order->where('id', $id)->find();
         $transfer_order_item = $this->_stock_transfer_order_item->where('transfer_order_id', $id)->select();
-        foreach ($transfer_order_item as $k=>$v){
+        foreach ($transfer_order_item as $k => $v) {
             $transfer_order_item[$k]['transfer_order_item_id'] = $v['id'];
             unset($transfer_order_item[$k]['id']);
         }
@@ -3870,12 +3871,12 @@ class ScmWarehouse extends Scm
                 ->where('transfer_order_id', $id)
                 ->field('sku,id,real_num')
                 ->select();
-            foreach ($allItemDetail as $k0=>$v0){
-                if ($v0['real_num'] == 0){
-                    $this->error(__($v0['sku'].'调拨数量为0，请检查或重新创建仓库调拨单'), '', 546);
+            foreach ($allItemDetail as $k0 => $v0) {
+                if ($v0['real_num'] == 0) {
+                    $this->error(__($v0['sku'] . '调拨数量为0，请检查或重新创建仓库调拨单'), '', 546);
                 }
             }
-            $allItemIds = array_column($allItemDetail,'id');
+            $allItemIds = array_column($allItemDetail, 'id');
             $allCodes = $this->_stock_transfer_order_item_code->where('transfer_order_item_id', 'in', $allItemIds)->column('code');
             $res = false;
             $this->_product_bar_code_item->startTrans();
@@ -3887,8 +3888,8 @@ class ScmWarehouse extends Scm
             try {
                 /****************库存逻辑开始**********************/
                 //提交的时候操作库存 以及更新条形码状态为出库
-                if($status == 3){
-                    foreach ($allItemDetail as $sk=>$sv){
+                if ($status == 3) {
+                    foreach ($allItemDetail as $sk => $sv) {
                         $StockTransferOutOrderItem[$sk]['sku'] = $sv['sku'];
                         $StockTransferOutOrderItem[$sk]['out_num'] = $sv['real_num'];
                         //同步对应SKU库存 更新商品表商品总库存 总库存
@@ -3928,7 +3929,7 @@ class ScmWarehouse extends Scm
                                 $numNum += abs($vv['stock']);
                             }
                             //sku实际调拨的数量
-                            $stockNum= $sv['real_num'];
+                            $stockNum = $sv['real_num'];
                             //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
                             $stockAllNum = array_sum(array_column($itemPlatformSku, 'stock'));
                             if ($stockAllNum == 0) {
@@ -4029,11 +4030,11 @@ class ScmWarehouse extends Scm
                     $res = $this->_product_bar_code_item->where('code', 'in', $allCodes)->update(['library_status' => 2]);
                     //实体仓调拨单出库单 主单添加记录 item子单批量添加并统一添加主单id
                     $transferOutOrderId = $this->_stock_transfer_out_order
-                        ->insertGetId(['transfer_out_order_number'=>'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999),'stock_transfer_order_id'=>$id,'create_person'=> $this->auth->nickname,'create_time'=>time()]);
+                        ->insertGetId(['transfer_out_order_number' => 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999), 'stock_transfer_order_id' => $id, 'create_person' => $this->auth->nickname, 'create_time' => time()]);
                     $arrArr = ['transfer_out_order_id' => $transferOutOrderId];
                     array_walk($StockTransferOutOrderItem, function (&$value1, $key, $arrArr) {
                         $value1 = array_merge($value1, $arrArr);
-                    },$arrArr);
+                    }, $arrArr);
                     $this->_stock_transfer_out_order_item
                         ->insertAll($StockTransferOutOrderItem);
                 }
@@ -4076,18 +4077,18 @@ class ScmWarehouse extends Scm
             } else {
                 $this->error(__('No rows were inserted'), '', 525);
             }
-        }elseif ($detail['status'] == 5){
+        } elseif ($detail['status'] == 5) {
             //待入库状态提交 会进入已完成状态
             $allItemDetail = $this->_stock_transfer_order_item
                 ->where('transfer_order_id', $id)
                 ->field('sku,id,real_instock_num')
                 ->select();
-            foreach ($allItemDetail as $k0=>$v0){
-                if ($v0['real_instock_num'] == 0){
-                    $this->error(__($v0['sku'].'实际入库数量0，请检查'), '', 546);
+            foreach ($allItemDetail as $k0 => $v0) {
+                if ($v0['real_instock_num'] == 0) {
+                    $this->error(__($v0['sku'] . '实际入库数量0，请检查'), '', 546);
                 }
             }
-            foreach ($allItemDetail as $sk=>$sv){
+            foreach ($allItemDetail as $sk => $sv) {
                 $StockTransferOutOrderItem[$sk]['sku'] = $sv['sku'];
                 $StockTransferOutOrderItem[$sk]['in_num'] = $sv['real_instock_num'];
             }
@@ -4098,8 +4099,8 @@ class ScmWarehouse extends Scm
             $this->_stock_transfer_out_order->startTrans();
             $this->_stock_transfer_in_order_item->startTrans();
             try {
-                if($status == 3){
-                    foreach ($allItemDetail as $sk=>$sv){
+                if ($status == 3) {
+                    foreach ($allItemDetail as $sk => $sv) {
                         //同步对应SKU库存 更新商品表商品总库存 总库存
                         $itemMap['sku'] = $sv['sku'];
                         $itemMap['is_del'] = 1;
@@ -4137,7 +4138,7 @@ class ScmWarehouse extends Scm
                                 $numNum += abs($vv['stock']);
                             }
                             //sku实际调拨的数量
-                            $stockNum= $sv['real_instock_num'];
+                            $stockNum = $sv['real_instock_num'];
                             //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
                             $stockAllNum = array_sum(array_column($itemPlatformSku, 'stock'));
                             if ($stockAllNum == 0) {
@@ -4236,11 +4237,11 @@ class ScmWarehouse extends Scm
                     }
                     //实体仓调拨单入库单 主单添加记录 item子单批量添加并统一添加主单id
                     $transferOutOrderId = $this->_stock_transfer_in_order
-                        ->insertGetId(['transfer_in_order_number'=>'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999),'stock_transfer_order_id'=>$id,'create_person'=> $this->auth->nickname,'create_time'=>time()]);
+                        ->insertGetId(['transfer_in_order_number' => 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999), 'stock_transfer_order_id' => $id, 'create_person' => $this->auth->nickname, 'create_time' => time()]);
                     $arrArr = ['transfer_in_order_id' => $transferOutOrderId];
                     array_walk($StockTransferOutOrderItem, function (&$value1, $key, $arrArr) {
                         $value1 = array_merge($value1, $arrArr);
-                    },$arrArr);
+                    }, $arrArr);
                     $this->_stock_transfer_in_order_item
                         ->insertAll($StockTransferOutOrderItem);
                 }
@@ -4278,7 +4279,7 @@ class ScmWarehouse extends Scm
             } else {
                 $this->error(__('No rows were inserted'), '', 525);
             }
-        }else{
+        } else {
             $this->error(__('调拨单非可提交状态，请检查'), '', 546);
         }
 
@@ -4308,7 +4309,7 @@ class ScmWarehouse extends Scm
         foreach ($transferOrderItemCode as $k => $v) {
             if (!empty($arr[$v['location_id']])) {
                 $arr[$v['location_id']]['num'] += 1;
-                array_push($arr[$v['location_id']]['code_agg'],$v['code']);
+                array_push($arr[$v['location_id']]['code_agg'], $v['code']);
             } else {
                 $arr[$v['location_id']]['area_id'] = $v['area_id'];
                 $arr[$v['location_id']]['location_id'] = $v['location_id'];
@@ -4368,7 +4369,7 @@ class ScmWarehouse extends Scm
         $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
         $transferOrderDetail = $this->_stock_transfer_order->where('id', $transferOrderItemDetail['transfer_order_id'])->find();
         $transferOrderItemCodeDetail = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId])->find();
-        $allStock = Db::name('warehouse_stock')->column('name','id');
+        $allStock = Db::name('warehouse_stock')->column('name', 'id');
         if (!empty($transferOrderItemCodeDetail)) {
             $this->error(__('实体仓调拨单子单sku' . $transferOrderItemDetail['sku'] . '已提交过,只可编辑单个sku，请检查！！'), '', 524);
         }
@@ -4395,7 +4396,7 @@ class ScmWarehouse extends Scm
                 $this->error(__('条形码sku与调拨sku不一致，请检查！！'), '', 524);
             }
             if ($codeStatus['stock_id'] !== $transferOrderDetail['out_stock_id']) {
-                $this->error(__($v['code'] . '当前不在调出仓库：'.$allStock[$transferOrderDetail['out_stock_id']].'！！'), '', 524);
+                $this->error(__($v['code'] . '当前不在调出仓库：' . $allStock[$transferOrderDetail['out_stock_id']] . '！！'), '', 524);
             }
             //实体仓调拨单子表的子表（条形码明细表）插入数据
             $arr[$k]['code'] = $v['code'];
@@ -4448,7 +4449,7 @@ class ScmWarehouse extends Scm
         $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
         $transferOrderDetail = $this->_stock_transfer_order->where('id', $transferOrderItemDetail['transfer_order_id'])->find();
         $transferOrderItemCodeDetail = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->find();
-        $allStock = Db::name('warehouse_stock')->column('name','id');
+        $allStock = Db::name('warehouse_stock')->column('name', 'id');
         if (empty($transferOrderItemDetail)) {
             $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
         }
@@ -4481,7 +4482,7 @@ class ScmWarehouse extends Scm
                 $this->error(__('条形码sku与调拨sku不一致，请检查！！'), '', 524);
             }
             if ($codeStatus['stock_id'] !== $transferOrderDetail['out_stock_id']) {
-                $this->error(__($v['code'] . '当前不在调出仓库：'.$allStock[$transferOrderDetail['out_stock_id']].'！！'), '', 524);
+                $this->error(__($v['code'] . '当前不在调出仓库：' . $allStock[$transferOrderDetail['out_stock_id']] . '！！'), '', 524);
             }
         }
         $res = false;
@@ -4641,7 +4642,7 @@ class ScmWarehouse extends Scm
             //更新实体仓调拨单子单的实际入库数量
             $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->setInc('real_instock_num', $realInstokcNum);
             //更新子单为已入库
-            $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->update(['status'=>2]);
+            $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->update(['status' => 2]);
             foreach ($arr as $k => $v) {
                 //更新条形码表 仓库id 库区id 库位id 库位号 在库状态
                 $v['location_code'] = $this->_store_house->where('id', $v['location_id'])->value('coding');

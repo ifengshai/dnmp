@@ -79,6 +79,14 @@ class Instock extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
+            if ($filter['location_code']) {
+                $smap = [];
+                $smap['coding'] = ['like', '%' . $filter['location_code'] . '%'];
+                $ids = Db::name('store_house')->where($smap)->column('id');
+                $map['instock.location_id'] = ['in', $ids];
+                unset($filter['location_code']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -96,6 +104,9 @@ class Instock extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            foreach ($list as &$v) {
+                $v['location_code'] = Db::name('store_house')->where(['id' => $v['location_id']])->value('coding');
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -401,15 +412,10 @@ class Instock extends Backend
         $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
-        //查询入库库区库位
-        $product_bar_code = new ProductBarCodeItem();
-        $area =$product_bar_code->where('in_stock_id',$ids)->field('location_id,location_code_id')->find();
-
         $warehouse_area = Db::name('warehouse_area')->column('coding','id');
         $this->assign('warehouse_area', $warehouse_area);
         $store_house = Db::name('store_house')->column('coding','id');
         $this->assign('store_house', $store_house);
-        $this->assign('area', $area);
 
         //查询质检单
         $check = new \app\admin\model\warehouse\Check;
