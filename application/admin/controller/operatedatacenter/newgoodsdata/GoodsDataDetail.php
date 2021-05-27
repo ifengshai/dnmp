@@ -166,6 +166,7 @@ class GoodsDataDetail extends Backend
         $sku = input('sku');
         $type = input('type');
         $goods_grade = input('goods_grade');
+        $goods_grade = iconv("UTF-8", "GB2312", $goods_grade);
         $field = input('field');
         $field_arr = explode(',',$field);
         $field_info = array(

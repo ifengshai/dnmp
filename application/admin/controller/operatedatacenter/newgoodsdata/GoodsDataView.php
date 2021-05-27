@@ -338,7 +338,7 @@ class GoodsDataView extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             //站点
-            $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
+            $order_platform = $params['platform'] ? $params['platform'] : 1;
             //时间
             $time_str = $params['time_str'];
             if (!$time_str) {
@@ -545,7 +545,6 @@ class GoodsDataView extends Backend
                 ->where($itemMap)
                 ->where('m.sku', 'in', $frame_sku)
                 ->sum('m.base_price');
-
             //眼镜的折扣价格
             $frame_money_discount = $model->table('sales_flat_order_item m')
                 ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
@@ -777,7 +776,6 @@ class GoodsDataView extends Backend
     {
         if ($this->request->isAjax()) {
             $params = $this->request->param();
-            // dump($params);
             //站点
             $order_platform = $params['order_platform'] ? $params['order_platform'] : 1;
             //时间
