@@ -36,98 +36,102 @@ class RepurchaseTemp extends Command
      * @date   2021/4/1 10:02:32
      */
     protected function getUserRepurchase($site){
-        $today = date('Y-m-d');
-        //获取前一个月时间
-        $lastOneMonthStart = date("Y-m-d", strtotime("first day of -1 month", strtotime($today)));
-        $lastOneMonthEnd = date("Y-m-d 23:59:59", strtotime("last day of -1 month", strtotime($today)));
-        #############################################   一月期复购率start  #########################################
-        $oneMonthDate = date("Y-m", strtotime("-2 month", strtotime($today)));
-        //获取前两个月时间
-        $lastTwoMonthStart = date("Y-m-01", strtotime("-2 month", strtotime($today)));
-        $lastTwoMonthEnd = date("Y-m-t 23:59:59", strtotime("-2 month", strtotime($today)));
-        $repurchaseDataOne = $this->getRepurchaseUserNum($site, $lastTwoMonthStart, $lastTwoMonthEnd,
-            $lastOneMonthStart, $lastOneMonthEnd);
-        //一月期复购率
-        $oneMonthArr = array(
-            'site'=>$site,  //站点
-            'type'=>1,   //复购周期：1：一月
-            'day_date'=>$oneMonthDate,  //时间
-            'usernum'=>$repurchaseDataOne['usernum'],  //客户数
-            'againbuy_usernum'=>$repurchaseDataOne['againbuy_usernum'],  //复购用户数
-            'againbuy_usernum_ordernum'=>$repurchaseDataOne['againbuy_usernum_ordernum'],  //复购用户订单数
-            'againbuy_rate'=>$repurchaseDataOne['againbuy_rate'],  //复购率
-            'againbuy_num_rate'=>$repurchaseDataOne['againbuy_num_rate'],  //复购频次
-        );
-        Db::name('datacenter_month_repurchase')->insert($oneMonthArr);
-        echo "站点：".$site." 一月期复购 is ok"."\n";
-        #############################################   一月期复购率end    #########################################
-        #############################################   三月期复购率start  #########################################
-        $threeMonthDate = date("Y-m", strtotime("-4 month", strtotime($today)));
-        //获取前四个月时间
-        $lastThreeMonthStart = date("Y-m-01", strtotime("-3 month", strtotime($today)));
-        $lastFourMonthStart = date("Y-m-01", strtotime("-4 month", strtotime($today)));
-        $lastFourMonthEnd = date("Y-m-t 23:59:59", strtotime("-4 month", strtotime($today)));
-        $repurchaseDataThree = $this->getRepurchaseUserNum($site, $lastFourMonthStart, $lastFourMonthEnd,
-            $lastThreeMonthStart, $lastOneMonthEnd);
-        //三月期复购率
-        $threeMonthArr = array(
-            'site'=>$site,  //站点
-            'type'=>2,   //复购周期：2：三月
-            'day_date'=>$threeMonthDate,  //时间
-            'usernum'=>$repurchaseDataThree['usernum'],  //客户数
-            'againbuy_usernum'=>$repurchaseDataThree['againbuy_usernum'],  //复购用户数
-            'againbuy_usernum_ordernum'=>$repurchaseDataThree['againbuy_usernum_ordernum'],  //复购用户订单数
-            'againbuy_rate'=>$repurchaseDataThree['againbuy_rate'],  //复购率
-            'againbuy_num_rate'=>$repurchaseDataThree['againbuy_num_rate'],  //复购频次
-        );
-        Db::name('datacenter_month_repurchase')->insert($threeMonthArr);
-        echo "站点：".$site." 三月期复购 is ok"."\n";
-        #############################################   三月期复购率end    #########################################
-        #############################################   半年期复购率start  #########################################
-        $halfYearDate = date("Y-m", strtotime("-7 month", strtotime($today)));
-        //获取前七个月时间
-        $lastSixMonthStart = date("Y-m-01", strtotime("-6 month", strtotime($today)));
-        $lastSevenMonthStart = date("Y-m-01", strtotime("-7 month", strtotime($today)));
-        $lastSevenMonthEnd = date("Y-m-t 23:59:59", strtotime("-7 month", strtotime($today)));
-        $repurchaseDataSix = $this->getRepurchaseUserNum($site, $lastSevenMonthStart, $lastSevenMonthEnd,
-            $lastSixMonthStart, $lastOneMonthEnd);
-        //半年期复购率
-        $halfYearArr = array(
-            'site'=>$site,  //站点
-            'type'=>3,   //复购周期：3：半年
-            'day_date'=>$halfYearDate,  //时间
-            'usernum'=>$repurchaseDataSix['usernum'],  //客户数
-            'againbuy_usernum'=>$repurchaseDataSix['againbuy_usernum'],  //复购用户数
-            'againbuy_usernum_ordernum'=>$repurchaseDataSix['againbuy_usernum_ordernum'],  //复购用户订单数
-            'againbuy_rate'=>$repurchaseDataSix['againbuy_rate'],  //复购率
-            'againbuy_num_rate'=>$repurchaseDataSix['againbuy_num_rate'],  //复购频次
-        );
-        Db::name('datacenter_month_repurchase')->insert($halfYearArr);
-        echo "站点：".$site." 半年期复购 is ok"."\n";
-        #############################################   半年期复购率end    #########################################
-        #############################################  一年期复购率start #########################################
-        $oneYearDate = date("Y-m", strtotime("-13 month", strtotime($today)));
-        //获取前十三个月时间
-        $lastTwelveMonthStart = date("Y-m-01", strtotime("-12 month", strtotime($today)));
-        $lastThirteenMonthStart = date("Y-m-01", strtotime("-13 month", strtotime($today)));
-        $lastThirteenMonthEnd = date("Y-m-t 23:59:59", strtotime("-13 month", strtotime($today)));
-        $repurchaseDataThirteen = $this->getRepurchaseUserNum($site, $lastThirteenMonthStart, $lastThirteenMonthEnd,
-            $lastTwelveMonthStart, $lastOneMonthEnd);
-        //一年期复购率
-        $oneYearArr = array(
-            'site'=>$site,  //站点
-            'type'=>4,   //复购周期：4：一年
-            'day_date'=>$oneYearDate,  //时间
-            'usernum'=>$repurchaseDataThirteen['usernum'],  //客户数
-            'againbuy_usernum'=>$repurchaseDataThirteen['againbuy_usernum'],  //复购用户数
-            'againbuy_usernum_ordernum'=>$repurchaseDataThirteen['againbuy_usernum_ordernum'],  //复购用户订单数
-            'againbuy_rate'=>$repurchaseDataThirteen['againbuy_rate'],  //复购率
-            'againbuy_num_rate'=>$repurchaseDataThirteen['againbuy_num_rate'],  //复购频次
-        );
-        Db::name('datacenter_month_repurchase')->insert($oneYearArr);
-        echo "站点：".$site." 一年期复购 is ok"."\n";
-        usleep(10000);
-        #############################################  一年期复购率end   #########################################
+        $dayArr=['2021-05-27','2021-04-27','2021-03-27','2021-02-27','2021-01-27','2020-12-27','2020-11-27','2020-10-27','2020-09-27','2020-08-27','2020-07-27','2020-06-27','2020-05-27'];
+        foreach ($dayArr as $k=>$v){
+            $today = $v;
+            //获取前一个月时间
+            $lastOneMonthStart = date("Y-m-d", strtotime("first day of -1 month", strtotime($today)));
+            $lastOneMonthEnd = date("Y-m-d 23:59:59", strtotime("last day of -1 month", strtotime($today)));
+            #############################################   一月期复购率start  #########################################
+            $oneMonthDate = date("Y-m", strtotime("-2 month", strtotime($today)));
+            //获取前两个月时间
+            $lastTwoMonthStart = date("Y-m-01", strtotime("-2 month", strtotime($today)));
+            $lastTwoMonthEnd = date("Y-m-t 23:59:59", strtotime("-2 month", strtotime($today)));
+            $repurchaseDataOne = $this->getRepurchaseUserNum($site, $lastTwoMonthStart, $lastTwoMonthEnd,
+                $lastOneMonthStart, $lastOneMonthEnd);
+            //一月期复购率
+            $oneMonthArr = array(
+                'site'=>$site,  //站点
+                'type'=>1,   //复购周期：1：一月
+                'day_date'=>$oneMonthDate,  //时间
+                'usernum'=>$repurchaseDataOne['usernum'],  //客户数
+                'againbuy_usernum'=>$repurchaseDataOne['againbuy_usernum'],  //复购用户数
+                'againbuy_usernum_ordernum'=>$repurchaseDataOne['againbuy_usernum_ordernum'],  //复购用户订单数
+                'againbuy_rate'=>$repurchaseDataOne['againbuy_rate'],  //复购率
+                'againbuy_num_rate'=>$repurchaseDataOne['againbuy_num_rate'],  //复购频次
+            );
+            Db::name('datacenter_month_repurchase')->insert($oneMonthArr);
+            echo "站点：".$site." 一月期复购 is ok"."\n";
+            #############################################   一月期复购率end    #########################################
+            #############################################   三月期复购率start  #########################################
+            $threeMonthDate = date("Y-m", strtotime("-4 month", strtotime($today)));
+            //获取前四个月时间
+            $lastThreeMonthStart = date("Y-m-01", strtotime("-3 month", strtotime($today)));
+            $lastFourMonthStart = date("Y-m-01", strtotime("-4 month", strtotime($today)));
+            $lastFourMonthEnd = date("Y-m-t 23:59:59", strtotime("-4 month", strtotime($today)));
+            $repurchaseDataThree = $this->getRepurchaseUserNum($site, $lastFourMonthStart, $lastFourMonthEnd,
+                $lastThreeMonthStart, $lastOneMonthEnd);
+            //三月期复购率
+            $threeMonthArr = array(
+                'site'=>$site,  //站点
+                'type'=>2,   //复购周期：2：三月
+                'day_date'=>$threeMonthDate,  //时间
+                'usernum'=>$repurchaseDataThree['usernum'],  //客户数
+                'againbuy_usernum'=>$repurchaseDataThree['againbuy_usernum'],  //复购用户数
+                'againbuy_usernum_ordernum'=>$repurchaseDataThree['againbuy_usernum_ordernum'],  //复购用户订单数
+                'againbuy_rate'=>$repurchaseDataThree['againbuy_rate'],  //复购率
+                'againbuy_num_rate'=>$repurchaseDataThree['againbuy_num_rate'],  //复购频次
+            );
+            Db::name('datacenter_month_repurchase')->insert($threeMonthArr);
+            echo "站点：".$site." 三月期复购 is ok"."\n";
+            #############################################   三月期复购率end    #########################################
+            #############################################   半年期复购率start  #########################################
+            $halfYearDate = date("Y-m", strtotime("-7 month", strtotime($today)));
+            //获取前七个月时间
+            $lastSixMonthStart = date("Y-m-01", strtotime("-6 month", strtotime($today)));
+            $lastSevenMonthStart = date("Y-m-01", strtotime("-7 month", strtotime($today)));
+            $lastSevenMonthEnd = date("Y-m-t 23:59:59", strtotime("-7 month", strtotime($today)));
+            $repurchaseDataSix = $this->getRepurchaseUserNum($site, $lastSevenMonthStart, $lastSevenMonthEnd,
+                $lastSixMonthStart, $lastOneMonthEnd);
+            //半年期复购率
+            $halfYearArr = array(
+                'site'=>$site,  //站点
+                'type'=>3,   //复购周期：3：半年
+                'day_date'=>$halfYearDate,  //时间
+                'usernum'=>$repurchaseDataSix['usernum'],  //客户数
+                'againbuy_usernum'=>$repurchaseDataSix['againbuy_usernum'],  //复购用户数
+                'againbuy_usernum_ordernum'=>$repurchaseDataSix['againbuy_usernum_ordernum'],  //复购用户订单数
+                'againbuy_rate'=>$repurchaseDataSix['againbuy_rate'],  //复购率
+                'againbuy_num_rate'=>$repurchaseDataSix['againbuy_num_rate'],  //复购频次
+            );
+            Db::name('datacenter_month_repurchase')->insert($halfYearArr);
+            echo "站点：".$site." 半年期复购 is ok"."\n";
+            #############################################   半年期复购率end    #########################################
+            #############################################  一年期复购率start #########################################
+            $oneYearDate = date("Y-m", strtotime("-13 month", strtotime($today)));
+            //获取前十三个月时间
+            $lastTwelveMonthStart = date("Y-m-01", strtotime("-12 month", strtotime($today)));
+            $lastThirteenMonthStart = date("Y-m-01", strtotime("-13 month", strtotime($today)));
+            $lastThirteenMonthEnd = date("Y-m-t 23:59:59", strtotime("-13 month", strtotime($today)));
+            $repurchaseDataThirteen = $this->getRepurchaseUserNum($site, $lastThirteenMonthStart, $lastThirteenMonthEnd,
+                $lastTwelveMonthStart, $lastOneMonthEnd);
+            //一年期复购率
+            $oneYearArr = array(
+                'site'=>$site,  //站点
+                'type'=>4,   //复购周期：4：一年
+                'day_date'=>$oneYearDate,  //时间
+                'usernum'=>$repurchaseDataThirteen['usernum'],  //客户数
+                'againbuy_usernum'=>$repurchaseDataThirteen['againbuy_usernum'],  //复购用户数
+                'againbuy_usernum_ordernum'=>$repurchaseDataThirteen['againbuy_usernum_ordernum'],  //复购用户订单数
+                'againbuy_rate'=>$repurchaseDataThirteen['againbuy_rate'],  //复购率
+                'againbuy_num_rate'=>$repurchaseDataThirteen['againbuy_num_rate'],  //复购频次
+            );
+            Db::name('datacenter_month_repurchase')->insert($oneYearArr);
+            echo "站点：".$site." 一年期复购 is ok"."\n";
+            usleep(10000);
+            #############################################  一年期复购率end   #########################################
+        }
+
     }
     /**
      * 获取用户邮箱及用户数
