@@ -36,7 +36,7 @@ class GoodsDataDetail extends Backend
             $site = $filter['order_platform'] ? $filter['order_platform'] : 1;
             $map['p.platform_type'] = $site;
             if($filter['sku']){
-                $map['p.sku'] = $filter['sku'];
+                $map['p.platform_sku'] = $filter['sku'];
             }
             if($filter['type']){
                 $map['c.attribute_group_id'] = $filter['type'];
@@ -74,7 +74,7 @@ class GoodsDataDetail extends Backend
             $end = time();
             $nowDate = date('Y-m-d H:i:s');
             foreach ($list as $key=>$value){
-                $list[$key]['sku'] = $value['sku'];
+                $list[$key]['sku'] = $value['platform_sku'];
                 $list[$key]['type'] = $value['attribute_group_id'];
                 $list[$key]['goods_type'] = $value['name'];
                 if($value['outer_sku_status'] == 1){
