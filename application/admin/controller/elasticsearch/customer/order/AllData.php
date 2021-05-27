@@ -192,7 +192,7 @@ class AllData extends BaseElasticsearch
             $compareTimeStr = $params['compare_time_str'] ?: '';
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if (!$timeStr) {
-                $nowDay = date('Y-m-d', strtotime('-6 days')) . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+                $nowDay = date('Y-m-d', strtotime('-6 days')) . ' ' . '00:00:00' . ' - ' . date('Y-m-d'). ' ' . '23:59:59';
             }
             switch ($site) {
                 case Site::ZEELOOL:
@@ -237,7 +237,7 @@ class AllData extends BaseElasticsearch
             $timeStr = $params['time_str'];
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             if (!$timeStr) {
-                $nowDay = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
+                $nowDay = date('Y-m-d') . ' ' . '00:00:00' . ' - ' . date('Y-m-d'). ' ' . '23:59:59';
             }
             switch ($site) {
                 case Site::ZEELOOL:

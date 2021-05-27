@@ -1243,7 +1243,7 @@ class Voogueme extends Model
             $time_str = $start . ' - '. $end;
         }
         $createat = explode(' ', $time_str);
-        $customerWhere['created_at'] = ['between', [$start, $end]];
+        $customerWhere['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $orderWhere['order_type'] = 1;
         //用户统计
