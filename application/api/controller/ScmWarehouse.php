@@ -3183,9 +3183,11 @@ class ScmWarehouse extends Scm
         if (!empty($codes)) {
             $call_in_site_coding = $this->_store_house->where(['id' => ['in', $call_in_site_id]])->column('coding');
             $vat = array_merge($codes, $call_in_site_coding);
+            //所有拣货库区ids
+            $allPickingIds = Db::name('warehouse_area')->where('type',2)->column('id');
 
             $count = $this->_inventory->alias('a')
-                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat], 'b.area_id' => '3'])
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat], 'b.area_id' => ['in',$allPickingIds]])
                 ->count();
             if ($count > 0) {
                 $this->error(__('此数据下对应库位正在盘点,暂无法进行出入库操作'), '', 525);
@@ -3805,6 +3807,7 @@ class ScmWarehouse extends Scm
             $list[$key]['show_logistics'] = 3 == $value['status'] ? 1 : 0; //扫描物流单号按钮 待物流揽收状态有
             $list[$key]['show_sign'] = 4 == $value['status'] ? 1 : 0; //待收货 有签收按钮
             $list[$key]['show_in'] = 5 == $value['status'] ? 1 : 0; //待入库有入库按钮
+            $list[$key]['show_detail'] = 6 == $value['status'] ? 1 : 0; //已完成状态有显示详情按钮
         }
         $this->success('', ['list' => $list], 200);
     }
