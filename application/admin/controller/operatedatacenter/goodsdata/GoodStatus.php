@@ -84,11 +84,11 @@ class GoodStatus extends Backend
             $platform_n_down_num =$platform_n_down_num[0]['total'];
             $platform_n_yushou_num =Db::name('datacenter_day')->where('site',3)->where($where)->field($presell_field)->select();
             $platform_n_yushou_num =$platform_n_yushou_num[0]['total'];
-            $platform_w_up_num =Db::name('datacenter_day')->where('site',4)->where($where)->field($up_field)->select();
+            $platform_w_up_num =Db::name('datacenter_day')->where('site',5)->where($where)->field($up_field)->select();
             $platform_w_up_num =$platform_w_up_num[0]['total'];
-            $platform_w_down_num =Db::name('datacenter_day')->where('site',4)->where($where)->field($down_field)->select();
+            $platform_w_down_num =Db::name('datacenter_day')->where('site',5)->where($where)->field($down_field)->select();
             $platform_w_down_num =$platform_w_down_num[0]['total'];
-            $platform_w_yushou_num =Db::name('datacenter_day')->where('site',4)->where($where)->field($presell_field)->select();
+            $platform_w_yushou_num =Db::name('datacenter_day')->where('site',5)->where($where)->field($presell_field)->select();
             $platform_w_yushou_num =$platform_w_yushou_num[0]['total'];
             /*$platform_m_up_num =Db::name('datacenter_day')->where('site',5)->where($where)->field($up_field)->select();
             $platform_m_up_num =$platform_m_up_num[0]['total'];
