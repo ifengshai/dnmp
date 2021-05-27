@@ -235,7 +235,7 @@ class NewDataMarket extends Backend
             ->where($where)
             ->sum('stock');
         $total = $stockNum ? round($stock/$stockNum*$stockAmount,2) : 0;
-        $arr['stock_total'] = $stock['price'];
+        $arr['stock_total'] = $total;
         //呆滞库存数量、呆滞库存金额
         $dullStockData = Db::name('supply_dull_stock_site')
             ->where('site',$site)
