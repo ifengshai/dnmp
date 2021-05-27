@@ -20,6 +20,7 @@ class GoodsChange extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        $this->order = new \app\admin\model\order\order\NewOrder();
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme();
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao();
