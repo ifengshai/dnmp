@@ -95,8 +95,8 @@ class StockTransferOrder extends Backend
             if ($params['out_stock_id'] == $params['in_stock_id']) {
                 $this->error('调入仓和调出仓不能为同一个站');
             }
-            if (count($sku) != count(array_unique($sku))) {
-                $this->error('当前调拨单中存在相同的sku，请检查后重试');
+            if (empty($params['response_person'])) {
+                $this->error('调拨负责人不能为空');
             }
             //添加调拨单保存或提交审核时数据有效性的判断
             foreach ($sku as $k => $v) {
@@ -107,6 +107,10 @@ class StockTransferOrder extends Backend
                     $this->error('期望调拨数量不能为0，请确认' . $v . '期望调拨数量');
                 }
             }
+            if (count($sku) != count(array_unique($sku))) {
+                $this->error('当前调拨单中存在相同的sku，请检查后重试');
+            }
+
             if ($params) {
                 $result = false;
                 Db::startTrans();
@@ -169,8 +173,8 @@ class StockTransferOrder extends Backend
             if ($params['out_stock_id'] == $params['in_stock_id']) {
                 $this->error('调入仓和调出仓不能为同一个站');
             }
-            if (count($sku) != count(array_unique($sku))) {
-                $this->error('当前调拨单中存在相同的sku，请检查后重试');
+            if (empty($params['response_person'])) {
+                $this->error('调拨负责人不能为空');
             }
             //添加调拨单保存或提交审核时数据有效性的判断
             foreach ($sku as $k => $v) {
@@ -180,6 +184,9 @@ class StockTransferOrder extends Backend
                 if ($num[$k] <= 0 || empty($num[$k])) {
                     $this->error('期望调拨数量不能为0，请确认' . $v . '期望调拨数量');
                 }
+            }
+            if (count($sku) != count(array_unique($sku))) {
+                $this->error('当前调拨单中存在相同的sku，请检查后重试');
             }
             if ($params) {
                 $result = false;
