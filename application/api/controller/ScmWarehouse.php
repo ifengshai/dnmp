@@ -3184,9 +3184,11 @@ class ScmWarehouse extends Scm
         if (!empty($codes)) {
             $call_in_site_coding = $this->_store_house->where(['id' => ['in', $call_in_site_id]])->column('coding');
             $vat = array_merge($codes, $call_in_site_coding);
+            //所有拣货库区ids
+            $allPickingIds = Db::name('warehouse_area')->where('type',2)->column('id');
 
             $count = $this->_inventory->alias('a')
-                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat], 'b.area_id' => '3'])
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat], 'b.area_id' => ['in',$allPickingIds]])
                 ->count();
             if ($count > 0) {
                 $this->error(__('此数据下对应库位正在盘点,暂无法进行出入库操作'), '', 525);
@@ -3806,6 +3808,7 @@ class ScmWarehouse extends Scm
             $list[$key]['show_logistics'] = 3 == $value['status'] ? 1 : 0; //扫描物流单号按钮 待物流揽收状态有
             $list[$key]['show_sign'] = 4 == $value['status'] ? 1 : 0; //待收货 有签收按钮
             $list[$key]['show_in'] = 5 == $value['status'] ? 1 : 0; //待入库有入库按钮
+            $list[$key]['show_detail'] = 6 == $value['status'] ? 1 : 0; //已完成状态有显示详情按钮
         }
         $this->success('', ['list' => $list], 200);
     }
@@ -4292,11 +4295,15 @@ class ScmWarehouse extends Scm
     public function stock_transfer_out_sku()
     {
         $id = $this->request->request("transfer_order_item_id");
+        $status = $this->request->request("status");
         if (empty($id)) {
             $this->error(__('error，调拨单id为空'), '', 546);
         }
+        if (empty($status)) {
+            $this->error(__('error，状态码为空'), '', 546);
+        }
         $transferOrderItem = $this->_stock_transfer_order_item->where('id', $id)->find();
-        $transferOrderItemCode = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $id, 'status' => 1])->select();
+        $transferOrderItemCode = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id'=>$id,'status'=>$status])->select();
         $transferOrderItemCode = collection($transferOrderItemCode)->toArray();
         $arr = [];
         foreach ($transferOrderItemCode as $k => $v) {
