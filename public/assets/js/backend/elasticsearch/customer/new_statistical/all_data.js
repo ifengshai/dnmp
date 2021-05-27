@@ -304,7 +304,7 @@ function re_buy_num()
     }, function (data, ret) {
         var again_user_num = ret.data.again_user_num;
         var compare_again_user_num_rate = ret.data.contrast_again_user_num;
-        $('#again_user_num').text(again_user_num);
+        $('#again_user_num').text(again_user_num );
         if (parseInt(compare_again_user_num_rate) < 0) {
             $('#huan_again_user_num').html("<img src='/xiadie.png'>" + compare_again_user_num_rate+ '%');
         } else {
@@ -312,7 +312,7 @@ function re_buy_num()
         }
         var huan_again_user_num_rate = ret.data.huan_again_user_num_rate;
         var compare_again_user_num_rate = ret.data.contrast_again_user_num;
-        $('#huan_again_user_num_rate').text(huan_again_user_num_rate);
+        $('#huan_again_user_num_rate').text(huan_again_user_num_rate + '%');
         if (parseInt(compare_again_user_num_rate) < 0) {
             $('#huan_again_user_num').html("<img src='/xiadie.png'>" + compare_again_user_num_rate+ '%');
         } else {
