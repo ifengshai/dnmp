@@ -62,7 +62,7 @@ class GoodsChange extends Backend
             $map['site'] = $order_platform;
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
             $orderWhere['o.site'] = $order_platform;
-            $orderWhere['o.order_type'] = $order_platform;
+            $orderWhere['o.order_type'] = 1;
             $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
             $orderWhere['o.payment_time'] = ['between', [strtotime($createat[0]), $lastDay]];
             unset($filter['time_str']);
@@ -94,10 +94,10 @@ class GoodsChange extends Backend
                 //订单金额
                 $orderIds = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
+                    ->join('fa_order_item_option i','o.entity_id=i.magento_order_id')
                     ->where($orderWhere)
                     ->where('i.sku',$v['platform_sku'])
-                    ->column('distinct entity_id');
+                    ->column('magento_order_id');
                 $orderTotal = $this->order
                     ->where('entity_id','in',$orderIds)
                     ->sum('base_grand_total');
