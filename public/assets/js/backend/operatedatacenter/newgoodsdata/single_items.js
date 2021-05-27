@@ -128,7 +128,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             legend: { //图例配置
                                 padding: 5,
                                 top: '2%',
-                                data: ['商品销量', '现价']
+                                data: ['商品销量', '售价']
                             },
                             xAxis: [
                                 {
@@ -145,7 +145,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                                 },
                                 {
                                     type: 'value',
-                                    name: '现价',
+                                    name: '售价',
                                     axisLabel: {
                                         formatter: '{value} $'
                                     }

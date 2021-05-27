@@ -75,6 +75,8 @@ class SingleItems extends Backend
                 ->select();
             $list = collection($list)->toArray();
             foreach ($list as $key=>$value){
+                $list[$key]['base_grand_total'] = round($value['base_grand_total'],2);
+                $list[$key]['base_discount_amount'] = round($value['base_discount_amount'],2);
                 $list[$key]['payment_time'] = date('Y-m-d H:i:s',$value['payment_time']);
             }
 
@@ -553,7 +555,7 @@ class SingleItems extends Backend
                 [
                     'type' => 'line',
                     'data' => array_values($recent_day_now),
-                    'name' => '现价',
+                    'name' => '售价',
                     'yAxisIndex' => 1,
                     'smooth' => true //平滑曲线
                 ],
