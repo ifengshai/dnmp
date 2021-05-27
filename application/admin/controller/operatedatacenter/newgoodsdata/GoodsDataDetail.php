@@ -222,7 +222,7 @@ class GoodsDataDetail extends Backend
         fputcsv($fp, $field_arr);
         $map['p.platform_type'] = $site;
         if($sku){
-            $map['p.sku'] = $sku;
+            $map['p.platform_sku'] = $sku;
         }
         if($type){
             $map['c.attribute_group_id'] = $type;
@@ -257,7 +257,7 @@ class GoodsDataDetail extends Backend
                 $tmpRow = [];
                 if (in_array('sku', $column_name)) {
                     $index = array_keys($column_name, 'sku');
-                    $tmpRow[$index[0]] = $val['sku'];
+                    $tmpRow[$index[0]] = $val['platform_sku'];
                 }
                 if (in_array('type', $column_name)) {
                     switch ($val['attribute_group_id']){
