@@ -153,11 +153,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui','bootstrap-tab
                 html.push("<select class='form-control store selectpicker' data-live-search = true name='row[store_id]'>");
                 for (var i = 0; i < obj.length; i++) {
                     var house = obj[i]
-                    console.log(house.id)
                     html.push("<option value='" + house.id + "'>" + house.coding + "</option>");
                 }
                 html.push("</select>");
-                // $('#store').html(html.join(""));
+                $('#store').html(html.join(""));
+                $(".store").selectpicker('refresh');
             }
         });
     })
