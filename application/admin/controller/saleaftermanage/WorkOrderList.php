@@ -1159,15 +1159,20 @@ class WorkOrderList extends Backend
                     //主单取消
                     if (in_array(3, $measureChooseId)) {
                         $_new_order = new NewOrder();
-                        $order_id = $_new_order
+                        $orderList = $_new_order->field('id,stock_id')
                             ->where('increment_id', $params['platform_order'])
-                            ->value('id');
+                            ->find();
+                        $order_id = $orderList->id;
                         if ($order_id) {
                             $order_item_where['order_id'] = $order_id;
                             $_new_order_item_process = new NewOrderItemProcess();
                             $order_item_list = $_new_order_item_process
                                 ->where($order_item_where)
                                 ->column('sku');
+
+                            //查询仓库库区
+                            $area_id = Db::name('warehouse_area')->where(['stock_id' => $orderList->stock_id,'type' => 2])->value('id');
+
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                             //配货完成时判断
                             //拣货区盘点时不能操作
@@ -1181,7 +1186,7 @@ class WorkOrderList extends Backend
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
                                     ->count();
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
@@ -1321,6 +1326,12 @@ class WorkOrderList extends Backend
                     $_new_order_item_process = new NewOrderItemProcess();
                     $count_item_num = $_new_order_item_process->where('order_id', $order_id)->count();
 
+                    $_new_order = new NewOrder();
+                    $stock_id = $_new_order->where('increment_id', $platform_order)
+                        ->value('stock_id');
+                    //查询仓库库区
+                    $area_id = Db::name('warehouse_area')->where(['stock_id' => $stock_id,'type' => 2])->value('id');
+
                     1 > count($item_order_info) && $this->error("子订单号错误");
                     foreach ($item_order_info as $key => &$item) {
                         $item['item_choose'] = array_unique(array_filter($item['item_choose']));
@@ -1357,7 +1368,8 @@ class WorkOrderList extends Backend
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
+                                    ->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
                                     ->count();
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
@@ -1380,7 +1392,7 @@ class WorkOrderList extends Backend
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
                                     ->count();
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
@@ -1401,7 +1413,7 @@ class WorkOrderList extends Backend
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
                                     ->count();
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['change_frame']['change_sku'].'对应库位正在盘点,暂无法进行出入库操作'];
@@ -2120,9 +2132,10 @@ class WorkOrderList extends Backend
                     //主单取消
                     if (in_array(3, $measure_choose_id)) {
                         $_new_order = new NewOrder();
-                        $order_id = $_new_order
+                        $orderList = $_new_order->field('id,stock_id')
                             ->where('increment_id', $params['platform_order'])
-                            ->value('id');
+                            ->find();
+                        $order_id = $orderList->id;
                         if ($order_id) {
                             $order_item_where['order_id'] = $order_id;
                             $_new_order_item_process = new NewOrderItemProcess();
@@ -2130,6 +2143,10 @@ class WorkOrderList extends Backend
                                 ->where($order_item_where)
                                 ->column('sku');
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+
+                            //查询仓库库区
+                            $area_id = Db::name('warehouse_area')->where(['stock_id' => $orderList->stock_id,'type' => 2])->value('id');
+
                             //配货完成时判断
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
@@ -2142,7 +2159,7 @@ class WorkOrderList extends Backend
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
                                     ->count();
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
@@ -2283,6 +2300,12 @@ class WorkOrderList extends Backend
                     $_new_order_item_process = new NewOrderItemProcess();
                     $count_item_num = $_new_order_item_process->where('order_id', $order_id)->count();
 
+                    $_new_order = new NewOrder();
+                    $stock_id = $_new_order->where('increment_id', $platform_order)
+                        ->value('stock_id');
+                    //查询仓库库区
+                    $area_id = Db::name('warehouse_area')->where(['stock_id' => $stock_id,'type' => 2])->value('id');
+
                     1 > count($item_order_info) && $this->error("子订单号错误");
 
                     foreach ($item_order_info as $key => &$item) {
@@ -2320,7 +2343,7 @@ class WorkOrderList extends Backend
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
                                     ->count();
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
@@ -2344,7 +2367,7 @@ class WorkOrderList extends Backend
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
                                     ->count();
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
@@ -2364,7 +2387,7 @@ class WorkOrderList extends Backend
                             $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
                             if (!empty($barcodedata)) {
                                 $count = $this->_inventory->alias('a')
-                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => '3'])
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
                                     ->count();
                                 if ($count > 0) {
                                     return ['result' => false, 'msg' => '此'.$item['change_frame']['change_sku'].'对应库位正在盘点,暂无法进行出入库操作'];
