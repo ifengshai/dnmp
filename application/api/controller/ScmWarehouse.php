@@ -4604,6 +4604,9 @@ class ScmWarehouse extends Scm
         $codeAgg = $this->request->request("item_data");
         $codeAgg = html_entity_decode($codeAgg);
         $codeAgg = array_filter(json_decode($codeAgg, true));
+        if (empty($codeAgg)) {
+            $this->error(__('调入数据不能为空，请检查！！'), '', 524);
+        }
         $arr = [];
         $key = 0;
         foreach ($codeAgg as $k => $v) {
