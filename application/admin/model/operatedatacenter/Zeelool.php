@@ -237,8 +237,7 @@ class Zeelool extends Model
             $contrast_all_order_user = $this->get_all_order_user($createat2);
             $arrs['contrast_again_user_num'] = $contrast_again_num ? round(($arrs['again_user_num'] - $contrast_again_num) / $contrast_again_num * 100, 2) : 0;
             $contrast_all_order_user_rate = $contrast_all_order_user ? round(($contrast_again_num) / $contrast_all_order_user * 100, 2) : 0;
-ECHO $all_order_user_rate.PHP_EOL;
-            ECHO $contrast_all_order_user_rate.PHP_EOL;
+
             $arrs['all_contrast_again_user_num'] = $contrast_all_order_user_rate ? round(($all_order_user_rate - $contrast_all_order_user_rate) / $contrast_all_order_user_rate * 100, 2) : 0;
         }
         return $arrs;
