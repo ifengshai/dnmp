@@ -3437,8 +3437,10 @@ class TrackReg extends Backend
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
         $data = date('Y-m-d', strtotime('-1 day'));
+        $data = '2021-05-25';
         $start = strtotime($data);
         $end = strtotime(date('Y-m-d 23:59:59', strtotime('-1 day')));
+        $end = strtotime('2021-05-25 23:59:59');
         $orderWhere['o.payment_time'] = ['between',[$start,$end]];
         $orderWhere['o.site'] = $site;
         $orderWhere['o.order_type'] = 1;
