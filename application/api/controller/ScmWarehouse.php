@@ -4294,11 +4294,15 @@ class ScmWarehouse extends Scm
     public function stock_transfer_out_sku()
     {
         $id = $this->request->request("transfer_order_item_id");
+        $status = $this->request->request("status");
         if (empty($id)) {
             $this->error(__('error，调拨单id为空'), '', 546);
         }
+        if (empty($status)) {
+            $this->error(__('error，状态码为空'), '', 546);
+        }
         $transferOrderItem = $this->_stock_transfer_order_item->where('id', $id)->find();
-        $transferOrderItemCode = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id'=>$id])->select();
+        $transferOrderItemCode = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id'=>$id,'status'=>$status])->select();
         $transferOrderItemCode = collection($transferOrderItemCode)->toArray();
         $arr = [];
         foreach ($transferOrderItemCode as $k => $v) {
@@ -4312,7 +4316,6 @@ class ScmWarehouse extends Scm
                 $arr[$v['location_id']]['location'] = Db::name('store_house')->where('id', $v['location_id'])->value('coding');
                 $arr[$v['location_id']]['num'] += 1;
                 $arr[$v['location_id']]['code_agg'] = [$v['code']];
-                $arr[$v['location_id']]['status'] = $v['status'];
             }
         }
         $data['sku'] = $transferOrderItem['sku'];
