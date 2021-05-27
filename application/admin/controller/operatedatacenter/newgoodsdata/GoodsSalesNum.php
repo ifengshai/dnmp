@@ -150,8 +150,6 @@ class GoodsSalesNum extends Backend
                 return $this->selectpage();
             }
             $params['site'] = $filter['order_platform'] ? $filter['order_platform'] : 1;
-            unset($filter['create_time-operate']);
-            unset($filter['create_time']);
             unset($filter['order_platform']);
             $this->request->get(['filter' => json_encode($filter)]);
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
@@ -236,21 +234,21 @@ class GoodsSalesNum extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $params['site'] = $params['site'] ? $params['site'] : 1;
-            //默认当天
-            if ($params['time']) {
-                $time = explode(' ', $params['time']);
-                $start = strtotime($time[0] . ' ' . $time[1]);
-                $end = strtotime($time[3] . ' ' . $time[4]);
-            } else {
-                $start = strtotime(date('Y-m-d 00:00:00', strtotime('-6 day')));
-                $end = strtotime(date('Y-m-d H:i:s', time()));
-            }
-            $map['payment_time'] = ['between', [$start, $end]];
             /***********图表*************/
             //$cachename = 'goodsSalesNum_line_' . md5(serialize($map)) . '_' . $params['site'].$params['type'];
             //$cacheData = cache($cachename);
             //if (!$cacheData) {
                 if($params['type'] == 1){
+                    //默认当天
+                    if ($params['time']) {
+                        $time = explode(' ', $params['time']);
+                        $start = strtotime($time[0] . ' ' . $time[1]);
+                        $end = strtotime($time[3] . ' ' . $time[4]);
+                    } else {
+                        $start = strtotime(date('Y-m-d 00:00:00', strtotime('-6 day')));
+                        $end = strtotime(date('Y-m-d H:i:s', time()));
+                    }
+                    $map['payment_time'] = ['between', [$start, $end]];
                     //总体销量排行榜
                     $pageArr['limit'] = 50;
                     $res = $this->getOrderSalesNum($params['site'],$map,$pageArr);
