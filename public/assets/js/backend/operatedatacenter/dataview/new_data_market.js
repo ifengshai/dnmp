@@ -344,9 +344,9 @@ function re_buy_num()
         var compare_huan_again_user_num_rate = ret.data.all_contrast_again_user_num;
         $('#huan_again_user_num_rate').text(huan_again_user_num_rate + '%');
         if (parseInt(compare_huan_again_user_num_rate) < 0) {
-            $('#compare_huan_again_user_num_rate').html("<img src='/xiadie.png'>" + compare_huan_again_user_num_rate+ '%');
+            $('#compare_again_user_num_rate').html("<img src='/xiadie.png'>" + compare_huan_again_user_num_rate+ '%');
         } else {
-            $('#compare_huan_again_user_num_rate').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_huan_again_user_num_rate + '%');
+            $('#compare_again_user_num_rate').html("<img  style='transform:rotate(180deg);' src='/shangzhang.png'>" + compare_huan_again_user_num_rate + '%');
         }
         return false;
     }, function (data, ret) {
