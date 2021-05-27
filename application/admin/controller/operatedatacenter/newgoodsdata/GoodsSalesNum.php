@@ -158,6 +158,7 @@ class GoodsSalesNum extends Backend
             $startTime = strtotime(date('Y-m-d 00:00:00', strtotime('-30 day')));  //过去30天时间
             $total = Db::name('sku_shelves_time')
                 ->where('shelves_time','>=',$startTime)
+                ->where('site',$params['site'])
                 ->count();
             $skus = Db::name('sku_shelves_time')
                 ->where('shelves_time','>=',$startTime)
