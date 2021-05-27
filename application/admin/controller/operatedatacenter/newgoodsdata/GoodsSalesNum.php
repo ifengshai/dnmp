@@ -161,6 +161,7 @@ class GoodsSalesNum extends Backend
                 ->count();
             $skus = Db::name('sku_shelves_time')
                 ->where('shelves_time','>=',$startTime)
+                ->where('site',$params['site'])
                 ->field('platform_sku,shelves_time,sku')
                 ->limit($offset,$limit)
                 ->select();
@@ -260,13 +261,21 @@ class GoodsSalesNum extends Backend
                     $startTime = strtotime(date('Y-m-d 00:00:00', strtotime('-30 day')));  //过去30天时间
                     $skus = Db::name('sku_shelves_time')
                         ->where('shelves_time','>=',$startTime)
+                        ->where('site',$params['site'])
                         ->column('platform_sku','shelves_time');
                     $res = [];
-
+                    $i = 0;
                     foreach($skus as $k=>$sku){
                         $skuTimeWhere['payment_time'] = ['between',[$k,time()]];
                         $skuSalesNum = $this->getOrderSalesNum($params['site'],$skuTimeWhere,[],$sku);
-                        $res[$sku] = $skuSalesNum['data'][$sku] ?? 0;
+                        $salesNum = $skuSalesNum['data'][$sku] ?? 0;
+                        if($salesNum != 0){
+                            if($i<50){
+                                $res[$sku] = $salesNum;
+                                $i++;
+                            }
+                        }
+
                     }
                     $res = array_diff($res, [0]);
                     arsort($res);
