@@ -499,7 +499,7 @@ class GoodsDataView extends Backend
                 ->alias('i')
                 ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where($whereItem)
-                ->where('m.sku', 'in', $frame_sku)
+                ->where('i.sku', 'in', $frame_sku)
                 ->where($itemMap)
                 ->count('distinct o.customer_email');
             //眼镜客户平均副数
@@ -509,7 +509,7 @@ class GoodsDataView extends Backend
                 ->alias('i')
                 ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                 ->where($whereItem)
-                ->where('m.sku', 'in', $decoration_sku)
+                ->where('i.sku', 'in', $decoration_sku)
                 ->where($itemMap)
                 ->count('distinct o.customer_email');
             $decoration_avg_customer = $decoration_order_customer ? round(($decoration_sales_num / $decoration_order_customer), 2) : 0;
@@ -843,32 +843,34 @@ class GoodsDataView extends Backend
         }
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-        switch ($platform) {
-            case 1:
-                $model = Db::connect('database.db_zeelool');
-                break;
-            case 2:
-                $model = Db::connect('database.db_voogueme');
-                break;
-            case 3:
-                $model = Db::connect('database.db_nihao');
-                break;
-            case 10:
-                $model = Db::connect('database.db_zeelool_de');
-                break;
-            case 11:
-                $model = Db::connect('database.db_zeelool_jp');
-                break;
-            default:
-                $model = false;
-                break;
+        if($platform != 5){
+            switch ($platform) {
+                case 1:
+                    $model = Db::connect('database.db_zeelool');
+                    break;
+                case 2:
+                    $model = Db::connect('database.db_voogueme');
+                    break;
+                case 3:
+                    $model = Db::connect('database.db_nihao');
+                    break;
+                case 10:
+                    $model = Db::connect('database.db_zeelool_de');
+                    break;
+                case 11:
+                    $model = Db::connect('database.db_zeelool_jp');
+                    break;
+                default:
+                    $model = false;
+                    break;
+            }
+            if (false == $model) {
+                return false;
+            }
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+            $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
+            $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         }
-        if (false == $model) {
-            return false;
-        }
-        $model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-        $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
         //求出眼镜所有sku
         $frame_sku = $this->itemPlatformSku->getDifferencePlatformSku(1, $platform);
