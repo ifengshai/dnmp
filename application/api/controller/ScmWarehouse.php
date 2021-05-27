@@ -1559,7 +1559,7 @@ class ScmWarehouse extends Scm
         $info['location_id'] = $_in_stock_info['area_id'];
         $info['location_area'] = Db::name('warehouse_area')->where('id', $_in_stock_info['area_id'])->value('name');
         $info['location_code_id'] = $_in_stock_info['location_id'];
-        $info['location_code'] = Db::name('store_house')->where('id', $_in_stock_info['location_code_id'])->value('coding');
+        $info['location_code'] = Db::name('store_house')->where('id', $_in_stock_info['location_id'])->value('coding');
         $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
         $info['in_stock_type'] = $in_stock_type_list;
         $info['item_list'] = $item_list;
