@@ -20,6 +20,7 @@ class GoodsChange extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        $this->order = new \app\admin\model\order\order\NewOrder();
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme();
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao();
@@ -29,6 +30,7 @@ class GoodsChange extends Backend
 
     public function index()
     {
+        $lastDay = strtotime(date('Y-m-d', strtotime('-1 day')));
         $start = date('Y-m-d', strtotime('-6 day'));
         $end = date('Y-m-d 23:59:59');
         $seven_days = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
@@ -55,11 +57,15 @@ class GoodsChange extends Backend
                 $createat = explode(' ', $seven_days);
             }
             if ($filter['sku']) {
-                $map['platform_sku'] = ['like', '%' . $filter['sku'] . '%'];
+                $map['platform_sku'] = $filter['sku'];
             }
             $order_platform = $filter['order_platform'] ? $filter['order_platform'] : 1;
             $map['site'] = $order_platform;
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $orderWhere['o.site'] = $order_platform;
+            $orderWhere['o.order_type'] = 1;
+            $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+            $orderWhere['o.payment_time'] = ['between', [strtotime($createat[0]), $lastDay]];
             unset($filter['time_str']);
             unset($filter['create_time-operate']);
             unset($filter['sku']);
@@ -75,7 +81,7 @@ class GoodsChange extends Backend
                 ->where($where)
                 ->where($map)
                 ->group('platform_sku')
-                ->field('platform_sku,sku,sum(cart_num) as cart_num,sum(update_cart_num) as update_cart_num,sum(pay_lens_num) as pay_lens_num,day_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(sku_grand_total) as sku_grand_total')
+                ->field('platform_sku,sku,sum(cart_num) as cart_num,sum(update_cart_num) as update_cart_num,sum(pay_lens_num) as pay_lens_num,day_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total')
                 ->order('id', 'desc')
                 ->limit($offset, $limit)
                 ->select();
@@ -86,6 +92,17 @@ class GoodsChange extends Backend
                     ->field('stock,outer_sku_status,presell_status,presell_start_time,presell_end_time,presell_num')
                     ->find();
                 $list[$k]['single_price'] = $v['glass_num'] != 0 ? round($v['sku_row_total'] / $v['glass_num'], 2) : 0;
+                //订单金额
+                $orderIds = $this->order
+                    ->alias('o')
+                    ->join('fa_order_item_option i','o.entity_id=i.magento_order_id')
+                    ->where($orderWhere)
+                    ->where('i.sku',$v['platform_sku'])
+                    ->column('magento_order_id');
+                $orderTotal = $this->order
+                    ->where('entity_id','in',$orderIds)
+                    ->sum('base_grand_total');
+                $list[$k]['sku_grand_total'] = $orderTotal ?? 0;
                 //商品现价
                 $list[$k]['now_pricce'] = Db::name('datacenter_sku_day')
                     ->where(['sku'=>$v['sku'],'site'=>$order_platform])
@@ -157,7 +174,7 @@ class GoodsChange extends Backend
         }
         $createat = explode(' ', $time_str);
         if ($sku) {
-            $map['sku'] = ['like', '%' . $sku . '%'];
+            $map['platform_sku'] = $sku;
         }
         $map['site'] = $order_platform;
         $map['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -166,6 +183,11 @@ class GoodsChange extends Backend
             ->group('platform_sku')
             ->count();
         $nowDate = date('Y-m-d H:i:s');
+        $lastDay = strtotime(date('Y-m-d', strtotime('-1 day')));
+        $orderWhere['o.site'] = $order_platform;
+        $orderWhere['o.order_type'] = 1;
+        $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+        $orderWhere['o.payment_time'] = ['between', [strtotime($createat[0]), $lastDay]];
         $pre_count = 5000;
         for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
             $start = $i*$pre_count;
@@ -173,7 +195,7 @@ class GoodsChange extends Backend
             $list = Db::name('datacenter_sku_day')
                 ->where($map)
                 ->group('platform_sku')
-                ->field('platform_sku,sku,sum(cart_num) as cart_num,sum(update_cart_num) as update_cart_num,sum(pay_lens_num) as pay_lens_num,day_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(sku_grand_total) as sku_grand_total')
+                ->field('platform_sku,sku,sum(cart_num) as cart_num,sum(update_cart_num) as update_cart_num,sum(pay_lens_num) as pay_lens_num,day_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total')
                 ->order('id', 'desc')
                 ->limit($start,$pre_count)
                 ->select();
@@ -187,6 +209,18 @@ class GoodsChange extends Backend
                 }
                 $tmpRow['order_num'] =$v['order_num'];//订单成功数
                 $tmpRow['sku_grand_total'] =$v['sku_grand_total'];//订单金额
+
+                $orderIds = $this->order
+                    ->alias('o')
+                    ->join('fa_order_item_option i','o.entity_id=i.magento_order_id')
+                    ->where($orderWhere)
+                    ->where('i.sku',$v['platform_sku'])
+                    ->column('magento_order_id');
+                $orderTotal = $this->order
+                    ->where('entity_id','in',$orderIds)
+                    ->sum('base_grand_total');
+                $tmpRow['sku_grand_total'] = $orderTotal ?? 0;
+
                 if($order_platform != 5){
                     $tmpRow['update_cart_rate'] =$v['update_cart_num'] ? round($v['order_num']/$v['update_cart_num']*100,2).'%' : '0%';//更新购物车转化率
                     $tmpRow['cart_change'] = $v['cart_num'] ? round($v['order_num'] / $v['cart_num'] * 100, 2) . '%' : '0%';//新增购物车转化率
@@ -202,20 +236,20 @@ class GoodsChange extends Backend
                     ->find();
                 if($skuStockInfo['outer_sku_status'] == 1){
                     if($skuStockInfo['stock'] > 0){
-                        $status = 1; //上架
+                        $status = '上架'; //上架
                     }else{
                         if($skuStockInfo['presell_status'] == 1 && $nowDate >= $skuStockInfo['presell_start_time'] && $nowDate <= $skuStockInfo['presell_end_time']){
                             if($skuStockInfo['presell_num'] > 0){
-                                $status = 1; //上架
+                                $status = '上架'; //上架
                             }else{
-                                $status = 2; //售罄
+                                $status = '售罄'; //售罄
                             }
                         }else{
-                            $status = 2; //售罄
+                            $status = '售罄'; //售罄
                         }
                     }
                 }else{
-                    $status = 3;  //下架
+                    $status = '下架';  //下架
                 }
                 $tmpRow['status'] = $status;
                 $tmpRow['glass_num'] =$v['glass_num'];//销售副数

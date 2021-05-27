@@ -226,10 +226,12 @@ class ItemPlatformSku extends Model
 
     public function getSkuInfo($site,$platform_sku){
         $map['p.platform_type'] = $site;
-        $map['p.platform_sku'] = $site;
+        $map['p.platform_sku'] = $platform_sku;
         return $this->alias('p')
-            ->join('fa_item_category c','c.id=p.category_id')
+            ->join('fa_item i','p.sku=i.sku')
+            ->join('fa_item_category c','c.id=i.category_id')
             ->field('c.name,p.stock,p.sku,p.outer_sku_status,p.presell_status,p.presell_start_time,p.presell_end_time,p.presell_num')
+            ->where($map)
             ->find();
     }
 

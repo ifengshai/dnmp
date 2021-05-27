@@ -15,6 +15,7 @@ class NewDataMarket extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        $this->item = new \app\admin\model\itemmanage\Item;
         $this->model = new \app\admin\model\OperationAnalysis;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
@@ -219,14 +220,23 @@ class NewDataMarket extends Backend
     {
         //虚拟仓库存、虚拟仓库存金额
         $stock = $this->itemplatformsku
-            ->alias('s')
-            ->join('fa_item i','s.sku=i.sku')
-            ->where('s.platform_type',$site)
-            ->where('i.category_id','neq',43)
-            ->field('sum(s.stock) stock,sum(s.stock*i.purchase_price) price')
-            ->find();
-        $arr['stock'] = $stock['stock'];
-        $arr['stock_total'] = $stock['price'];
+            ->where('platform_type',$site)
+            ->where('platform_sku','not like','%Price%')
+            ->sum('stock');
+        $arr['stock'] = $stock;
+        //库存总金额
+        $where['is_open'] = 1;
+        $where['is_del'] = 1;
+        $where['category_id'] = ['<>', 43]; //排除补差价商品
+        $stockAmount = $this->item
+            ->where($where)
+            ->sum('stock*purchase_price');
+        //库存总数量
+        $stockNum = $this->item
+            ->where($where)
+            ->sum('stock');
+        $total = $stockNum ? round($stock/$stockNum*$stockAmount,2) : 0;
+        $arr['stock_total'] = $total;
         //呆滞库存数量、呆滞库存金额
         $dullStockData = Db::name('supply_dull_stock_site')
             ->where('site',$site)
@@ -249,7 +259,7 @@ class NewDataMarket extends Backend
             ->where($orderWhere)
             ->sum('i.qty');
         //周转月数
-        $turn_month = $salesNum ? round($stock['stock']/$salesNum,2) : 0;
+        $turn_month = $salesNum ? round($stock/$salesNum,2) : 0;
         $arr['turn_month'] = $turn_month;
         //过去30天上架的SKU数
         $skuNum = Db::name('sku_shelves_time')

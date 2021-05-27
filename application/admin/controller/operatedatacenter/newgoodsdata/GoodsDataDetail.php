@@ -36,7 +36,7 @@ class GoodsDataDetail extends Backend
             $site = $filter['order_platform'] ? $filter['order_platform'] : 1;
             $map['p.platform_type'] = $site;
             if($filter['sku']){
-                $map['p.sku'] = $filter['sku'];
+                $map['p.platform_sku'] = $filter['sku'];
             }
             if($filter['type']){
                 $map['c.attribute_group_id'] = $filter['type'];
@@ -74,7 +74,7 @@ class GoodsDataDetail extends Backend
             $end = time();
             $nowDate = date('Y-m-d H:i:s');
             foreach ($list as $key=>$value){
-                $list[$key]['sku'] = $value['sku'];
+                $list[$key]['sku'] = $value['platform_sku'];
                 $list[$key]['type'] = $value['attribute_group_id'];
                 $list[$key]['goods_type'] = $value['name'];
                 if($value['outer_sku_status'] == 1){
@@ -222,7 +222,7 @@ class GoodsDataDetail extends Backend
         fputcsv($fp, $field_arr);
         $map['p.platform_type'] = $site;
         if($sku){
-            $map['p.sku'] = $sku;
+            $map['p.platform_sku'] = $sku;
         }
         if($type){
             $map['c.attribute_group_id'] = $type;
@@ -257,7 +257,7 @@ class GoodsDataDetail extends Backend
                 $tmpRow = [];
                 if (in_array('sku', $column_name)) {
                     $index = array_keys($column_name, 'sku');
-                    $tmpRow[$index[0]] = $val['sku'];
+                    $tmpRow[$index[0]] = $val['platform_sku'];
                 }
                 if (in_array('type', $column_name)) {
                     switch ($val['attribute_group_id']){

@@ -12,6 +12,13 @@ use think\Db;
 
 class skuDayAsynData extends Command
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
+    }
     protected function configure()
     {
         $this->setName('sku_day')
@@ -20,16 +27,18 @@ class skuDayAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getSkuDayData(5);
+        $this->getCartData(1);
+        $this->getCartData(2);
+        $this->getCartData(3);
+        $this->getCartData(10);
+        $this->getCartData(11);
+        //$this->getSkuDayData(5);
         $output->writeln("All is ok");
     }
 
     public function getSkuDayData($site)
     {
-        $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $this->order = new \app\admin\model\order\order\NewOrder();
-        $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
-        $tStart = strtotime('2021-01-01');
+        $tStart = strtotime('2021-05-01');
         $tend = time();
         for($i = $tStart;$i<$tend;$i+=3600*24){
             $data = date('Y-m-d', $i);
@@ -40,7 +49,7 @@ class skuDayAsynData extends Command
             $orderWhere['o.site'] = $site;
             $orderWhere['o.order_type'] = 1;
             $orderWhere['o.status'] = ['in',['free_processing','processing', 'complete', 'paypal_reversed', 'payment_review','paypal_canceled_reversal', 'delivered']];
-            $sku_data = $_item_platform_sku
+            $sku_data = $this->item_platform_sku
                 ->field('sku,grade,platform_sku,stock,plat_on_way_stock')
                 ->where(['platform_type' => $site, 'outer_sku_status' => 1])
                 ->select();
@@ -105,4 +114,59 @@ class skuDayAsynData extends Command
         }
     }
 
+    public function getCartData($site){
+        $tStart = strtotime('2021-01-01');
+        $tend = time();
+        switch ($site){
+            case 1:
+                $model = Db::connect('database.db_zeelool_online');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme_online');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao_online');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de_online');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp_online');
+                break;
+        }
+        $cartWhere['a.base_grand_total'] = ['>',0];
+        for($i = $tStart;$i<$tend;$i+=3600*24){
+            $start = date('Y-m-d', $i);
+            $end = date('Y-m-d 23:59:59', $i);
+            $createTimeWhere['a.created_at'] = ['between',[$start,$end]];
+            $skuList = Db::name('datacenter_sku_day')
+                ->where(['day_date' => $start, 'site' => $site])
+                ->field('id,platform_sku')
+                ->select();
+            $cartNum = $model->table('sales_flat_quote')
+                ->alias('a')
+                ->join(['sales_flat_quote_item' => 'b'], 'a.entity_id=b.quote_id')
+                ->where($createTimeWhere)
+                ->where($cartWhere)
+                ->whereIn('b.sku',array_column($skuList,'platform_sku'))
+                ->field('b.sku,a.entity_id')
+                ->select();
+            $skuArr = [];
+            foreach ($cartNum as $key=>$value){
+                $skuArr[$value['sku']]['quote_num'][] = $value['entity_id'];
+            }
+            foreach ($skuList as $k => $v) {
+                if(!empty($skuArr[$v['platform_sku']]['quote_num'])){
+                    $quoteNum = array_unique($skuArr[$v['platform_sku']]['quote_num']);
+                    //某个sku当天的购物车数
+                    $skuList[$k]['cart_num'] = count($quoteNum);
+                }else{
+                    $skuList[$k]['cart_num'] = 0;
+                }
+                Db::name('datacenter_sku_day')->update($skuList[$k]);
+                echo $v['id'].' is ok'."\n";
+                usleep(10000);
+            }
+        }
+    }
 }

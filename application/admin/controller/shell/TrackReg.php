@@ -3519,7 +3519,7 @@ class TrackReg extends Backend
             $list[$k]['sku_grand_total'] = $frame_money_price;
             $list[$k]['sku_row_total'] = $frame_money;
             Db::name('datacenter_sku_day')->update($list[$k]);
-            echo $list[$k]['sku']."\n";
+            echo $list[$k]['id']."\n";
             echo '<br>';
         }
     }
