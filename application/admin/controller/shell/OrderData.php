@@ -1709,7 +1709,7 @@ class OrderData extends Backend
             //根据sku查询库位排序
             $stockSku = new StockSku();
             $where = [];
-            $where['b.type'] = 2;//默认拣货区
+            $where['c.type'] = 2;//默认拣货区
             $where['b.status'] = 1;//启用状态
             $where['a.is_del'] = 1;//正常状态
             $where['b.stock_id'] = $stockId;//查询对应仓库
