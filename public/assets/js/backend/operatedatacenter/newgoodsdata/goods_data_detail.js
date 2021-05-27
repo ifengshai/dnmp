@@ -143,7 +143,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var sales_status = $('#sales_status').val();
                 var goods_grade = $('#goods_grade').val();
                 var field = $('#field').val();
-                window.location.href=Config.moduleurl+'/operatedatacenter/newgoodsdata/goods_data_detail/export?order_platform='+order_platform+'&sku='+sku+'&type='+type+'&sales_status='+sales_status+'&goods_grade='+goods_grade+'&field='+field;
+                window.location.href=Config.moduleurl+'/operatedatacenter/newgoodsdata/goods_data_detail/export?order_platform='+order_platform+'&sku='+sku+'&type='+type+'&sales_status='+sales_status+'&goods_grade='+encodeURIComponent(goods_grade)+'&field='+field;
             });
         },
         add: function () {
