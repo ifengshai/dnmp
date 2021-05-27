@@ -221,6 +221,7 @@ class NewDataMarket extends Backend
         //虚拟仓库存、虚拟仓库存金额
         $stock = $this->itemplatformsku
             ->where('platform_type',$site)
+            ->where('platform_sku','not like','%Price%')
             ->sum('stock');
         $arr['stock'] = $stock;
         //库存总金额
