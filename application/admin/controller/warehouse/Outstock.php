@@ -97,12 +97,6 @@ class Outstock extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-//            foreach ($list as $key=>$item){
-//                $productBarcodeItem = new ProductBarCodeItem();
-//                $location =  $productBarcodeItem->where('out_stock_id',$item['id'])->order('id desc')->field('location_code,location_id')->find();
-//                $list[$key]['location_code'] = $location->location_code;
-//                $list[$key]['location_id'] = $location->location_id;
-//            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -241,7 +235,6 @@ class Outstock extends Backend
 
                     $sku = $this->request->post("sku/a");
                     $out_stock_num = $this->request->post("out_stock_num/a");
-                    // dump($sku);dump($out_stock_num);die;
                     if (count(array_filter($sku)) < 1) {
                         $this->error('sku不能为空！！');
                     }
@@ -458,14 +451,20 @@ class Outstock extends Backend
         $this->assign('type', $type);
 
         $barCodeItem = new ProductBarCodeItem();
-        $ared = $barCodeItem->where('out_stock_id',$row->id)->field('location_id,location_code')->find();
+        $ared = $barCodeItem->where('out_stock_id', $row->id)->field('location_id,location_code,stock_id')->find();
+
+        //查询库区
+        $warehouse = new \app\admin\model\warehouse\WarehouseArea();
+        $warehouseName = $warehouse->where(['id' => $ared->location_id])->value('name');
         /***********查询出库商品信息***************/
         //查询入库单商品信息
         $item_map['out_stock_id'] = $ids;
         $item = $this->item->where($item_map)->select();
         $this->assign('item', $item);
+        $this->assign('warehouseName', $warehouseName);
         $this->view->assign("row", $row);
         $this->view->assign("ared", $ared);
+
         return $this->view->fetch();
     }
 
