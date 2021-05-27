@@ -173,7 +173,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         data: {
                             order_platform: $("#order_platform").val(),
                             time_str: $("#time_str").val(),
-                            type: 1
+                            type: 2
                         }
 
                     }
@@ -182,7 +182,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
 
                 user_change_chart: function () {
                     var chartOptions = {
-                        targetId: 'echart1',
+                        targetId: 'echart2',
                         downLoadTitle: '图表',
                         type: 'bar',
                         bar: {
@@ -237,7 +237,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         data: {
                             order_platform: $("#order_platform").val(),
                             time_str: $("#time_str").val(),
-                            type: 2
+                            type: 1
                         }
 
                     }

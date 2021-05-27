@@ -184,7 +184,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         data: {
                             order_platform: $("#order_platform").val(),
                             time_str: $("#time_str").val(),
-                            type: 1
+                            type: 2
                         }
 
                     }
@@ -248,7 +248,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         data: {
                             order_platform: $("#order_platform").val(),
                             time_str: $("#time_str").val(),
-                            type: 2
+                            type: 1
                         }
 
                     }
@@ -342,7 +342,7 @@ function re_buy_num()
         }
         var huan_again_user_num_rate = ret.data.again_user_num_rate;
         var compare_huan_again_user_num_rate = ret.data.all_contrast_again_user_num;
-        $('#huan_again_user_num_rate').text(huan_again_user_num_rate);
+        $('#huan_again_user_num_rate').text(huan_again_user_num_rate + '%');
         if (parseInt(compare_huan_again_user_num_rate) < 0) {
             $('#compare_huan_again_user_num_rate').html("<img src='/xiadie.png'>" + compare_huan_again_user_num_rate+ '%');
         } else {
