@@ -38,7 +38,7 @@ class skuDayAsynData extends Command
 
     public function getSkuDayData($site)
     {
-        $tStart = strtotime('2021-01-01');
+        $tStart = strtotime('2021-05-01');
         $tend = time();
         for($i = $tStart;$i<$tend;$i+=3600*24){
             $data = date('Y-m-d', $i);
