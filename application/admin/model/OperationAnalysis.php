@@ -122,6 +122,7 @@ class OperationAnalysis extends Model
         $model = $this->get_model_by_id($id);
         $date_time_start = date('Y-m-d 00:00:00');
         $date_time_end = date('Y-m-d 23:59:59');
+
         if ($id == 5) {
             $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('orders')->query("set time_zone='+8:00'");
