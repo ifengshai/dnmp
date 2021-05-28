@@ -228,7 +228,7 @@ class OperationAnalysis extends Model
         $date_time_end = date('Y-m-d 23:59:59');
         $model = $this->get_model_by_id($id);
         //今日新增购物车sql
-        $today_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND created_at between '$date_time_start' and '$date_time_end'";
+        $today_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND updated_at between '$date_time_start' and '$date_time_end'";
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //今日新增购物车总数
         $today_shoppingcart_new_rs = $model->query($today_shoppingcart_new_sql);
@@ -296,7 +296,7 @@ class OperationAnalysis extends Model
             $today_sign_customer_data = $today_sign_customer_rs['count'];
         } else {
             //今日新增登录用户数
-            $today_sign_customer_sql = "SELECT count(*) counter from customer_entity where created_at between '$date_time_start' and '$date_time_end'";
+            $today_sign_customer_sql = "SELECT count(*) counter from customer_entity where updated_at between '$date_time_start' and '$date_time_end'";
             $model->table('customer_entity')->query("set time_zone='+8:00'");
             //今日登录用户数
             $today_sign_customer_rs  = $model->query($today_sign_customer_sql);
@@ -324,6 +324,7 @@ class OperationAnalysis extends Model
         //新增购物车数
         $today_shoppingcart_total_data = $this->get_today_shoppingcart_total($id);
         $today_shoppingcart_new_data = $this->get_today_shoppingcart_new($id);
+
         $today_register_customer_data = $this->get_today_register_customer($id);
         $today_sign_customer_data = $this->get_today_sign_customer($id);
         if (false != $today_order_success_data) {
