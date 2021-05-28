@@ -15,7 +15,7 @@ class GoodsChange extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['export'];
+    protected $noNeedRight = ['*'];
 
     public function _initialize()
     {
