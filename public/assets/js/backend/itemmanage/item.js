@@ -49,18 +49,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 return 1 + index;
                             }, operate: false
                         },
-                        { field: 'id', title: __('Id'), operate: false },
-                        { field: 'name', title: __('Name'),operate: 'LIKE' },
-                        { field: 'origin_sku', title: __('Origin_sku'), operate: 'LIKE' },
-                        { field: 'sku', title: __('Sku'), operate: 'LIKE' },
+                        {field: 'id', title: __('Id'), operate: false},
+                        {field: 'name', title: __('Name'), operate: 'LIKE'},
+                        {field: 'origin_sku', title: __('Origin_sku'), operate: 'LIKE'},
+                        {field: 'sku', title: __('Sku'), operate: 'LIKE'},
                         {
                             field: 'is_spot', title: __('大货/现货'),
-                            searchList: { 0:'-',1: '大货', 2: '现货'},
-                            custom: { 1: 'yellow', 2: 'blue'},
+                            searchList: {0: '-', 1: '大货', 2: '现货'},
+                            custom: {1: 'yellow', 2: 'blue'},
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'price', title: __('打样成本'), operate: false },
-                        { field: 'purchase_price', title: __('采购成本'), operate: false },
+                        {field: 'price', title: __('打样成本'), operate: false},
+                        {field: 'purchase_price', title: __('采购成本'), operate: false},
                         {
                             field: 'brand_id',
                             title: __('Brand_id'),

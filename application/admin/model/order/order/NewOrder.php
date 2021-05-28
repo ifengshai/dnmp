@@ -4,6 +4,7 @@ namespace app\admin\model\order\order;
 
 use app\enum\OrderType;
 use think\Model;
+use think\model\relation\HasMany;
 
 class NewOrder extends Model
 {
@@ -25,7 +26,7 @@ class NewOrder extends Model
     protected $append = [];
 
     //获取选项卡列表
-    public function getTabList()
+    public function getTabList(): array
     {
         return [
             ['name' => 'Zeelool', 'field' => 'site', 'value' => 1],
@@ -192,14 +193,22 @@ class NewOrder extends Model
             ->group('sku,a.site')
             ->select();
         $sales_num_list = [];
-        foreach($list as $k => $v) {
+        foreach ($list as $k => $v) {
             $sales_num_list[$v['site']][$v['sku']] = $v['num'];
         }
+
         return $sales_num_list;
     }
 
-    public function item()
+
+    /**
+     * 关联子订单表
+     * @return HasMany
+     * @author wpl
+     * @date   2021/5/17 18:44
+     */
+    public function newOrderItemProcess(): HasMany
     {
-        return $this->hasMany(NewOrderItemOption::class, 'order_id', 'id');
+        return $this->hasMany(NewOrderItemProcess::class, 'order_id', 'id');
     }
 }

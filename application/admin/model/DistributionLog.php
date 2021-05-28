@@ -37,7 +37,7 @@ class DistributionLog extends Model
                 'distribution_node' => $distribution_node,
                 'remark' => $remark,
                 'create_time' => $create_time ?: time(),
-                'create_person' => $auth->nickname
+                'create_person' => $auth->nickname ?: '',
             ]);
         }
     }

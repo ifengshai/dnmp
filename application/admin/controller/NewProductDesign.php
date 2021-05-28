@@ -9,8 +9,6 @@ use app\admin\model\DistributionLog;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemBrand;
-use app\admin\model\itemmanage\ItemPlatformSku;
-use app\admin\model\NewProductDesignLog;
 use app\admin\model\order\Order;
 use app\common\controller\Backend;
 use app\common\model\Auth;
@@ -20,6 +18,8 @@ use think\Db;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
+use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\NewProductDesignLog;
 
 /**
  * 选品设计管理
@@ -245,7 +245,7 @@ class NewProductDesign extends Backend
     {
         $itemAttribute = new ItemAttribute();
         if ($this->request->post()){
-           $data = $this->request->post();
+            $data = $this->request->post();
             if ($data['attributeType'] ==1){
                 if ($data['row']['frame_height'] < 0.1){
                     $this->error('请输入正确的镜框高数值');
@@ -710,7 +710,6 @@ class NewProductDesign extends Backend
     public function designRecording($value){
         Db::name('new_product_design_log')->insert($value);
     }
-
     /**
      * 选品设计管理导出
      * Interface export
@@ -745,6 +744,7 @@ class NewProductDesign extends Backend
             ->field('id,sku')
             ->where($map)
             ->select();
+
         $list = collection($list)->toArray();
         $sheet1 = [];
         $sheet2 = [];

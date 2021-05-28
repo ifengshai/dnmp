@@ -45,7 +45,7 @@
             <li>
                 <a href="{:url('order/distribution/wave_order_list')}">波次单</a>
             </li>
-    
+
             {foreach name="label_list" item="value"}
             <li class="{:$label == $key ? 'active' : ''}">
                 <a href="#t-{$key}" data-value="{$key}" data-toggle="tab">{$value}</a>
@@ -111,7 +111,7 @@
                         <a href="javascript:;" data-status="8"
                            class="btn btn-distribution btn-success btn-cancel-abnormal  hide"
                            title="{:__('取消异常')}"> {:__('取消异常')}</a>
-                        
+
                         <!--<a href="javascript:;" data-status="8"
                            class="btn btn-distribution btn-success btn-join-complete btn-set-status btn-disabled disabled hide"
                            title="{:__('合单完成')}"> {:__('合单完成')}</a>-->
@@ -127,6 +127,13 @@
                         <a href="javascript:;" data-status="5"
                            class="btn btn-distribution btn-danger btn-batch-export-account hide"
                            title="{:__('批量导出')}"><i class="fa fa-upload"></i> {:__('财务导出')}</a>
+
+                        <a href="javascript:;" class="btn btn-success btn-import" title="{:__('Import')}"
+                           id="btn-import-file" data-url="ajax/upload" data-mimetype="csv,xls,xlsx"
+                           data-multipart={"dir":"order/distribution"} data-multiple="false"><i
+                                class="fa fa-upload"></i> {:__('批量导入改派仓库')}</a>
+                        <a href="/template/order_template.xlsx" class="btn btn-primary"
+                           title="下载批量改派仓库模板示例">下载批量改派仓库模板</a>
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap" width="100%">
                     </table>

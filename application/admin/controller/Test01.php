@@ -733,21 +733,45 @@ class Test01 extends Backend
 
     public function hedankuwei()
     {
-        $res = Db::name('work_order_list')->where('id', 'in', ['54838'])->setField('assign_user_id', 117);
-        die;
-        $list = Db::name('hedan_kuwei')->where('id', '>', 0)->select();
+        $list = Db::name('hedan_kuwei_2')->where('id', '>', 0)->select();
         foreach ($list as $k => $v) {
+            $list[$k]['stock_id'] = 2;
+            $list[$k]['area_id'] = 6;
             $list[$k]['type'] = 2;
-            $list[$k]['createtime'] = '2020-12-22 20:03:31';
+            $list[$k]['createtime'] = '2021-05-28 15:03:31';
             $list[$k]['create_person'] = 'Admin';
             $list[$k]['shelf_number'] = '';
-            // Db::name('store_house')->insert($list[$k]);
             unset($list[$k]['id']);
         }
         Db::name('store_house')->insertAll($list);
         dump($list);
     }
+    public function hedankuwei2()
+    {
+        $list = Db::name('hedan_kuwei_2')->where('id', '>', 0)->select();
+        foreach ($list as $k => $v) {
+            $subarea = explode('-',$v['coding'])[0];
+            $location = explode('-',$v['coding'])[1].'-'.explode('-',$v['coding'])[2].'-'.explode('-',$v['coding'])[3];
+            Db::name('hedan_kuwei_2')->where('id',$v['id'])->update(['subarea'=>$subarea,'location'=>$location]);
+        }
+    }
+    public function kuweiliebiao()
+    {
+        $list = Db::name('hedan_house')->select();
+        $arr = [];
+        foreach ($list as $k => $v) {
+            $arr[$k]['stock_id'] = 2;
+            $arr[$k]['area_id'] = 6;
+            $arr[$k]['shelf_number'] = explode('-',$v['coding'])[0];
+            $arr[$k]['coding'] = $v['coding'];
+            $arr[$k]['type'] = 1;
+            $arr[$k]['createtime'] = '2021-05-28 15:03:31';
+            $arr[$k]['create_person'] = 'Admin';
+        }
+        // dump($arr);die;
+        Db::name('store_house')->insertAll($arr);
 
+    }
     public function xiaoliangpaihangbang()
     {
         $data = date('Y-m-d', strtotime('-1 day'));

@@ -12,6 +12,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     index_url: 'purchase/purchase_order/index' + location.search,
                     add_url: 'purchase/purchase_order/add',
                     edit_url: 'purchase/purchase_order/edit',
+                    // del_url: 'purchase/purchase_order/del',
                     multi_url: 'purchase/purchase_order/multi',
                     import_url: 'purchase/purchase_order/logistics_info_import',
                     table: 'purchase_order',
@@ -236,7 +237,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                     },
                                     visible: function (row) {
                                         //返回true时按钮显示,返回false隐藏
-                                        if (row.can_create_pay == 1 && row.pay_type != 3 && row.id > 16475) {
+                                        if (row.can_create_pay == 1 && row.purchase_status == 2  && row.pay_type !=3) {
                                             return true;
                                         } else {
                                             return false;
@@ -384,7 +385,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 Backend.api.ajax({
                     url: url,
                     data: {
-                        'ids': ids
+                        'ids':ids
                     }
                 }, function (data, ret) {
                     var url = 'financepurchase/purchase_pay/batch_add?ids=' + ids;
@@ -392,6 +393,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 });
 
 
+               
                 return false;
             });
         },
@@ -444,34 +446,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     Fast.api.error(ret.msg);
                 });
             })
-            $(document).on('change', '#factory_type', function () {
+            $(document).on('change','#factory_type',function (){
                 var fac_val = $('#factory_type').val();
-                if (fac_val == 0) {
+                if (fac_val ==0){
                     $('#is_first').show();
                     $('#time').show();
                     $('#is_first_purchase').show();
                     $('#1688_number').hide();
                     $('#customized_procurement').show();
-                } else {
+                }else{
                     $('#is_first').hide();
                     $('#time').hide();
                     $('#1688_number').show();
                     $('#customized_procurement').hide();
                 }
             });
-            $(document).on('change', '#pay_type', function () {
+            $(document).on('change','#pay_type',function (){
                 var pay_type = $('#pay_type').val();
-                if (pay_type == 1) {
+                if (pay_type ==1){
                     $('#pay_rate').show();
-                } else {
+                }else{
                     $('#pay_rate').hide();
                 }
             });
-            $(document).on('click', '.tijiao', function () {
-                $('#is_new_product').attr("disabled", false);
+            $(document).on('click','.tijiao',function (){
+               $('#is_new_product').attr("disabled",false);
             });
-            $(document).on('click', '.tijaio1', function () {
-                $('#is_new_product').attr("disabled", false);
+            $(document).on('click','.tijaio1',function (){
+               $('#is_new_product').attr("disabled",false);
             })
 
             $(document).on('click', '.btn-addplus', function () {
@@ -637,15 +639,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 $(this).parent().remove();
                 z--;
             })
-            $(document).on('change', '#factory_type', function () {
+            $(document).on('change','#factory_type',function (){
                 var fac_val = $('#factory_type').val();
-                if (fac_val == 0) {
+                if (fac_val ==0){
                     $('#is_first').show();
                     $('#is_first_purchase').show();
                     $('#1688_number').hide();
                     $('#time').show();
                     $('#customized_procurement').show();
-                } else {
+                }else{
                     $('#is_first').hide();
                     $('#1688_number').show();
                     $('#time').hide();
@@ -989,15 +991,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         {field: 'purchase_person', title: __('采购创建人'), operate: 'like'},
                         {field: 'true_sku', title: __('SKU'), operate: 'like'},
                         {field: 'grade', title: __('等级'), operate: 'like'},
+                        {field: 'zeelool_sku', title: __('Zeelool_Sku'), operate: 'like'},
+                        {field: 'voogueme_sku', title: __('Voogueme_Sku'), operate: 'like'},
+                        {field: 'nihao_sku', title: __('Nihao_Sku'), operate: 'like'},
                         {
                             field: 'counter', title: __('总销量'), operate: false, formatter: function (value, rows) {
                                 return rows.days + '天:' + rows.counter;
                             }
                         },
+
+                        {field: 'num', title: __('30天预估销量'), operate: false},
                         {field: 'days_sales_num', title: __('日均销量'), operate: false},
                         {field: 'replenish_days', title: __('预估售卖天数'), operate: false},
                         {field: 'stock', title: __('可用库存'), operate: false},
                         {field: 'purchase_qty', title: __('在途库存'), operate: false},
+                        {field: 'replenish_num', title: __('建议补货量'), operate: false},
+                        {field: 'created_at', title: __('上架时间'), operate: 'RANGE', addclass: 'datetimerange'},
+
                     ]
                 ]
             });
@@ -1154,6 +1164,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 }
 
             });
+
+
+
 
 
         },

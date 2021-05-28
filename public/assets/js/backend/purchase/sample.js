@@ -3,7 +3,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
         sample_index: function () {
             // 初始化表格参数配置
             Table.api.init({
-                searchFormVisible: true,
+                searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_index' + location.search,
                     add_url: 'purchase/sample/sample_add',
@@ -22,7 +22,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
-                sortOrder: 'asc',
+                sortOrder: 'asc',
                 columns: [
                     [
                         {checkbox: true},
@@ -94,12 +94,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 Fast.api.open(url, __('申请'), { area: ['900px', '500px'] });
 
                 return false;
-            })
+            });
+            Form.events.plupload($("form"));
         },
         sample_location_index: function () {
             // 初始化表格参数配置
             Table.api.init({
-                searchFormVisible: true,
+                searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_location_index' + location.search,
                     add_url: 'purchase/sample/sample_location_add',
@@ -117,7 +118,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
-                sortOrder: 'asc',
+                sortOrder: 'asc',
                 columns: [
                     [
                         {checkbox: true},
@@ -136,7 +137,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
         sample_workorder_index: function () {
             // 初始化表格参数配置
             Table.api.init({
-                searchFormVisible: true,
+                searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_workorder_index' + location.search,
                     add_url: 'purchase/sample/sample_workorder_add',
@@ -155,7 +156,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
-                sortOrder: 'asc',
+                sortOrder: 'asc',
                 columns: [
                     [
                         {checkbox: true},
@@ -250,7 +251,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
         sample_workorder_out_index: function () {
             // 初始化表格参数配置
             Table.api.init({
-                searchFormVisible: true,
+                searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_workorder_out_index' + location.search,
                     add_url: 'purchase/sample/sample_workorder_out_add',
@@ -268,7 +269,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
-                sortOrder: 'asc',
+                sortOrder: 'asc',
                 columns: [
                     [
                         {checkbox: true},
@@ -363,7 +364,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
         sample_lendlog_index: function () {
             // 初始化表格参数配置
             Table.api.init({
-                searchFormVisible: true,
+                searchFormVisible: true,
                 extend: {
                     index_url: 'purchase/sample/sample_lendlog_index' + location.search,
                     add_url: 'purchase/sample/sample_lendlog_add',
@@ -381,7 +382,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
-                sortOrder: 'desc',
+                sortOrder: 'desc',
                 columns: [
                     [
                         {checkbox: true},
@@ -574,14 +575,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
 });
 /**
  * 入库删除
- * @param {key} key 
+ * @param {key} key
  */
 function del_add_tr(key){
     $(".del_"+key).remove();
 }
 /**
  * 编辑删除 lsw
- * @param {key} key 
+ * @param {key} key
  */
 function del_lend_tr(key){
     $(".del_"+key).remove();
@@ -616,3 +617,4 @@ function workorder_check_refuse(){
 function workorder_check_cancel(){
     $("#workorder_status").val(5);
 }
+

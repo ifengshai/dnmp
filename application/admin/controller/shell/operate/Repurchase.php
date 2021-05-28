@@ -285,13 +285,13 @@ class Repurchase extends Command
         //新用户环比变动
         $lastMonthNewUser = $lastData['usernum'] - $lastData['old_usernum'];
         $newSequential = $lastMonthNewUser ? round(($newUserCount / $lastMonthNewUser - 1) * 100, 2) : 0;
-        $arr = array(
-            'usernum' => $userCount,
-            'old_usernum' => $oldUserCount,
-            'old_usernum_rate' => $oldUserRate,
+        $arr = [
+            'usernum'                => $userCount,
+            'old_usernum'            => $oldUserCount,
+            'old_usernum_rate'       => $oldUserRate,
             'old_usernum_sequential' => $oldSequential,
             'new_usernum_sequential' => $newSequential,
-        );
+        ];
         Db::name('datacenter_supply_month_web')
             ->where('day_date',$nowMonth)
             ->where('site',$site)

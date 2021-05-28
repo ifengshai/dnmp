@@ -28,22 +28,39 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
-                        { field: 'id', title: __('Id') },
-                        { field: 'out_stock_number', title: __('Out_stock_number'), operate: 'like' },
-                        { field: 'outstocktype.name', title: __('Type_id'), operate: 'like' },
-                        { field: 'order_number', title: __('Order_number'), operate: 'like' },
-                        { field: 'remark', title: __('Remark'), cellStyle: formatTableUnit, formatter: Controller.api.formatter.getClear, operate: false },
+                        {checkbox: true},
+                        {field: 'id', title: __('Id')},
+                        {field: 'out_stock_number', title: __('Out_stock_number'), operate: 'like'},
+                        {field: 'outstocktype.name', title: __('Type_id'), operate: 'like'},
                         {
-                            field: 'status', title: __('Status'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray' },
-                            searchList: { 0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消' },
+                            field: 'stock_id', title: __('仓库'), custom: {1: 'success', 2: 'success'},
+                            searchList: {1: '郑州仓', 2: '丹阳仓'},
                             formatter: Table.api.formatter.status
                         },
-                        { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
-                        { field: 'create_person', title: __('Create_person'), operate: 'like' },
-                        { field: 'sku', title: __('sku'), operate: 'like', visible: false },
+                        {field: 'order_number', title: __('Order_number'), operate: 'like'},
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            field: 'remark',
+                            title: __('Remark'),
+                            cellStyle: formatTableUnit,
+                            formatter: Controller.api.formatter.getClear,
+                            operate: false
+                        },
+                        {
+                            field: 'status',
+                            title: __('Status'),
+                            custom: {0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger', 4: 'gray'},
+                            searchList: {0: '新建', 1: '待审核', 2: '已审核', 3: '已拒绝', 4: '已取消'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange'},
+                        {field: 'create_person', title: __('Create_person'), operate: 'like'},
+                        {field: 'sku', title: __('sku'), operate: 'like', visible: false},
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
                                 {
                                     name: 'submitAudit',
                                     text: '提交审核',

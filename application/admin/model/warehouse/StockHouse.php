@@ -66,12 +66,17 @@ class StockHouse extends Model
      *
      * @return void
      */
-    public function getLocationData($area_id = null, $coding = null)
+    public function getLocationData($area_id = null, $coding = null, $stockId = null)
     {
         if ($coding) {
-            $where['coding'] = ['like', $coding.'%'];
+            $where['coding'] = ['like', $coding . '%'];
         }
-        $cacheName = 'getLocationData_'.md5(serialize($where)).$area_id;
+
+        if ($stockId) {
+            $where['stock_id'] = $stockId;
+        }
+
+        $cacheName = 'getLocationData_' . md5(serialize($where)) . $area_id;
         $list = unserialize(Cache::get($cacheName));
         if (!$list) {
             $list = $this
@@ -84,5 +89,16 @@ class StockHouse extends Model
         }
 
         return $list ?: [];
+    }
+
+    /**
+     * 所属分仓
+     * @return \think\model\relation\BelongsTo
+     * @author crasphb
+     * @date   2021/5/17 14:13
+     */
+    public function warehouseStock()
+    {
+        return $this->belongsTo(WarehouseStock::class, 'stock_id', 'id');
     }
 }

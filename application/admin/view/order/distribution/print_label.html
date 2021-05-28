@@ -7,10 +7,12 @@
 
     .single_box {
         margin: 0px auto;
-        width: 400px;
+        width: 460px;
         display: list-item;
         /* list-style: none; */
         padding-top: 1mm;
+        padding-left: 3mm;
+        padding-right: 3mm;
         position: relative;
     }
 
@@ -43,7 +45,8 @@
         border-right: 1px solid #000;
         width: 0px;
     }
-    .single_box > img{
+
+    .single_box > img {
         position: absolute;
         top: 35%;
         left: 30%;
@@ -53,7 +56,7 @@
 </style>
 
 {if $list}
-{foreach $list as $v}
+{foreach $list as $k => $v}
 <div class='single_box'>
     {if $v['site'] == 1}
     <img src="/assets/img/distribution/zeelool.jpg" alt="">
@@ -72,7 +75,7 @@
     {elseif($v['site'] == 12) }
     <img src="/assets/img/distribution/voogmechic.jpg" alt="">
     {/if}
-    <table width='380mm' height='200mm' border='0' cellspacing='0' cellpadding='0' class='addpro'>
+    <table width='460mm' height='240mm' border='0' cellspacing='0' cellpadding='0' class='addpro'>
 
 
         <tbody cellpadding='0'>
@@ -82,11 +85,12 @@
                 {$v.created_at} <br>
                 {$v.coding}&nbsp;
             </td>
-            <td rowspan='' colspan='8' style='padding:10px;'>
-                <img style='width:100%;height:80%;' src='{$v.img_url}'><br></td>
+            <td rowspan='' colspan='8' style='padding:5px;'>
+                <img style='width:100%;height:90%;' src='{$v.img_url}'><br></td>
         </tr>
         <tr>
             <td colspan='10'>
+                <span style='margin-left:5px;'> {$v.prescription_type}</span> &nbsp&nbsp
                 <span style='margin-left:5px;'> Order:{$v.increment_id}</span> &nbsp&nbsp
                 <span style=' margin-left:5px;'>SKU:{$v.sku}</span>&nbsp &nbsp
                 <span style=' margin-left:5px;'>Num:<strong>{$v.serial}/{$v.total_qty_ordered}</strong></span>
@@ -189,12 +193,9 @@
             <td colspan='10' style=' text-align:center'>
                 {if $v['prismcheck'] == 'on'}
                 {$v.web_lens_name}
-                <br>
-                {else}
-                {$v.prescription_type}
-                <br>
                 {/if}
-                {$v.lens_name}
+                {$v.lens_name}<br>
+                <img style='width:80%;height:60%;' src='{$v.sku_url}'>
             </td>
         </tr>
         {/if}

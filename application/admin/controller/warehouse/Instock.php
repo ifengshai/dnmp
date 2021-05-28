@@ -79,6 +79,14 @@ class Instock extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
+            if ($filter['location_code']) {
+                $smap = [];
+                $smap['coding'] = ['like', '%' . $filter['location_code'] . '%'];
+                $ids = Db::name('store_house')->where($smap)->column('id');
+                $map['instock.location_id'] = ['in', $ids];
+                unset($filter['location_code']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -96,6 +104,9 @@ class Instock extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            foreach ($list as &$v) {
+                $v['location_code'] = Db::name('store_house')->where(['id' => $v['location_id']])->value('coding');
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -401,15 +412,10 @@ class Instock extends Backend
         $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
-        //查询入库库区库位
-        $product_bar_code = new ProductBarCodeItem();
-        $area =$product_bar_code->where('in_stock_id',$ids)->field('location_id,location_code_id')->find();
-
         $warehouse_area = Db::name('warehouse_area')->column('coding','id');
         $this->assign('warehouse_area', $warehouse_area);
         $store_house = Db::name('store_house')->column('coding','id');
         $this->assign('store_house', $store_house);
-        $this->assign('area', $area);
 
         //查询质检单
         $check = new \app\admin\model\warehouse\Check;
@@ -471,7 +477,8 @@ class Instock extends Backend
         //查询条形码库区库位
         $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => ['in', $ids]])->column('location_code');
         $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
+            ->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
             ->count();
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
@@ -487,6 +494,7 @@ class Instock extends Backend
             }
         }
         $data['status'] = input('status');
+        //status  2 审核通过  3审核拒绝
         if ($data['status'] == 2) {
             $data['check_time'] = date('Y-m-d H:i:s', time());
         }
@@ -914,7 +922,7 @@ class Instock extends Backend
                     throw new Exception("入库失败！！请检查SKU");
                 }
             } else {
-                //审核拒绝解除条形码绑定关系
+                //审核拒绝解除条形码绑定关系 更新入库单id  条形码所在库位 条形码所在库位库区id 库位id
                 $_product_bar_code_item = new ProductBarCodeItem();
                 $_product_bar_code_item
                     ->where(['in_stock_id' => ['in', $ids]])
@@ -1030,6 +1038,11 @@ class Instock extends Backend
         $data['status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res) {
+            //取消入库单得时候解除条形码绑定关系 更新入库单id  条形码所在库位 条形码所在库位库区id 库位id
+            $_product_bar_code_item = new ProductBarCodeItem();
+            $_product_bar_code_item
+                ->where(['in_stock_id' => ['eq', $ids]])
+                ->update(['in_stock_id' => 0,'location_code'=>'','location_id'=>'0','location_code_id'=>'0']);
             //如果取消入库单 则 去掉质检单已入库标记
             $check = new \app\admin\model\warehouse\Check;
             $check->allowField(true)->save(['is_stock' => 0], ['id' => $row['check_id']]);
@@ -1500,5 +1513,13 @@ class Instock extends Backend
             $this->error($e->getMessage());
         }
         $this->success('导入成功！');
+    }
+
+    /**
+     * @author zjw
+     * @date   2021/4/9 10:05
+     */
+    public function Review_the_operation(){
+
     }
 }
