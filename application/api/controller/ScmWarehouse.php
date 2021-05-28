@@ -655,7 +655,7 @@ class ScmWarehouse extends Scm
         $barcodedata = $this->_product_bar_code_item->where(['out_stock_id' => $out_stock_id])->column('location_code');
         $count = $this->_inventory->alias('a')
             ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
-            ->where(['a.stock_id' => $row['stock_id'], 'a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+            ->where(['a.stock_id' => $row['stock_id'],'area' => $row->area_id, 'a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
             ->count();
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法出库审核'), [], 403);
@@ -1628,22 +1628,6 @@ class ScmWarehouse extends Scm
         $in_stock_id = $this->request->request('in_stock_id');
         empty($in_stock_id) && $this->error(__('入库单ID不能为空'), [], 516);
 
-        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-        //配货完成时判断
-        //拣货区盘点时不能操作
-        //查询条形码库区库位
-        $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->column('location_code');
-        Log::write("输出库区库位");
-        Log::write($barcodedata);
-        $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
-            ->count();
-        Log::write($count);
-        if ($count > 0) {
-            $this->error(__('此库位正在盘点,暂无法入库审核001'), [], 403);
-        }
-        /****************************end*****************************************/
-
         $do_type = $this->request->request('do_type');
         empty($do_type) && $this->error(__('审核类型不能为空'), [], 517);
         !in_array($do_type, [2, 3]) && $this->error(__('审核类型错误'), [], 517);
@@ -1652,6 +1636,23 @@ class ScmWarehouse extends Scm
         $row = $this->_in_stock->get($in_stock_id);
         empty($row) && $this->error(__('入库单不存在'), [], 516);
         1 != $row['status'] && $this->error(__('只有待审核状态才能操作'), [], 518);
+
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->column('location_code');
+        Log::write("输出库区库位");
+        Log::write($barcodedata);
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => $row->area_id])
+            ->count();
+        Log::write($count);
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
+        }
+        /****************************end*****************************************/
 
         $data['status'] = $do_type; //审核状态，2通过，3拒绝
         if (2 == $data['status']) {
