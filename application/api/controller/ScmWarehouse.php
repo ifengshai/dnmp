@@ -3780,7 +3780,7 @@ class ScmWarehouse extends Scm
 
         $where = [];
         if ($query) {
-            $where['transfer_order_number|create_person'] = ['like', '%' . $query . '%'];
+            $where['transfer_order_number|create_person|response_person'] = ['like', '%' . $query . '%'];
         }
         if (isset($status)) {
             $where['status'] = $status;
