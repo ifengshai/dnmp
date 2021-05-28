@@ -421,7 +421,7 @@ class Hour extends BaseElasticsearch
                             "ids" => [
                                 "terms" => [
                                     'field' => 'entity_id',
-                                    'size'  => 1000000,
+                                    'size'  => 9000000,
                                 ],
                             ],
                         ],
@@ -498,7 +498,7 @@ class Hour extends BaseElasticsearch
                             "ids" => [
                                 "terms" => [
                                     'field' => 'entity_id',
-                                    'size'  => 1000000,
+                                    'size'  => 9000000,
                                 ],
                             ],
                         ],
