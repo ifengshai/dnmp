@@ -85,8 +85,8 @@ class OperationAnalysis extends Model
         $order_status = $this->order_status;
         $model = $this->get_model_by_id($id);
         $where['order_platform'] = $id;
-        $date_time_start = date('Y-m-d 00:00:00');
-        $date_time_end = date('Y-m-d 23:59:59');
+        $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
+        $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
         if ($id == 5) {
             $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
             $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
@@ -120,8 +120,8 @@ class OperationAnalysis extends Model
         //     return $cacheData;
         // }
         $model = $this->get_model_by_id($id);
-        $date_time_start = date('Y-m-d 00:00:00');
-        $date_time_end = date('Y-m-d 23:59:59');
+        $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
+        $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
 
         if ($id == 5) {
             $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
@@ -157,8 +157,8 @@ class OperationAnalysis extends Model
         // }
         $order_status = $this->order_status;
         $model = $this->get_model_by_id($id);
-        $date_time_start = date('Y-m-d 00:00:00');
-        $date_time_end = date('Y-m-d 23:59:59');
+        $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
+        $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
         if ($id == 5) {
             $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
             $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
@@ -194,8 +194,8 @@ class OperationAnalysis extends Model
         if ($cacheData) {
             // return $cacheData;
         }
-        $date_time_start = date('Y-m-d 00:00:00');
-        $date_time_end = date('Y-m-d 23:59:59');
+        $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
+        $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
         $model = $this->get_model_by_id($id);
         //今日购物车总数sql
         $today_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND created_at between '$date_time_start' and '$date_time_end'";
@@ -225,8 +225,8 @@ class OperationAnalysis extends Model
         if ($cacheData) {
             return $cacheData;
         }
-        $date_time_start = date('Y-m-d 00:00:00');
-        $date_time_end = date('Y-m-d 23:59:59');
+        $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
+        $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
         $model = $this->get_model_by_id($id);
         //今日新增购物车sql
         $today_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND updated_at between '$date_time_start' and '$date_time_end'";
@@ -253,8 +253,8 @@ class OperationAnalysis extends Model
             return $cacheData;
         }
         $model = $this->get_model_by_id($id);
-        $date_time_start = date('Y-m-d 00:00:00');
-        $date_time_end = date('Y-m-d 23:59:59');
+        $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
+        $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
         if ($id == 5) {
             $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('users')->query("set time_zone='+8:00'");
@@ -288,8 +288,8 @@ class OperationAnalysis extends Model
             return $cacheData;
         }
         $model = $this->get_model_by_id($id);
-        $date_time_start = date('Y-m-d 00:00:00');
-        $date_time_end = date('Y-m-d 23:59:59');
+        $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
+        $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
         if ($id == 5) {
             $yestime_where['updated_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('users')->query("set time_zone='+8:00'");
@@ -333,8 +333,8 @@ class OperationAnalysis extends Model
         } else {
             $today_unit_price_data = 0;
         }
-        $date_time_start = date('Y-m-d 00:00:00');
-        $date_time_end = date('Y-m-d 23:59:59');
+        $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
+        $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
         //新增购物车传化率 2020-11-25要改成 新增购物车产生的订单/新增的购物车数量 现在的计算方法是 订单支付成功数/新增购物车的数量
         if (false != $today_shoppingcart_total_data) {
             //今日所有购物车的ids
