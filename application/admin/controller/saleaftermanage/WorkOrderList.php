@@ -1386,7 +1386,7 @@ class WorkOrderList extends Backend
                             //查询条形码库区库位
 
                             //转换sku
-                            $whe_sku['platform_sku'] = $item['change_frame']['sku'];
+                            $whe_sku['platform_sku'] = $item['change_frame']['original_sku'];
                             //转换sku
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
@@ -1399,7 +1399,7 @@ class WorkOrderList extends Backend
                                     ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
                                     ->count();
                                 if ($count > 0) {
-                                    return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
+                                    return ['result' => false, 'msg' => '此'.$item['change_frame']['original_sku'].'对应库位正在盘点,暂无法进行出入库操作'];
                                 }
                             }
                             /****************************end*****************************************/
@@ -1408,7 +1408,7 @@ class WorkOrderList extends Backend
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
                             //转换sku
-                            $whe_sku['platform_sku'] = ['eq', $item['change_frame']['change_sku']];
+                            $whe_sku['platform_sku'] = $item['change_frame']['change_sku'];
                             //转换sku
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
