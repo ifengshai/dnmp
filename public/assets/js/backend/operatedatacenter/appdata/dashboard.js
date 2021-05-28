@@ -163,16 +163,14 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         },
                         series: [
                             {
-                                name: '用户数',
-                                type: 'line',
-                                stack: '总量',
-                                data: users
-                            },
-                            {
                                 name: '会话数',
                                 type: 'line',
-                                stack: '总量',
                                 data: sessions
+                            },
+                            {
+                                name: '用户数',
+                                type: 'line',
+                                data: users
                             }
                         ]
                     };
