@@ -654,7 +654,7 @@ class ScmWarehouse extends Scm
         $barcodedata = $this->_product_bar_code_item->where(['out_stock_id' => $out_stock_id])->column('location_code');
         $count = $this->_inventory->alias('a')
             ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
-            ->where(['a.stock_id' => $row['stock_id'],'area' => $row->area_id, 'a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+            ->where(['a.stock_id' => $row['stock_id'],'area_id' => $row->area_id, 'a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
             ->count();
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法出库审核'), [], 403);
