@@ -2854,6 +2854,7 @@ class ScmWarehouse extends Scm
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $params['type_id'] = 2;
                     $params['status'] = 2;
+                    $params['stock_id'] = $row->stock_id;
                     $params['remark'] = '盘盈入库';
                     $params['check_time'] = date('Y-m-d H:i:s', time());
                     $params['check_person'] = $this->auth->nickname;
@@ -2886,6 +2887,7 @@ class ScmWarehouse extends Scm
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $params['type_id'] = 1;
                     $params['status'] = 2;
+                    $params['stock_id'] = $row->stock_id;
                     $params['remark'] = '盘亏出库';
                     $params['check_time'] = date('Y-m-d H:i:s', time());
                     $params['check_person'] = $this->auth->nickname;
