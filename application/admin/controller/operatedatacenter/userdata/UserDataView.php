@@ -10,7 +10,7 @@ use think\Request;
 
 class UserDataView extends Backend
 {
-
+    protected $noNeedRight = ['*'];
     public function _initialize()
     {
         parent::_initialize();
