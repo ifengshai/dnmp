@@ -3158,7 +3158,7 @@ class Test4 extends Controller
         $this->_work_order_change_sku = new WorkOrderChangeSku();
         //默认展示3个月内的数据
         //二月
-        $map['a.created_at'] = ['between', [1612108800,1614527999]];//128662
+        $map['a.created_at'] = ['between', [1619798400,1622476800]];//128662
 //        $map['a.created_at'] = ['between', [1614528000,1617206399]];//173915
 //        $map['a.created_at'] = ['between', [1617206400,1619798399]];//162822
 //        $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];

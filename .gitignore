@@ -5,7 +5,6 @@
 /application/extra/upload.php
 /application/extra/url.php
 .idea
-composer.lock
 *.log
 *.css.map
 !.gitkeep

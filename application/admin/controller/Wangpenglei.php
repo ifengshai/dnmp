@@ -14,6 +14,7 @@ use FacebookAds\Object\Campaign;
 use app\admin\model\financial\Fackbook;
 use fast\Excel;
 use think\Exception;
+use think\Model;
 
 class Wangpenglei extends Backend
 {
@@ -1220,29 +1221,72 @@ class Wangpenglei extends Backend
 
         $item = new Item();
         $data = $item
-            ->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])
+            ->where(['is_del' => 1, 'category_id' => ['<>', 43], 'sku' => 'FP0044-09'])
             ->column('stock,distribution_occupy_stock', 'sku');
         $list = $barcode
-            ->field('sku,count(1) as num')
-            ->where(['library_status' => 1])
-            ->where("item_order_number=''")
+            ->alias('a')
+            ->field('sku,count(1) as stock')
+            ->where(['a.library_status' => 1])
+            ->where(['b.status' => 2, 'a.sku' => 'FP0044-09'])
+            ->where(['a.location_code_id' => ['>', 0]])
+            ->join(['fa_in_stock' => 'b'], 'a.in_stock_id=b.id')
+            ->where("a.item_order_number=''")
             ->group('sku')
             ->select();
         $list = collection($list)->toArray();
-        foreach ($list as $k => $v) {
-            $list[$k]['stock'] = $data[$v['sku']]['stock'] - $data[$v['sku']]['distribution_occupy_stock'];
+        foreach ($list as $k => &$v) {
+            $v['real_stock'] = $data[$v['sku']]['stock'] - $data[$v['sku']]['distribution_occupy_stock'];
+            if ($v['real_stock'] == $v['stock']) {
+                unset($list[$k]);
+            }
+            unset($v['real_stock']);
         }
+        $list = array_values($list);
+        Db::table('fa_zz_temp1')->query('truncate table fa_zz_temp1');
+        Db::table('fa_zz_temp1')->insertAll($list);
+    }
 
-        $headlist = ['sku', '在库实时库存', '系统实时库存'];
-        Excel::writeCsv($list, $headlist, '库存', true);
-        die;
+
+    /**
+     *  导出库存数据对比
+     * @Description
+     * @author: wpl
+     * @since : 2021/4/1 17:40
+     */
+    public function getStockList()
+    {
+        //查询镜架成本为0的财务数据
+        $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $skus = Db::table('fa_zz_temp1')->column('sku');
+        $list = $barcode
+            ->alias('a')
+            ->where(['a.library_status' => 1])
+            ->where(['a.sku' => ['in', $skus]])
+            ->where(['a.location_code_id' => ['>', 0]])
+            ->where("a.item_order_number=''")
+            ->group('sku')
+            ->column('count(1) as stock', 'sku');
+        foreach ($skus as $v) {
+            Db::table('fa_zz_temp1')->where(['sku' => $v])->update(['stock' => $list[$v] ?: 0]);
+        }
     }
 
     public function test002()
     {
-        $file = 'fx0123-01';
-        echo str_replace(strrchr($file, "-"), "", $file);
-        die;
+        $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $list = $barcode
+            ->alias('a')
+            ->field('a.id,a.check_id')
+            ->where(['a.in_stock_id' => 0, 'a.check_id' => ['>', 0], 'b.status' => 2, 'b.is_stock' => 1, 'a.library_status' => 1])
+            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id')
+            ->select();
+
+        foreach ($list as $k => $v) {
+            $id = Db::table('fa_in_stock')->where(['check_id' => $v['check_id']])->value('id');
+            $barcode->where(['id' => $v['id']])->update(['in_stock_id' => $id]);
+            echo $k . "\n";
+        }
+        echo "ok";
     }
 
 
@@ -1291,19 +1335,52 @@ class Wangpenglei extends Backend
     {
         $type = 1;
         $site = 'zeelool';
-        for ($i = 0; $i < 24; $i++) {
-            $start = '2021-05-14T' . $i . ':00:00Z';
-            $end = '2021-05-14T' . $i . ':59:59Z';
+        for ($i = 0; $i < 9; $i++) {
+            $start = '2021-05-18T' . $i . ':00:00Z';
+            $end = '2021-05-18T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
-                usleep(100000);
+                usleep(10000);
             } catch (Exception $e) {
                 echo $e->getMessage();
             }
-
         }
     }
 
+    /**
+     * 每天 凌晨 1点同步 UTC时间前一天的数据
+     * @author crasphb
+     * @date   2021/5/18 17:26
+     */
+    public function asyncZendeskZeeloolDay()
+    {
+        $type = 1;
+        $site = 'zeelool';
+        $dayBefore = date('Y-m-d', strtotime('-2 day'));
+        $dayNow = date('Y-m-d', strtotime('-1 day'));
+        //UTC时间前一天的数据
+        for ($i = 16; $i < 24; $i++) {
+            $start = $dayBefore . 'T' . $i . ':00:00Z';
+            $end = $dayBefore . 'T' . $i . ':59:59Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+        }
+        //同步当天0点到16点的
+        for ($i = 0; $i < 16; $i++) {
+            $start = $dayNow . 'T' . $i . ':00:00Z';
+            $end = $dayNow . 'T' . $i . ':59:59Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+        }
+    }
 
     /**
      * 判断定制现片逻辑
@@ -1359,6 +1436,15 @@ class Wangpenglei extends Backend
         $params['lens_number'] = 22100000;
         $data = $this->set_processing_type($params);
         dump($data);
+        die;
+    }
+
+    public function test02()
+    {
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
+        $today_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status";
+        echo $today_sales_money_sql;
         die;
     }
 }

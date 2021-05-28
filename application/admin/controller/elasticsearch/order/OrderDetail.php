@@ -62,7 +62,7 @@ class OrderDetail extends BaseElasticsearch
             }
             $cacheStr = 'dash_board_' . $site . $timeStr . $compareTimeStr;
             $cacheData = Cache::get($cacheStr);
-            if(!$cacheData) {
+            //if(!$cacheData) {
                 $compareData = [];
                 if ($compareTimeStr) {
                     $compareTime = explode(' ', $compareTimeStr);
@@ -73,9 +73,9 @@ class OrderDetail extends BaseElasticsearch
                 $result = $this->buildPurchaseSearch($site, $start, $end);
                 $allData = $this->esFormatData->formatPurchaseData($site, $result, $compareData);
                 Cache::set($cacheStr, $allData, 600);
-            }else{
-                $allData = $cacheData;
-            }
+//            }else{
+//                $allData = $cacheData;
+//            }
 
             switch ($type) {
                 case 0:

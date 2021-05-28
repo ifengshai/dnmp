@@ -54,11 +54,11 @@ class EsFormatData
             $finalLists[$key]['cartCount'] = $hourCartData['doc_count'];
 
             //加购率
-            $finalLists[$key]['addCartRate'] = $finalLists[$key]['sessions'] ? bcdiv($hourCartData['doc_count'], $finalLists[$key]['sessions'], 2) . '%' : '0%';
+            $finalLists[$key]['addCartRate'] = $finalLists[$key]['sessions'] ? bcmul(bcdiv($hourCartData['doc_count'], $finalLists[$key]['sessions'], 4),100,2) . '%' : '0%';
             //新增购物车转化率
-            $finalLists[$key]['cartRate'] = $hourOrderData['doc_count'] ? bcdiv($hourCartData['doc_count'], $hourOrderData['doc_count'], 2) . '%' : '0%';
+            $finalLists[$key]['cartRate'] = $hourCartData['doc_count'] ? bcmul(bcdiv($hourOrderData['doc_count'], $hourCartData['doc_count'], 4),100,2) . '%' : '0%';
             //回话转化率
-            $finalLists[$key]['sessionRate'] = $finalLists[$key]['sessions'] ? bcdiv($hourOrderData['doc_count'], $finalLists[$key]['sessions'], 2) . '%' : '0%';
+            $finalLists[$key]['sessionRate'] = $finalLists[$key]['sessions'] ? bcmul(bcdiv($hourOrderData['doc_count'], $finalLists[$key]['sessions'], 4),100,2) . '%' : '0%';
 
             //总回话数
             $allSession += $finalLists[$key]['sessions'];
@@ -76,11 +76,11 @@ class EsFormatData
         $allAvgPrice = round($orderData['allAvgPrice']['value'], 2);
 
         //加购率
-        $addCartRate = $allSession ? bcdiv($allCartAmount, $allSession, 2) . '%' : '0%';
+        $addCartRate = $allSession ? bcmul(bcdiv($allCartAmount, $allSession, 4),100,2) . '%' : '0%';
         //新增购物车转化率
-        $cartRate = $allOrderCount ? bcdiv($allCartAmount, $allOrderCount, 2) . '%' : '0%';
+        $cartRate = $allOrderCount ? bcmul(bcdiv($allCartAmount, $allOrderCount, 4),100,2) . '%' : '0%';
         //回话转化率
-        $sessionRate = $allSession ? bcdiv($allOrderCount, $allSession, 2) . '%' : '0%';
+        $sessionRate = $allSession ? bcmul(bcdiv($allOrderCount, $allSession, 4),100,2) . '%' : '0%';
 
         //合计
         //返回图标
@@ -706,7 +706,7 @@ class EsFormatData
                 $yData[$site]['registerNum'][] = $v['registerNum']['value'] ?: 0;
                 $yData[$site]['cartNum'][] = $v['cartNum']['value'] ?: 0;
                 $yData[$site]['orderCount'][] = $v['orderNum']['value'] ?: 0;
-                $yData[$site]['cartNumRate'][] = $v['orderNum']['value'] ? bcmul(bcdiv($v['cartNum']['value'], $v['orderNum']['value'], 4), 100) : 0;
+                $yData[$site]['cartNumRate'][] = $v['cartNum']['value'] ? bcmul(bcdiv($v['orderNum']['value'], $v['cartNum']['value'], 4), 100) : 0;
             }
 
         }
@@ -729,11 +729,17 @@ class EsFormatData
      * @author crasphb
      * @date   2021/4/24 14:11
      */
-    public function formatDataMarketTop($site, $operationData, $order, $cart, $customer, $time, $status, $siteAll = false)
+    public function formatDataMarketTop($site, $operationData, $order, $cart, $customer,$cartToOrder, $time, $status, $siteAll = false)
     {
         $cartDay = $this->formatDataMarketCartCustomer($cart, $time);
         $customerDay = $this->formatDataMarketCartCustomer($customer, $time);
         $orderDay = $this->formatDataMarketOrder($order, $status);
+        $cartToOrder = $cartToOrder['cartToOrder']['buckets'];
+        $cartToOrderToday = 0;
+        //今天新增购物车转化为订单的数目
+        foreach($cartToOrder as $key => $val) {
+            $cartToOrderToday += $val['doc_count'];
+        }
         $operationDetail = [];
         foreach ($operationData as $key => $val) {
             if (!$siteAll) {
@@ -912,14 +918,14 @@ class EsFormatData
         $operationDetail['thismonth_order_success'] = bcadd($operationDetail['thismonth_order_success'], $orderDay['successCount']);
         $operationDetail['thismonth_unit_price'] = $operationDetail['thismonth_order_success'] ? bcdiv($operationDetail['thismonth_sales_money'], $operationDetail['thismonth_order_success'], 2) : 0;
 
-        $operationDetail['thismonth_shoppingcart_total'] = bcadd($operationDetail['thismonth_shoppingcart_total'], $cartDay['dayUpdate']);
-        $operationDetail['thismonth_shoppingcart_conversion'] = $operationDetail['thismonth_shoppingcart_total'] ? bcmul(bcdiv($operationDetail['thismonth_order_success'], $operationDetail['thismonth_shoppingcart_total'], 4), 100, 2) : 0;
+        $operationDetail['thismonth_shoppingcart_total'] = bcadd($operationDetail['thismonth_shoppingcart_total'], $cartDay['dayCreate']);
+        //$operationDetail['thismonth_shoppingcart_conversion'] = $operationDetail['thismonth_shoppingcart_total'] ? bcmul(bcdiv($operationDetail['thismonth_order_success'], $operationDetail['thismonth_shoppingcart_total'], 4), 100, 2) : 0;
 
-        $operationDetail['thismonth_shoppingcart_new'] = bcadd($operationDetail['thismonth_shoppingcart_new'], $cartDay['dayCreate']);
+        $operationDetail['thismonth_shoppingcart_new'] = bcadd($operationDetail['thismonth_shoppingcart_new'], $cartDay['dayUpdate']);
         $operationDetail['thismonth_shoppingcart_newconversion'] = $operationDetail['thismonth_shoppingcart_new'] ? bcmul(bcdiv($operationDetail['thismonth_order_success'], $operationDetail['thismonth_shoppingcart_new'], 4), 100, 2) : 0;
 
-        $operationDetail['thismonth_register_customer'] = bcadd($operationDetail['thismonth_register_customer'], $customerDay['dayUpdate']);
-        $operationDetail['thismonth_sign_customer'] = bcadd($operationDetail['thismonth_sign_customer'], $customerDay['dayCreate']);
+        $operationDetail['thismonth_register_customer'] = bcadd($operationDetail['thismonth_register_customer'], $customerDay['dayCreate']);
+        $operationDetail['thismonth_sign_customer'] = bcadd($operationDetail['thismonth_sign_customer'], $customerDay['dayUpdate']);
 
         //今年加上今天
         $operationDetail['thisyear_sales_money'] = bcadd($operationDetail['thisyear_sales_money'], $orderDay['allDaySalesAmount'], 2);
@@ -927,14 +933,14 @@ class EsFormatData
         $operationDetail['thisyear_order_success'] = bcadd($operationDetail['thisyear_order_success'], $orderDay['successCount']);
         $operationDetail['thisyear_unit_price'] = $operationDetail['thisyear_order_success'] ? bcdiv($operationDetail['thisyear_sales_money'], $operationDetail['thisyear_order_success'], 2) : 0;
 
-        $operationDetail['thisyear_shoppingcart_total'] = bcadd($operationDetail['thisyear_shoppingcart_total'], $cartDay['dayUpdate']);
-        $operationDetail['thisyear_shoppingcart_conversion'] = $operationDetail['thisyear_shoppingcart_total'] ? bcmul(bcdiv($operationDetail['thisyear_order_success'], $operationDetail['thisyear_shoppingcart_total'], 4), 100, 2) : 0;
+        $operationDetail['thisyear_shoppingcart_total'] = bcadd($operationDetail['thisyear_shoppingcart_total'], $cartDay['dayCreate']);
+        //$operationDetail['thisyear_shoppingcart_conversion'] = $operationDetail['thisyear_shoppingcart_total'] ? bcmul(bcdiv($operationDetail['thisyear_order_success'], $operationDetail['thisyear_shoppingcart_total'], 4), 100, 2) : 0;
 
-        $operationDetail['thisyear_shoppingcart_new'] = bcadd($operationDetail['thisyear_shoppingcart_new'], $cartDay['dayCreate']);
+        $operationDetail['thisyear_shoppingcart_new'] = bcadd($operationDetail['thisyear_shoppingcart_new'], $cartDay['dayUpdate']);
         $operationDetail['thisyear_shoppingcart_newconversion'] = $operationDetail['thisyear_shoppingcart_new'] ? bcmul(bcdiv($operationDetail['thisyear_order_success'], $operationDetail['thisyear_shoppingcart_new'], 4), 100, 2) : 0;
 
-        $operationDetail['thisyear_register_customer'] = bcadd($operationDetail['thisyear_register_customer'], $customerDay['dayUpdate']);
-        $operationDetail['thisyear_sign_customer'] = bcadd($operationDetail['thisyear_sign_customer'], $customerDay['dayCreate']);
+        $operationDetail['thisyear_register_customer'] = bcadd($operationDetail['thisyear_register_customer'], $customerDay['dayCreate']);
+        $operationDetail['thisyear_sign_customer'] = bcadd($operationDetail['thisyear_sign_customer'], $customerDay['dayUpdate']);
 
 
         //总计加上今天
@@ -943,14 +949,14 @@ class EsFormatData
         $operationDetail['total_order_success'] = bcadd($operationDetail['total_order_success'], $orderDay['successCount']);
         $operationDetail['total_unit_price'] = $operationDetail['total_order_success'] ? bcdiv($operationDetail['total_sales_money'], $operationDetail['total_order_success'], 2) : 0;
 
-        $operationDetail['total_shoppingcart_total'] = bcadd($operationDetail['total_shoppingcart_total'], $cartDay['dayUpdate']);
-        $operationDetail['total_shoppingcart_conversion'] = $operationDetail['total_shoppingcart_total'] ? bcmul(bcdiv($operationDetail['total_order_success'], $operationDetail['total_shoppingcart_total'], 4), 100, 2) : 0;
+        $operationDetail['total_shoppingcart_total'] = bcadd($operationDetail['total_shoppingcart_total'], $cartDay['dayCreate']);
+        //$operationDetail['total_shoppingcart_conversion'] = $operationDetail['total_shoppingcart_total'] ? bcmul(bcdiv($operationDetail['total_order_success'], $operationDetail['total_shoppingcart_total'], 4), 100, 2) : 0;
 
-        $operationDetail['total_shoppingcart_new'] = bcadd($operationDetail['total_shoppingcart_new'], $cartDay['dayCreate']);
+        $operationDetail['total_shoppingcart_new'] = bcadd($operationDetail['total_shoppingcart_new'], $cartDay['dayUpdate']);
         $operationDetail['total_shoppingcart_newconversion'] = $operationDetail['total_shoppingcart_new'] ? bcmul(bcdiv($operationDetail['total_order_success'], $operationDetail['total_shoppingcart_new'], 4), 100, 2) : 0;
 
-        $operationDetail['total_register_customer'] = bcadd($operationDetail['total_register_customer'], $customerDay['dayUpdate']);
-        $operationDetail['total_sign_customer'] = bcadd($operationDetail['total_sign_customer'], $customerDay['dayCreate']);
+        $operationDetail['total_register_customer'] = bcadd($operationDetail['total_register_customer'], $customerDay['dayCreate']);
+        $operationDetail['total_sign_customer'] = bcadd($operationDetail['total_sign_customer'], $customerDay['dayUpdate']);
 
         //今天的
         $operationDetail['today_sales_money'] = round($orderDay['allDaySalesAmount'], 2) ?: 0;
@@ -958,14 +964,14 @@ class EsFormatData
         $operationDetail['today_order_success'] = $orderDay['successCount'] ?: 0;
         $operationDetail['today_unit_price'] = round($orderDay['allAvgPrice'], 2);
 
-        $operationDetail['today_shoppingcart_total'] = $cartDay['dayUpdate'] ?: 0;
-        $operationDetail['today_shoppingcart_conversion'] = $operationDetail['today_shoppingcart_today'] ? bcmul(bcdiv($operationDetail['today_order_success'], $operationDetail['today_shoppingcart_today'], 4), 100, 2) : 0;
+        $operationDetail['today_shoppingcart_total'] = $cartDay['dayCreate'] ?: 0;
+        $operationDetail['today_shoppingcart_conversion'] = $operationDetail['today_order_success'] ? bcmul(bcdiv($operationDetail['cartToOrderToday'], $operationDetail['today_order_success'], 4), 100, 2) : 0;
 
-        $operationDetail['today_shoppingcart_new'] = $cartDay['dayCreate'] ?: 0;
+        $operationDetail['today_shoppingcart_new'] = $cartDay['dayUpdate'] ?: 0;
         $operationDetail['today_shoppingcart_newconversion'] = $operationDetail['today_shoppingcart_new'] ? bcmul(bcdiv($operationDetail['today_order_success'], $operationDetail['today_shoppingcart_new'], 4), 100, 2) : 0;
 
-        $operationDetail['today_register_customer'] = $customerDay['dayUpdate'] ?: 0;
-        $operationDetail['today_sign_customer'] = bcadd($operationDetail['today_sign_customer'], $customerDay['dayCreate'], 2);
+        $operationDetail['today_register_customer'] = $customerDay['dayCreate'] ?: 0;
+        $operationDetail['today_sign_customer'] = bcadd($operationDetail['today_sign_customer'], $customerDay['dayUpdate']);
 
         return $operationDetail;
 
@@ -1030,5 +1036,10 @@ class EsFormatData
         $allAvgPrice = $successCount ? bcdiv($allDaySalesAmount, $successCount, 2) : 0;
 
         return compact('allCount', 'successCount', 'allDaySalesAmount', 'allAvgPrice');
+    }
+    public function formatGetCartIds($data) {
+        $cartBuckets = $data['dayCreate']['buckets'];
+        $cartBucketsData = array_values(array_column($cartBuckets,'key'));
+        return $cartBucketsData;
     }
 }

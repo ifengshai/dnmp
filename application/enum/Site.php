@@ -26,5 +26,6 @@ class Site
     const ZEELOOL_DE = 10;
     const ZEELOOL_JP = 11;
     const VOOGUEME_ACC = 12;
+    const ZEELOOL_FR = 15;
 
 }

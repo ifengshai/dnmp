@@ -128,6 +128,7 @@ class Dashboard extends Backend
             $arr[] = $pkey;
         }
         $zeelool_data = $this->model->getList(key($platform));
+
         //z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
         //z站的历史数据  昨天、过去7天、过去30天、当月、上月、今年、总计
         $zeelool_data = collection($zeelool_data)->toArray();

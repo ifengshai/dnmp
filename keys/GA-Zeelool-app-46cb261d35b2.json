@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "zeelool-app-1621214060359",
+  "private_key_id": "46cb261d35b2859a95d6782f100b1290507013eb",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC7Et+GDF+A6h/Q\naeJtad9WMLDCIsqxeNn868GvPILtopJqSgeHt6YiLrsuhGpgl6FcoMTQ+JqEMuHU\nxGUwB5UXYA7v/1HY521fJIcft4ytG2ejYjqjwHOH2MzYeSixwTOTgLqH2CM9XSTT\nGJEeBLeHc1hERd1JiR3oc3mEwAwEyXhkNNC6Mdp9R/3DzxqP5o02LQTvbFBZeR/8\nOtqIrNzsUiWbBA5+iUFPZmp5J9qcQGxB+GSesW9KKLNHg13Y636w1oHO2iNyAeSA\nJcDBJvIkWKkj3cu7YYdvO+Y4H8yQ3/E8dzkN4Sq1jK2eIYrQWUimHM598yo7Ca1K\namGDhfPVAgMBAAECggEACjcYSD7vYsq7Z1YLgeNWHrlp7YVDgY1n2eJwdnEyH70m\nNvJJQaVK8nLlexTKpPD4DrwjWIXlah1H16Z3IA2fRozS7qgH1XWjCJ77V0VemSqg\nmNC0WFzEnOu/GShZ4IWm8KxcLdl6Pc+S7d6u40S+q4F7lb7QO+5mLltKjMUv4tLw\nTjxjgXHhTR8RHsGFwu0u1zHf+DY1XS/GeHsts8kE8bZsFDdJR15PSVjRew3b5bmy\n66vsAoPsN5bLJOm/+aEk0TLDViD4fWflL0ip1VB0dxTxYYldwQ6xIohRh/hPEmNM\nB8+zfx2oT6jqzF2dlDEA0iSZj9cuBruDfheoE2L8AQKBgQDkzge67DNN1v0tGUTn\nekwGy61+AIyNG8sW8jFk/eL+m/G+Dn/FJgU+8dAvd1FPnbP/bUHAVn7s8jiFUh6k\neLMSX4riRTOWaUF9ZBwMmw02gBDvexVrGWopFfP+Rne6K1mV+VzBXguwk/BlENzg\nBPExeQHmI5epzuQRJ8hOwti5sQKBgQDRTxF9u614gB0oklCl/DZwvNr1/zgRNa6J\nZwKH7eJsncZtp77Wmr0kiUNt2pa2nNxOsCuZthR1sWFLpIrocU8LPnCwEe07H51/\nxrs4rlSM8ErvXyTBjmGn5QEIu+vcN/RY8QAYxeEniIh1kyb10yNwm71cZiGpxqXV\nDsJxV7sBZQKBgQClyNs1B3xNBF/B07NnfeekbOQyjjdI70CCSc6cfJGDJn9M1Lij\not7eMtxD6FKUO5J2mzWvJX0mNoPZphzp00L9Jxk8xiOQ8ocvUeA5CgfS24xp2Wc1\niN6xEmUOcwTBcjOhRWN+AKS7txXSRRulfi89R46msFduBKif/ZFX8DqUoQKBgAUl\nJ23qziHXLGBR8G+UGpZ83fkMFAnAQxEXmiVTQKyg2D7bz8IgvaOHSEQMCoZkprm8\ndOXrZudZu+WLHusF1gaVu1lop2c7qLh6XyHOjz+DrKPjt9iWMmpZI8ReMjcQnQ4O\npoz1WEqLfac+PcfvL8DV4zrBO/SbcHojSb5VhMBNAoGBAKK0UymACXZpTb2Rxltx\n9QGptTdqG/H2rJsubyl50diHtyvCIf3if6Pc23TJK8QmyEkPT5luEVZr5KFql9wE\ndjLuotLpx6cbHlcmJKtl4mVrQXPlYgCnxSikNzU9pdreL9Cn/56iDBf20sam1Nd8\nI0bATENwoHCANJpSYcQ4ev7m\n-----END PRIVATE KEY-----\n",
+  "client_email": "starting-account-zacepl7g3q9f@zeelool-app-1621214060359.iam.gserviceaccount.com",
+  "client_id": "108377599902378366031",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/starting-account-zacepl7g3q9f%40zeelool-app-1621214060359.iam.gserviceaccount.com"
+}

@@ -688,6 +688,27 @@ class SelfApi extends Api
             if (false !== $res) {
                 //如果是上架 则查询此sku是否存在当天有效sku表里
                 if ($status == 1) {
+                    //判断上下架时间记录表中是否有该sku，如果没有，插入一条记录，如果有更新上架时间
+                    $isExistShelvesTime = Db::name('sku_shelves_time')
+                        ->where(['site' => $site, 'platform_sku' => $sku])
+                        ->value('id');
+                    $arr = array(
+                        'site' => $site,
+                        'sku' => $list['sku'],
+                        'platform_sku' => $sku,
+                        'shelves_time' => time(),
+                    );
+                    if($isExistShelvesTime){
+                        //有该记录，更新上架时间
+                        Db::name('sku_shelves_time')
+                            ->where('id',$isExistShelvesTime)
+                            ->update($arr);
+                    }else{
+                        $arr['created_at'] = time();
+                        //没有记录，插入数据
+                        Db::name('sku_shelves_time')
+                            ->insert($arr);
+                    }
                     $count = Db::name('sku_sales_num')->where(['platform_sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
                     //如果不存在则插入此sku
                     if ($count < 1) {
@@ -716,6 +737,7 @@ class SelfApi extends Api
     public function batch_set_product_status()
     {
         $value = $this->request->post();
+        $day_date = date('Y-m-d');
         if (!$value['site']) {
             $this->error(__('缺少站点参数'));
         }
@@ -727,11 +749,34 @@ class SelfApi extends Api
                 $this->error(__('缺少状态参数'));
             }
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $list = $platform->where(['platform_type' => $value['site'], 'platform_sku' => $item['sku']])->find();
+            $list = $platform
+                ->alias('p')
+                ->join('fa_item_category c','p.category_id=c.id','left')
+                ->where(['p.platform_type' => $value['site'], 'p.platform_sku' => $item['sku']])
+                ->field('p.sku,p.platform_sku,c.name')
+                ->find();
             if (!$list) {
                 unset($item);
             } else {
                 $res = $platform->allowField(true)->isUpdate(true, ['platform_type' => $value['site'], 'platform_sku' => $item['sku']])->save(['outer_sku_status' => $item['status']]);
+                //判断是否有当天sku数据，有就更新，没有就插入
+                $isExistSkuDay = Db::name('sku_status_dataday')
+                    ->where(['site' => $value['site'], 'platform_sku' => $item['sku'],'day_date'=>$day_date])
+                    ->find();
+                if($isExistSkuDay['id']){
+                    Db::name('sku_status_dataday')
+                        ->where('id',$isExistSkuDay['id'])
+                        ->update(['status'=>$item['online_status']]);
+                }else{
+                    $arr['day_date'] = $day_date;
+                    $arr['site'] = $value['site'];
+                    $arr['sku'] = $list['sku'];
+                    $arr['platform_sku'] = $list['platform_sku'];
+                    $arr['category_name'] = $list['name'] ? $list['name'] : '';
+                    $arr['status'] = $item['online_status'];
+                    Db::name('sku_status_dataday')
+                        ->insert($arr);
+                }
                 if (false !== $res) {
                     //如果是上架 则查询此sku是否存在当天有效sku表里
                     if ($item['status'] == 1) {
@@ -744,7 +789,6 @@ class SelfApi extends Api
                             Db::name('sku_sales_num')->insert($data);
                         }
                     }
-
                 } else {
                     $this->error('同步失败');
                 }

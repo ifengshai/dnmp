@@ -47,14 +47,14 @@ class AsyncCustomer extends BaseElasticsearch
         $value = array_map(function ($v) {
             return $v === null ? 0 : $v;
         }, $data);
-        $mergeData = $value['created_at'];
+        $mergeData = $value['created_at'] + 8*3600;
         $updateData = [
             'id'              => $data['id'],
             'entity_id'       => $value['entity_id'],
             'site'            => $value['site'],
             'email'           => $value['email'],
-            'update_time_day' => date('Ymd', $value['updated_at']),
-            'update_time'     => $value['updated_at'],
+            'update_time_day' => date('Ymd', $value['updated_at'] + 8*3600),
+            'update_time'     => $value['updated_at'] + 8*3600,
             'create_time'     => $mergeData,
             'is_vip'          => $value['is_vip'] ?? 0,
             'group_id'        => $value['group_id'],

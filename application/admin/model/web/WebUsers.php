@@ -118,14 +118,14 @@ class WebUsers extends Model
         try {
             $params = [];
             foreach ($data as $k => $v) {
-                $params[$k]['entity_id'] = $v['id'];
-                $params[$k]['email'] = $v['email'] ?: '';
-                $params[$k]['site'] = $site;
-                $params[$k]['group_id'] = $v['group_id'] ?: 0;
-                $params[$k]['store_id'] = $v['store_id'] ?: 0;
-                $params[$k]['created_at'] = strtotime($v['created_at']);
-                $params[$k]['updated_at'] = strtotime($v['updated_at']);
-                $params[$k]['is_vip'] = $v['is_vip'];
+                $params['entity_id'] = $v['id'];
+                $params['email'] = $v['email'] ?: '';
+                $params['site'] = $site;
+                $params['group_id'] = $v['group_id'] ?: 0;
+                $params['store_id'] = $v['store_id'] ?: 0;
+                $params['created_at'] = strtotime($v['created_at']);
+                $params['updated_at'] = strtotime($v['updated_at']);
+                $params['is_vip'] = $v['is_vip'];
                 $userId = (new WebUsers)->insertGetId($params);
                 //新增用户信息
                 (new AsyncCustomer())->runInsert($params, $userId);

@@ -1,0 +1,160 @@
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 45%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #eee;
+    }
+
+    .handle_table1 td {
+        padding: 8px;
+        text-align: center;
+        font-size: 14px;
+        border: 1px solid #ccc;
+    }
+
+    .nav-tabs > li {
+        float: left;
+        margin-bottom: -1px;
+    }
+
+    .nav > li {
+        position: relative;
+        display: block;
+    }
+
+    .nav-tabs > li > a {
+        margin-right: 4px;
+        color: #95a5a6;
+        background-color: #d8e0e6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+
+    .nav-tabs > li > a {
+        margin-right: 4px;
+        color: #95a5a6;
+        border: 1px solid #e8edf0;
+        border-bottom-color: transparent;
+    }
+</style>
+{:build_heading()}
+<div class="panel">
+    <div class="panel-body">
+        <form id="form" class="form-commonsearch form-horizontal" role="form"
+              method="post">
+            <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-3">
+                        <div class="form-group">
+                            <label class="control-label col-xs-4">平台选择</label>
+                            <div class="col-xs-8">
+                                <select data-rule="required" class="form-control"
+                                        name="platform" id="platform">
+                                    {foreach name="magentoPlatforms" item="vo" key="key"}
+                                    <option value="{$vo.id}" {if condition="$key == 0" }selected{/if}>{$vo.name}</option>
+                                    {/foreach}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="panel" style="margin-top: 10px;">
+    <div class="panel-body">
+        <div class="form-group" style="float:left;width: 100%;">
+            <label class="control-label col-xs-6"><< 库存概况</label>
+        </div>
+        <div style="width: 100%;float: left;">
+            <table id="stock_overview" class="altrowstable" style="width: 100%;">
+                <tr>
+                    <td>品类</td>
+                    <td>SKU个数</td>
+                    <td>库存量</td>
+                    <td>过去30天销量</td>
+                    <td>周转月数</td>
+                    <td>呆滞库存量</td>
+                    <td>呆滞库存占比</td>
+                </tr>
+                <tbody id="stock_overview_tbody">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="panel" style="margin-top: 10px;">
+    <div class="panel-body">
+        <div class="form-group" style="float:left;width: 100%;">
+            <label class="control-label col-xs-6"><< 库存分级</label>
+        </div>
+        <div style="width: 100%;float: left;">
+            <table id="stock_grading" class="altrowstable" style="width: 100%;">
+                <tr>
+                    <td>产品等级</td>
+                    <td>SKU数量</td>
+                    <td>SKU占比</td>
+                    <td>库存</td>
+                    <td>库存占比</td>
+                    <td>参考实时周转天数</td>
+                    <td>呆滞库存</td>
+                    <td>呆滞库存SKU个数</td>
+                    <td>呆滞库存占比</td>
+                    <td>高风险呆滞库存(SKU个数)</td>
+                    <td>中风险呆滞库存(SKU个数)</td>
+                    <td>低风险呆滞库存(SKU个数)</td>
+                </tr>
+                <tbody id="stock_grading_tbody">
+
+                </tbody>
+            </table>
+        </div>
+        <div style="width: 100%;">
+            <div class="row item_info"
+                 style="background:#f5f5f5;float: left;width: 100%;margin-top: 20px;padding:10px;margin-left: 1px;">
+                <div class="col-lg-12">
+                    <div style="width:100%;">
+                        <p style='font-family: "微软雅黑 Bold", "微软雅黑 Regular", 微软雅黑, sans-serif;font-weight: 700;font-size: 18px;'>
+                            << 库存健康状况</p>
+                        <div id="stock_health_status" style="height:400px;width:100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

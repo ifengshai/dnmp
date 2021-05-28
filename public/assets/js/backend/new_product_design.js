@@ -96,46 +96,88 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {
                             field: 'status',
-                            addclass:'design_status',
+                            addclass: 'design_status',
                             title: __('状态'),
-                            searchList: { 1: '待录尺寸', 2: '待拍摄', 3: '拍摄中', 4: '待分配', 5: '待修图', 6: '修图中', 7: '待审核', 8: '已完成', 9: '审核拒绝', 10: '完成'},
-                            custom: { 1: 'black', 2: 'black', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black' },
+                            searchList: {
+                                1: '待录尺寸',
+                                2: '待拍摄',
+                                3: '拍摄中',
+                                4: '待分配',
+                                5: '待修图',
+                                6: '修图中',
+                                7: '待审核',
+                                8: '已完成',
+                                9: '审核拒绝',
+                                10: '完成'
+                            },
+                            custom: {
+                                1: 'black',
+                                2: 'black',
+                                3: 'black',
+                                4: 'black',
+                                5: 'black',
+                                6: 'black',
+                                7: 'black',
+                                8: 'black',
+                                9: 'black',
+                                10: 'black',
+                                11: 'black'
+                            },
 
                             formatter: Table.api.formatter.status,
                         },
                         {field: 'responsible_id', title: __('责任人')},
-                        {field: 'location_code', title: __('样品间库位号'),operate: false},
-                        {field: 'platform', title: __('站点'),operate: false},
-                        {field: 'site', title: __('站点'), visible: false,
-                            addclass:'plat_type selectpicker',
+                        {field: 'location_code', title: __('样品间库位号'), operate: false},
+                        {field: 'platform', title: __('站点'), operate: false, visible: true},
+                        {
+                            field: 'site', title: __('站点'), visible: false,
+                            addclass: 'plat_type selectpicker',
                             data: 'multiple',
                             operate: 'IN',
                             searchList: {
                                 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee',
                                 8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',
-                                12: 'voogmechic',13:'zeelool_cn',14:'alibaba',15:'zeelool_fr'
+                                12: 'voogmechic', 13: 'zeelool_cn', 14: 'alibaba', 15: 'zeelool_fr'
                             },
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'addtime', title: __('操作时间'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime,sortable:true},
-                        {field: 'create_time', title: __('创建时间'), operate:'RANGE', addclass:'datetimerange',sortable:true, formatter: Table.api.formatter.datetime},
                         {
-                            field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
+                            field: 'addtime',
+                            title: __('操作时间'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            formatter: Table.api.formatter.datetime,
+                            sortable: true
+                        },
+                        {
+                            field: 'create_time',
+                            title: __('创建时间'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            sortable: true,
+                            formatter: Table.api.formatter.datetime
+                        },
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            buttons: [
 
                                 {
                                     name: 'edit_recipient',
-                                    text:__('录尺寸'),
-                                    title:__('录尺寸'),
+                                    text: __('录尺寸'),
+                                    title: __('录尺寸'),
                                     extend: 'data-area = \'["50%","50%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     url: 'new_product_design/record_size',
                                     icon: '',
-                                    area: ['50%', '45%'],
+                                    area: ['50%', '45%'],
                                     //extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
                                     callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
-                                    visible: function(row){
+                                    visible: function (row) {
                                         if (row.status ==1 && row.label !==0){
                                             return  true;
                                         }else{
@@ -366,6 +408,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                              // formatter: Table.api.formatter.operate
 
                             formatter: function (value, row, index) { //隐藏自定义的视频按钮
+                                console.log(Config);
                                 var that = $.extend({}, this);
                                 var table = $(that.table).clone(true);
                                 //权限判断
@@ -409,22 +452,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                     ]
                 ],
-                onLoadSuccess: function (value){
-                    if (value.label ==1 || value.label ==2 || value.label ==3 ||value.label ==4 ){
-                        table.bootstrapTable('hideColumn','responsible_id');
-                    }else{
-                        table.bootstrapTable('showColumn','responsible_id');
+                onLoadSuccess: function (value) {
+                    if (value.label == 1 || value.label == 2 || value.label == 3 || value.label == 4) {
+                        table.bootstrapTable('hideColumn', 'responsible_id');
+                    } else {
+                        table.bootstrapTable('showColumn', 'responsible_id');
                     }
-                    if (value.label ==3){
-                        table.bootstrapTable('showColumn','location_code');
-                    }else {
-                        table.bootstrapTable('hideColumn','location_code');
+                    if (value.label == 3) {
+                        table.bootstrapTable('showColumn', 'location_code');
+                    } else {
+                        table.bootstrapTable('hideColumn', 'location_code');
                     }
-                    if (value.label ==3 || value.label ==2 || value.label ==4){
-                        table.bootstrapTable('showColumn','platform');
-                    }else {
-                        table.bootstrapTable('hideColumn','platform');
-                    }
+                    // if (value.label ==3 || value.label ==2 || value.label ==4){
+                    //     table.bootstrapTable('showColumn','platform');
+                    // }else {
+                    //     table.bootstrapTable('hideColumn','platform');
+                    // }
                 }
             });
 

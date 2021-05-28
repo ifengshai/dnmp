@@ -80,6 +80,12 @@ class BaseElasticsearch extends Backend
             'increment_id'            => [
                 'type' => 'keyword',
             ],
+            'customer_id'            => [
+                'type' => 'keyword',
+            ],
+            'quote_id'            => [
+                'type' => 'keyword',
+            ],
             'status'                  => [
                 'type' => 'keyword',
             ],
@@ -93,17 +99,11 @@ class BaseElasticsearch extends Backend
             'total_qty_ordered'       => [
                 'type' => 'integer',
             ],
-            'total_item_count'        => [
-                'type' => 'integer',
-            ],
             'order_type'              => [
                 'type' => 'integer',
             ],
             'order_prescription_type' => [
                 'type' => 'integer',
-            ],
-            'base_currency_code'      => [
-                'type' => 'keyword',
             ],
             'shipping_method'         => [
                 'type' => 'keyword',
@@ -123,39 +123,12 @@ class BaseElasticsearch extends Backend
             'region_id'               => [
                 'type' => 'keyword',
             ],
-            'city'                    => [
-                'type' => 'keyword',
-            ],
-            'street'                  => [
-                'type' => 'keyword',
-            ],
-            'postcode'                => [
-                'type' => 'keyword',
-            ],
-            'telephone'               => [
-                'type' => 'keyword',
-            ],
-            'customer_email'          => [
-                'type' => 'keyword',
-            ],
-            'customer_firstname'      => [
-                'type' => 'keyword',
-            ],
-            'taxno'                   => [
-                'type' => 'keyword',
-            ],
-            'base_to_order_rate'      => [
-                'type' => 'keyword',
-            ],
             'payment_method'          => [
                 'type' => 'keyword',
             ],
             'mw_rewardpoint_discount' => [
                 'type'           => 'scaled_float',
                 'scaling_factor' => 10000,
-            ],
-            'last_trans_id'           => [
-                'type' => 'keyword',
             ],
             'mw_rewardpoint'          => [
                 'type'           => 'scaled_float',
@@ -167,19 +140,7 @@ class BaseElasticsearch extends Backend
             ],
             'payment_time'            => [
                 'type' => 'date',
-            ],
-            'order_currency_code'     => [
-                'type' => 'keyword',
-            ],
-            'firstname'               => [
-                'type' => 'keyword',
-            ],
-            'lastname'                => [
-                'type' => 'keyword',
-            ],
-            'area'                    => [
-                'type' => 'keyword',
-            ],
+            ]
         ];
 
         $this->esService->createIndex('mojing_order', $selfProperties);
@@ -339,8 +300,15 @@ class BaseElasticsearch extends Backend
             'id'              => [
                 'type' => 'integer',
             ],
+            'entity_id'            => [
+                'type' => 'keyword',
+            ],
             'site'            => [
                 'type' => 'integer',
+            ],
+            'base_grand_total'        => [
+                'type'           => 'scaled_float',
+                'scaling_factor' => 10000,
             ],
             'status'          => [
                 'type' => 'keyword',
@@ -353,6 +321,9 @@ class BaseElasticsearch extends Backend
             ],
             'update_time_day' => [
                 'type' => 'date',
+            ],
+            'update_time_hour' => [
+                'type' => 'keyword',
             ],
 
         ];
