@@ -4467,6 +4467,9 @@ class ScmWarehouse extends Scm
             $this->error(__('当前库区库位下没有此sku可编辑的条码'), '', 524);
         }
         $codeAgg = $this->request->request("sku_agg");
+        if (empty($codeAgg)) {
+            $this->error(__('条形码数据传递为空！！'), '', 524);
+        }
         $codeAgg = html_entity_decode($codeAgg);
         $codeAgg = array_filter(json_decode($codeAgg, true));
         if (count(array_filter($codeAgg)) < 1) {
@@ -4535,6 +4538,62 @@ class ScmWarehouse extends Scm
         }
     }
 
+    /**
+     * 调出删除子条目
+     * Interface stock_code_del
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/28 11:21:27
+     */
+    public function stock_code_del()
+    {
+        $transferOrderItemId = $this->request->request('transfer_order_item_id');
+        $areaId = $this->request->request('area_id');
+        $locationId = $this->request->request('location_id');
+        $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
+        if (empty($transferOrderItemDetail)) {
+            $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
+        }
+        if (empty($areaId)) {
+            $this->error(__('库区id为空，请检查！！'), '', 524);
+        }
+        if (empty($locationId)) {
+            $this->error(__('库位id为空，请检查！！'), '', 524);
+        }
+
+        $res = false;
+        $res1 = false;
+        $this->_stock_transfer_order_item->startTrans();
+        $this->_stock_transfer_order_item_code->startTrans();
+        try {
+            //旧的这个库区库位下的调拨条码数目
+            $oldCount = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->count();
+            $res1 = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->delete();
+            $res = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->delete();
+            //此步骤为减
+            $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->setDec('real_num', $oldCount);
+
+            $this->_stock_transfer_order_item->commit();
+            $this->_stock_transfer_order_item_code->commit();
+        } catch (ValidateException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
+        if ($res !== false && $res1 !== false) {
+            $this->success('提交成功', '', 200);
+        } else {
+            $this->error(__('No rows were inserted'), '', 525);
+        }
+    }
     /**
      * 扫描物流单号
      * Interface scan_logistics_number
