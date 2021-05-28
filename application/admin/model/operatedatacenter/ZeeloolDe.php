@@ -1311,6 +1311,7 @@ class ZeeloolDe extends Model
             ->table('sales_flat_order')
             ->where($customerWhere)
             ->where($orderWhere)
+            ->where('customer_group_id','>',0)
             ->sum('base_grand_total');
         $result = [];
         foreach($customer as $key => $val) {

@@ -201,7 +201,7 @@ class OrderEsFormat extends BaseEsFormatData
         $daySaleStr .= '<tr><td> 合计 </td><td>' . $allLoginNum . '</td><td>' . $allSessions . '</td><td>' . $allAddToCartRate . '</td><td>' . $allSessionRate . '</td><td>' . $allOrderNum . '</td><td>' . $allAvgPrice . '</td><td>' . $allNewCartNum . '</td><td>' . $allUpdateCartNum . '</td><td>' . $allSalesTotalMoney . '</td><td>' . $allRegisterNum . '</td></td></tr>';
         $dayChartsSalesArr = array_column($dayChartsSales,'value');
         foreach($dayChartsSalesArr as $key => $val) {
-            $dayChartsSalesArr[$key] = round($val);
+            $dayChartsSalesArr[$key] = round($val,2);
         }
         //回话-销售趋势
         $ydataSessionSale = [
