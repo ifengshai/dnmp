@@ -25,6 +25,12 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 }
                 Controller.api.formatter.app_data_view();
             });
+            $(".reset").click(function(){
+                $('#input-site').val(1);
+                $('#input-platform').val(5);
+                $('#input-date').val($('#input-date').data('default'));
+                $('#input-compare-date').val('');
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -105,6 +111,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                         display_field('ga-sessions', current.ga_sessions, getProperty(compare, 'ga_sessions'))
                         display_field('ga-user', current.ga_users, getProperty(compare, 'ga_users'))
                         display_field('ga-first-open', current.first_open, getProperty(compare, 'first_open'))
+                        display_field('ga-app-remove', current.app_remove, getProperty(compare, 'app_remove'))
 
                         display_field('order-money', current.order_money, getProperty(compare, 'order_money'))
                         display_field('order-num', current.order_num, getProperty(compare, 'order_num'))
@@ -120,7 +127,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                 },
                 echart_ga: function (data) {
                     var chartDom = document.getElementById('echart-ga');
-                    var myChart = Echarts.init(chartDom);
+                    var myChart = Echarts.init(chartDom, 'walden');
                     var option;
 
                     let dates = $.map(data, function(n, i){
@@ -158,15 +165,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             {
                                 name: '会话数',
                                 type: 'line',
-                                stack: '总量',
                                 data: sessions
                             },
                             {
                                 name: '用户数',
                                 type: 'line',
-                                stack: '总量',
                                 data: users
-                            },
+                            }
                         ]
                     };
 
@@ -187,8 +192,8 @@ function display_field(loc, current, compare, is_percent = false)
         dom_num.text(current);
     }
 
+    let dom_compare = $('#display-compare-' + loc);
     if (compare != null) {
-        let dom_compare = $('#display-compare-' + loc);
         let subtraction = current - compare;
 
         let percent = 0;
@@ -209,5 +214,7 @@ function display_field(loc, current, compare, is_percent = false)
             dom_compare.addClass('text-green');
             dom_compare.html("<i class=\"fa fa-caret-down\"></i> " + percent + '%');
         }
+    } else {
+        dom_compare.html('');
     }
 }

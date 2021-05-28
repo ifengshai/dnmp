@@ -282,19 +282,23 @@
                     <li>
                         <p>一级筛选</p>
                         <ul>
-                            <li data-name="download_count_paid">
-                                <input type="checkbox">
-                                <span>付费下载数</span>
-                            </li>
-                            <li data-name="ad_cost">
-                                <input type="checkbox">
-                                <span>花费</span>
-                            </li>
+<!--                            <li data-name="download_count_paid">-->
+<!--                                <input type="checkbox">-->
+<!--                                <span>付费下载数</span>-->
+<!--                            </li>-->
+<!--                            <li data-name="ad_cost">-->
+<!--                                <input type="checkbox">-->
+<!--                                <span>花费</span>-->
+<!--                            </li>-->
                         </ul>
                     </li>
                     <li>
                         <p>二级筛选</p>
                         <ul>
+                            <li data-name="app_remove">
+                                <input type="checkbox">
+                                <span>卸载量</span>
+                            </li>
                             <li data-name="sessions">
                                 <input type="checkbox">
                                 <span>会话数</span>
@@ -328,7 +332,7 @@
                     </li>
                 </ul>
             </div>
-            <input type="hidden" name="field" id="field" value="date,download_count_paid,ad_cost,sessions,activeUsers,first_open,order_money,order_num,money_per_user">
+            <input type="hidden" name="field" id="field" value="date,app_remove,sessions,activeUsers,first_open,order_money,order_num,money_per_user">
             <div style="float: right;margin: 10px 50px 10px 0px;">
                 <input type="button" value="导出" id="export" class="btn" style="background: #18bc9c;color: #fefefe">
             </div>

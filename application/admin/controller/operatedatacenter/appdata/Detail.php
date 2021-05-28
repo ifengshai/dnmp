@@ -7,6 +7,8 @@ use app\enum\Store;
 
 class Detail extends Dashboard
 {
+    protected $noNeedRight = ['*'];
+
     public function index()
     {
         //查询对应平台权限
@@ -89,6 +91,7 @@ class Detail extends Dashboard
                 'sessions' => $ga_list[$date]['sessions'] ?: 0,
                 'activeUsers' => $ga_list[$date]['activeUsers'] ?: 0,
                 'first_open' => $ga_list[$date]['first_open'] ?: 0,
+                'app_remove' => $ga_list[$date]['app_remove'] ?: 0,
                 'order_money' => $order_list[$date]['order_money'] ?: 0,
                 'order_num' => $order_list[$date]['order_num'] ?: 0,
                 'money_per_user' => 0,
@@ -141,13 +144,17 @@ class Detail extends Dashboard
                 'name' => '日期',
                 'field' => 'date',
             ),
+//            array(
+//                'name' => '付费下载数',
+//                'field' => 'download_count_paid',
+//            ),
+//            array(
+//                'name' => '花费',
+//                'field' => 'ad_cost',
+//            ),
             array(
-                'name' => '付费下载数',
-                'field' => 'download_count_paid',
-            ),
-            array(
-                'name' => '花费',
-                'field' => 'ad_cost',
+                'name' => '卸载量',
+                'field' => 'app_remove',
             ),
             array(
                 'name' => '会话数',
@@ -175,10 +182,12 @@ class Detail extends Dashboard
             ),
         );
         $column_name = [];
+        $columns = [];
         // 将中文标题转换编码，否则乱码
         foreach ($field_arr as $i => $v) {
             $title_name = $this->filter_by_value($field_info, 'field', $v);
             $column_name[$i] = iconv('utf-8', 'GB18030', $title_name['name']);
+            $columns[$i] = $v;
         }
         // 将标题名称通过fputcsv写到文件句柄
         fputcsv($fp, $column_name);
@@ -190,10 +199,15 @@ class Detail extends Dashboard
         // 当日获取数据
         $data = $this->getDetailData($site, $store_id, $start_time, $end_time);
         foreach ($data as $datum) {
-            $row = array_filter($datum, function ($k) use ($field_arr) {
-                return in_array($k, $field_arr);
-            }, ARRAY_FILTER_USE_KEY);
-
+            $row = [];
+            foreach ($columns as $column) {
+                foreach ($datum as $key => $item) {
+                    if ($key == $column) {
+                        $row[] = $item;
+                        break;
+                    }
+                }
+            }
             fputcsv($fp, $row);
         }
         fclose($fp);

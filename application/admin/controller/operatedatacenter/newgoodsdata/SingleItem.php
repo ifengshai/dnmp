@@ -11,6 +11,7 @@ use think\Request;
 
 class SingleItem extends Backend
 {
+    protected $noNeedRight = ['*'];
     public function _initialize()
     {
         parent::_initialize();
