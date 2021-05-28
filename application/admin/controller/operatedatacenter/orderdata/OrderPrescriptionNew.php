@@ -201,13 +201,13 @@ class OrderPrescriptionNew extends Backend
 
     public function coating_data($site = 1, $timeStr = '')
     {
-        if ($site == 2) {
+        if ($site == 3 || $site == 2) {
             $type = [4.95, 8.95, 9.95];
         } elseif ($site == 10) {
             $type = [4.95, 8.95, 9.95];
         } elseif ($site == 11) {
             $type = [4.95, 8.95, 9.95];
-        } elseif ($site == 1 || $site == 2) {
+        } elseif ($site == 1) {
             $type = [0, 5, 9];
         }
         if (!$timeStr) {
