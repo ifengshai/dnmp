@@ -128,8 +128,6 @@ class GoodsChange extends Backend
                 }
                 $list[$k]['status'] = $status;
                 $list[$k]['stock'] = $skuStockInfo['stock'];
-                $list[$k]['cart_change'] = $v['cart_num'] == 0 ? '0%' : round($v['order_num'] / $v['cart_num'] * 100, 2) . '%';
-                $list[$k]['update_cart_rate'] = $v['update_cart_num'] == 0 ? '0%' : round($v['order_num'] / $v['update_cart_num'] * 100, 2) . '%';
                 $list[$k]['pay_lens_rate'] = $v['glass_num'] == 0 ? '0%' : round($v['pay_lens_num'] / $v['glass_num'] * 100, 2) . '%';
             }
             $result = array("total" => $total, "rows" => $list);
@@ -156,7 +154,7 @@ class GoodsChange extends Backend
             );
         }else{
             $field_arr = array(
-                'SKU','购物车数量','订单成功数','订单金额','更新购物车转化率','新增购物车转化率','付费镜片占比','售价','在售状态（实时）','销售副数','实际支付的销售额','副单价','虚拟库存'
+                'SKU','购物车数量','订单成功数','订单金额','付费镜片占比','售价','在售状态（实时）','销售副数','实际支付的销售额','副单价','虚拟库存'
             );
         }
 
@@ -205,7 +203,7 @@ class GoodsChange extends Backend
                 $tmpRow = [];
                 $tmpRow['platform_sku'] =$v['platform_sku'];//sku
                 if($order_platform != 5){
-                    $tmpRow['cart_num'] =$v['cart_num'];//购物车数量
+                    $tmpRow['update_cart_num'] =$v['update_cart_num'];//购物车数量
                 }
                 $tmpRow['order_num'] =$v['order_num'];//订单成功数
                 $tmpRow['sku_grand_total'] =$v['sku_grand_total'];//订单金额
@@ -221,10 +219,6 @@ class GoodsChange extends Backend
                     ->sum('base_grand_total');
                 $tmpRow['sku_grand_total'] = $orderTotal ?? 0;
 
-                if($order_platform != 5){
-                    $tmpRow['update_cart_rate'] =$v['update_cart_num'] ? round($v['order_num']/$v['update_cart_num']*100,2).'%' : '0%';//更新购物车转化率
-                    $tmpRow['cart_change'] = $v['cart_num'] ? round($v['order_num'] / $v['cart_num'] * 100, 2) . '%' : '0%';//新增购物车转化率
-                }
                 $tmpRow['pay_lens_rate'] = $v['glass_num'] ? round($v['pay_lens_num'] / $v['glass_num'] * 100, 2) . '%' : '0%';//付费镜片占比
                 $tmpRow['now_pricce'] =Db::name('datacenter_sku_day')
                     ->where(['sku'=>$v['sku'],'site'=>$order_platform])
