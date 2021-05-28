@@ -1347,7 +1347,7 @@ class ScmDistribution extends Scm
             //获取子订单数据
             $item_process_info = $this->_new_order_item_process
                 ->where('item_order_number', $item_order_number)
-                ->field('id,option_id,order_id,sku,site')
+                ->field('id,option_id,order_id,sku,site,stock_id')
                 ->find();
 
             //状态
@@ -1433,6 +1433,7 @@ class ScmDistribution extends Scm
                     $outstock['type_id'] = 2;
                     $outstock['remark'] = 'PDA质检拒绝：镜架报损自动生成出库单';
                     $outstock['status'] = 2;
+                    $outstock['stock_id'] = $item_process_info['stock_id'];
                     $outstock['create_person'] = $this->auth->nickname;
                     $outstock['createtime'] = date('Y-m-d H:i:s', time());
                     $outstock['platform_id'] = $item_process_info['site'];
@@ -2295,7 +2296,7 @@ class ScmDistribution extends Scm
                 $item_where['item_order_number'] = ['in', $item_order_numbers];
             }
             $item_info = $this->_new_order_item_process
-                ->field('sku,site,item_order_number')
+                ->field('sku,site,item_order_number,stock_id')
                 ->where($item_where)
                 ->select();
             if (2 == $check_status) {
@@ -2381,6 +2382,7 @@ class ScmDistribution extends Scm
                             $outstock['type_id'] = 4;
                             $outstock['remark'] = 'PDA审单-配错镜框-报损出库自动生成出库单';
                             $outstock['status'] = 2;
+                            $outstock['stock_id'] = $value['stock_id'];
                             $outstock['create_person'] = $create_person;
                             $outstock['createtime'] = date('Y-m-d H:i:s', time());
                             $outstock['platform_id'] = $value['site'];
