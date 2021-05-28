@@ -4467,6 +4467,9 @@ class ScmWarehouse extends Scm
             $this->error(__('当前库区库位下没有此sku可编辑的条码'), '', 524);
         }
         $codeAgg = $this->request->request("sku_agg");
+        if (empty($codeAgg)) {
+            $this->error(__('条形码数据传递为空！！'), '', 524);
+        }
         $codeAgg = html_entity_decode($codeAgg);
         $codeAgg = array_filter(json_decode($codeAgg, true));
         if (count(array_filter($codeAgg)) < 1) {
