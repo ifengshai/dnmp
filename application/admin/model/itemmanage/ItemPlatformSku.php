@@ -302,7 +302,7 @@ class ItemPlatformSku extends Model
             $skus = $item->getOrnamentsSku();
         }
 
-        $map['outer_sku_status'] = 1;
+//        $map['outer_sku_status'] = 1;
         $map['platform_type']    = $platform;
         $map['sku'] = ['in', $skus];
         return $this->where($map)->group('sku')->count(1);
@@ -321,8 +321,11 @@ class ItemPlatformSku extends Model
     {
         $category = new \app\admin\model\itemmanage\ItemCategory;
         $map['attribute_group_id'] = $id;
+        $map['is_del'] = 1;
         $ids = $category->where($map)->column('id');
         $where['m.category_id']  = ['in', $ids];
+        $where['m.is_del']  = 1;
+        $where['m.is_open']  = 1;
         $where['p.platform_type'] = $platform;
         return $this->alias('p')->join('fa_item m', 'p.sku=m.sku', 'inner')->where($where)->column('p.platform_sku');
     }
