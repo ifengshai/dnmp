@@ -94,7 +94,7 @@
                         <div class="form-group col-xs-12 col-sm-6 col-md-3">
                             <label for="input-date" class="control-label col-xs-4">时间</label>
                             <div class="col-xs-8" role="form">
-                                <input type="text" autocomplete="off" class="form-control datetimerange" name="input-date" placeholder="时间" id="input-date" value="{$date}" data-index="14">
+                                <input type="text" autocomplete="off" class="form-control datetimerange" name="input-date" placeholder="时间" id="input-date" value="{$date}" data-index="14" data-default="{$date}">
                             </div>
                         </div>
                         <div class="form-group col-xs-12 col-sm-6 col-md-3">
@@ -120,17 +120,27 @@
         <div class="row">
             <div class="col-sm-4 col-xs-6">
                 <div class="description-block border-right row">
-                    <span class="description-header col-sm-4 text-right">付费下载数</span>
-                    <span class="description-text col-sm-4 text-right" id="display-paid-download">0</span>
-                    <span class="description-percentage col-sm-4 text-left text-gray"></span>
+                    <span class="description-header col-sm-4 text-right">首次打开</span>
+                    <span class="description-text col-sm-4 text-right" id="display-ga-first-open">0</span>
+                    <span class="description-percentage col-sm-4 text-left text-gray" id="display-compare-ga-first-open"></span>
                 </div>
-                <div class="description-block border-right row">
-                    <span class="description-header col-sm-4 text-right">花费</span>
-                    <span class="description-text col-sm-4 text-right" id="display-ad-cost">0</span>
-                    <span class="description-percentage col-sm-4 text-left text-gray"></span>
-                </div>
+<!--                <div class="description-block border-right row">-->
+<!--                    <span class="description-header col-sm-4 text-right">付费下载数</span>-->
+<!--                    <span class="description-text col-sm-4 text-right" id="display-paid-download">0</span>-->
+<!--                    <span class="description-percentage col-sm-4 text-left text-gray"></span>-->
+<!--                </div>-->
+<!--                <div class="description-block border-right row">-->
+<!--                    <span class="description-header col-sm-4 text-right">花费</span>-->
+<!--                    <span class="description-text col-sm-4 text-right" id="display-ad-cost">0</span>-->
+<!--                    <span class="description-percentage col-sm-4 text-left text-gray"></span>-->
+<!--                </div>-->
             </div>
             <div class="col-sm-4 col-xs-6">
+                <div class="description-block border-right row">
+                    <span class="description-header col-sm-4 text-right">卸载量</span>
+                    <span class="description-text col-sm-4 text-right" id="display-ga-app-remove">0</span>
+                    <span class="description-percentage col-sm-4 text-left text-gray"></span>
+                </div>
                 <div class="description-block border-right row">
                     <span class="description-header col-sm-4 text-right">会话数</span>
                     <span class="description-text col-sm-4 text-right" id="display-ga-sessions">0</span>
@@ -143,11 +153,6 @@
                 </div>
             </div>
             <div class="col-sm-4 col-xs-6">
-                <div class="description-block border-right row">
-                    <span class="description-header col-sm-4 text-right">首次打开</span>
-                    <span class="description-text col-sm-4 text-right" id="display-ga-first-open">0</span>
-                    <span class="description-percentage col-sm-4 text-left text-gray" id="display-compare-ga-first-open"></span>
-                </div>
                 <div class="description-block border-right row">
                     <span class="description-header col-sm-4 text-right">订单金额</span>
                     <span class="description-text col-sm-4 text-right" id="display-order-money">0</span>

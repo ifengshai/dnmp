@@ -7,6 +7,8 @@ use app\enum\Store;
 
 class Detail extends Dashboard
 {
+    protected $noNeedRight = ['*'];
+
     public function index()
     {
         //查询对应平台权限

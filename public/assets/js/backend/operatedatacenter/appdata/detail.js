@@ -26,12 +26,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 showToggle: false,
                 showColumns: false,
                 showExport: false,
-                showPaginationSwitch: false,
+                pagination: false,
                 columns: [
                     [
                         {field: 'date', title: __('日期'), visible: true, operate: false},
-                        {field: 'download_count_paid', title: __('付费下载数'), visible: true, operate: false},
-                        {field: 'ad_cost', title: __('花费'), visible: true, operate: false},
+                        // {field: 'download_count_paid', title: __('付费下载数'), visible: true, operate: false},
+                        // {field: 'ad_cost', title: __('花费'), visible: true, operate: false},
                         {field: 'sessions', title: __('会话数'), visible: true, operate: false},
                         {field: 'activeUsers', title: __('用户数'), visible: true, operate: false},
                         {field: 'first_open', title: __('首次打开'), visible: true, operate: false},

@@ -8,6 +8,7 @@ use think\Db;
 
 class Dashboard extends Backend
 {
+    protected $noNeedRight = ['*'];
 
     public function _initialize()
     {
@@ -61,7 +62,6 @@ class Dashboard extends Backend
             // 比较数据
             $compare = [];
             if ($compare_date) {
-                $compare_date = date('Y-m-d - Y-m-d', strtotime('yesterday'));
                 $compare_time = explode(' - ', $compare_date);
                 $compare_start_time = date('Y-m-d', strtotime($compare_time[0]));
                 $compare_end_time = date('Y-m-d', strtotime($compare_time[1]));
@@ -94,15 +94,15 @@ class Dashboard extends Backend
         foreach ($platforms as $plat) {
             // 获取订单数据
             $list = $this->getOrderData($site, $plat, $start_time, $end_time);
-            $data['order_list'] = self::arraySum($data['order_list'], $list);
+            $data['order_list'] = self::arraySum($data['order_list'], $list) ?: [];
 
             // 获取GA数据
             $list = $this->getGaData($site, $plat, $start_time, $end_time);
-            $data['ga_list'] = self::arraySum($data['ga_list'], $list);
+            $data['ga_list'] = self::arraySum($data['ga_list'], $list) ?: [];
 
             // 获取googleads数据
 //            $list = $this->getAdData($site, $plat, $start_time, $end_time);
-//            $data['ad_list'] = self::arraySum($data['ad_list'], $list);
+//            $data['ad_list'] = self::arraySum($data['ad_list'], $list) ?: [];
         }
         $data['ga_list'] = array_values($data['ga_list']);
 
@@ -112,6 +112,7 @@ class Dashboard extends Backend
         $data['ga_users'] = array_sum(array_column($data['ga_list'], 'activeUsers'));
         $data['ga_sessions'] = array_sum(array_column($data['ga_list'], 'sessions'));
         $data['first_open'] = array_sum(array_column($data['ga_list'], 'first_open'));
+        $data['app_remove'] = array_sum(array_column($data['ga_list'], 'app_remove'));
 
         // 转化率
         $data['conversion_session'] = $data['ga_sessions'] > 0 ? round($data['order_num'] / $data['ga_sessions'] * 100, 2) : 100;
@@ -123,7 +124,7 @@ class Dashboard extends Backend
     protected function getGaData($site, $platform, $start_time, $end_time)
     {
         $ga = new \app\service\google\AnalyticsData($site, $platform);
-        $data = [];
+        $data = $this->initArray($start_time, $end_time, ['first_open', 'app_remove', 'sessions', 'activeUsers']);
         // 选择时间的会话数与用户数
         $result = $ga->getReport($start_time, $end_time, ['sessions', 'activeUsers'], ['date']);
         foreach ($result as $key => $item) {
@@ -136,6 +137,7 @@ class Dashboard extends Backend
             $date = date('Y-m-d', strtotime($key));
             $data[$date]['date'] = $date;
             $data[$date]['first_open'] = $item['first_open']['eventCount'] ?? 0;
+            $data[$date]['app_remove'] = $item['app_remove']['eventCount'] ?? 0;
         }
         ksort($data);
 
@@ -165,11 +167,26 @@ class Dashboard extends Backend
                 ],
                 'created_at' => ['between', [strtotime($start_time), strtotime($end_time) + 86400]]
             ])
-            ->field("DATE_FORMAT(FROM_UNIXTIME(created_at),'%Y-%m-%d') as date, sum(base_grand_total) as order_money, count(*) as order_num")
+            ->field("DATE_FORMAT(FROM_UNIXTIME(created_at),'%Y-%m-%d') as date, round(sum(base_grand_total), 2) as order_money, count(*) as order_num")
             ->group('date')
             ->select();
 
+
+
         return array_combine(array_column($data, 'date'), $data);
+    }
+
+    protected function initArray($start_time, $end_time, $attributes)
+    {
+        $data = [];
+        for ($time = strtotime($start_time); $time <= strtotime($end_time); $time+= 86400) {
+            $date = date('Y-m-d', $time);
+            $data[$date]['date'] = $date;
+            foreach ($attributes as $attribute) {
+                $data[$date][$attribute] = 0;
+            }
+        }
+        return $data;
     }
 
     protected function arraySum($a, $b)
