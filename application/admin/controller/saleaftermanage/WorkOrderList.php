@@ -1386,7 +1386,7 @@ class WorkOrderList extends Backend
                             //查询条形码库区库位
 
                             //转换sku
-                            $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            $whe_sku['platform_sku'] = $item['change_frame']['sku'];
                             //转换sku
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
@@ -2084,7 +2084,6 @@ class WorkOrderList extends Backend
 
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
@@ -2375,7 +2374,7 @@ class WorkOrderList extends Backend
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
 
-                            $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            $whe_sku['platform_sku'] = $item['change_frame']['original_sku'];
                             //转换sku
                             $item_platform_sku = new ItemPlatformSku();
                             $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
