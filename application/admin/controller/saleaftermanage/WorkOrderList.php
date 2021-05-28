@@ -1988,7 +1988,15 @@ class WorkOrderList extends Backend
             } else {
                 $sku = trim($v);
             }
-           
+
+            //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
+            if ($siteType == 13 || $siteType == 14) {
+                $itemPlatFormSkuWhere = ['platform_sku' => $sku, 'platform_type' => $siteType];
+            }else{
+                $itemPlatFormSkuWhere = ['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $siteType];
+            }
+            $res = $itemPlatFormSku->where($itemPlatFormSkuWhere)->find();
+
             if(!empty($sku)){
 
                 $_new_order = new NewOrder();
@@ -2002,7 +2010,7 @@ class WorkOrderList extends Backend
                 //配货完成时判断
                 //拣货区盘点时不能操作
                 //查询条形码库区库位
-                $whe_sku['sku'] = $sku;
+                $whe_sku['sku'] = $res->sku;
                 $whe_sku['library_status'] = 1;
                 $whe_sku['stock_id'] = $stockId;
                 $barcodedata = $this->_product_bar_code_item->where($whe_sku)->column('location_code');
@@ -2016,13 +2024,6 @@ class WorkOrderList extends Backend
                 }
                 /****************************end*****************************************/
             }
-            //判断是否开启预售 并且预售时间是否满足 并且预售数量是否足够
-            if ($siteType == 13 || $siteType == 14) {
-                $itemPlatFormSkuWhere = ['platform_sku' => $sku, 'platform_type' => $siteType];
-            }else{
-                $itemPlatFormSkuWhere = ['outer_sku_status' => 1, 'platform_sku' => $sku, 'platform_type' => $siteType];
-            }
-            $res = $itemPlatFormSku->where($itemPlatFormSkuWhere)->find();
 
             //判断是否开启预售
             if ($res['stock'] >= 0 && $res['presell_status'] == 1 && strtotime($res['presell_create_time']) <= time() && strtotime($res['presell_end_time']) >= time()) {
