@@ -460,7 +460,7 @@ class GoodsDataView extends Backend
                 ->where($itemMap)
                 ->count('distinct i.sku');
             //眼镜动销率
-            $frame_in_print_rate = $frame_onsales_num ? round(($frame_in_print_num/$frame_onsales_num)*100,2) : 0;
+            $frame_in_print_rate = $frame_onsales_num ? round(($frame_in_print_num/$frame_onsales_num)*100,2).'%' : 0;
             //配饰动销数
             $decoration_in_print_num = $this->orderitemoption
                 ->alias('i')
@@ -470,7 +470,7 @@ class GoodsDataView extends Backend
                 ->where($itemMap)
                 ->count('distinct i.sku');
             //配饰动销率
-            $decoration_in_print_rate = $decoration_onsales_num ? round(($decoration_in_print_num / $decoration_onsales_num) * 100, 2) : 0;
+            $decoration_in_print_rate = $decoration_onsales_num ? round(($decoration_in_print_num / $decoration_onsales_num) * 100, 2).'%' : 0;
             //求出所有新品眼镜sku
             $frame_new_sku = $this->itemPlatformSku->getDifferencePlatformNewSku(1, $platform);
             //求出所有新品饰品sku
@@ -527,7 +527,7 @@ class GoodsDataView extends Backend
                 ->where('i.sku', 'in', $frame_new_sku)
                 ->count('distinct i.sku');
             //新品眼镜动销率
-            $frame_new_in_print_rate = $frame_new_num ? round(($frame_new_in_print_num / $frame_new_num) * 100, 2) : 0;
+            $frame_new_in_print_rate = $frame_new_num ? round(($frame_new_in_print_num / $frame_new_num) * 100, 2).'%' : 0;
             //新品饰品动销数
             $decoration_new_in_print_num = $this->orderitemoption
                 ->alias('i')
@@ -537,7 +537,7 @@ class GoodsDataView extends Backend
                 ->where('i.sku', 'in', $decoration_new_sku)
                 ->count('distinct i.sku');
             //新品饰品动销率
-            $decoration_new_in_print_rate = $decoration_new_num ? round(($decoration_new_in_print_num / $decoration_new_num) * 100, 2) : 0;
+            $decoration_new_in_print_rate = $decoration_new_num ? round(($decoration_new_in_print_num / $decoration_new_num) * 100, 2).'%' : 0;
         }else{
             //求出眼镜的销售额
             $frame_money_price = $model->table('sales_flat_order_item m')
@@ -612,7 +612,7 @@ class GoodsDataView extends Backend
             //$frame_num                 = $this->item->getDifferenceSkuNUm(1);
             //眼镜动销率
             if (0 < $frame_onsales_num) {
-                $frame_in_print_rate = round(($frame_in_print_num / $frame_onsales_num) * 100, 2);
+                $frame_in_print_rate = round(($frame_in_print_num / $frame_onsales_num) * 100, 2).'%';
             } else {
                 $frame_in_print_rate = 0;
             }
@@ -627,7 +627,7 @@ class GoodsDataView extends Backend
             //$decoration_num            = $this->item->getDifferenceSkuNUm(3);
             //配饰动销率
             if (0 < $decoration_onsales_num) {
-                $decoration_in_print_rate = round(($decoration_in_print_num / $decoration_onsales_num) * 100, 2);
+                $decoration_in_print_rate = round(($decoration_in_print_num / $decoration_onsales_num) * 100, 2).'%';
             } else {
                 $decoration_in_print_rate = 0;
             }
@@ -701,7 +701,7 @@ class GoodsDataView extends Backend
                 ->count('distinct m.sku');
             //新品眼镜动销率
             if (0 < $frame_new_num) {
-                $frame_new_in_print_rate = round(($frame_new_in_print_num / $frame_new_num) * 100, 2);
+                $frame_new_in_print_rate = round(($frame_new_in_print_num / $frame_new_num) * 100, 2).'%';
             } else {
                 $frame_new_in_print_rate = 0;
             }
@@ -714,7 +714,7 @@ class GoodsDataView extends Backend
                 ->count('distinct m.sku');
             //新品饰品动销率
             if (0 < $decoration_new_num) {
-                $decoration_new_in_print_rate = round(($decoration_new_in_print_num / $decoration_new_num) * 100, 2);
+                $decoration_new_in_print_rate = round(($decoration_new_in_print_num / $decoration_new_num) * 100, 2).'%';
             } else {
                 $decoration_new_in_print_rate = 0;
             }
@@ -1086,7 +1086,7 @@ class GoodsDataView extends Backend
                 ->where('m.sku', 'in', $frame_new_sku)
                 ->count('distinct m.sku');
         }
-        $frame_in_print_rate = $frame_onsales_num ? round(($frame_in_print_num/$frame_onsales_num)*100, 2) : 0;
+        $frame_in_print_rate = $frame_onsales_num ? round(($frame_in_print_num/$frame_onsales_num)*100, 2).'%' : 0;
         //某个类型的眼镜客户平均副数
         $frame_avg_customer = $frame_order_customer ? round(($frame_sales_num / $frame_order_customer), 2) : 0;
 
@@ -1106,7 +1106,7 @@ class GoodsDataView extends Backend
             }
         }
         //某个类型的新品眼镜动销率
-        $frame_new_in_print_rate = $frame_new_num ? round(($frame_new_in_print_num / $frame_new_num) * 100, 2) : 0;
+        $frame_new_in_print_rate = $frame_new_num ? round(($frame_new_in_print_num / $frame_new_num) * 100, 2).'%' : 0;
         //光学镜
         $arr = [
             //眼镜的实际销售额
