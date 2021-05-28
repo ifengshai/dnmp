@@ -26,11 +26,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 columns: [
                     [
                         {field: 'platform_sku', title: __('SKU'),operate: false},
-                        {field: 'cart_num', title: __('购物车数量'),operate: false},
+                        {field: 'update_cart_num', title: __('购物车数量'),operate: false},
                         {field: 'order_num', title: __('订单成功数'),operate: false},
                         {field: 'sku_grand_total', title: __('订单金额'),operate: false},
-                        {field: 'update_cart_rate', title: __('更新购物车转化率'),operate: false},
-                        {field: 'cart_change', title: __('新增购物车转化率'),operate: false},
                         {field: 'pay_lens_rate', title: __('付费镜片占比'),operate: false},
                         {field: 'now_pricce', title: __('售价'),operate: false},
                         {field: 'status', title: __('在售状态（实时）'),
@@ -50,12 +48,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 var order_platform = $('#order_platform').val();
                 if(order_platform == 5){
                     table.bootstrapTable("hideColumn", 'cart_num');
-                    table.bootstrapTable("hideColumn", 'update_cart_rate');
-                    table.bootstrapTable("hideColumn", 'cart_change');
                 }else{
                     table.bootstrapTable("showColumn", 'cart_num');
-                    table.bootstrapTable("showColumn", 'update_cart_rate');
-                    table.bootstrapTable("showColumn", 'cart_change');
                 }
                 var params = table.bootstrapTable('getOptions')
                 params.queryParams = function (params) {
