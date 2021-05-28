@@ -227,7 +227,7 @@ class UserData extends BaseElasticsearch
             $resultData[0]['userType']="普通用户";//用户类型
             $resultData[0]['userNumber']=$customerCount;//用户数
             $resultData[0]['userNumberRatio']="100%";//用户数占比
-            $resultData[0]['userSale']=$orderCount;//销售额
+            $resultData[0]['userSale']=$orderCount?number_format($orderCount, 2):0;//销售额
             $resultData[0]['userSaleRatio']="100%";//销售额占比
 
             return $resultData;
