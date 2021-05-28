@@ -235,13 +235,17 @@ class OrderEsFormat extends BaseEsFormatData
     public function formatHourData($orderData, $createCartData, $updateCartData, $gaData = [], $today = true)
     {
         $hourSale = $orderData['hourSale']['buckets'];
-        $hourCreateCart = $createCartData['hourCart']['buckets'];
-        $hourUpdateCart = $updateCartData['hourCart']['buckets'];
-
+        $hourCreateCart = $createCartData['hourCart']['buckets'] ?? [];
+        $hourUpdateCart = $updateCartData['hourCart']['buckets'] ?? [];
+        $hourCreateCartFormat = $hourUpdateCartFormat = [];
 
         $hourSaleFormat = array_combine(array_column($hourSale, 'key'), $hourSale);
-        $hourCreateCartFormat = array_combine(array_column($hourCreateCart, 'key'), $hourCreateCart);
-        $hourUpdateCartFormat = array_combine(array_column($hourUpdateCart, 'key'), $hourUpdateCart);
+        if($hourCreateCart) {
+            $hourCreateCartFormat = array_combine(array_column($hourCreateCart, 'key'), $hourCreateCart);
+        }
+        if($hourUpdateCart) {
+            $hourUpdateCartFormat = array_combine(array_column($hourUpdateCart, 'key'), $hourUpdateCart);
+        }
         $finalLists = $this->formatHour($today);
         //时段销量数据
         $allSession = $allCreateCartToOrderNum = $allUpdateCartToOrderNum = $createCartToOrderNum = $updateCartToOrderNum = 0;
