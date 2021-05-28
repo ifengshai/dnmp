@@ -3189,7 +3189,7 @@ class ScmWarehouse extends Scm
             $call_in_site_coding = $this->_store_house->where(['id' => ['in', $call_in_site_id]])->column('coding');
             $vat = array_merge($codes, $call_in_site_coding);
             //所有拣货库区ids
-            $allPickingIds = Db::name('warehouse_area')->where('type',2)->column('id');
+            $allPickingIds = Db::name('warehouse_area')->column('id');
 
             $count = $this->_inventory->alias('a')
                 ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat], 'b.area_id' => ['in',$allPickingIds]])
@@ -3781,7 +3781,7 @@ class ScmWarehouse extends Scm
 
         $where = [];
         if ($query) {
-            $where['transfer_order_number|create_person'] = ['like', '%' . $query . '%'];
+            $where['transfer_order_number|create_person|response_person'] = ['like', '%' . $query . '%'];
         }
         if (isset($status)) {
             $where['status'] = $status;
