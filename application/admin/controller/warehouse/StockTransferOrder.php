@@ -32,7 +32,7 @@ class StockTransferOrder extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['print_label','getStockHouse'];
+    protected $noNeedRight = ['print_label','getStockHouse','setStatus'];
 
     public function _initialize()
     {
