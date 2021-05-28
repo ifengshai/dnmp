@@ -1257,7 +1257,7 @@ class Voogueme extends Model
             ->table('customer_entity')
             ->where($customerWhere)
             ->count();
-        $order = Db::connect('database.db_nihao')
+        $order = Db::connect('database.db_voogueme')
             ->table('sales_flat_order')
             ->field('customer_group_id,sum(base_grand_total) as total')
             ->group('customer_group_id')
@@ -1265,7 +1265,7 @@ class Voogueme extends Model
             ->where($customerWhere)
             ->where($orderWhere)
             ->select();
-        $orderCount = Db::connect('database.db_nihao')
+        $orderCount = Db::connect('database.db_voogueme')
             ->table('sales_flat_order')
             ->where($customerWhere)
             ->where($orderWhere)

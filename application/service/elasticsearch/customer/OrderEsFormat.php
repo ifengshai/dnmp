@@ -199,6 +199,10 @@ class OrderEsFormat extends BaseEsFormatData
             $daySaleStr .= '<tr><td>' . $date . '</td><td>' . $loginNum . '</td><td>' . $session . '</td><td>' . $addToCartRate . '</td><td>' . $sessionRate . '</td><td>' . $orderNum . '</td><td>' . $avgPrice . '</td><td>' . $newCartNum . '</td><td>' . $updateCartNum . '</td><td>' . $salesTotalMoney . '</td><td>' . $registerNum . '</td></td></tr>';
         }
         $daySaleStr .= '<tr><td> 合计 </td><td>' . $allLoginNum . '</td><td>' . $allSessions . '</td><td>' . $allAddToCartRate . '</td><td>' . $allSessionRate . '</td><td>' . $allOrderNum . '</td><td>' . $allAvgPrice . '</td><td>' . $allNewCartNum . '</td><td>' . $allUpdateCartNum . '</td><td>' . $allSalesTotalMoney . '</td><td>' . $allRegisterNum . '</td></td></tr>';
+        $dayChartsSalesArr = array_column($dayChartsSales,'value');
+        foreach($dayChartsSalesArr as $key => $val) {
+            $dayChartsSalesArr[$key] = round($val);
+        }
         //回话-销售趋势
         $ydataSessionSale = [
             [
@@ -206,7 +210,7 @@ class OrderEsFormat extends BaseEsFormatData
                 'name' => '会话数',
             ],
             [
-                'value' => array_values(array_column($dayChartsSales,'value')),
+                'value' => array_values($dayChartsSalesArr),
                 'name' => '销售额',
             ]
 

@@ -218,13 +218,13 @@ class AllData extends BaseElasticsearch
             $timeStr = $timeStr ? $timeStr : $nowDay;
             $cacheStr = 'alldata_dash_board_rebuy_' . $site . $timeStr . $compareTimeStr;
             $cacheData = Cache::get($cacheStr);
-            //if(!$cacheData) {
+            if(!$cacheData) {
                 //复购用户数
                 $againUserNum = $model->getAgainUser($timeStr, $compareTimeStr);
                 Cache::set($cacheStr,$againUserNum,600);
-//            }else{
-//                $againUserNum = $cacheData;
-//            }
+            }else{
+                $againUserNum = $cacheData;
+            }
 
             $this->success('', '', $againUserNum);
         }
