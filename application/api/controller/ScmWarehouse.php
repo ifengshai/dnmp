@@ -4371,11 +4371,11 @@ class ScmWarehouse extends Scm
         $transferOrderItemId = $this->request->request('transfer_order_item_id');
         $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
         $transferOrderDetail = $this->_stock_transfer_order->where('id', $transferOrderItemDetail['transfer_order_id'])->find();
-        $transferOrderItemCodeDetail = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId])->find();
+        // $transferOrderItemCodeDetail = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId])->find();
         $allStock = Db::name('warehouse_stock')->column('name', 'id');
-        if (!empty($transferOrderItemCodeDetail)) {
-            $this->error(__('实体仓调拨单子单sku' . $transferOrderItemDetail['sku'] . '已提交过,只可编辑单个sku，请检查！！'), '', 524);
-        }
+        // if (!empty($transferOrderItemCodeDetail)) {
+        //     $this->error(__('实体仓调拨单子单sku' . $transferOrderItemDetail['sku'] . '已提交过,只可编辑单个sku，请检查！！'), '', 524);
+        // }
         if (empty($transferOrderItemDetail)) {
             $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
         }
