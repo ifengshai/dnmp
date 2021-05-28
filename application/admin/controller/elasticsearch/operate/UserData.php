@@ -17,7 +17,7 @@ use think\Db;
 
 class UserData extends BaseElasticsearch
 {
-
+    protected $noNeedRight = ['*'];
 
     /**
      * Created by Phpstorm.
