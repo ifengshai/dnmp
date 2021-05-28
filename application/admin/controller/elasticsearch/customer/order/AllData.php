@@ -232,8 +232,8 @@ class AllData extends BaseElasticsearch
 
     public function getCustomer()
     {
-        echo date('Y-m-d 00:00:00').PHP_EOL;
-        echo date('Y-m-d 00:00:00',time() - 8*3600);DIE;
+        echo date('Y-m-d H:i:s').PHP_EOL;
+        echo date('Y-m-d H:i:s',time() - 8*3600);DIE;
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $timeStr = $params['time_str'];
