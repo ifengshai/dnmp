@@ -181,27 +181,6 @@ class OrderData extends Backend
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order') {
                                 $order_params = [];
                                 foreach ($payload['data'] as $k => $v) {
-
-
-                                    $order_ids = $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->value('id');
-                                    $order_ids2 = $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->value('id');
-                                    if ($order_ids) {
-                                        $this->order->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
-                                        $this->orderprocess->where('site=' . $site . ' and increment_id=' . $v['increment_id'])->delete();
-
-                                        //删除子订单表
-                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
-                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids)->delete();
-
-                                    }
-
-                                    if ($order_ids2) {
-                                        $this->orderprocess->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
-                                        $this->order->where('site=' . $site . ' and entity_id=' . $v['entity_id'])->delete();
-                                        $this->orderitemoption->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
-                                        $this->orderitemprocess->where('site=' . $site . ' and order_id=' . $order_ids2)->delete();
-                                    }
-
                                     $params = [];
                                     $params['entity_id'] = $v['entity_id'];
                                     $params['site'] = $site;
