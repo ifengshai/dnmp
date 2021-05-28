@@ -24,6 +24,8 @@ class StockData extends Backend
      */
     private $magentoPlatform;
 
+    protected $noNeedRight = ['*'];
+
     /**
      * @author fangke
      * @date   5/17/21 11:28 AM
