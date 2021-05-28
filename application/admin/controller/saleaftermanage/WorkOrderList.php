@@ -2016,7 +2016,7 @@ class WorkOrderList extends Backend
                 $barcodedata = $this->_product_bar_code_item->where($whe_sku)->column('location_code');
                 if (!empty($barcodedata)){
                     $count = $this->_inventory->alias('a')
-                        ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $barcodedata],'b.area' => $area_id])
+                        ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $barcodedata],'b.area_id' => $area_id])
                         ->count();
                     if ($count > 0) {
                         return ['result' => false, 'msg' => '此'.$sku.'对应库位正在盘点,暂无法进行出入库操作'];
