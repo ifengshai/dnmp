@@ -963,14 +963,12 @@ class GoodsDataView extends Backend
                     ->alias('i')
                     ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
                     ->where($whereItem)
-                    ->where($itemMap)
                     ->where('i.goods_type', $goods_type)
                     ->count('distinct i.sku');
             }else{
                 $frame_onsales_num = $model->table('sales_flat_order_item m')
                     ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
                     ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                    ->where($itemMap)
                     ->where('p.goods_type', '=', $goods_type)
                     ->where($whereItem)
                     ->count('distinct m.sku');
