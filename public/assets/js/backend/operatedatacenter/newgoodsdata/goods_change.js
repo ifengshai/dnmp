@@ -47,9 +47,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
             $("#sku_submit").click(function () {
                 var order_platform = $('#order_platform').val();
                 if(order_platform == 5){
-                    table.bootstrapTable("hideColumn", 'cart_num');
+                    table.bootstrapTable("hideColumn", 'update_cart_num');
                 }else{
-                    table.bootstrapTable("showColumn", 'cart_num');
+                    table.bootstrapTable("showColumn", 'update_cart_num');
                 }
                 var params = table.bootstrapTable('getOptions')
                 params.queryParams = function (params) {
