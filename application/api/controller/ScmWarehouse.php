@@ -4478,6 +4478,10 @@ class ScmWarehouse extends Scm
         if (count(array_filter($codeAgg)) < 1) {
             $this->error(__('条形码数据不能为空！！'), '', 524);
         }
+        $codeAggUnique = array_unique(array_column($codeAgg,'code'));
+        if(count($codeAggUnique) != count($codeAgg)) {
+            $this->error(__('条形码数据有重复的，请检查！！'), '', 524);
+        }
         $arr = [];
         foreach ($codeAgg as $k => $v) {
             //判断当前条码的在库状态
@@ -4676,6 +4680,11 @@ class ScmWarehouse extends Scm
         $arr = [];
         $key = 0;
         foreach ($codeAgg as $k => $v) {
+            $skuCodeAggUnique = [];
+            $skuCodeAggUnique = array_unique(array_column($v['sku_agg'],'code'));
+            if(count($skuCodeAggUnique) != count($v['sku_agg'])) {
+                $this->error(__('条形码数据有重复的，请检查！！'), '', 524);
+            }
             foreach ($v['sku_agg'] as $k1 => $v1) {
                 if (count(array_filter($v1)) < 1) {
                     $this->error(__('条形码数据不能为空！！'), '', 524);
