@@ -155,8 +155,7 @@ class StockTransferOrder extends Backend
         $transferOrderNumber = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('transfer_order_number', $transferOrderNumber);
         $this->assign('all_stock', $allStock);
-        $allPerson = AuthGroup::getAllNextGroup(135);
-        dump($allPerson);die;
+        $allPerson = AuthGroup::getAllNextGroup(43);
         $this->assign('all_person', $allPerson);
         return $this->view->fetch();
     }
