@@ -3874,11 +3874,11 @@ class ScmWarehouse extends Scm
                 ->where('transfer_order_id', $id)
                 ->field('sku,id,real_num')
                 ->select();
-            foreach ($allItemDetail as $k0 => $v0) {
-                if ($v0['real_num'] == 0) {
-                    $this->error(__($v0['sku'] . '调拨数量为0，请检查或重新创建仓库调拨单'), '', 546);
-                }
-            }
+            // foreach ($allItemDetail as $k0 => $v0) {
+            //     if ($v0['real_num'] == 0) {
+            //         $this->error(__($v0['sku'] . '调拨数量为0，请检查或重新创建仓库调拨单'), '', 546);
+            //     }
+            // }
             $allItemIds = array_column($allItemDetail, 'id');
             $allCodes = $this->_stock_transfer_order_item_code->where('transfer_order_item_id', 'in', $allItemIds)->column('code');
             $res = false;
