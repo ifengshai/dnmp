@@ -17,7 +17,7 @@ use think\Cache;
 class ConversionRate extends BaseElasticsearch
 {
     public $esFormat = null;
-
+    protected $noNeedRight = ['*'];
     public function _initialize()
     {
         $this->esFormat = new OrderEsFormat();
