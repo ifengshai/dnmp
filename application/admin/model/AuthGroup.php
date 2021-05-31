@@ -72,7 +72,7 @@ class AuthGroup extends Model
         foreach($array as $v){
             if($v['pid'] == $id){
                 $arr[] = $v['id'];
-                $arr = array_merge($arr,$this->get_all_child($array,$v['id']));
+                $arr = array_merge($arr,self::get_all_child($array,$v['id']));
             };
         };
         return $arr;
