@@ -155,7 +155,12 @@ class StockTransferOrder extends Backend
         $transferOrderNumber = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('transfer_order_number', $transferOrderNumber);
         $this->assign('all_stock', $allStock);
-        $allPerson = AuthGroup::getAllNextGroup(43);
+        $allTerm = AuthGroup::getAllNextGroup(43);
+        $allPersonIds = Db::name('auth_group_access')->where('group_id','in',$allTerm)->column('uid');
+        $allPerson1 = Db::name('admin')->where('id','in',$allPersonIds)->column('nickname');
+        foreach ($allPerson1 as $k=>$v){
+            $allPerson[$v] = $v;
+        }
         $this->assign('all_person', $allPerson);
         return $this->view->fetch();
     }
