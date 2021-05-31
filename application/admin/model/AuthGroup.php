@@ -58,7 +58,7 @@ class AuthGroup extends Model
         // if($arr){
         //     return $arr;
         // }
-        $rs = $this->field('id,pid')->select();
+        $rs = self::field('id,pid')->select();
         if(!$rs){
             return false;
         }
