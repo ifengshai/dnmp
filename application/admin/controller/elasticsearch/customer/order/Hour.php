@@ -18,7 +18,7 @@ use think\Cache;
 class Hour extends BaseElasticsearch
 {
     public $esFormat = null;
-
+    protected $noNeedRight = ['*'];
     public function _initialize()
     {
         $this->esFormat = new OrderEsFormat();
