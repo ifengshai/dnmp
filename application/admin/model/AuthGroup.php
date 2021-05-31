@@ -62,7 +62,7 @@ class AuthGroup extends Model
         if(!$rs){
             return false;
         }
-        $info = $this->get_all_child($rs,$group_id);
+        $info = self::get_all_child($rs,$group_id);
         //Cache::set('AuthGroup_getAllNextGroup_'.$group_id,$info);
         return $info;
     }
