@@ -1288,20 +1288,9 @@ class ZeeloolDe extends Model
         $customerWhere['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $orderWhere['order_type'] = 1;
-        //用户统计
-        $customer = Db::connect('database.db_zeelool_de')
-            ->table('customer_entity')
-            ->field('count(*) as count,group_id')
-            ->where($customerWhere)
-            ->group('group_id')
-            ->select();
-        $customerCount = Db::connect('database.db_zeelool_de')
-            ->table('customer_entity')
-            ->where($customerWhere)
-            ->count();
         $order = Db::connect('database.db_zeelool_de')
             ->table('sales_flat_order')
-            ->field('customer_group_id,sum(base_grand_total) as total')
+            ->field('customer_group_id,sum(base_grand_total) as total,count(*) as count')
             ->group('customer_group_id')
             ->where('customer_group_id','>',0)
             ->where($customerWhere)
@@ -1314,31 +1303,31 @@ class ZeeloolDe extends Model
             ->where('customer_group_id','>',0)
             ->sum('base_grand_total');
         $result = [];
-        foreach($customer as $key => $val) {
-            foreach($order as $k => $v){
-                if($val['group_id'] == $v['customer_group_id']) {
-                    switch($v['customer_group_id']) {
-                        case 1:
-                            $name = '普通用户';
-                            break;
-                        case 2:
-                            $name = '批发用户';
-                            break;
-                        case 4:
-                            $name = 'VIP';
-                            break;
-                        default:
-                            $name = "其余非游客用户";
-                    }
-                    $result[$key] = [
-                        'count' => $val['count'],
-                        'name' => $name,
-                        'num'  => round($v['total'],2),
-                        'rate' => bcmul(bcdiv($v['total'], $orderCount,4),100,2).'%',
-                        'customerRate' => bcmul(bcdiv($val['count'], $customerCount,4),100,2).'%',
-                    ];
-                }
+        $customerCount = 0;
+        foreach($order as $k => $v){
+            $customerCount += $v['count'];
+        }
+        foreach($order as $k => $v){
+            switch($v['customer_group_id']) {
+                case 1:
+                    $name = '普通用户';
+                    break;
+                case 2:
+                    $name = '批发用户';
+                    break;
+                case 4:
+                    $name = 'VIP';
+                    break;
+                default:
+                    $name = "其余非游客用户";
             }
+            $result[$k] = [
+                'count' => $v['count'],
+                'name' => $name,
+                'num'  => round($v['total'],2),
+                'rate' => bcmul(bcdiv($v['total'], $orderCount,4),100,2).'%',
+                'customerRate' => bcmul(bcdiv($v['count'], $customerCount,4),100,2).'%',
+            ];
         }
         return $result;
     }
