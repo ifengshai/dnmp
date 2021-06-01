@@ -12,6 +12,7 @@ use think\Request;
 
 class NewDataMarket extends Backend
 {
+    protected $noNeedRight = ['*'];
     public function _initialize()
     {
         parent::_initialize();

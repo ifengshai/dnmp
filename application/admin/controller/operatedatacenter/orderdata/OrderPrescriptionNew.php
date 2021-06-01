@@ -15,6 +15,7 @@ use think\Db;
 
 class OrderPrescriptionNew extends Backend
 {
+    protected $noNeedRight = ['*'];
     /**
      * 显示资源列表
      *

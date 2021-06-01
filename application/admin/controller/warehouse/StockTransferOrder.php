@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\warehouse;
 
+use app\admin\model\AuthGroup;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -154,6 +155,13 @@ class StockTransferOrder extends Backend
         $transferOrderNumber = 'TO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
         $this->assign('transfer_order_number', $transferOrderNumber);
         $this->assign('all_stock', $allStock);
+        $allTerm = AuthGroup::getAllNextGroup(135);
+        $allPersonIds = Db::name('auth_group_access')->where('group_id','in',$allTerm)->column('uid');
+        $allPerson1 = Db::name('admin')->where('id','in',$allPersonIds)->column('nickname');
+        foreach ($allPerson1 as $k=>$v){
+            $allPerson[$v] = $v;
+        }
+        $this->assign('all_person', $allPerson);
         return $this->view->fetch();
     }
 

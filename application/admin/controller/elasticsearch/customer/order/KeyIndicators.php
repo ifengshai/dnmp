@@ -23,6 +23,7 @@ use think\Cache;
  */
 class KeyIndicators extends BaseElasticsearch
 {
+    protected $noNeedRight = ['*'];
     public $esFormat = null;
 
     public function _initialize()

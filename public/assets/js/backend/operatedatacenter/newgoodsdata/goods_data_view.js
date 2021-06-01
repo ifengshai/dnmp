@@ -17,7 +17,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('.zeelool-div').show();
                     $('.voogueme-div').hide();
                     $('.nihao-div').hide();
-
+                    $("#optical_glass").html('光学镜');
                     $('#run_glass').show();
                     $('#old_glass').show();
                     $('#son_glass').show();
@@ -25,7 +25,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('.zeelool-div').hide();
                     $('.voogueme-div').show();
                     $('.nihao-div').hide();
-
+                    $("#optical_glass").html('平光镜');
                     $('#run_glass').hide();
                     $('#old_glass').hide();
                     $('#son_glass').hide();
@@ -34,6 +34,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('.zeelool-div').hide();
                     $('.voogueme-div').hide();
                     $('.nihao-div').show();
+                    $("#optical_glass").html('平光镜');
+                    $('#run_glass').hide();
+                    $('#old_glass').hide();
+                    $('#son_glass').hide();
                 }
                 site_goods_type();
                 order_data_view();   //商品销售概况

@@ -82,7 +82,13 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">调拨负责人:</label>
         <div class="col-xs-12 col-sm-4">
-            <input id="response_person" class="form-control" name="row[response_person]" value="" type="text">
+<!--            <input id="response_person" class="form-control" name="row[response_person]" value="" type="text">-->
+            <select id="response_person" class="form-control selectpicker call_out_site" name="row[response_person]" data-rule="required">
+                <option value="">请选择</option>
+                {foreach name="all_person" item="vo"}
+                <option value="{$vo}">{$vo}</option>
+                {/foreach}
+            </select>
         </div>
     </div>
     <div class="form-group">

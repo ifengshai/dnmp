@@ -341,7 +341,7 @@ class GoodsDataView extends Backend
             //站点
             $order_platform = $params['platform'] ? $params['platform'] : 1;
             //时间
-            $time_str = $params['time_str'];
+            $time_str = $params['time'];
             if (!$time_str) {
                 //默认查询z站七天的数据
                 $start = date('Y-m-d', strtotime('-6 day'));

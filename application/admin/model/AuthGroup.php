@@ -58,11 +58,11 @@ class AuthGroup extends Model
         // if($arr){
         //     return $arr;
         // }
-        $rs = $this->field('id,pid')->select();
+        $rs = self::field('id,pid')->select();
         if(!$rs){
             return false;
         }
-        $info = $this->get_all_child($rs,$group_id);
+        $info = self::get_all_child($rs,$group_id);
         //Cache::set('AuthGroup_getAllNextGroup_'.$group_id,$info);
         return $info;
     }
@@ -72,7 +72,7 @@ class AuthGroup extends Model
         foreach($array as $v){
             if($v['pid'] == $id){
                 $arr[] = $v['id'];
-                $arr = array_merge($arr,$this->get_all_child($array,$v['id']));
+                $arr = array_merge($arr,self::get_all_child($array,$v['id']));
             };
         };
         return $arr;
