@@ -263,13 +263,13 @@ class AllData extends BaseElasticsearch
             $timeStr = $timeStr ? $timeStr : $nowDay;
             $cacheStr = 'dash_board_alldata_' . $site . $timeStr;
             $cacheData = Cache::get($cacheStr);
-            if(!$cacheData) {
+            //if(!$cacheData) {
                 //用户数据
                 $userNum = $model->getUserOrderData($timeStr);
                 Cache::set($cacheStr,$userNum,600);
-            }else{
-                $userNum = $cacheData;
-            }
+//            }else{
+//                $userNum = $cacheData;
+//            }
             $str = '';
             foreach($userNum as $key => $val){
                     $str .= '<tr><td>' . $val['name'] . '</td><td>' . $val['count'] . '</td><td>' . $val['customerRate'] . '</td><td>' . $val['num'] . '</td><td>' . $val['rate'] . '</td></tr>';
