@@ -17,6 +17,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 sortName: 'id',
                 search: false,
+                showExport: false,
                 columns: [
                     [
                         { field: 'platformsku', title: __('平台SKU'), operate: false },
@@ -59,6 +60,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                 }
 
                 table.bootstrapTable('refresh', params);
+            });
+            $("#export").click(function(){
+                var order_platform = $('#order_platform').val();
+                var time_str = $('#create_time').val();
+                window.location.href=Config.moduleurl+'/operatedatacenter/newgoodsdata/goods_sales_num/export?order_platform='+order_platform+'&time_str='+time_str;
             });
 
         },
