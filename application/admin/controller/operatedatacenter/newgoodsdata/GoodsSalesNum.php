@@ -245,12 +245,12 @@ class GoodsSalesNum extends Backend
             //时间段总和
             $start = date('Y-m-d', strtotime('-6 day'));
             $end = date('Y-m-d 23:59:59');
-            $time_str = $start . ' 00:00:00 - ' . $end . ' 00:00:00';
+            $time_str = $start . ' 00:00:00 - ' . $end;
         }
         $createat = explode(' ', $time_str);
-        $start = strtotime($createat[0] . ' ' . $createat[1]);
-        $end = strtotime($createat[3] . ' ' . $createat[4]);
-        $map['payment_time'] = ['between', [$start, $end]];
+        $startTime = strtotime($createat[0] . ' ' . $createat[1]);
+        $endTime = strtotime($createat[3] . ' ' . $createat[4]);
+        $map['payment_time'] = ['between', [$startTime, $endTime]];
 
         $info = $this->getOrderSalesNum($order_platform,$map);
         //切割每份数据
@@ -433,7 +433,6 @@ class GoodsSalesNum extends Backend
                 ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                 ->where($map)
                 ->where($timeWhere)
-                ->where('sku',$sku)
                 ->group('sku')
                 ->order('num desc')
                 ->column('sum(p.qty) as num', 'p.sku');
