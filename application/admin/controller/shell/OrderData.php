@@ -1575,7 +1575,7 @@ class OrderData extends Backend
                 }
             }
 
-            if ($tempArr['od'] == 1 && $tempArr['os'] = 1) {
+            if ($tempArr['od'] == 1 && $tempArr['os'] == 1) {
                 $arr['order_prescription_type'] = 2;
             }
         }
