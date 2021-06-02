@@ -1392,6 +1392,7 @@ class Wangpenglei extends Backend
         $list = $this->is_prescription_abnormal($params);
         $arr = array_merge($arr, $list);
 
+        $arr['order_prescription_type'] = 0;
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
@@ -1402,14 +1403,18 @@ class Wangpenglei extends Backend
             $os_cyl = (float)urldecode($params['os_cyl']);
             //判断是否为现片，其余为定制
             $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
+            $tempArr = [];
             foreach ($lensData as $v) {
-                if (($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'])
-                    && ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'])
-                    && ($os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end'])
-                    && ($od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end'])
-                ) {
-                    $arr['order_prescription_type'] = 2;
+                if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
+                    $tempArr['od'] = 1;
                 }
+                if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
+                    $tempArr['os'] = 1;
+                }
+            }
+
+            if ($tempArr['od'] == 1 && $tempArr['os'] = 1) {
+                $arr['order_prescription_type'] = 2;
             }
         }
 
@@ -1428,12 +1433,12 @@ class Wangpenglei extends Backend
      */
     public function test_lens()
     {
-        $params['od_sph'] = '-2.50';
-        $params['os_sph'] = '-2.50';
-        $params['od_cyl'] = '-0.50';
-        $params['os_cyl'] = '-0.50';
+        $params['od_sph'] = '-3.25';
+        $params['os_sph'] = '-2.75';
+        $params['od_cyl'] = '-2.00';
+        $params['os_cyl'] = '-2.75';
         $params['pd'] = 60;
-        $params['lens_number'] = 22100000;
+        $params['lens_number'] = 24200000;
         $data = $this->set_processing_type($params);
         dump($data);
         die;
