@@ -48,7 +48,12 @@ class ThirdApi extends Api
                 //更新加工表中订单妥投状态
                 $process = new \app\admin\model\order\order\NewOrderProcess;
                 $process->where('increment_id',$order_node['order_number'])->update(['is_tracking'=>5]);
-                $url = config('url.zeelool_url').'magic/order/updateOrderStatus';
+                if ($order_node['site'] == 1) {
+                    $url = config('url.zeelool_url').'magic/order/updateOrderStatus';
+                } elseif ($order_node['site'] == 2) {
+                    $url = config('url.voogueme_url').'magic/order/updateOrderStatus';
+                }
+
                 $value['increment_id']  = $order_node['order_number'];
                 $curl = curl_init();
                 curl_setopt($curl, CURLOPT_URL, $url);
