@@ -2001,13 +2001,13 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(15);
+        $this->zeelool_old_order(3);
     }
 
     protected function zeelool_old_order($site)
     {
-        if ($site == 15) {
-            $list = Db::connect('database.db_zeelool_fr')->table('sales_flat_order')->select();
+        if ($site == 3) {
+            $list = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', [78510, 78511]]])->select();
         }
 
         $list = collection($list)->toArray();
@@ -2070,7 +2070,7 @@ class OrderData extends Backend
 
     public function order_address_data_shell()
     {
-        $list = Db::connect('database.db_zeelool_fr')->table('sales_flat_order_address')->where(['address_type' => 'shipping'])->select();
+        $list = Db::connect('database.db_nihao')->table('sales_flat_order_address')->where(['parent_id' => ['in', [78510, 78511]]])->where(['address_type' => 'shipping'])->select();
 
         foreach ($list as $k => $v) {
             $params = [];
@@ -2085,7 +2085,7 @@ class OrderData extends Backend
                 $params['firstname'] = $v['firstname'];
                 $params['lastname'] = $v['lastname'];
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 15])->update($params);
+                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 3])->update($params);
             }
         }
     }
@@ -2166,16 +2166,16 @@ class OrderData extends Backend
      */
     public function order_item_data_shell()
     {
-        $this->order_item_shell(2);
+        $this->order_item_shell(3);
     }
 
     protected function order_item_shell($site)
     {
-        if ($site == 2) {
+        if ($site == 3) {
             // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_voogueme')
+            $list = Db::connect('database.db_nihao')
                 ->table('sales_flat_order_item')
-                ->where(['order_id' => ['in', ['440276', '440277', '440278']]])
+                ->where(['order_id' => ['in', ['78510', '78511', '440278']]])
                 ->select();
         }
 
@@ -2186,8 +2186,8 @@ class OrderData extends Backend
             }
             $options = [];
             //处方解析 不同站不同字段
-            if ($site == 2) {
-                $options = $this->voogueme_prescription_analysis($v['product_options']);
+            if ($site == 3) {
+                $options = $this->nihao_prescription_analysis($v['product_options']);
             }
 
             $options['item_id'] = $v['item_id'];
@@ -2220,6 +2220,12 @@ class OrderData extends Backend
                     $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                 }
                 $this->orderitemprocess->insertAll($data);
+
+                //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
+                if ($order_prescription_type == 3) {
+                    $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                    $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                }
             }
             echo $v['item_id'] . "\n";
             usleep(10000);
@@ -2238,7 +2244,7 @@ class OrderData extends Backend
     public function order_payment_data_shell()
     {
 
-        $this->order_payment_data(15);
+        $this->order_payment_data(3);
     }
 
     /**
@@ -2259,7 +2265,7 @@ class OrderData extends Backend
         } elseif ($site == 2) {
             $res = Db::connect('database.db_voogueme')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
         } elseif ($site == 3) {
-            $res = Db::connect('database.db_nihao')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
         } elseif ($site == 4) {
             $res = Db::connect('database.db_meeloog')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
         } elseif ($site == 5) {
@@ -2461,19 +2467,20 @@ class OrderData extends Backend
         $this->order->saveAll($params);
         echo $site . 'ok';
     }
+
     public function batch_payment_time()
     {
         $model = Db::connect('database.db_weseeoptical');
         $orders = $model->table('orders')
             ->field('order_no,payment_time')
             ->select();
-        foreach ($orders as $value){
-            $time = strtotime($value['payment_time'])+8*3600;
+        foreach ($orders as $value) {
+            $time = strtotime($value['payment_time']) + 8 * 3600;
             $this->order
-                ->where('site',5)
-                ->where('increment_id',$value['order_no'])
-                ->update(['payment_time'=>$time]);
-            echo $value['order_no'].' is ok'."\n";
+                ->where('site', 5)
+                ->where('increment_id', $value['order_no'])
+                ->update(['payment_time' => $time]);
+            echo $value['order_no'] . ' is ok' . "\n";
             usleep(10000);
         }
     }
