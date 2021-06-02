@@ -120,6 +120,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             searchList: {1: '是', 2: '否'},
                             formatter: Table.api.formatter.status
                         },
+                        {
+                            field: 'stock_id', title: __('所属仓库'),
+                            custom: {1: 'success', 2: 'danger'},
+                            searchList: {1: '郑州仓', 2: '丹阳仓'},
+                            formatter: Table.api.formatter.status
+                        },
                         {field: 'create_time', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange'},
                         {field: 'in_stock_time', title: __('入库时间'), operate: 'RANGE', addclass: 'datetimerange'},
                         {field: 'out_stock_time', title: __('出库时间'), operate: 'RANGE', addclass: 'datetimerange'}
