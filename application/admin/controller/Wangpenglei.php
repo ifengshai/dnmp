@@ -1408,15 +1408,24 @@ class Wangpenglei extends Backend
                 if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
                     $tempArr['od'] = 1;
                 }
+
+                dump($os_sph);
+                dump($os_cyl);
+                dump($v['sph_start']);
+                dump($v['sph_end']);
+                dump($v['cyl_start']);
+                dump($v['cyl_end']);
                 if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
                     $tempArr['os'] = 1;
                 }
             }
 
+            dump($tempArr);
             if ($tempArr['od'] == 1 && $tempArr['os'] = 1) {
                 $arr['order_prescription_type'] = 2;
             }
         }
+        dump($arr);
 
         //默认如果不是仅镜架 或定制片 则为现货处方镜
         if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 2) {
