@@ -1221,6 +1221,13 @@ class Distribution extends Backend
                 $map['b.order_type'] = ['in', $filter['order_type']];
                 unset($filter['order_type']);
             }
+
+            //筛选站点
+            if ($filter['stock_id']) {
+                $map['a.stock_id'] = $filter['stock_id'];
+                unset($filter['stock_id']);
+            }
+
             if ($filter['check_time']) {
                 $check_time = explode(' - ', $filter['check_time']);
                 $map['d.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
