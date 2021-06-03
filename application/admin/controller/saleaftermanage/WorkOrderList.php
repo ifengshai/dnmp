@@ -1558,7 +1558,8 @@ class WorkOrderList extends Backend
                         $params['order_sku'] = $order_sku;
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
-                        $params['stock_id'] = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id',$params['platform_order'])->value('stock_id');
+                        $stock_id = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id',$params['platform_order'])->value('stock_id');
+                        $params['stock_id'] = $stock_id ?: 0;
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) throw new Exception("添加失败！！");
                         $work_id = $this->model->id;
