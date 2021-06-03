@@ -3769,6 +3769,7 @@ class ScmWarehouse extends Scm
     public function stock_transfer_list()
     {
         $query = $this->request->request('query');
+        $sku = $this->request->request('sku');
         $status = $this->request->request('status');
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
@@ -3781,6 +3782,10 @@ class ScmWarehouse extends Scm
         $where = [];
         if ($query) {
             $where['transfer_order_number|create_person|response_person'] = ['like', '%' . $query . '%'];
+        }
+        if ($sku) {
+            $allIds = $this->_stock_transfer_order_item->where('sku','like','%'.$sku.'%')->group('transfer_order_id')->column('transfer_order_id');
+            $where['id'] = ['in',$allIds];
         }
         if (isset($status)) {
             $where['status'] = $status;
