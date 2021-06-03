@@ -57,6 +57,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         {field: 'response_person', title: __('调拨负责人'), operate: 'like'},
+                        {field: 'sku', title: __('sku'), visible:false},
                         {field: 'create_person', title: __('创建人'), operate: 'like'},
                         {
                             field: 'create_time',
