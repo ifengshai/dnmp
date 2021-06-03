@@ -2038,7 +2038,7 @@ class WorkOrderList extends Backend
             if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
-                return ['result' => false, 'msg' => $sku . '库存不足！！'];
+                return ['result' => false, 'msg' => $sku . '库存不足！！当前虚拟仓库存'.$stock.'，补发所需库存'.$num[$k]];
             }
 
             //判断此sku是否在第三方平台
