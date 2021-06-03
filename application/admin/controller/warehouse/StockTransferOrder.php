@@ -60,18 +60,29 @@ class StockTransferOrder extends Backend
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
-            //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $map = [];
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $allIds = $this->_stock_transfer_order_item->where('sku','like','%'.$filter['sku'].'%')->group('transfer_order_id')->column('transfer_order_id');
+                $map['id'] = ['in',$allIds];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
