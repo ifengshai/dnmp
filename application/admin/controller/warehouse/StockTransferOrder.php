@@ -67,7 +67,7 @@ class StockTransferOrder extends Backend
             //自定义sku搜索
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['sku']) {
-                $allIds = $this->_stock_transfer_order_item->where('sku','like','%'.$filter['sku'].'%')->group('transfer_order_id')->column('transfer_order_id');
+                $allIds = Db::name('stock_transfer_order_item')->where('sku','like','%'.$filter['sku'].'%')->group('transfer_order_id')->column('transfer_order_id');
                 $map['id'] = ['in',$allIds];
                 unset($filter['sku']);
                 $this->request->get(['filter' => json_encode($filter)]);
