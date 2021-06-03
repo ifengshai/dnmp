@@ -1790,9 +1790,8 @@ class OrderData extends Backend
             } else {
                 $stockId = 2; //丹阳仓
             }
-
+            //todo:暂时默认为郑州仓
             $stockId = 1;
-
             $id = $waveOrder
                 ->where([
                     'type'           => $type,
