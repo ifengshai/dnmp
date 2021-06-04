@@ -72,6 +72,19 @@ class NewDataMarket extends Backend
         ]);
         return $this->view->fetch('operatedatacenter/new_statistical/all_data/index');
     }
+    public function index_box()
+    {
+        $platform = $this->magentoplatform->getNewAuthSite();
+        foreach ($platform as $k=>$v){
+            if(!in_array($k,[12])){
+                unset($platform[$k]);
+            }
+        }
+        if(empty($platform)){
+            $this->error('您没有权限访问','general/profile?ref=addtabs');
+        }
+        return $this->view->fetch('operatedatacenter/new_statistical/all_data/index_box');
+    }
     public function ajaxGetData()
     {
         $platform = input('order_platform') ? input('order_platform') : 1;
