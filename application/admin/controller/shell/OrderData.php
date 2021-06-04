@@ -577,9 +577,9 @@ class OrderData extends Backend
                                         $this->orderitemprocess->insertAll($data);
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                        if ($order_prescription_type == 3) {
-                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 1]);
-                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 1]);
+                                        if ($order_prescription_type == 3 && in_array($site, [1, 2, 3])) {
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                         }
                                     }
                                 }
@@ -628,9 +628,9 @@ class OrderData extends Backend
                                         $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type, 'sku' => $options['sku']]);
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                        if ($order_prescription_type == 3) {
-                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 1]);
-                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 1]);
+                                        if ($order_prescription_type == 3  && in_array($site, [1, 2, 3])) {
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                         }
                                     }
                                 }
@@ -1785,13 +1785,11 @@ class OrderData extends Backend
                 $wave_time_type = 8;
             }
 
-            if ($v['stock_id'] == 1) {
-                $stockId = 1; //郑州仓
-            } else {
+            if ($v['stock_id'] == 2) {
                 $stockId = 2; //丹阳仓
+            } else {
+                $stockId = 1; //郑州仓
             }
-            //todo:暂时默认为郑州仓
-            $stockId = 1;
             $id = $waveOrder
                 ->where([
                     'type'           => $type,
