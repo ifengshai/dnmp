@@ -408,47 +408,72 @@ class EsFormatData
         $arr = [];
         $i = 0;
         $sendNum = $delievedNum = $waitTime = $sevenDelievedDay = $tenDelievedDay = $fourteenDelievedDay = $twentyDelievedDay = $twentyupDelievedDay = 0;
-        foreach ($buckets1 as $key => $value) {
-            $sendNum += $newBuckets[$value['key']];
-            $delievedNum += $value['doc_count'];
-            $waitTime += $value['sumWaitTime']['value'];
-            $arr[$i]['shipment_data_type'] = $value['key'];
-            $arr[$i]['send_order_num'] = $newBuckets[$value['key']];
-            $arr[$i]['deliverd_order_num'] = $value['doc_count'];
-            $arr[$i]['total_deliverd_rate'] = $newBuckets[$value['key']] ? round($value['doc_count'] / $newBuckets[$value['key']] * 100,
-                2) : 0;
-            $arr[$i]['avg_deliverd_rate'] = $value['doc_count'] ? round($value['sumWaitTime']['value'] / $value['doc_count'] / 86400,
-                2) : 0;
-            $result = $value['delieveredDays']['buckets'];
-            foreach ($result as $k => $v) {
-
-                switch ($v['key']) {
-                    case '0.0-6.99':
-                        $arr[$i]['serven_deliverd_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
-                            2) : 0;
-                        $sevenDelievedDay += $v['doc_count'];
-                        break;
-                    case '7.0-9.99':
-                        $arr[$i]['ten_deliverd_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
-                            2) : 0;
-                        $tenDelievedDay += $v['doc_count'];
-                        break;
-                    case '10.0-13.99':
-                        $arr[$i]['fourteen_deliverd_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
-                            2) : 0;
-                        $fourteenDelievedDay += $v['doc_count'];
-                        break;
-                    case '14.0-19.99':
-                        $arr[$i]['twenty_deliverd_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
-                            2) : 0;
-                        $twentyDelievedDay += $v['doc_count'];
-                        break;
-                    case '20.0-5000000.0':
-                        $arr[$i]['gtTwenty_deliverd_rate'] = $value['doc_count'] ? round($v['doc_count'] / $value['doc_count'] * 100,
-                            2) : 0;
-                        $twentyupDelievedDay += $v['doc_count'];
-                        break;
+        foreach($newBuckets as $k=>$v){
+            $sendNum += $v;
+            $arr[$i]['shipment_data_type'] = $k;
+            $arr[$i]['send_order_num'] = $v;
+            foreach ($buckets1 as $value){
+                if($k==$value['key']){
+                    $delievedNum += $value['doc_count'];
+                    $waitTime += $value['sumWaitTime']['value'];
+                    $arr[$i]['deliverd_order_num'] = $value['doc_count'];
+                    $arr[$i]['total_deliverd_rate'] = $v ? round($value['doc_count'] / $v * 100,2) : 0;
+                    $arr[$i]['avg_deliverd_rate'] = $value['doc_count'] ? round($value['sumWaitTime']['value'] / $value['doc_count'] / 86400,2) : 0;
+                    $result = $value['delieveredDays']['buckets'];
+                    foreach ($result as $k1 => $v1) {
+                        switch ($v1['key']) {
+                            case '0.0-6.99':
+                                $arr[$i]['serven_deliverd_rate'] = $value['doc_count'] ? round($v1['doc_count'] / $value['doc_count'] * 100,
+                                    2) : 0;
+                                $sevenDelievedDay += $v1['doc_count'];
+                                break;
+                            case '7.0-9.99':
+                                $arr[$i]['ten_deliverd_rate'] = $value['doc_count'] ? round($v1['doc_count'] / $value['doc_count'] * 100,
+                                    2) : 0;
+                                $tenDelievedDay += $v1['doc_count'];
+                                break;
+                            case '10.0-13.99':
+                                $arr[$i]['fourteen_deliverd_rate'] = $value['doc_count'] ? round($v1['doc_count'] / $value['doc_count'] * 100,
+                                    2) : 0;
+                                $fourteenDelievedDay += $v1['doc_count'];
+                                break;
+                            case '14.0-19.99':
+                                $arr[$i]['twenty_deliverd_rate'] = $value['doc_count'] ? round($v1['doc_count'] / $value['doc_count'] * 100,
+                                    2) : 0;
+                                $twentyDelievedDay += $v1['doc_count'];
+                                break;
+                            case '20.0-5000000.0':
+                                $arr[$i]['gtTwenty_deliverd_rate'] = $value['doc_count'] ? round($v1['doc_count'] / $value['doc_count'] * 100,
+                                    2) : 0;
+                                $twentyupDelievedDay += $v1['doc_count'];
+                                break;
+                        }
+                    }
                 }
+            }
+            if(!isset($arr[$i]['deliverd_order_num'])){
+                $arr[$i]['deliverd_order_num'] = 0;
+            }
+            if(!isset($arr[$i]['total_deliverd_rate'])){
+                $arr[$i]['total_deliverd_rate'] = 0;
+            }
+            if(!isset($arr[$i]['avg_deliverd_rate'])){
+                $arr[$i]['avg_deliverd_rate'] = 0;
+            }
+            if(!isset($arr[$i]['serven_deliverd_rate'])){
+                $arr[$i]['serven_deliverd_rate'] = 0;
+            }
+            if(!isset($arr[$i]['ten_deliverd_rate'])){
+                $arr[$i]['ten_deliverd_rate'] = 0;
+            }
+            if(!isset($arr[$i]['fourteen_deliverd_rate'])){
+                $arr[$i]['fourteen_deliverd_rate'] = 0;
+            }
+            if(!isset($arr[$i]['twenty_deliverd_rate'])){
+                $arr[$i]['twenty_deliverd_rate'] = 0;
+            }
+            if(!isset($arr[$i]['gtTwenty_deliverd_rate'])){
+                $arr[$i]['gtTwenty_deliverd_rate'] = 0;
             }
             $i++;
         }
