@@ -70,7 +70,7 @@ class LogisticsStatistic extends BaseElasticsearch
             $timeRange = explode(' ', $time);
         } else {
             $timeRange = [
-                strtotime('-200 days'),
+                strtotime('-30 days'),
                 time()
             ];
         }
