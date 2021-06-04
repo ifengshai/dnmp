@@ -663,6 +663,12 @@ class Distribution extends Backend
                 unset($filter['site']);
             }
 
+            //筛选仓库
+            if ($filter['stock_id']) {
+                $map['a.stock_id'] = ['in', $filter['stock_id']];
+                unset($filter['stock_id']);
+            }
+
             //加工类型筛选
             if (isset($filter['order_prescription_type'])) {
                 $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
@@ -696,7 +702,7 @@ class Distribution extends Backend
                 ->count();
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.created_at,a.picking_sort')
+                ->field('a.id,a.stock_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.created_at,a.picking_sort')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where($where)
                 ->where($map)
@@ -1157,7 +1163,7 @@ class Distribution extends Backend
             $sort = 'a.created_at';
             $order = 'desc';
         } else {
-
+            $wave_order_id = input('wave_order_id');
             //普通状态剔除跟单数据
             if (!in_array($label, [0, 8])) {
                 if (7 == $label) {
@@ -1254,6 +1260,10 @@ class Distribution extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
 
             [$where, $sort, $order] = $this->buildparams();
+
+            if ($wave_order_id) {
+                $map['a.wave_order_id'] = $wave_order_id;
+            }
         }
 
         $sort = 'a.id';
