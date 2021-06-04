@@ -75,6 +75,43 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
             // 为表格绑定事件
             Table.api.bindevent(table);
         },
+        index_box: function () {
+            // 初始化表格参数配置
+            Table.api.init({
+                extend: {
+                    index_url: 'operatedatacenter/dataview/dash_board/index_box' + location.search,
+                    table: 'dash_board',
+                }
+            });
+            get_order_detail(12);
+       
+            Controller.api.formatter.daterangepicker($("div[role=form]"));
+          
+            var table = $("#table");
+
+            // 初始化表格
+            table.bootstrapTable({
+                url: $.fn.bootstrapTable.defaults.extend.index_url,
+                pk: 'id',
+                sortName: 'id',
+                columns: [
+                    [
+                        {checkbox: true},
+                        {field: 'id', title: __('Id')},
+                        {
+                            field: 'operate',
+                            title: __('Operate'),
+                            table: table,
+                            events: Table.api.events.operate,
+                            formatter: Table.api.formatter.operate
+                        }
+                    ]
+                ]
+            });
+
+            // 为表格绑定事件
+            Table.api.bindevent(table);
+        },
         add: function () {
             Controller.api.bindevent();
         },
@@ -370,9 +407,13 @@ function customer_num()
         return false;
     });
 }
-function get_order_detail()
+function get_order_detail($site)
 {
-    var order_platform = $('#site').val();
+    if($site){
+        var order_platform = $site;
+    }else{
+        var order_platform = $('#site').val();
+    }
     $('#order_info').html()
     Backend.api.ajax({
         url: 'operatedatacenter/dataview/new_data_market/ajaxGetData',
