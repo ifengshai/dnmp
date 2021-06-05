@@ -628,7 +628,7 @@ class OrderData extends Backend
                                         $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type, 'sku' => $options['sku']]);
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                        if ($order_prescription_type == 3  && in_array($site, [1, 2, 3])) {
+                                        if ($order_prescription_type == 3 && in_array($site, [1, 2, 3])) {
                                             $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
                                             $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                         }
@@ -2000,13 +2000,13 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(3);
+        $this->zeelool_old_order(2);
     }
 
     protected function zeelool_old_order($site)
     {
-        if ($site == 3) {
-            $list = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', [78510, 78511]]])->select();
+        if ($site == 2) {
+            $list = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', [454797, 454798, 454799]]])->select();
         }
 
         $list = collection($list)->toArray();
@@ -2069,7 +2069,7 @@ class OrderData extends Backend
 
     public function order_address_data_shell()
     {
-        $list = Db::connect('database.db_nihao')->table('sales_flat_order_address')->where(['parent_id' => ['in', [78510, 78511]]])->where(['address_type' => 'shipping'])->select();
+        $list = Db::connect('database.db_voogueme')->table('sales_flat_order_address')->where(['parent_id' => ['in', [454797, 454798, 454799]]])->where(['address_type' => 'shipping'])->select();
 
         foreach ($list as $k => $v) {
             $params = [];
@@ -2084,26 +2084,42 @@ class OrderData extends Backend
                 $params['firstname'] = $v['firstname'];
                 $params['lastname'] = $v['lastname'];
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 3])->update($params);
+                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 2])->update($params);
             }
         }
     }
 
-    public function order_data_shell()
+
+    /**
+     * 临时处理订单子表数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 16:47:50 
+     * @return void
+     */
+    public function order_item_data_shell()
     {
-        $this->order_data(1);
+        $this->order_item_shell(2);
     }
 
-    public function order_data_shell_v()
+    /**
+     * 订单支付临时表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 17:06:50 
+     * @return void
+     */
+    public function order_payment_data_shell()
     {
-        $this->order_data(2);
 
+        $this->order_payment_data(2);
     }
 
-    public function order_data_shell_n()
-    {
-        $this->order_data(3);
-    }
+
+
+
 
     public function order_data_shell_de()
     {
@@ -2155,26 +2171,14 @@ class OrderData extends Backend
         echo $site . 'ok';
     }
 
-    /**
-     * 临时处理订单子表数据
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/11/12 16:47:50 
-     * @return void
-     */
-    public function order_item_data_shell()
-    {
-        $this->order_item_shell(3);
-    }
+
 
     protected function order_item_shell($site)
     {
-        if ($site == 3) {
-            // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_nihao')
+        if ($site == 2) {
+            $list = Db::connect('database.db_voogueme')
                 ->table('sales_flat_order_item')
-                ->where(['order_id' => ['in', ['78510', '78511', '440278']]])
+                ->where(['order_id' => ['in', [454797, 454798, 454799]]])
                 ->select();
         }
 
@@ -2185,8 +2189,8 @@ class OrderData extends Backend
             }
             $options = [];
             //处方解析 不同站不同字段
-            if ($site == 3) {
-                $options = $this->nihao_prescription_analysis($v['product_options']);
+            if ($site == 2) {
+                $options = $this->voogueme_prescription_analysis($v['product_options']);
             }
 
             $options['item_id'] = $v['item_id'];
@@ -2232,19 +2236,7 @@ class OrderData extends Backend
         echo "ok";
     }
 
-    /**
-     * 订单支付临时表
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/11/12 17:06:50 
-     * @return void
-     */
-    public function order_payment_data_shell()
-    {
 
-        $this->order_payment_data(3);
-    }
 
     /**
      * 支付方式处理
@@ -2262,7 +2254,7 @@ class OrderData extends Backend
         if ($site == 1) {
             $res = Db::connect('database.db_zeelool')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
         } elseif ($site == 3) {
             $res = Db::connect('database.db_nihao')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
         } elseif ($site == 4) {
