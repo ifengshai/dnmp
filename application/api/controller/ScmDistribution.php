@@ -2698,7 +2698,7 @@ class ScmDistribution extends Scm
             ->where('sku','like','%'.$sku.'%')
             ->where('is_open',1)
             ->column('sku');
-        empty($item_sku) && $this->error(__('sku不存在'), ['purchase_price' => ''], 403);
+        empty($item_sku) && $this->error(__('sku不存在'),'', 403);
         $this->success('成功', ['skus' => $item_sku], 200);
     }
 }
