@@ -2696,6 +2696,7 @@ class ScmDistribution extends Scm
         empty($sku) && $this->error(__('sku不能为空'), '', 403);
         $item_sku = $this->_item
             ->where('sku','like','%'.$sku.'%')
+            ->where('is_open',1)
             ->column('sku');
         empty($item_sku) && $this->error(__('sku不存在'), ['purchase_price' => ''], 403);
         $this->success('成功', ['skus' => $item_sku], 200);
