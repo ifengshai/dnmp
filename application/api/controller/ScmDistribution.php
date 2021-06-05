@@ -2689,4 +2689,16 @@ class ScmDistribution extends Scm
         empty($purchase_price['purchase_price']) && $this->error(__('没有采购单价'), ['purchase_price' => ''], 405);
         $this->success('成功', ['purchase_price' => $purchase_price['purchase_price']], 200);
     }
+
+    public function sku_like()
+    {
+        $sku = $this->request->request('sku');
+        empty($sku) && $this->error(__('sku不能为空'), '', 403);
+        $item_sku = $this->_item
+            ->where('sku','like','%'.$sku.'%')
+            ->where('is_open',1)
+            ->column('sku');
+        empty($item_sku) && $this->error(__('sku不存在'),'', 403);
+        $this->success('成功', ['skus' => $item_sku], 200);
+    }
 }
