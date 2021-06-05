@@ -6,7 +6,9 @@ use app\admin\controller\zendesk\Notice;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\lens\LensPrice;
+use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\warehouse\ProductBarCodeItem;
+use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
 use think\Db;
 use FacebookAds\Api;
@@ -1460,5 +1462,52 @@ class Wangpenglei extends Backend
         $today_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status";
         echo $today_sales_money_sql;
         die;
+    }
+
+
+    /**
+     * 库位排序
+     * @author wpl
+     * @date   2021/6/5 10:26
+     */
+    public function set_store_sort()
+    {
+        $stock_house = new StockHouse();
+        $list = Db::table('fa_zz_temp2')->select();
+        foreach ($list as $k => $v) {
+            $stock_house->where(['stock_id' => 2,'coding' => $v['store_house']])->update(['picking_sort' => $v['sort']]);
+            echo $k . "\n";
+        }
+        echo "ok";
+    }
+
+
+    public function set_order_sort()
+    {
+        $order = new NewOrderItemProcess();
+        $list = $order->where(['stock_id' => 2])->select();
+        $itemPlatform = new ItemPlatformSku();
+        foreach ($list as $k => $v) {
+            //转换平台SKU
+            $sku = $itemPlatform->getTrueSku($v['sku'], $v['site']);
+            //根据sku查询库位排序
+            $stockSku = new StockSku();
+            $where = [];
+            $where['c.type'] = 2;//默认拣货区
+            $where['b.status'] = 1;//启用状态
+            $where['a.is_del'] = 1;//正常状态
+            $where['b.stock_id'] = 2;//查询对应仓库
+            $location_data = $stockSku
+                ->alias('a')
+                ->where($where)
+                ->where(['a.sku' => $sku])
+                ->field('b.coding,b.picking_sort')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
+                ->find();
+            $order->where(['id' => $v['id']])->update(['picking_sort' => $location_data['picking_sort']]);
+        }
+
+
     }
 }
