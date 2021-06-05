@@ -20,11 +20,13 @@ class UserDataViewVip extends Backend
         $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
         $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->zeeloolfr = new \app\admin\model\order\order\ZeeloolFr();
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme();
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao();
         $this->zeelooldeOperate = new \app\admin\model\operatedatacenter\ZeeloolDe();
         $this->zeelooljpOperate = new \app\admin\model\operatedatacenter\ZeeloolJp();
+        $this->zeeloolfrOperate = new \app\admin\model\operatedatacenter\ZeeloolFr();
         $this->datacenterday = new \app\admin\model\operatedatacenter\Datacenter();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
@@ -56,6 +58,9 @@ class UserDataViewVip extends Backend
             } elseif ($filter['order_platform'] == 11) {
                 $order_model = $this->zeelooljp;
                 $web_model = Db::connect('database.db_zeelool_jp');
+            } elseif ($filter['order_platform'] == 15) {
+                $order_model = $this->zeeloolfr;
+                $web_model = Db::connect('database.db_zeelool_fr');
             } else {
                 $order_model = $this->zeelool;
                 $web_model = Db::connect('database.db_zeelool');
@@ -114,7 +119,7 @@ class UserDataViewVip extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'zeelool_de','zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'zeelool_de','zeelool_jp','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -149,6 +154,9 @@ class UserDataViewVip extends Backend
             } elseif ($order_platform == 11) {
                 $model = $this->zeelooljpOperate;
                 $web_model = Db::connect('database.db_zeelool_jp');
+            } elseif ($order_platform == 15) {
+                $model = $this->zeeloolfrOperate;
+                $web_model = Db::connect('database.db_zeelool_fr');
             } else {
                 $model = $this->zeeloolOperate;
                 $web_model = Db::connect('database.db_zeelool');
@@ -201,6 +209,9 @@ class UserDataViewVip extends Backend
         } elseif ($order_platform == 11) {
             $order_model = $this->zeelooljp;
             $web_model = Db::connect('database.db_zeelool_jp');
+        } elseif ($order_platform == 15) {
+            $order_model = $this->zeeloolfr;
+            $web_model = Db::connect('database.db_zeelool_fr');
         } else {
             $order_model = $this->zeelool;
             $web_model = Db::connect('database.db_zeelool');

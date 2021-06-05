@@ -20,7 +20,7 @@ class skuTypeDayAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getSkuDayData(5);
+        $this->getSkuDayData(15);
         $output->writeln("All is ok");
     }
 
@@ -36,7 +36,7 @@ class skuTypeDayAsynData extends Command
     {
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
-        $tStart = strtotime('2020-01-01');
+        $tStart = strtotime('2021-05-15');
         $tend = time();
         for($i = $tStart;$i<$tend;$i+=3600*24){
             $dayDate = date('Y-m-d',$i);
@@ -57,27 +57,27 @@ class skuTypeDayAsynData extends Command
             } else {
                 echo $dayDate.'-站点：'.$site.'-太阳镜不ok';
             }
-            $res3 = Db::name('datacenter_goods_type_data')
-                ->insert($this->getSkuData($site,$dayDate,$timeWhere,3));
-            if ($res3) {
-                echo $dayDate.'-站点：'.$site.'-老花镜ok';
-            } else {
-                echo $dayDate.'-站点：'.$site.'-老花镜不ok';
-            }
-            $res4 = Db::name('datacenter_goods_type_data')
-                ->insert($this->getSkuData($site,$dayDate,$timeWhere,4));
-            if ($res4) {
-                echo $dayDate.'-站点：'.$site.'-儿童镜ok';
-            } else {
-                echo $dayDate.'-站点：'.$site.'-儿童镜不ok';
-            }
-            $res5 = Db::name('datacenter_goods_type_data')
-                ->insert($this->getSkuData($site,$dayDate,$timeWhere,5));
-            if ($res5) {
-                echo $dayDate.'-站点：'.$site.'-运动镜ok';
-            } else {
-                echo $dayDate.'-站点：'.$site.'-运动镜不ok';
-            }
+            // $res3 = Db::name('datacenter_goods_type_data')
+            //     ->insert($this->getSkuData($site,$dayDate,$timeWhere,3));
+            // if ($res3) {
+            //     echo $dayDate.'-站点：'.$site.'-老花镜ok';
+            // } else {
+            //     echo $dayDate.'-站点：'.$site.'-老花镜不ok';
+            // }
+            // $res4 = Db::name('datacenter_goods_type_data')
+            //     ->insert($this->getSkuData($site,$dayDate,$timeWhere,4));
+            // if ($res4) {
+            //     echo $dayDate.'-站点：'.$site.'-儿童镜ok';
+            // } else {
+            //     echo $dayDate.'-站点：'.$site.'-儿童镜不ok';
+            // }
+            // $res5 = Db::name('datacenter_goods_type_data')
+            //     ->insert($this->getSkuData($site,$dayDate,$timeWhere,5));
+            // if ($res5) {
+            //     echo $dayDate.'-站点：'.$site.'-运动镜ok';
+            // } else {
+            //     echo $dayDate.'-站点：'.$site.'-运动镜不ok';
+            // }
             $res6 = Db::name('datacenter_goods_type_data')
                 ->insert($this->getSkuData($site,$dayDate,$timeWhere,6));
             if ($res6) {

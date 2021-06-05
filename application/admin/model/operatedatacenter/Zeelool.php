@@ -787,6 +787,14 @@ class Zeelool extends Model
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 5) {
+            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 10) {
+            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 11) {
+            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 15) {
+            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         // Replace with your view ID, for example XXXX.
@@ -850,6 +858,14 @@ class Zeelool extends Model
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 5) {
+            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 10) {
+            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 11) {
+            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 15) {
+            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         // Replace with your view ID, for example XXXX.
@@ -913,6 +929,14 @@ class Zeelool extends Model
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 5) {
+            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 10) {
+            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 11) {
+            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 15) {
+            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         // Replace with your view ID, for example XXXX.
@@ -977,6 +1001,14 @@ class Zeelool extends Model
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 5) {
+            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 10) {
+            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 11) {
+            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 15) {
+            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         // Replace with your view ID, for example XXXX.
@@ -1040,6 +1072,14 @@ class Zeelool extends Model
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 5) {
+            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 10) {
+            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 11) {
+            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 15) {
+            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         // Replace with your view ID, for example XXXX.
@@ -1104,6 +1144,14 @@ class Zeelool extends Model
             $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 3) {
             $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 5) {
+            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 10) {
+            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 11) {
+            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 15) {
+            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         // Replace with your view ID, for example XXXX.
@@ -1249,6 +1297,8 @@ class Zeelool extends Model
             $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
         } elseif ($site == 11) {
             $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
+        } elseif ($site == 15) {
+            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         }
 
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
