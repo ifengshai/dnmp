@@ -261,9 +261,6 @@ class SupplierAccount extends Backend
             ->where('c.is_statement', 0)
             ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
             ->select();
-        // dump($instock->getLastSql());
-        // dump($list);
-        // die;
         $wait_pay_money = 0;
         $now = date('Y-m-t', time());
         $all = 0;
@@ -395,6 +392,7 @@ class SupplierAccount extends Backend
                 ->where('a.status', 2)//已审核通过的入库单
                 ->where('a.check_id', 'in', $check_order_ids)//已审核通过的入库单
                 ->where('a.id', 'not in', $instock_ids)
+                ->where('c.is_statement', 0)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -409,6 +407,7 @@ class SupplierAccount extends Backend
                 ->where('a.status', 2)//已审核通过的入库单
                 ->where('a.check_id', 'in', $check_order_ids)//已审核通过的入库单
                 ->where('a.id', 'not in', $instock_ids)
+                ->where('c.is_statement', 0)
                 ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                 ->where($where)
                 ->order($sort, $order)
