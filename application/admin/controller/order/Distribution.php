@@ -1255,6 +1255,11 @@ class Distribution extends Backend
                 unset($filter['status']);
             }
 
+            if ($filter['increment_id']) {
+                $map['b.increment_id'] = ['in', $filter['increment_id']];
+                unset($filter['increment_id']);
+            }
+
             if ($filter['sku']) {
                 $map['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
                 unset($filter['sku']);
