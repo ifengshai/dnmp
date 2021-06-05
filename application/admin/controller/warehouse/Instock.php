@@ -1522,4 +1522,81 @@ class Instock extends Backend
     public function Review_the_operation(){
 
     }
+    public function get_sku_first_check_time()
+    {
+        $skus = Db::name('zzzzzzzz_temp')->select();
+        foreach ($skus as $k => $v) {
+            $instockArr = Db::name('in_stock')
+                ->alias('a')
+                ->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id', 'left')
+                ->where('b.sku',$v['sku'])
+                ->order('a.check_time', 'asc')
+                ->field('a.check_time,a.in_stock_number')
+                ->select();
+            if ($instockArr){
+                $skus[$k]['check_time'] = $instockArr[0]['check_time'];
+                $skus[$k]['in_stock_number'] = $instockArr[0]['in_stock_number'];
+            }
+        }
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "入库单号")
+            ->setCellValue("B1", "SKU")
+            ->setCellValue("C1", "审核时间");   //利用setCellValues()填充数据
+
+
+        foreach ($skus as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['in_stock_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['check_time']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:C' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '入库单数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
 }
