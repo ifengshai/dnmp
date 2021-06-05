@@ -2104,11 +2104,9 @@ class Distribution extends Backend
         $cargo_number = $stockSku
             ->alias('a')
             ->where($where)
-            ->field('b.coding,b.picking_sort')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
             ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
-            ->column('coding', 'sku');
-
+            ->column('b.coding', 'sku');
 
 
         //查询产品货位号
