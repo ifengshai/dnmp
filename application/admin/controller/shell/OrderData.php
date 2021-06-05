@@ -2089,21 +2089,37 @@ class OrderData extends Backend
         }
     }
 
-    public function order_data_shell()
+
+    /**
+     * 临时处理订单子表数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 16:47:50 
+     * @return void
+     */
+    public function order_item_data_shell()
     {
-        $this->order_data(1);
+        $this->order_item_shell(2);
     }
 
-    public function order_data_shell_v()
+    /**
+     * 订单支付临时表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 17:06:50 
+     * @return void
+     */
+    public function order_payment_data_shell()
     {
-        $this->order_data(2);
 
+        $this->order_payment_data(2);
     }
 
-    public function order_data_shell_n()
-    {
-        $this->order_data(3);
-    }
+
+
+
 
     public function order_data_shell_de()
     {
@@ -2155,18 +2171,7 @@ class OrderData extends Backend
         echo $site . 'ok';
     }
 
-    /**
-     * 临时处理订单子表数据
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/11/12 16:47:50 
-     * @return void
-     */
-    public function order_item_data_shell()
-    {
-        $this->order_item_shell(2);
-    }
+
 
     protected function order_item_shell($site)
     {
@@ -2231,19 +2236,7 @@ class OrderData extends Backend
         echo "ok";
     }
 
-    /**
-     * 订单支付临时表
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/11/12 17:06:50 
-     * @return void
-     */
-    public function order_payment_data_shell()
-    {
 
-        $this->order_payment_data(2);
-    }
 
     /**
      * 支付方式处理
