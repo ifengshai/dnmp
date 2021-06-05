@@ -2000,13 +2000,13 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(2);
+        $this->zeelool_old_order(1);
     }
 
     protected function zeelool_old_order($site)
     {
-        if ($site == 2) {
-            $list = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', [454797, 454798, 454799]]])->select();
+        if ($site == 1) {
+            $list = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', [908638, 908639, 908640,908641,908642,908643]]])->select();
         }
 
         $list = collection($list)->toArray();
@@ -2069,7 +2069,7 @@ class OrderData extends Backend
 
     public function order_address_data_shell()
     {
-        $list = Db::connect('database.db_voogueme')->table('sales_flat_order_address')->where(['parent_id' => ['in', [454797, 454798, 454799]]])->where(['address_type' => 'shipping'])->select();
+        $list = Db::connect('database.db_zeelool')->table('sales_flat_order_address')->where(['parent_id' => ['in', [908638, 908639, 908640,908641,908642,908643]]])->where(['address_type' => 'shipping'])->select();
 
         foreach ($list as $k => $v) {
             $params = [];
@@ -2084,7 +2084,7 @@ class OrderData extends Backend
                 $params['firstname'] = $v['firstname'];
                 $params['lastname'] = $v['lastname'];
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 2])->update($params);
+                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 1])->update($params);
             }
         }
     }
@@ -2100,7 +2100,7 @@ class OrderData extends Backend
      */
     public function order_item_data_shell()
     {
-        $this->order_item_shell(2);
+        $this->order_item_shell(1);
     }
 
     /**
@@ -2114,7 +2114,7 @@ class OrderData extends Backend
     public function order_payment_data_shell()
     {
 
-        $this->order_payment_data(2);
+        $this->order_payment_data(1);
     }
 
 
@@ -2175,10 +2175,10 @@ class OrderData extends Backend
 
     protected function order_item_shell($site)
     {
-        if ($site == 2) {
-            $list = Db::connect('database.db_voogueme')
+        if ($site == 1) {
+            $list = Db::connect('database.db_zeelool')
                 ->table('sales_flat_order_item')
-                ->where(['order_id' => ['in', [454797, 454798, 454799]]])
+                ->where(['order_id' => ['in', [908638, 908639, 908640,908641,908642,908643]]])
                 ->select();
         }
 
@@ -2189,8 +2189,8 @@ class OrderData extends Backend
             }
             $options = [];
             //处方解析 不同站不同字段
-            if ($site == 2) {
-                $options = $this->voogueme_prescription_analysis($v['product_options']);
+            if ($site == 1) {
+                $options = $this->zeelool_prescription_analysis($v['product_options']);
             }
 
             $options['item_id'] = $v['item_id'];
