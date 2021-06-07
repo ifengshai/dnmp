@@ -27,6 +27,9 @@ class Repurchase extends Command
         $this->getUserRepurchase(1);  //zeelool复购数据
         $this->getUserRepurchase(2);  //voogueme复购数据
         $this->getUserRepurchase(3);  //nihao复购数据
+        $this->getUserRepurchase(5);  //批发站复购数据
+        $this->getUserRepurchase(10);  //德语复购数据
+        $this->getUserRepurchase(11);  //西语复购数据
         $this->getOldNewUser(1);  //zeelool新老用户数据
         $this->getOldNewUser(2);  //voogueme新老用户数据
         $this->getOldNewUser(3);  //nihao新老用户数据
@@ -34,7 +37,7 @@ class Repurchase extends Command
     }
     /**
      * 获取用户复购数据
-     * @param $site  站点
+     * @param $site
      * @author mjj
      * @date   2021/4/1 10:02:32
      */
@@ -282,13 +285,13 @@ class Repurchase extends Command
         //新用户环比变动
         $lastMonthNewUser = $lastData['usernum'] - $lastData['old_usernum'];
         $newSequential = $lastMonthNewUser ? round(($newUserCount / $lastMonthNewUser - 1) * 100, 2) : 0;
-        $arr = array(
-            'usernum' => $userCount,
-            'old_usernum' => $oldUserCount,
-            'old_usernum_rate' => $oldUserRate,
+        $arr = [
+            'usernum'                => $userCount,
+            'old_usernum'            => $oldUserCount,
+            'old_usernum_rate'       => $oldUserRate,
             'old_usernum_sequential' => $oldSequential,
             'new_usernum_sequential' => $newSequential,
-        );
+        ];
         Db::name('datacenter_supply_month_web')
             ->where('day_date',$nowMonth)
             ->where('site',$site)

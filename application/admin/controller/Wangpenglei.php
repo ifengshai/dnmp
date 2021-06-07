@@ -6,7 +6,9 @@ use app\admin\controller\zendesk\Notice;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\lens\LensPrice;
+use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\warehouse\ProductBarCodeItem;
+use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
 use think\Db;
 use FacebookAds\Api;
@@ -1395,6 +1397,7 @@ class Wangpenglei extends Backend
         $list = $this->is_prescription_abnormal($params);
         $arr = array_merge($arr, $list);
 
+        $arr['order_prescription_type'] = 0;
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
@@ -1405,16 +1408,29 @@ class Wangpenglei extends Backend
             $os_cyl = (float)urldecode($params['os_cyl']);
             //判断是否为现片，其余为定制
             $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
+            $tempArr = [];
             foreach ($lensData as $v) {
-                if (($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'])
-                    && ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'])
-                    && ($os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end'])
-                    && ($od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end'])
-                ) {
-                    $arr['order_prescription_type'] = 2;
+                if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
+                    $tempArr['od'] = 1;
+                }
+
+                dump($os_sph);
+                dump($os_cyl);
+                dump($v['sph_start']);
+                dump($v['sph_end']);
+                dump($v['cyl_start']);
+                dump($v['cyl_end']);
+                if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
+                    $tempArr['os'] = 1;
                 }
             }
+
+            dump($tempArr);
+            if ($tempArr['od'] == 1 && $tempArr['os'] = 1) {
+                $arr['order_prescription_type'] = 2;
+            }
         }
+        dump($arr);
 
         //默认如果不是仅镜架 或定制片 则为现货处方镜
         if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 2) {
@@ -1431,14 +1447,70 @@ class Wangpenglei extends Backend
      */
     public function test_lens()
     {
-        $params['od_sph'] = '-2.50';
-        $params['os_sph'] = '-2.50';
-        $params['od_cyl'] = '-0.50';
-        $params['os_cyl'] = '-0.50';
+        $params['od_sph'] = '-3.25';
+        $params['os_sph'] = '-2.75';
+        $params['od_cyl'] = '-2.00';
+        $params['os_cyl'] = '-2.75';
         $params['pd'] = 60;
-        $params['lens_number'] = 22100000;
+        $params['lens_number'] = 24200000;
         $data = $this->set_processing_type($params);
         dump($data);
         die;
+    }
+
+    public function test02()
+    {
+        $date_time_start = date('Y-m-d 00:00:00');
+        $date_time_end = date('Y-m-d 23:59:59');
+        $today_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status";
+        echo $today_sales_money_sql;
+        die;
+    }
+
+
+    /**
+     * 库位排序
+     * @author wpl
+     * @date   2021/6/5 10:26
+     */
+    public function set_store_sort()
+    {
+        $stock_house = new StockHouse();
+        $list = Db::table('fa_zz_temp2')->select();
+        foreach ($list as $k => $v) {
+            $stock_house->where(['stock_id' => 2,'coding' => $v['store_house']])->update(['picking_sort' => $v['sort']]);
+            echo $k . "\n";
+        }
+        echo "ok";
+    }
+
+
+    public function set_order_sort()
+    {
+        $order = new NewOrderItemProcess();
+        $list = $order->where(['stock_id' => 2])->select();
+        $itemPlatform = new ItemPlatformSku();
+        foreach ($list as $k => $v) {
+            //转换平台SKU
+            $sku = $itemPlatform->getTrueSku($v['sku'], $v['site']);
+            //根据sku查询库位排序
+            $stockSku = new StockSku();
+            $where = [];
+            $where['c.type'] = 2;//默认拣货区
+            $where['b.status'] = 1;//启用状态
+            $where['a.is_del'] = 1;//正常状态
+            $where['b.stock_id'] = 2;//查询对应仓库
+            $location_data = $stockSku
+                ->alias('a')
+                ->where($where)
+                ->where(['a.sku' => $sku])
+                ->field('b.coding,b.picking_sort')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
+                ->find();
+            $order->where(['id' => $v['id']])->update(['picking_sort' => $location_data['picking_sort']]);
+        }
+
+
     }
 }

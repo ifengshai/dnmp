@@ -104,6 +104,12 @@ class Scm extends Api
                     'link' => 'warehouse/allocation',
                     'icon' => '/assets/img/distribution/kuneidiaobo.png',
                     'href' => 'com.nextmar.mojing.ui.allocation.AllocationListActivity'
+                ],
+                [
+                    'name' => '实体仓调拨',
+                    'link' => 'warehouse/trans',
+                    'icon' => '/assets/img/distribution/kuneidiaobo.png',
+                    'href' => 'com.nextmar.mojing.ui.stocktransfer.StockTransferListActivity'
                 ]
             ],
         ],

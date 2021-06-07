@@ -1,0 +1,239 @@
+<style type="text/css">
+    .echart-style td{
+        width:60px;
+    }
+
+    .caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: #a9c6c9;
+        border-radius: 6px;
+    }
+    .margin-div{
+        margin-top: 30px;
+    }
+    .btn-div {
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 10px;
+        margin-left: 10px;
+        width: 23%;
+    }
+    .title{
+        font-size: 18px;
+        color: rgb(127, 127, 127);
+    }
+    .rate_class{
+        font-size: 12px;
+        display: none;
+    }
+
+    /*第一块*/
+    .new-form-group{
+        margin-top: 2%;
+        float: left;
+        min-width: 25%;
+        height: 30px;
+        line-height: 30px;
+    }
+    .new-form-group label{
+        text-align: right;
+    }
+    .col-xs-4{
+        width: 30%;
+    }
+    .new-col-xs-8{
+        width: 60%;
+    }
+    .new-background{
+        border-radius:2px;
+        margin-bottom:10px;
+        background:#f5f5f5;
+        padding:20px;
+    }
+    /*表格*/
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+        text-align: center;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.altrowstable tr:nth-child(odd){
+        background:#E9F1F4;
+        background: #F5F5F5;
+    }
+    table.altrowstable tr:nth-child(even){
+        background: #fff;
+        background: #eee;
+    }
+
+    table.new-altrowstable{
+        float: left;
+        margin: 0 auto;
+        width: 48%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    table.new-altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+        text-align: center;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.new-altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+        vertical-align: middle;
+        color: #666666;
+    }
+    table.new-altrowstable tr:nth-child(odd){
+        background:#E9F1F4;
+        background: #F5F5F5;
+    }
+    table.new-altrowstable tr:nth-child(even){
+        background: #fff;
+        background: #eee;
+    }
+    table.height-table td{
+        height: 76.5px;
+    }
+    .wenhao {
+        width: 20px;
+        float: right;
+    }
+    .wenhao1 {
+        width: 12px;
+        float: right;
+    }
+    .wenhao-class{
+        width: 12px;
+        float: right;
+    }
+    .sales-div {
+        float: left;
+        width: 33%;
+        height: 100%;
+        font-family: "微软雅黑 Regular", 微软雅黑, sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        font-size: 20px;
+        line-height: 36px;
+
+    }
+</style>
+
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div class="tab-pane fade active in">
+            <div class="widget-body no-padding" style="wight: 400px; overflow:scroll">
+                <table id="order-info-list" class="altrowstable"
+                       data-operate-edit="{:$auth->check('saleaftermanage/order_return/edit')}"
+                       data-operate-del="{:$auth->check('saleaftermanage/order_return/del')}"
+                       width="100%">
+                    <thead>
+                    <tr>
+                        <th style="text-align: center; vertical-align: middle;">日期</th>
+                        <th style="text-align: center; vertical-align: middle;">销售额</th>
+                        <th style="text-align: center; vertical-align: middle;">订单数</th>
+                        <th style="text-align: center; vertical-align: middle;">订单支付成功数</th>
+                        <th style="text-align: center; vertical-align: middle;">客单价
+                            <span tabindex="0" data-bs-toggle="tooltip" title="平均订单金额 （销售额/订单数）">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span>
+                        </th>
+                        <th style="text-align: center; vertical-align: middle;">新增购物车
+                            <span tabindex="0" data-bs-toggle="tooltip" title="用户购物车从0到1，数量+1">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                        <th style="text-align: center; vertical-align: middle;">新增购物车转化率(%)
+                            <span tabindex="0" data-bs-toggle="tooltip" title="从新增购物车生成的订单数/新增购物车数">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                        <th style="text-align: center; vertical-align: middle;">更新购物车数
+                            <span tabindex="0" data-bs-toggle="tooltip" title="用户购物车有变更时，数量+1">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                        <th style="text-align: center; vertical-align: middle;">更新购物车转化率(%)
+                            <span tabindex="0" data-bs-toggle="tooltip" title="订单数/更新购物车数">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span></th>
+                        <th style="text-align: center; vertical-align: middle;">新增注册用户数</th>
+                        <th style="text-align: center; vertical-align: middle;">登录用户数</th>
+                    </tr>
+                    </thead>
+                    <tbody id="order_info">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

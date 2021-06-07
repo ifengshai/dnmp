@@ -31,12 +31,13 @@ class WarehouseArea extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['print_label'];
+    protected $noNeedRight = ['print_label','getStockHouse'];
 
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\WarehouseArea;
+        $this->assignconfig('warehourseStock',getStockHouse());
 
     }
     
@@ -65,11 +66,13 @@ class WarehouseArea extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->with('warehouseStock')
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -214,6 +217,20 @@ class WarehouseArea extends Backend
             $this->error('修改失败！！');
         }
     }
+    /**
+     * 获取库区对应的库位
+     * @return \think\response\Json
+     * @author crasphb
+     * @date   2021/5/17 14:42
+     */
+    public function getStockHouse()
+    {
+        if ($this->request->isAjax()) {
+            $area_id = input('area_id','');
 
+            $area = \app\admin\model\warehouse\StockHouse::where('area_id',$area_id)->where('status', '=', 1)->field('coding,id')->select();
+            return json($area);
+        }
+    }
 
 }

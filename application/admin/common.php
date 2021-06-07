@@ -1,5 +1,6 @@
 <?php
 
+use app\admin\model\warehouse\WarehouseStock;
 use app\common\model\Category;
 use fast\Form;
 use fast\Tree;
@@ -269,4 +270,14 @@ if (!function_exists('arrayConversion')) {
         }
         return $list;
     }
+}
+/**
+ * 获取仓库列表
+ * @return mixed
+ * @author crasphb
+ * @date   2021/5/17 13:58
+ */
+function getStockHouse()
+{
+    return WarehouseStock::column('name','id');
 }

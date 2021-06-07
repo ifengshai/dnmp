@@ -7,11 +7,17 @@
 namespace app\admin\controller\shell;
 
 use app\admin\controller\elasticsearch\async\AsyncOrder;
+use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\order\order\WaveOrder;
+use app\admin\model\warehouse\StockSku;
 use app\common\controller\Backend;
 use app\enum\Site;
 use think\Db;
 use app\admin\model\lens\LensPrice;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
 use think\Env;
+use think\exception\DbException;
 
 class OrderData extends Backend
 {
@@ -28,6 +34,12 @@ class OrderData extends Backend
      * @date   2021/5/6 14:17
      */
     private $topicIp;
+    /**
+     * @var
+     * @author wpl
+     * @date   2021/5/14 14:19
+     */
+    private $orderitemprocess;
 
     public function _initialize()
     {
@@ -44,6 +56,7 @@ class OrderData extends Backend
         $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
         $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
         $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->asyncOrder = new AsyncOrder();
         $this->topicName = Env::get('topic.orderTopicName');
         $this->topicIp = Env::get('topic.topicIp');
         $this->asyncOrder = new AsyncOrder();
@@ -412,7 +425,6 @@ class OrderData extends Backend
                                     if ($site == 5) {
                                         $options = $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                     }
-
                                     $options['item_id'] = $v['id'];
                                     $options['site'] = $site;
                                     $options['magento_order_id'] = $v['order_id'];
@@ -431,7 +443,6 @@ class OrderData extends Backend
                                     $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
                                     $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
-
                                     $order_prescription_type = $options['order_prescription_type'];
                                     $is_prescription_abnormal = $options['is_prescription_abnormal'];
                                     unset($options['order_prescription_type']);
@@ -451,6 +462,12 @@ class OrderData extends Backend
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
                                         $this->orderitemprocess->insertAll($data);
+
+                                        //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
+                                        if ($order_prescription_type == 3) {
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 1]);
+                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 1]);
+                                        }
                                     }
                                 }
                             }
@@ -492,6 +509,12 @@ class OrderData extends Backend
                                         $this->orderitemoption->where(['item_id' => $v['id'], 'site' => $site])->update($options);
 
                                         $this->orderitemprocess->where(['item_id' => $v['id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type, 'sku' => $options['sku']]);
+
+                                        //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
+                                        if ($order_prescription_type == 3) {
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 1]);
+                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 1]);
+                                        }
                                     }
                                 }
                             }
@@ -510,8 +533,6 @@ class OrderData extends Backend
                                         $options = $this->nihao_prescription_analysis($v['product_options']);
                                     } elseif ($site == 4) {
                                         $options = $this->meeloog_prescription_analysis($v['product_options']);
-                                    } elseif ($site == 5) {
-                                        $options = $this->wesee_prescription_analysis($v['product_options']);
                                     } elseif ($site == 9) {
                                         $options = $this->zeelool_es_prescription_analysis($v['product_options']);
                                     } elseif ($site == 10) {
@@ -554,6 +575,12 @@ class OrderData extends Backend
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
                                         $this->orderitemprocess->insertAll($data);
+
+                                        //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
+                                        if ($order_prescription_type == 3 && in_array($site, [1, 2, 3])) {
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                        }
                                     }
                                 }
                             }
@@ -599,6 +626,12 @@ class OrderData extends Backend
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
 
                                         $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type, 'sku' => $options['sku']]);
+
+                                        //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
+                                        if ($order_prescription_type == 3 && in_array($site, [1, 2, 3])) {
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                        }
                                     }
                                 }
                             }
@@ -735,7 +768,7 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2020/10/28 10:16:53 
-     * @return void
+     * @return array
      */
     protected function zeelool_prescription_analysis($data)
     {
@@ -832,7 +865,7 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2020/10/28 10:16:53 
-     * @return void
+     * @return array
      */
     protected function voogueme_prescription_analysis($data)
     {
@@ -922,7 +955,7 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2020/10/28 10:16:53 
-     * @return void
+     * @return array
      */
     protected function nihao_prescription_analysis($data)
     {
@@ -1009,7 +1042,7 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2020/10/28 10:16:53 
-     * @return void
+     * @return array
      */
     protected function meeloog_prescription_analysis($data)
     {
@@ -1100,7 +1133,7 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2020/10/28 10:16:53 
-     * @return void
+     * @return array
      */
     protected function zeelool_es_prescription_analysis($data)
     {
@@ -1194,7 +1227,7 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2020/10/28 10:16:53 
-     * @return void
+     * @return array
      */
     protected function zeelool_de_prescription_analysis($data)
     {
@@ -1284,7 +1317,7 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2020/10/28 10:16:53 
-     * @return void
+     * @return array
      */
     protected function zeelool_jp_prescription_analysis($data)
     {
@@ -1375,7 +1408,7 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2020/10/28 10:16:53 
-     * @return void
+     * @return array
      */
     protected function voogueme_acc_prescription_analysis($data)
     {
@@ -1521,6 +1554,7 @@ class OrderData extends Backend
         $list = $this->is_prescription_abnormal($params);
         $arr = array_merge($arr, $list);
 
+        $arr['order_prescription_type'] = 0;
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
@@ -1541,7 +1575,7 @@ class OrderData extends Backend
                 }
             }
 
-            if ($tempArr['od'] == 1 && $tempArr['os'] = 1) {
+            if ($tempArr['od'] == 1 && $tempArr['os'] == 1) {
                 $arr['order_prescription_type'] = 2;
             }
         }
@@ -1637,7 +1671,7 @@ class OrderData extends Backend
                 }
 
                 $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
-                $item_params[$key]['order_id'] = $res->id;
+                $item_params[$key]['order_id'] = $res->id ?: 0;
             }
             //更新数据
             if ($item_params) {
@@ -1669,7 +1703,7 @@ class OrderData extends Backend
         foreach ($list as $k => $v) {
             $order_id = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->value('id');
             $params[$k]['id'] = $v['id'];
-            $params[$k]['order_id'] = $order_id;
+            $params[$k]['order_id'] = $order_id ?: 0;
             echo $v['id'] . "\n";
         }
         //更新数据
@@ -1689,6 +1723,9 @@ class OrderData extends Backend
      * @author wpl
      * @since 2021/03/23 17:47:29 
      * @return void
+     * @throws DataNotFoundException
+     * @throws ModelNotFoundException
+     * @throws DbException
      */
     public function create_wave_order()
     {
@@ -1707,25 +1744,21 @@ class OrderData extends Backend
          * 第八波次：21:00-23:59:59
          *
          */
-        //查询今天的订单
-        // $where['a.created_at'] = ['between', [strtotime(date('Y-m-d 00:00:00')), strtotime(date('Y-m-d 23:59:59'))]];
         $where['b.is_print'] = 0;
         $where['b.wave_order_id'] = 0;
         $where['b.is_prescription_abnormal'] = 0;
-        $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-        $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,a.updated_at,entity_id,a.site')
+        $where['a.status'] = ['in', ['processing']];
+        $list = $this->order->where($where)->alias('a')->field('b.id,b.sku,a.created_at,a.updated_at,entity_id,a.site,a.is_custom_lens,a.stock_id')
             ->join(['fa_order_item_process' => 'b'], 'a.entity_id=b.magento_order_id and a.site=b.site')
             ->order('id desc')
             ->select();
         $list = collection($list)->toArray();
         //第三方站点id
         $third_site = [13, 14];
-        $waveorder = new \app\admin\model\order\order\WaveOrder();
-        $itemplaform = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $storesku = new \app\admin\model\warehouse\StockHouse();
+        $waveOrder = new WaveOrder();
+        $itemPlatform = new ItemPlatformSku();
         foreach ($list as $k => $v) {
             //判断波次类型
-            $type = 0;
             if (in_array($v['site'], $third_site)) {
                 $type = 2;
             } else {
@@ -1733,6 +1766,7 @@ class OrderData extends Backend
             }
             $time = $v['updated_at'] > 28800 ? $v['updated_at'] : $v['created_at'];
             //判断波次时间段
+            $wave_time_type = 0;
             if (strtotime(date('Y-m-d 00:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 02:59:59', $time))) {
                 $wave_time_type = 1;
             } elseif (strtotime(date('Y-m-d 03:00:00', $time)) <= $time and $time <= strtotime(date('Y-m-d 05:59:59', $time))) {
@@ -1751,41 +1785,57 @@ class OrderData extends Backend
                 $wave_time_type = 8;
             }
 
-            $id = $waveorder
+            if ($v['stock_id'] == 2) {
+                $stockId = 2; //丹阳仓
+            } else {
+                $stockId = 1; //郑州仓
+            }
+            $id = $waveOrder
                 ->where([
                     'type'           => $type,
                     'wave_time_type' => $wave_time_type,
+                    'stock_id'       => $stockId,//丹阳仓
                     'order_date'     => ['between', [strtotime(date('Y-m-d 00:00:00', $time)), strtotime(date('Y-m-d 23:59:59', $time))]],
                 ])
                 ->value('id');
+
             if (!$id) {
                 $params = [];
                 $params['wave_order_number'] = 'BC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $params['type'] = $type;
                 $params['wave_time_type'] = $wave_time_type;
+                $params['stock_id'] = $stockId;
                 $params['order_date'] = $time;
                 $params['createtime'] = time();
-                $id = $waveorder->insertGetId($params);
+                $id = $waveOrder->insertGetId($params);
             }
+
             //转换平台SKU
-            $sku = $itemplaform->getTrueSku($v['sku'], $v['site']);
+            $sku = $itemPlatform->getTrueSku($v['sku'], $v['site']);
             //根据sku查询库位排序
-            $storesku = new \app\admin\model\warehouse\StockSku();
+            $stockSku = new StockSku();
             $where = [];
-            $where['b.area_id'] = 3;//默认拣货区
+            $where['c.type'] = 2;//默认拣货区
             $where['b.status'] = 1;//启用状态
             $where['a.is_del'] = 1;//正常状态
-            $location_data = $storesku->alias('a')->where($where)->where(['a.sku' => $sku])->field('coding,picking_sort')->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->find();
+            $where['b.stock_id'] = $stockId;//查询对应仓库
+            $location_data = $stockSku
+                ->alias('a')
+                ->where($where)
+                ->where(['a.sku' => $sku])
+                ->field('b.coding,b.picking_sort')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
+                ->find();
             $this->orderitemprocess->where(['id' => $v['id']])->update(['wave_order_id' => $id, 'location_code' => $location_data['coding'], 'picking_sort' => $location_data['picking_sort']]);
         }
-
         echo "ok";
     }
 
     ########################################end##############################################
 
 
-    ################################################处理旧数据脚本##########################################################################
+    ################################################处理旧数据脚本#############################
 
     /**
      * 批发站主表
@@ -1950,13 +2000,13 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(15);
+        $this->zeelool_old_order(11);
     }
 
     protected function zeelool_old_order($site)
     {
-        if ($site == 15) {
-            $list = Db::connect('database.db_zeelool_fr')->table('sales_flat_order')->select();
+        if ($site == 11) {
+            $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', [8405, 8406]]])->select();
         }
 
         $list = collection($list)->toArray();
@@ -2019,7 +2069,7 @@ class OrderData extends Backend
 
     public function order_address_data_shell()
     {
-        $list = Db::connect('database.db_zeelool_fr')->table('sales_flat_order_address')->where(['address_type' => 'shipping'])->select();
+        $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_address')->where(['parent_id' => ['in', [8405, 8406]]])->where(['address_type' => 'shipping'])->select();
 
         foreach ($list as $k => $v) {
             $params = [];
@@ -2034,26 +2084,42 @@ class OrderData extends Backend
                 $params['firstname'] = $v['firstname'];
                 $params['lastname'] = $v['lastname'];
                 $params['updated_at'] = strtotime($v['updated_at']) + 28800;
-                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 15])->update($params);
+                $this->order->where(['entity_id' => $v['parent_id'], 'site' => 11])->update($params);
             }
         }
     }
 
-    public function order_data_shell()
+
+    /**
+     * 临时处理订单子表数据
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 16:47:50 
+     * @return void
+     */
+    public function order_item_data_shell()
     {
-        $this->order_data(1);
+        $this->order_item_shell(11);
     }
 
-    public function order_data_shell_v()
+    /**
+     * 订单支付临时表
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/11/12 17:06:50 
+     * @return void
+     */
+    public function order_payment_data_shell()
     {
-        $this->order_data(2);
 
+        $this->order_payment_data(11);
     }
 
-    public function order_data_shell_n()
-    {
-        $this->order_data(3);
-    }
+
+
+
 
     public function order_data_shell_de()
     {
@@ -2105,26 +2171,14 @@ class OrderData extends Backend
         echo $site . 'ok';
     }
 
-    /**
-     * 临时处理订单子表数据
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/11/12 16:47:50 
-     * @return void
-     */
-    public function order_item_data_shell()
-    {
-        $this->order_item_shell(2);
-    }
+
 
     protected function order_item_shell($site)
     {
-        if ($site == 2) {
-            // $id = $this->orderitemoption->where('site=' . $site . ' and item_id < 929673')->max('item_id');
-            $list = Db::connect('database.db_voogueme')
+        if ($site == 11) {
+            $list = Db::connect('database.db_zeelool_jp')
                 ->table('sales_flat_order_item')
-                ->where(['order_id' => ['in', ['440276', '440277', '440278']]])
+                ->where(['order_id' => ['in', [8405, 8406]]])
                 ->select();
         }
 
@@ -2135,8 +2189,8 @@ class OrderData extends Backend
             }
             $options = [];
             //处方解析 不同站不同字段
-            if ($site == 2) {
-                $options = $this->voogueme_prescription_analysis($v['product_options']);
+            if ($site == 11) {
+                $options = $this->zeelool_jp_prescription_analysis($v['product_options']);
             }
 
             $options['item_id'] = $v['item_id'];
@@ -2169,6 +2223,12 @@ class OrderData extends Backend
                     $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                 }
                 $this->orderitemprocess->insertAll($data);
+
+                //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
+                if ($order_prescription_type == 3) {
+                    $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                    $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                }
             }
             echo $v['item_id'] . "\n";
             usleep(10000);
@@ -2176,19 +2236,7 @@ class OrderData extends Backend
         echo "ok";
     }
 
-    /**
-     * 订单支付临时表
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/11/12 17:06:50 
-     * @return void
-     */
-    public function order_payment_data_shell()
-    {
 
-        $this->order_payment_data(15);
-    }
 
     /**
      * 支付方式处理
@@ -2206,9 +2254,9 @@ class OrderData extends Backend
         if ($site == 1) {
             $res = Db::connect('database.db_zeelool')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
+            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
         } elseif ($site == 3) {
-            $res = Db::connect('database.db_nihao')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
+            $res = Db::connect('database.db_nihao')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
         } elseif ($site == 4) {
             $res = Db::connect('database.db_meeloog')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
         } elseif ($site == 5) {
@@ -2216,9 +2264,9 @@ class OrderData extends Backend
         } elseif ($site == 9) {
             $res = Db::connect('database.db_zeelool_es')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
         } elseif ($site == 10) {
-            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
+            $res = Db::connect('database.db_zeelool_de')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
         } elseif ($site == 11) {
-            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id', 'parent_id');
+            $res = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
         } elseif ($site == 15) {
             $res = Db::connect('database.db_zeelool_fr')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('last_trans_id,method', 'parent_id');
         }
@@ -2409,5 +2457,22 @@ class OrderData extends Backend
         }
         $this->order->saveAll($params);
         echo $site . 'ok';
+    }
+
+    public function batch_payment_time()
+    {
+        $model = Db::connect('database.db_weseeoptical');
+        $orders = $model->table('orders')
+            ->field('order_no,payment_time')
+            ->select();
+        foreach ($orders as $value) {
+            $time = strtotime($value['payment_time']) + 8 * 3600;
+            $this->order
+                ->where('site', 5)
+                ->where('increment_id', $value['order_no'])
+                ->update(['payment_time' => $time]);
+            echo $value['order_no'] . ' is ok' . "\n";
+            usleep(10000);
+        }
     }
 }

@@ -31,7 +31,7 @@ use Think\Log;
 /**
  * 供应链配货接口类
  * @author lzh
- * @since 2020-10-20
+ * @since  2020-10-20
  */
 class ScmDistribution extends Scm
 {
@@ -164,7 +164,7 @@ class ScmDistribution extends Scm
         empty($type) && $this->error(__('异常类型不能为空'), [], 403);
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
-            ->field('id,abnormal_house_id')
+            ->field('id,abnormal_house_id,stock_id')
             ->where('item_order_number', $item_order_number)
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
@@ -174,7 +174,7 @@ class ScmDistribution extends Scm
         //自动分配异常库位号
         $stock_house_info = $this->_stock_house
             ->field('id,coding')
-            ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000]])
+            ->where(['status' => 1, 'type' => 4, 'stock_id' => $item_process_info['stock_id'], 'occupy' => ['<', 10000]])
             ->order('occupy', 'desc')
             ->find();
         if (empty($stock_house_info)) {
@@ -188,10 +188,10 @@ class ScmDistribution extends Scm
             //绑定异常子单号
             $abnormal_data = [
                 'item_process_id' => $item_process_id,
-                'type' => $type,
-                'status' => 1,
-                'create_time' => time(),
-                'create_person' => $this->auth->nickname
+                'type'            => $type,
+                'status'          => 1,
+                'create_time'     => time(),
+                'create_person'   => $this->auth->nickname,
             ];
 
             $this->_distribution_abnormal->allowField(true)->save($abnormal_data);
@@ -244,7 +244,7 @@ class ScmDistribution extends Scm
         empty($type) && $this->error(__('异常类型不能为空'), [], 403);
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
-            ->field('id,abnormal_house_id')
+            ->field('id,abnormal_house_id,stock_id')
             ->where('item_order_number', $item_order_number)
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
@@ -254,7 +254,7 @@ class ScmDistribution extends Scm
         //自动分配异常库位号
         $stock_house_info = $this->_stock_house
             ->field('id,coding')
-            ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000]])
+            ->where(['status' => 1, 'type' => 4, 'stock_id' => $item_process_info['stock_id'], 'occupy' => ['<', 10000]])
             ->order('occupy', 'desc')
             ->find();
         if (empty($stock_house_info)) {
@@ -265,10 +265,10 @@ class ScmDistribution extends Scm
         //绑定异常子单号
         $abnormal_data = [
             'item_process_id' => $item_process_id,
-            'type' => $type,
-            'status' => 1,
-            'create_time' => time(),
-            'create_person' => $this->auth->nickname
+            'type'            => $type,
+            'status'          => 1,
+            'create_time'     => time(),
+            'create_person'   => $this->auth->nickname,
         ];
 
 
@@ -317,7 +317,8 @@ class ScmDistribution extends Scm
      * 获取并校验子订单数据（配货通用）
      *
      * @param string $item_order_number 子订单号
-     * @param int $check_status 检测状态
+     * @param int    $check_status      检测状态
+     *
      * @return mixed
      * @author lzh
      */
@@ -328,7 +329,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,option_id,distribution_status,temporary_house_id,abnormal_house_id,order_prescription_type,order_id,customize_status,reason,fail_son_reason')
+            ->field('id,option_id,distribution_status,temporary_house_id,abnormal_house_id,order_prescription_type,order_id,customize_status,reason,fail_son_reason,stock_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
 
@@ -349,7 +350,7 @@ class ScmDistribution extends Scm
             ->where([
                 'a.operation_type' => 0,
                 'b.platform_order' => $order_info['increment_id'],
-                'b.work_status' => ['in', [1, 2, 3, 5]]
+                'b.work_status'    => ['in', [1, 2, 3, 5]],
             ])
             ->select();
         //获取库位号
@@ -363,8 +364,8 @@ class ScmDistribution extends Scm
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
 
-                    // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                    && $this->error(__('子订单存在工单' . "<br><b>$coding</b>"), [], 405);
+                // && $this->error(__('有工单未处理，无法操作'), [], 405);
+                && $this->error(__('子订单存在工单' . "<br><b>$coding</b>"), [], 405);
                 if ($val['measure_choose_id'] == 21) {
                     // $this->error(__('有工单存在暂缓措施未处理，无法操作'), [], 405);
                     $this->error(__("子订单存在工单" . "<br><b>$coding</b>"), [], 405);
@@ -385,7 +386,7 @@ class ScmDistribution extends Scm
             4 => '待加工',
             5 => '待印logo',
             6 => '待成品质检',
-            7 => '待合单'
+            7 => '待合单',
         ];
         $status_arr1 = [
             2 => '配货',
@@ -393,7 +394,7 @@ class ScmDistribution extends Scm
             4 => '加工',
             5 => '印logo',
             6 => '成品质检',
-            7 => '合单'
+            7 => '合单',
         ];
         // $check_status != $item_process_info['distribution_status'] && $this->error(__('只有' . $status_arr[$check_status] . '状态才能操作'), [], 405);
         $check_status != $item_process_info['distribution_status'] && $this->error(__('去' . $status_arr1[$item_process_info['distribution_status']]), [], 405);
@@ -402,16 +403,18 @@ class ScmDistribution extends Scm
         $option_info = $this->_new_order_item_option
             ->where('id', $item_process_info['option_id'])
             ->find();
-        if ($option_info) $option_info = $option_info->toArray();
+        if ($option_info) {
+            $option_info = $option_info->toArray();
+        }
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
             ->alias('a')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
-                'a.change_type' => 1,
+                'a.change_type'       => 1,
                 'a.item_order_number' => $item_order_number,
-                'b.operation_type' => 1
+                'b.operation_type'    => 1,
             ])
             ->order('a.id', 'desc')
             ->value('a.change_sku');
@@ -425,9 +428,9 @@ class ScmDistribution extends Scm
             ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
-                'a.change_type' => 2,
+                'a.change_type'       => 2,
                 'a.item_order_number' => $item_order_number,
-                'b.operation_type' => 1
+                'b.operation_type'    => 1,
             ])
             ->order('a.id', 'desc')
             ->find();
@@ -472,27 +475,27 @@ class ScmDistribution extends Scm
                 ['id' => 3, 'name' => '核实处方', 'reason' => [['id' => 1, 'name' => '核实轴位（AXI）'], ['id' => 2, 'name' => '核实瞳距（PD）'], ['id' => 3, 'name' => '核实处方光度符号'], ['id' => 4, 'name' => '核实镜片类型'], ['id' => 5, 'name' => '核实处方光度']]],
                 ['id' => 4, 'name' => '镜片缺货'],
                 ['id' => 5, 'name' => '镜片重做'],
-                ['id' => 6, 'name' => '定制片超时']
+                ['id' => 6, 'name' => '定制片超时'],
             ],
             4 => [
                 ['id' => 7, 'name' => '不可加工'],
                 ['id' => 8, 'name' => '镜架加工报损'],
-                ['id' => 9, 'name' => '镜片加工报损']
+                ['id' => 9, 'name' => '镜片加工报损'],
             ],
             5 => [
                 ['id' => 10, 'name' => 'logo不可加工'],
-                ['id' => 11, 'name' => '镜架印logo报损']
+                ['id' => 11, 'name' => '镜架印logo报损'],
             ],
             6 => [
                 ['id' => 1, 'name' => '加工调整', 'reason' => [['id' => 1, 'name' => '划伤'], ['id' => 2, 'name' => '断裂'], ['id' => 3, 'name' => '杂质'], ['id' => 4, 'name' => '黑点'], ['id' => 5, 'name' => '掉漆'], ['id' => 6, 'name' => '镜架凸起']]],
                 ['id' => 2, 'name' => '镜架报损'],
                 // ['id' => 3, 'name' => '镜片报损', 'reason' => [['id' => 1, 'name' => '划伤'], ['id' => 2, 'name' => '轴位错'], ['id' => 3, 'name' => '左右反'], ['id' => 4, 'name' => '不变色'], ['id' => 5, 'name' => '崩边'], ['id' => 6, 'name' => '配错片']]],
                 ['id' => 3, 'name' => '镜片报损'],
-                ['id' => 4, 'name' => 'logo调整']
+                ['id' => 4, 'name' => 'logo调整'],
             ],
             7 => [
-                ['id' => 12, 'name' => '缺货']
-            ]
+                ['id' => 12, 'name' => '缺货'],
+            ],
         ];
         $abnormal_list = $abnormal_arr[$check_status] ?? [];
 
@@ -516,7 +519,7 @@ class ScmDistribution extends Scm
                     //暂存自动分配库位
                     $stock_house_info = $this->_stock_house
                         ->field('id,coding')
-                        ->where(['status' => 1, 'type' => 3, 'occupy' => ['<', 10000]])
+                        ->where(['status' => 1, 'type' => 3, 'stock_id' => $item_process_info['stock_id'], 'occupy' => ['<', 10000]])
                         ->order('occupy', 'desc')
                         ->find();
                     if (!empty($stock_house_info)) {
@@ -661,7 +664,8 @@ class ScmDistribution extends Scm
      * 提交操作（配货通用）
      *
      * @param string $item_order_number 子订单号
-     * @param int $check_status 检测状态
+     * @param int    $check_status      检测状态
+     *
      * @return mixed
      * @author lzh
      */
@@ -674,8 +678,8 @@ class ScmDistribution extends Scm
         $barcode = $this->request->request('barcode');
         if (2 == $check_status) {
             $count = $this->_product_bar_code_item
-            ->where(['code' => $barcode, 'library_status' => 1])
-            ->count();
+                ->where(['code' => $barcode, 'library_status' => 1])
+                ->count();
             if ($count < 1) {
                 $this->error(__('条形码非在库状态'), [], 403);
             }
@@ -698,7 +702,7 @@ class ScmDistribution extends Scm
             3 => '配镜片',
             4 => '加工',
             5 => '印logo',
-            6 => '成品质检'
+            6 => '成品质检',
         ];
         //获取库位号
         /* $coding = $this->_stock_house
@@ -752,7 +756,7 @@ class ScmDistribution extends Scm
             ->where([
                 'a.operation_type' => 0,
                 'b.platform_order' => $increment_id,
-                'b.work_status' => ['in', [1, 2, 3, 5]]
+                'b.work_status'    => ['in', [1, 2, 3, 5]],
             ])
             ->select();
         if ($check_work_order) {
@@ -765,8 +769,8 @@ class ScmDistribution extends Scm
                     $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
                 )
 
-                    // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                    && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
+                // && $this->error(__('有工单未处理，无法操作'), [], 405);
+                && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
 
                 if ($val['measure_choose_id'] == 21) {
                     $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
@@ -797,9 +801,9 @@ class ScmDistribution extends Scm
                     ->alias('a')
                     ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                     ->where([
-                        'a.change_type' => 1,
+                        'a.change_type'       => 1,
                         'a.item_order_number' => $item_order_number,
-                        'b.operation_type' => 1
+                        'b.operation_type'    => 1,
                     ])
                     ->order('a.id', 'desc')
                     ->value('a.change_sku');
@@ -832,18 +836,18 @@ class ScmDistribution extends Scm
 
                 //记录库存日志
                 $this->_stock_log->setData([
-                    'type' => 2,
-                    'site' => $item_process_info['site'],
-                    'modular' => 2,
-                    'change_type' => 4,
-                    'source' => 2,
-                    'sku' => $true_sku,
-                    'number_type' => 2,
-                    'order_number' => $item_order_number,
+                    'type'                      => 2,
+                    'site'                      => $item_process_info['site'],
+                    'modular'                   => 2,
+                    'change_type'               => 4,
+                    'source'                    => 2,
+                    'sku'                       => $true_sku,
+                    'number_type'               => 2,
+                    'order_number'              => $item_order_number,
                     'distribution_stock_before' => $item_before['distribution_occupy_stock'],
                     'distribution_stock_change' => 1,
-                    'create_person' => $this->auth->nickname,
-                    'create_time' => time()
+                    'create_person'             => $this->auth->nickname ?: '',
+                    'create_time'               => time(),
                 ]);
 
                 //根据处方类型字段order_prescription_type(现货处方镜、定制处方镜)判断是否需要配镜片
@@ -888,7 +892,9 @@ class ScmDistribution extends Scm
                 }
             }
 
-            if (empty($save_status)) throw new Exception('未获取到下一步状态');
+            if (empty($save_status)) {
+                throw new Exception('未获取到下一步状态');
+            }
 
             //订单主表标记已合单
             if (9 == $save_status) {
@@ -915,12 +921,12 @@ class ScmDistribution extends Scm
                     5 => '印logo',
                     6 => '去质检',
                     7 => '去合单',
-                    9 => '去合单'
+                    9 => '去合单',
                 ];
                 $back_msg = $next_step[$save_status];
             }
             //将订单号截取处理
-            $order_log_order_number =  substr($item_process_info['item_order_number'], 0, strpos($item_process_info['item_order_number'], '-'));
+            $order_log_order_number = substr($item_process_info['item_order_number'], 0, strpos($item_process_info['item_order_number'], '-'));
             if (!empty($node_status)) {
                 $site_array = [1, 2, 3];
                 if (in_array($item_process_info['site'], $site_array)) {
@@ -1004,38 +1010,40 @@ class ScmDistribution extends Scm
         empty($item_order_number) && $this->error(__('子订单号不能为空'), [], 403);
         empty($barcode) && $this->error(__('商品条形码不能为空'), [], 403);
 
+        //获取子单sku
+        $order_item_info = $this->_new_order_item_process
+            ->field('sku,site,id,stock_id')
+            ->where('item_order_number', $item_order_number)
+            ->find();
+        $order_item_true_sku = $order_item_info['sku'];
+        $order_item_id = $order_item_info['id'];
+        empty($order_item_info) && $this->error(__('订单不存在'), [], 403);
+
         /*****************限制如果有盘点单未结束不能操作配货完成*******************/
         //配货完成时判断
         //拣货区盘点时不能操作
         //查询条形码库区库位
         $barcodedata = $this->_product_bar_code_item->where(['code' => $barcode])->find();
         $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.area_id' => 3, 'library_name' => $barcodedata->location_code])
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
+            ->where(['a.is_del' => 1, 'a.stock_id' => $order_item_info['stock_id'], 'a.check_status' => ['in', [0, 1]], 'b.area_id' => $barcodedata->location_id, 'library_name' => $barcodedata->location_code])
             ->count();
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法配货'), [], 403);
         }
         /****************************end*****************************************/
-
-        //子订单号获取平台platform_sku
-        $order_item_id = $this->_new_order_item_process->where('item_order_number', $item_order_number)->value('id');
-        empty($order_item_id) && $this->error(__('订单不存在'), [], 403);
-
-        //获取子单sku
-        $order_item_info = $this->_new_order_item_process
-            ->field('sku,site')
-            ->where('item_order_number', $item_order_number)
-            ->find();
-        $order_item_true_sku = $order_item_info['sku'];
+        if ($barcodedata['stock_id'] != $order_item_info['stock_id']) {
+            $this->error(__('条码不在此仓库'), [], 403);
+        }
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku
             ->alias('a')
             ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
             ->where([
-                'a.change_type' => 1,
+                'a.change_type'       => 1,
                 'a.item_order_number' => $item_order_number,
-                'b.operation_type' => 1
+                'b.operation_type'    => 1,
             ])
             ->order('a.id', 'desc')
             ->value('a.change_sku');
@@ -1085,9 +1093,9 @@ class ScmDistribution extends Scm
         empty($page) && $this->error(__('Page can not be empty'), [], 403);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
         $where = [
-            'a.distribution_status' => 3,
-            'd.status' => 'processing',
-            'b.index_name' => ['neq', ''],
+            'a.distribution_status'     => 3,
+            'd.status'                  => 'processing',
+            'b.index_name'              => ['neq', ''],
             'a.order_prescription_type' => ['neq', 3],
         ];
         if ($start_time && $end_time) {
@@ -1164,9 +1172,9 @@ class ScmDistribution extends Scm
     public function no_sorting()
     {
         $where = [
-            'a.distribution_status' => 3,
+            'a.distribution_status'     => 3,
             'a.order_prescription_type' => 2,
-            'b.status' => 'processing',
+            'b.status'                  => 'processing',
         ];
 
         //未分拣子订单数量
@@ -1175,6 +1183,7 @@ class ScmDistribution extends Scm
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->where($where)
             ->count();
+
         return 2 * $count;
     }
 
@@ -1338,7 +1347,7 @@ class ScmDistribution extends Scm
             //获取子订单数据
             $item_process_info = $this->_new_order_item_process
                 ->where('item_order_number', $item_order_number)
-                ->field('id,option_id,order_id,sku,site')
+                ->field('id,option_id,order_id,sku,site,stock_id')
                 ->find();
 
             //状态
@@ -1346,7 +1355,7 @@ class ScmDistribution extends Scm
                 1 => ['status' => 4, 'name' => '质检拒绝：加工调整'],
                 2 => ['status' => 2, 'name' => '质检拒绝：镜架报损'],
                 3 => ['status' => 3, 'name' => '质检拒绝：镜片报损'],
-                4 => ['status' => 5, 'name' => '质检拒绝：logo调整']
+                4 => ['status' => 5, 'name' => '质检拒绝：logo调整'],
             ];
             $status = $status_arr[$reason]['status'];
 
@@ -1387,9 +1396,9 @@ class ScmDistribution extends Scm
                         ->alias('a')
                         ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                         ->where([
-                            'a.change_type' => 1,
+                            'a.change_type'       => 1,
                             'a.item_order_number' => $item_order_number,
-                            'b.operation_type' => 1
+                            'b.operation_type'    => 1,
                         ])
                         ->order('a.id', 'desc')
                         ->limit(1)
@@ -1424,6 +1433,7 @@ class ScmDistribution extends Scm
                     $outstock['type_id'] = 2;
                     $outstock['remark'] = 'PDA质检拒绝：镜架报损自动生成出库单';
                     $outstock['status'] = 2;
+                    $outstock['stock_id'] = $item_process_info['stock_id'];
                     $outstock['create_person'] = $this->auth->nickname;
                     $outstock['createtime'] = date('Y-m-d H:i:s', time());
                     $outstock['platform_id'] = $item_process_info['site'];
@@ -1433,7 +1443,6 @@ class ScmDistribution extends Scm
                     $outstock_item['out_stock_num'] = 1;
                     $outstock_item['out_stock_id'] = $outstock_id;
                     $this->_outstock_item->insert($outstock_item);
-
 
 
                     //条码出库
@@ -1454,24 +1463,24 @@ class ScmDistribution extends Scm
 
                     //记录库存日志
                     $this->_stock_log->setData([
-                        'type' => 2,
-                        'site' => $item_process_info['site'],
-                        'modular' => 3,
-                        'change_type' => 5,
-                        'source' => 2,
-                        'sku' => $true_sku,
-                        'number_type' => 2,
-                        'order_number' => $item_order_number,
-                        'available_stock_before' => $stock_arr['available_stock'],
-                        'available_stock_change' => -1,
+                        'type'                      => 2,
+                        'site'                      => $item_process_info['site'],
+                        'modular'                   => 3,
+                        'change_type'               => 5,
+                        'source'                    => 2,
+                        'sku'                       => $true_sku,
+                        'number_type'               => 2,
+                        'order_number'              => $item_order_number,
+                        'available_stock_before'    => $stock_arr['available_stock'],
+                        'available_stock_change'    => -1,
                         'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                         'distribution_stock_change' => -1,
-                        'stock_before' => $stock_arr['stock'],
-                        'stock_change' => -1,
-                        'fictitious_before' => $platform_info['stock'],
-                        'fictitious_change' => -1,
-                        'create_person' => $this->auth->nickname,
-                        'create_time' => time()
+                        'stock_before'              => $stock_arr['stock'],
+                        'stock_change'              => -1,
+                        'fictitious_before'         => $platform_info['stock'],
+                        'fictitious_change'         => -1,
+                        'create_person'             => $this->auth->nickname,
+                        'create_time'               => time(),
                     ]);
                 }
 
@@ -1531,7 +1540,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id,abnormal_house_id')
+            ->field('id,distribution_status,sku,order_id,temporary_house_id,abnormal_house_id,abnormal_house_id,stock_id')
             ->find();
         //查询订单号
         $order_info = $this->_new_order
@@ -1555,7 +1564,7 @@ class ScmDistribution extends Scm
             ->where([
                 'a.operation_type' => 0,
                 'b.platform_order' => $order_info['increment_id'],
-                'b.work_status' => ['in', [1, 2, 3, 5]]
+                'b.work_status'    => ['in', [1, 2, 3, 5]],
             ])
             ->select();
         if ($check_work_order) {
@@ -1598,7 +1607,7 @@ class ScmDistribution extends Scm
             4 => '加工',
             5 => '印logo',
             6 => '成品质检',
-            7 => '合单'
+            7 => '合单',
         ];
         // !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
         !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('去' . $status_arr1[$item_process_info['distribution_status']]), [], 405);
@@ -1619,7 +1628,10 @@ class ScmDistribution extends Scm
 
         //查询预库位占用
         $fictitious_time = time();
-        $fictitious_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['>', $fictitious_time], 'order_id' => $item_process_info['order_id']])->find();
+        $fictitious_store_house_info = $this->_stock_house
+            ->field('id,coding,subarea')
+            ->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['>', $fictitious_time], 'order_id' => $item_process_info['order_id'], 'stock_id' => $item_process_info['stock_id']])
+            ->find();
 
         //如果预占用信息不为空。返回预占用库位
         if (empty($fictitious_store_house_info)) {
@@ -1627,7 +1639,7 @@ class ScmDistribution extends Scm
             //未合单，首次扫描
             if (!$order_process_info['store_house_id']) {
                 //主单中无库位号，首个子单进入时，分配一个合单库位给PDA，暂不占用根据是否确认放入合单架占用或取消
-                $store_house_where = ['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]];
+                $store_house_where = ['stock_id' => $item_process_info['stock_id'], 'status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]];
                 $store_house_info = $this->_stock_house->field('id,coding,subarea')->where($store_house_where)->find();
                 if ($order_process_info['order_prescription_type'] == 1) { //仅镜架优先分配B开头的货架
                     $store_house_where['subarea'] = 'B';
@@ -1685,7 +1697,7 @@ class ScmDistribution extends Scm
         //获取子订单数据
         $item_process_info = $this->_new_order_item_process
             ->where('item_order_number', $item_order_number)
-            ->field('id,distribution_status,order_id,item_id,site')
+            ->field('id,distribution_status,order_id,item_id,site,stock_id')
             ->find();
         empty($item_process_info) && $this->error(__('子订单不存在'), [], 403);
         !in_array($item_process_info['distribution_status'], [7, 8]) && $this->error(__('子订单当前状态不可合单操作'), [], 403);
@@ -1710,11 +1722,11 @@ class ScmDistribution extends Scm
         if ($order_process_info['store_house_id'] != $store_house_id) {
             if ($store_house_info['occupy'] && empty($order_process_info['store_house_id'])) {
                 //主单无绑定库位，且分配的库位被占用，重新分配合单库位后再次提交确认放入新分配合单架
-                $new_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0])->find();
+                $new_store_house_info = $this->_stock_house->field('id,coding,subarea')->where(['stock_id' => $item_process_info['stock_id'], 'status' => 1, 'type' => 2, 'occupy' => 0])->find();
                 empty($new_store_house_info) && $this->error(__('合单库位已用完，请检查合单库位情况'), [], 403);
 
                 $info['store_id'] = $new_store_house_info['id'];
-                $this->error(__('合单架'.$store_house_info['coding'].'库位已被占用，'.'请将子单号'.$item_order_number.'的商品放入新合单架'.$new_store_house_info['coding'].'库位'), ['info' => $info], 2001);
+                $this->error(__('合单架' . $store_house_info['coding'] . '库位已被占用，' . '请将子单号' . $item_order_number . '的商品放入新合单架' . $new_store_house_info['coding'] . '库位'), ['info' => $info], 2001);
             }
         }
 
@@ -1897,6 +1909,7 @@ class ScmDistribution extends Scm
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $site = $this->request->request('site');
+        $stockId = $this->request->request('stock_id');
         $shelf_number = $this->request->request('shelf_number');
         $order_prescription_type = $this->request->request('order_prescription_type'); //订单处方分类 1 仅镜架 2 现货处方镜 3 定制处方镜 ',
         $page = $this->request->request('page');
@@ -1908,54 +1921,53 @@ class ScmDistribution extends Scm
 
         $where = [];
         if (1 == $type) {
-            $where['combine_status'] = 1; //合单完成状态
-            //$where['store_house_id'] = ['>', 0];
+            $where['a.combine_status'] = 1; //合单完成状态
             //合单待取出列表，主单为合单完成状态且子单都已合单
             if ($query) {
-                //线上不允许跨库联合查询，拆分，wang导与产品静确认去除SKU搜索
-                $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%']])->column('id');
-                /* $order_id = $this->_new_order_item_process->where(['sku'=> ['like', '%' . $query . '%']])->column('order_id');
-                 $order_id = array_unique($order_id);
-                 $store_house_id_sku = [];
-                 if($order_id) {
-                     $store_house_id_sku = $this->_new_order_process->where(['order_id'=> ['in', $order_id]])->column('store_house_id');
-                 }
-                 $store_house_ids = array_merge(array_filter($store_house_id_store), array_filter($store_house_id_sku));
-                 if($store_house_ids) $where['store_house_id'] = ['in', $store_house_ids];*/
+                //线上不允许跨库联合查询，拆分
+                $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%'], 'stock_id' => $stockId])->column('id');
                 if ($store_house_id_store) {
-                    $where['store_house_id'] = ['in', $store_house_id_store];
-                } else {
-                    $where['store_house_id'] = ['=', -1];
+                    $where['a.store_house_id'] = ['in', $store_house_id_store];
                 }
             }
             if ($start_time && $end_time) {
-                $where['combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
+                $where['a.combine_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
             }
             if ($site) {
-                $where['site'] = ['=', $site];
+                $where['a.site'] = ['=', $site];
             }
             if ($order_prescription_type == 1) {
-                $where['order_prescription_type'] = ['=', $order_prescription_type];
-            } else if ($order_prescription_type == 2) {
-                $where['order_prescription_type'] = ['in', [2, 3]];
+                $where['a.order_prescription_type'] = ['=', $order_prescription_type];
+            } else {
+                if ($order_prescription_type == 2) {
+                    $where['a.order_prescription_type'] = ['in', [2, 3]];
+                }
             }
+
+            //所属仓库
+            if ($stockId) {
+                $where['b.stock_id'] = $stockId;
+            }
+
             if ($shelf_number) {
-                $shelf_number_arr = $this->_stock_house->where(['type' => 2, 'subarea' => $shelf_number])->column('id');
+                $shelf_number_arr = $this->_stock_house->where(['type' => 2, 'subarea' => $shelf_number, 'stock_id' => $stockId])->column('id');
                 if ($query && !empty($store_house_id_store)) {
                     $shelf_number_arr_intersect = array_intersect($where['store_house_id'], $shelf_number_arr);
                 }
                 if (!empty($shelf_number_arr_intersect)) {
-                    $where['store_house_id'] = ['in', $shelf_number_arr_intersect];
+                    $where['a.store_house_id'] = ['in', $shelf_number_arr_intersect];
                 } elseif (!empty($shelf_number_arr)) {
-                    $where['store_house_id'] = ['in', $shelf_number_arr];
+                    $where['a.store_house_id'] = ['in', $shelf_number_arr];
                 }
             }
             //print_r($where);die;
             $list = $this->_new_order_process
+                ->alias('a')
                 ->where($where)
-                ->where(['store_house_id' => ['>', 0]])
-                ->field('order_id,store_house_id,combine_time,order_prescription_type')
-                ->group('order_id')
+                ->where(['a.store_house_id' => ['>', 0]])
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->field('a.order_id,a.store_house_id,a.combine_time,a.order_prescription_type')
+                ->group('a.order_id')
                 ->limit($offset, $limit)
                 ->order('order_prescription_type')
                 ->select();
@@ -1970,38 +1982,22 @@ class ScmDistribution extends Scm
             //异常待处理列表
             if ($query) {
                 //线上不允许跨库联合查询，拆分，由于字段值明显差异，可以分别模糊匹配
-                $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%']])->column('id');
+                $store_house_id_store = $this->_stock_house->where(['type' => 2, 'coding' => ['like', '%' . $query . '%'], 'stock_id' => $stockId])->column('id');
                 if ($store_house_id_store) {
                     $where['b.store_house_id'] = ['in', $store_house_id_store];
                 } else {
                     $where['b.store_house_id'] = -1;
                 }
-                /*if ($store_house_ids) {
-                    $where['a.id'] = ['in', $item_ids];
-                    $where['b.store_house_id'] = ['in', $store_house_ids];
-                    $item_order_number_store = $this->_new_order_item_process
-                        ->where(['abnormal_house_id' => ['in', $store_house_ids]])
-                        ->column('id');
-                }
-                $item_ids = $this->_new_order_item_process
-                    ->where(['item_order_number' => ['like', $query . '%']])
-                    ->column('id');
-                if (!empty($item_order_number_store)) {
-                        $item_ids = array_merge($item_ids, $item_order_number_store);
-                }
-                if ($item_ids) {
-                    $where['a.id'] = ['in', $item_ids];
-                } else {
-                    $where['a.id'] = -1;
-                }*/
             }
             if ($site) {
                 $where['b.site'] = ['=', $site];
             }
             if ($order_prescription_type == 1) {
                 $where['b.order_prescription_type'] = ['=', $order_prescription_type];
-            } else if ($order_prescription_type == 2) {
-                $where['b.order_prescription_type'] = ['in', [2, 3]];
+            } else {
+                if ($order_prescription_type == 2) {
+                    $where['b.order_prescription_type'] = ['in', [2, 3]];
+                }
             }
             if ($shelf_number) {
                 $shelf_number_arr = $this->_stock_house->where(['type' => 2, 'subarea' => $shelf_number])->column('id');
@@ -2014,6 +2010,12 @@ class ScmDistribution extends Scm
                     $where['b.store_house_id'] = ['in', $shelf_number_arr];
                 }
             }
+
+            //所属仓库
+            if ($stockId) {
+                $where['a.stock_id'] = $stockId;
+            }
+
             $list = $this->_new_order_item_process
                 ->alias('a')
                 ->where($where)
@@ -2262,7 +2264,7 @@ class ScmDistribution extends Scm
                 //查询给所有子单标记异常异常库位是否足够
                 $stock_house_info = $this->_stock_house
                     ->field('id,coding')
-                    ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000 - count($all_item_order_number)]])
+                    ->where(['status' => 1, 'type' => 4, 'stock_id' => $row->stock_id, 'occupy' => ['<', 10000 - count($all_item_order_number)]])
                     ->order('occupy', 'desc')
                     ->find();
                 if (empty($stock_house_info)) {
@@ -2287,14 +2289,14 @@ class ScmDistribution extends Scm
             $log_data = [];
             //审单通过和拒绝都影响库存
             $item_where = [
-                'order_id' => $order_id,
-                'distribution_status' => ['neq', 0]
+                'order_id'            => $order_id,
+                'distribution_status' => ['neq', 0],
             ];
             if (!empty($item_order_numbers)) {
                 $item_where['item_order_number'] = ['in', $item_order_numbers];
             }
             $item_info = $this->_new_order_item_process
-                ->field('sku,site,item_order_number')
+                ->field('sku,site,item_order_number,stock_id')
                 ->where($item_where)
                 ->select();
             if (2 == $check_status) {
@@ -2318,7 +2320,7 @@ class ScmDistribution extends Scm
                         ->allowField(true)
                         ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0]])
                         ->save([
-                            'distribution_status' => 7
+                            'distribution_status' => 7,
                         ]);
 
                     //配错镜框，指定子单回退到待配货，清空定制片库位ID及定制片处理状态
@@ -2327,8 +2329,8 @@ class ScmDistribution extends Scm
                         ->isUpdate(true, ['order_id' => $order_id, 'distribution_status' => ['neq', 0], 'item_order_number' => ['in', $item_order_numbers]])
                         ->save([
                             'distribution_status' => 2,
-                            'temporary_house_id' => 0,
-                            'customize_status' => 0
+                            'temporary_house_id'  => 0,
+                            'customize_status'    => 0,
                         ]);
                     //审单拒绝-报损出库,所选SKU退回待配货，条码出库，其余子订单回到待合单。扣减总库存、可用库存、虚拟库存，配货占用库存
                     if (2 == $check_refuse) {
@@ -2340,9 +2342,9 @@ class ScmDistribution extends Scm
                                 ->alias('a')
                                 ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                                 ->where([
-                                    'a.change_type' => 1,
+                                    'a.change_type'       => 1,
                                     'a.item_order_number' => $value['item_order_number'],
-                                    'b.operation_type' => 1
+                                    'b.operation_type'    => 1,
                                 ])
                                 ->order('a.id', 'desc')
                                 ->limit(1)
@@ -2380,6 +2382,7 @@ class ScmDistribution extends Scm
                             $outstock['type_id'] = 4;
                             $outstock['remark'] = 'PDA审单-配错镜框-报损出库自动生成出库单';
                             $outstock['status'] = 2;
+                            $outstock['stock_id'] = $value['stock_id'];
                             $outstock['create_person'] = $create_person;
                             $outstock['createtime'] = date('Y-m-d H:i:s', time());
                             $outstock['platform_id'] = $value['site'];
@@ -2389,7 +2392,6 @@ class ScmDistribution extends Scm
                             $outstock_item['out_stock_num'] = 1;
                             $outstock_item['out_stock_id'] = $outstock_id;
                             $this->_outstock_item->insert($outstock_item);
-
 
 
                             // //条码出库
@@ -2415,26 +2417,26 @@ class ScmDistribution extends Scm
 
                             //记录库存日志
                             $log_data[] = [
-                                'type' => 2,
-                                'site' => $value['site'],
-                                'modular' => 4,
-                                'change_type' => 7,
-                                'source' => 2,
-                                'sku' => $true_sku,
-                                'number_type' => 2,
-                                'order_number' => $value['item_order_number'],
+                                'type'                      => 2,
+                                'site'                      => $value['site'],
+                                'modular'                   => 4,
+                                'change_type'               => 7,
+                                'source'                    => 2,
+                                'sku'                       => $true_sku,
+                                'number_type'               => 2,
+                                'order_number'              => $value['item_order_number'],
                                 // 'occupy_stock_before' => $stock_arr['occupy_stock'],
                                 // 'occupy_stock_change' => -1,
                                 'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                                 'distribution_stock_change' => -1,
-                                'stock_before' => $stock_arr['stock'],
-                                'stock_change' => -1,
-                                'available_stock_before' => $stock_arr['available_stock'],
-                                'available_stock_change' => -1,
-                                'fictitious_before' => $platform_info['stock'],
-                                'fictitious_change' => -1,
-                                'create_person' => $create_person,
-                                'create_time' => time()
+                                'stock_before'              => $stock_arr['stock'],
+                                'stock_change'              => -1,
+                                'available_stock_before'    => $stock_arr['available_stock'],
+                                'available_stock_change'    => -1,
+                                'fictitious_before'         => $platform_info['stock'],
+                                'fictitious_change'         => -1,
+                                'create_person'             => $create_person,
+                                'create_time'               => time(),
                             ];
                         }
                     } elseif (3 == $check_refuse) { //审单拒绝-重新配货，所选SKU回退到待配货，条码解除绑定关系,其余子订单退回待合单。扣减配货占用库存。
@@ -2450,9 +2452,9 @@ class ScmDistribution extends Scm
                                 ->alias('a')
                                 ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                                 ->where([
-                                    'a.change_type' => 1,
+                                    'a.change_type'       => 1,
                                     'a.item_order_number' => $value['item_order_number'],
-                                    'b.operation_type' => 1
+                                    'b.operation_type'    => 1,
                                 ])
                                 ->order('a.id', 'desc')
                                 ->limit(1)
@@ -2484,21 +2486,21 @@ class ScmDistribution extends Scm
 
                             //记录库存日志
                             $log_data[] = [
-                                'type' => 2,
-                                'site' => $value['site'],
-                                'modular' => 4,
-                                'change_type' => 7,
-                                'source' => 2,
-                                'sku' => $true_sku,
-                                'number_type' => 2,
-                                'order_number' => $value['item_order_number'],
+                                'type'                      => 2,
+                                'site'                      => $value['site'],
+                                'modular'                   => 4,
+                                'change_type'               => 7,
+                                'source'                    => 2,
+                                'sku'                       => $true_sku,
+                                'number_type'               => 2,
+                                'order_number'              => $value['item_order_number'],
                                 // 'occupy_stock_before' => $stock_arr['occupy_stock'],
                                 'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                                 'distribution_stock_change' => -1,
                                 // 'stock_before' => $stock_arr['stock'],
                                 // 'fictitious_before' => $platform_info['stock'],
-                                'create_person' => $create_person,
-                                'create_time' => time()
+                                'create_person'             => $create_person,
+                                'create_time'               => time(),
                             ];
                         }
                     }
@@ -2514,9 +2516,9 @@ class ScmDistribution extends Scm
                         ->alias('a')
                         ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                         ->where([
-                            'a.change_type' => 1,
+                            'a.change_type'       => 1,
                             'a.item_order_number' => $value['item_order_number'],
-                            'b.operation_type' => 1
+                            'b.operation_type'    => 1,
                         ])
                         ->order('a.id', 'desc')
                         ->limit(1)
@@ -2547,34 +2549,38 @@ class ScmDistribution extends Scm
 
                     //记录库存日志
                     $log_data[] = [
-                        'type' => 2,
-                        'site' => $value['site'],
-                        'modular' => 4,
-                        'change_type' => 6,
-                        'source' => 2,
-                        'sku' => $true_sku,
-                        'number_type' => 2,
-                        'order_number' => $value['item_order_number'],
-                        'occupy_stock_before' => $stock_arr['occupy_stock'],
-                        'occupy_stock_change' => -1,
+                        'type'                      => 2,
+                        'site'                      => $value['site'],
+                        'modular'                   => 4,
+                        'change_type'               => 6,
+                        'source'                    => 2,
+                        'sku'                       => $true_sku,
+                        'number_type'               => 2,
+                        'order_number'              => $value['item_order_number'],
+                        'occupy_stock_before'       => $stock_arr['occupy_stock'],
+                        'occupy_stock_change'       => -1,
                         'distribution_stock_before' => $stock_arr['distribution_occupy_stock'],
                         'distribution_stock_change' => -1,
-                        'stock_before' => $stock_arr['stock'],
-                        'stock_change' => -1,
-                        'create_person' => $create_person,
-                        'create_time' => time()
+                        'stock_before'              => $stock_arr['stock'],
+                        'stock_change'              => -1,
+                        'create_person'             => $create_person,
+                        'create_time'               => time(),
                     ];
                 }
 
                 //子单号集合
                 $item_order_numbers = array_column($item_info, 'item_order_number');
-                if (empty($item_order_numbers)) throw new Exception("子单号获取失败，请检查");
+                if (empty($item_order_numbers)) {
+                    throw new Exception("子单号获取失败，请检查");
+                }
 
                 //校验条形码是否已出库
                 $check_bar_code = $this->_product_bar_code_item
                     ->where(['item_order_number' => ['in', $item_order_numbers], 'library_status' => 2, 'is_loss_report_out' => 0])
                     ->value('code');
-                if ($check_bar_code) throw new Exception("条形码：{$check_bar_code}已出库，请检查");
+                if ($check_bar_code) {
+                    throw new Exception("条形码：{$check_bar_code}已出库，请检查");
+                }
 
                 //条形码出库时间
                 $this->_product_bar_code_item
@@ -2586,6 +2592,16 @@ class ScmDistribution extends Scm
             //保存库存日志
             if ($log_data) {
                 $this->_stock_log->allowField(true)->saveAll($log_data);
+            }
+
+            //审单通过 计算成本收入
+            if (1 == $check_status) {
+                //审单触发收入核算
+                $FinanceCost = new FinanceCost();
+                $FinanceCost->order_income($order_id);
+
+                //计算出库成本
+                $FinanceCost->order_cost($order_id);
             }
 
             $this->_item->commit();
@@ -2656,18 +2672,7 @@ class ScmDistribution extends Scm
             }
         }
 
-        try {
-            if (1 == $check_status) {
-                //审单触发收入核算
-                $FinanceCost = new FinanceCost();
-                $FinanceCost->order_income($order_id);
 
-                //计算出库成本
-                $FinanceCost->order_cost($order_id);
-            }
-        } catch (Exception $e) {
-            $this->error(__('审单已通过,成本核算逻辑有误,请联系魔晶'), [], 405);
-        }
         $this->success($msg . '成功', [], 200);
     }
 
@@ -2683,5 +2688,17 @@ class ScmDistribution extends Scm
         $purchase_price = $PurchaseOrderItem->alias('a')->field('a.purchase_price')->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')->where(['a.sku' => $sku])->order('b.createtime', 'desc')->find();
         empty($purchase_price['purchase_price']) && $this->error(__('没有采购单价'), ['purchase_price' => ''], 405);
         $this->success('成功', ['purchase_price' => $purchase_price['purchase_price']], 200);
+    }
+
+    public function sku_like()
+    {
+        $sku = $this->request->request('sku');
+        empty($sku) && $this->error(__('sku不能为空'), '', 403);
+        $item_sku = $this->_item
+            ->where('sku','like','%'.$sku.'%')
+            ->where('is_open',1)
+            ->column('sku');
+        empty($item_sku) && $this->error(__('sku不存在'),'', 403);
+        $this->success('成功', ['skus' => $item_sku], 200);
     }
 }

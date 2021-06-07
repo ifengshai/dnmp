@@ -108,7 +108,7 @@ class Order extends Model
             $OrderNodeDetail->order_id = $order_id;
             $OrderNodeDetail->content = $content;
             $OrderNodeDetail->site = $site;
-            $OrderNodeDetail->handle_user_id = session('admin.id');
+            $OrderNodeDetail->handle_user_id = session('admin.id') ?: 0;
             $OrderNodeDetail->create_time = date('Y-m-d H:i:s');
             $OrderNodeDetail->order_node = $order_node;
             $OrderNodeDetail->node_type =$node_type;

@@ -2,6 +2,13 @@
 
 namespace app\api\controller;
 
+use app\admin\model\warehouse\StockTransferInOrder;
+use app\admin\model\warehouse\StockTransferInOrderItem;
+use app\admin\model\warehouse\StockTransferOrder;
+use app\admin\model\warehouse\StockTransferOrderItem;
+use app\admin\model\warehouse\StockTransferOrderItemCode;
+use app\admin\model\warehouse\StockTransferOutOrder;
+use app\admin\model\warehouse\StockTransferOutOrderItem;
 use app\admin\model\warehouse\WarehouseTransferOrder;
 use app\admin\model\warehouse\WarehouseTransferOrderItem;
 use app\admin\model\warehouse\WarehouseTransferOrderItemCode;
@@ -37,7 +44,7 @@ use Think\Log;
 /**
  * 供应链出入库接口类
  * @author lzh
- * @since 2020-10-20
+ * @since  2020-10-20
  */
 class ScmWarehouse extends Scm
 {
@@ -231,6 +238,13 @@ class ScmWarehouse extends Scm
         $this->_store_house = new StockHouse();
         $this->_warehouse_transfer_order = new WarehouseTransferOrder();
         $this->_warehouse_transfer_order_item = new WarehouseTransferOrderItem();
+        $this->_stock_transfer_order = new StockTransferOrder();
+        $this->_stock_transfer_order_item = new StockTransferOrderItem();
+        $this->_stock_transfer_order_item_code = new StockTransferOrderItemCode();
+        $this->_stock_transfer_in_order = new StockTransferInOrder();
+        $this->_stock_transfer_out_order = new StockTransferOutOrder();
+        $this->_stock_transfer_in_order_item = new StockTransferInOrderItem();
+        $this->_stock_transfer_out_order_item = new StockTransferOutOrderItem();
     }
 
     /**
@@ -253,6 +267,7 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
+        $stockId = $this->request->request('stock_id');
 
         empty($page) && $this->error(__('Page can not be empty'), [], 403);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 403);
@@ -260,20 +275,27 @@ class ScmWarehouse extends Scm
         $where = [];
         if ($query) {
             //            $where['a.out_stock_number|a.create_person|b.sku'] = ['like', '%' . $query . '%'];
-            $where['a.id'] = ['in', function ($search) use ($query) {
-                $search
-                    ->table('fa_out_stock')
-                    ->field('id')
-                    ->union("SELECT out_stock_id FROM fa_out_stock_item WHERE sku like '" . $query . "%'")
-                    ->union("SELECT id FROM fa_out_stock WHERE create_person like '" . $query . "%'")
-                    ->where(['out_stock_number' => ['like', $query . '%']]);
-            }];
+            $where['a.id'] = [
+                'in',
+                function ($search) use ($query) {
+                    $search
+                        ->table('fa_out_stock')
+                        ->field('id')
+                        ->union("SELECT out_stock_id FROM fa_out_stock_item WHERE sku like '" . $query . "%'")
+                        ->union("SELECT id FROM fa_out_stock WHERE create_person like '" . $query . "%'")
+                        ->where(['out_stock_number' => ['like', $query . '%']]);
+                },
+            ];
         }
         if (isset($status)) {
             $where['a.status'] = $status;
         }
         if ($start_time && $end_time) {
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
+        }
+
+        if ($stockId) {
+            $where['a.stock_id'] = $stockId;
         }
 
         $offset = ($page - 1) * $page_size;
@@ -320,7 +342,7 @@ class ScmWarehouse extends Scm
         $outStockId = $this->request->request('out_stock_id');
         if ($outStockId) {
             $info = $this->_out_stock
-                ->field('out_stock_number,type_id,platform_id')
+                ->field('out_stock_number,type_id,platform_id,stock_id,location_id as location_code_id,area_id as location_id')
                 ->where('id', $outStockId)
                 ->find();
 
@@ -362,25 +384,24 @@ class ScmWarehouse extends Scm
             }
 
             $info['item_data'] = $itemData;
+            $info['stock_name'] = $info['stock_id'] == 2 ? '丹阳仓' : '郑州仓';
         } else {
             $info = [
                 'out_stock_number' => 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999),
-                'type_id' => 0,
-                'platform_id' => 0,
-                'item_data' => []
+                'type_id'          => 0,
+                'platform_id'      => 0,
+                'item_data'        => [],
             ];
         }
-        $kuquKuwei = $this->_product_bar_code_item->where(['out_stock_id' => $outStockId])->find();
+
         //出库单所需数据
-        $info['location_id'] = $kuquKuwei['location_id'];
-        $info['location_area'] = Db::name('warehouse_area')->where('id', $kuquKuwei['location_id'])->value('coding');
-        $info['location_code_id'] = $kuquKuwei['location_code_id'];
-        $info['location_code'] = $kuquKuwei['location_code'];
+        $info['location_area'] = Db::name('warehouse_area')->where('id', $info['location_id'])->value('coding');
+        $info['location_code'] = Db::name('store_house')->where('id', $info['location_code_id'])->value('coding');
+
         //获取出库分类数据
         $typeList = $this->_out_stock_type
             ->field('id,name')
             ->where('is_del', 1)
-            ->where('id', 'not in', [2, 4])
             ->select();
 
         //站点列表
@@ -429,6 +450,9 @@ class ScmWarehouse extends Scm
         $area_id = $this->request->request("area_id"); //出库库库区id
         empty($area_id) && $this->error(__('请选择出库区'), [], 510);
 
+        $stockId = $this->request->request("stock_id"); //仓库ID
+        empty($stockId) && $this->error(__('请选择出仓库'), [], 510);
+
         $item_data = $this->request->request('item_data');
         $item_data = json_decode(htmlspecialchars_decode($item_data), true);
         empty($item_data) && $this->error(__('sku集合不能为空'), [], 403);
@@ -445,7 +469,7 @@ class ScmWarehouse extends Scm
         //拣货区盘点时不能操作
         //查询条形码库区库位
         $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'], 'area_id' => $warehouse_area['area_id']])
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.stock_id' => $stockId, 'a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => $warehouse_area['coding'], 'area_id' => $warehouse_area['area_id']])
             ->count();
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法出库提交'), [], 403);
@@ -460,14 +484,20 @@ class ScmWarehouse extends Scm
             //编辑提交
             if ($get_out_stock_id) {
                 $row = $this->_out_stock->get($get_out_stock_id);
-                if (empty($row)) throw new Exception('出库单不存在');
-                if (0 != $row['status']) throw new Exception('只有新建状态才能编辑');
+                if (empty($row)) {
+                    throw new Exception('出库单不存在');
+                }
+                if (0 != $row['status']) {
+                    throw new Exception('只有新建状态才能编辑');
+                }
 
                 //更新出库单
                 $out_stock_data = [
-                    'type_id' => $type_id,
+                    'type_id'     => $type_id,
                     'platform_id' => $platform_id,
-                    'status' => 1 == $do_type ?: 0
+                    'location_id' => $warehouse_area_id ?? $row->location_id,
+                    'area_id'     => $area_id ?? $row->area_id,
+                    'status'      => 1 == $do_type ?: 0,
                 ];
                 $result = $this->_out_stock->allowField(true)->save($out_stock_data, ['id' => $get_out_stock_id]);
                 $out_stock_id = $get_out_stock_id;
@@ -476,18 +506,25 @@ class ScmWarehouse extends Scm
             } else {
                 //新建提交
                 $out_stock_number = $this->request->request('out_stock_number');
-                if (empty($out_stock_number)) throw new Exception('出库单号不能为空');
+                if (empty($out_stock_number)) {
+                    throw new Exception('出库单号不能为空');
+                }
                 $check_number = $this->_out_stock->where(['out_stock_number' => $out_stock_number])->value('id');
-                if (!empty($check_number)) throw new Exception('出库单号已存在');
+                if (!empty($check_number)) {
+                    throw new Exception('出库单号已存在');
+                }
 
                 //创建出库单
                 $out_stock_data = [
                     'out_stock_number' => $out_stock_number,
-                    'type_id' => $type_id,
-                    'platform_id' => $platform_id,
-                    'status' => 1 == $do_type ?: 0,
-                    'create_person' => $this->auth->nickname,
-                    'createtime' => date('Y-m-d H:i:s')
+                    'type_id'          => $type_id,
+                    'platform_id'      => $platform_id,
+                    'stock_id'         => $stockId,
+                    'location_id'      => $warehouse_area_id,
+                    'area_id'          => $area_id,
+                    'status'           => 1 == $do_type ?: 0,
+                    'create_person'    => $this->auth->nickname,
+                    'createtime'       => date('Y-m-d H:i:s'),
                 ];
                 $result = $this->_out_stock->allowField(true)->save($out_stock_data);
                 $out_stock_id = $this->_out_stock->id;
@@ -496,12 +533,18 @@ class ScmWarehouse extends Scm
                 //校验条形码当前是否在出库库区跟库位
                 foreach ($value['sku_agg'] as $v) {
                     $detail = $this->_product_bar_code_item->where(['code' => $v['code'], 'location_code_id' => $warehouse_area_id, 'location_id' => $area_id])->find();
-                    if (empty($detail)) throw new Exception($v['code'] . '不在当前库区库位');
+                    if (empty($detail)) {
+                        throw new Exception($v['code'] . '不在当前库区库位');
+                    }
                 }
             }
-            if (false === $result) throw new Exception('提交失败');
+            if (false === $result) {
+                throw new Exception('提交失败');
+            }
 
-            if (count($item_data) != count(array_unique(array_column($item_data, 'sku')))) throw new Exception('sku重复，请检查');
+            if (count($item_data) != count(array_unique(array_column($item_data, 'sku')))) {
+                throw new Exception('sku重复，请检查');
+            }
 
             //获取各站点虚拟仓库存
             $stock_list = $this->_item_platform_sku
@@ -510,22 +553,30 @@ class ScmWarehouse extends Scm
 
             //校验各站点虚拟仓库存
             foreach ($item_data as $key => $value) {
-                if (empty($stock_list[$value['sku']])) throw new Exception('sku: ' . $value['sku'] . ' 没有同步至对应平台');
-                if ($value['out_stock_num'] > $stock_list[$value['sku']]) throw new Exception('sku: ' . $value['sku'] . ' 出库数量不能大于虚拟仓库存');
+                if (empty($stock_list[$value['sku']])) {
+                    throw new Exception('sku: ' . $value['sku'] . ' 没有同步至对应平台');
+                }
+                if ($value['out_stock_num'] > $stock_list[$value['sku']]) {
+                    throw new Exception('sku: ' . $value['sku'] . ' 出库数量不能大于虚拟仓库存');
+                }
             }
 
             //检测条形码是否已绑定
             $where['out_stock_id'] = [['>', 0], ['neq', $out_stock_id]];
             foreach ($item_data as $key => $value) {
                 $sku_code = array_column($value['sku_agg'], 'code');
-                if (count($value['sku_agg']) != count(array_unique($sku_code))) throw new Exception(' 条形码有重复，请检查');
+                if (count($value['sku_agg']) != count(array_unique($sku_code))) {
+                    throw new Exception(' 条形码有重复，请检查');
+                }
 
                 $where['code'] = ['in', $sku_code];
                 $check_quantity = $this->_product_bar_code_item
                     ->where($where)
                     ->field('code')
                     ->find();
-                if (!empty($check_quantity['code'])) throw new Exception('条形码:' . $check_quantity['code'] . ' 已绑定,请移除');
+                if (!empty($check_quantity['code'])) {
+                    throw new Exception('条形码:' . $check_quantity['code'] . ' 已绑定,请移除');
+                }
             }
 
             //批量创建或更新出库单商品
@@ -540,8 +591,8 @@ class ScmWarehouse extends Scm
                 //新增出库单sku数据
                 $item_save = [
                     'out_stock_num' => $value['out_stock_num'],
-                    'out_stock_id' => $out_stock_id,
-                    'sku' => $value['sku']
+                    'out_stock_id'  => $out_stock_id,
+                    'sku'           => $value['sku'],
                 ];
                 $this->_out_stock_item->allowField(true)->isUpdate(false)->data($item_save)->save();
 
@@ -585,22 +636,8 @@ class ScmWarehouse extends Scm
     public function out_stock_examine()
     {
 
-
         $out_stock_id = $this->request->request('out_stock_id');
         empty($out_stock_id) && $this->error(__('出库单ID不能为空'), [], 403);
-
-        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-        //配货完成时判断
-        //拣货区盘点时不能操作
-        //查询条形码库区库位
-        $barcodedata = $this->_product_bar_code_item->where(['out_stock_id' => $out_stock_id])->column('location_code');
-        $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
-            ->count();
-        if ($count > 0) {
-            $this->error(__('此库位正在盘点,暂无法出库审核'), [], 403);
-        }
-        /****************************end*****************************************/
 
         $do_type = $this->request->request('do_type');
         empty($do_type) && $this->error(__('审核类型不能为空'), [], 403);
@@ -609,6 +646,21 @@ class ScmWarehouse extends Scm
         //检测出库单状态
         $row = $this->_out_stock->get($out_stock_id);
         1 != $row['status'] && $this->error(__('只有待审核状态才能审核'), [], 405);
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $barcodedata = $this->_product_bar_code_item->where(['out_stock_id' => $out_stock_id])->column('location_code');
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
+            ->where(['a.stock_id' => $row['stock_id'],'area_id' => $row->area_id, 'a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+            ->count();
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法出库审核'), [], 403);
+        }
+        /****************************end*****************************************/
+
 
         $this->_item->startTrans();
         $this->_stock_log->startTrans();
@@ -647,50 +699,50 @@ class ScmWarehouse extends Scm
 
                     $stock_data[] = [
                         //'大站点类型：1网站 2魔晶',
-                        'type' => 2,
+                        'type'                   => 2,
                         //'站点类型：1Zeelool  2Voogueme 3Nihao 4Meeloog 5Wesee 8Amazon 9Zeelool_es 10Zeelool_de 11Zeelool_jp'
-                        'site' => 0,
+                        'site'                   => 0,
                         //'模块：1普通订单 2配货 3质检 4审单 5异常处理 6更改镜架 7取消订单 8补发 9赠品 10采购入库 11出入库 12盘点 13调拨'
-                        'modular' => 11,
+                        'modular'                => 11,
                         //'变动类型：1非预售下单 2预售下单-虚拟仓>0 3预售下单-虚拟仓<0 4配货 5质检拒绝-镜架报损 6审单-成功 7审单-配错镜框
                         // 8加工异常打回待配货 9印logo异常打回待配货 10更改镜架-配镜架前 11更改镜架-配镜架后 12取消订单-配镜架前 13取消订单-配镜架后
                         // 14补发 15赠品 16采购-有比例入库 17采购-没有比例入库 18手动入库 19手动出库 20盘盈入库 21盘亏出库 22调拨 23调拨 24库存调拨'
-                        'change_type' => 19,
+                        'change_type'            => 19,
                         // '关联sku'
-                        'sku' => $sku,
+                        'sku'                    => $sku,
                         //'关联订单号或子单号'
-                        'order_number' => $this->_out_stock->where('id', $out_stock_id)->value('out_stock_number'),
+                        'order_number'           => $this->_out_stock->where('id', $out_stock_id)->value('out_stock_number'),
                         //'关联变化的ID'
-                        'public_id' => 0,
+                        'public_id'              => 0,
                         //'操作端：1PC端 2PDA'
-                        'source' => 2,
+                        'source'                 => 2,
                         //'总库存变动前'
-                        'stock_before' => $sku_item['stock'],
+                        'stock_before'           => $sku_item['stock'],
                         //'总库存变化量：正数为加，负数为减'
-                        'stock_change' => -$value['out_stock_num'],
+                        'stock_change'           => -$value['out_stock_num'],
                         //'可用库存变动前'
                         'available_stock_before' => $sku_item['available_stock'],
                         //'可用库存变化量：正数为加，负数为减'
                         'available_stock_change' => -$value['out_stock_num'],
-                        'create_person' => $this->auth->nickname,
-                        'create_time' => time(),
+                        'create_person'          => $this->auth->nickname,
+                        'create_time'            => time(),
                         //'关联单号类型：1订单号 2子订单号 3入库单 4出库单 5盘点单 6调拨单'
-                        'number_type' => 4,
+                        'number_type'            => 4,
                     ];
                     //插入日志表
                     $stock_data1[] = [
-                        'type' => 2,
-                        'site' => $row['platform_id'],
-                        'modular' => 11,
-                        'change_type' => 19,
-                        'sku' => $sku,
-                        'order_number' => $this->_out_stock->where('id', $out_stock_id)->value('out_stock_number'),
-                        'source' => 2,
+                        'type'              => 2,
+                        'site'              => $row['platform_id'],
+                        'modular'           => 11,
+                        'change_type'       => 19,
+                        'sku'               => $sku,
+                        'order_number'      => $this->_out_stock->where('id', $out_stock_id)->value('out_stock_number'),
+                        'source'            => 2,
                         'fictitious_before' => $item_platform_sku_detail['stock'],
                         'fictitious_change' => -$value['out_stock_num'],
-                        'create_person' => $this->auth->nickname,
-                        'create_time' => time(),
-                        'number_type' => 4,
+                        'create_person'     => $this->auth->nickname,
+                        'create_time'       => time(),
+                        'number_type'       => 4,
                     ];
                 }
 
@@ -702,7 +754,9 @@ class ScmWarehouse extends Scm
 
                 //校验条形码是否已出库
                 $check_bar_code = $this->_product_bar_code_item->where(['out_stock_id' => $out_stock_id, 'library_status' => 2])->value('code');
-                if ($check_bar_code) throw new Exception("条形码：{$check_bar_code}已出库，请检查");
+                if ($check_bar_code) {
+                    throw new Exception("条形码：{$check_bar_code}已出库，请检查");
+                }
 
                 //条形码出库时间
                 $this->_product_bar_code_item
@@ -716,7 +770,7 @@ class ScmWarehouse extends Scm
                 $financecost->outstock_cost($out_stock_id, $row['out_stock_number']);
             } else { //审核拒绝解除条形码绑定关系
                 $code_clear = [
-                    'out_stock_id' => 0
+                    'out_stock_id' => 0,
                 ];
                 $this->_product_bar_code_item
                     ->allowField(true)
@@ -769,7 +823,7 @@ class ScmWarehouse extends Scm
 
         //解除条形码绑定关系
         $code_clear = [
-            'out_stock_id' => 0
+            'out_stock_id' => 0,
         ];
         $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['out_stock_id' => $out_stock_id])->save($code_clear);
 
@@ -873,14 +927,17 @@ class ScmWarehouse extends Scm
         $where = [];
         if ($query) {
             //            $where['a.in_stock_number|b.check_order_number|c.sku|a.create_person|b.create_person'] = ['like', '%' . $query . '%'];
-            $where['a.check_id'] = ['in', function ($search) use ($query) {
-                $search
-                    ->table('fa_check_order')
-                    ->field('id')
-                    ->union("SELECT id FROM fa_check_order WHERE create_person like '" . $query . "%'")
-                    ->union("SELECT check_id FROM fa_check_order_item WHERE sku like '" . $query . "%'")
-                    ->where(['check_order_number' => ['like', $query . '%']]);
-            }];
+            $where['a.check_id'] = [
+                'in',
+                function ($search) use ($query) {
+                    $search
+                        ->table('fa_check_order')
+                        ->field('id')
+                        ->union("SELECT id FROM fa_check_order WHERE create_person like '" . $query . "%'")
+                        ->union("SELECT check_id FROM fa_check_order_item WHERE sku like '" . $query . "%'")
+                        ->where(['check_order_number' => ['like', $query . '%']]);
+                },
+            ];
         }
         if (isset($status)) {
             $where['a.status'] = $status;
@@ -995,7 +1052,6 @@ class ScmWarehouse extends Scm
 
         //入库库位详情
         $warehouse_area = $this->_store_house->where('id', $warehouse_area_id)->find();
-
         /*****************限制如果有盘点单未结束不能操作配货完成*******************/
         //配货完成时判断
         //拣货区盘点时不能操作
@@ -1032,7 +1088,9 @@ class ScmWarehouse extends Scm
                 $where['in_stock_id'] = [['>', 0], ['neq', $in_stock_id]];
                 foreach ($item_sku as $key => $value) {
                     $sku_code = array_column($value['sku_agg'], 'code');
-                    if (count($value['sku_agg']) != count(array_unique($sku_code))) throw new Exception(' 条形码有重复，请检查');
+                    if (count($value['sku_agg']) != count(array_unique($sku_code))) {
+                        throw new Exception(' 条形码有重复，请检查');
+                    }
 
                     $where['code'] = ['in', $sku_code];
                     $check_quantity = $this->_product_bar_code_item
@@ -1053,8 +1111,10 @@ class ScmWarehouse extends Scm
                 }
                 //更新数据组装
                 $_in_stock_data = [
-                    'type_id' => $type_id,
-                    'status' => 1 == $do_type ? 1 : 0
+                    'type_id'     => $type_id,
+                    'status'      => 1 == $do_type ? 1 : 0,
+                    'location_id' => $warehouse_area_id ?? $_in_stock_info->location_id,
+                    'area_id'     => $area_id ?? $_in_stock_info->area_id,
                 ];
 
                 if ($platform_id) {
@@ -1113,10 +1173,10 @@ class ScmWarehouse extends Scm
                         //入库单移除条形码
                         if (!empty($value['remove_agg'])) {
                             $code_clear = [
-                                'in_stock_id' => 0,
-                                'location_code' => '',
+                                'in_stock_id'      => 0,
+                                'location_code'    => '',
                                 'location_code_id' => '',
-                                'location_id' => '', //解除库位号条形码绑定
+                                'location_id'      => '', //解除库位号条形码绑定
                             ];
                             $this->_product_bar_code_item->where(['code' => ['in', $value['remove_agg']]])->update($code_clear);
                         }
@@ -1131,6 +1191,7 @@ class ScmWarehouse extends Scm
                                 $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
                                 $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                                 $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
+                                $save_code_data['library_status'] = 1; //在库状态
                                 $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                             }
                         } else {
@@ -1165,6 +1226,8 @@ class ScmWarehouse extends Scm
                 }
 
                 //组装新增数据
+                $params['location_id'] = $warehouse_area_id;
+                $params['area_id'] = $area_id;
                 $params['in_stock_number'] = $in_stock_number;
                 $params['type_id'] = $type_id;
                 $params['status'] = 1 == $do_type ? 1 : 0;
@@ -1217,6 +1280,7 @@ class ScmWarehouse extends Scm
                                     $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
                                     $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                                     $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
+                                    $save_code_data['library_status'] = 1; //在库状态为1
                                     $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                                 }
                             } else {
@@ -1489,14 +1553,13 @@ class ScmWarehouse extends Scm
             $in_stock_type_list = $in_stock_type;
         }
 
-        $kuqu_kuwei = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->find();
         //入库单所需数据
         $info['in_stock_id'] = $_in_stock_info['id'];
         $info['in_stock_number'] = $_in_stock_info['in_stock_number'];
-        $info['location_id'] = $kuqu_kuwei['location_id'];
-        $info['location_area'] = Db::name('warehouse_area')->where('id', $kuqu_kuwei['location_id'])->value('name');
-        $info['location_code_id'] = $kuqu_kuwei['location_code_id'];
-        $info['location_code'] = $kuqu_kuwei['location_code'];
+        $info['location_id'] = $_in_stock_info['area_id'];
+        $info['location_area'] = Db::name('warehouse_area')->where('id', $_in_stock_info['area_id'])->value('name');
+        $info['location_code_id'] = $_in_stock_info['location_id'];
+        $info['location_code'] = Db::name('store_house')->where('id', $_in_stock_info['location_id'])->value('coding');
         $info['in_stock_type_check_id'] = $_in_stock_info['type_id'];
         $info['in_stock_type'] = $in_stock_type_list;
         $info['item_list'] = $item_list;
@@ -1564,19 +1627,6 @@ class ScmWarehouse extends Scm
         $in_stock_id = $this->request->request('in_stock_id');
         empty($in_stock_id) && $this->error(__('入库单ID不能为空'), [], 516);
 
-        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-        //配货完成时判断
-        //拣货区盘点时不能操作
-        //查询条形码库区库位
-        $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->column('location_code');
-        $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
-            ->count();
-        if ($count > 0) {
-            $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
-        }
-        /****************************end*****************************************/
-
         $do_type = $this->request->request('do_type');
         empty($do_type) && $this->error(__('审核类型不能为空'), [], 517);
         !in_array($do_type, [2, 3]) && $this->error(__('审核类型错误'), [], 517);
@@ -1585,6 +1635,23 @@ class ScmWarehouse extends Scm
         $row = $this->_in_stock->get($in_stock_id);
         empty($row) && $this->error(__('入库单不存在'), [], 516);
         1 != $row['status'] && $this->error(__('只有待审核状态才能操作'), [], 518);
+
+
+        /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+        //配货完成时判断
+        //拣货区盘点时不能操作
+        //查询条形码库区库位
+        $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => $in_stock_id])->column('location_code');
+        Log::write("输出库区库位");
+        Log::write($barcodedata);
+        $count = $this->_inventory->alias('a')
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata],'area_id' => $row->area_id])
+            ->count();
+        Log::write($count);
+        if ($count > 0) {
+            $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
+        }
+        /****************************end*****************************************/
 
         $data['status'] = $do_type; //审核状态，2通过，3拒绝
         if (2 == $data['status']) {
@@ -1673,20 +1740,20 @@ class ScmWarehouse extends Scm
 
                                     //插入日志表
                                     (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['website_type'],
-                                        'modular' => 10,
-                                        'change_type' => 16,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['in_stock_number'],
-                                        'source' => 2,
-                                        'fictitious_before' => $sku_platform['stock'],
-                                        'fictitious_change' => $stock_num,
+                                        'type'                    => 2,
+                                        'site'                    => $val['website_type'],
+                                        'modular'                 => 10,
+                                        'change_type'             => 16,
+                                        'sku'                     => $v['sku'],
+                                        'order_number'            => $v['in_stock_number'],
+                                        'source'                  => 2,
+                                        'fictitious_before'       => $sku_platform['stock'],
+                                        'fictitious_change'       => $stock_num,
                                         'wait_instock_num_before' => $sku_platform['wait_instock_num'],
                                         'wait_instock_num_change' => -$should_arrivals_num,
-                                        'create_person' => $this->auth->nickname,
-                                        'create_time' => time(),
-                                        'number_type' => 3,
+                                        'create_person'           => $this->auth->nickname,
+                                        'create_time'             => time(),
+                                        'number_type'             => 3,
                                     ]);
                                 } else {
                                     $num = round($v['in_stock_num'] * $val['rate']);
@@ -1707,20 +1774,20 @@ class ScmWarehouse extends Scm
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setDec('wait_instock_num', $should_arrivals_num_plat);
                                     //插入日志表
                                     (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['website_type'],
-                                        'modular' => 10,
-                                        'change_type' => 16,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['in_stock_number'],
-                                        'source' => 2,
-                                        'fictitious_before' => $sku_platform['stock'],
-                                        'fictitious_change' => $num,
+                                        'type'                    => 2,
+                                        'site'                    => $val['website_type'],
+                                        'modular'                 => 10,
+                                        'change_type'             => 16,
+                                        'sku'                     => $v['sku'],
+                                        'order_number'            => $v['in_stock_number'],
+                                        'source'                  => 2,
+                                        'fictitious_before'       => $sku_platform['stock'],
+                                        'fictitious_change'       => $num,
                                         'wait_instock_num_before' => $sku_platform['wait_instock_num'],
                                         'wait_instock_num_change' => -$should_arrivals_num_plat,
-                                        'create_person' => $this->auth->nickname,
-                                        'create_time' => time(),
-                                        'number_type' => 3,
+                                        'create_person'           => $this->auth->nickname,
+                                        'create_time'             => time(),
+                                        'number_type'             => 3,
                                     ]);
                                 }
                             }
@@ -1747,20 +1814,20 @@ class ScmWarehouse extends Scm
 
                             //插入日志表
                             (new StockLog())->setData([
-                                'type' => 2,
-                                'site' => 4,
-                                'modular' => 10,
-                                'change_type' => 17,
-                                'sku' => $v['sku'],
-                                'order_number' => $v['in_stock_number'],
-                                'source' => 2,
+                                'type'              => 2,
+                                'site'              => 4,
+                                'modular'           => 10,
+                                'change_type'       => 17,
+                                'sku'               => $v['sku'],
+                                'order_number'      => $v['in_stock_number'],
+                                'source'            => 2,
                                 'fictitious_before' => $item_platform_sku['stock'],
                                 'fictitious_change' => $v['in_stock_num'],
                                 // 'wait_instock_num_before' => $item_platform_sku['wait_instock_num'],
                                 // 'wait_instock_num_change' => -$v['in_stock_num'],
-                                'create_person' => $this->auth->nickname,
-                                'create_time' => time(),
-                                'number_type' => 3,
+                                'create_person'     => $this->auth->nickname,
+                                'create_time'       => time(),
+                                'number_type'       => 3,
                             ]);
                         }
                     } //不是采购过来的 如果有站点id 说明是指定增加此平台sku
@@ -1784,18 +1851,18 @@ class ScmWarehouse extends Scm
                                 ->save(['check_id' => $generate_purchase_check['check_id'], 'purchase_id' => $generate_purchase_check['purchase_id']]);
                         }
                         (new StockLog())->setData([
-                            'type' => 2,
-                            'site' => $v['platform_id'],
-                            'modular' => 11,
-                            'change_type' => 18,
-                            'sku' => $v['sku'],
-                            'order_number' => $v['in_stock_number'],
-                            'source' => 2,
+                            'type'              => 2,
+                            'site'              => $v['platform_id'],
+                            'modular'           => 11,
+                            'change_type'       => 18,
+                            'sku'               => $v['sku'],
+                            'order_number'      => $v['in_stock_number'],
+                            'source'            => 2,
                             'fictitious_before' => $item_platform_sku['stock'],
                             'fictitious_change' => $v['in_stock_num'],
-                            'create_person' => $this->auth->nickname,
-                            'create_time' => time(),
-                            'number_type' => 3,
+                            'create_person'     => $this->auth->nickname,
+                            'create_time'       => time(),
+                            'number_type'       => 3,
                         ]);
 
                         //                        if ($v['platform_id'] ==1 && $v['type_id'] !== 3 && $k == 0){
@@ -1840,18 +1907,18 @@ class ScmWarehouse extends Scm
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
                                     //插入日志表
                                     (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['platform_type'],
-                                        'modular' => 12,
-                                        'change_type' => 20,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['in_stock_number'],
-                                        'source' => 2,
+                                        'type'              => 2,
+                                        'site'              => $val['platform_type'],
+                                        'modular'           => 12,
+                                        'change_type'       => 20,
+                                        'sku'               => $v['sku'],
+                                        'order_number'      => $v['in_stock_number'],
+                                        'source'            => 2,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $stock_num,
-                                        'create_person' => $this->auth->nickname,
-                                        'create_time' => time(),
-                                        'number_type' => 3,
+                                        'create_person'     => $this->auth->nickname,
+                                        'create_time'       => time(),
+                                        'number_type'       => 3,
                                     ]);
                                 } else {
                                     $num = round($v['in_stock_num'] * $rate_rate);
@@ -1859,18 +1926,18 @@ class ScmWarehouse extends Scm
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
                                     //插入日志表
                                     (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['platform_type'],
-                                        'modular' => 12,
-                                        'change_type' => 20,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['in_stock_number'],
-                                        'source' => 2,
+                                        'type'              => 2,
+                                        'site'              => $val['platform_type'],
+                                        'modular'           => 12,
+                                        'change_type'       => 20,
+                                        'sku'               => $v['sku'],
+                                        'order_number'      => $v['in_stock_number'],
+                                        'source'            => 2,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $num,
-                                        'create_person' => $this->auth->nickname,
-                                        'create_time' => time(),
-                                        'number_type' => 3,
+                                        'create_person'     => $this->auth->nickname,
+                                        'create_time'       => time(),
+                                        'number_type'       => 3,
                                     ]);
                                 }
                             }
@@ -1895,18 +1962,18 @@ class ScmWarehouse extends Scm
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $stock_num);
                                     //插入日志表
                                     (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['platform_type'],
-                                        'modular' => 12,
-                                        'change_type' => 20,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['in_stock_number'],
-                                        'source' => 2,
+                                        'type'              => 2,
+                                        'site'              => $val['platform_type'],
+                                        'modular'           => 12,
+                                        'change_type'       => 20,
+                                        'sku'               => $v['sku'],
+                                        'order_number'      => $v['in_stock_number'],
+                                        'source'            => 2,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $stock_num,
-                                        'create_person' => $this->auth->nickname,
-                                        'create_time' => time(),
-                                        'number_type' => 3,
+                                        'create_person'     => $this->auth->nickname,
+                                        'create_time'       => time(),
+                                        'number_type'       => 3,
                                     ]);
                                 } else {
                                     $num = round($v['in_stock_num'] * $val['stock'] / $whole_num);
@@ -1914,18 +1981,18 @@ class ScmWarehouse extends Scm
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->setInc('stock', $num);
                                     //插入日志表
                                     (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['platform_type'],
-                                        'modular' => 12,
-                                        'change_type' => 20,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['in_stock_number'],
-                                        'source' => 2,
+                                        'type'              => 2,
+                                        'site'              => $val['platform_type'],
+                                        'modular'           => 12,
+                                        'change_type'       => 20,
+                                        'sku'               => $v['sku'],
+                                        'order_number'      => $v['in_stock_number'],
+                                        'source'            => 2,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $num,
-                                        'create_person' => $this->auth->nickname,
-                                        'create_time' => time(),
-                                        'number_type' => 3,
+                                        'create_person'     => $this->auth->nickname,
+                                        'create_time'       => time(),
+                                        'number_type'       => 3,
                                     ]);
                                 }
                             }
@@ -1954,24 +2021,24 @@ class ScmWarehouse extends Scm
 
                         //插入日志表
                         (new StockLog())->setData([
-                            'type' => 2,
-                            'site' => 0,
-                            'modular' => $is_purchase,
-                            'change_type' => $change_type,
-                            'sku' => $v['sku'],
-                            'order_number' => $v['in_stock_number'],
-                            'source' => 2,
-                            'stock_before' => $sku_item['stock'],
-                            'stock_change' => $v['in_stock_num'],
-                            'available_stock_before' => $sku_item['available_stock'],
-                            'available_stock_change' => $v['in_stock_num'],
-                            'sample_num_before' => $sku_item['sample_num'],
-                            'sample_num_change' => $v['sample_num'],
+                            'type'                    => 2,
+                            'site'                    => 0,
+                            'modular'                 => $is_purchase,
+                            'change_type'             => $change_type,
+                            'sku'                     => $v['sku'],
+                            'order_number'            => $v['in_stock_number'],
+                            'source'                  => 2,
+                            'stock_before'            => $sku_item['stock'],
+                            'stock_change'            => $v['in_stock_num'],
+                            'available_stock_before'  => $sku_item['available_stock'],
+                            'available_stock_change'  => $v['in_stock_num'],
+                            'sample_num_before'       => $sku_item['sample_num'],
+                            'sample_num_change'       => $v['sample_num'],
                             'wait_instock_num_before' => $sku_item['wait_instock_num'],
                             'wait_instock_num_change' => -$should_arrivals_num,
-                            'create_person' => $this->auth->nickname,
-                            'create_time' => time(),
-                            'number_type' => 3,
+                            'create_person'           => $this->auth->nickname,
+                            'create_time'             => time(),
+                            'number_type'             => 3,
                         ]);
                     }
 
@@ -2103,6 +2170,7 @@ class ScmWarehouse extends Scm
         curl_setopt($curl, CURLOPT_TIMEOUT, 20);
         $content = json_decode(curl_exec($curl), true);
         curl_close($curl);
+
         return $content;
     }
 
@@ -2130,6 +2198,7 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
+        $stockId = $this->request->request('stock_id');
 
         empty($page) && $this->error(__('Page can not be empty'), [], 520);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 521);
@@ -2146,6 +2215,10 @@ class ScmWarehouse extends Scm
         }
         if ($start_time && $end_time) {
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
+        }
+
+        if ($stockId) {
+            $where['a.stock_id'] = $stockId;
         }
 
         $offset = ($page - 1) * $page_size;
@@ -2197,6 +2270,7 @@ class ScmWarehouse extends Scm
     {
         //根据type值判断是筛选还是保存 type值为1是筛选 type值为2是保存
         $type = $this->request->request("type") ?? 1;
+        $stockId = $this->request->request('stock_id');
         $info = [];
         if ($type == 1) {
             //创建盘点单筛选 ok
@@ -2208,40 +2282,25 @@ class ScmWarehouse extends Scm
             $page_size = $this->request->request('page_size');
             empty($page) && $this->error(__('Page can not be empty'), [], 522);
             empty($page_size) && $this->error(__('Page size can not be empty'), [], 523);
+
             if ($query) {
-                $cat['a.sku'] = ['like', '%'.$query.'%'];
+                $cat['a.sku'] = ['like', '%' . $query . '%'];
                 $cat['a.inventory_id'] = ['neq', 0];
-//                $cat['a.is_add'] = ['eq',1];
-
-//            //通过盘点明细表+库存盘点单 过滤对应库位编码
-                $library_name = Db::table('fa_inventory_item')
-                    ->alias('a')
-                    ->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
-                    ->where(['b.is_del' => 1, 'b.check_status' => ['in', [0, 1]]])
-                    ->where($cat)
-                    ->column('a.library_name');
-                if ($library_name) {
-                    $where['b.coding'] = ['not in', array_unique($library_name)];
+                if ($stockId) {
+                    $cat['b.stock_id'] = $stockId;
                 }
-
-            }
-            //排除待盘点sku
-            $sku_arr = $this->_inventory_item->alias('a')->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
-                ->where(['b.status' => ['in', [0, 1]]])
-                ->where(['a.sku' => ['not like', '%'.$query.'%']])
-                ->column('sku');
-            foreach ($sku_arr as $k => $v) {
-                $sku_arr_sku[] = $k;
-                $sku_area_id[] = $v;
             }
 
-            if ($sku_arr) {
-                $where['sku'] = ['not in', $sku_arr];
+            //通过盘点明细表+库存盘点单 过滤对应库位编码
+            $library_name = Db::table('fa_inventory_item')
+                ->alias('a')
+                ->join(['fa_inventory_list' => 'b'], 'a.inventory_id=b.id')
+                ->where(['b.is_del' => 1, 'b.check_status' => ['in', [0, 1]]])
+                ->where($cat)
+                ->column('a.library_name');
+            if ($library_name) {
+                $where['b.coding'] = ['not in', array_unique($library_name)];
             }
-            if ($sku_area_id) {
-                $where['b.area_id'] = ['not in', $sku_area_id];
-            }
-
             //库存范围
             if ($start_stock && $end_stock) {
                 $item_where = [
@@ -2267,14 +2326,15 @@ class ScmWarehouse extends Scm
             $where['a.is_del'] = 1;
             $where['b.status'] = 1;
             $where['b.type'] = 1;
-
+            if ($stockId) {
+                $where['b.stock_id'] = $stockId;
+            }
             $offset = ($page - 1) * $page_size;
             $limit = $page_size;
-
             //获取SKU库位绑定表（fa_store_sku）数据列表
             $list = $this->_store_sku
                 ->alias('a')
-                ->field('a.id,a.sku,b.coding as library_name,c.coding as warehouse_name,b.area_id')
+                ->field('a.id,a.sku,b.coding as library_name,c.coding as warehouse_name,b.area_id,b.stock_id')
                 ->where($where)
                 ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
                 ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
@@ -2303,7 +2363,9 @@ class ScmWarehouse extends Scm
                     $no_sku[] = $v['sku'];
                 }
             }
-            if ($no_sku) $this->error(__('SKU：' . implode(',', $no_sku) . '不存在'), [], 523);
+            if ($no_sku) {
+                $this->error(__('SKU：' . implode(',', $no_sku) . '不存在'), [], 523);
+            }
 
             $result = false;
             $this->_inventory->startTrans();
@@ -2314,6 +2376,7 @@ class ScmWarehouse extends Scm
                 $arr['number'] = 'IS' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $arr['create_person'] = $this->auth->nickname;
                 $arr['createtime'] = date('Y-m-d H:i:s', time());
+                $arr['stock_id'] = $stockId;
                 $result = $this->_inventory->allowField(true)->save($arr);
                 if ($result) {
                     $list = [];
@@ -2322,14 +2385,14 @@ class ScmWarehouse extends Scm
                         $list[$k]['sku'] = $v['sku'];
                         $item = $this->_item->field('name,stock,available_stock,distribution_occupy_stock')->where('sku', $v['sku'])->find();
                         if (empty($item)) {
-                            $this->error(__($v['sku'].'不存在'), [], 525);
+                            $this->error(__($v['sku'] . '不存在'), [], 525);
                         }
 
                         $list[$k]['name'] = $item['name']; //商品名
                         $list[$k]['distribution_occupy_stock'] = $item['distribution_occupy_stock'] ?? 0; //配货占用数量
 
                         // //查询库位实时库存
-                        $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'], 'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
+                        $real_time_qty = $this->_product_bar_code_item->where(['sku' => $v['sku'], 'stock_id' => $stockId, 'location_id' => $v['area_id'], 'location_code' => $v['library_name'], 'library_status' => 1])->where("item_order_number=''")->count();
                         $list[$k]['real_time_qty'] = $real_time_qty; //库区实时库存
                         $list[$k]['available_stock'] = $item['available_stock'] ?? 0; //可用库存
 //                        $list[$k]['remark'] = $v['remark']; //备注
@@ -2379,7 +2442,6 @@ class ScmWarehouse extends Scm
         //获取盘点单数据
         $_inventory_info = $this->_inventory->get($inventory_id);
         empty($_inventory_info) && $this->error(__('盘点单不存在'), [], 531);
-        //        $inventory_item_info = $_inventory_item->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock')->where(['inventory_id'=>$inventory_id])->select();
 
         $inventory_item_info = $this->_inventory_item
             ->field('id,sku,inventory_qty,error_qty,real_time_qty,available_stock,distribution_occupy_stock,warehouse_name,area_id,library_name,sku_agg')
@@ -2388,39 +2450,18 @@ class ScmWarehouse extends Scm
             ->select();
         $item_list = collection($inventory_item_info)->toArray();
 
-        //获取条形码数据
-        // $bar_code_list = $this->_product_bar_code_item
-        //     ->where(['inventory_id' => $inventory_id])
-        //     ->field('sku,code')
-        //     ->select();
-        // $bar_code_list = collection($bar_code_list)->toArray();
-
         foreach (array_filter($item_list) as $key => $value) {
             $item_list[$key]['stock'] = $this->_item->where('sku', $value['sku'])->value('stock');
-            //            $stock = $this->_item->where('sku',$value['sku'])->value('stock');
-            // $sku = $value['sku'];
-            //条形码列表
-            // $sku_agg = array_filter($bar_code_list, function ($v) use ($sku) {
-            //     if ($v['sku'] == $sku) {
-            //         return $v;
-            //     }
-            // });
-
-            // if (!empty($sku_agg)) {
-            //     array_walk($sku_agg, function (&$value, $k, $p) {
-            //         $value = array_merge($value, $p);
-            //     }, ['is_new' => 0]);
-            // }
-
             $item_list[$key]['sku_agg'] = unserialize($value['sku_agg']) ?: [];
         }
 
         //盘点单所需数据
         $info = [
-            'inventory_id' => $_inventory_info['id'],
+            'inventory_id'     => $_inventory_info['id'],
+            'stock_id'         => $_inventory_info['stock_id'],
+            'stock_name'       => $_inventory_info['stock_id'] == 2 ? '丹阳仓' : '郑州仓',
             'inventory_number' => $_inventory_info['number'],
-            //            'status'=>$_inventory_info['status'],
-            'item_list' => !empty($item_list) ? $item_list : []
+            'item_list'        => !empty($item_list) ? $item_list : [],
         ];
 
         $this->success('', ['info' => $info], 200);
@@ -2472,7 +2513,7 @@ class ScmWarehouse extends Scm
         foreach ($item_sku as $key => $value) {
 
             $sku_code = array_column($value['sku_agg'], 'code');
-            if ($sku_code){
+            if ($sku_code) {
                 //查询条形码是否已绑定过sku
                 $where = [];
                 $where['code'] = ['in', array_unique($sku_code)];
@@ -2509,7 +2550,7 @@ class ScmWarehouse extends Scm
                     $item_map['is_del'] = 1;
                     $sku_item = $this->_item->where($item_map)->field('stock,available_stock,distribution_occupy_stock')->find();
                     if (empty($sku_item)) {
-                        throw new Exception('SKU=>'.$v['sku'].'不存在');
+                        throw new Exception('SKU=>' . $v['sku'] . '不存在');
                     }
 
                     //等PDA改为 以此为准
@@ -2620,8 +2661,8 @@ class ScmWarehouse extends Scm
                             'available_stock_before' => $sku_item['available_stock'],
                             'available_stock_change' => $v['error_qty'],
                             'create_person'          => $this->auth->nickname,
-                            'create_time' => time(),
-                            'number_type' => 5,
+                            'create_time'            => time(),
+                            'number_type'            => 5,
                         ]);
                         //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
                         //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
@@ -2648,18 +2689,18 @@ class ScmWarehouse extends Scm
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
                                     //插入日志表
                                     (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['platform_type'],
-                                        'modular' => 12,
-                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['inventory_id'],
-                                        'source' => 2,
+                                        'type'              => 2,
+                                        'site'              => $val['platform_type'],
+                                        'modular'           => 12,
+                                        'change_type'       => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku'               => $v['sku'],
+                                        'order_number'      => $v['inventory_id'],
+                                        'source'            => 2,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $stock_num,
-                                        'create_person' => $this->auth->nickname,
-                                        'create_time' => time(),
-                                        'number_type' => 5,
+                                        'create_person'     => $this->auth->nickname,
+                                        'create_time'       => time(),
+                                        'number_type'       => 5,
                                     ]);
                                 } else {
                                     $num = round($v['error_qty'] * $rate_rate);
@@ -2668,18 +2709,18 @@ class ScmWarehouse extends Scm
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
                                     //插入日志表
                                     (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['platform_type'],
-                                        'modular' => 12,
-                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['inventory_id'],
-                                        'source' => 2,
+                                        'type'              => 2,
+                                        'site'              => $val['platform_type'],
+                                        'modular'           => 12,
+                                        'change_type'       => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku'               => $v['sku'],
+                                        'order_number'      => $v['inventory_id'],
+                                        'source'            => 2,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $num,
-                                        'create_person' => $this->auth->nickname,
-                                        'create_time' => time(),
-                                        'number_type' => 5,
+                                        'create_person'     => $this->auth->nickname,
+                                        'create_time'       => time(),
+                                        'number_type'       => 5,
                                     ]);
                                 }
                             }
@@ -2691,18 +2732,18 @@ class ScmWarehouse extends Scm
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stock_num)->update();
                                     //插入日志表
                                     (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['platform_type'],
-                                        'modular' => 12,
-                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['inventory_id'],
-                                        'source' => 2,
+                                        'type'              => 2,
+                                        'site'              => $val['platform_type'],
+                                        'modular'           => 12,
+                                        'change_type'       => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku'               => $v['sku'],
+                                        'order_number'      => $v['inventory_id'],
+                                        'source'            => 2,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $stock_num,
-                                        'create_person' => $this->auth->nickname,
-                                        'create_time' => time(),
-                                        'number_type' => 5,
+                                        'create_person'     => $this->auth->nickname,
+                                        'create_time'       => time(),
+                                        'number_type'       => 5,
                                     ]);
                                 } else {
                                     $num = round($v['error_qty'] * abs($val['stock']) / $num_num);
@@ -2711,18 +2752,18 @@ class ScmWarehouse extends Scm
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
                                     //插入日志表
                                     (new StockLog())->setData([
-                                        'type' => 2,
-                                        'site' => $val['platform_type'],
-                                        'modular' => 12,
-                                        'change_type' => $v['error_qty'] > 0 ? 20 : 21,
-                                        'sku' => $v['sku'],
-                                        'order_number' => $v['inventory_id'],
-                                        'source' => 2,
+                                        'type'              => 2,
+                                        'site'              => $val['platform_type'],
+                                        'modular'           => 12,
+                                        'change_type'       => $v['error_qty'] > 0 ? 20 : 21,
+                                        'sku'               => $v['sku'],
+                                        'order_number'      => $v['inventory_id'],
+                                        'source'            => 2,
                                         'fictitious_before' => $item_platform_sku_detail['stock'],
                                         'fictitious_change' => $num,
-                                        'create_person' => $this->auth->nickname,
-                                        'create_time' => time(),
-                                        'number_type' => 5,
+                                        'create_person'     => $this->auth->nickname,
+                                        'create_time'       => time(),
+                                        'number_type'       => 5,
                                     ]);
                                 }
                             }
@@ -2731,7 +2772,7 @@ class ScmWarehouse extends Scm
 
                     //修改库存结果为真
                     if ($stock === false) {
-                        throw new Exception('同步库存失败,请检查SKU=>'.$v['sku']);
+                        throw new Exception('同步库存失败,请检查SKU=>' . $v['sku']);
                     }
 
                     //重新绑定条形码
@@ -2762,7 +2803,7 @@ class ScmWarehouse extends Scm
                         //新增的这些设置为入库
 
                         //查询库位id
-                        $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
+                        $store_id = $this->_store_house->where(['stock_id' => $row->stock_id, 'area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
                         $this->_product_bar_code_item
                             ->where(['code' => ['in', $codes]])
                             ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
@@ -2778,15 +2819,19 @@ class ScmWarehouse extends Scm
                             ->count();
                         $list[$k]['sku'] = $v['sku'];
                         $list[$k]['out_stock_num'] = $other_message;
+                        $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
+                        $this->_product_bar_code_item
+                            ->where(['code' => ['in', $codes]])
+                            ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
                         //更新如果出库单id为空 添加出库单id
                         $this->_product_bar_code_item
-                            ->where(['code' => ['not in', $codes],'library_status' => 1,'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
+                            ->where(['code' => ['not in', $codes], 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
                             ->where("item_order_number=''")
                             ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
                     } else {
                         if ($codes) {
                             //查询库位id
-                            $store_id = $this->_store_house->where(['area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
+                            $store_id = $this->_store_house->where(['stock_id' => $row->stock_id, 'area_id' => $v['area_id'], 'coding' => $v['library_name'], 'status' => 1])->value('id');
                             //更新如果出库单id为空 添加出库单id
                             $this->_product_bar_code_item
                                 ->where(['code' => ['in', $codes], 'sku' => $v['sku']])
@@ -2794,10 +2839,9 @@ class ScmWarehouse extends Scm
                                 ->update(['inventory_id' => $inventory_id, 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'location_code_id' => $store_id]);
 
                             $this->_product_bar_code_item
-                                ->where(['code' => ['not in', $codes],'library_status' => 1,'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
+                                ->where(['code' => ['not in', $codes], 'library_status' => 1, 'location_code' => $v['library_name'], 'location_id' => $v['area_id'], 'sku' => $v['sku']])
                                 ->where("item_order_number=''")
                                 ->update(['library_status' => 2, 'inventory_id' => $inventory_id]);
-
                         }
                     }
                 }
@@ -2810,6 +2854,7 @@ class ScmWarehouse extends Scm
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $params['type_id'] = 2;
                     $params['status'] = 2;
+                    $params['stock_id'] = $row->stock_id;
                     $params['remark'] = '盘盈入库';
                     $params['check_time'] = date('Y-m-d H:i:s', time());
                     $params['check_person'] = $this->auth->nickname;
@@ -2842,6 +2887,7 @@ class ScmWarehouse extends Scm
                     $params['createtime'] = date('Y-m-d H:i:s', time());
                     $params['type_id'] = 1;
                     $params['status'] = 2;
+                    $params['stock_id'] = $row->stock_id;
                     $params['remark'] = '盘亏出库';
                     $params['check_time'] = date('Y-m-d H:i:s', time());
                     $params['check_person'] = $this->auth->nickname;
@@ -2947,6 +2993,19 @@ class ScmWarehouse extends Scm
     }
 
     /**
+     * 获取所有仓库
+     * Interface get_all_stock
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/21 14:28:13
+     */
+    public function get_all_stock()
+    {
+        $allStock = Db::name('warehouse_stock')->field('name,id')->select();
+        $this->success('获取成功', $allStock, 200);
+    }
+
+    /**
      * 获取库区
      *
      * @Description
@@ -2957,8 +3016,9 @@ class ScmWarehouse extends Scm
     public function inventory_warehouse_area()
     {
         if ($this->request->isPost()) {
-            $area_name = $this->request->request('area_name'); //库区名称
-            $list = $this->_warehouse_area->getRowsData($area_name);
+            $areaName = $this->request->request('area_name'); //库区名称
+            $stockId = $this->request->request('stock_id'); //仓库id
+            $list = $this->_warehouse_area->getRowsData($areaName, $stockId);
             $this->success('获取成功', $list, 200);
         }
         $this->error('网络异常', '', 401);
@@ -2977,8 +3037,9 @@ class ScmWarehouse extends Scm
         if ($this->request->isPost()) {
             $area_id = $this->request->request('area_id'); //库区id 多个逗号拼接
             $coding = $this->request->request('coding'); //库位编码
+            $stockId = $this->request->request('stock_id'); //仓库id
             empty($area_id) && $this->error(__('库区id不能为空'), '', 403);
-            $list = $this->_store_house->getLocationData($area_id, $coding);
+            $list = $this->_store_house->getLocationData($area_id, $coding, $stockId);
             $areaList = Db::name('warehouse_area')->column('coding', 'id');
             foreach ($list as $k => $v) {
                 $list[$k]['sku'] = '';
@@ -3004,14 +3065,13 @@ class ScmWarehouse extends Scm
     {
         if ($this->request->isPost()) {
             $location_id = $this->request->request('location_id'); //库位id 多个逗号拼接
+            $stockId = $this->request->request('stock_id'); //库位id 多个逗号拼接
             empty($location_id) && $this->error(__('库位id不能为空'), '', 403);
-            $list = $this->_store_sku->getRowsData($location_id);
+            $list = $this->_store_sku->getRowsData($location_id, $stockId);
             $this->success('获取成功', $list, 200);
         }
         $this->error('网络异常', [], 401);
     }
-
-
 
 
     /***************************************end******************************************/
@@ -3050,6 +3110,7 @@ class ScmWarehouse extends Scm
     public function transfer_order_list()
     {
         $query = $this->request->request('query');
+        $stockId = $this->request->request('stock_id');
         $status = $this->request->request('status');
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
@@ -3062,6 +3123,9 @@ class ScmWarehouse extends Scm
         $where = [];
         if ($query) {
             $where['transfer_order_number|create_person'] = ['like', '%' . $query . '%'];
+        }
+        if ($stockId) {
+            $where['stock_id'] = $stockId;
         }
         if (isset($status)) {
             $where['status'] = $status;
@@ -3089,6 +3153,7 @@ class ScmWarehouse extends Scm
             $list[$key]['show_detail'] = 6 == $value['status'] ? 1 : 0; //详情按钮
             $list[$key]['show_examine'] = 1 == $value['status'] ? 1 : 0; //审核按钮
             $list[$key]['show_trans'] = 5 == $value['status'] ? 1 : 0; //调拨中编辑按钮
+            $list[$key]['stock_name'] = Db::name('warehouse_stock')->where('id', $value['stock_id'])->value('name');
         }
         $this->success('', ['list' => $list], 200);
     }
@@ -3107,28 +3172,50 @@ class ScmWarehouse extends Scm
         $number = $this->request->request("number");
         $type = $this->request->request("type");
         $id = $this->request->request("transfer_order_id");
+        $stockId = $this->request->request("stock_id");
+        if (!$stockId) {
+            $this->error(__('仓库id不能为空'), '', 524);
+        }
         $item_sku = html_entity_decode($item_sku);
         $item_sku = array_filter(json_decode($item_sku, true));
         if (count(array_filter($item_sku)) < 1) {
             $this->error(__('调拨单子数据集合不能为空！！'), '', 524);
         }
-
-
         $codes = array_column($item_sku, 'call_out_site');
         $call_in_site_id = array_column($item_sku, 'call_in_site_id');
 
         if (!empty($codes)) {
             $call_in_site_coding = $this->_store_house->where(['id' => ['in', $call_in_site_id]])->column('coding');
             $vat = array_merge($codes, $call_in_site_coding);
+            //所有拣货库区ids
+            $allPickingIds = Db::name('warehouse_area')->column('id');
 
             $count = $this->_inventory->alias('a')
-                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat], 'b.area_id' => '3'])
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat], 'b.area_id' => ['in',$allPickingIds]])
                 ->count();
             if ($count > 0) {
                 $this->error(__('此数据下对应库位正在盘点,暂无法进行出入库操作'), '', 525);
             }
         }
-
+        //实体分仓导致库内调拨单新逻辑 判断调出库区及调入库区是否为同一仓库的
+        foreach ($item_sku as $k => $v) {
+            $outStockId = Db::name('warehouse_area')->where('id', $v['outarea_id'])->value('stock_id'); //调出库区仓库id
+            $inStockId = Db::name('warehouse_area')->where('id', $v['inarea_id'])->value('stock_id'); //调出库区仓库id
+            if ($outStockId != $stockId) {
+                $this->error(__('调出库区id' . $v['outarea_id'] . '的仓库id' . $outStockId . '与当前调拨单仓库仓库id' . $stockId . '不一致'), '', 525);
+            }
+            if ($inStockId != $stockId) {
+                $this->error(__('调入库区id' . $v['inarea_id'] . '的仓库id' . $inStockId . '与当前调拨单仓库仓库id' . $stockId . '不一致'), '', 525);
+            }
+            if ($outStockId != $inStockId) {
+                $this->error(__('调出库区与调入库区非同一仓库'), '', 525);
+            }
+            $outStockId1 = Db::name('store_house')->where('id', $v['call_out_site_id'])->value('stock_id'); //调出库位仓库id
+            $inStockId1 = Db::name('store_house')->where('id', $v['call_in_site_id'])->value('stock_id'); //调出库位仓库id
+            if ($outStockId1 !== $inStockId1) {
+                $this->error(__('调出库位与调入库位非同一仓库'), '', 525);
+            }
+        }
 
         if (!empty($number) && !$id) {
             //有调拨单号没有调拨单id说明是第一次保存
@@ -3141,6 +3228,7 @@ class ScmWarehouse extends Scm
                 $arr['transfer_order_number'] = $number;
                 $arr['create_person'] = $this->auth->nickname;
                 $arr['status'] = $type;
+                $arr['stock_id'] = $stockId;
                 $arr['create_time'] = date('Y-m-d H:i:s', time());
                 $result = $this->_warehouse_transfer_order->allowField(true)->save($arr);
                 if ($result) {
@@ -3181,72 +3269,74 @@ class ScmWarehouse extends Scm
             } else {
                 $this->error(__('No rows were inserted'), '', 525);
             }
-        } else if ($id) { //编辑调拨单
-            empty($id) && $this->error(__('调拨单id不能为空！！'), '', 523);
-            $warehouse_trans_order_detail = $this->_warehouse_transfer_order->where('id', $id)->find();
-            $this->_warehouse_transfer_order->startTrans();
-            $this->_warehouse_transfer_order_item->startTrans();
-            try {
-                //状态为5说明是调拨中 只能提交
-                if ($warehouse_trans_order_detail['status'] == 5) {
-                    //调拨中提交需要判断子调拨单是不是都已经完成了
-                    $is_complete = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->field('id,sku,inarea_id,call_in_site_id')->select();
-                    foreach ($is_complete as $key => $value) {
-                        $transfer_order_item_code = Db::name('warehouse_transfer_order_item_code')->where('transfer_order_item_id', $value['id'])->select();
-                        if (empty($transfer_order_item_code)) {
-                            $this->error(__('请先扫码调出调入'), '', 525);
-                        }
-                        foreach ($transfer_order_item_code as $key1 => $value1) {
-                            $product_bar_code = $this->_product_bar_code_item->where(['code' => $value1['code'], 'location_id' => $value['inarea_id'], 'location_code_id' => $value['call_in_site_id']])->find();
-                            if (empty($product_bar_code)) {
-                                $this->error(__($value1['code'] . '未调入'), '', 525);
+        } else {
+            if ($id) { //编辑调拨单
+                empty($id) && $this->error(__('调拨单id不能为空！！'), '', 523);
+                $warehouse_trans_order_detail = $this->_warehouse_transfer_order->where('id', $id)->find();
+                $this->_warehouse_transfer_order->startTrans();
+                $this->_warehouse_transfer_order_item->startTrans();
+                try {
+                    //状态为5说明是调拨中 只能提交
+                    if ($warehouse_trans_order_detail['status'] == 5) {
+                        //调拨中提交需要判断子调拨单是不是都已经完成了
+                        $is_complete = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->field('id,sku,inarea_id,call_in_site_id')->select();
+                        foreach ($is_complete as $key => $value) {
+                            $transfer_order_item_code = Db::name('warehouse_transfer_order_item_code')->where('transfer_order_item_id', $value['id'])->select();
+                            if (empty($transfer_order_item_code)) {
+                                $this->error(__('请先扫码调出调入'), '', 525);
+                            }
+                            foreach ($transfer_order_item_code as $key1 => $value1) {
+                                $product_bar_code = $this->_product_bar_code_item->where(['code' => $value1['code'], 'location_id' => $value['inarea_id'], 'location_code_id' => $value['call_in_site_id']])->find();
+                                if (empty($product_bar_code)) {
+                                    $this->error(__($value1['code'] . '未调入'), '', 525);
+                                }
                             }
                         }
-                    }
-                    $result = $this->_warehouse_transfer_order->where('id', $id)->update(['status' => 6]);
-                } else {
-                    //type为0是保存 1是提交
-                    0 != $warehouse_trans_order_detail['status'] && $this->error(__('只有新建状态才能编辑'), '', 405);
-                    $result = $this->_warehouse_transfer_order->where('id', $id)->update(['status' => $type]);
-                    $results = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->delete();
-                    if ($results) {
-                        $list = [];
-                        foreach ($item_sku as $k => $v) {
-                            $list[$k]['transfer_order_id'] = $id;
-                            $list[$k]['sku'] = $v['sku'];
-                            $list[$k]['num'] = $v['num'];
-                            $list[$k]['outarea_id'] = $v['outarea_id']; //调出库区id
-                            $list[$k]['outarea'] = $v['outarea']; //调出库区
-                            $list[$k]['call_out_site_id'] = $v['call_out_site_id']; //调出库位id
-                            $list[$k]['call_out_site'] = $v['call_out_site']; //调出库位
-                            $list[$k]['inarea_id'] = $v['inarea_id']; //调入库区id
-                            $list[$k]['inarea'] = $v['inarea']; //调入库区
-                            $list[$k]['call_in_site_id'] = $v['call_in_site_id']; //调入库位id
-                            $list[$k]['call_in_site'] = Db::name('store_house')->where('id', $v['call_in_site_id'])->value('coding'); //调入库位
+                        $result = $this->_warehouse_transfer_order->where('id', $id)->update(['status' => 6]);
+                    } else {
+                        //type为0是保存 1是提交
+                        0 != $warehouse_trans_order_detail['status'] && $this->error(__('只有新建状态才能编辑'), '', 405);
+                        $result = $this->_warehouse_transfer_order->where('id', $id)->update(['status' => $type]);
+                        $results = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->delete();
+                        if ($results) {
+                            $list = [];
+                            foreach ($item_sku as $k => $v) {
+                                $list[$k]['transfer_order_id'] = $id;
+                                $list[$k]['sku'] = $v['sku'];
+                                $list[$k]['num'] = $v['num'];
+                                $list[$k]['outarea_id'] = $v['outarea_id']; //调出库区id
+                                $list[$k]['outarea'] = $v['outarea']; //调出库区
+                                $list[$k]['call_out_site_id'] = $v['call_out_site_id']; //调出库位id
+                                $list[$k]['call_out_site'] = $v['call_out_site']; //调出库位
+                                $list[$k]['inarea_id'] = $v['inarea_id']; //调入库区id
+                                $list[$k]['inarea'] = $v['inarea']; //调入库区
+                                $list[$k]['call_in_site_id'] = $v['call_in_site_id']; //调入库位id
+                                $list[$k]['call_in_site'] = Db::name('store_house')->where('id', $v['call_in_site_id'])->value('coding'); //调入库位
+                            }
+                            //添加明细表数据
+                            $result1 = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
                         }
-                        //添加明细表数据
-                        $result1 = $this->_warehouse_transfer_order_item->allowField(true)->saveAll($list);
                     }
+                    $this->_warehouse_transfer_order->commit();
+                    $this->_warehouse_transfer_order_item->commit();
+                } catch (ValidateException $e) {
+                    $this->_warehouse_transfer_order->rollback();
+                    $this->_warehouse_transfer_order_item->rollback();
+                    $this->error($e->getMessage(), [], 444);
+                } catch (PDOException $e) {
+                    $this->_warehouse_transfer_order->rollback();
+                    $this->_warehouse_transfer_order_item->rollback();
+                    $this->error($e->getMessage(), [], 444);
+                } catch (Exception $e) {
+                    $this->_warehouse_transfer_order->rollback();
+                    $this->_warehouse_transfer_order_item->rollback();
+                    $this->error($e->getMessage(), [], 444);
                 }
-                $this->_warehouse_transfer_order->commit();
-                $this->_warehouse_transfer_order_item->commit();
-            } catch (ValidateException $e) {
-                $this->_warehouse_transfer_order->rollback();
-                $this->_warehouse_transfer_order_item->rollback();
-                $this->error($e->getMessage(), [], 444);
-            } catch (PDOException $e) {
-                $this->_warehouse_transfer_order->rollback();
-                $this->_warehouse_transfer_order_item->rollback();
-                $this->error($e->getMessage(), [], 444);
-            } catch (Exception $e) {
-                $this->_warehouse_transfer_order->rollback();
-                $this->_warehouse_transfer_order_item->rollback();
-                $this->error($e->getMessage(), [], 444);
-            }
-            if ($result !== false) {
-                $this->success('提交成功！！', '', 200);
-            } else {
-                $this->error(__('No rows were inserted'), '', 525);
+                if ($result !== false) {
+                    $this->success('提交成功！！', '', 200);
+                } else {
+                    $this->error(__('No rows were inserted'), '', 525);
+                }
             }
         }
     }
@@ -3263,6 +3353,8 @@ class ScmWarehouse extends Scm
         $id = $this->request->request("transfer_order_id");
         empty($id) && $this->error(__('调拨单id不能为空！！'), '', 523);
         $list['transfer_order_number'] = $this->_warehouse_transfer_order->where('id', $id)->value('transfer_order_number');
+        $list['stock_id'] = $this->_warehouse_transfer_order->where('id', $id)->value('stock_id');
+        $list['stock_name'] = Db::name('warehouse_stock')->where('id', $list['stock_id'])->value('name');
         $list['item_list'] = $this->_warehouse_transfer_order_item->where('transfer_order_id', $id)->select();
         foreach ($list['item_list'] as $k => $v) {
             $area_id = Db::name('warehouse_area')->where('coding', $v['outarea'])->value('id');
@@ -3585,15 +3677,19 @@ class ScmWarehouse extends Scm
      */
     public function area_warehouse_sku()
     {
-        $area_id = $this->request->request("area_id");
-        $store_id = $this->request->request("store_id");
+        $areaId = $this->request->request("area_id");
+        $stockId = $this->request->request("stock_id");
+        $storeId = $this->request->request("store_id");
         $sku = $this->request->request("sku");
         $where = [];
-        if ($area_id) {
-            $where['b.area_id'] = $area_id;
+        if ($areaId) {
+            $where['b.area_id'] = $areaId;
         }
-        if ($store_id) {
-            $where['b.id'] = $store_id;
+        if ($stockId) {
+            $where['a.stock_id'] = $stockId;
+        }
+        if ($storeId) {
+            $where['b.id'] = $storeId;
         }
         if ($sku) {
             $where['a.sku'] = ['like', '%' . $sku . '%'];
@@ -3602,7 +3698,8 @@ class ScmWarehouse extends Scm
             ->alias('a')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id', 'left')
             ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
-            ->field('a.sku,b.coding,c.name,a.id as bind_id,c.id as area_id,a.store_id as location_id,c.coding as area')
+            ->join(['fa_warehouse_stock' => 'd'], 'b.stock_id=d.id')
+            ->field('a.sku,b.coding,c.name,a.id as bind_id,c.id as area_id,a.store_id as location_id,c.coding as area,d.id as stock_id,d.name as stock_name')
             ->where('is_del', 1)
             ->where($where)
             ->select();
@@ -3660,4 +3757,1010 @@ class ScmWarehouse extends Scm
     }
 
     /***************************************库内调拨单end******************************************/
+
+    /***************************************实体仓调拨单start******************************************/
+    /**
+     * 实体仓调拨单列表
+     * Interface stock_transfer_list
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/14 13:38:01
+     */
+    public function stock_transfer_list()
+    {
+        $query = $this->request->request('query');
+        $sku = $this->request->request('sku');
+        $status = $this->request->request('status');
+        $start_time = $this->request->request('start_time');
+        $end_time = $this->request->request('end_time');
+        $page = $this->request->request('page');
+        $pageSize = $this->request->request('page_size');
+
+        empty($page) && $this->error(__('Page can not be empty'), '', 520);
+        empty($pageSize) && $this->error(__('Page size can not be empty'), '', 521);
+
+        $where = [];
+        if ($query) {
+            $where['transfer_order_number|create_person|response_person'] = ['like', '%' . $query . '%'];
+        }
+        if ($sku) {
+            $allIds = $this->_stock_transfer_order_item->where('sku','like','%'.$sku.'%')->group('transfer_order_id')->column('transfer_order_id');
+            $where['id'] = ['in',$allIds];
+        }
+        if (isset($status)) {
+            $where['status'] = $status;
+        }
+        if ($start_time && $end_time) {
+            $where['create_time'] = ['between', [$start_time, $end_time]];
+        }
+
+        $offset = ($page - 1) * $pageSize;
+        $limit = $pageSize;
+
+        //获取库内调拨单列表数据
+        $list = $this->_stock_transfer_order
+            ->where($where)
+            ->order('create_time', 'desc')
+            ->limit($offset, $limit)
+            ->select();
+        $list = collection($list)->toArray();
+        $checkStatus = [0 => '新建', 1 => '待审核', 2 => '待配货', 3 => '待物流揽收', 4 => '待收货', 5 => '待入库', 6 => '已完成', 7 => '审核拒绝', 8 => '已取消'];
+        $allStock = Db::name('warehouse_stock')->column('name', 'id');
+        foreach ($list as $key => $value) {
+            $list[$key]['status'] = $checkStatus[$value['status']];
+            $list[$key]['create_time'] = date("Y-m-d H:i:s", $value['create_time']);
+            $list[$key]['out_stock_name'] = $allStock[$value['out_stock_id']];
+            $list[$key]['in_stock_name'] = $allStock[$value['in_stock_id']];
+            //按钮
+            $list[$key]['show_out'] = 2 == $value['status'] ? 1 : 0; //配货出库按钮 待配货状态有
+            $list[$key]['show_logistics'] = 3 == $value['status'] ? 1 : 0; //扫描物流单号按钮 待物流揽收状态有
+            $list[$key]['show_sign'] = 4 == $value['status'] ? 1 : 0; //待收货 有签收按钮
+            $list[$key]['show_in'] = 5 == $value['status'] ? 1 : 0; //待入库有入库按钮
+            $list[$key]['show_detail'] = 6 == $value['status'] ? 1 : 0; //已完成状态有显示详情按钮
+        }
+        $this->success('', ['list' => $list], 200);
+    }
+
+    /**
+     * 配货出库实体仓调拨单详情
+     * Interface stock_transfer_out
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/17 14:08:04
+     */
+    public function stock_transfer_out()
+    {
+        $id = $this->request->request("transfer_order_id");
+        if (empty($id)) {
+            $this->error(__('error，调拨单id为空'), '', 546);
+        }
+        $transferOrder = $this->_stock_transfer_order->where('id', $id)->find();
+        $transfer_order_item = $this->_stock_transfer_order_item->where('transfer_order_id', $id)->select();
+        foreach ($transfer_order_item as $k => $v) {
+            $transfer_order_item[$k]['transfer_order_item_id'] = $v['id'];
+            unset($transfer_order_item[$k]['id']);
+        }
+        $allStock = Db::name('warehouse_stock')->column('name', 'id');
+        $data['transfer_order_number'] = $transferOrder['transfer_order_number'];
+        $data['out_stock_id'] = $transferOrder['out_stock_id'];
+        $data['out_stock'] = $allStock[$transferOrder['out_stock_id']];
+        $data['in_stock_id'] = $transferOrder['in_stock_id'];
+        $data['in_stock'] = $allStock[$transferOrder['in_stock_id']];
+        $data['response_person'] = $transferOrder['response_person'];
+        $data['item_list'] = $transfer_order_item;
+        $this->success('', $data, 200);
+    }
+
+    /**
+     * 配货出库保存/提交
+     * Interface stock_transfer_out_add
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/20 14:18:40
+     */
+    public function stock_transfer_out_add()
+    {
+        $id = $this->request->request("transfer_order_id");
+        $type = $this->request->request('type');
+        if ($type == 1) {
+            $status = 2;
+        } else {
+            //提交进入下一步 该扫描物流单号了
+            $status = 3;
+        }
+        //当前实体仓调拨单详情
+        $detail = $this->_stock_transfer_order->where('id', $id)->find();
+        if (empty($detail)) {
+            $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
+        }
+        //当前调拨单待配货状态提交 会进入待物流揽收状态
+        if ($detail['status'] == 2) {
+            $allItemDetail = $this->_stock_transfer_order_item
+                ->where('transfer_order_id', $id)
+                ->field('sku,id,real_num')
+                ->select();
+            // foreach ($allItemDetail as $k0 => $v0) {
+            //     if ($v0['real_num'] == 0) {
+            //         $this->error(__($v0['sku'] . '调拨数量为0，请检查或重新创建仓库调拨单'), '', 546);
+            //     }
+            // }
+            $allItemIds = array_column($allItemDetail, 'id');
+            $allCodes = $this->_stock_transfer_order_item_code->where('transfer_order_item_id', 'in', $allItemIds)->column('code');
+            $res = false;
+            $this->_product_bar_code_item->startTrans();
+            $this->_stock_transfer_order->startTrans();
+            $this->_item->startTrans();
+            $this->_item_platform_sku->startTrans();
+            $this->_stock_transfer_out_order->startTrans();
+            $this->_stock_transfer_in_order_item->startTrans();
+            try {
+                /****************库存逻辑开始**********************/
+                //提交的时候操作库存 以及更新条形码状态为出库
+                if ($status == 3) {
+                    foreach ($allItemDetail as $sk => $sv) {
+                        $StockTransferOutOrderItem[$sk]['sku'] = $sv['sku'];
+                        $StockTransferOutOrderItem[$sk]['out_num'] = $sv['real_num'];
+                        //同步对应SKU库存 更新商品表商品总库存 总库存
+                        $itemMap['sku'] = $sv['sku'];
+                        $itemMap['is_del'] = 1;
+                        $skuItem = $this->_item->where($itemMap)->field('stock,available_stock,sample_num,wait_instock_num,occupy_stock,distribution_occupy_stock')->find();
+                        if ($sv['sku']) {
+                            //扣减sku总库存 可用库存
+                            $stock = $this->_item->where($itemMap)->dec('stock', $sv['real_num'])->dec('available_stock', $sv['real_num'])->update();
+                            //插入日志表
+                            (new StockLog())->setData([
+                                'type'                   => 2,
+                                'site'                   => 0,
+                                'modular'                => 14,//实体仓调拨
+                                'change_type'            => 25,//实体仓调拨出库
+                                'sku'                    => $sv['sku'],
+                                'order_number'           => $detail['transfer_order_number'],//实体仓调拨单id
+                                'source'                 => 2,
+                                'stock_before'           => $skuItem['stock'],
+                                'stock_change'           => -$sv['real_num'],
+                                'available_stock_before' => $skuItem['available_stock'],
+                                'available_stock_change' => -$sv['real_num'],
+                                'create_person'          => $this->auth->nickname,
+                                'create_time'            => time(),
+                                'number_type'            => 8,//实体仓调拨单
+                            ]);
+                            //实体仓调拨出库的同时要对虚拟库存进行一定的操作
+                            //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
+                            $itemPlatformSku = $this->_item_platform_sku->where('sku', $sv['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                            $allNum = count($itemPlatformSku);
+                            $wholeNum = $this->_item_platform_sku
+                                ->where('sku', $sv['sku'])
+                                ->field('stock')
+                                ->select();
+                            $numNum = 0;
+                            foreach ($wholeNum as $kk => $vv) {
+                                $numNum += abs($vv['stock']);
+                            }
+                            //sku实际调拨的数量
+                            $stockNum = $sv['real_num'];
+                            //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
+                            $stockAllNum = array_sum(array_column($itemPlatformSku, 'stock'));
+                            if ($stockAllNum == 0) {
+                                $rateRate = 1 / $allNum;
+                                foreach ($itemPlatformSku as $key => $val) {
+                                    //最后一个站点 剩余数量分给最后一个站
+                                    if (($allNum - $key) == 1) {
+                                        $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stockNum)->update();
+                                        //插入日志表
+                                        (new StockLog())->setData([
+                                            'type'              => 2,
+                                            'site'              => $val['platform_type'],
+                                            'modular'           => 14,//实体仓调拨
+                                            'change_type'       => 25,//实体仓调拨出库
+                                            'sku'               => $sv['sku'],
+                                            'order_number'      => $detail['transfer_order_number'],
+                                            'source'            => 2,
+                                            'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                            'fictitious_change' => -$stockNum,
+                                            'create_person'     => $this->auth->nickname,
+                                            'create_time'       => time(),
+                                            'number_type'       => 8,//实体仓调拨单
+                                        ]);
+                                    } else {
+                                        $num = round($sv['real_num'] * $rateRate);
+                                        $stockNum -= $num;
+                                        $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
+                                        //插入日志表
+                                        (new StockLog())->setData([
+                                            'type'              => 2,
+                                            'site'              => $val['platform_type'],
+                                            'modular'           => 14,//实体仓调拨
+                                            'change_type'       => 25,//实体仓调拨出库
+                                            'sku'               => $sv['sku'],
+                                            'order_number'      => $detail['transfer_order_number'],
+                                            'source'            => 2,
+                                            'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                            'fictitious_change' => -$num,
+                                            'create_person'     => $this->auth->nickname,
+                                            'create_time'       => time(),
+                                            'number_type'       => 8,//实体仓调拨单
+                                        ]);
+                                    }
+                                }
+                            } else {
+                                foreach ($itemPlatformSku as $key => $val) {
+                                    //最后一个站点 剩余数量分给最后一个站
+                                    if (($allNum - $key) == 1) {
+                                        $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stockNum)->update();
+                                        //插入日志表
+                                        (new StockLog())->setData([
+                                            'type'              => 2,
+                                            'site'              => $val['platform_type'],
+                                            'modular'           => 14,//实体仓调拨
+                                            'change_type'       => 25,//实体仓调拨出库
+                                            'sku'               => $sv['sku'],
+                                            'order_number'      => $detail['transfer_order_number'],
+                                            'source'            => 2,
+                                            'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                            'fictitious_change' => -$stockNum,
+                                            'create_person'     => $this->auth->nickname,
+                                            'create_time'       => time(),
+                                            'number_type'       => 8,//实体仓调拨单
+                                        ]);
+                                    } else {
+                                        $num = round($sv['real_num'] * abs($val['stock']) / $numNum);
+                                        $stockNum -= $num;
+                                        $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
+                                        //插入日志表
+                                        (new StockLog())->setData([
+                                            'type'              => 2,
+                                            'site'              => $val['platform_type'],
+                                            'modular'           => 14,//实体仓调拨
+                                            'change_type'       => 25,//实体仓调拨出库
+                                            'sku'               => $sv['sku'],
+                                            'order_number'      => $detail['transfer_order_number'],
+                                            'source'            => 2,
+                                            'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                            'fictitious_change' => -$num,
+                                            'create_person'     => $this->auth->nickname,
+                                            'create_time'       => time(),
+                                            'number_type'       => 8,//实体仓调拨单
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
+                        //修改库存结果为真
+                        if ($stock === false) {
+                            throw new Exception('同步库存失败,请检查SKU=>' . $sv['sku']);
+                        }
+                    }
+                    //条形码全部改为出库状态
+                    $res = $this->_product_bar_code_item->where('code', 'in', $allCodes)->update(['library_status' => 2]);
+                    //实体仓调拨单出库单 主单添加记录 item子单批量添加并统一添加主单id
+                    $transferOutOrderId = $this->_stock_transfer_out_order
+                        ->insertGetId(['transfer_out_order_number' => 'OUT' . date('YmdHis') . rand(100, 999) . rand(100, 999), 'stock_transfer_order_id' => $id, 'create_person' => $this->auth->nickname, 'create_time' => time()]);
+                    $arrArr = ['transfer_out_order_id' => $transferOutOrderId];
+                    array_walk($StockTransferOutOrderItem, function (&$value1, $key, $arrArr) {
+                        $value1 = array_merge($value1, $arrArr);
+                    }, $arrArr);
+                    $this->_stock_transfer_out_order_item
+                        ->insertAll($StockTransferOutOrderItem);
+                }
+                /****************库存逻辑结束**********************/
+                //更新仓库调拨单状态为待物流揽收
+                $res = $this->_stock_transfer_order->where('id', $id)->update(['status' => $status]);
+                $this->_product_bar_code_item->commit();
+                $this->_stock_transfer_order->commit();
+                $this->_item->commit();
+                $this->_item_platform_sku->commit();
+                $this->_stock_transfer_out_order->commit();
+                $this->_stock_transfer_in_order_item->commit();
+            } catch (ValidateException $e) {
+                $this->_product_bar_code_item->rollback();
+                $this->_stock_transfer_order->rollback();
+                $this->_item->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_stock_transfer_out_order->rollback();
+                $this->_stock_transfer_in_order_item->rollback();
+                $this->error($e->getMessage(), [], 444);
+            } catch (PDOException $e) {
+                $this->_product_bar_code_item->rollback();
+                $this->_stock_transfer_order->rollback();
+                $this->_item->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_stock_transfer_out_order->rollback();
+                $this->_stock_transfer_in_order_item->rollback();
+                $this->error($e->getMessage(), [], 444);
+            } catch (Exception $e) {
+                $this->_product_bar_code_item->rollback();
+                $this->_stock_transfer_order->rollback();
+                $this->_item->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_stock_transfer_out_order->rollback();
+                $this->_stock_transfer_in_order_item->rollback();
+                $this->error($e->getMessage(), [], 444);
+            }
+            if ($res !== false) {
+                $this->success('提交成功', '', 200);
+            } else {
+                $this->error(__('No rows were inserted'), '', 525);
+            }
+        } elseif ($detail['status'] == 5) {
+            //待入库状态提交 会进入已完成状态
+            $allItemDetail = $this->_stock_transfer_order_item
+                ->where('transfer_order_id', $id)
+                ->field('sku,id,real_instock_num')
+                ->select();
+            foreach ($allItemDetail as $k0 => $v0) {
+                if ($v0['real_instock_num'] == 0) {
+                    $this->error(__($v0['sku'] . '实际入库数量0，请检查'), '', 546);
+                }
+            }
+            foreach ($allItemDetail as $sk => $sv) {
+                $StockTransferOutOrderItem[$sk]['sku'] = $sv['sku'];
+                $StockTransferOutOrderItem[$sk]['in_num'] = $sv['real_instock_num'];
+            }
+            $res = false;
+            $this->_item->startTrans();
+            $this->_item_platform_sku->startTrans();
+            $this->_stock_transfer_order->startTrans();
+            $this->_stock_transfer_out_order->startTrans();
+            $this->_stock_transfer_in_order_item->startTrans();
+            try {
+                if ($status == 3) {
+                    foreach ($allItemDetail as $sk => $sv) {
+                        //同步对应SKU库存 更新商品表商品总库存 总库存
+                        $itemMap['sku'] = $sv['sku'];
+                        $itemMap['is_del'] = 1;
+                        $skuItem = $this->_item->where($itemMap)->field('stock,available_stock,sample_num,wait_instock_num,occupy_stock,distribution_occupy_stock')->find();
+                        if ($sv['sku']) {
+                            //扣减sku总库存 可用库存
+                            $stock = $this->_item->where($itemMap)->inc('stock', $sv['real_instock_num'])->inc('available_stock', $sv['real_instock_num'])->update();
+                            //插入日志表
+                            (new StockLog())->setData([
+                                'type'                   => 2,
+                                'site'                   => 0,
+                                'modular'                => 14,//实体仓调拨
+                                'change_type'            => 26,//实体仓调拨入库
+                                'sku'                    => $sv['sku'],
+                                'order_number'           => $detail['transfer_order_number'],//实体仓调拨单id
+                                'source'                 => 2,
+                                'stock_before'           => $skuItem['stock'],
+                                'stock_change'           => $sv['real_instock_num'],
+                                'available_stock_before' => $skuItem['available_stock'],
+                                'available_stock_change' => $sv['real_instock_num'],
+                                'create_person'          => $this->auth->nickname,
+                                'create_time'            => time(),
+                                'number_type'            => 8,//实体仓调拨单
+                            ]);
+                            //实体仓调拨出库的同时要对虚拟库存进行一定的操作
+                            //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
+                            $itemPlatformSku = $this->_item_platform_sku->where('sku', $sv['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                            $allNum = count($itemPlatformSku);
+                            $wholeNum = $this->_item_platform_sku
+                                ->where('sku', $sv['sku'])
+                                ->field('stock')
+                                ->select();
+                            $numNum = 0;
+                            foreach ($wholeNum as $kk => $vv) {
+                                $numNum += abs($vv['stock']);
+                            }
+                            //sku实际调拨的数量
+                            $stockNum = $sv['real_instock_num'];
+                            //计算当前sku的总虚拟库存 如果总的为0 表示当前所有平台的此sku都为0 此时入库的话按照平均规则分配 例如五个站都有此品 那么比例就是20%
+                            $stockAllNum = array_sum(array_column($itemPlatformSku, 'stock'));
+                            if ($stockAllNum == 0) {
+                                $rateRate = 1 / $allNum;
+                                foreach ($itemPlatformSku as $key => $val) {
+                                    //最后一个站点 剩余数量分给最后一个站
+                                    if (($allNum - $key) == 1) {
+                                        $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stockNum)->update();
+                                        //插入日志表
+                                        (new StockLog())->setData([
+                                            'type'              => 2,
+                                            'site'              => $val['platform_type'],
+                                            'modular'           => 14,//实体仓调拨
+                                            'change_type'       => 26,//实体仓调拨出库
+                                            'sku'               => $sv['sku'],
+                                            'order_number'      => $detail['transfer_order_number'],
+                                            'source'            => 2,
+                                            'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                            'fictitious_change' => $stockNum,
+                                            'create_person'     => $this->auth->nickname,
+                                            'create_time'       => time(),
+                                            'number_type'       => 8,//实体仓调拨单
+                                        ]);
+                                    } else {
+                                        $num = round($sv['real_instock_num'] * $rateRate);
+                                        $stockNum -= $num;
+                                        $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
+                                        //插入日志表
+                                        (new StockLog())->setData([
+                                            'type'              => 2,
+                                            'site'              => $val['platform_type'],
+                                            'modular'           => 14,//实体仓调拨
+                                            'change_type'       => 26,//实体仓调拨出库
+                                            'sku'               => $sv['sku'],
+                                            'order_number'      => $detail['transfer_order_number'],
+                                            'source'            => 2,
+                                            'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                            'fictitious_change' => $num,
+                                            'create_person'     => $this->auth->nickname,
+                                            'create_time'       => time(),
+                                            'number_type'       => 8,//实体仓调拨单
+                                        ]);
+                                    }
+                                }
+                            } else {
+                                foreach ($itemPlatformSku as $key => $val) {
+                                    //最后一个站点 剩余数量分给最后一个站
+                                    if (($allNum - $key) == 1) {
+                                        $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $stockNum)->update();
+                                        //插入日志表
+                                        (new StockLog())->setData([
+                                            'type'              => 2,
+                                            'site'              => $val['platform_type'],
+                                            'modular'           => 14,//实体仓调拨
+                                            'change_type'       => 26,//实体仓调拨出库
+                                            'sku'               => $sv['sku'],
+                                            'order_number'      => $detail['transfer_order_number'],
+                                            'source'            => 2,
+                                            'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                            'fictitious_change' => $stockNum,
+                                            'create_person'     => $this->auth->nickname,
+                                            'create_time'       => time(),
+                                            'number_type'       => 8,//实体仓调拨单
+                                        ]);
+                                    } else {
+                                        $num = round($sv['real_instock_num'] * abs($val['stock']) / $numNum);
+                                        $stockNum -= $num;
+                                        $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->inc('stock', $num)->update();
+                                        //插入日志表
+                                        (new StockLog())->setData([
+                                            'type'              => 2,
+                                            'site'              => $val['platform_type'],
+                                            'modular'           => 14,//实体仓调拨
+                                            'change_type'       => 26,//实体仓调拨出库
+                                            'sku'               => $sv['sku'],
+                                            'order_number'      => $detail['transfer_order_number'],
+                                            'source'            => 2,
+                                            'fictitious_before' => $itemPlatformSkuDetail['stock'],
+                                            'fictitious_change' => $num,
+                                            'create_person'     => $this->auth->nickname,
+                                            'create_time'       => time(),
+                                            'number_type'       => 8,//实体仓调拨单
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
+                        //修改库存结果为真
+                        if ($stock === false) {
+                            throw new Exception('同步库存失败,请检查SKU=>' . $sv['sku']);
+                        }
+                    }
+                    //实体仓调拨单入库单 主单添加记录 item子单批量添加并统一添加主单id
+                    $transferOutOrderId = $this->_stock_transfer_in_order
+                        ->insertGetId(['transfer_in_order_number' => 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999), 'stock_transfer_order_id' => $id, 'create_person' => $this->auth->nickname, 'create_time' => time()]);
+                    $arrArr = ['transfer_in_order_id' => $transferOutOrderId];
+                    array_walk($StockTransferOutOrderItem, function (&$value1, $key, $arrArr) {
+                        $value1 = array_merge($value1, $arrArr);
+                    }, $arrArr);
+                    $this->_stock_transfer_in_order_item
+                        ->insertAll($StockTransferOutOrderItem);
+                }
+                //更新仓库调拨单状态为已完成
+                $res = $this->_stock_transfer_order->where('id', $id)->update(['status' => 6]);
+                $this->_item->commit();
+                $this->_item_platform_sku->commit();
+                $this->_stock_transfer_order->commit();
+                $this->_stock_transfer_out_order->commit();
+                $this->_stock_transfer_in_order_item->commit();
+            } catch (ValidateException $e) {
+                $this->_item->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_stock_transfer_order->rollback();
+                $this->_stock_transfer_out_order->rollback();
+                $this->_stock_transfer_in_order_item->rollback();
+                $this->error($e->getMessage(), [], 444);
+            } catch (PDOException $e) {
+                $this->_item->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_stock_transfer_order->rollback();
+                $this->_stock_transfer_out_order->rollback();
+                $this->_stock_transfer_in_order_item->rollback();
+                $this->error($e->getMessage(), [], 444);
+            } catch (Exception $e) {
+                $this->_item->rollback();
+                $this->_item_platform_sku->rollback();
+                $this->_stock_transfer_order->rollback();
+                $this->_stock_transfer_out_order->rollback();
+                $this->_stock_transfer_in_order_item->rollback();
+                $this->error($e->getMessage(), [], 444);
+            }
+            if ($res !== false) {
+                $this->success('提交成功', '', 200);
+            } else {
+                $this->error(__('No rows were inserted'), '', 525);
+            }
+        } else {
+            $this->error(__('调拨单非可提交状态，请检查'), '', 546);
+        }
+
+    }
+
+    /**
+     * 调出sku信息
+     * Interface stock_transfer_out_sku
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/17 16:20:09
+     */
+    public function stock_transfer_out_sku()
+    {
+        $id = $this->request->request("transfer_order_item_id");
+        $status = $this->request->request("status");
+        if (empty($id)) {
+            $this->error(__('error，调拨单id为空'), '', 546);
+        }
+        if (empty($status)) {
+            $this->error(__('error，状态码为空'), '', 546);
+        }
+        $transferOrderItem = $this->_stock_transfer_order_item->where('id', $id)->find();
+        $transferOrderItemCode = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id'=>$id,'status'=>$status])->select();
+        $transferOrderItemCode = collection($transferOrderItemCode)->toArray();
+        $arr = [];
+        foreach ($transferOrderItemCode as $k => $v) {
+            if (!empty($arr[$v['location_id']])) {
+                $arr[$v['location_id']]['num'] += 1;
+                array_push($arr[$v['location_id']]['code_agg'], $v['code']);
+            } else {
+                $arr[$v['location_id']]['area_id'] = $v['area_id'];
+                $arr[$v['location_id']]['location_id'] = $v['location_id'];
+                $arr[$v['location_id']]['area'] = Db::name('warehouse_area')->where('id', $v['area_id'])->value('coding');
+                $arr[$v['location_id']]['location'] = Db::name('store_house')->where('id', $v['location_id'])->value('coding');
+                $arr[$v['location_id']]['num'] += 1;
+                $arr[$v['location_id']]['code_agg'] = [$v['code']];
+            }
+        }
+        $data['sku'] = $transferOrderItem['sku'];
+        $data['item_list'] = array_values($arr);
+        $this->success('', $data, 200);
+    }
+
+    /**
+     * 扫描条码返回信息
+     * Interface stock_code_review
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/17 11:26:54
+     */
+    public function stock_code_review()
+    {
+        $code = $this->request->request("code");
+        $sku = $this->request->request("sku");
+        //当前条形码详情
+        $detail = $this->_product_bar_code_item->where('code', $code)->find();
+        if (empty($detail)) {
+            $this->error(__('条形码:' . $code . '信息不存在，请联系管理员'), '', 546);
+        }
+        if (empty($detail['location_id']) || empty($detail['location_code_id'])) {
+            $this->error(__('条形码没有库区或库位信息,条形码:' . $code), '', 546);
+        }
+        if ($sku !== $detail['sku']) {
+            $this->error(__('条形码:' . $code . '与sku：' . $sku . '不匹配'), '', 546);
+        }
+        if ($detail['library_status'] == 2) {
+            $this->error(__($code . '当前不是在库状态，请检查！！'), '', 524);
+        }
+        $arr['location'] = Db::name('warehouse_area')->where('id', $detail['location_id'])->value('coding');
+        $arr['location_id'] = $detail['location_id'];
+        $arr['location_code_id'] = $detail['location_code_id'];
+        $arr['location_code'] = $detail['location_code'];
+        $this->success('扫码成功！！', $arr, 200);
+    }
+
+    /**
+     * 配货出库实体仓调拨单扫码页面提交
+     * Interface stock_code_add
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/17 14:30:18
+     */
+    public function stock_code_add()
+    {
+        $transferOrderItemId = $this->request->request('transfer_order_item_id');
+        $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
+        $transferOrderDetail = $this->_stock_transfer_order->where('id', $transferOrderItemDetail['transfer_order_id'])->find();
+        // $transferOrderItemCodeDetail = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId])->find();
+        $allStock = Db::name('warehouse_stock')->column('name', 'id');
+        // if (!empty($transferOrderItemCodeDetail)) {
+        //     $this->error(__('实体仓调拨单子单sku' . $transferOrderItemDetail['sku'] . '已提交过,只可编辑单个sku，请检查！！'), '', 524);
+        // }
+        if (empty($transferOrderItemDetail)) {
+            $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
+        }
+        $codeAgg = $this->request->request("sku_agg");
+        $codeAgg = html_entity_decode($codeAgg);
+        $codeAgg = array_filter(json_decode($codeAgg, true));
+        if (count(array_filter($codeAgg)) < 1) {
+            $this->error(__('条形码数据不能为空！！'), '', 524);
+        }
+        $codeAggUnique = array_unique(array_column($codeAgg,'code'));
+        if(count($codeAggUnique) != count($codeAgg)) {
+            $this->error(__('条形码数据有重复的，请检查！！'), '', 524);
+        }
+        $arr = [];
+        foreach ($codeAgg as $k => $v) {
+            //判断当前条码的在库状态
+            $codeStatus = $this->_product_bar_code_item->where('code', $v['code'])->find();
+            if (empty($codeStatus)) {
+                $this->error(__($v['code'] . '不存在，请检查！！'), '', 524);
+            }
+            if ($codeStatus['library_status'] == 2) {
+                $this->error(__($v['code'] . '当前不是在库状态，请检查！！'), '', 524);
+            }
+            if ($codeStatus['sku'] !== $transferOrderItemDetail['sku']) {
+                $this->error(__('条形码sku与调拨sku不一致，请检查！！'), '', 524);
+            }
+            if ($codeStatus['stock_id'] !== $transferOrderDetail['out_stock_id']) {
+                $this->error(__($v['code'] . '当前不在调出仓库：' . $allStock[$transferOrderDetail['out_stock_id']] . '！！'), '', 524);
+            }
+            //重复条码校验
+            $hasCode = $this->_stock_transfer_order_item_code->where(['code'=>$v['code'],'transfer_order_item_id'=>$transferOrderItemId])->find();
+            if ($hasCode) {
+                $this->error(__($v['code'] . '重复，请删除此条码！'), '', 524);
+            }
+            //实体仓调拨单子表的子表（条形码明细表）插入数据
+            $arr[$k]['code'] = $v['code'];
+            $arr[$k]['transfer_order_item_id'] = $transferOrderItemId;
+            $arr[$k]['sku'] = $transferOrderItemDetail['sku'];
+            $arr[$k]['area_id'] = $codeStatus['location_id'];
+            $arr[$k]['location_id'] = $codeStatus['location_code_id'];
+            $arr[$k]['status'] = 1;
+        }
+        $res = false;
+        $this->_stock_transfer_order_item->startTrans();
+        $this->_stock_transfer_order_item_code->startTrans();
+        try {
+            $res = $this->_stock_transfer_order_item_code->insertAll($arr);
+            $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->setInc('real_num', count(array_filter($codeAgg)));
+            $this->_stock_transfer_order_item->commit();
+            $this->_stock_transfer_order_item_code->commit();
+        } catch (ValidateException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
+        if ($res !== false) {
+            $this->success('提交成功', '', 200);
+        } else {
+            $this->error(__('No rows were inserted'), '', 525);
+        }
+    }
+
+    /**
+     * sku信息页面编辑条码
+     * Interface stock_code_edit
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/17 17:28:25
+     */
+    public function stock_code_edit()
+    {
+        $transferOrderItemId = $this->request->request('transfer_order_item_id');
+        $areaId = $this->request->request('area_id');
+        $locationId = $this->request->request('location_id');
+        $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
+        $transferOrderDetail = $this->_stock_transfer_order->where('id', $transferOrderItemDetail['transfer_order_id'])->find();
+        $transferOrderItemCodeDetail = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->find();
+        $allStock = Db::name('warehouse_stock')->column('name', 'id');
+        if (empty($transferOrderItemDetail)) {
+            $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
+        }
+        if (empty($areaId)) {
+            $this->error(__('库区id为空，请检查！！'), '', 524);
+        }
+        if (empty($locationId)) {
+            $this->error(__('库位id为空，请检查！！'), '', 524);
+        }
+        if (empty($transferOrderItemCodeDetail)) {
+            $this->error(__('当前库区库位下没有此sku可编辑的条码'), '', 524);
+        }
+        $codeAgg = $this->request->request("sku_agg");
+        if (empty($codeAgg)) {
+            $this->error(__('条形码数据传递为空！！'), '', 524);
+        }
+        $codeAgg = html_entity_decode($codeAgg);
+        $codeAgg = array_filter(json_decode($codeAgg, true));
+        if (count(array_filter($codeAgg)) < 1) {
+            $this->error(__('条形码数据不能为空！！'), '', 524);
+        }
+        $codeAggUnique = array_unique(array_column($codeAgg,'code'));
+        if(count($codeAggUnique) != count($codeAgg)) {
+            $this->error(__('条形码数据有重复的，请检查！！'), '', 524);
+        }
+        $arr = [];
+        foreach ($codeAgg as $k => $v) {
+            //判断当前条码的在库状态
+            $codeStatus = $this->_product_bar_code_item->where('code', $v['code'])->find();
+            if (empty($codeStatus)) {
+                $this->error(__($v['code'] . '不存在，请检查！！'), '', 524);
+            }
+            if ($codeStatus['library_status'] == 2) {
+                $this->error(__($v['code'] . '当前不是在库状态，请检查！！'), '', 524);
+            }
+            if ($codeStatus['sku'] !== $transferOrderItemDetail['sku']) {
+                $this->error(__('条形码sku与调拨sku不一致，请检查！！'), '', 524);
+            }
+            if ($codeStatus['stock_id'] !== $transferOrderDetail['out_stock_id']) {
+                $this->error(__($v['code'] . '当前不在调出仓库：' . $allStock[$transferOrderDetail['out_stock_id']] . '！！'), '', 524);
+            }
+        }
+        $res = false;
+        $this->_stock_transfer_order_item->startTrans();
+        $this->_stock_transfer_order_item_code->startTrans();
+        try {
+            //旧的这个库区库位下的调拨条码数目
+            $oldCount = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->count();
+            $res1 = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->delete();
+            //先减后加 此步骤为先减
+            $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->setDec('real_num', $oldCount);
+            if ($res1) {
+                foreach ($codeAgg as $k => $v) {
+                    //实体仓调拨单子表的子表（条形码明细表）插入数据
+                    $codeStatus = $this->_product_bar_code_item->where('code', $v['code'])->find();
+                    $arr[$k]['code'] = $v['code'];
+                    $arr[$k]['transfer_order_item_id'] = $transferOrderItemId;
+                    $arr[$k]['sku'] = $transferOrderItemDetail['sku'];
+                    $arr[$k]['area_id'] = $codeStatus['location_id'];
+                    $arr[$k]['location_id'] = $codeStatus['location_code_id'];
+                    $arr[$k]['status'] = 1;
+                }
+                $res = $this->_stock_transfer_order_item_code->insertAll($arr);
+                //先减后加 此步骤为后加 后加的数目为扫描的新的条形码的集合总数
+                $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->setInc('real_num', count(array_filter($codeAgg)));
+            }
+            $this->_stock_transfer_order_item->commit();
+            $this->_stock_transfer_order_item_code->commit();
+        } catch (ValidateException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
+        if ($res !== false) {
+            $this->success('提交成功', '', 200);
+        } else {
+            $this->error(__('No rows were inserted'), '', 525);
+        }
+    }
+
+    /**
+     * 调出删除子条目
+     * Interface stock_code_del
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/28 11:21:27
+     */
+    public function stock_code_del()
+    {
+        $transferOrderItemId = $this->request->request('transfer_order_item_id');
+        $areaId = $this->request->request('area_id');
+        $locationId = $this->request->request('location_id');
+        $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
+        if (empty($transferOrderItemDetail)) {
+            $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
+        }
+        if (empty($areaId)) {
+            $this->error(__('库区id为空，请检查！！'), '', 524);
+        }
+        if (empty($locationId)) {
+            $this->error(__('库位id为空，请检查！！'), '', 524);
+        }
+
+        $res = false;
+        $res1 = false;
+        $this->_stock_transfer_order_item->startTrans();
+        $this->_stock_transfer_order_item_code->startTrans();
+        try {
+            //旧的这个库区库位下的调拨条码数目
+            $oldCount = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->count();
+            $res1 = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->delete();
+            $res = $this->_stock_transfer_order_item_code->where(['transfer_order_item_id' => $transferOrderItemId, 'area_id' => $areaId, 'location_id' => $locationId])->delete();
+            //此步骤为减
+            $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->setDec('real_num', $oldCount);
+
+            $this->_stock_transfer_order_item->commit();
+            $this->_stock_transfer_order_item_code->commit();
+        } catch (ValidateException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
+        if ($res !== false && $res1 !== false) {
+            $this->success('提交成功', '', 200);
+        } else {
+            $this->error(__('No rows were inserted'), '', 525);
+        }
+    }
+    /**
+     * 扫描物流单号
+     * Interface scan_logistics_number
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/18 16:38:58
+     */
+    public function scan_logistics_number()
+    {
+        $number = $this->request->request("logistics_number");
+        $id = $this->request->request("transfer_order_id");
+        $detail = $this->_stock_transfer_order->where('id', $id)->find();
+        if (empty($detail)) {
+            $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
+        }
+        if ($detail['status'] !== 3) {
+            $this->error(__('调拨单非待揽收状态'), '', 546);
+        }
+        $res = $this->_stock_transfer_order->where('id', $id)->update(['logistics_number' => $number, 'status' => 4]);
+        if ($res) {
+            $this->success('扫描物流单号成功！！', '', 200);
+        } else {
+            $this->error(__('扫描物流单号失败'), '', 403);
+        }
+    }
+
+    /**
+     * 签收
+     * Interface sign_stock_transfer_order
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/18 16:51:30
+     */
+    public function sign_stock_transfer_order()
+    {
+        $id = $this->request->request("transfer_order_id");
+        //当前条形码详情
+        $detail = $this->_stock_transfer_order->where('id', $id)->find();
+        if (empty($detail)) {
+            $this->error(__('调拨单信息不存在，请联系管理员'), '', 546);
+        }
+        if ($detail['status'] !== 4) {
+            $this->error(__('调拨单非待收货状态'), '', 546);
+        }
+        $res = $this->_stock_transfer_order->where('id', $id)->update(['status' => 5]);
+        if ($res) {
+            $this->success('签收成功！！', '', 200);
+        } else {
+            $this->error(__('签收失败'), '', 403);
+        }
+    }
+
+    /**
+     * 入库扫码提交
+     * Interface stock_code_instcok_add
+     * @package app\api\controller
+     * @author  jhh
+     * @date    2021/5/19 9:41:17
+     */
+    public function stock_code_instock_add()
+    {
+        $transferOrderItemId = $this->request->request('transfer_order_item_id');
+        $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
+        $transferOrderDetail = $this->_stock_transfer_order->where('id', $transferOrderItemDetail['transfer_order_id'])->find();
+        if ($transferOrderDetail['status'] !== 5) {
+            $this->error(__('实体仓调拨单非待入库状态，禁止提交！！'), '', 524);
+        }
+        if (empty($transferOrderItemDetail)) {
+            $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
+        }
+        $codeAgg = $this->request->request("item_data");
+        $codeAgg = html_entity_decode($codeAgg);
+        $codeAgg = array_filter(json_decode($codeAgg, true));
+        if (empty($codeAgg)) {
+            $this->error(__('调入数据不能为空，请检查！！'), '', 524);
+        }
+        $arr = [];
+        $key = 0;
+        foreach ($codeAgg as $k => $v) {
+            $skuCodeAggUnique = [];
+            $skuCodeAggUnique = array_unique(array_column($v['sku_agg'],'code'));
+            if(count($skuCodeAggUnique) != count($v['sku_agg'])) {
+                $this->error(__('条形码数据有重复的，请检查！！'), '', 524);
+            }
+            foreach ($v['sku_agg'] as $k1 => $v1) {
+                if (count(array_filter($v1)) < 1) {
+                    $this->error(__('条形码数据不能为空！！'), '', 524);
+                }
+                //判断当前条码是否在调出合集中
+                $codeStatus = $this->_stock_transfer_order_item_code->where(['code' => $v1['code'], 'status' => 1, 'transfer_order_item_id' => $transferOrderItemId])->find();
+                if (empty($codeStatus)) {
+                    $this->error(__($v1['code'] . '不在调出合集中，请检查！！'), '', 524);
+                }
+                //判断调入库位是否有sku跟库位的绑定关系
+                $storeSku = $this->_store_sku->where('sku', $v['sku'])->where(['store_id' => $v['location_code_id'], 'stock_id' => $transferOrderDetail['in_stock_id']])->find();
+                //调入库位号
+                $inStore = Db::name('store_house')->where('id', $v['location_code_id'])->value('coding');
+                empty($storeSku) && $this->error(__('调入库位' . $inStore . '与sku：' . $v['sku'] . '没有绑定关系！！'), '', 546);
+                //实体仓调拨单子表的子表（条形码明细表）插入数据
+                $arr[$key]['code'] = $v1['code'];
+                $arr[$key]['transfer_order_item_id'] = $transferOrderItemId;
+                $arr[$key]['sku'] = $v['sku'];
+                $arr[$key]['area_id'] = $v['location_id'];
+                $arr[$key]['location_id'] = $v['location_code_id'];
+                $arr[$key]['status'] = 2;
+                $key += 1;
+            }
+        }
+        $realInstokcNum = count($arr);
+        $res = false;
+        $this->_stock_transfer_order_item->startTrans();
+        $this->_product_bar_code_item->startTrans();
+        $this->_stock_transfer_order_item_code->startTrans();
+        try {
+            //插入实体仓调拨单 子表的子表也就是条码表 数据为实际入库的条码调拨子单id、sku、库区id、库位id、status为2表示是入库条码 为1表示是出库条码
+            $res = $this->_stock_transfer_order_item_code->insertAll($arr);
+            //更新实体仓调拨单子单的实际入库数量
+            $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->setInc('real_instock_num', $realInstokcNum);
+            //更新子单为已入库
+            $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->update(['status' => 2]);
+            foreach ($arr as $k => $v) {
+                //更新条形码表 仓库id 库区id 库位id 库位号 在库状态
+                $v['location_code'] = $this->_store_house->where('id', $v['location_id'])->value('coding');
+                $this->_product_bar_code_item->where('code', $v['code'])->update(['stock_id' => $transferOrderDetail['in_stock_id'], 'location_id' => $v['area_id'], 'location_code_id' => $v['location_id'], 'location_code' => $v['location_code'], 'library_status' => 1]);
+            }
+            $this->_stock_transfer_order_item->commit();
+            $this->_product_bar_code_item->commit();
+            $this->_stock_transfer_order_item_code->commit();
+        } catch (ValidateException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (PDOException $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        } catch (Exception $e) {
+            $this->_stock_transfer_order_item->rollback();
+            $this->_product_bar_code_item->rollback();
+            $this->_stock_transfer_order_item_code->rollback();
+            $this->error($e->getMessage(), [], 444);
+        }
+        if ($res !== false) {
+            $this->success('提交成功', '', 200);
+        } else {
+            $this->error(__('No rows were inserted'), '', 525);
+        }
+    }
+
+    /***************************************实体仓调拨单end******************************************/
 }

@@ -49,7 +49,7 @@ class SupplierAccount extends Backend
             $map = [];
             $map['status'] = ['=', 1];
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->supplier
                 ->where($where)
                 ->where($map)
@@ -84,9 +84,10 @@ class SupplierAccount extends Backend
                     ->where('a.status', 2)//已审核通过的入库单
                     ->where('a.check_id', 'in', $check_order_ids)
                     ->where('a.id', 'not in', $instock_ids)
-                    ->where('c.id', '>', 16475)
+                    ->where('c.is_statement', 0)
                     ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                     ->select();
+
                 $wait_pay_money = 0;
                 $now = date('Y-m-t', time());
                 $all = 0;
@@ -134,11 +135,11 @@ class SupplierAccount extends Backend
                     }
                     //采购单物流单详情
                     $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time,createtime')->find();
-                   
-                    if(!empty($row['collect_time'])){
-                        $list[$k]['periods'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $vvv['period'] . 'month')));
-                    }else{
-                        $list[$k]['periods'] = date("Y-m-t",strtotime(($row['createtime'] . '+' . $vvv['period'] . 'month')));
+
+                    if (!empty($row['collect_time'])) {
+                        $list[$k]['periods'] = date("Y-m-t", strtotime(($row['collect_time'] . '+' . $vvv['period'] . 'month')));
+                    } else {
+                        $list[$k]['periods'] = date("Y-m-t", strtotime(($row['createtime'] . '+' . $vvv['period'] . 'month')));
                     }
                     switch ($v['pay_type']) {
                         case 1:
@@ -174,9 +175,11 @@ class SupplierAccount extends Backend
             // $lists = array_merge($lists);
             // $total = count($lists);
             // dump($lists);die;
-            $result = array("total" => $total, "rows" => $lists);
+            $result = ["total" => $total, "rows" => $lists];
+
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -222,6 +225,7 @@ class SupplierAccount extends Backend
         $data['now_wait_statement'] = 1;
         $data['all_wait_statement'] = 1;
         $data['wait_statement_detail'] = 1;
+
         return $data;
     }
 
@@ -254,12 +258,9 @@ class SupplierAccount extends Backend
             ->where('a.status', 2)//已审核通过的入库单
             ->where('a.check_id', 'in', $check_order_ids)
             ->where('a.id', 'not in', $instock_ids)
-            ->where('c.id', '>', 16475)
+            ->where('c.is_statement', 0)
             ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
             ->select();
-        // dump($instock->getLastSql());
-        // dump($list);
-        // die;
         $wait_pay_money = 0;
         $now = date('Y-m-t', time());
         $all = 0;
@@ -307,11 +308,11 @@ class SupplierAccount extends Backend
             }
             //采购单物流单详情
             $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time,createtime')->find();
-        
-            if(!empty($row['collect_time'])){
-                $list[$k]['period'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
-            }else{
-                $list[$k]['period'] = date("Y-m-t",strtotime(($row['createtime'] . '+' . $supplier['period'] . 'month')));
+
+            if (!empty($row['collect_time'])) {
+                $list[$k]['period'] = date("Y-m-t", strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
+            } else {
+                $list[$k]['period'] = date("Y-m-t", strtotime(($row['createtime'] . '+' . $supplier['period'] . 'month')));
             }
             switch ($v['pay_type']) {
                 case 1:
@@ -336,6 +337,7 @@ class SupplierAccount extends Backend
         $this->assign('supplier', $supplier);
         $this->assign('wait_pay_money', round($wait_pay_money, 2));
         $this->assign('all_wait_pay_money', round($all_wait_pay_money, 2));
+
         return $this->view->fetch();
     }
 
@@ -378,7 +380,7 @@ class SupplierAccount extends Backend
             $supplier = Db::name('supplier')->where('id', $supplier_id)->field('period,currency')->find();
             //所有的质检单
             $check_order_ids = Db::name('check_order')->where('supplier_id', $supplier_id)->column('id');
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $instock
                 ->alias('a')
                 ->join('check_order b', 'a.check_id = b.id', 'left')
@@ -390,7 +392,7 @@ class SupplierAccount extends Backend
                 ->where('a.status', 2)//已审核通过的入库单
                 ->where('a.check_id', 'in', $check_order_ids)//已审核通过的入库单
                 ->where('a.id', 'not in', $instock_ids)
-                ->where('c.id', '>', 16475)
+                ->where('c.is_statement', 0)
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
@@ -405,7 +407,7 @@ class SupplierAccount extends Backend
                 ->where('a.status', 2)//已审核通过的入库单
                 ->where('a.check_id', 'in', $check_order_ids)//已审核通过的入库单
                 ->where('a.id', 'not in', $instock_ids)
-                ->where('c.id', '>', 16475)
+                ->where('c.is_statement', 0)
                 ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                 ->where($where)
                 ->order($sort, $order)
@@ -435,10 +437,10 @@ class SupplierAccount extends Backend
                 }
                 //采购单物流单详情
                 $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time,createtime')->find();
-                if(!empty($row['collect_time'])){
-                    $list[$k]['period'] = date("Y-m-t",strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
-                }else{
-                    $list[$k]['period'] = date("Y-m-t",strtotime(($row['createtime'] . '+' . $supplier['period'] . 'month')));
+                if (!empty($row['collect_time'])) {
+                    $list[$k]['period'] = date("Y-m-t", strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
+                } else {
+                    $list[$k]['period'] = date("Y-m-t", strtotime(($row['createtime'] . '+' . $supplier['period'] . 'month')));
                 }
                 if ($timeBegin && $timeEnd) {
                     if (strtotime($list[$k]['period']) < $timeBegin || strtotime($list[$k]['period']) > $timeEnd) {
@@ -446,10 +448,11 @@ class SupplierAccount extends Backend
                     }
                 }
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch('index');
     }
 
@@ -471,7 +474,7 @@ class SupplierAccount extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $statement
                 ->where($where)
                 ->order($sort, $order)
@@ -485,10 +488,11 @@ class SupplierAccount extends Backend
                 ->where('supplier_id', $supplier_id)
                 ->select();
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch('index');
     }
 }

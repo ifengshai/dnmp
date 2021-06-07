@@ -228,14 +228,46 @@ class ZeeloolDe extends Model
         }
         $createat = explode(' ', $time_str);
         $again_num = $this->get_again_user($createat);
+        $all_order_user = $this->get_all_order_user($createat);
+        $all_order_user_rate = $all_order_user ? round(($again_num) / $all_order_user * 100, 2) : 0;
         $arrs['again_user_num'] = $again_num;
+        $arrs['again_user_num_rate'] = $all_order_user_rate;
         if($time_str2){
             $createat2 = explode(' ', $time_str2);
             $contrast_again_num = $this->get_again_user($createat2);
+            $contrast_all_order_user = $this->get_all_order_user($createat2);
             $arrs['contrast_again_user_num'] = $contrast_again_num ? round(($arrs['again_user_num'] - $contrast_again_num) / $contrast_again_num * 100, 2) : 0;
+            $contrast_all_order_user_rate = $contrast_all_order_user ? round(($contrast_again_num) / $contrast_all_order_user * 100, 2) : 0;
+
+            $arrs['all_contrast_again_user_num'] = $contrast_all_order_user_rate ? round(($all_order_user_rate - $contrast_all_order_user_rate) / $contrast_all_order_user_rate * 100, 2) : 0;
         }
         return $arrs;
+    }
+    /**
+     * 获取某一个时间购买的用户总数
+     * @param $createat
+     *
+     * @return int|string
+     * @throws \think\Exception
+     * @author crasphb
+     * @date   2021/5/14 12:53
+     */
+    public function get_all_order_user($createat)
+    {
+        $map_where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+        $order_where['payment_time'] = ['lt',$createat[0]];
 
+        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['order_type'] = 1;
+        $map1['customer_id'] = ['>',0];
+
+        $order_model = new \app\admin\model\order\order\ZeeloolDe();
+        return $order_model
+            ->where($map_where)
+            ->where($map)
+            ->where($map1)
+            ->group('customer_id')
+            ->count('customer_id');
     }
     //获取某一段时间内的复购用户数 old
     public function get_again_user1($createat){
@@ -1232,5 +1264,71 @@ class ZeeloolDe extends Model
             $country_arr[$key]['rate'] = $order_num ? round($value['count']/$order_num*100,2).'%' : 0;
         }
         return $country_arr;
+    }
+    /**
+     * 用户统计
+     * @param $time_str
+     *
+     * @return array
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @author crasphb
+     * @date   2021/5/14 17:33
+     */
+    public function getUserOrderData($time_str)
+    {
+        if(!$time_str){
+            $start = date('Y-m-d 00:00:00', strtotime('-6 day'));
+            $end   = date('Y-m-d 23:59:59');
+            $time_str = $start . ' - '. $end;
+        }
+        $createat = explode(' ', $time_str);
+        $customerWhere['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+        $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $orderWhere['order_type'] = 1;
+        $order = Db::connect('database.db_zeelool_de')
+            ->table('sales_flat_order')
+            ->field('customer_group_id,sum(base_grand_total) as total,count(*) as count')
+            ->group('customer_group_id')
+            ->where('customer_group_id','>',0)
+            ->where($customerWhere)
+            ->where($orderWhere)
+            ->select();
+        $orderCount = Db::connect('database.db_zeelool_de')
+            ->table('sales_flat_order')
+            ->where($customerWhere)
+            ->where($orderWhere)
+            ->where('customer_group_id','>',0)
+            ->sum('base_grand_total');
+        $result = [];
+        $customerCount = 0;
+        foreach($order as $k => $v){
+            $customerCount += $v['count'];
+        }
+        foreach($order as $k => $v){
+            switch($v['customer_group_id']) {
+                case 1:
+                    $name = '普通用户';
+                    break;
+                case 2:
+                    $name = '批发用户';
+                    break;
+                case 4:
+                    $name = 'VIP';
+                    break;
+                default:
+                    $name = "其余非游客用户";
+            }
+            $result[$k] = [
+                'count' => $v['count'],
+                'name' => $name,
+                'num'  => round($v['total'],2),
+                'rate' => bcmul(bcdiv($v['total'], $orderCount,4),100,2).'%',
+                'customerRate' => bcmul(bcdiv($v['count'], $customerCount,4),100,2).'%',
+            ];
+        }
+        return $result;
     }
 }

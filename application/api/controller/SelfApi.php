@@ -28,6 +28,7 @@ class SelfApi extends Api
         $this->asyncEs = new AsyncEs();
         parent::_initialize();
     }
+
     /**
      * 创建订单节点 订单号 站点 时间
      * @Description
@@ -56,48 +57,48 @@ class SelfApi extends Api
         //判断如果子节点大于等于0时  不插入
         $order_count = (new OrderNode)->where([
             'order_number' => $order_number,
-            'order_id' => $order_id,
-            'site' => $site,
-            'node_type' => ['>=', 0]
+            'order_id'     => $order_id,
+            'site'         => $site,
+            'node_type'    => ['>=', 0],
         ])->count();
         if ($order_count <= 0) {
             $res_node = $this->node->allowField(true)->save([
                 'order_number' => $order_number,
-                'order_id' => $order_id,
-                'site' => $site,
-                'create_time' => date('Y-m-d H:i:s'),
-                'order_node' => 0,
-                'node_type' => 0,
-                'update_time' => date('Y-m-d H:i:s'),
+                'order_id'     => $order_id,
+                'site'         => $site,
+                'create_time'  => date('Y-m-d H:i:s'),
+                'order_node'   => 0,
+                'node_type'    => 0,
+                'update_time'  => date('Y-m-d H:i:s'),
             ]);
             $insertId = $this->node->getLastInsID();
             $arr = [
-                'id'=>$insertId,
-                'order_node' => 0,
-                'node_type' => 0,
-                'site' => $site,
-                'order_id' => $order_id,
-                'order_number' => $order_number,
-                'shipment_type' => '',
-                'shipment_data_type' => '',
-                'track_number' => '',
-                'signing_time' => 0,
-                'delivery_time' => 0,
+                'id'                  => $insertId,
+                'order_node'          => 0,
+                'node_type'           => 0,
+                'site'                => $site,
+                'order_id'            => $order_id,
+                'order_number'        => $order_number,
+                'shipment_type'       => '',
+                'shipment_data_type'  => '',
+                'track_number'        => '',
+                'signing_time'        => 0,
+                'delivery_time'       => 0,
                 'delivery_error_flag' => 0,
-                'shipment_last_msg' => "",
-                'delievered_days' => 0,
-                'wait_time' => 0,
+                'shipment_last_msg'   => "",
+                'delievered_days'     => 0,
+                'wait_time'           => 0,
             ];
-            $data[] = $this->asyncEs->formatDate($arr,time());
-            $this->asyncEs->esService->addMutilToEs('mojing_track',$data);
+            $data[] = $this->asyncEs->formatDate($arr, time());
+            $this->asyncEs->esService->addMutilToEs('mojing_track', $data);
         }
 
         $count = (new OrderNodeDetail())->where([
             'order_number' => $order_number,
-            'order_id' => $order_id,
-            'site' => $site,
-            'order_node' => 0,
-            'node_type' => 0
+            'order_id'     => $order_id,
+            'site'         => $site,
+            'order_node'   => 0,
+            'node_type'    => 0,
         ])->count();
         if ($count > 0) {
             $this->error('已存在', [], 400);
@@ -105,12 +106,12 @@ class SelfApi extends Api
 
         $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
-            'order_id' => $order_id,
-            'content' => 'Your order has been created.',
-            'site' => $site,
-            'create_time' => date('Y-m-d H:i:s'),
-            'order_node' => 0,
-            'node_type' => 0
+            'order_id'     => $order_id,
+            'content'      => 'Your order has been created.',
+            'site'         => $site,
+            'create_time'  => date('Y-m-d H:i:s'),
+            'order_node'   => 0,
+            'node_type'    => 0,
         ]);
         if (false !== $res_node && false !== $res_node_detail) {
             $this->success('创建成功', [], 200);
@@ -148,16 +149,16 @@ class SelfApi extends Api
         if (!$status) {
             $this->error(__('缺少状态参数'));
         }
-        if ($status == 'processing'){
+        if ($status == 'processing') {
             //判断如果子节点大于等于1时  不更新
             $order_count = (new OrderNode)->where([
                 'order_number' => $order_number,
-                'order_id' => $order_id,
-                'site' => $site,
-                'node_type' => ['>=', 1]
+                'order_id'     => $order_id,
+                'site'         => $site,
+                'node_type'    => ['>=', 1],
             ])->count();
-            if ($order_count <= 0) {
-                $res_node = (new OrderNode())->save([
+            if ($order_count < 0) {
+                $res_node = $this->node->save([
                     'order_node'  => 0,
                     'node_type'   => 1,
                     'update_time' => date('Y-m-d H:i:s'),
@@ -168,18 +169,18 @@ class SelfApi extends Api
                     ->value('id');
                 //更新order_node表中es数据
                 $arr = [
-                    'id' => $id,
+                    'id'        => $id,
                     'node_type' => 1,
                 ];
-                $this->asyncEs->updateEsById('mojing_track',$arr);
+                $this->asyncEs->updateEsById('mojing_track', $arr);
             }
 
             $count = (new OrderNodeDetail())->where([
                 'order_number' => $order_number,
-                'order_id' => $order_id,
-                'site' => $site,
-                'order_node' => 0,
-                'node_type' => 1
+                'order_id'     => $order_id,
+                'site'         => $site,
+                'order_node'   => 0,
+                'node_type'    => 1,
             ])->count();
             if ($count > 0) {
                 $this->error('已存在');
@@ -187,12 +188,12 @@ class SelfApi extends Api
 
             $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
                 'order_number' => $order_number,
-                'order_id' => $order_id,
-                'content' => 'Your payment has been successful.',
-                'site' => $site,
-                'create_time' => date('Y-m-d H:i:s'),
-                'order_node' => 0,
-                'node_type' => 1
+                'order_id'     => $order_id,
+                'content'      => 'Your payment has been successful.',
+                'site'         => $site,
+                'create_time'  => date('Y-m-d H:i:s'),
+                'order_node'   => 0,
+                'node_type'    => 1,
             ]);
             if (false !== $res_node && false !== $res_node_detail) {
                 $this->success('创建成功', [], 200);
@@ -252,52 +253,49 @@ class SelfApi extends Api
         }
 
         //如果已发货 则不再更新发货时间
-        if ($row->order_node >= 2 && $row->node_type >= 7) {
-            $this->error(__('订单节点已存在'), [], 400);
-        }
-       
         //更新节点主表
         $row->allowField(true)->save([
-            'order_node' => 2,
-            'node_type' => 7,
-            'update_time' => date('Y-m-d H:i:s'),
-            'shipment_type' => $title,
+            'order_node'         => 2,
+            'node_type'          => 7,
+            'update_time'        => date('Y-m-d H:i:s'),
+            'shipment_type'      => $title,
             'shipment_data_type' => $shipment_data_type,
-            'track_number' => $track_number,
-            'delivery_time' => date('Y-m-d H:i:s')
+            'track_number'       => $track_number,
+            'delivery_time'      => date('Y-m-d H:i:s'),
         ]);
+
         //更新order_node表中es数据
         $arr = [
-            'id' => $row['id'],
-            'order_node' => 2,
-            'node_type' => 7,
-            'shipment_type' => $title,
+            'id'                 => $row['id'],
+            'order_node'         => 2,
+            'node_type'          => 7,
+            'shipment_type'      => $title,
             'shipment_data_type' => $shipment_data_type,
-            'track_number' => $track_number,
-            'delivery_time' => time()
+            'track_number'       => $track_number,
+            'delivery_time'      => time(),
         ];
-        $this->asyncEs->updateEsById('mojing_track',$arr);
+        $this->asyncEs->updateEsById('mojing_track', $arr);
+
 
         //插入节点子表
         (new OrderNodeDetail())->allowField(true)->save([
-            'order_number' => $order_number,
-            'order_id' => $order_id,
-//            'content' => 'Leave warehouse, Waiting for being picked up.',
-            'content' => 'Order leave warehouse, waiting for being picked up.',
-            'site' => $site,
-            'create_time' => date('Y-m-d H:i:s'),
-            'order_node' => 2,
-            'node_type' => 7,
-            'shipment_type' => $title,
+            'order_number'       => $order_number,
+            'order_id'           => $order_id,
+            'content'            => 'Order leave warehouse, waiting for being picked up.',
+            'site'               => $site,
+            'create_time'        => date('Y-m-d H:i:s'),
+            'order_node'         => 2,
+            'node_type'          => 7,
+            'shipment_type'      => $title,
             'shipment_data_type' => $shipment_data_type,
-            'track_number' => $track_number,
+            'track_number'       => $track_number,
         ]);
-        
+
         //注册17track
         $title = strtolower(str_replace(' ', '-', $title));
         $carrier = $this->getCarrier($title);
-        $shipment_reg[0]['number'] =  $track_number;
-        $shipment_reg[0]['carrier'] =  $carrier['carrierId'];
+        $shipment_reg[0]['number'] = $track_number;
+        $shipment_reg[0]['carrier'] = $carrier['carrierId'];
         $track = $this->regitster17Track($shipment_reg);
 
         if (count($track['data']['rejected']) > 0) {
@@ -308,7 +306,9 @@ class SelfApi extends Api
 
     /**
      * 获取快递号
+     *
      * @param $title
+     *
      * @return mixed|string
      */
     protected function getCarrier($title)
@@ -361,6 +361,7 @@ class SelfApi extends Api
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
         }
+
         return ['title' => $title, 'carrierId' => $carrierId];
     }
 
@@ -370,15 +371,19 @@ class SelfApi extends Api
      * @Description
      * @author wpl
      * @since 2020/05/18 18:14:12 
-     * @param [type] $params
+     *
+     * @param     [type] $params
+     *
      * @return void
      */
     protected function regitster17Track($params = [])
     {
         $trackingConnector = new TrackingConnector($this->apiKey);
         $track = $trackingConnector->registerMulti($params);
+
         return $track;
     }
+
     /**
      * 获取订单加工/物流节点流程 -- 新
      *
@@ -425,6 +430,7 @@ class SelfApi extends Api
         }
         $this->success('成功', $order_data, 200);
     }
+
     /**
      * 获取订单物流节点流程 -- 新
      *
@@ -456,6 +462,7 @@ class SelfApi extends Api
         }
         $this->success('成功', $order_data, 200);
     }
+
     /**
      * 获取订单加工节点流程 -- 新
      *
@@ -688,6 +695,27 @@ class SelfApi extends Api
             if (false !== $res) {
                 //如果是上架 则查询此sku是否存在当天有效sku表里
                 if ($status == 1) {
+                    //判断上下架时间记录表中是否有该sku，如果没有，插入一条记录，如果有更新上架时间
+                    $isExistShelvesTime = Db::name('sku_shelves_time')
+                        ->where(['site' => $site, 'platform_sku' => $sku])
+                        ->value('id');
+                    $arr = [
+                        'site'         => $site,
+                        'sku'          => $list['sku'],
+                        'platform_sku' => $sku,
+                        'shelves_time' => time(),
+                    ];
+                    if ($isExistShelvesTime) {
+                        //有该记录，更新上架时间
+                        Db::name('sku_shelves_time')
+                            ->where('id', $isExistShelvesTime)
+                            ->update($arr);
+                    } else {
+                        $arr['created_at'] = time();
+                        //没有记录，插入数据
+                        Db::name('sku_shelves_time')
+                            ->insert($arr);
+                    }
                     $count = Db::name('sku_sales_num')->where(['platform_sku' => $sku, 'site' => $site, 'createtime' => ['between', [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')]]])->count();
                     //如果不存在则插入此sku
                     if ($count < 1) {
@@ -716,6 +744,7 @@ class SelfApi extends Api
     public function batch_set_product_status()
     {
         $value = $this->request->post();
+        $day_date = date('Y-m-d');
         if (!$value['site']) {
             $this->error(__('缺少站点参数'));
         }
@@ -727,11 +756,34 @@ class SelfApi extends Api
                 $this->error(__('缺少状态参数'));
             }
             $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-            $list = $platform->where(['platform_type' => $value['site'], 'platform_sku' => $item['sku']])->find();
+            $list = $platform
+                ->alias('p')
+                ->join('fa_item_category c', 'p.category_id=c.id', 'left')
+                ->where(['p.platform_type' => $value['site'], 'p.platform_sku' => $item['sku']])
+                ->field('p.sku,p.platform_sku,c.name')
+                ->find();
             if (!$list) {
                 unset($item);
             } else {
                 $res = $platform->allowField(true)->isUpdate(true, ['platform_type' => $value['site'], 'platform_sku' => $item['sku']])->save(['outer_sku_status' => $item['status']]);
+                //判断是否有当天sku数据，有就更新，没有就插入
+                $isExistSkuDay = Db::name('sku_status_dataday')
+                    ->where(['site' => $value['site'], 'platform_sku' => $item['sku'], 'day_date' => $day_date])
+                    ->find();
+                if ($isExistSkuDay['id']) {
+                    Db::name('sku_status_dataday')
+                        ->where('id', $isExistSkuDay['id'])
+                        ->update(['status' => $item['online_status']]);
+                } else {
+                    $arr['day_date'] = $day_date;
+                    $arr['site'] = $value['site'];
+                    $arr['sku'] = $list['sku'];
+                    $arr['platform_sku'] = $list['platform_sku'];
+                    $arr['category_name'] = $list['name'] ? $list['name'] : '';
+                    $arr['status'] = $item['online_status'];
+                    Db::name('sku_status_dataday')
+                        ->insert($arr);
+                }
                 if (false !== $res) {
                     //如果是上架 则查询此sku是否存在当天有效sku表里
                     if ($item['status'] == 1) {
@@ -744,7 +796,6 @@ class SelfApi extends Api
                             Db::name('sku_sales_num')->insert($data);
                         }
                     }
-
                 } else {
                     $this->error('同步失败');
                 }
@@ -804,7 +855,6 @@ class SelfApi extends Api
                 }
 
 
-
                 //如果虚拟仓库存不足 判断此sku 对应站点是否开启预售
                 if ($platform_data[$v['sku']]['stock'] < $qty) {
                     //判断是否开启预售 并且在有效时间内 并且预售剩余数量大于0
@@ -834,17 +884,17 @@ class SelfApi extends Api
                 if (false !== $item_res) {
                     //生成扣减库存日志
                     (new StockLog())->setData([
-                        'type'                      => 1,
-                        'site'                      => $site,
-                        'one_type'                  => 1,
-                        'sku'                       => $true_sku,
-                        'order_number'              => $order_number,
-                        'public_id'                 => $orderid,
-                        'occupy_stock_change'       => $qty,
-                        'available_stock_change'    => -$qty,
-                        'create_person'             => 'admin',
-                        'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '生成订单扣减可用库存,增加占用库存'
+                        'type'                   => 1,
+                        'site'                   => $site,
+                        'one_type'               => 1,
+                        'sku'                    => $true_sku,
+                        'order_number'           => $order_number,
+                        'public_id'              => $orderid,
+                        'occupy_stock_change'    => $qty,
+                        'available_stock_change' => -$qty,
+                        'create_person'          => 'admin',
+                        'create_time'            => date('Y-m-d H:i:s'),
+                        'remark'                 => '生成订单扣减可用库存,增加占用库存',
                     ]);
                 } else {
                     file_put_contents('/www/wwwroot/mojing/runtime/log/set_goods_stock.log', '可用库存扣减失败：site:' . $site . '|订单id:' . $orderid . '|sku:' . $true_sku . "\r\n", FILE_APPEND);
@@ -1008,17 +1058,17 @@ class SelfApi extends Api
                 if (false !== $item_res) {
                     //生成扣减库存日志
                     (new StockLog())->setData([
-                        'type'                      => 1,
-                        'site'                      => $site,
-                        'one_type'                  => 2,
-                        'sku'                       => $true_sku,
-                        'order_number'              => $order_number,
-                        'public_id'                 => $orderid,
-                        'occupy_stock_change'       => $qty,
-                        'available_stock_change'    => -$qty,
-                        'create_person'             => 'admin',
-                        'create_time'               => date('Y-m-d H:i:s'),
-                        'remark'                    => '如佛小程序取消订单增加可用库存,扣减占用库存'
+                        'type'                   => 1,
+                        'site'                   => $site,
+                        'one_type'               => 2,
+                        'sku'                    => $true_sku,
+                        'order_number'           => $order_number,
+                        'public_id'              => $orderid,
+                        'occupy_stock_change'    => $qty,
+                        'available_stock_change' => -$qty,
+                        'create_person'          => 'admin',
+                        'create_time'            => date('Y-m-d H:i:s'),
+                        'remark'                 => '如佛小程序取消订单增加可用库存,扣减占用库存',
                     ]);
                 } else {
                     file_put_contents('/www/wwwroot/mojing/runtime/log/set_goods_stock.log', '如佛小程序取消订单增加可用库存：site:' . $site . '|订单id:' . $orderid . '|sku:' . $true_sku . "\r\n", FILE_APPEND);
@@ -1040,7 +1090,8 @@ class SelfApi extends Api
      * @author gyh
      * @param $income_amount 收入金额
      */
-    public function vip_order_income($work_id = null){
+    public function vip_order_income($work_id = null)
+    {
         $order_detail = $this->request->request();
         $params['type'] = 1;
         $params['bill_type'] = 2;//单据类型
@@ -1063,5 +1114,4 @@ class SelfApi extends Api
             $this->error('失败', [], 400);
         }
     }
-
 }

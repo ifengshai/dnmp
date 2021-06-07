@@ -18,7 +18,7 @@ namespace app\enum;
  */
 class OrderType
 {
-    //批发
+    //常规订单
     const REGULAR_ORDER = 1;
     //批发
     const WHOLESALE_ORDER = 2;

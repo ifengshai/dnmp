@@ -79,7 +79,7 @@ class Rule extends Backend
                     $this->error($this->model->getError());
                 }
                 Cache::rm('__menu__');
-                $this->success();
+                //$this->success();
             }
             $this->error();
         }

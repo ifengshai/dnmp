@@ -79,6 +79,14 @@ class Instock extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
+            if ($filter['location_code']) {
+                $smap = [];
+                $smap['coding'] = ['like', '%' . $filter['location_code'] . '%'];
+                $ids = Db::name('store_house')->where($smap)->column('id');
+                $map['instock.location_id'] = ['in', $ids];
+                unset($filter['location_code']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
 
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
@@ -96,6 +104,9 @@ class Instock extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
+            foreach ($list as &$v) {
+                $v['location_code'] = Db::name('store_house')->where(['id' => $v['location_id']])->value('coding');
+            }
             $result = array("total" => $total, "rows" => $list);
 
             return json($result);
@@ -401,15 +412,10 @@ class Instock extends Backend
         $type = $this->type->where('is_del', 1)->select();
         $this->assign('type', $type);
 
-        //查询入库库区库位
-        $product_bar_code = new ProductBarCodeItem();
-        $area =$product_bar_code->where('in_stock_id',$ids)->field('location_id,location_code_id')->find();
-
         $warehouse_area = Db::name('warehouse_area')->column('coding','id');
         $this->assign('warehouse_area', $warehouse_area);
         $store_house = Db::name('store_house')->column('coding','id');
         $this->assign('store_house', $store_house);
-        $this->assign('area', $area);
 
         //查询质检单
         $check = new \app\admin\model\warehouse\Check;
@@ -471,7 +477,8 @@ class Instock extends Backend
         //查询条形码库区库位
         $barcodedata = $this->_product_bar_code_item->where(['in_stock_id' => ['in', $ids]])->column('location_code');
         $count = $this->_inventory->alias('a')
-            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
+            ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')
+            ->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata]])
             ->count();
         if ($count > 0) {
             $this->error(__('此库位正在盘点,暂无法入库审核'), [], 403);
@@ -487,6 +494,7 @@ class Instock extends Backend
             }
         }
         $data['status'] = input('status');
+        //status  2 审核通过  3审核拒绝
         if ($data['status'] == 2) {
             $data['check_time'] = date('Y-m-d H:i:s', time());
         }
@@ -914,7 +922,7 @@ class Instock extends Backend
                     throw new Exception("入库失败！！请检查SKU");
                 }
             } else {
-                //审核拒绝解除条形码绑定关系
+                //审核拒绝解除条形码绑定关系 更新入库单id  条形码所在库位 条形码所在库位库区id 库位id
                 $_product_bar_code_item = new ProductBarCodeItem();
                 $_product_bar_code_item
                     ->where(['in_stock_id' => ['in', $ids]])
@@ -1030,6 +1038,11 @@ class Instock extends Backend
         $data['status'] = input('status');
         $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
         if ($res) {
+            //取消入库单得时候解除条形码绑定关系 更新入库单id  条形码所在库位 条形码所在库位库区id 库位id
+            $_product_bar_code_item = new ProductBarCodeItem();
+            $_product_bar_code_item
+                ->where(['in_stock_id' => ['eq', $ids]])
+                ->update(['in_stock_id' => 0,'location_code'=>'','location_id'=>'0','location_code_id'=>'0']);
             //如果取消入库单 则 去掉质检单已入库标记
             $check = new \app\admin\model\warehouse\Check;
             $check->allowField(true)->save(['is_stock' => 0], ['id' => $row['check_id']]);
@@ -1500,5 +1513,90 @@ class Instock extends Backend
             $this->error($e->getMessage());
         }
         $this->success('导入成功！');
+    }
+
+    /**
+     * @author zjw
+     * @date   2021/4/9 10:05
+     */
+    public function Review_the_operation(){
+
+    }
+    public function get_sku_first_check_time()
+    {
+        $skus = Db::name('zzzzzzzz_temp')->select();
+        foreach ($skus as $k => $v) {
+            $instockArr = Db::name('in_stock')
+                ->alias('a')
+                ->join(['fa_in_stock_item' => 'b'], 'a.id=b.in_stock_id', 'left')
+                ->where('b.sku',$v['sku'])
+                ->order('a.check_time', 'asc')
+                ->field('a.check_time,a.in_stock_number')
+                ->select();
+            if ($instockArr){
+                $skus[$k]['check_time'] = $instockArr[0]['check_time'];
+                $skus[$k]['in_stock_number'] = $instockArr[0]['in_stock_number'];
+            }
+        }
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "入库单号")
+            ->setCellValue("B1", "SKU")
+            ->setCellValue("C1", "审核时间");   //利用setCellValues()填充数据
+
+
+        foreach ($skus as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['in_stock_number'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['check_time']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:C' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '入库单数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
 }

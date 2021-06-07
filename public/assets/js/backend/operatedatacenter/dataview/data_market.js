@@ -104,50 +104,23 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         },
                     data: Orderdata.meeloogSalesMoneyList
                 },
-                {
-                    name: __('Zeelool_es站销售额'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_esSalesMoneyList
-                },
-                {
-                    name: __('Zeelool_de站销售额'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_deSalesMoneyList
-                },
-                {
-                    name: __('Zeelool_jp站销售额'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_jpSalesMoneyList
-                },
                     {
-                        name: __('Voogmechic站销售额'),
+                        name: __('Zeelool_es站销售额'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+
+                        },
+                        data: Orderdata.zeelool_esSalesMoneyList
+                    },
+                    {
+                        name: __('Zeelool_de站销售额'),
                         type: 'line',
                         smooth: true,
                         areaStyle: {
@@ -158,7 +131,21 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                                 width: 1.5
                             }
                         },
-                        data: Orderdata.voogmechicSalesMoneyList
+                        data: Orderdata.zeelool_deSalesMoneyList
+                    },
+                    {
+                        name: __('Zeelool_jp站销售额'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
+                        data: Orderdata.zeelool_jpSalesMoneyList
                     }
                 ]
             };
@@ -211,6 +198,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     },
                     data: Orderdata.zeeloolSalesNumList
                 },
+
                 {
                     name: __('V站销量V站订单支付成功数'),
                     type: 'line',
@@ -253,50 +241,23 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         },
                     data: Orderdata.meeloogSalesNumList
                 },
-                {
-                    name: __('Zeelool_es站订单支付成功数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_esSalesNumList
-                },
-                {
-                    name: __('Zeelool_de站订单支付成功数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_deSalesNumList
-                },
-                {
-                    name: __('Zeelool_jp站订单支付成功数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_jpSalesNumList
-                },
                     {
-                        name: __('Voogmechic站订单支付成功数'),
+                        name: __('Zeelool_es站订单支付成功数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            },
+
+                        },
+                        data: Orderdata.zeelool_esSalesNumList
+                    },
+                    {
+                        name: __('Zeelool_de站订单支付成功数'),
                         type: 'line',
                         smooth: true,
                         areaStyle: {
@@ -307,10 +268,24 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                                 width: 1.5
                             }
                         },
-                        data: Orderdata.voogmechicSalesNumList
+                        data: Orderdata.zeelool_deSalesNumList
+                    },
+                    {
+                        name: __('Zeelool_jp站订单支付成功数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
+                        data: Orderdata.zeelool_jpSalesNumList
                     }
                 ]
-            };            
+            };
             var option3 = {
                 title: {
                     text: '',
@@ -354,6 +329,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     },
                     data: Orderdata.zeeloolUnitPriceList
                 },
+
                 {
                     name: __('V站客单价'),
                     type: 'line',
@@ -396,50 +372,22 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         },
                     data: Orderdata.meeloogUnitPriceList
                 },
-                {
-                    name: __('Zeelool_es站客单价'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_esUnitPriceList
-                }, 
-                {
-                    name: __('Zeelool_de站客单价'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_deUnitPriceList
-                }, 
-                {
-                    name: __('Zeelool_jp站客单价'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_jpUnitPriceList
-                },
                     {
-                        name: __('Voogmechic站客单价'),
+                        name: __('Zeelool_es站客单价'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            },
+                            data: Orderdata.zeelool_esUnitPriceList
+                        },
+                    },
+                    {
+                        name: __('Zeelool_de站客单价'),
                         type: 'line',
                         smooth: true,
                         areaStyle: {
@@ -450,7 +398,21 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                                 width: 1.5
                             }
                         },
-                        data: Orderdata.voogmechicUnitPriceList
+                        data: Orderdata.zeelool_deUnitPriceList
+                    },
+                    {
+                        name: __('Zeelool_jp站客单价'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
+                        data: Orderdata.zeelool_jpUnitPriceList
                     }
                 ]
             };
@@ -539,50 +501,22 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     },
                     data: Orderdata.meeloogShoppingcartTotal
                 },
-                {
-                    name: __('Zeelool_es站购物车数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_esShoppingcartTotal
-                },
-                {
-                    name: __('Zeelool_de站购物车数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_deShoppingcartTotal
-                },
-                {
-                    name: __('Zeelool_jp站购物车数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_jpShoppingcartTotal
-                },
                     {
-                        name: __('Voogmechic站购物车数'),
+                        name: __('Zeelool_es站购物车数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            },
+                            data: Orderdata.zeelool_esShoppingcartTotal
+                        },
+                    },
+                    {
+                        name: __('Zeelool_de站购物车数'),
                         type: 'line',
                         smooth: true,
                         areaStyle: {
@@ -593,7 +527,21 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                                 width: 1.5
                             }
                         },
-                        data: Orderdata.voogmechicShoppingcartTotal
+                        data: Orderdata.zeelool_deShoppingcartTotal
+                    },
+                    {
+                        name: __('Zeelool_jp站购物车数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
+                        data: Orderdata.zeelool_jpShoppingcartTotal
                     }
                 ]
             };
@@ -607,6 +555,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                 },
                 legend: {
                     data: [__('Z站购物车转化率'), __('V站购物车数转化率'), __('Meeloog站购物车数转化率'), __('Vicmoo站购物车数转化率'), __('Zeelool_es站购物车数转化率'), __('Zeelool_de站购物车数转化率'), __('Zeelool_jp站购物车数转化率'), __('Voogmechic站购物车数转化率')]
+
                 },
                 toolbox: {
                     show: false,
@@ -682,50 +631,22 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         },
                     data: Orderdata.meeloogShoppingcartConversion
                 },
-                {
-                    name: __('Zeelool_es站购物车数转化率'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_esShoppingcartConversion
-                },
-                {
-                    name: __('Zeelool_de站购物车数转化率'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_deShoppingcartConversion
-                },
-                {
-                    name: __('Zeelool_jp站购物车数转化率'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_jpShoppingcartConversion
-                },
                     {
-                        name: __('Voogmechic站购物车数转化率'),
+                        name: __('Zeelool_es站购物车数转化率'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            },
+                            data: Orderdata.zeelool_esShoppingcartConversion
+                        },
+                    },
+                    {
+                        name: __('Zeelool_de站购物车数转化率'),
                         type: 'line',
                         smooth: true,
                         areaStyle: {
@@ -736,7 +657,21 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                                 width: 1.5
                             }
                         },
-                        data: Orderdata.voogmechicShoppingcartConversion
+                        data: Orderdata.zeelool_deShoppingcartConversion
+                    },
+                    {
+                        name: __('Zeelool_jp站购物车数转化率'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
+                        data: Orderdata.zeelool_jpShoppingcartConversion
                     }
                 ]
             };
@@ -825,50 +760,23 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                         },
                     data: Orderdata.meeloogRegisterCustomer
                 },
-                {
-                    name: __('Zeelool_es站注册用户数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_esRegisterCustomer
-                }, 
-                {
-                    name: __('Zeelool_de站注册用户数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_deRegisterCustomer
-                }, 
-                {
-                    name: __('Zeelool_jp站注册用户数'),
-                    type: 'line',
-                    smooth: true,
-                    areaStyle: {
-                        normal: {}
-                    },
-                    lineStyle: {
-                        normal: {
-                            width: 1.5
-                        }
-                    },
-                    data: Orderdata.zeelool_jpRegisterCustomer
-                },
                     {
-                        name: __('Voogmechic站注册用户数'),
+                        name: __('Zeelool_es站注册用户数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            },
+
+                        },
+                        data: Orderdata.zeelool_esRegisterCustomer
+                    },
+                    {
+                        name: __('Zeelool_de站注册用户数'),
                         type: 'line',
                         smooth: true,
                         areaStyle: {
@@ -879,28 +787,42 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                                 width: 1.5
                             }
                         },
-                        data: Orderdata.voogmechicRegisterCustomer
+                        data: Orderdata.zeelool_deRegisterCustomer
+                    },
+                    {
+                        name: __('Zeelool_jp站注册用户数'),
+                        type: 'line',
+                        smooth: true,
+                        areaStyle: {
+                            normal: {}
+                        },
+                        lineStyle: {
+                            normal: {
+                                width: 1.5
+                            }
+                        },
+                        data: Orderdata.zeelool_jpRegisterCustomer
                     }
                 ]
-            };                                     
+            };
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
-			myChart2.setOption(option2);
-			myChart3.setOption(option3);
+            myChart2.setOption(option2);
+            myChart3.setOption(option3);
             myChart4.setOption(option4);
-			myChart5.setOption(option5);
-			myChart6.setOption(option6);
+            myChart5.setOption(option5);
+            myChart6.setOption(option6);
             $(window).resize(function () {
                 myChart.resize();
-				myChart2.resize();
-				myChart3.resize();
-				myChart4.resize();
-				myChart5.resize();
-				myChart6.resize();
+                myChart2.resize();
+                myChart3.resize();
+                myChart4.resize();
+                myChart5.resize();
+                myChart6.resize();
             });
-			Form.api.bindevent($("form[role=form]"));
-			$('#c-order_platform').on('change',function(){
-				var order_platform = $('#c-order_platform').val();
+            Form.api.bindevent($("form[role=form]"));
+            $('#c-order_platform').on('change',function(){
+                var order_platform = $('#c-order_platform').val();
                 Backend.api.ajax({
                     url:'operatedatacenter/dataview/data_market/async_data',
                     data:{order_platform:order_platform}
@@ -994,7 +916,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#lastmonth_sign_customer').text(ret.data.lastmonth_sign_customer);
                     $('#thisyear_sign_customer').text(ret.data.thisyear_sign_customer);
                     $('#lastyear_sign_customer').text(ret.data.lastyear_sign_customer);
-                    $('#total_sign_customer').text(ret.data.total_sign_customer);                                                                                    
+                    $('#total_sign_customer').text(ret.data.total_sign_customer);
                     //console.log(ret.data);
                     return false;
                 }, function(data, ret){
@@ -1088,13 +1010,13 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#lastmonth_sign_customer').text(0);
                     $('#thisyear_sign_customer').text(0);
                     $('#lastyear_sign_customer').text(0);
-                    $('#total_sign_customer').text(0);                      
+                    $('#total_sign_customer').text(0);
                     //console.log(ret);
                     Layer.alert(ret.msg);
                     return false;
                 });
             });
-			$('#submit').on('click',function(){
+            $('#submit').on('click',function(){
                 var create_time = $('#created_at').val();
                 Backend.api.ajax({
                     url:'operatedatacenter/dataview/data_market/async_bottom_data',
@@ -1149,12 +1071,6 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#zeelool_jp_wap_sales_money').text(ret.data.zeelool_jp_wap_sales_money);
                     $('#zeelool_jp_wap_sales_num').text(ret.data.zeelool_jp_wap_sales_num);
                     $('#zeelool_jp_wap_unit_price').text(ret.data.zeelool_jp_wap_unit_price);
-                    $('#voogmechic_pc_sales_money').text(ret.data.voogmechic_pc_sales_money);
-                    $('#voogmechic_pc_sales_num').text(ret.data.voogmechic_pc_sales_num);
-                    $('#voogmechic_pc_unit_price').text(ret.data.voogmechic_pc_unit_price);
-                    $('#voogmechic_wap_sales_money').text(ret.data.voogmechic_wap_sales_money);
-                    $('#voogmechic_wap_sales_num').text(ret.data.voogmechic_wap_sales_num);
-                    $('#voogmechic_wap_unit_price').text(ret.data.voogmechic_wap_unit_price);
                     //console.log(ret.data);
                     return false;
                 }, function(data, ret){
@@ -1204,17 +1120,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form', 'echarts', 
                     $('#zeelool_jp_wap_sales_money').text(0);
                     $('#zeelool_jp_wap_sales_num').text(0);
                     $('#zeelool_jp_wap_unit_price').text(0);
-                    $('#voogmechic_pc_sales_money').text(0);
-                    $('#voogmechic_pc_sales_num').text(0);
-                    $('#voogmechic_pc_unit_price').text(0);
-                    $('#voogmechic_wap_sales_money').text(0);
-                    $('#voogmechic_wap_sales_num').text(0);
-                    $('#voogmechic_wap_unit_price').text(0);
                     //console.log(ret);
                     Layer.alert(ret.msg);
                     return false;
                 });
-			});            
+            });
         },
         api: {
             formatter: {

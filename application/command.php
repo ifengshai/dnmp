@@ -27,4 +27,9 @@ return [
     'app\admin\controller\shell\service\zendeskAsynData',
     'app\admin\controller\shell\service\StockAsyncData',
     'app\admin\controller\shell\supply\PurchaseAsynData',
+    'app\admin\controller\shell\operate\skuDayAsynData',
+    'app\admin\controller\shell\operate\skuTypeDayAsynData',
+    'app\admin\controller\shell\supply\SupplyDullDataSync',
+    'app\admin\controller\shell\operate\skuDayDataAsynData',
+    'app\admin\controller\shell\operate\RepurchaseTemp',
 ];

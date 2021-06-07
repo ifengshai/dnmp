@@ -1,0 +1,202 @@
+<style>
+    .content {
+        max-width: 100%;
+    }
+</style>
+
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
+    .btn-div {
+        font-size: 14px;
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 20px;
+        width: 200px;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    <div class="panel-heading">
+        <div class="widget-body no-padding">
+            <div id="form1" class="form-commonsearch form-horizontal">
+                <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:10px;">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-6 col-md-2">
+                            <div class="form-group">
+                                <label class="control-label col-xs-4" for="input-site">平台</label>
+                                <div class="col-xs-8">
+                                    <select data-rule="required" class="form-control" name="input-site" id="input-site">
+                                        {foreach name="magentoplatformarr" item="vo" key="key"}
+                                        <option value="{$vo.id}" {if condition="$key == 0" }selected="selected" {/if}>{$vo.name}</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-6 col-md-2">
+                            <div class="form-group">
+                                <div class="col-xs-8">
+                                    <select data-rule="required" class="form-control" name="input-platform" id="input-platform">
+                                        {foreach name="platform_arr" item="vo" key="key"}
+                                        <option value="{$key}" {if condition="$key == 0" }selected="selected" {/if}>
+                                        {$vo}
+                                        </option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12 col-sm-6 col-md-3">
+                            <label for="input-date" class="control-label col-xs-4">时间</label>
+                            <div class="col-xs-8" role="form">
+                                <input type="text" autocomplete="off" class="form-control datetimerange" name="input-date" placeholder="时间" id="input-date" value="{$date}" data-index="14" data-default="{$date}">
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12 col-sm-6 col-md-3">
+                            <label for="input-compare-date" class="control-label col-xs-4">比较时间</label>
+                            <div class="col-xs-8" role="form">
+                                <input type="text" autocomplete="off" class="form-control datetimerange" name="input-compare-date" placeholder="比较时间" id="input-compare-date" value="{$compare_date}" data-index="14">
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12 col-sm-6 col-md-2">
+                            <div class="col-sm-8 col-xs-offset-4">
+                                <input type="submit" id="app_submit" class="btn btn-success" value="提交">
+                                <input type="reset" class="btn btn-default reset" value="重置">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-4 col-xs-6">
+                <div class="description-block border-right row">
+                    <span class="description-header col-sm-4 text-right">首次打开</span>
+                    <span class="description-text col-sm-4 text-right" id="display-ga-first-open">0</span>
+                    <span class="description-percentage col-sm-4 text-left text-gray" id="display-compare-ga-first-open"></span>
+                </div>
+<!--                <div class="description-block border-right row">-->
+<!--                    <span class="description-header col-sm-4 text-right">付费下载数</span>-->
+<!--                    <span class="description-text col-sm-4 text-right" id="display-paid-download">0</span>-->
+<!--                    <span class="description-percentage col-sm-4 text-left text-gray"></span>-->
+<!--                </div>-->
+<!--                <div class="description-block border-right row">-->
+<!--                    <span class="description-header col-sm-4 text-right">花费</span>-->
+<!--                    <span class="description-text col-sm-4 text-right" id="display-ad-cost">0</span>-->
+<!--                    <span class="description-percentage col-sm-4 text-left text-gray"></span>-->
+<!--                </div>-->
+            </div>
+            <div class="col-sm-4 col-xs-6">
+                <div class="description-block border-right row">
+                    <span class="description-header col-sm-4 text-right">卸载量</span>
+                    <span class="description-text col-sm-4 text-right" id="display-ga-app-remove">0</span>
+                    <span class="description-percentage col-sm-4 text-left text-gray" id="display-compare-ga-app-remove"></span>
+                </div>
+                <div class="description-block border-right row">
+                    <span class="description-header col-sm-4 text-right">会话数</span>
+                    <span class="description-text col-sm-4 text-right" id="display-ga-sessions">0</span>
+                    <span class="description-percentage col-sm-4 text-left text-gray" id="display-compare-ga-sessions"></span>
+                </div>
+                <div class="description-block border-right row">
+                    <span class="description-header col-sm-4 text-right">用户数</span>
+                    <span class="description-text col-sm-4 text-right" id="display-ga-user">0</span>
+                    <span class="description-percentage col-sm-4 text-left text-gray" id="display-compare-ga-user"></span>
+                </div>
+            </div>
+            <div class="col-sm-4 col-xs-6">
+                <div class="description-block border-right row">
+                    <span class="description-header col-sm-4 text-right">订单金额</span>
+                    <span class="description-text col-sm-4 text-right" id="display-order-money">0</span>
+                    <span class="description-percentage col-sm-4 text-left text-gray" id="display-compare-order-money"></span>
+                </div>
+                <div class="description-block border-right row">
+                    <span class="description-header col-sm-4 text-right">订单数</span>
+                    <span class="description-text col-sm-4 text-right" id="display-order-num">0</span>
+                    <span class="description-percentage col-sm-4 text-left text-gray" id="display-compare-order-num"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-sm-4 col-xs-6">
+                <div class="description-block border-right">
+                    <h5 class="description-header">会话转化率</h5>
+                    <span class="description-text" id="display-conversion-session">0%</span>
+                    <span class="description-percentage text-grey" id="display-compare-conversion-session"></span>
+                </div>
+            </div>
+            <div class="col-sm-4 col-xs-6">
+                <div class="description-block border-right">
+                    <h5 class="description-header">用户转化率</h5>
+                    <span class="description-text" id="display-conversion-user">0%</span>
+                    <span class="description-percentage text-grey" id="display-compare-conversion-user"></span>
+                </div>
+            </div>
+            <div class="col-sm-4 col-xs-6">
+                <div class="description-block border-right">
+                    <h5 class="description-header">客单价</h5>
+                    <span class="description-text" id="display-conversion-money-per-user">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div id="echart-ga" style="height:300px"></div>
+    </div>
+</div>

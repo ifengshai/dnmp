@@ -180,7 +180,7 @@ return [
     // +----------------------------------------------------------------------
     'cache'                              => [
         // 使用复合缓存类型
-        'type'    => 'redis',
+        'type'    => 'Redis',
         // 默认使用的缓存
         'default' => [
             // 驱动方式
@@ -302,6 +302,7 @@ return [
     "ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID"   => '168154683',
     "VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID"  => '172731925',
     "NIHAO_GOOGLE_ANALYTICS_VIEW_ID"     => '190029216',
+    "WESEE_GOOGLE_ANALYTICS_VIEW_ID"     => '213729161',
     "MEELOOG_GOOGLE_ANALYTICS_VIEW_ID"   => '216467794',
     "ZEELOOLES_GOOGLE_ANALYTICS_VIEW_ID" => '178457373',
     "ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID" => '228533402',

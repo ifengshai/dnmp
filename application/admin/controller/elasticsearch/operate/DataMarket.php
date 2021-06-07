@@ -183,16 +183,18 @@ class DataMarket extends BaseElasticsearch
             $siteAll = $order_platform == 100 ? true : false;
             $cacheStr = 'data_market_async_data_' . $site . '-' . $begin;
             $cacheData = Cache::get($cacheStr);
-            if(!$cacheData) {
+            //if(!$cacheData) {
                 $topOrder = $this->buildDataMarketTopOrderSearch($site, $begin, $begin);
                 $topCart = $this->buildDataMarketTopCartSearch($site, $begin, $begin);
                 $topCustomer = $this->buildDataMarketTopCustomerSearch($site, $begin, $begin);
+                $topCartCreateIds = $this->esFormatData->formatGetCartIds($this->DataMarketTopCreateCartSearch($site, $begin, $begin));
+                $topCartToOrder = $this->buildDataMarketTopCartToOrderSearch($site, $begin, $begin,$topCartCreateIds);
                 $operationData = (new OperationAnalysis())->getSiteAnalysis($site);
-                $data = $this->esFormatData->formatDataMarketTop($site, $operationData, $topOrder, $topCart, $topCustomer, $begin, $this->status, $siteAll);
+                $data = $this->esFormatData->formatDataMarketTop($site, $operationData, $topOrder, $topCart, $topCustomer,$topCartToOrder, $begin, $this->status, $siteAll);
                 Cache::set($cacheStr,$data,600);
-            }else{
-                $data = $cacheData;
-            }
+//            }else{
+//                $data = $cacheData;
+//            }
 
             if (false == $data) {
                 return $this->error('没有该平台数据,请重新选择');
@@ -260,6 +262,57 @@ class DataMarket extends BaseElasticsearch
                             ],
                         ],
                     ],
+                ],
+            ],
+        ];
+
+        return $this->esService->search($params);
+    }
+    public function buildDataMarketTopCartToOrderSearch($site, $start, $end, $ids)
+    {
+        if (!is_array($site)) {
+            $site = [$site];
+        }
+        $params = [
+            'index' => 'mojing_order',
+            'body'  => [
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            [
+                                'range' => [
+                                    'day_date' => [
+                                        'gte' => $start,
+                                        'lte' => $end,
+                                    ],
+                                ],
+                            ],
+                            //in查询
+                            [
+                                'terms' => [
+                                    'site' => $site,
+                                ],
+                            ],
+                            [
+                                'terms' => [
+                                    'status' => $this->status,
+                                ],
+                            ],
+                            [
+                                'terms' => [
+                                    'entity_id' => $ids,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                "aggs"  => [
+                    "cartToOrder" => [
+                        "terms" => [
+                            "field" => 'day_date'
+                        ],
+                    ],
+
                 ],
             ],
         ];
@@ -337,11 +390,17 @@ class DataMarket extends BaseElasticsearch
                     "dayCreate" => [
                         "terms" => [
                             "field" => 'day_date',
+                            "order" => [
+                                "_key" => "desc"
+                            ],
                         ],
                     ],
                     "dayUpdate" => [
                         "terms" => [
                             "field" => 'update_time_day',
+                            "order" => [
+                                "_key" => "desc"
+                            ],
                         ],
                     ],
                 ],
@@ -350,7 +409,44 @@ class DataMarket extends BaseElasticsearch
 
         return $this->esService->search($params);
     }
+    public function DataMarketTopCreateCartSearch($site, $start,$end)
+    {
+        if (!is_array($site)) {
+            $site = [$site];
+        }
+        $params = [
+            'index' => 'mojing_cart',
+            'body'  => [
+                'query' => [
+                    'bool' => [
+                        'must'   => [
+                            //in查询
+                            [
+                                'terms' => [
+                                    'site' => $site,
+                                ],
+                            ],
+                            [
+                                'match' => [
+                                    'day_date' => $start
+                                ],
+                            ]
+                        ],
+                    ],
+                ],
+                "aggs"  => [
+                    "dayCreate" => [
+                        "terms" => [
+                            "field" => 'id',
+                            "size" => 10000
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
+        return $this->esService->search($params);
+    }
     /**
      * 顶部数据 = 今天的用户数据
      *

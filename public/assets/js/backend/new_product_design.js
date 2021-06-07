@@ -402,6 +402,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         }
                                     }
                                 },
+
+
                             ],
                              // formatter: Table.api.formatter.operate
 

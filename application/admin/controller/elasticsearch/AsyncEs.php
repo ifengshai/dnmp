@@ -56,11 +56,21 @@ class AsyncEs extends BaseElasticsearch
                     if($value['base_shipping_amount'] > 0) $value['shipping_method_type'] = 3;
                 }
                 $mergeData = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] : $value['created_at'];
-                $value['payment_time'] = $mergeData;
+                $value['payment_time'] = $mergeData + 8*3600;
+                $value['created_at'] = $value['created_at'] + 8*3600;
+                $value['updated_at'] = $value['updated_at'] + 8*3600;
+                $value['payment_time'] = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] + 8*3600 : $value['created_at'];
+                //删除无用字段
+                foreach($value as $key => $val) {
+                    if(!in_array($key,['id','site','customer_id','increment_id','quote_id','status','store_id','base_grand_total','total_qty_ordered','order_type','order_prescription_type','shipping_method','shipping_title','shipping_method_type','country_id','region','region_id','payment_method','mw_rewardpoint_discount','mw_rewardpoint','base_shipping_amount','payment_time'])){
+                        unset($value[$key]);
+                    }
+                }
+                echo $value['id'] . PHP_EOL;
                 return $this->formatDate($value,$mergeData);
             },collection($newOrder)->toArray());
             $this->esService->addMutilToEs('mojing_order',$data);
-        });
+        },'id','desc');
         Debug::remark('end');
         echo Debug::getRangeTime('begin','end').'s';
     }
@@ -78,7 +88,7 @@ class AsyncEs extends BaseElasticsearch
                     return $v === null ? 0 : $v;
                 },$value);
 
-                $mergeData = strtotime($value['day_date']);
+                $mergeData = strtotime($value['day_date'])  + 8*3600;
                 return $this->formatDate($value,$mergeData);
             },collection($newOrder)->toArray());
             $this->esService->addMutilToEs('mojing_datacenterday',$data);
@@ -95,26 +105,27 @@ class AsyncEs extends BaseElasticsearch
     public function asyncCartMagento()
     {
         $i = 0;
-        Db::connect('database.db_nihao')->table('sales_flat_quote')->chunk(1000,function($carts) use (&$i){
-            array_map(function($value) use ($i) {
+        Db::connect('database.db_zeelool')->table('sales_flat_quote')->field('entity_id,is_active,base_grand_total,updated_at,created_at')->where('created_at','<=','2021-05-25 00:00:00')->chunk(10000,function($carts) use (&$i){
+            $data = array_map(function($value) use ($i) {
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
                 },$value);
+                dump($value);die;
                 $mergeData = strtotime($value['created_at']);
                 $insertData = [
-                    'id' => $value['entity_id'],
-                    'site' => 3,
-                    'status' => $value['is_active'],
+                    'entity_id'       => $value['entity_id'],
+                    'site'            => 1,
+                    'status'          => $value['is_active'],
+                    'base_grand_total'=> $value['base_grand_total'],
                     'update_time_day' => date('Ymd',strtotime($value['updated_at'])),
-                    'update_time' => strtotime($value['updated_at']),
-                    'create_time' => $mergeData,
-
+                    'update_time'     => strtotime($value['updated_at']),
+                    'create_time'     => $mergeData,
                 ];
-                $i++;
-                $this->esService->addToEs('mojing_cart',$this->formatDate($insertData,$mergeData));
-                echo $i . PHP_EOL;
+
+                return $this->formatDate($insertData,$mergeData);
             },collection($carts)->toArray());
-        });
+            $this->esService->addMutilToEs('mojing_cart',$data);
+        },'entity_id','desc');
     }
 
     /**
@@ -160,25 +171,29 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCart()
     {
-        WebShoppingCart::chunk(10000,function($carts){
+        WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,updated_at,created_at')->chunk(10000,function($carts){
             $data = array_map(function($value) {
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
                 },$value);
-                $mergeData = $value['created_at'];
+                $mergeData = $value['created_at'] + 8*3600;
                 $insertData = [
                     'id' => $value['id'],
                     'site' => $value['site'],
+                    'entity_id' => $value['entity_id'],
                     'status' => $value['is_active'],
+                    'base_grand_total'=> $value['base_grand_total'],
                     'update_time_day' => date('Ymd',$value['updated_at'] + 8*3600),
-                    'update_time' => $value['updated_at'],
+                    'update_time_hour' => date('H',$value['updated_at'] + 8*3600),
+                    'update_time' => $value['updated_at'] + 8*3600,
                     'create_time' => $mergeData,
 
                 ];
+                echo $value['id'] . PHP_EOL;
                 return $this->formatDate($insertData,$mergeData);
             },collection($carts)->toArray());
             $this->esService->addMutilToEs('mojing_cart',$data);
-        });
+        },'id','desc');
     }
 
     /**
@@ -193,13 +208,13 @@ class AsyncEs extends BaseElasticsearch
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
                 },$value);
-                $mergeData = $value['created_at'];
+                $mergeData = $value['created_at'] + 8*3600;
                 $insertData = [
                     'id' => $value['id'],
                     'site' => $value['site'],
                     'email' => $value['email'],
                     'update_time_day' => date('Ymd',$value['updated_at'] + 8*3600),
-                    'update_time' => $value['updated_at'],
+                    'update_time' => $value['updated_at'] + 8*3600,
                     'create_time' => $mergeData,
                     'is_vip' => $value['is_vip'] ?? 0,
                     'group_id' => $value['group_id'],
@@ -207,10 +222,11 @@ class AsyncEs extends BaseElasticsearch
                     'resouce' => $value['resouce'] ?? 0,
 
                 ];
+                echo $value['id'] . PHP_EOL;
                 return $this->formatDate($insertData,$mergeData);
             },collection($carts)->toArray());
             $this->esService->addMutilToEs('mojing_customer',$data);
-        });
+        },'id','desc');
     }
 
     /**
@@ -247,7 +263,7 @@ class AsyncEs extends BaseElasticsearch
                 return $this->formatDate($insertData,$mergeData);
             },collection($track)->toArray());
             $this->esService->addMutilToEs('mojing_track',$data);
-        });
+        },'id','desc');
 
     }
 

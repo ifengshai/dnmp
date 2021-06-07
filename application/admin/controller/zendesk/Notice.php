@@ -1294,7 +1294,7 @@ class Notice extends Controller
             return true;
         }
 
-        echo $tickets->count . "\n";
+        echo $tickets->count."\n";
 
         $page = ceil($tickets->count / 100);
         if ($page >= 1) {

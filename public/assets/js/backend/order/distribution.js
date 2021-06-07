@@ -1,4 +1,4 @@
-define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to', 'template'], function ($, undefined, Backend, Table, Form, Template) {
+define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to', 'template', 'upload'], function ($, undefined, Backend, Table, Form, undefined, Template, Upload) {
     function viewTable(table, value) {
         //隐藏、显示列
         -1 != $.inArray(value, [3, 7, 8]) ? table.bootstrapTable('showColumn', 'stock_house_num') : table.bootstrapTable('hideColumn', 'stock_house_num');
@@ -85,6 +85,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 pageList: [10, 25, 50, 100, 300],
                 extend: {
                     index_url: 'order/distribution/index' + location.search + (location.search ? '&label=' + Config.label : '?label=' + Config.label),
+
                     table: 'distribution'
                 }
             });
@@ -192,6 +193,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'stock_id',
+                            title: __('仓库'),
+                            addClass: 'selectpicker',
+                            searchList: {
+                                1: '郑州仓',
+                                2: '丹阳仓'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'order_type',
                             title: __('订单类型'),
                             addClass: 'selectpicker',
@@ -212,10 +223,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 6: '一件代发',
                                 7: '手动补单',
                                 10: '货到付款',
-                                11: '便利店支付',
-                                41: '免加工单'
+                                11: '普通订单'
                             },
                             operate: 'IN',
+                            field: 'order_type', title: __('订单类型'), addClass: 'selectpicker', data: 'multiple',
+                            custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue' },
+                            searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发', 7: '手动补单', 10: '货到付款', 11: '普通订单', 41: '免加工单' }, operate: 'IN',
                             formatter: Table.api.formatter.status
                         },
                         {
@@ -727,6 +740,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     }
                 );
             });
+
+            // 导入按钮事件
+            Upload.api.plupload($('.btn-import'), function (data, row) {
+                Fast.api.ajax({
+                    url: 'order/distribution/importOrder',
+                    data: {file: data.url},
+                }, function (data, ret) {
+                    layer.alert(ret.msg, function () {
+                        layer.closeAll();
+                        table.bootstrapTable('refresh');
+                    });
+
+                });
+            });
+
+
         },
         wave_order_list: function () {
             // 初始化表格参数配置
@@ -799,6 +828,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'stock_id',
+                            title: __('仓库'),
+                            addClass: 'selectpicker',
+                            searchList: {
+                                1: '郑州仓',
+                                2: '丹阳仓'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'status',
                             title: __('打印状态'),
                             addClass: 'selectpicker',
@@ -826,7 +865,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             table: table,
                             events: Table.api.events.operate,
                             buttons: [
-
                                 {
                                     name: 'detail',
                                     text: '详情',
@@ -969,6 +1007,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             operate: 'like'
                         },
                         {
+                            field: 'stock_id',
+                            title: __('仓库'),
+                            addClass: 'selectpicker',
+                            searchList: {
+                                1: '郑州仓',
+                                2: '丹阳仓'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'sku',
                             title: __('SKU'),
                             operate: 'like'
@@ -1108,6 +1156,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
 
+
+
                         {
                             field: 'a.created_at',
                             title: __('创建时间'),
@@ -1202,6 +1252,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         });
                     }
                 );
+            });
+
+
+            //批量导出xls
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                var params = '';
+                if (ids.length > 0) {
+                    params = 'ids=' + ids;
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
+                }
+                window.open(Config.moduleurl + '/order/distribution/batch_export_xls?' + params + '&wave_order_id=' + Config.ids, '_blank');
             });
         },
         handle_abnormal: function () {

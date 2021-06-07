@@ -140,21 +140,21 @@ class OrderDataDetail extends Backend
             $list = collection($list)->toArray();
             $arr = array();
             $i = 0;
-            foreach ($list as $key=>$value){
+            foreach ($list as $key=>$value) {
                 $arr[$i]['increment_id'] = $value['increment_id'];
                 $arr[$i]['created_at'] = $value['created_at'];
                 $arr[$i]['payment_time'] = $value['payment_time'];
                 $arr[$i]['base_grand_total'] = round($value['base_grand_total'], 2);
-                $arr[$i]['base_shipping_amount'] = round($value['base_shipping_amount'],2);
-                switch ($value['order_type']){
+                $arr[$i]['base_shipping_amount'] = round($value['base_shipping_amount'], 2);
+                switch ($value['order_type']) {
                     case 1:
                         $list[$key]['order_type'] = '普通订单';
                         break;
                     case 2:
-                        $list[$key]['order_type']  = '批发';
+                        $list[$key]['order_type'] = '批发';
                         break;
                     case 3:
-                        $list[$key]['order_type']  = '网红';
+                        $list[$key]['order_type'] = '网红';
                         break;
                     case 4:
                         $list[$key]['order_type']  = '补发';
@@ -262,19 +262,6 @@ class OrderDataDetail extends Backend
                 $arr[$i]['work_list_num'] = $work_list_num;
                 $i++;
             }
-            /*if ($refund > 0){
-                if($refund == 1){
-                    $refund1 = '有';
-                }else{
-                    $refund1 = '无';
-                }
-                foreach ($list as $k=>$v){
-                    if ($v['is_refund'] != $refund1){
-                        unset($list[$k]);
-                    }
-                }
-                sort($list);
-            }*/
             $result = array("total" => $total, "rows" => $arr);
 
             return json($result);
@@ -339,8 +326,8 @@ class OrderDataDetail extends Backend
                 'field' => 'base_shipping_amount',
             ),
             array(
-                'name' => '订单状态',
-                'field'=>'status',
+                'name'  => '订单状态',
+                'field' => 'status',
             ),
             array(
                 'name'=>'设备类型',
@@ -543,15 +530,15 @@ class OrderDataDetail extends Backend
                 }
                 if (in_array('status', $column_name)) {
                     $order_node = Db::name('order_node')->where('order_id', $val['entity_id'])->value('node_type');
-                    if($order_node == 7){
+                    if ($order_node == 7) {
                         $order_shipping_status = '已发货';
-                    }elseif ($order_node == 8 && $order_node == 10){
+                    } elseif ($order_node == 8 && $order_node == 10) {
                         $order_shipping_status = '运输途中';
-                    }elseif ($order_node == 30){
+                    } elseif ($order_node == 30) {
                         $order_shipping_status = '到达待取';
-                    }elseif ($order_node == 40){
+                    } elseif ($order_node == 40) {
                         $order_shipping_status = '成功签收';
-                    }elseif ($order_node == 35){
+                    } elseif ($order_node == 35) {
                         $order_shipping_status = '投递失败';
                     }else{
                         $order_shipping_status = $val['status'];
