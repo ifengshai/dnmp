@@ -30,7 +30,7 @@
     </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('附件')}:</label>
-        {if condition="(!empty(row['pic']))"}
+        {if condition="(!empty(row['file']))"}
         <div class="col-xs-12 col-sm-8">
             {volist name="row['file']" id="vo"}
             <a href="321.png" download="{$vo}">{$vo}</a>
@@ -42,7 +42,6 @@
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
         <div class="col-xs-12 col-sm-8">
-            <button type="submit" class="btn btn-success btn-embossed"  {if $row['status'] eq 3} disabled{/if}>{:__('处理完成')}</button>
-        </div>
+            <button type="submit" class="btn btn-success btn-embossed"  {if $row['status'] eq 3} disabled{/if}>{:__('处理完成')}</button></div>
     </div>
 </form>
