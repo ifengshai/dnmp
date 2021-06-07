@@ -252,6 +252,7 @@ class ZendeskAccount extends Backend
         curl_close($curl);
         $arr = json_decode($response,true);
         var_dump($arr);
+
     }
 
 }

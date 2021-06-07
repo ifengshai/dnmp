@@ -4091,11 +4091,11 @@ class ScmWarehouse extends Scm
                 ->where('transfer_order_id', $id)
                 ->field('sku,id,real_instock_num')
                 ->select();
-            foreach ($allItemDetail as $k0 => $v0) {
-                if ($v0['real_instock_num'] == 0) {
-                    $this->error(__($v0['sku'] . '实际入库数量0，请检查'), '', 546);
-                }
-            }
+//            foreach ($allItemDetail as $k0 => $v0) {
+//                if ($v0['real_instock_num'] == 0) {
+//                    $this->error(__($v0['sku'] . '实际入库数量0，请检查'), '', 546);
+//                }
+//            }
             foreach ($allItemDetail as $sk => $sv) {
                 $StockTransferOutOrderItem[$sk]['sku'] = $sv['sku'];
                 $StockTransferOutOrderItem[$sk]['in_num'] = $sv['real_instock_num'];

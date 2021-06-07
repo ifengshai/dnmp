@@ -1409,26 +1409,43 @@ class Wangpenglei extends Backend
             //判断是否为现片，其余为定制
             $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
             $tempArr = [];
-            foreach ($lensData as $v) {
+            $tempOrderType = [];
+            foreach ($lensData as &$v) {
+                if (!$v['sph_start']) {
+                    $v['sph_start'] = $v['sph_end'];
+                }
+
+                if (!$v['cyl_start']) {
+                    $v['cyl_start'] = $v['cyl_end'];
+                }
+
+                $v['sph_start'] = (float)$v['sph_start'];
+                $v['sph_end'] = (float)$v['sph_end'];
+                $v['cyl_start'] = (float)$v['cyl_start'];
+                $v['cyl_end'] = (float)$v['cyl_end'];
+
                 if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
                     $tempArr['od'] = 1;
                 } else {
-                    $tempArr['od'] = 0;
+                    $tempArr['os'] = 0;
                 }
-
                 if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
                     $tempArr['os'] = 1;
                 } else {
                     $tempArr['os'] = 0;
                 }
+
+                if ($tempArr['od'] == 1 && $tempArr['os'] == 1) {
+                    $tempOrderType[] = 2;
+                } else {
+                    $tempOrderType[] = 3;
+                }
             }
 
-            dump($tempArr);
-            if ($tempArr['od'] == 1 && $tempArr['os'] = 1) {
+            if (in_array(2, $tempOrderType)) {
                 $arr['order_prescription_type'] = 2;
             }
         }
-        dump($arr);
 
         //默认如果不是仅镜架 或定制片 则为现货处方镜
         if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 2) {
@@ -1445,12 +1462,12 @@ class Wangpenglei extends Backend
      */
     public function test_lens()
     {
-        $params['od_sph'] = '-5.00';
-        $params['os_sph'] = '-5.00';
-        $params['od_cyl'] = '1.0';
-        $params['os_cyl'] = '1.0';
+        $params['od_sph'] = '-2.25';
+        $params['os_sph'] = '-2.00';
+        $params['od_cyl'] = '-2.50';
+        $params['os_cyl'] = '-2.00';
         $params['pd'] = 60;
-        $params['lens_number'] = 24100000;
+        $params['lens_number'] = 23100001;
         $data = $this->set_processing_type($params);
         dump($data);
         die;
