@@ -375,4 +375,19 @@ return [
         'charset'  => Env::get('db_zeelool_fr.charset'),
         'prefix'   => Env::get('db_zeelool_fr.prefix'),
     ],
+    'db_zeelool_fr_online' => [
+        // 数据库类型
+        'type'     => Env::get('db_zeelool_fr_online.type'),
+        // 服务器地址
+        'hostname' => Env::get('db_zeelool_fr_online.hostname'),
+        // 数据库名
+        'database' => Env::get('db_zeelool_fr_online.database'),
+        // 数据库用户名
+        'username' => Env::get('db_zeelool_fr_online.username'),
+        // 密码
+        'password' => Env::get('db_zeelool_fr_online.password'),
+        // 数据库编码默认采用utf8
+        'charset'  => Env::get('db_zeelool_fr_online.charset'),
+        'prefix'   => Env::get('db_zeelool_fr_online.prefix'),
+    ]
 ];
