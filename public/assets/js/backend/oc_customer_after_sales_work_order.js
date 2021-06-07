@@ -34,6 +34,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 return 1 + index;
                             }, operate: false
                         },
+                        {
+                            field: 'type',
+                            title: __('问题分类'),
+                            searchList: { 1: '客户投诉', 2: '订单问题'},
+                            formatter: Table.api.formatter.status,
+                            visible: false
+                        },
                         {field: 'id', title: __('ID')},
                         {
                             field: 'site',
@@ -84,8 +91,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        //返回true时按钮显示,返回false隐藏
-                                        return true;
+                                        if (row.type == 2){
+                                            //返回true时按钮显示,返回false隐藏
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
+                                  }
+                                },
+                                {
+                                    name: 'detail',
+                                    text: '处理',
+                                    title: __('处理'),
+                                    extend: 'data-area = \'["80%","80%"]\'',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-list',
+                                    url: Config.moduleurl + '/oc_customer_after_sales_work_order/complaints_detail',
+                                    callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    },
+                                    visible: function (row) {
+                                        if (row.type == 1){
+                                            //返回true时按钮显示,返回false隐藏
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
                                     }
                                 },
                                 {
@@ -102,7 +133,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
                                     visible: function (row) {
-                                        return true;
+                                        if (row.type == 2){
+                                            //返回true时按钮显示,返回false隐藏
+                                            return true;
+                                        }else{
+                                            return false;
+                                        }
                                     }
                                 },
                             ],
@@ -119,6 +155,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         edit: function () {
+            Controller.api.bindevent();
+        },
+        complaints_detail: function () {
+            parent.$("a.btn-refresh").trigger("click");
             Controller.api.bindevent();
         },
         question_detail:function (){
