@@ -23,7 +23,7 @@ class GoodStatus extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','nihao','wesee','zeelool_de','zeelool_jp'])){
+            if(!in_array($val['name'],['zeelool','voogueme','meeloog','wesee','zeelool_de','zeelool_jp'])){
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -43,7 +43,7 @@ class GoodStatus extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $json['xColumnName'] = ['zeelool','voogueme','nihao','wesee','zeelool-es','zeelool-de','zeelool-jp'];
+            $json['xColumnName'] = ['zeelool','voogueme','meeloog','wesee','zeelool-es','zeelool-de','zeelool-jp'];
 
             if ($order_platform == 1){
                 $up_field = 'glass_in_sale_num as total';

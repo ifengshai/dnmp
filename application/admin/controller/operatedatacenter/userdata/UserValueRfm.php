@@ -39,7 +39,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp','wesee','zeelool_fr'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp','wesee','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -190,7 +190,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp','wesee','zeelool_fr'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp','wesee','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -337,7 +337,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp','wesee','zeelool_fr'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp','wesee','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
