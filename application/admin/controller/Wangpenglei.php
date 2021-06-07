@@ -1526,6 +1526,5 @@ class Wangpenglei extends Backend
             $order->where(['id' => $v['id']])->update(['picking_sort' => $location_data['picking_sort']]);
         }
 
-
     }
 }
