@@ -27,18 +27,40 @@ class skuDayAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getCartData(1);
-        $this->getCartData(2);
-        $this->getCartData(3);
-        $this->getCartData(10);
-        $this->getCartData(11);
+//        $this->getCartData(1);
+//        $this->getCartData(2);
+//        $this->getCartData(3);
+//        $this->getCartData(10);
+//        $this->getCartData(11);
+        $this->getCartData(15);
+        $this->getSkuDayData(15);
         //$this->getSkuDayData(5);
         $output->writeln("All is ok");
     }
 
     public function getSkuDayData($site)
     {
-        $tStart = strtotime('2021-05-01');
+        switch ($site){
+            case 1:
+                $model = Db::connect('database.db_zeelool_online');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme_online');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao_online');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de_online');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp_online');
+                break;
+            case 15:
+                $model = Db::connect('database.db_zeelool_fr_online');
+                break;
+        }
+        $tStart = strtotime('2021-05-15');
         $tend = time();
         for($i = $tStart;$i<$tend;$i+=3600*24){
             $data = date('Y-m-d', $i);
@@ -71,10 +93,18 @@ class skuDayAsynData extends Command
                 $skuArr[$value['sku']]['sku_grand_total'] += $value['base_original_price'];
                 $skuArr[$value['sku']]['sku_row_total'] += $value['base_original_price'] - $value['base_discount_amount'];
             }
-            $nowPrice = Db::connect('database.db_weseeoptical')
-                ->table('goods') //为了获取现价找的表
-                ->whereIn('sku',array_column($sku_data,'platform_sku'))
-                ->column('IF(special_price,special_price,price) price','sku');
+            if($site == 5){
+                $nowPrice = Db::connect('database.db_weseeoptical')
+                    ->table('goods') //为了获取现价找的表
+                    ->whereIn('sku',array_column($sku_data,'platform_sku'))
+                    ->column('IF(special_price,special_price,price) price','sku');
+            }else{
+                $nowPrice = $model->table('catalog_product_index_price') //为了获取现价找的表
+                    ->alias('a')
+                    ->join(['catalog_product_entity' => 'b'], 'a.entity_id=b.entity_id') //商品主表
+                    ->whereIn('sku',array_column($sku_data,'platform_sku'))
+                    ->column('a.final_price','b.sku');
+            }
             foreach ($sku_data as $k => $v) {
                 $sku_data[$k]['unique_pageviews'] = 0;
                 $sku_data[$k]['goods_grade'] = $v['grade'];
@@ -115,7 +145,7 @@ class skuDayAsynData extends Command
     }
 
     public function getCartData($site){
-        $tStart = strtotime('2021-01-01');
+        $tStart = strtotime('2021-05-15');
         $tend = time();
         switch ($site){
             case 1:
@@ -132,6 +162,9 @@ class skuDayAsynData extends Command
                 break;
             case 11:
                 $model = Db::connect('database.db_zeelool_jp_online');
+                break;
+            case 15:
+                $model = Db::connect('database.db_zeelool_fr_online');
                 break;
         }
         $cartWhere['a.base_grand_total'] = ['>',0];

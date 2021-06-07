@@ -6,11 +6,10 @@ use think\Model;
 use think\Db;
 
 
-class ZeeloolEs extends Model
+class ZeeloolFr extends Model
 {
     //数据库
-    // protected $connection = 'database';
-    protected $connection = 'database.db_zeelool_es';
+    protected $connection = 'database.db_zeelool_fr';
 
 
     // 表名
@@ -658,7 +657,7 @@ class ZeeloolEs extends Model
     public function getOrderId($map)
     {
         if ($map) {
-            $result = Db::connect('database.db_zeelool_es')
+            $result = Db::connect('database.db_zeelool_fr')
                 ->table('sales_flat_order_item')
                 ->alias('a')
                 ->join(['sales_flat_order' => 'b'], 'a.order_id=b.entity_id')

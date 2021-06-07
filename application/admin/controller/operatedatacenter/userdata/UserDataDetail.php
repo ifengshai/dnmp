@@ -20,7 +20,8 @@ class UserDataDetail extends Backend
         $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
         $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
-        $this->weseeoptical= new \app\admin\model\order\order\ZeeloolJp();
+        $this->zeeloolfr = new \app\admin\model\order\order\ZeeloolFr();
+        $this->weseeoptical= new \app\admin\model\order\order\Weseeoptical();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
     /**
@@ -54,7 +55,11 @@ class UserDataDetail extends Backend
                 $order_model = $this->zeelooljp;
                 $web_model = Db::connect('database.db_zeelool_jp');
                 $site = 11;
-            }elseif ($filter['order_platform'] == 5) {
+            } elseif ($filter['order_platform'] == 15) {
+                $order_model = $this->zeeloolfr;
+                $web_model = Db::connect('database.db_zeelool_fr');
+                $site = 15;
+            } elseif ($filter['order_platform'] == 5) {
                 $web_model = Db::connect('database.db_weseeoptical');
                 $site = 5;
             } else {
@@ -213,7 +218,7 @@ class UserDataDetail extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp','wesee'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp','wesee','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -321,6 +326,10 @@ class UserDataDetail extends Backend
             $order_model = $this->zeelooljp;
             $web_model = Db::connect('database.db_zeelool_jp');
             $site = 11;
+        } elseif ($order_platform == 15) {
+            $order_model = $this->zeeloolfr;
+            $web_model = Db::connect('database.db_zeelool_fr');
+            $site = 15;
         } elseif ($order_platform == 5) {
             $web_model = Db::connect('database.db_weseeoptical');
             $site = 5;
