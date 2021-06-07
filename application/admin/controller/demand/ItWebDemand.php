@@ -457,9 +457,9 @@ class ItWebDemand extends Backend
             } elseif ($v['site'] == 2) {
                 $list[$k]['site'] = 'voogueme';
             } elseif ($v['site'] == 3) {
-                $list[$k]['site'] = 'nihao';
-            } elseif ($v['site'] == 4) {
                 $list[$k]['site'] = 'meeloog';
+            } elseif ($v['site'] == 4) {
+                $list[$k]['site'] = 'vicmoo';
             } elseif ($v['site'] == 5) {
                 $list[$k]['site'] = 'wesee';
             } elseif ($v['site'] == 6) {
