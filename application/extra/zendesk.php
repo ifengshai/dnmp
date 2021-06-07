@@ -8,7 +8,7 @@ return [
     'platform'             => [
         1 => 'zeelool',
         2 => 'voogueme',
-        3 => 'nihaooptical',
+        3 => 'meeloog',
     ],
     'zeelool'              => [
         'subdomain' => "zeelooloptical",
@@ -21,7 +21,7 @@ return [
         'token'     => "FksHlSPfruUXrfXv4rAz5IGFZHbW48UKzMg6H5Go",
     ],
     'nihaooptical'         => [
-        'subdomain' => "nihao",
+        'subdomain' => "meeloog",
         'username'  => "wangwei@nextmar.com",
         'token'     => "1T6P4ewBZsuGLbHcx9WGpEprConFoEd8H5bPZlER",
     ],
@@ -62,7 +62,7 @@ return [
     'platform_url'         => [
         1 => 'https://pc.zeelool.com/index.php/nextmarvel/sales_order/view/order_id/',
         2 => 'https://pc.voogueme.com/index.php/xiaomoshou/sales_order/view/order_id/',
-        3 => 'https://pc.nihaooptical.com/index.php/xiaomoshou/sales_order/view/order_id/',
+        3 => 'https://pc.meeloog.com/index.php/xiaomoshou/sales_order/view/order_id/',
     ],
     'check_order_info_url' =>
         'https://mojing.nextmar.com/admin_1biSSnWyfW.php/saleaftermanage/order_return/search?ref=addtabs'

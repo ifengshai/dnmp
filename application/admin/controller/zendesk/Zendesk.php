@@ -237,7 +237,7 @@ class Zendesk extends Backend
                     if($type == 2) {
                         $siteName = 'voogueme';
                     }elseif($type == 3){
-                        $siteName = 'nihaooptical';
+                        $siteName = 'meeloog';
                     }
                     $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
                     $status = config('zendesk.status')[$params['status']];
@@ -503,7 +503,7 @@ class Zendesk extends Backend
         if($ticket->type == 2){
             $siteName = 'voogueme';
         } elseif($ticket->type == 3){
-            $siteName = 'nihaooptical';
+            $siteName = 'meeloog';
         }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
@@ -805,7 +805,7 @@ class Zendesk extends Backend
         if($ticket->type == 2){
             $siteName = 'voogueme';
         } elseif($ticket->type == 3){
-            $siteName = 'nihaooptical';
+            $siteName = 'meeloog';
         }
         //获取所有的tags
         $tags = ZendeskTags::order('count desc')->column('name', 'id');
@@ -1092,7 +1092,7 @@ Please close this window and try again.");
             }elseif($type == 2){
                 $siteName = 'voogueme';
             }else{
-                $siteName = 'nihaooptical';
+                $siteName = 'meeloog';
             }
 
             $data = [
@@ -1476,7 +1476,7 @@ DOC;
                     $site_str = 'voogueme';
                     break;
                 case 3:
-                    $site_str = 'nihaooptical';
+                    $site_str = 'meeloog';
                     break;
                 default:
                     $site_str = '';
@@ -1832,11 +1832,11 @@ DOC;
                     $webModel = Db::connect('database.db_voogueme');
                     break;
                 case 3:
-                    $value['site_type'] = 'Nihao';
+                    $value['site_type'] = 'Meeloog';
                     $webModel = Db::connect('database.db_nihao');
                     break;
                 case 4:
-                    $value['site_type'] = 'meeloog';
+                    $value['site_type'] = 'Vicmoo';
                     break;
                 case 5:
                     $value['site_type'] = 'wesee';
