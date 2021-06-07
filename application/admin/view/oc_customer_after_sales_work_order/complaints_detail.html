@@ -34,7 +34,7 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('附件')}:</label>
         <div class="col-xs-12 col-sm-8">
             {volist name="row['file']" id="vo"}
-            <a href="321.png" download="{$vo}">{$vo}</a>
+            <a href="{$vo}" target="_blank">{$vo}</a>
             {/volist}
         </div>
         {/if}
