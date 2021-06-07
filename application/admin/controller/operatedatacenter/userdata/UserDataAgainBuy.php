@@ -62,7 +62,7 @@ class UserDataAgainBuy extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','wesee'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -207,7 +207,7 @@ class UserDataAgainBuy extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','wesee'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -362,7 +362,7 @@ class UserDataAgainBuy extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','wesee'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
