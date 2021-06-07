@@ -1569,9 +1569,13 @@ class OrderData extends Backend
             foreach ($lensData as $v) {
                 if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
                     $tempArr['od'] = 1;
+                } else {
+                    $tempArr['od'] = 0;
                 }
                 if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
                     $tempArr['os'] = 1;
+                } else {
+                    $tempArr['os'] = 0;
                 }
             }
 
@@ -2118,9 +2122,6 @@ class OrderData extends Backend
     }
 
 
-
-
-
     public function order_data_shell_de()
     {
         $this->order_data(5);
@@ -2170,7 +2171,6 @@ class OrderData extends Backend
         usleep(100000);
         echo $site . 'ok';
     }
-
 
 
     protected function order_item_shell($site)
@@ -2235,7 +2235,6 @@ class OrderData extends Backend
         }
         echo "ok";
     }
-
 
 
     /**

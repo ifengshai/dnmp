@@ -1409,16 +1409,14 @@ class Wangpenglei extends Backend
             foreach ($lensData as $v) {
                 if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
                     $tempArr['od'] = 1;
+                } else {
+                    $tempArr['od'] = 0;
                 }
 
-                dump($os_sph);
-                dump($os_cyl);
-                dump($v['sph_start']);
-                dump($v['sph_end']);
-                dump($v['cyl_start']);
-                dump($v['cyl_end']);
                 if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
                     $tempArr['os'] = 1;
+                } else {
+                    $tempArr['os'] = 0;
                 }
             }
 
@@ -1444,12 +1442,12 @@ class Wangpenglei extends Backend
      */
     public function test_lens()
     {
-        $params['od_sph'] = '-3.25';
-        $params['os_sph'] = '-2.75';
-        $params['od_cyl'] = '-2.00';
-        $params['os_cyl'] = '-2.75';
+        $params['od_sph'] = '-5.00';
+        $params['os_sph'] = '-5.00';
+        $params['od_cyl'] = '1.0';
+        $params['os_cyl'] = '1.0';
         $params['pd'] = 60;
-        $params['lens_number'] = 24200000;
+        $params['lens_number'] = 24100000;
         $data = $this->set_processing_type($params);
         dump($data);
         die;
