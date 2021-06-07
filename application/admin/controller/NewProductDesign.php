@@ -267,35 +267,35 @@ class NewProductDesign extends Backend
                 }
 
             }
-            if ($data['attributeType'] ==32){
-                if($data['row']['box_height']<0.1){
-                    $this->error('请输入正确的高度数值');
-                }
-                if($data['row']['box_width']<0.1){
-                    $this->error('请输入正确的宽度数值');
-                }
-            }
-            if ($data['attributeType'] ==35){
-                if($data['row']['earrings_height']<0.1){
-                    $this->error('请输入正确的高度数值');
-                }
-                if($data['row']['earrings_width']<0.1){
-                    $this->error('请输入正确的宽度数值');
-                }
-            }
-            if ($data['attributeType'] ==38){
-                if($data['row']['eyeglasses_chain']<0.1){
-                    $this->error('请输入正确的周长数值数值');
-                }
-            }
-            if ($data['attributeType'] ==34 ||$data['attributeType'] ==39){
-                if($data['row']['necklace_perimeter']<0.1){
-                    $this->error('请输入正确的周长数值');
-                }
-                if($data['row']['necklace_chain']<0.1){
-                    $this->error('请输入正确的延长链数值');
-                }
-            }
+//            if ($data['attributeType'] ==32){
+//                if($data['row']['box_height']<0.1){
+//                    $this->error('请输入正确的高度数值');
+//                }
+//                if($data['row']['box_width']<0.1){
+//                    $this->error('请输入正确的宽度数值');
+//                }
+//            }
+//            if ($data['attributeType'] ==35){
+//                if($data['row']['earrings_height']<0.1){
+//                    $this->error('请输入正确的高度数值');
+//                }
+//                if($data['row']['earrings_width']<0.1){
+//                    $this->error('请输入正确的宽度数值');
+//                }
+//            }
+//            if ($data['attributeType'] ==38){
+//                if($data['row']['eyeglasses_chain']<0.1){
+//                    $this->error('请输入正确的周长数值数值');
+//                }
+//            }
+//            if ($data['attributeType'] ==34 ||$data['attributeType'] ==39){
+//                if($data['row']['necklace_perimeter']<0.1){
+//                    $this->error('请输入正确的周长数值');
+//                }
+//                if($data['row']['necklace_chain']<0.1){
+//                    $this->error('请输入正确的延长链数值');
+//                }
+//            }
             $this->model->startTrans();
             $itemAttribute->startTrans();
             try {
