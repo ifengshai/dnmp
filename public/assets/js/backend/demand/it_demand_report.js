@@ -110,8 +110,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','echartsobj'], functio
                             {
                                 field: 'site_type',
                                 title: __('Site_type'),
-                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Orther'},
-                                formatter: Table.api.formatter.status
+                                searchList: {1: 'Zeelool', 2: 'Voogueme', 3: 'Meeloog', 4: 'Wesee', 5: 'Orther'},
+                                formatter: Table.api.formatter.status
                             },
                             {
                                 field: 'type',
@@ -231,8 +231,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','echartsobj'], functio
                             {
                                 field: 'site_type',
                                 title: __('Site_type'),
-                                searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao' , 4: 'Wesee', 5: 'Orther'},
-                                formatter: Table.api.formatter.status
+                                searchList: {1: 'Zeelool', 2: 'Voogueme', 3: 'Meeloog', 4: 'Wesee', 5: 'Orther'},
+                                formatter: Table.api.formatter.status
                             },
                             { field: 'type', title: __('Task_ype'), custom: { 1: 'success', 2: 'black', 3: 'danger' }, searchList: { 1: '短期任务', 2: '中期任务', 3: '长期任务' }, formatter: Table.api.formatter.status },
                             { field: 'title', title: __('Title') },

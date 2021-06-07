@@ -408,8 +408,8 @@ class ScmWarehouse extends Scm
         $siteList = [
             ['id' => 1, 'title' => 'zeelool'],
             ['id' => 2, 'title' => 'voogueme'],
-            ['id' => 3, 'title' => 'nihao'],
-            ['id' => 4, 'title' => 'meeloog'],
+            ['id' => 3, 'title' => 'meeloog'],
+            ['id' => 4, 'title' => 'vicmoo'],
             ['id' => 5, 'title' => 'wesee'],
             ['id' => 8, 'title' => 'amazon'],
             ['id' => 9, 'title' => 'zeelool_es'],

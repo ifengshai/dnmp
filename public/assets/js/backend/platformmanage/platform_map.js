@@ -38,8 +38,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                         {
                             field: 'platform_id',
                             title: __('Platform_id'),
-                            searchList: { 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'amazon' },
-                            custom: { 1: 'yellow', 2: 'blue', 3: 'green', 4: 'red'},
+                            searchList: {1: 'zeelool', 2: 'voogueme', 3: 'meeloog', 4: 'amazon'},
+                            custom: {1: 'yellow', 2: 'blue', 3: 'green', 4: 'red'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'field_name', title: __('Field_name')},

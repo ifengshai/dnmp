@@ -29,8 +29,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     [
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
+                        { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Meeloog',4:'Vicmoo',5:'Wesee',9:'Es',10:'De',11:'Jp',13:'Zeeloolcn',14:'Alibaba' ,15:'Fr' }, data: 'multiple',addClass: 'selectpicker', operate: 'IN', formatter: Table.api.formatter.status },
                         { field: 'stock_id', title: __('仓库'), searchList: { 1: '郑州', 2: '丹阳' }, visible: false, formatter: Table.api.formatter.status},
-                        { field: 'work_platform', title: __('work_platform'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Z', 2: 'V', 3: 'Nh',4:'Ml',5:'We',9:'Es',10:'De',11:'Jp',13:'Zeeloolcn',14:'Alibaba' ,15:'Fr' }, data: 'multiple',addClass: 'selectpicker', operate: 'IN', formatter: Table.api.formatter.status },
                         { field: 'work_type_str', title: __('Work_type'), operate: false },
                         { field: 'work_type', title: __('Work_type'), searchList: { 1: '客服工单', 2: '仓库工单' }, visible: false, formatter: Table.api.formatter.status },
                         { field: 'platform_order', title: __('Platform_order') },
@@ -1910,7 +1910,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 sortName: 'id',
                 columns: [
                     [
-                        { checkbox: true },
+                        {checkbox: true},
                         {
                             field: '', title: __('序号'), formatter: function (value, row, index) {
                                 var options = table.bootstrapTable('getOptions');
@@ -1919,13 +1919,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 return (pageNumber - 1) * pageSize + 1 + index;
                             }, operate: false
                         },
-                        { field: 'id', title: __('Id'), operate: false, visible: false },
-                        { field: 'work_platform', title: __('平台'), custom: { 1: 'blue', 2: 'danger', 3: 'orange' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao',4:'Meeloog',9:'ZeeloolEs',10:'ZeeloolDe',11:'ZeeloolJp' }, formatter: Table.api.formatter.status },
-                        { field: 'platform_order', title: __('订单号') },
-                        { field: 'coupon_describe', title: __('优惠券名称'), operate: 'like' },
-                        { field: 'coupon_str', title: __('优惠码'), operate: false },
-                        { field: 'create_user_name', title: __('申请人'), operate: 'like' },
-                        { field: 'create_time', title: __('申请时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime },
+                        {field: 'id', title: __('Id'), operate: false, visible: false},
+                        {
+                            field: 'work_platform',
+                            title: __('平台'),
+                            custom: {1: 'blue', 2: 'danger', 3: 'orange'},
+                            searchList: {
+                                1: 'Zeelool',
+                                2: 'Voogueme',
+                                3: 'Meeloog',
+                                4: 'Vicmoo',
+                                9: 'ZeeloolEs',
+                                10: 'ZeeloolDe',
+                                11: 'ZeeloolJp'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {field: 'platform_order', title: __('订单号')},
+                        {field: 'coupon_describe', title: __('优惠券名称'), operate: 'like'},
+                        {field: 'coupon_str', title: __('优惠码'), operate: false},
+                        {field: 'create_user_name', title: __('申请人'), operate: 'like'},
+                        {
+                            field: 'create_time',
+                            title: __('申请时间'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+                            formatter: Table.api.formatter.datetime
+                        },
 
                     ]
                 ]

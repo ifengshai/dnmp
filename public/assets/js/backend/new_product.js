@@ -68,8 +68,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                 13: '无',
                                 1: 'zeelool',
                                 2: 'voogueme',
-                                3: 'nihao',
-                                4: 'meeloog',
+                                3: 'meeloog',
+                                4: 'vicmoo',
                                 5: 'wesee',
                                 8: 'amazon',
                                 9: 'zeelool_de',
@@ -987,11 +987,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             field: 'z_sku_num', title: __('zeelool'), operate: false
                         },{
                             field: 'v_sku_num', title: __('voogueme'), operate: false
-                        },{
-                            field: 'nihao_sku_num', title: __('nihao'), operate: false
-                        },{
-                            field: 'm_sku_num', title: __('meeloog'), operate: false
-                        },{
+                        }, {
+                        field: 'nihao_sku_num', title: __('meeloog'), operate: false
+                    }, {
+                        field: 'm_sku_num', title: __('vicmoo'), operate: false
+                    },{
                             field: 'w_sku_num', title: __('wesee'), operate: false
                         },{
                             field: 'a_sku_num', title: __('amazon'), operate: false

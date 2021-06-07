@@ -834,7 +834,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','bootstrap-table-jump-
                     }else if(value==2){
                         str2= 'voogueme';
                     }else if(value==3){
-                        str2 = 'nihao';
+                        str2 = 'meeloog';
                     }
                     return str2;
                 },
