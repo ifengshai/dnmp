@@ -13,8 +13,8 @@ return [
     'site' => [
         '1' => 'Zeelool',
         '2' => 'Voogueme',
-        '3' => 'Nihao',
-        '4' => 'Meeloog',
+        '3' => 'Meeloog',
+        '4' => 'Vicmoo',
         '5' => 'Wesee',
         '6' => 'Rufoo',
         '7' => 'Toloog',
