@@ -282,7 +282,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         }
         $url =config('url.zeelool_url').'/media/';
 
-        $fileArray = $row['pic'] =explode('|',$row['images']);
+        $fileArray =!empty($row['images']) ? explode('|',$row['images']):[];
         $photoHref = [];
         $fileUrl = [];
         foreach ($fileArray as $key=>$item){
@@ -292,8 +292,13 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 $fileUrl[$key] = $url.$item;
             }
         }
-        $row['pic'] = $photoHref;
-        $row['file'] = $fileUrl;
+        if (!empty($fileArray)){
+            $row['pic'] = $photoHref;
+            $row['file'] = $fileUrl;
+        }else{
+            $row['pic'] = [];
+            $row['file'] = [];
+        }
 
         $this->assign('row',$row);
 
