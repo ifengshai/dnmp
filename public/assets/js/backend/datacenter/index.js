@@ -48,6 +48,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                         {field: 'de_num', title: __('德语站销量'), operate: false},
                         {field: 'jp_sku', title: __('日语站SKU'), operate: false},
                         {field: 'jp_num', title: __('日语站销量'), operate: false},
+                        {field: 'fr_sku', title: __('法语站SKU'), operate: false},
+                        {field: 'fr_num', title: __('法语站销量'), operate: false},
                         { field: 'available_stock', title: __('可用库存'), operate: false },
                         { field: 'all_num', title: __('汇总销量'), operate: false },
                         { field: 'created_at', visible: false, title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange' },

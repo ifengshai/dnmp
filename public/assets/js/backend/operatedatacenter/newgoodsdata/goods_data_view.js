@@ -21,19 +21,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $('#run_glass').show();
                     $('#old_glass').show();
                     $('#son_glass').show();
-                } else if (order_platform == 2 || order_platform == 10 || order_platform == 11) {
-                    $('.zeelool-div').hide();
-                    $('.voogueme-div').show();
-                    $('.nihao-div').hide();
-                    $("#optical_glass").html('平光镜');
-                    $('#run_glass').hide();
-                    $('#old_glass').hide();
-                    $('#son_glass').hide();
-                    // $('#c-order_platform').show();
                 } else if (order_platform == 3) {
                     $('.zeelool-div').hide();
                     $('.voogueme-div').hide();
                     $('.nihao-div').show();
+                    $("#optical_glass").html('平光镜');
+                    $('#run_glass').hide();
+                    $('#old_glass').hide();
+                    $('#son_glass').hide();
+                } else{
+                    $('.zeelool-div').hide();
+                    $('.voogueme-div').show();
+                    $('.nihao-div').hide();
                     $("#optical_glass").html('平光镜');
                     $('#run_glass').hide();
                     $('#old_glass').hide();

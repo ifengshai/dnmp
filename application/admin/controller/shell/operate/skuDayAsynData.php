@@ -60,6 +60,7 @@ class skuDayAsynData extends Command
                 $model = Db::connect('database.db_zeelool_fr_online');
                 break;
         }
+
         $tStart = strtotime('2021-05-15');
         $tend = time();
         for($i = $tStart;$i<$tend;$i+=3600*24){

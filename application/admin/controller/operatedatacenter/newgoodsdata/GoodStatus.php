@@ -23,7 +23,7 @@ class GoodStatus extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','meeloog','wesee','zeelool_de','zeelool_jp'])){
+            if(!in_array($val['name'],['zeelool','voogueme','meeloog','wesee','zeelool_de','zeelool_jp','zeelool_fr'])){
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -43,7 +43,7 @@ class GoodStatus extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $order_platform = $params['order_platform'];
-            $json['xColumnName'] = ['zeelool','voogueme','meeloog','wesee','zeelool-es','zeelool-de','zeelool-jp'];
+            $json['xColumnName'] = ['zeelool','voogueme','meeloog','wesee','zeelool-es','zeelool-de','zeelool-jp','zeelool-fr'];
 
             if ($order_platform == 1){
                 $up_field = 'glass_in_sale_num as total';
@@ -110,23 +110,30 @@ class GoodStatus extends Backend
             $platform_jp_yushou_num =Db::name('datacenter_day')->where('site',11)->where($where)->field($presell_field)->select();
             $platform_jp_yushou_num =$platform_jp_yushou_num[0]['total'];
 
+            $platform_fr_up_num =Db::name('datacenter_day')->where('site',15)->where($where)->field($up_field)->select();
+            $platform_fr_up_num =$platform_fr_up_num[0]['total'];
+            $platform_fr_down_num =Db::name('datacenter_day')->where('site',15)->where($where)->field($down_field)->select();
+            $platform_fr_down_num =$platform_fr_down_num[0]['total'];
+            $platform_fr_yushou_num =Db::name('datacenter_day')->where('site',15)->where($where)->field($presell_field)->select();
+            $platform_fr_yushou_num =$platform_fr_yushou_num[0]['total'];
+
             $json['columnData'] = [
                 [
                     'type' => 'bar',
                     'barWidth' => '10%',
-                    'data' => [$platform_z_up_num,$platform_v_up_num,$platform_n_up_num,$platform_w_up_num,$platform_es_up_num,$platform_de_up_num,$platform_jp_up_num],
+                    'data' => [$platform_z_up_num,$platform_v_up_num,$platform_n_up_num,$platform_w_up_num,$platform_es_up_num,$platform_de_up_num,$platform_jp_up_num,$platform_fr_up_num],
                     'name' => '在售'
                 ],
                 [
                     'type' => 'bar',
                     'barWidth' => '10%',
-                    'data' => [$platform_z_yushou_num,$platform_v_yushou_num,$platform_n_yushou_num,$platform_w_yushou_num,$platform_es_yushou_num,$platform_de_yushou_num,$platform_jp_yushou_num],
+                    'data' => [$platform_z_yushou_num,$platform_v_yushou_num,$platform_n_yushou_num,$platform_w_yushou_num,$platform_es_yushou_num,$platform_de_yushou_num,$platform_jp_yushou_num,$platform_fr_yushou_num],
                     'name' => '售罄'
                 ],
                 [
                     'type' => 'bar',
                     'barWidth' => '10%',
-                    'data' => [$platform_z_down_num,$platform_v_down_num,$platform_n_down_num,$platform_w_down_num,$platform_es_down_num,$platform_de_down_num,$platform_jp_down_num],
+                    'data' => [$platform_z_down_num,$platform_v_down_num,$platform_n_down_num,$platform_w_down_num,$platform_es_down_num,$platform_de_down_num,$platform_jp_down_num,$platform_fr_down_num],
                     'name' => '下架'
                 ],
             ];

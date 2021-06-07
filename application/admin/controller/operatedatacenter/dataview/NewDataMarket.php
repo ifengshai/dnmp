@@ -45,7 +45,7 @@ class NewDataMarket extends Backend
     {
         $platform = $this->magentoplatform->getNewAuthSite();
         foreach ($platform as $k=>$v){
-            if(!in_array($k,[1,2,3,10,11,5,15])){
+            if(!in_array($k,[1,2,3,10,11,5])){
                 unset($platform[$k]);
             }
         }

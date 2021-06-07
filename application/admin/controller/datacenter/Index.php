@@ -39,6 +39,7 @@ class Index extends Backend
         $this->zeeloolDe = new \app\admin\model\order\order\ZeeloolDe;
         $this->zeeloolEs = new \app\admin\model\order\order\ZeeloolEs;
         $this->zeeloolJp = new \app\admin\model\order\order\ZeeloolJp;
+        $this->zeeloolFr = new \app\admin\model\order\order\ZeeloolFr;
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->lens = new \app\admin\model\lens\Index;
@@ -120,6 +121,8 @@ class Index extends Backend
 
                 $v['jp_sku'] = $platform_list[11];
 
+                $v['fr_sku'] = $platform_list[15];
+
                 $skus = array_merge($skus, array_values($platform_list));
             }
             unset($v);
@@ -136,7 +139,8 @@ class Index extends Backend
                 $v['es_num'] = $sales_num_list[9][$v['es_sku']] ?: 0;
                 $v['de_num'] = $sales_num_list[10][$v['de_sku']] ?: 0;
                 $v['jp_num'] = $sales_num_list[11][$v['jp_sku']] ?: 0;
-                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'];
+                $v['fr_num'] = $sales_num_list[11][$v['fr_sku']] ?: 0;
+                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'] + $v['fr_num'];
             }
             unset($v);
 
@@ -1502,6 +1506,8 @@ class Index extends Backend
 
             $v['jp_sku'] = $platform_list[11];
 
+            $v['fr_sku'] = $platform_list[11];
+
             $skus = array_merge($skus, array_values($platform_list));
         }
         unset($v);
@@ -1518,7 +1524,8 @@ class Index extends Backend
             $v['es_num'] = $sales_num_list[9][$v['es_sku']] ?: 0;
             $v['de_num'] = $sales_num_list[10][$v['de_sku']] ?: 0;
             $v['jp_num'] = $sales_num_list[11][$v['jp_sku']] ?: 0;
-            $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'];
+            $v['fr_num'] = $sales_num_list[11][$v['fr_sku']] ?: 0;
+            $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'] +$v['fr_num'];
             unset($v['z_sku']);
             unset($v['v_sku']);
             unset($v['n_sku']);
@@ -1527,6 +1534,7 @@ class Index extends Backend
             unset($v['es_sku']);
             unset($v['de_sku']);
             unset($v['jp_sku']);
+            unset($v['fr_sku']);
         }
         unset($v);
         $headlist = [
