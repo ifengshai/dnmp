@@ -265,6 +265,13 @@ class StockTransferOrder extends Backend
         $this->assign('item', $item);
         $allStock = Db::name('warehouse_stock')->column('name','id');
         $this->assign('all_stock', $allStock);
+        $allTerm = AuthGroup::getAllNextGroup(135);
+        $allPersonIds = Db::name('auth_group_access')->where('group_id','in',$allTerm)->column('uid');
+        $allPerson1 = Db::name('admin')->where('id','in',$allPersonIds)->column('nickname');
+        foreach ($allPerson1 as $k=>$v){
+            $allPerson[$v] = $v;
+        }
+        $this->assign('all_person', $allPerson);
         return $this->view->fetch();
     }
 
