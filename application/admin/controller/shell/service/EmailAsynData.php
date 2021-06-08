@@ -23,18 +23,23 @@ class EmailAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $data = Db::name('zendesk_mail_template')
-            ->field('id,template_content')
+        $data = Db::name('zendesk_comments')
+            ->where('id',29535)
+            ->field('id,body,html_body')
             ->select();
         foreach ($data as $value){
-            if(strpos($value['template_content'],'Dear Customer,')!==false){
-                $str = str_replace('Dear Customer,','Dear {{username}},',$value['template_content']);
-                Db::name('zendesk_mail_template')
-                    ->where('id',$value['id'])
-                    ->update(['template_content'=>$str]);
-                echo $value['id']." is ok"."\n";
-                usleep(10000);
+            $arr = [];
+            if(strpos($value['body'],'nihao.zendesk.com')!==false){
+                $arr['body'] = str_replace('nihao.zendesk.com','meeloog.zendesk.com',$value['body']);
             }
+            if(strpos($value['html_body'],'nihao.zendesk.com')!==false){
+                $arr['html_body'] = str_replace('nihao.zendesk.com','meeloog.zendesk.com',$value['html_body']);
+            }
+            Db::name('zendesk_comments')
+                ->where('id',$value['id'])
+                ->update($arr);
+            echo $value['id']." is ok"."\n";
+            usleep(10000);
         }
         $output->writeln("All is ok");
     }
