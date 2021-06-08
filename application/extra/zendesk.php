@@ -23,7 +23,7 @@ return [
     'nihaooptical'         => [
         'subdomain' => "meeloog",
         'username'  => "wangwei@nextmar.com",
-        'token'     => "1T6P4ewBZsuGLbHcx9WGpEprConFoEd8H5bPZlER",
+        'token'     => "LgIPk6w2wVw0qhJB0pcxRHSrMMbpjPxhHfmUNoIf",
     ],
     'priority'             => [
         0 => '',
