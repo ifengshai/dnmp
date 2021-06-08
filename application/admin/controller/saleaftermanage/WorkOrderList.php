@@ -170,15 +170,15 @@ class WorkOrderList extends Backend
                         $newWorkIds = implode(',', $newWorkIds);
                         if (strlen($newWorkIds) > 0) {
                             //数据查询的条件
-                            $map = "(id in ($newWorkIds) or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
+                            $map2 = "(id in ($newWorkIds) or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
                         } else {
-                            $map = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
+                            $map2 = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
                         }
                     } else {
-                        $map = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                        $map2 = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                     }
                 } else {
-                    $map = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                    $map2 = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                 }
                 unset($filter['recept_person_id']);
                 unset($filter['measure_choose_id']);
@@ -189,7 +189,6 @@ class WorkOrderList extends Backend
                 unset($filter['recept_person']);
             }
             if ($filter['stock_id']) {
-                dump($filter['stock_id']);
                 $stockId = $filter['stock_id'];
                 $map['stock_id'] = $stockId;
                 unset($filter['stock_id']);
@@ -217,12 +216,14 @@ class WorkOrderList extends Backend
                 ->where($where)
                 ->where($map)
                 ->where($map1)
+                ->where($map2)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
                 ->where($where)
                 ->where($map)
                 ->where($map1)
+                ->where($map2)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
