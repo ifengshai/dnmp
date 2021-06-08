@@ -188,7 +188,7 @@ class WorkOrderList extends Backend
                 $map['id'] = ['in', $workIds];
                 unset($filter['recept_person']);
             }
-            if ($filter['stock_id']) {
+            if (isset($filter['stock_id'])) {
                 $map['stock_id'] = ['=', $filter['stock_id']];
                 unset($filter['stock_id']);
             }
