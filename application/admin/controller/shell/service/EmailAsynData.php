@@ -23,6 +23,7 @@ class EmailAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
+        set_time_limit(0);
         $data = Db::name('zendesk_comments')
             ->where('platform',3)
             ->field('id,body,html_body,attachments')
