@@ -188,8 +188,8 @@ class WorkOrderList extends Backend
                 $map['id'] = ['in', $workIds];
                 unset($filter['recept_person']);
             }
-            if (isset($filter['stock_id'])) {
-                $map['stock_id'] = ['=', $filter['stock_id']];
+            if ($filter['stock_id']) {
+                $map['stock_id'] = $filter['stock_id'];
                 unset($filter['stock_id']);
             }
             //筛选措施
