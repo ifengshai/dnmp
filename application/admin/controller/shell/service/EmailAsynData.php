@@ -24,8 +24,8 @@ class EmailAsynData extends Command
     protected function execute(Input $input, Output $output)
     {
         $data = Db::name('zendesk_comments')
-            ->where('ticket_id',29535)
-            ->field('id,body,html_body')
+            ->where('platform',3)
+            ->field('id,body,html_body,attachments')
             ->select();
         foreach ($data as $value){
             $arr = [];
@@ -34,6 +34,9 @@ class EmailAsynData extends Command
             }
             if(strpos($value['html_body'],'nihao.zendesk.com')!==false){
                 $arr['html_body'] = str_replace('nihao.zendesk.com','meeloog.zendesk.com',$value['html_body']);
+            }
+            if(strpos($value['attachments'],'nihao.zendesk.com')!==false){
+                $arr['attachments'] = str_replace('nihao.zendesk.com','meeloog.zendesk.com',$value['attachments']);
             }
             Db::name('zendesk_comments')
                 ->where('id',$value['id'])
