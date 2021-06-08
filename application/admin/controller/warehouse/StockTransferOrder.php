@@ -3,6 +3,7 @@
 namespace app\admin\controller\warehouse;
 
 use app\admin\model\AuthGroup;
+use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -14,6 +15,7 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use think\Loader;
+use think\Model;
 
 /**
  * 库位管理
@@ -110,10 +112,15 @@ class StockTransferOrder extends Backend
             if (empty($params['response_person'])) {
                 $this->error('调拨负责人不能为空');
             }
+            $platSku = new Item();
             //添加调拨单保存或提交审核时数据有效性的判断
             foreach ($sku as $k => $v) {
                 if (empty($v)) {
                     $this->error('sku不能为空');
+                }
+                $isExistSku = $platSku->where('sku',$v)->find();
+                if (!$isExistSku){
+                    $this->error('sku'.$v.'不存在，请检查');
                 }
                 if ($num[$k] <= 0 || empty($num[$k])) {
                     $this->error('期望调拨数量不能为0，请确认' . $v . '期望调拨数量');
@@ -195,10 +202,15 @@ class StockTransferOrder extends Backend
             if (empty($params['response_person'])) {
                 $this->error('调拨负责人不能为空');
             }
+            $platSku = new Item();
             //添加调拨单保存或提交审核时数据有效性的判断
             foreach ($sku as $k => $v) {
                 if (empty($v)) {
                     $this->error('sku不能为空');
+                }
+                $isExistSku = $platSku->where('sku',$v)->find();
+                if (!$isExistSku){
+                    $this->error('sku'.$v.'不存在，请检查');
                 }
                 if ($num[$k] <= 0 || empty($num[$k])) {
                     $this->error('期望调拨数量不能为0，请确认' . $v . '期望调拨数量');
