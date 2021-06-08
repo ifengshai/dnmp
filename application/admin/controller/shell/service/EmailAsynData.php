@@ -24,7 +24,7 @@ class EmailAsynData extends Command
     protected function execute(Input $input, Output $output)
     {
         $data = Db::name('zendesk_comments')
-            ->where('id',29535)
+            ->where('ticket_id',29535)
             ->field('id,body,html_body')
             ->select();
         foreach ($data as $value){
