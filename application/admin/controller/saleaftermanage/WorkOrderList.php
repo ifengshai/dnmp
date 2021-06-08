@@ -189,7 +189,9 @@ class WorkOrderList extends Backend
                 unset($filter['recept_person']);
             }
             if ($filter['stock_id']) {
-                $map['stock_id'] = $filter['stock_id'];
+                dump($filter['stock_id']);
+                $stockId = $filter['stock_id'];
+                $map['stock_id'] = $stockId;
                 unset($filter['stock_id']);
             }
             //筛选措施
