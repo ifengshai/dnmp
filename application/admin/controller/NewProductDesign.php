@@ -9,6 +9,7 @@ use app\admin\model\DistributionLog;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemBrand;
+use app\admin\model\itemmanage\ItemCategory;
 use app\admin\model\order\Order;
 use app\common\controller\Backend;
 use app\common\model\Auth;
@@ -183,6 +184,7 @@ class NewProductDesign extends Backend
             }
             $list = collection($list)->toArray();
             $itemPlatform = new ItemPlatformSku();
+            $itemCategory= new ItemCategory();
             $platformType = ['0','Z','V','N','M','W','0','0','A','Es','De','Jp','Chic','Z_cn','Ali','Z_fr'];
             foreach ($list as $key=>$item){
                 $list[$key]['label'] = $map['a.status'] ? $map['a.status'] : 0;
@@ -191,8 +193,10 @@ class NewProductDesign extends Backend
                 }else{
                     $list[$key]['responsible_id'] = '暂无';
                 }
-                $itemStatusIsNew = $Item->where(['sku'=>$item['sku']])->field('item_status,is_new')->find();
+                $itemStatusIsNew = $Item->where(['sku'=>$item['sku']])->field('item_status,is_new,available_stock,category_id')->find();
                 $list[$key]['item_status'] =$itemStatusIsNew->item_status;
+                $list[$key]['stock'] =$itemStatusIsNew->available_stock;
+                $list[$key]['category'] =$itemCategory->where('id',$itemStatusIsNew->category_id)->value('name');
                 $list[$key]['is_new'] = $itemStatusIsNew->is_new;
                 //$list[$key]['addtime'] = Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime') ? Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime'):'';
                 $list[$key]['location_code'] = Db::name('purchase_sample')->alias('a')->join(['fa_purchase_sample_location' => 'b'],'a.location_id=b.id')->where('a.sku',$item['sku'])->value('b.location');

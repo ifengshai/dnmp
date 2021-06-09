@@ -82,6 +82,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('序号'),operate: false},
                         {field: 'sku', title: __('Sku')},
+                        {field: 'stock', title: __('库存'),operate: false},
+                        {field: 'category', title: __('商品分类'),operate: false},
                         {
                             field: 'item_status', title: __('商品状态'),
                             searchList: { 1: '新建', 2: '待审核', 3: '审核通过', 4: '待分配', 5: '审核拒绝', 6: '取消'},
