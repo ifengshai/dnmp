@@ -4,6 +4,7 @@ namespace app\admin\controller\saleaftermanage;
 
 use app\admin\model\infosynergytaskmanage\InfoSynergyTask;
 use app\admin\model\infosynergytaskmanage\InfoSynergyTaskCategory;
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
@@ -315,10 +316,9 @@ class OrderReturn extends Backend
         $customer_email = input('email', '');
         if ($request->isPost()) {
 
-
+            //抖店视图
             if ($order_platform == 13) {
-               return $this->itemDouDian($request);
-                die;
+                return $this->itemDouDian($request);
             };
 
             //获取输入的订单号
@@ -602,7 +602,7 @@ class OrderReturn extends Backend
      * @author wangpenglei
      * @date   2021/6/8 17:50
      */
-    public function itemDouDian(Request $request)
+    protected function itemDouDian(Request $request)
     {
         //获取输入的订单号
         $increment_id = trim($request->post('increment_id'));
@@ -634,25 +634,63 @@ class OrderReturn extends Backend
             $where['c.track_number'] = $track_number;
         }
 
+        if (empty($where)) {
+            return json(['code' => 0, 'msg' => '请至少输入一个筛选项']);
+        }
+
         $where['c.is_repeat'] = 0;
         $where['c.is_split'] = 0;
         $order = new NewOrder();
         $orderList = $order->alias('a')
+            ->field('a.id,a.increment_id,a.order_type,c.agent_way_title,c.track_number,a.entity_id,a.status,a.total_qty_ordered,a.order_currency_code,a.base_grand_total,a.base_shipping_amount,a.created_at')
             ->where($where)
             ->where('a.site', $order_platform)
             ->join(['fa_order_process' => 'c'], 'a.id=c.order_id')
-            ->find();
-        $orderList = collection($orderList)->toArray();
-
-        $orderItem = new NewOrderItemProcess();
-        $orderItemResult = $orderItem->alias('a')
-            ->where(['a.order_id' => $orderList['order_id']])
-            ->join(['fa_order_item_option' => 'b'],'a.order_id=b.order_id')
             ->select();
-        $orderItemResult = collection($orderItemResult)->toArray();
+        $orderList = collection($orderList)->toArray();
+        $orderItem = new NewOrderItemProcess();
+        foreach ($orderList as $k => $v) {
+            switch ($v['order_type']) {
+                case 2:
+                    $orderList[$k]['order_type'] = '<span style="color:#f39c12">批发</span>';
+                    break;
+                case 3:
+                    $orderList[$k]['order_type'] = '<span style="color:#18bc9c">网红</span>';
+                    break;
+                case 4:
+                    $orderList[$k]['order_type'] = '<span style="color:#e74c3c">补发</span>';
+                    break;
+                default:
+                    $orderList[$k]['order_type'] = '<span style="color:#0073b7">普通</span>';
+                    break;
+            }
+            $orderList[$k]['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
+
+            $orderItemResult = $orderItem->alias('a')
+                ->field('b.*,a.item_order_number')
+                ->where(['a.order_id' => $v['id']])
+                ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
+                ->select();
+            $orderItemResult = collection($orderItemResult)->toArray();
+            $skus = array_column($orderItemResult, 'sku');
+
+            //查询虚拟仓库存
+            $itemPlatForm = new ItemPlatformSku();
+            $stockList = $itemPlatForm->where(['sku' => ['in', $skus], 'platform_type' => 13])->column('stock', 'sku');
+            foreach ($orderItemResult as $key => $val) {
+                $orderItemResult[$key]['stock'] = $stockList[$val['sku']];
+            }
+            $orderList[$k]['item'] = $orderItemResult;
+
+            //查询工单
+            $workList = new \app\admin\model\saleaftermanage\WorkOrderList();
+            $workResult = $workList->where(['platform_order' => $v['increment_id']])->select();
+            $workResult = collection($workResult)->toArray();
+            $orderList[$k]['workOrderList'] = $workResult;
+
+        }
         //上传订单平台
-        $this->view->assign('orderItemResult', $orderItemResult);
-        $this->view->assign('orderInfoResult', $orderList);
+        $this->view->assign('orderList', $orderList);
         $this->view->assign('order_platform', $order_platform);
         $this->view->engine->layout(false);
         $html = $this->view->fetch('doudian_item');

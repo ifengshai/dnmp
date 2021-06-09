@@ -6,6 +6,7 @@ use app\common\controller\Api;
 use app\admin\model\OrderNode;
 use app\admin\model\OrderNodeDetail;
 use app\admin\model\OrderNodeCourier;
+use fast\Kuaidi100;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
@@ -290,6 +291,15 @@ class SelfApi extends Api
             'shipment_data_type' => $shipment_data_type,
             'track_number'       => $track_number,
         ]);
+
+        if ($site == 13) {
+            //快递100注册
+
+            //订阅快递100推送
+            Kuaidi100::setPoll($logistics_company_no[$k], $v, implode(',', $ids));
+
+        }
+
 
         //注册17track
         $title = strtolower(str_replace(' ', '-', $title));

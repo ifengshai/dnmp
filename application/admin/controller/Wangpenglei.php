@@ -1409,7 +1409,6 @@ class Wangpenglei extends Backend
             //判断是否为现片，其余为定制
             $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
             $tempArr = [];
-            $tempOrderType = [];
             foreach ($lensData as &$v) {
                 if (!$v['sph_start']) {
                     $v['sph_start'] = $v['sph_end'];
@@ -1426,23 +1425,15 @@ class Wangpenglei extends Backend
 
                 if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
                     $tempArr['od'] = 1;
-                } else {
-                    $tempArr['os'] = 0;
-                }
-                if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
-                    $tempArr['os'] = 1;
-                } else {
-                    $tempArr['os'] = 0;
                 }
 
-                if ($tempArr['od'] == 1 && $tempArr['os'] == 1) {
-                    $tempOrderType[] = 2;
-                } else {
-                    $tempOrderType[] = 3;
+                if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
+                    $tempArr['os'] = 1;
                 }
             }
 
-            if (in_array(2, $tempOrderType)) {
+
+            if ($tempArr['od'] == 1 && $tempArr['os'] == 1) {
                 $arr['order_prescription_type'] = 2;
             }
         }
@@ -1462,12 +1453,12 @@ class Wangpenglei extends Backend
      */
     public function test_lens()
     {
-        $params['od_sph'] = '-2.25';
-        $params['os_sph'] = '-2.00';
-        $params['od_cyl'] = '-2.50';
-        $params['os_cyl'] = '-2.00';
+        $params['od_sph'] = '-7.25';
+        $params['os_sph'] = '-7.50';
+        $params['od_cyl'] = '-1.50';
+        $params['os_cyl'] = '-2.50';
         $params['pd'] = 60;
-        $params['lens_number'] = 23100001;
+        $params['lens_number'] = 24200000;
         $data = $this->set_processing_type($params);
         dump($data);
         die;
