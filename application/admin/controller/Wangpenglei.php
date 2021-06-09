@@ -190,7 +190,6 @@ class Wangpenglei extends Backend
 
         $skus = Db::table('fa_zz_temp1')->column('sku');
         foreach ($skus as $k => $v) {
-            $v = 'ZM0979-04';
             $map = [];
             $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
             $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
@@ -223,8 +222,6 @@ class Wangpenglei extends Backend
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
                 ->count(1);
-            echo $this->orderitemprocess->getLastSql();
-            die;
 
             $p_map['sku'] = $v;
             $data['occupy_stock'] = $occupy_stock;
