@@ -1566,7 +1566,6 @@ class OrderData extends Backend
             //判断是否为现片，其余为定制
             $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
             $tempArr = [];
-            $tempOrderType = [];
             foreach ($lensData as $v) {
 
                 if (!$v['sph_start']) {
@@ -1584,23 +1583,13 @@ class OrderData extends Backend
 
                 if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
                     $tempArr['od'] = 1;
-                } else {
-                    $tempArr['od'] = 0;
                 }
                 if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
                     $tempArr['os'] = 1;
-                } else {
-                    $tempArr['os'] = 0;
-                }
-
-                if ($tempArr['od'] == 1 && $tempArr['os'] == 1) {
-                    $tempOrderType[] = 2;
-                } else {
-                    $tempOrderType[] = 3;
                 }
             }
 
-            if (in_array(2, $tempOrderType)) {
+            if ($tempArr['od'] == 1 && $tempArr['os'] == 1) {
                 $arr['order_prescription_type'] = 2;
             }
         }
