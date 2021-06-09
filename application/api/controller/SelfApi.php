@@ -296,7 +296,7 @@ class SelfApi extends Api
             //快递100注册
 
             //订阅快递100推送
-            Kuaidi100::setPoll($logistics_company_no[$k], $v, implode(',', $ids));
+            Kuaidi100::setPoll();
 
         }
 
