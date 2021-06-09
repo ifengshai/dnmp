@@ -91,7 +91,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                     10: 'ZeeloolDe',
                                     11: 'ZeeloolJp',
                                     12: 'voogmechic',
-                                    15: 'ZeeloolFr'
+                                    15: 'ZeeloolFr',
+                                    66: '网红管理系统',
                                 },
                                 custom: {
                                     1: 'black',
@@ -422,7 +423,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                     10: 'ZeeloolDe',
                                     11: 'ZeeloolJp',
                                     12: 'voogmechic',
-                                    15: 'ZeeloolFr'
+                                    15: 'ZeeloolFr',
+                                    66: '网红管理系统'
                                 },
                                 custom: {
                                     1: 'black',
