@@ -171,7 +171,7 @@ class Wangpenglei extends Backend
             $map['b.status'] = ['in', ['processing']];
             $map['a.distribution_status'] = ['>', 2]; //大于待配货
             $map['c.check_status'] = 0; //未审单计算配货占用
-            $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
+            $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
             $map['c.is_repeat'] = 0;
             $map['c.is_split'] = 0;
             $distribution_occupy_stock = $this->orderitemprocess->alias('a')->where($map)
@@ -211,7 +211,7 @@ class Wangpenglei extends Backend
             $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
             $map['c.check_status'] = 0; //未审单计算订单占用
-            $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
+            $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
             $map['c.is_repeat'] = 0;
             $map['c.is_split'] = 0;
             $occupy_stock = $this->orderitemprocess->alias('a')->where($map)
@@ -334,7 +334,7 @@ class Wangpenglei extends Backend
                     $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
                     $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
                     $map['c.check_status'] = 0; //未审单计算订单占用
-                    $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
+                    $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
                     $map['c.is_repeat'] = 0;
                     $map['c.is_split'] = 0;
                     $map['a.site'] = $val['platform_type'];
