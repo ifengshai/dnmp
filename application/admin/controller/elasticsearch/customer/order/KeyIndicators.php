@@ -77,7 +77,7 @@ class KeyIndicators extends BaseElasticsearch
             }
             $cacheStr = 'key_indicators_' . $site. '-' . $timeStr . $compareTimeStr;
             $cacheData = Cache::get($cacheStr);
-            //if (!$cacheData) {
+            if (!$cacheData) {
                 $compareData = [];
                 if ($compareTimeStr) {
                     $compareTime = explode(' ', $compareTimeStr);
@@ -86,12 +86,11 @@ class KeyIndicators extends BaseElasticsearch
                     $compareData = $this->buildPurchaseSearch($site, $compareStart, $compareEnd);
                 }
                 $result = $this->buildPurchaseSearch($site, $start, $end);
-                dump($result);die;
                 $allData = $this->esFormat->formatPurchaseData($site, $result, $compareData);
                 Cache::set($cacheStr, $allData, 600);
-//            } else {
-//                $allData = $cacheData;
-//            }
+            } else {
+                $allData = $cacheData;
+            }
             $this->success('', '', $allData);
         }
     }
