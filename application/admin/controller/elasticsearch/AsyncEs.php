@@ -112,6 +112,7 @@ class AsyncEs extends BaseElasticsearch
                 }
             }
             $datas[] = $this->formatDate($value,$mergeData);
+            dump($datas);
             dump($this->esService->addMutilToEs('mojing_order',$datas));die;
 
         }
