@@ -336,7 +336,6 @@ class Wangpenglei extends Backend
             } elseif ($available_stock == 0) {
                 $platform->where(['sku' => $v])->update(['stock' => 0]);
             } elseif ($available_stock < 0) {
-
                 if ($real_stock > 0) {
                     $available_num = abs($available_stock);
                     $skus = $platform->where(['sku' => $v])->column('platform_sku');
@@ -348,20 +347,18 @@ class Wangpenglei extends Backend
                     $map['c.is_repeat'] = 0;
                     $map['c.is_split'] = 0;
                     $map['a.distribution_status'] = ['<=', 2];
-                    $occupyList = $this->orderitemprocess->alias('a')->where($map)
+                    $sql = $this->orderitemprocess->alias('a')->where($map)
                         ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                         ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
+                        ->field('a.id,a.site')
                         ->order('b.created_at desc')
                         ->limit($available_num)
-                        ->group('a.site')
-                        ->column('count(1)','a.site');
-                    dump($occupyList);
+                        ->buildSql();
+
+                    $occupyList = Db::connect('database.db_mojing_order')->table($sql.' d')->field('count(1) as num,d.site')->group('d.site')->select();
                     foreach ($occupyList as $keys => $value) {
-                        $platform->where(['sku' => $v, 'platform_type' => $keys])->update(['stock' => '-' . $value]);
+                        $platform->where(['sku' => $v, 'platform_type' => $value['site']])->update(['stock' => '-' . $value['num']]);
                     }
-
-
-
 
                 } else {
                     foreach ($item_platform_sku as $key => $val) {
