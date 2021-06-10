@@ -374,8 +374,6 @@ class Wangpenglei extends Backend
                             ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                             ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
                             ->count(1);
-
-                        echo $this->orderitemprocess->getLastSql();
                         $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => '-' . $occupy_stock]);
                     }
 
