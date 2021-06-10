@@ -33,7 +33,8 @@ class AsyncEs extends BaseElasticsearch
     public function asyncOrder()
     {
         Debug::remark('begin');
-        NewOrder::where('site','in',[10,15])->where('created_at','>=','1623307968')->chunk(3000,function($newOrder){
+        $orders = NewOrder::where('site','in',[10,15])->where('created_at','>=','1623307968')->order('id','desc')->select();
+        foreach($orders as $newOrder){
             $data = array_map(function($value) {
                 $value = array_map(function($v){
                     return $v === null ? 0 : $v;
@@ -70,7 +71,7 @@ class AsyncEs extends BaseElasticsearch
                 return $this->formatDate($value,$mergeData);
             },collection($newOrder)->toArray());
             $this->esService->addMutilToEs('mojing_order',$data);
-        },'id','desc');
+        }
         Debug::remark('end');
         echo Debug::getRangeTime('begin','end').'s';
     }
