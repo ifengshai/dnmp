@@ -83,7 +83,8 @@ class AsyncEs extends BaseElasticsearch
             $value = array_map(function($v){
                 return $v === null ? 0 : $v;
             },collection($order)->toArray());
-
+            dump($order);
+dump($value);die;
             //nihao站的终端转换
             if($value['site'] == 3 && $value['store_id'] == 2) {
                 $value['store_id'] = 4;
