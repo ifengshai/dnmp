@@ -355,9 +355,13 @@ class Wangpenglei extends Backend
                         ->limit($available_num)
                         ->group('a.site')
                         ->column('count(1)','a.site');
+                    dump($occupyList);
                     foreach ($occupyList as $keys => $value) {
                         $platform->where(['sku' => $v, 'platform_type' => $keys])->update(['stock' => '-' . $value]);
                     }
+
+
+
 
                 } else {
                     foreach ($item_platform_sku as $key => $val) {
