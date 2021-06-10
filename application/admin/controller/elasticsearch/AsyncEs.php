@@ -15,6 +15,7 @@ use app\admin\model\order\order\NewOrder;
 use app\admin\model\OrderNode;
 use app\admin\model\web\WebShoppingCart;
 use app\admin\model\web\WebUsers;
+use think\Collection;
 use think\Db;
 use think\Debug;
 
@@ -81,7 +82,7 @@ class AsyncEs extends BaseElasticsearch
         foreach($orders as $order){
             $value = array_map(function($v){
                 return $v === null ? 0 : $v;
-            },$order);
+            },collection($order)->toArray());
 
             //nihao站的终端转换
             if($value['site'] == 3 && $value['store_id'] == 2) {
