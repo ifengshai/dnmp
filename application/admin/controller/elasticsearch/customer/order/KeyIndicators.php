@@ -86,6 +86,7 @@ class KeyIndicators extends BaseElasticsearch
                     $compareData = $this->buildPurchaseSearch($site, $compareStart, $compareEnd);
                 }
                 $result = $this->buildPurchaseSearch($site, $start, $end);
+                dump($result);die;
                 $allData = $this->esFormat->formatPurchaseData($site, $result, $compareData);
                 Cache::set($cacheStr, $allData, 600);
 //            } else {
