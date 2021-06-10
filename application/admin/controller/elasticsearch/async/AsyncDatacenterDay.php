@@ -88,5 +88,6 @@ class AsyncDatacenterDay extends BaseElasticsearch
             },collection($newOrder)->toArray());
         });
 
+
     }
 }

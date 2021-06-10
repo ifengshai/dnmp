@@ -258,6 +258,16 @@ function order_data_view() {
         $('#ordernum_rate100').text(order_total100.rate);
         $('#ordernum200').text(order_total200.doc_count);
         $('#ordernum_rate200').text(order_total200.rate);
+        $('#flatrate_free_order_num').text('');
+        $('#flatrate_free_rate').text('');
+        $('#flatrate_nofree_order_num').text('');
+        $('#flatrate_nofree_rate').text('');
+        $('#flatrate_nofree_order_total').text('');
+        $('#tablerate_free_order_num').text('');
+        $('#tablerate_free_rate').text('');
+        $('#tablerate_nofree_order_num').text('');
+        $('#tablerate_nofree_rate').text('');
+        $('#tablerate_nofree_order_total').text('')
         //订单运费数据统计
         if(ship_type[0]) {
             var flatrate_free = ship_type[0];

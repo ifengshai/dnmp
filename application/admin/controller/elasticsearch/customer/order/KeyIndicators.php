@@ -75,7 +75,7 @@ class KeyIndicators extends BaseElasticsearch
                 $start = date('Ymd', strtotime($createat[0]));
                 $end = date('Ymd', strtotime($createat[3]));
             }
-            $cacheStr = 'key_indicators_' . $site . $timeStr . $compareTimeStr;
+            $cacheStr = 'key_indicators_' . $site. '-' . $timeStr . $compareTimeStr;
             $cacheData = Cache::get($cacheStr);
             if (!$cacheData) {
                 $compareData = [];
