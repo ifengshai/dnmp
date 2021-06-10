@@ -68,4 +68,25 @@ class AsyncDatacenterDay extends BaseElasticsearch
             echo $e->getMessage();
         }
     }
+
+    /**
+     * 每天凌晨4点同步数据
+     * @author huangbinbin
+     * @date   2021/6/10 14:19
+     */
+    public function asyncDatacenterDay()
+    {
+        DatacenterDay::chunk(10000,function($newOrder){
+            array_map(function($value) {
+                $value = array_map(function($v){
+                    return $v === null ? 0 : $v;
+                },$value);
+
+                $mergeData = strtotime($value['day_date'])  + 8*3600;
+                $updateData = $this->formatDate($value,$mergeData);
+                $this->esService->updateEs('mojing_datacenterday',$updateData);
+            },collection($newOrder)->toArray());
+        });
+
+    }
 }
