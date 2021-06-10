@@ -355,7 +355,7 @@ class Wangpenglei extends Backend
                         ->limit($available_num)
                         ->buildSql();
 
-                    $occupyList = Db::connect('database.db_mojing_order')->table($sql.' d')->field('count(1) as num,d.site')->group('d.site')->select();
+                    $occupyList = Db::connect('database.db_mojing_order')->table($sql . ' d')->field('count(1) as num,d.site')->group('d.site')->select();
                     foreach ($occupyList as $keys => $value) {
                         $platform->where(['sku' => $v, 'platform_type' => $value['site']])->update(['stock' => '-' . $value['num']]);
                     }
@@ -364,17 +364,18 @@ class Wangpenglei extends Backend
                     foreach ($item_platform_sku as $key => $val) {
                         $map['a.sku'] = $val['platform_sku'];
                         $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
-                        $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
                         $map['c.check_status'] = 0; //未审单计算订单占用
                         $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
                         $map['c.is_repeat'] = 0;
                         $map['c.is_split'] = 0;
                         $map['a.site'] = $val['platform_type'];
-                        $map['a.distribution_status'] = ['<=', 2];
+                        $map['a.distribution_status'] = ['in', [1, 2]];
                         $occupy_stock = $this->orderitemprocess->alias('a')->where($map)
                             ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                             ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
                             ->count(1);
+
+                        echo $this->orderitemprocess->getLastSql();
                         $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => '-' . $occupy_stock]);
                     }
 
