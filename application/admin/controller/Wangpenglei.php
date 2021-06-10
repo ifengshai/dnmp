@@ -285,7 +285,9 @@ class Wangpenglei extends Backend
                 continue;
             }
             //可用库存
-            $available_stock = $item->where($item_map)->value('available_stock');
+            $stockList = $item->where($item_map)->field('available_stock,stock,distribution_occupy_stock')->find();
+            $available_stock = $stockList['available_stock'];
+            $real_stock = $stockList['stock'] - $stockList['distribution_occupy_stock'];
 
             $item_platform_sku = $platform->where('sku', $v)->order('stock asc')->field('sku,platform_type,stock,platform_sku')->select();
             if (!$item_platform_sku) {
@@ -334,22 +336,49 @@ class Wangpenglei extends Backend
             } elseif ($available_stock == 0) {
                 $platform->where(['sku' => $v])->update(['stock' => 0]);
             } elseif ($available_stock < 0) {
-                foreach ($item_platform_sku as $key => $val) {
-                    $map['a.sku'] = $val['platform_sku'];
+
+                if ($real_stock > 0) {
+                    $available_num = abs($available_stock);
+                    $skus = $this->itemplatformsku->where(['sku' => $v])->column('platform_sku');
+                    $map['a.sku'] = ['in', $skus];
                     $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
                     $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
                     $map['c.check_status'] = 0; //未审单计算订单占用
                     $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
                     $map['c.is_repeat'] = 0;
                     $map['c.is_split'] = 0;
-                    $map['a.site'] = $val['platform_type'];
                     $map['a.distribution_status'] = ['<=', 2];
-                    $occupy_stock = $this->orderitemprocess->alias('a')->where($map)
+                    $occupyList = $this->orderitemprocess->alias('a')->where($map)
                         ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                         ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
-                        ->count(1);
-                    $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => '-' . $occupy_stock]);
+                        ->order('b.created_at desc')
+                        ->limit($available_num)
+                        ->group('a.site')
+                        ->column('count(1)','a.site');
+                    foreach ($occupyList as $keys => $value) {
+                        $platform->where(['sku' => $v, 'platform_type' => $keys])->update(['stock' => '-' . $value]);
+                    }
+
+                } else {
+                    foreach ($item_platform_sku as $key => $val) {
+                        $map['a.sku'] = $val['platform_sku'];
+                        $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
+                        $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
+                        $map['c.check_status'] = 0; //未审单计算订单占用
+                        $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
+                        $map['c.is_repeat'] = 0;
+                        $map['c.is_split'] = 0;
+                        $map['a.site'] = $val['platform_type'];
+                        $map['a.distribution_status'] = ['<=', 2];
+                        $occupy_stock = $this->orderitemprocess->alias('a')->where($map)
+                            ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                            ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
+                            ->count(1);
+                        $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => '-' . $occupy_stock]);
+                    }
+
                 }
+
             }
             usleep(10000);
             echo $k . "\n";
@@ -1254,8 +1283,6 @@ class Wangpenglei extends Backend
         Db::table('fa_zz_temp1')->query('truncate table fa_zz_temp1');
         Db::table('fa_zz_temp1')->insertAll($list);
     }
-
-
 
 
     public function test002()
