@@ -105,6 +105,15 @@ class Wangpenglei extends Backend
 
     /************************跑库存数据用START*****勿删*****************************/
 
+    public function set_stock()
+    {
+        $this->getStockList();
+        $this->set_product_relstock();
+        $this->set_product_process();
+        $this->set_product_process_order();
+        $this->set_product_sotck();
+        $this->set_platform_stock();
+    }
 
     /**
      *  根据条码计算实时库存
