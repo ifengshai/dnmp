@@ -124,11 +124,6 @@ class KeyIndicators extends BaseElasticsearch
                                     ],
                                 ],
                             ],
-                            [
-                                'match' => [
-                                    'site' => $site
-                                ]
-                            ],
                             //in查询
                             [
                                 'terms' => [
