@@ -32,7 +32,7 @@ class AsyncOrder extends BaseElasticsearch
 
             $res = $this->esService->addToEs('mojing_order', $insertData);
             if($data['site'] == 10) {
-                dump($$res);
+                dump($res);
             }
 
         } catch (\Exception $e) {
