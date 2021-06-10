@@ -80,6 +80,7 @@ class AsyncEs extends BaseElasticsearch
         $orders = NewOrder::where('site','in','10,15')->where('created_at','>','1621569600')->order('id','desc')->select();
         $datas = [];
         foreach($orders as $order){
+            dump(collection($order)->toArray());die;
             $value = array_map(function($v){
                 return $v === null ? 0 : $v;
             },collection($order)->toArray());
