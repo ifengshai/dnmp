@@ -339,7 +339,7 @@ class Wangpenglei extends Backend
 
                 if ($real_stock > 0) {
                     $available_num = abs($available_stock);
-                    $skus = $this->itemplatformsku->where(['sku' => $v])->column('platform_sku');
+                    $skus = $platform->where(['sku' => $v])->column('platform_sku');
                     $map['a.sku'] = ['in', $skus];
                     $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
                     $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
