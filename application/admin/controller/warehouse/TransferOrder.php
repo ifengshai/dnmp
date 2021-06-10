@@ -560,6 +560,7 @@ class TransferOrder extends Backend
 
         //模板文件列名
         try {
+            $reader->setReadDataOnly(true);
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
             }
