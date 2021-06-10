@@ -74,6 +74,47 @@ class AsyncEs extends BaseElasticsearch
         Debug::remark('end');
         echo Debug::getRangeTime('begin','end').'s';
     }
+    public function asyncOrderDeFr()
+    {
+        $orders = NewOrder::where('site','in','10,15')->where('created_at','>','1621569600')->order('id','desc')->select();
+        $datas = [];
+        foreach($orders as $order){
+            $value = array_map(function($v){
+                return $v === null ? 0 : $v;
+            },$order);
+
+            //nihao站的终端转换
+            if($value['site'] == 3 && $value['store_id'] == 2) {
+                $value['store_id'] = 4;
+            }
+            $value['shipping_method_type'] = 0;
+            //运输类型添加
+            if(in_array($value['shipping_method'],['freeshipping_freeshipping','flatrate_flatrate']))
+            {
+                if($value['base_shipping_amount'] == 0) $value['shipping_method_type'] = 0;
+                if($value['base_shipping_amount'] > 0) $value['shipping_method_type'] = 1;
+            }
+            if(in_array($value['shipping_method'],['tablerate_bestway']))
+            {
+                if($value['base_shipping_amount'] == 0) $value['shipping_method_type'] = 2;
+                if($value['base_shipping_amount'] > 0) $value['shipping_method_type'] = 3;
+            }
+            $mergeData = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] : $value['created_at'];
+            $value['payment_time'] = $mergeData + 8*3600;
+            $value['created_at'] = $value['created_at'] + 8*3600;
+            $value['updated_at'] = $value['updated_at'] + 8*3600;
+            $value['payment_time'] = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] + 8*3600 : $value['created_at'];
+            //删除无用字段
+            foreach($value as $key => $val) {
+                if(!in_array($key,['id','site','customer_id','increment_id','quote_id','status','store_id','base_grand_total','total_qty_ordered','order_type','order_prescription_type','shipping_method','shipping_title','shipping_method_type','country_id','region','region_id','payment_method','mw_rewardpoint_discount','mw_rewardpoint','base_shipping_amount','payment_time'])){
+                    unset($value[$key]);
+                }
+            }
+            $datas[] = $this->formatDate($value,$mergeData);
+
+        }
+        $this->esService->addMutilToEs('mojing_order',$datas);
+    }
 
     /**
      * 同步每日center的数据到es
