@@ -11,6 +11,7 @@ $html = __DIR__ . '/../templates/46readHtml.html';
 $callStartTime = microtime(true);
 
 $objReader = IOFactory::createReader('Html');
+$objReader->setReadDataOnly(true);
 $objPHPExcel = $objReader->load($html);
 
 $helper->logRead('Html', $html, $callStartTime);
