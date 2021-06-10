@@ -107,9 +107,6 @@ class KeyIndicators extends BaseElasticsearch
      */
     public function buildPurchaseSearch($site, $start, $end)
     {
-        if (!is_array($site)) {
-            $site = [$site];
-        }
         $params = [
             'index' => 'mojing_order',
             'body'  => [
@@ -124,12 +121,17 @@ class KeyIndicators extends BaseElasticsearch
                                     ],
                                 ],
                             ],
-                            //in查询
                             [
-                                'terms' => [
-                                    'site' => $site,
-                                ],
+                                'match' => [
+                                    'site' => $site
+                                ]
                             ],
+//                            //in查询
+//                            [
+//                                'terms' => [
+//                                    'site' => $site,
+//                                ],
+//                            ],
                             [
                                 'terms' => [
                                     'status' => $this->status,
