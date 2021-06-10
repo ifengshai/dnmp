@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\purchase;
 
+use app\admin\model\itemmanage\Item;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -57,7 +58,7 @@ class SupplierSku extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['supplier'])
                 ->where($where)
@@ -73,10 +74,11 @@ class SupplierSku extends Backend
 
             $list = collection($list)->toArray();
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -114,7 +116,7 @@ class SupplierSku extends Backend
                     array_walk($supplier_skus, 'trim_value');
                     if (count(array_filter($supplier_skus)) < 1) {
                         $this->error('供应商sku不能为空！！');
-                    }  
+                    }
 
                     //是否为大货
                     if ($params['is_big_goods'] == 1 && !$params['product_cycle']) {
@@ -126,7 +128,14 @@ class SupplierSku extends Backend
                     $link = $this->request->post("link/a");
 
                     $data = [];
+                    $item = new Item();
                     foreach (array_filter($skus) as $k => $v) {
+
+                        $itemDetail = $item->where('sku', $v)->find();
+                        if (!$itemDetail) {
+                            $this->error('SKU不存在');
+                        }
+
                         //判断是否重复
                         $where['sku'] = $v;
                         $where['supplier_id'] = $params['supplier_id'];
@@ -187,6 +196,7 @@ class SupplierSku extends Backend
         $supplier = new \app\admin\model\purchase\Supplier;
         $supplier = $supplier->getSupplierData();
         $this->assign('supplier', $supplier);
+
         return $this->view->fetch();
     }
 
@@ -227,7 +237,7 @@ class SupplierSku extends Backend
                     if ($count > 1) {
                         $this->error('记录已存在！！SKU:' . $params['sku']);
                     }
-                    
+
                     //是否为大货
                     if ($params['is_big_goods'] == 1 && !$params['product_cycle']) {
                         $this->error('生产周期不能为空');
@@ -248,6 +258,11 @@ class SupplierSku extends Backend
                         if ($count < 1) {
                             $params['label'] = 1;
                         }
+                    }
+                    $item = new Item();
+                    $itemDetail = $item->where('sku', $params['sku'])->find();
+                    if (!$itemDetail) {
+                        $this->error('SKU不存在');
                     }
 
                     $result = $row->allowField(true)->save($params);
@@ -275,6 +290,7 @@ class SupplierSku extends Backend
         $supplier = $supplier->getSupplierData();
         $this->assign('supplier', $supplier);
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
 
@@ -484,7 +500,8 @@ class SupplierSku extends Backend
 
             $list = [];
             if (!$result->productInfo->skuInfos) {
-                $result = array("total" => 0, "rows" => $list);
+                $result = ["total" => 0, "rows" => $list];
+
                 return json($result);
             }
 
@@ -503,11 +520,12 @@ class SupplierSku extends Backend
                 $list[$k]['parent_id'] = $ids;
             }
 
-            $result = array("total" => count($list), "rows" => $list);
+            $result = ["total" => count($list), "rows" => $list];
 
             return json($result);
         }
         $this->assignconfig('ids', $ids);
+
         return $this->view->fetch();
     }
 

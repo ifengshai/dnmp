@@ -39,11 +39,11 @@ class Hour extends BaseElasticsearch
         //查询对应平台权限
         $magentoplatformarr = $magentoplatformarr->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp', 'wesee'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp', 'wesee','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('web_site', 'time_str', 'magentoplatformarr'));
+        $this->view->assign(compact( 'magentoplatformarr'));
 
         return $this->view->fetch();
     }

@@ -9,6 +9,7 @@ use app\admin\model\DistributionLog;
 use app\admin\model\itemmanage\attribute\ItemAttribute;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemBrand;
+use app\admin\model\itemmanage\ItemCategory;
 use app\admin\model\order\Order;
 use app\common\controller\Backend;
 use app\common\model\Auth;
@@ -183,16 +184,33 @@ class NewProductDesign extends Backend
             }
             $list = collection($list)->toArray();
             $itemPlatform = new ItemPlatformSku();
+
+            $itemCategory= new ItemCategory();
             $platformType = ['0','Z','V','N','M','W','0','0','A','Es','De','Jp','Chic','Z_cn','Ali','Z_fr'];
             foreach ($list as $key=>$item){
+                $platStock = $itemPlatform->where('sku',$item['sku'])->column('stock','platform_type');
                 $list[$key]['label'] = $map['a.status'] ? $map['a.status'] : 0;
                 if ($item['responsible_id'] !==null){
                     $list[$key]['responsible_id'] = $admin->where('id',$item['responsible_id'])->value('nickname');
                 }else{
                     $list[$key]['responsible_id'] = '暂无';
                 }
-                $itemStatusIsNew = $Item->where(['sku'=>$item['sku']])->field('item_status,is_new')->find();
+                $itemStatusIsNew = $Item->where(['sku'=>$item['sku']])->field('item_status,is_new,available_stock,category_id')->find();
                 $list[$key]['item_status'] =$itemStatusIsNew->item_status;
+                $list[$key]['zeelool'] =isset($platStock[1]) ? $platStock[1] : '-';
+                $list[$key]['voogueme'] =isset($platStock[2]) ? $platStock[2] : '-';
+                $list[$key]['meeloog'] =isset($platStock[3]) ? $platStock[3] : '-';
+                $list[$key]['vicmoo'] =isset($platStock[4]) ? $platStock[4] : '-';
+                $list[$key]['wesee'] =isset($platStock[5]) ? $platStock[5] : '-';
+                $list[$key]['amazon'] =isset($platStock[8]) ? $platStock[8] : '-';
+                $list[$key]['zeelool_es'] =isset($platStock[9]) ? $platStock[9] : '-';
+                $list[$key]['zeelool_de'] =isset($platStock[10]) ? $platStock[10] : '-';
+                $list[$key]['zeelool_jp'] =isset($platStock[11]) ? $platStock[11] : '-';
+                $list[$key]['voogmechic'] =isset($platStock[12]) ? $platStock[12] : '-';
+                $list[$key]['zeelool_cn'] =isset($platStock[13]) ? $platStock[13] : '-';
+                $list[$key]['alibaba'] =isset($platStock[14]) ? $platStock[14] : '-';
+                $list[$key]['zeelool_fr'] =isset($platStock[15]) ? $platStock[15] : '-';
+                $list[$key]['category'] =$itemCategory->where('id',$itemStatusIsNew->category_id)->value('name');
                 $list[$key]['is_new'] = $itemStatusIsNew->is_new;
                 //$list[$key]['addtime'] = Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime') ? Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime'):'';
                 $list[$key]['location_code'] = Db::name('purchase_sample')->alias('a')->join(['fa_purchase_sample_location' => 'b'],'a.location_id=b.id')->where('a.sku',$item['sku'])->value('b.location');

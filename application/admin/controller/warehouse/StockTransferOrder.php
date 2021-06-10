@@ -3,6 +3,7 @@
 namespace app\admin\controller\warehouse;
 
 use app\admin\model\AuthGroup;
+use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -14,6 +15,7 @@ use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
 use think\Loader;
+use think\Model;
 
 /**
  * 库位管理
@@ -60,18 +62,29 @@ class StockTransferOrder extends Backend
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
-            //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
+            $map = [];
+            //自定义sku搜索
+            $filter = json_decode($this->request->get('filter'), true);
+            if ($filter['sku']) {
+                $allIds = Db::name('stock_transfer_order_item')->where('sku','like','%'.$filter['sku'].'%')->group('transfer_order_id')->column('transfer_order_id');
+                $map['id'] = ['in',$allIds];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
+
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
                 ->where($where)
+                ->where($map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -99,10 +112,15 @@ class StockTransferOrder extends Backend
             if (empty($params['response_person'])) {
                 $this->error('调拨负责人不能为空');
             }
+            $platSku = new Item();
             //添加调拨单保存或提交审核时数据有效性的判断
             foreach ($sku as $k => $v) {
                 if (empty($v)) {
                     $this->error('sku不能为空');
+                }
+                $isExistSku = $platSku->where('sku',$v)->find();
+                if (!$isExistSku){
+                    $this->error('sku'.$v.'不存在，请检查');
                 }
                 if ($num[$k] <= 0 || empty($num[$k])) {
                     $this->error('期望调拨数量不能为0，请确认' . $v . '期望调拨数量');
@@ -184,10 +202,15 @@ class StockTransferOrder extends Backend
             if (empty($params['response_person'])) {
                 $this->error('调拨负责人不能为空');
             }
+            $platSku = new Item();
             //添加调拨单保存或提交审核时数据有效性的判断
             foreach ($sku as $k => $v) {
                 if (empty($v)) {
                     $this->error('sku不能为空');
+                }
+                $isExistSku = $platSku->where('sku',$v)->find();
+                if (!$isExistSku){
+                    $this->error('sku'.$v.'不存在，请检查');
                 }
                 if ($num[$k] <= 0 || empty($num[$k])) {
                     $this->error('期望调拨数量不能为0，请确认' . $v . '期望调拨数量');
@@ -242,6 +265,13 @@ class StockTransferOrder extends Backend
         $this->assign('item', $item);
         $allStock = Db::name('warehouse_stock')->column('name','id');
         $this->assign('all_stock', $allStock);
+        $allTerm = AuthGroup::getAllNextGroup(135);
+        $allPersonIds = Db::name('auth_group_access')->where('group_id','in',$allTerm)->column('uid');
+        $allPerson1 = Db::name('admin')->where('id','in',$allPersonIds)->column('nickname');
+        foreach ($allPerson1 as $k=>$v){
+            $allPerson[$v] = $v;
+        }
+        $this->assign('all_person', $allPerson);
         return $this->view->fetch();
     }
 

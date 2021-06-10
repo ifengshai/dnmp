@@ -44,7 +44,7 @@ class ZendeskAccount extends Backend
                     case 'voogueme':
                         $map['account_type'] = 2;
                         break;
-                    case 'nihao':
+                    case 'meeloog':
                         $map['account_type'] = 3;
                         break;
                 }
@@ -77,7 +77,7 @@ class ZendeskAccount extends Backend
                     }elseif(2 == $v['account_type']){
                         $list[$k]['account_type'] = 'voogueme';
                     }else{
-                        $list[$k]['account_type'] = 'nihao';
+                        $list[$k]['account_type'] = 'meeloog';
                     }
                 }
             }
@@ -252,6 +252,7 @@ class ZendeskAccount extends Backend
         curl_close($curl);
         $arr = json_decode($response,true);
         var_dump($arr);
+
     }
 
 }

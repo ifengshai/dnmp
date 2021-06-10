@@ -408,8 +408,8 @@ class ScmWarehouse extends Scm
         $siteList = [
             ['id' => 1, 'title' => 'zeelool'],
             ['id' => 2, 'title' => 'voogueme'],
-            ['id' => 3, 'title' => 'nihao'],
-            ['id' => 4, 'title' => 'meeloog'],
+            ['id' => 3, 'title' => 'meeloog'],
+            ['id' => 4, 'title' => 'vicmoo'],
             ['id' => 5, 'title' => 'wesee'],
             ['id' => 8, 'title' => 'amazon'],
             ['id' => 9, 'title' => 'zeelool_es'],
@@ -3769,6 +3769,7 @@ class ScmWarehouse extends Scm
     public function stock_transfer_list()
     {
         $query = $this->request->request('query');
+        $sku = $this->request->request('sku');
         $status = $this->request->request('status');
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
@@ -3781,6 +3782,10 @@ class ScmWarehouse extends Scm
         $where = [];
         if ($query) {
             $where['transfer_order_number|create_person|response_person'] = ['like', '%' . $query . '%'];
+        }
+        if ($sku) {
+            $allIds = $this->_stock_transfer_order_item->where('sku','like','%'.$sku.'%')->group('transfer_order_id')->column('transfer_order_id');
+            $where['id'] = ['in',$allIds];
         }
         if (isset($status)) {
             $where['status'] = $status;
@@ -4086,11 +4091,11 @@ class ScmWarehouse extends Scm
                 ->where('transfer_order_id', $id)
                 ->field('sku,id,real_instock_num')
                 ->select();
-            foreach ($allItemDetail as $k0 => $v0) {
-                if ($v0['real_instock_num'] == 0) {
-                    $this->error(__($v0['sku'] . '实际入库数量0，请检查'), '', 546);
-                }
-            }
+//            foreach ($allItemDetail as $k0 => $v0) {
+//                if ($v0['real_instock_num'] == 0) {
+//                    $this->error(__($v0['sku'] . '实际入库数量0，请检查'), '', 546);
+//                }
+//            }
             foreach ($allItemDetail as $sk => $sv) {
                 $StockTransferOutOrderItem[$sk]['sku'] = $sv['sku'];
                 $StockTransferOutOrderItem[$sk]['in_num'] = $sv['real_instock_num'];
@@ -4404,6 +4409,11 @@ class ScmWarehouse extends Scm
             }
             if ($codeStatus['stock_id'] !== $transferOrderDetail['out_stock_id']) {
                 $this->error(__($v['code'] . '当前不在调出仓库：' . $allStock[$transferOrderDetail['out_stock_id']] . '！！'), '', 524);
+            }
+            //重复条码校验
+            $hasCode = $this->_stock_transfer_order_item_code->where(['code'=>$v['code'],'transfer_order_item_id'=>$transferOrderItemId])->find();
+            if ($hasCode) {
+                $this->error(__($v['code'] . '重复，请删除此条码！'), '', 524);
             }
             //实体仓调拨单子表的子表（条形码明细表）插入数据
             $arr[$k]['code'] = $v['code'];

@@ -6,9 +6,9 @@ use think\Db;
 use think\Model;
 
 
-class Zeelool extends Model
+class ZeeloolFr extends Model
 {
-
+    const SITE = 15;
     // 表名
     protected $name = 'datacenter_day';
 
@@ -23,12 +23,12 @@ class Zeelool extends Model
 
     public function __construct()
     {
-        $this->model = new \app\admin\model\order\order\Zeelool();
+        $this->model = new \app\admin\model\order\order\ZeeloolFr();
     }
     //获取着陆页数据
     public function getLanding($time_str = '', $type = 0)
     {
-        $where['site'] = 1;
+        $where['site'] = self::SITE;
         $start = date('Y-m-d');
 
         if ($type == 1) {
@@ -55,7 +55,7 @@ class Zeelool extends Model
     public function getDetail($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-        $where['site'] = 1;
+        $where['site'] = self::SITE;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -82,7 +82,7 @@ class Zeelool extends Model
     public function getCart($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-        $where['site'] = 1;
+        $where['site'] = self::SITE;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -110,7 +110,7 @@ class Zeelool extends Model
     public function getComplete($time_str = '', $type = 0)
     {
         $start = date('Y-m-d');
-        $where['site'] = 1;
+        $where['site'] = self::SITE;
         if ($type == 1) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -139,7 +139,8 @@ class Zeelool extends Model
      */
     public function getActiveUser($time_str = '',$time_str2 = '')
     {
-        $map['site'] = 1;
+        
+        $map['site'] = self::SITE;
         if (!$time_str) {
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
@@ -163,7 +164,7 @@ class Zeelool extends Model
      */
     public function getRegisterUser($time_str = '',$time_str2 = '')
     {
-        $map['site'] = 1;
+        $map['site'] = self::SITE;
         if (!$time_str) {
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
@@ -184,11 +185,11 @@ class Zeelool extends Model
     }
 
     /*
-     * 统计vip用户数 zeelool
+     * 统计vip用户数 zeeloolfr
      */
     public function getVipUser($time_str = '',$time_str2 = '')
     {
-        $map['site'] = 1;
+        $map['site'] = self::SITE;
         //默认查询7天的数据
         if (!$time_str) {
             $start = date('Y-m-d', strtotime('-6 day'));
@@ -260,7 +261,7 @@ class Zeelool extends Model
         $map['order_type'] = 1;
         $map1['customer_id'] = ['>',0];
 
-        $order_model = new \app\admin\model\order\order\Zeelool();
+        $order_model = new \app\admin\model\order\order\ZeeloolFr();
         return $order_model
             ->where($map_where)
             ->where($map)
@@ -320,7 +321,7 @@ class Zeelool extends Model
         $map['order_type'] = 1;
         $map1['customer_id'] = ['>',0];
 
-        $order_model = new \app\admin\model\order\order\Zeelool();
+        $order_model = new \app\admin\model\order\order\ZeeloolFr();
         //复购用户数
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
         $again_buy_num1 = $order_model
@@ -339,7 +340,6 @@ class Zeelool extends Model
             ->having('count(customer_id)<=1')
             ->column('customer_id');
         $again_buy_num2 = 0;
-        //$again_buy_num2 = $order_model->field('customer_id')->distinct(true)->where($order_where)->where('customer_id','in',$again_buy_data2)->where($map)->select();
         foreach ($again_buy_data2 as $v){
             //查询时间段内是否进行购买行为
             $order_where_arr['customer_id'] = $v;
@@ -369,7 +369,7 @@ class Zeelool extends Model
         $map1['o.customer_id'] = ['>',0];
         $map['c.is_vip'] = 1;
 
-        $order_model = new \app\admin\model\order\order\Zeelool();
+        $order_model = new \app\admin\model\order\order\ZeeloolFr();
         //复购用户数
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
         $again_buy_num1 = $order_model->alias('o')
@@ -420,7 +420,7 @@ class Zeelool extends Model
      */
     public function getOrderNum($time_str = '', $time_str2 = '')
     {
-        $map['site'] = 1;
+        $map['site'] = self::SITE;
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
@@ -444,7 +444,7 @@ class Zeelool extends Model
      * */
     public function getSalesTotalMoney($time_str = '', $time_str2 = '')
     {
-        $map['site'] = 1;
+        $map['site'] = self::SITE;
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
@@ -498,7 +498,7 @@ class Zeelool extends Model
      * */
     public function getShippingTotalMoney($time_str = '',$time_str2 = '')
     {
-        $map['site'] = 1;
+        $map['site'] = self::SITE;
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
@@ -522,7 +522,7 @@ class Zeelool extends Model
      * */
     public function getReplacementOrderNum($time_str = '')
     {
-        $map['site'] = 1;
+        $map['site'] = self::SITE;
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -540,7 +540,7 @@ class Zeelool extends Model
      * */
     public function getReplacementOrderTotal($time_str = '')
     {
-        $map['site'] = 1;
+        $map['site'] = self::SITE;
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -559,7 +559,7 @@ class Zeelool extends Model
      * */
     public function getOnlineCelebrityOrderNum($time_str = '')
     {
-        $map['site'] = 1;
+        $map['site'] = self::SITE;
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -577,7 +577,7 @@ class Zeelool extends Model
      * */
     public function getOnlineCelebrityOrderTotal($time_str = '')
     {
-        $map['site'] = 1;
+        $map['site'] = self::SITE;
         if ($time_str) {
             $createat = explode(' ', $time_str);
             $where['day_date'] = ['between', [$createat[0], $createat[3]]];
@@ -716,18 +716,7 @@ class Zeelool extends Model
 
     protected function getReport_active_user($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
+        $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
 
@@ -777,26 +766,7 @@ class Zeelool extends Model
     //着陆页会话数
     protected function getReport_landing1($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 5) {
-            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 10) {
-            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 11) {
-            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 15) {
-            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
+        $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
 
@@ -848,26 +818,7 @@ class Zeelool extends Model
     //目标13会话数 产品详情页数据
     protected function getReport_target13($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 5) {
-            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 10) {
-            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 11) {
-            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 15) {
-            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
+        $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
 
@@ -919,26 +870,7 @@ class Zeelool extends Model
     //目标20会话数 产品详情页数据 v站单独用
     protected function getReport_target20($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 5) {
-            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 10) {
-            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 11) {
-            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 15) {
-            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
+        $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
 
@@ -991,28 +923,7 @@ class Zeelool extends Model
     //目标2会话数 加购数据 v站单独用
     protected function getReport_target2($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 5) {
-            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 10) {
-            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 11) {
-            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 15) {
-            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+        $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
 
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($startDate);
@@ -1062,28 +973,7 @@ class Zeelool extends Model
     //目标1会话数 购物车页面数据
     protected function getReport_target1($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 5) {
-            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 10) {
-            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 11) {
-            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 15) {
-            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
+        $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
 
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($startDate);
@@ -1134,29 +1024,7 @@ class Zeelool extends Model
     //最终电子商务页面交易次数数据
     protected function getReport_target_end($site, $analytics, $startDate, $endDate)
     {
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "168154683";
-        // $VIEW_ID = "172731925";
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 5) {
-            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 10) {
-            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 11) {
-            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 15) {
-            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
-        }
-
-        // Replace with your view ID, for example XXXX.
-        // $VIEW_ID = "<REPLACE_WITH_VIEW_ID>";
-
+        $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($startDate);
         $dateRange->setEndDate($endDate);
@@ -1206,7 +1074,7 @@ class Zeelool extends Model
     }
     protected function getReport_session($analytics, $startDate, $endDate)
     {
-        $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
+        $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($startDate);
         $dateRange->setEndDate($endDate);
@@ -1285,21 +1153,8 @@ class Zeelool extends Model
 
     protected function getReport11($site,$analytics, $startDate, $endDate)
     {
-        if ($site == 1) {
-            $VIEW_ID = config('ZEELOOL_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 2) {
-            $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 3) {
-            $VIEW_ID = config('NIHAO_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 5) {
-            $VIEW_ID = config('WESEE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 10) {
-            $VIEW_ID = config('ZEELOOLDE_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 11) {
-            $VIEW_ID = config('ZEELOOLJP_GOOGLE_ANALYTICS_VIEW_ID');
-        } elseif ($site == 15) {
-            $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
-        }
+       $VIEW_ID = config('ZEELOOLFR_GOOGLE_ANALYTICS_VIEW_ID');
+
 
         $dateRange = new \Google_Service_AnalyticsReporting_DateRange();
 
@@ -1431,8 +1286,7 @@ class Zeelool extends Model
         $customerWhere['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
         $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
         $orderWhere['order_type'] = 1;
-
-        $order = Db::connect('database.db_zeelool')
+        $order = Db::connect('database.db_zeelool_fr')
             ->table('sales_flat_order')
             ->field('customer_group_id,sum(base_grand_total) as total,count(*) as count')
             ->group('customer_group_id')
@@ -1440,7 +1294,7 @@ class Zeelool extends Model
             ->where($customerWhere)
             ->where($orderWhere)
             ->select();
-        $orderCount = Db::connect('database.db_zeelool')
+        $orderCount = Db::connect('database.db_zeelool_fr')
             ->table('sales_flat_order')
             ->where($customerWhere)
             ->where($orderWhere)

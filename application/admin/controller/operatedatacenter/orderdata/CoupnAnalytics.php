@@ -11,7 +11,7 @@ use think\Request;
 
 class CoupnAnalytics extends Backend
 {
-    protected $noNeedLogin = ['export_coupon_analytics'];
+    protected $noNeedRight = ['*'];
     /**
      * 优惠券明细列表
      *
@@ -87,6 +87,10 @@ class CoupnAnalytics extends Backend
                 case 11:
                     $model = Db::connect('database.db_zeelool_jp');
                     $salesrule = Db::connect('database.db_zeelool_jp_online');
+                    break;
+                case 15:
+                    $model = Db::connect('database.db_zeelool_fr');
+                    $salesrule = Db::connect('database.db_zeelool_fr_online');
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -182,7 +186,7 @@ class CoupnAnalytics extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -231,6 +235,10 @@ class CoupnAnalytics extends Backend
                 case 11:
                     $model = Db::connect('database.db_zeelool_jp');
                     $salesrule = Db::connect('database.db_zeelool_jp_online');
+                    break;
+                case 15:
+                    $model = Db::connect('database.db_zeelool_fr');
+                    $salesrule = Db::connect('database.db_zeelool_fr_online');
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -362,6 +370,11 @@ class CoupnAnalytics extends Backend
                     $model = Db::connect('database.db_zeelool_jp');
                     $salesrule = Db::connect('database.db_zeelool_jp_online');
                     $plat = new \app\admin\model\operatedatacenter\ZeeloolJp();
+                    break;
+                case 15:
+                    $model = Db::connect('database.db_zeelool_fr');
+                    $salesrule = Db::connect('database.db_zeelool_fr_online');
+                    $plat = new \app\admin\model\operatedatacenter\ZeeloolFr();
                     break;
             }
 
@@ -515,6 +528,11 @@ class CoupnAnalytics extends Backend
                     $salesrule = Db::connect('database.db_zeelool_jp_online');
                     $plat = new \app\admin\model\operatedatacenter\ZeeloolJp();
                     break;
+                case 15:
+                    $model = Db::connect('database.db_zeelool_fr');
+                    $salesrule = Db::connect('database.db_zeelool_fr_online');
+                    $plat = new \app\admin\model\operatedatacenter\ZeeloolFr();
+                    break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
@@ -634,6 +652,8 @@ class CoupnAnalytics extends Backend
             $order_model = Db::connect('database.db_zeelool_de');
         } elseif ($order_platform == 11) {
             $order_model = Db::connect('database.db_zeelool_jp');
+        } elseif ($order_platform == 15) {
+            $order_model = Db::connect('database.db_zeelool_fr');
         } else {
             $order_model = Db::connect('database.db_zeelool');
         }
@@ -752,6 +772,10 @@ class CoupnAnalytics extends Backend
             case 11:
                 $model = Db::connect('database.db_zeelool_jp');
                 $salesrule = Db::connect('database.db_zeelool_jp_online');
+                break;
+            case 15:
+                $model = Db::connect('database.db_zeelool_fr');
+                $salesrule = Db::connect('database.db_zeelool_fr_online');
                 break;
         }
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");

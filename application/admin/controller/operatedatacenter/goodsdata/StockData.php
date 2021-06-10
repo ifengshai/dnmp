@@ -51,7 +51,7 @@ class StockData extends Backend
     {
         //查询对应平台权限
         $magentoPlatforms = $this->magentoPlatform->getAuthSite([
-            'zeelool', 'voogueme', 'nihao', 'wesee', 'zeelool_de', 'zeelool_jp'
+            'zeelool', 'voogueme', 'meeloog', 'wesee', 'zeelool_de', 'zeelool_jp','zeelool_fr'
         ]);
 
         $this->view->assign('magentoPlatforms', $magentoPlatforms);

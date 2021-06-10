@@ -30,8 +30,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                         {field: 'customer_name', title: __('Customer_name'), operate: false},
                         {field: 'mobile', title: __('Mobile'), operate: false},
                         {field: 'country', title: __('Country'), operate: false},
-                        {field: 'site_type', title: __('Site_type'),custom: { 1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary' }, searchList: { 1: 'Zeelool', 2: 'Voogueme', 3: 'Nihao', 4: 'Alibaba', 5: '主动开发',6:'Wesee' },
-                            formatter: Table.api.formatter.status},
+                        {
+                            field: 'site_type',
+                            title: __('Site_type'),
+                            custom: {1: 'success', 2: 'danger', 3: 'orange', 4: 'warning', 5: 'purple', 6: 'primary'},
+                            searchList: {
+                                1: 'Zeelool',
+                                2: 'Voogueme',
+                                3: 'Meeloog',
+                                4: 'Alibaba',
+                                5: '主动开发',
+                                6: 'Wesee'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
                         {field: 'intention_level', title: __('Intention_level'), searchList: { 1: '低', 2: '中', 3: '高' },
                             formatter: Table.api.formatter.status},
                         { field: 'is_order', title: __('Is_order'), custom: { 1: 'danger', 2: 'success' }, searchList: { 1: '否', 2: '是' }, formatter: Table.api.formatter.status },

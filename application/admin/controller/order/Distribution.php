@@ -21,6 +21,7 @@ use app\admin\model\warehouse\Outstock;
 use app\admin\model\warehouse\OutStockItem;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\warehouse\StockHouse;
+use app\admin\model\warehouse\StockSku;
 use app\common\controller\Backend;
 use app\enum\OrderType;
 use fast\Excel;
@@ -35,6 +36,7 @@ use think\db\Query;
 use think\Exception;
 use think\exception\PDOException;
 use think\Loader;
+use think\Model;
 use think\Request;
 
 
@@ -663,6 +665,12 @@ class Distribution extends Backend
                 unset($filter['site']);
             }
 
+            //筛选仓库
+            if ($filter['stock_id']) {
+                $map['a.stock_id'] = ['in', $filter['stock_id']];
+                unset($filter['stock_id']);
+            }
+
             //加工类型筛选
             if (isset($filter['order_prescription_type'])) {
                 $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
@@ -696,7 +704,7 @@ class Distribution extends Backend
                 ->count();
             $list = $this->model
                 ->alias('a')
-                ->field('a.id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.created_at,a.picking_sort')
+                ->field('a.id,a.stock_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.created_at,a.picking_sort')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where($where)
                 ->where($map)
@@ -1157,7 +1165,7 @@ class Distribution extends Backend
             $sort = 'a.created_at';
             $order = 'desc';
         } else {
-
+            $wave_order_id = input('wave_order_id');
             //普通状态剔除跟单数据
             if (!in_array($label, [0, 8])) {
                 if (7 == $label) {
@@ -1221,6 +1229,13 @@ class Distribution extends Backend
                 $map['b.order_type'] = ['in', $filter['order_type']];
                 unset($filter['order_type']);
             }
+
+            //筛选站点
+            if ($filter['stock_id']) {
+                $map['a.stock_id'] = $filter['stock_id'];
+                unset($filter['stock_id']);
+            }
+
             if ($filter['check_time']) {
                 $check_time = explode(' - ', $filter['check_time']);
                 $map['d.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
@@ -1240,6 +1255,11 @@ class Distribution extends Backend
                 unset($filter['status']);
             }
 
+            if ($filter['increment_id']) {
+                $map['b.increment_id'] = ['in', $filter['increment_id']];
+                unset($filter['increment_id']);
+            }
+
             if ($filter['sku']) {
                 $map['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
                 unset($filter['sku']);
@@ -1247,6 +1267,10 @@ class Distribution extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
 
             [$where, $sort, $order] = $this->buildparams();
+
+            if ($wave_order_id) {
+                $map['a.wave_order_id'] = $wave_order_id;
+            }
         }
 
         $sort = 'a.id';
@@ -2062,7 +2086,7 @@ class Distribution extends Backend
         //获取子订单列表
         $list = $this->model
             ->alias('a')
-            ->field('a.site,a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coating_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number,b.web_lens_name,b.gra_certificate,b.ring_size,b.stone_type,b.type,b.Metal')
+            ->field('a.stock_id,a.site,a.item_order_number,a.order_id,a.created_at,b.os_add,b.od_add,b.pdcheck,b.prismcheck,b.pd_r,b.pd_l,b.pd,b.od_pv,b.os_pv,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.od_pv_r,b.os_pv_r,b.index_name,b.coating_name,b.prescription_type,b.sku,b.od_sph,b.od_cyl,b.od_axis,b.os_sph,b.os_cyl,b.os_axis,b.lens_number,b.web_lens_name,b.gra_certificate,b.ring_size,b.stone_type,b.type,b.Metal')
             ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
             ->where(['a.id' => ['in', $ids]])
             ->order('a.picking_sort asc')
@@ -2073,8 +2097,25 @@ class Distribution extends Backend
         //获取订单数据
         $order_list = $this->_new_order->where(['id' => ['in', array_unique($orderIds)]])->column('total_qty_ordered,increment_id', 'id');
 
+
+        $stockId = $list[0]['stock_id'];
+        //根据sku查询库位排序
+        $stockSku = new StockSku();
+        $where = [];
+        $where['c.type'] = 2;//默认拣货区
+        $where['b.status'] = 1;//启用状态
+        $where['a.is_del'] = 1;//正常状态
+        $where['b.stock_id'] = $stockId;//查询对应仓库
+        $cargo_number = $stockSku
+            ->alias('a')
+            ->where($where)
+            ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+            ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
+            ->column('b.coding', 'sku');
+
+
         //查询产品货位号
-        $cargo_number = $this->_stock_house->alias('a')->where(['status' => 1, 'b.is_del' => 1, 'a.type' => 1, 'a.area_id' => 3])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
+        //        $cargo_number = $this->_stock_house->alias('a')->where(['status' => 1, 'b.is_del' => 1, 'a.type' => 1, 'a.area_id' => 3])->join(['fa_store_sku' => 'b'], 'a.id=b.store_id')->column('coding', 'sku');
 
         //获取更改镜框最新信息
         $change_sku = $this->_work_order_change_sku

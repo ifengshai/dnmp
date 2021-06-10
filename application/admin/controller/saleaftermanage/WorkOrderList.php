@@ -170,15 +170,15 @@ class WorkOrderList extends Backend
                         $newWorkIds = implode(',', $newWorkIds);
                         if (strlen($newWorkIds) > 0) {
                             //数据查询的条件
-                            $map = "(id in ($newWorkIds) or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
+                            $map2 = "(id in ($newWorkIds) or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
                         } else {
-                            $map = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
+                            $map2 = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7) and id in ($arr)";
                         }
                     } else {
-                        $map = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                        $map2 = "(id in (" . join(',', $workIds) . ") or after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                     }
                 } else {
-                    $map = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
+                    $map2 = "(after_user_id = {$filter['recept_person_id']} or find_in_set({$filter['recept_person_id']},all_after_user_id) or assign_user_id = {$filter['recept_person_id']}) and work_status not in (0,1,7)";
                 }
                 unset($filter['recept_person_id']);
                 unset($filter['measure_choose_id']);
@@ -189,7 +189,8 @@ class WorkOrderList extends Backend
                 unset($filter['recept_person']);
             }
             if ($filter['stock_id']) {
-                $map['stock_id'] = ['=', $filter['stock_id']];
+                $stockId = $filter['stock_id'];
+                $map['stock_id'] = $stockId;
                 unset($filter['stock_id']);
             }
             //筛选措施
@@ -215,12 +216,14 @@ class WorkOrderList extends Backend
                 ->where($where)
                 ->where($map)
                 ->where($map1)
+                ->where($map2)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
                 ->where($where)
                 ->where($map)
                 ->where($map1)
+                ->where($map2)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
@@ -1558,7 +1561,8 @@ class WorkOrderList extends Backend
                         $params['order_sku'] = $order_sku;
                         $params['assign_user_id'] = $params['assign_user_id'] ?: 0;
                         $params['customer_group'] = $this->customer_group;
-                        $params['stock_id'] = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id',$params['platform_order'])->value('stock_id');
+                        $stock_id = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id',$params['platform_order'])->value('stock_id');
+                        $params['stock_id'] = $stock_id ?: 0;
                         $result = $this->model->allowField(true)->save($params);
                         if (false === $result) throw new Exception("添加失败！！");
                         $work_id = $this->model->id;
@@ -2037,7 +2041,7 @@ class WorkOrderList extends Backend
             if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
-                return ['result' => false, 'msg' => $sku . '库存不足！！'];
+                return ['result' => false, 'msg' => $sku . '库存不足！！当前虚拟仓库存'.$stock.'，补发所需库存'.$num[$k]];
             }
 
             //判断此sku是否在第三方平台

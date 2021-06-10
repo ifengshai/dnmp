@@ -28,11 +28,11 @@ class OrderPrescriptionNew extends Backend
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp', 'wesee'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp', 'wesee'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
-        $this->view->assign(compact('data', 'total', 'coating_arr', 'coating_count', 'web_site', 'time_show', 'magentoplatformarr'));
+        $this->view->assign(compact( 'magentoplatformarr'));
 
         return $this->view->fetch();
     }

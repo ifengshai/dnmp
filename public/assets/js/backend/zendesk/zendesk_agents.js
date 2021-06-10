@@ -33,7 +33,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'type',
                             title: __('type'),
                             custom: {1: 'blue', 2: 'yellow'},
-                            searchList: {1: 'Zeelool', 2: 'Voogueme', 3: 'Nihaooptical'},
+                            searchList: {1: 'Zeelool', 2: 'Voogueme', 3: 'Meeloog'},
                             formatter: Table.api.formatter.status
                         },
                         {

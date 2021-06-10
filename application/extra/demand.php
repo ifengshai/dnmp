@@ -13,8 +13,8 @@ return [
     'site' => [
         '1' => 'Zeelool',
         '2' => 'Voogueme',
-        '3' => 'Nihao',
-        '4' => 'Meeloog',
+        '3' => 'Meeloog',
+        '4' => 'Vicmoo',
         '5' => 'Wesee',
         '6' => 'Rufoo',
         '7' => 'Toloog',
@@ -23,7 +23,8 @@ return [
         '10' => 'ZeeloolDe',
         '11' => 'ZeeloolJp',
         '12' => 'Voogmechic',
-        '15'=>'ZeeloolFr'
+        '15'=>'ZeeloolFr',
+        '66'=>'网红管理系统',
     ],
     //类型
     'siteType' => [

@@ -19,11 +19,13 @@ class UserValueRfm extends Backend
         $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
         $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->zeeloolfr = new \app\admin\model\order\order\ZeeloolFr();
         $this->zeeloolOperate = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate = new \app\admin\model\operatedatacenter\Nihao;
         $this->zeelooldeOperate = new \app\admin\model\operatedatacenter\ZeeloolDe();
         $this->zeelooljpOperate = new \app\admin\model\operatedatacenter\ZeeloolJp();
+        $this->zeeloolfrOperate = new \app\admin\model\operatedatacenter\ZeeloolFr();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
 
@@ -37,7 +39,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp','wesee'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp','wesee','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -115,6 +117,9 @@ class UserValueRfm extends Backend
         } elseif ($order_platform == 11) {
             $web_model = Db::connect('database.db_zeelool_jp');
             $order_model = $this->zeelooljp;
+        } elseif ($order_platform == 15) {
+            $web_model = Db::connect('database.db_zeelool_fr');
+            $order_model = $this->zeeloolfr;
         } elseif ($order_platform == 5) {
             $web_model = Db::connect('database.db_weseeoptical');
         } else {
@@ -185,7 +190,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp','wesee'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp','wesee','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -259,7 +264,10 @@ class UserValueRfm extends Backend
         } elseif ($order_platform == 11) {
             $web_model = Db::connect('database.db_zeelool_jp');
             $order_model = $this->zeelooljp;
-        }elseif ($order_platform == 5) {
+        } elseif ($order_platform == 15) {
+            $web_model = Db::connect('database.db_zeelool_fr');
+            $order_model = $this->zeeloolfr;
+        } elseif ($order_platform == 5) {
             $web_model = Db::connect('database.db_weseeoptical');
         } else {
             $web_model = Db::connect('database.db_zeelool');
@@ -329,7 +337,7 @@ class UserValueRfm extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp','wesee'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp','wesee','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -401,7 +409,9 @@ class UserValueRfm extends Backend
             $web_model = Db::connect('database.db_zeelool_de');
         } elseif ($order_platform == 11) {
             $web_model = Db::connect('database.db_zeelool_jp');
-        }elseif ($order_platform == 5) {
+        } elseif ($order_platform == 15) {
+            $web_model = Db::connect('database.db_zeelool_fr');
+        } elseif ($order_platform == 5) {
             $web_model = Db::connect('database.db_weseeoptical');
         } else {
             $web_model = Db::connect('database.db_zeelool');

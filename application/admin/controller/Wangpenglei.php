@@ -6,7 +6,9 @@ use app\admin\controller\zendesk\Notice;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\lens\LensPrice;
+use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\warehouse\ProductBarCodeItem;
+use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
 use think\Db;
 use FacebookAds\Api;
@@ -20,6 +22,12 @@ class Wangpenglei extends Backend
 {
 
     protected $noNeedLogin = ['*'];
+    /**
+     * @var
+     * @author wangpenglei
+     * @date   2021/6/9 18:18
+     */
+    private $orderitemprocess;
 
     public function _initialize()
     {
@@ -31,6 +39,7 @@ class Wangpenglei extends Backend
         $this->app_secret = $this->facebook->app_secret;
         $this->access_token = $this->facebook->access_token;
         $this->accounts = $this->facebook->accounts;
+        $this->orderitemprocess = new  NewOrderItemProcess();
     }
 
     public function select_sku()
@@ -95,6 +104,42 @@ class Wangpenglei extends Backend
     }
 
     /************************跑库存数据用START*****勿删*****************************/
+
+    public function set_stock()
+    {
+        $this->getStockList();
+        $this->set_product_relstock();
+        $this->set_product_process();
+        $this->set_product_process_order();
+        $this->set_product_sotck();
+        $this->set_platform_stock();
+    }
+
+    /**
+     *  根据条码计算实时库存
+     * @Description
+     * @author: wpl
+     * @since : 2021/4/1 17:40
+     */
+    public function getStockList()
+    {
+        //查询镜架成本为0的财务数据
+        $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
+        $skus = Db::table('fa_zz_temp1')->column('sku');
+        $list = $barcode
+            ->alias('a')
+            ->where(['a.library_status' => 1])
+            ->where(['a.sku' => ['in', $skus]])
+            ->where(['a.location_code_id' => ['>', 0]])
+            ->where("a.item_order_number=''")
+            ->group('sku')
+            ->column('count(1) as stock', 'sku');
+        foreach ($skus as $v) {
+            Db::table('fa_zz_temp1')->where(['sku' => $v])->update(['stock' => $list[$v] ?: 0]);
+        }
+    }
+
+
     //导入实时库存 第一步
     public function set_product_relstock()
     {
@@ -107,7 +152,6 @@ class Wangpenglei extends Backend
             echo $v['sku'] . "\n";
         }
         echo 'ok';
-        die;
     }
 
     /**
@@ -123,39 +167,21 @@ class Wangpenglei extends Backend
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        // $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
 
         $skus = Db::table('fa_zz_temp1')->column('sku');
 
         foreach ($skus as $k => $v) {
             $map = [];
-            $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
-            $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
-            $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
-            $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
-            $meeloog_sku = $this->itemplatformsku->getWebSku($v, 4);
-            $zeelool_es_sku = $this->itemplatformsku->getWebSku($v, 9);
-            $zeelool_de_sku = $this->itemplatformsku->getWebSku($v, 10);
-            $zeelool_jp_sku = $this->itemplatformsku->getWebSku($v, 11);
-            $voogueme_acc_sku = $this->itemplatformsku->getWebSku($v, 12);
             $skus = [];
-            $skus = [
-                $zeelool_sku,
-                $voogueme_sku,
-                $nihao_sku,
-                $wesee_sku,
-                $meeloog_sku,
-                $zeelool_es_sku,
-                $zeelool_de_sku,
-                $zeelool_jp_sku,
-                $voogueme_acc_sku,
-            ];
+            $skus = $this->itemplatformsku->where(['sku' => $v])->column('platform_sku');
 
             $map['a.sku'] = ['in', array_filter($skus)];
-            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['b.status'] = ['in', ['processing']];
             $map['a.distribution_status'] = ['>', 2]; //大于待配货
-            $map['c.check_status'] = 0; //未审单计算订单占用
-            $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
+            $map['c.check_status'] = 0; //未审单计算配货占用
+            $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
+            $map['c.is_repeat'] = 0;
+            $map['c.is_split'] = 0;
             $distribution_occupy_stock = $this->orderitemprocess->alias('a')->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
@@ -168,7 +194,6 @@ class Wangpenglei extends Backend
             usleep(20000);
         }
         echo 'ok';
-        die;
     }
 
     /**
@@ -184,38 +209,18 @@ class Wangpenglei extends Backend
         $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        // $skus = $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->column('sku');
-
         $skus = Db::table('fa_zz_temp1')->column('sku');
         foreach ($skus as $k => $v) {
             $map = [];
-            $zeelool_sku = $this->itemplatformsku->getWebSku($v, 1);
-            $voogueme_sku = $this->itemplatformsku->getWebSku($v, 2);
-            $nihao_sku = $this->itemplatformsku->getWebSku($v, 3);
-            $wesee_sku = $this->itemplatformsku->getWebSku($v, 5);
-            $meeloog_sku = $this->itemplatformsku->getWebSku($v, 4);
-            $zeelool_es_sku = $this->itemplatformsku->getWebSku($v, 9);
-            $zeelool_de_sku = $this->itemplatformsku->getWebSku($v, 10);
-            $zeelool_jp_sku = $this->itemplatformsku->getWebSku($v, 11);
-            $voogueme_acc_sku = $this->itemplatformsku->getWebSku($v, 12);
             $skus = [];
-            $skus = [
-                $zeelool_sku,
-                $voogueme_sku,
-                $nihao_sku,
-                $wesee_sku,
-                $meeloog_sku,
-                $zeelool_es_sku,
-                $zeelool_de_sku,
-                $zeelool_jp_sku,
-                $voogueme_acc_sku,
-            ];
-
+            $skus = $this->itemplatformsku->where(['sku' => $v])->column('platform_sku');
             $map['a.sku'] = ['in', array_filter($skus)];
-            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+            $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
             $map['c.check_status'] = 0; //未审单计算订单占用
-            $map['b.created_at'] = ['between', [strtotime('2020-01-01 00:00:00'), time()]]; //时间节点
+            $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
+            $map['c.is_repeat'] = 0;
+            $map['c.is_split'] = 0;
             $occupy_stock = $this->orderitemprocess->alias('a')->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
@@ -228,7 +233,6 @@ class Wangpenglei extends Backend
             usleep(20000);
         }
         echo 'ok';
-        die;
     }
 
     /**
@@ -256,7 +260,6 @@ class Wangpenglei extends Backend
             usleep(20000);
         }
         echo 'ok';
-        die;
     }
 
     /**
@@ -272,75 +275,110 @@ class Wangpenglei extends Backend
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
         $skus = Db::table('fa_zz_temp1')->column('sku');
-        // dump($skus);die;
         foreach ($skus as $k => $v) {
-            // $v = 'OA01901-06';
             //同步对应SKU库存
             //更新商品表商品总库存
             //总库存
             $item_map['sku'] = $v;
             $item_map['is_del'] = 1;
-            if ($v) {
-                $available_stock = $item->where($item_map)->value('available_stock');
+            if (!$v) {
+                continue;
+            }
+            //可用库存
+            $stockList = $item->where($item_map)->field('available_stock,stock,distribution_occupy_stock')->find();
+            $available_stock = $stockList['available_stock'];
+            $real_stock = $stockList['stock'] - $stockList['distribution_occupy_stock'];
 
-                //盘点的时候盘盈入库 盘亏出库 的同时要对虚拟库存进行一定的操作
-                //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
-                $item_platform_sku = $platform->where('sku', $v)->order('stock asc')->field('platform_type,stock')->select();
-                if (!$item_platform_sku) {
-                    continue;
-                }
-                $all_num = count($item_platform_sku);
-                $whole_num = $platform
-                    ->where('sku', $v)
-                    ->field('stock')
-                    ->select();
-                $num_num = 0;
-                foreach ($whole_num as $kk => $vv) {
-                    $num_num += abs($vv['stock']);
-                }
-                $stock_num = $available_stock;
-                // dump($available_stock);
-                // dump($stock_num);
+            $item_platform_sku = $platform->where('sku', $v)->order('stock asc')->field('sku,platform_type,stock,platform_sku')->select();
+            if (!$item_platform_sku) {
+                continue;
+            }
+            //平台个数
+            $all_num = count($item_platform_sku);
 
-                $stock_all_num = array_sum(array_column($item_platform_sku, 'stock'));
-                if ($stock_all_num < 0) {
-                    $stock_all_num = 0;
-                }
-                //如果现有总库存为0 平均分给各站点
-                if ($stock_all_num == 0) {
-                    $rate_rate = 1 / $all_num;
-                    foreach ($item_platform_sku as $key => $val) {
-                        //最后一个站点 剩余数量分给最后一个站
-                        if (($all_num - $key) == 1) {
-                            // dump($stock_num);
-                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
-                        } else {
+            $whole_num = $platform
+                ->where('sku', $v)
+                ->field('stock')
+                ->select();
+
+            //绝对值总库存
+            $num_num = 0;
+            foreach ($whole_num as $kk => $vv) {
+                $num_num += abs($vv['stock']);
+            }
+
+            $stock_num = $available_stock;
+            /**
+             * 跑脚本逻辑
+             * 1、可用库存 < 0时,按现有库存比例分配
+             * 2、可用库存 = 0时,虚拟仓库存全为0
+             * 3、可用库存 < 0时,无库存超卖情况,按对应站点订单占用分配虚拟仓库存
+             */
+
+            if ($available_stock > 0) {
+                foreach ($item_platform_sku as $key => $val) {
+                    //最后一个站点 剩余数量分给最后一个站
+                    if (($all_num - $key) == 1) {
+                        $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
+                    } else {
+                        if ($num_num == 0) {
+                            $rate_rate = 1 / $all_num;
                             $num = round($available_stock * $rate_rate);
-                            $stock_num -= $num;
-                            // dump($num);
-                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
-                        }
-                    }
-                } else {
-                    // echo 1111;die;
-                    foreach ($item_platform_sku as $key => $val) {
-                        //最后一个站点 剩余数量分给最后一个站
-                        if (($all_num - $key) == 1) {
-                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $stock_num]);
                         } else {
-                            if ($num_num == 0) {
-                                $rate_rate = 1 / $all_num;
-                                $num_num = round($available_stock * $rate_rate);
-                            } else {
-
-                                $num = round($available_stock * abs($val['stock']) / $num_num);
-                            }
-
-                            $stock_num -= $num;
-                            $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
+                            $rate_rate = abs($val['stock']) / $num_num;
+                            $num = round($available_stock * $rate_rate);
                         }
+
+                        $stock_num -= $num;
+                        $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => $num]);
                     }
                 }
+            } elseif ($available_stock == 0) {
+                $platform->where(['sku' => $v])->update(['stock' => 0]);
+            } elseif ($available_stock < 0) {
+                if ($real_stock > 0) {
+                    $available_num = abs($available_stock);
+                    $skus = $platform->where(['sku' => $v])->column('platform_sku');
+                    $map['a.sku'] = ['in', $skus];
+                    $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
+                    $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
+                    $map['c.check_status'] = 0; //未审单计算订单占用
+                    $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
+                    $map['c.is_repeat'] = 0;
+                    $map['c.is_split'] = 0;
+                    $map['a.distribution_status'] = ['<=', 2];
+                    $sql = $this->orderitemprocess->alias('a')->where($map)
+                        ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                        ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
+                        ->field('a.id,a.site')
+                        ->order('b.created_at desc')
+                        ->limit($available_num)
+                        ->buildSql();
+
+                    $occupyList = Db::connect('database.db_mojing_order')->table($sql . ' d')->field('count(1) as num,d.site')->group('d.site')->select();
+                    foreach ($occupyList as $keys => $value) {
+                        $platform->where(['sku' => $v, 'platform_type' => $value['site']])->update(['stock' => '-' . $value['num']]);
+                    }
+
+                } else {
+                    foreach ($item_platform_sku as $key => $val) {
+                        $map['a.sku'] = $val['platform_sku'];
+                        $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
+                        $map['c.check_status'] = 0; //未审单计算订单占用
+                        $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
+                        $map['c.is_repeat'] = 0;
+                        $map['c.is_split'] = 0;
+                        $map['a.site'] = $val['platform_type'];
+                        $map['a.distribution_status'] = ['in', [1, 2]];
+                        $occupy_stock = $this->orderitemprocess->alias('a')->where($map)
+                            ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                            ->join(['fa_order_process' => 'c'], 'a.order_id = c.order_id')
+                            ->count(1);
+                        $platform->where(['sku' => $v, 'platform_type' => $val['platform_type']])->update(['stock' => '-' . $occupy_stock]);
+                    }
+
+                }
+
             }
             usleep(10000);
             echo $k . "\n";
@@ -1247,30 +1285,6 @@ class Wangpenglei extends Backend
     }
 
 
-    /**
-     *  导出库存数据对比
-     * @Description
-     * @author: wpl
-     * @since : 2021/4/1 17:40
-     */
-    public function getStockList()
-    {
-        //查询镜架成本为0的财务数据
-        $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
-        $skus = Db::table('fa_zz_temp1')->column('sku');
-        $list = $barcode
-            ->alias('a')
-            ->where(['a.library_status' => 1])
-            ->where(['a.sku' => ['in', $skus]])
-            ->where(['a.location_code_id' => ['>', 0]])
-            ->where("a.item_order_number=''")
-            ->group('sku')
-            ->column('count(1) as stock', 'sku');
-        foreach ($skus as $v) {
-            Db::table('fa_zz_temp1')->where(['sku' => $v])->update(['stock' => $list[$v] ?: 0]);
-        }
-    }
-
     public function test002()
     {
         $barcode = new \app\admin\model\warehouse\ProductBarCodeItem();
@@ -1392,6 +1406,7 @@ class Wangpenglei extends Backend
         $list = $this->is_prescription_abnormal($params);
         $arr = array_merge($arr, $list);
 
+        $arr['order_prescription_type'] = 0;
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
@@ -1402,14 +1417,42 @@ class Wangpenglei extends Backend
             $os_cyl = (float)urldecode($params['os_cyl']);
             //判断是否为现片，其余为定制
             $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
-            foreach ($lensData as $v) {
-                if (($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'])
-                    && ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'])
-                    && ($os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end'])
-                    && ($od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end'])
-                ) {
-                    $arr['order_prescription_type'] = 2;
+            $tempArr = [];
+            $tempOrderType = [];
+            foreach ($lensData as &$v) {
+                if (!$v['sph_start']) {
+                    $v['sph_start'] = $v['sph_end'];
                 }
+
+                if (!$v['cyl_start']) {
+                    $v['cyl_start'] = $v['cyl_end'];
+                }
+
+                $v['sph_start'] = (float)$v['sph_start'];
+                $v['sph_end'] = (float)$v['sph_end'];
+                $v['cyl_start'] = (float)$v['cyl_start'];
+                $v['cyl_end'] = (float)$v['cyl_end'];
+
+                if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
+                    $tempArr['od'] = 1;
+                } else {
+                    $tempArr['os'] = 0;
+                }
+                if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
+                    $tempArr['os'] = 1;
+                } else {
+                    $tempArr['os'] = 0;
+                }
+
+                if ($tempArr['od'] == 1 && $tempArr['os'] == 1) {
+                    $tempOrderType[] = 2;
+                } else {
+                    $tempOrderType[] = 3;
+                }
+            }
+
+            if (in_array(2, $tempOrderType)) {
+                $arr['order_prescription_type'] = 2;
             }
         }
 
@@ -1428,12 +1471,12 @@ class Wangpenglei extends Backend
      */
     public function test_lens()
     {
-        $params['od_sph'] = '-2.50';
-        $params['os_sph'] = '-2.50';
-        $params['od_cyl'] = '-0.50';
-        $params['os_cyl'] = '-0.50';
+        $params['od_sph'] = '-2.25';
+        $params['os_sph'] = '-2.00';
+        $params['od_cyl'] = '-2.50';
+        $params['os_cyl'] = '-2.00';
         $params['pd'] = 60;
-        $params['lens_number'] = 22100000;
+        $params['lens_number'] = 23100001;
         $data = $this->set_processing_type($params);
         dump($data);
         die;
@@ -1446,5 +1489,51 @@ class Wangpenglei extends Backend
         $today_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status";
         echo $today_sales_money_sql;
         die;
+    }
+
+
+    /**
+     * 库位排序
+     * @author wpl
+     * @date   2021/6/5 10:26
+     */
+    public function set_store_sort()
+    {
+        $stock_house = new StockHouse();
+        $list = Db::table('fa_zz_temp2')->select();
+        foreach ($list as $k => $v) {
+            $stock_house->where(['stock_id' => 2, 'coding' => $v['store_house']])->update(['picking_sort' => $v['sort']]);
+            echo $k . "\n";
+        }
+        echo "ok";
+    }
+
+
+    public function set_order_sort()
+    {
+        $order = new NewOrderItemProcess();
+        $list = $order->where(['stock_id' => 2])->select();
+        $itemPlatform = new ItemPlatformSku();
+        foreach ($list as $k => $v) {
+            //转换平台SKU
+            $sku = $itemPlatform->getTrueSku($v['sku'], $v['site']);
+            //根据sku查询库位排序
+            $stockSku = new StockSku();
+            $where = [];
+            $where['c.type'] = 2;//默认拣货区
+            $where['b.status'] = 1;//启用状态
+            $where['a.is_del'] = 1;//正常状态
+            $where['b.stock_id'] = 2;//查询对应仓库
+            $location_data = $stockSku
+                ->alias('a')
+                ->where($where)
+                ->where(['a.sku' => $sku])
+                ->field('b.coding,b.picking_sort')
+                ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+                ->join(['fa_warehouse_area' => 'c'], 'b.area_id=c.id')
+                ->find();
+            $order->where(['id' => $v['id']])->update(['picking_sort' => $location_data['picking_sort']]);
+        }
+
     }
 }

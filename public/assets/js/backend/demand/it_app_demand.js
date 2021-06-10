@@ -27,8 +27,34 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                         {
                             field: 'site',
                             title: __('站点'),
-                            searchList: { 1: 'zeelool', 2: 'voogueme', 3: 'nihao', 4: 'meeloog', 5: 'wesee', 6: 'rufoo', 7: 'toloog', 8: 'other', 9: 'ZeeloolEs', 10: 'ZeeloolDe', 11: 'ZeeloolJp', 12: 'voogmechic' },
-                            custom: { '1': 'black', '2': 'red', 3: 'black', 4: 'black', 5: 'black', 6: 'black', 7: 'black', 8: 'black', 9: 'black', 10: 'black', 11: 'black',12:'black'},
+                            searchList: {
+                                1: 'zeelool',
+                                2: 'voogueme',
+                                3: 'meeloog',
+                                4: 'vicmoo',
+                                5: 'wesee',
+                                6: 'rufoo',
+                                7: 'toloog',
+                                8: 'other',
+                                9: 'ZeeloolEs',
+                                10: 'ZeeloolDe',
+                                11: 'ZeeloolJp',
+                                12: 'voogmechic'
+                            },
+                            custom: {
+                                '1': 'black',
+                                '2': 'red',
+                                3: 'black',
+                                4: 'black',
+                                5: 'black',
+                                6: 'black',
+                                7: 'black',
+                                8: 'black',
+                                9: 'black',
+                                10: 'black',
+                                11: 'black',
+                                12: 'black'
+                            },
                             formatter: Table.api.formatter.status
                         },
                         {field: 'create_time', title: __('提出时间'), operate:'RANGE',  operate: false,addclass:'datetimerange', formatter: Table.api.formatter.datetime},

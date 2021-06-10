@@ -155,8 +155,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             searchList: {
                                 1: 'Zeelool',
                                 2: 'Voogueme',
-                                3: 'Nihao',
-                                4: 'Meeloog',
+                                3: 'Meeloog',
+                                4: 'Vicmoo',
                                 5: 'Wesee',
                                 8: 'Amazon',
                                 9: 'Zeelool_es',
@@ -1007,6 +1007,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             operate: 'like'
                         },
                         {
+                            field: 'stock_id',
+                            title: __('仓库'),
+                            addClass: 'selectpicker',
+                            searchList: {
+                                1: '郑州仓',
+                                2: '丹阳仓'
+                            },
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'sku',
                             title: __('SKU'),
                             operate: 'like'
@@ -1037,8 +1047,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             searchList: {
                                 1: 'Zeelool',
                                 2: 'Voogueme',
-                                3: 'Nihao',
-                                4: 'Meeloog',
+                                3: 'Meeloog',
+                                4: 'Vicmoo',
                                 5: 'Wesee',
                                 8: 'Amazon',
                                 9: 'Zeelool_es',
@@ -1146,6 +1156,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             formatter: Table.api.formatter.status
                         },
 
+
+
                         {
                             field: 'a.created_at',
                             title: __('创建时间'),
@@ -1240,6 +1252,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         });
                     }
                 );
+            });
+
+
+            //批量导出xls
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                var params = '';
+                if (ids.length > 0) {
+                    params = 'ids=' + ids;
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
+                }
+                window.open(Config.moduleurl + '/order/distribution/batch_export_xls?' + params + '&wave_order_id=' + Config.ids, '_blank');
             });
         },
         handle_abnormal: function () {

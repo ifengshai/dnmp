@@ -34,6 +34,7 @@ class GoodsSalesNum extends Backend
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
+        $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
     }
     /**
      * 销量排行榜
@@ -73,13 +74,12 @@ class GoodsSalesNum extends Backend
             );
             //列表
             $result = [];
-            $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
             //查询对应平台销量
             $info = $this->getOrderSalesNum($params['site'],$map,$pageArr);
             $total = $info['count'];
             $list = $info['data'];
             //查询对应平台商品SKU
-            $skus = $itemPlatformSku->getWebSkuAll($params['site']);
+            $skus = $this->itemPlatformSku->getWebSkuAll($params['site']);
             $productInfo = $this->item->getSkuInfo();
             $list = $list ?? [];
             $i = 0;
@@ -102,7 +102,7 @@ class GoodsSalesNum extends Backend
                 //日均销量
                 $result[$i]['sales_num_day'] = $result[$i]['online_day'] ? round($v/$result[$i]['online_day'],2) : 0;
                 //在线状态（实时）
-                $stockInfo = $itemPlatformSku
+                $stockInfo = $this->itemPlatformSku
                     ->where(['platform_type'=>$params['site'],'platform_sku'=>$k])
                     ->field('stock,outer_sku_status,presell_status,presell_start_time,presell_end_time,presell_num')
                     ->find();
@@ -132,7 +132,7 @@ class GoodsSalesNum extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','wesee','zeelool_de','zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee','zeelool_de','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -142,7 +142,6 @@ class GoodsSalesNum extends Backend
     }
     public function index1()
     {
-        $itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $create_time = input('create_time');
         if ($this->request->isAjax()) {
             $filter = json_decode($this->request->get('filter'), true);
@@ -168,7 +167,7 @@ class GoodsSalesNum extends Backend
             $i = 0;
             $nowDate = date('Y-m-d H:i:s');
             foreach($skus as $k=>$value){
-                $skuInfo = $itemPlatformSku->getSkuInfo($params['site'],$value['platform_sku']);
+                $skuInfo = $this->itemPlatformSku->getSkuInfo($params['site'],$value['platform_sku']);
                 $skuTimeWhere['payment_time'] = ['between',[$value['shelves_time'],time()]];
                 $skuSalesNum = $this->getOrderSalesNum($params['site'],$skuTimeWhere,[],$value['platform_sku']);
 
@@ -213,7 +212,7 @@ class GoodsSalesNum extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'nihao','wesee','zeelool_de','zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee','zeelool_de','zeelool_jp'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -222,7 +221,97 @@ class GoodsSalesNum extends Backend
         return $this->view->fetch('operatedatacenter/newgoodsdata/goods_sales_num/index1');
     }
 
+    public function export()
+    {
+        set_time_limit(0);
+        header ( "Content-type:application/vnd.ms-excel" );
+        header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", date('Y-m-d-His',time()) ) . ".csv" );//导出文件名
+        // 打开PHP文件句柄，php://output 表示直接输出到浏览器
+        $fp = fopen('php://output', 'a');
+        $time_str = input('time_str');
+        $order_platform = input('order_platform') ? input('order_platform') : 1;
 
+        // 将中文标题转换编码，否则乱码
+        $field_arr = array(
+            '平台SKU','SKU','上架时间','分类','虚拟仓库存','销量','在线天数','日均销量','在售状态（实时）'
+        );
+        foreach ($field_arr as $i => $v) {
+            $field_arr[$i] = iconv('utf-8', 'GB18030', $v);
+        }
+        // 将标题名称通过fputcsv写到文件句柄
+        fputcsv($fp, $field_arr);
+
+        if (!$time_str) {
+            //时间段总和
+            $start = date('Y-m-d', strtotime('-6 day'));
+            $end = date('Y-m-d 23:59:59');
+            $time_str = $start . ' 00:00:00 - ' . $end;
+        }
+        $createat = explode(' ', $time_str);
+        $startTime = strtotime($createat[0] . ' ' . $createat[1]);
+        $endTime = strtotime($createat[3] . ' ' . $createat[4]);
+        $map['payment_time'] = ['between', [$startTime, $endTime]];
+
+        $info = $this->getOrderSalesNum($order_platform,$map);
+        //切割每份数据
+        $list = $info['data'];
+        $skus = $this->itemPlatformSku->getWebSkuAll($order_platform);
+        $productInfo = $this->item->getSkuInfo();
+        $nowDate = date('Y-m-d H:i:s');
+        //整理数据
+        foreach ($list as $k=>$v) {
+            $tmpRow = [];
+            $tmpRow['platformsku'] =$k;
+            $tmpRow['sku'] = $skus[trim($k)]['sku'];
+            //上架时间
+            $shelvesTime = Db::name('sku_shelves_time')
+                ->where(['site'=>$order_platform,'platform_sku'=>$k])
+                ->value('shelves_time');
+            $tmpRow['shelves_date'] = date('Y-m-d H:i:s',$shelvesTime);
+            $tmpRow['type_name'] = $productInfo[$skus[trim($k)]['sku']]['type_name'];
+            $tmpRow['available_stock'] = $skus[trim($k)]['stock'];  //虚拟仓库存
+            $tmpRow['sales_num'] = $v;
+            //在线天数
+            $tmpRow['online_day'] = Db::name('sku_status_dataday')
+                ->where(['site'=>$order_platform,'platform_sku'=>$k,'status'=>1])
+                ->count();
+            //日均销量
+            $tmpRow['sales_num_day'] = $tmpRow['online_day'] ? round($v/$tmpRow['online_day'],2) : 0;
+            //在线状态（实时）
+            $stockInfo = $this->itemPlatformSku
+                ->where(['platform_type'=>$order_platform,'platform_sku'=>$k])
+                ->field('stock,outer_sku_status,presell_status,presell_start_time,presell_end_time,presell_num')
+                ->find();
+            if($stockInfo['outer_sku_status'] == 1){
+                if($stockInfo['stock'] > 0){
+                    $tmpRow['online_status'] = 1;  //在线
+                }else{
+                    if($stockInfo['presell_status'] == 1 && $nowDate >= $stockInfo['presell_start_time'] && $nowDate <= $stockInfo['presell_end_time']){
+                        if($stockInfo['presell_num'] > 0){
+                            $tmpRow['online_status'] = 1;  //在线
+                        }else{
+                            $tmpRow['online_status'] = 2;  //售罄
+                        }
+                    }else{
+                        $tmpRow['online_status'] = 2;  //售罄
+                    }
+                }
+            }else{
+                $tmpRow['online_status'] = 3;  //下架
+            }
+            $rows = array();
+            foreach ( $tmpRow as $export_obj){
+                $rows[] = iconv('utf-8', 'GB18030', $export_obj);
+            }
+            fputcsv($fp, $rows);
+        }
+        // 将已经写到csv中的数据存储变量销毁，释放内存占用
+        unset($list);
+        ob_flush();
+        flush();
+
+        fclose($fp);
+    }
 
     /**
      * 销量排行折线图
@@ -344,7 +433,6 @@ class GoodsSalesNum extends Backend
                 ->join('fa_order_item_option p','o.entity_id=p.magento_order_id')
                 ->where($map)
                 ->where($timeWhere)
-                ->where('sku',$sku)
                 ->group('sku')
                 ->order('num desc')
                 ->column('sum(p.qty) as num', 'p.sku');

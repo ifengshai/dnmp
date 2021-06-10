@@ -132,8 +132,8 @@ class WorkOrderList extends Model
      * @author wpl
      * @since 2020/04/10 15:43:14 
      *
-     * @param [type] $order_platform 平台
-     * @param [type] $increment_id 订单号
+     * @param     [type] $order_platform 平台
+     * @param     [type] $increment_id 订单号
      *
      * @return void
      */
@@ -200,11 +200,11 @@ class WorkOrderList extends Model
     /**
      * 根据订单号获取SKU列表-新
      *
-     * @param  string  $increment_id  订单号
-     * @param  mixed  $item_order_number  子订单号
-     * @param  int  $work_type  工单类型：1客服 2仓库
-     * @param  array  $work  工单数据
-     * @param  int  $do_type  操作类型：0其他 1载入数据
+     * @param string $increment_id      订单号
+     * @param mixed  $item_order_number 子订单号
+     * @param int    $work_type         工单类型：1客服 2仓库
+     * @param array  $work              工单数据
+     * @param int    $do_type           操作类型：0其他 1载入数据
      *
      * @return array
      * @author lzh
@@ -417,7 +417,7 @@ class WorkOrderList extends Model
             exception('无此订单号，请查询后重试');
         }
         foreach ($prescriptions as $prescription) {
-            $showPrescriptions[] = $prescription['prescription_type'].'--'.$prescription['index_type'];
+            $showPrescriptions[] = $prescription['prescription_type'] . '--' . $prescription['index_type'];
         }
 
         return $address ? compact('address', 'prescriptions', 'showPrescriptions') : [];
@@ -426,8 +426,8 @@ class WorkOrderList extends Model
     /**
      * 获取订单地址及处方信息-新
      *
-     * @param  string  $increment_id  订单号
-     * @param  string  $item_order_number  子单号
+     * @param string $increment_id      订单号
+     * @param string $item_order_number 子单号
      *
      * @return array|bool
      * @author lzh
@@ -468,7 +468,7 @@ class WorkOrderList extends Model
 
         $showPrescriptions = [];
         foreach ($prescriptions as $prescription) {
-            $showPrescriptions[] = $prescription['prescription_type'].'--'.$prescription['index_type'];
+            $showPrescriptions[] = $prescription['prescription_type'] . '--' . $prescription['index_type'];
         }
 
         return $address ? compact('address', 'prescriptions', 'showPrescriptions') : [];
@@ -486,7 +486,7 @@ class WorkOrderList extends Model
     public function getReissueLensOld($siteType, $showPrescriptions, $type = 1, $isNewVersion = 0)
     {
         $url = '';
-        $key = $siteType.'_getlens_'.$isNewVersion;
+        $key = $siteType . '_getlens_' . $isNewVersion;
         $data = Cache::get($key);
         if (!$data) {
             if ($isNewVersion == 1) {
@@ -496,7 +496,7 @@ class WorkOrderList extends Model
             }
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
-                $data['lens_list'] = ['Plastic lenses', 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers', 'Photochromic Lenses', 'Color Tint', 'Mid-Index Mirrored lenses', 'Polarized'];
+                $data['lens_list'] = ['Plastic lenses', 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers', 'Photochromic Lenses', 'Color Tint', 'Mid-Index Mirrored lenses', 'Polarized','PhotochromicBlueLightBlocking','Night vision'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
             } else {
@@ -529,10 +529,10 @@ class WorkOrderList extends Model
     /**
      * 获取镜片、镀膜、颜色列表-新
      *
-     * @param  int  $siteType  网站类型
-     * @param  array  $showPrescriptions  镜片类型列表
-     * @param  int  $type  操作类型：1补发 2更改镜片 3赠品
-     * @param  string  $item_order_number  子订单号
+     * @param int    $siteType          网站类型
+     * @param array  $showPrescriptions 镜片类型列表
+     * @param int    $type              操作类型：1补发 2更改镜片 3赠品
+     * @param string $item_order_number 子订单号
      *
      * @return array
      * @throws \think\Exception
@@ -541,12 +541,12 @@ class WorkOrderList extends Model
     public function getReissueLens($siteType, $showPrescriptions, $type = 1, $item_order_number = '')
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
-        $cache_key = $siteType.'_get_lens';
+        $cache_key = $siteType . '_get_lens' . $type;
         $data = Cache::get($cache_key);
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
-                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized'];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized','PhotochromicBlueLightBlocking'=>'PhotochromicBlueLightBlocking','Night vision'=>'Night vision'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
             } else {
@@ -586,10 +586,10 @@ class WorkOrderList extends Model
     /**
      * http请求
      *
-     * @param $siteType
-     * @param $pathinfo
-     * @param  array  $params
-     * @param  string  $method
+     * @param        $siteType
+     * @param        $pathinfo
+     * @param array  $params
+     * @param string $method
      *
      * @return bool
      * @throws \Exception
@@ -634,7 +634,7 @@ class WorkOrderList extends Model
                 return false;
                 break;
         }
-        $url = $url.$pathinfo;
+        $url = $url . $pathinfo;
 
         $client = new Client(['verify' => false]);
         //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
@@ -728,8 +728,8 @@ class WorkOrderList extends Model
     /**
      * 更改地址-通知网站
      *
-     * @param  object  $work  工单数据
-     * @param  int  $measure_id  工单措施表自增ID
+     * @param object $work       工单数据
+     * @param int    $measure_id 工单措施表自增ID
      *
      * @return bool
      * @throws \Exception
@@ -913,11 +913,11 @@ class WorkOrderList extends Model
     /**
      * 更改镜片、赠品、补发新增sku表数据 - 新
      *
-     * @param  array  $params  页面传参
-     * @param  int  $work_id  工单ID
-     * @param  int  $measure_choose_id  措施配置表ID
-     * @param  int  $measure_id  措施ID
-     * @param  string  $item_order_number  子单号
+     * @param array  $params            页面传参
+     * @param int    $work_id           工单ID
+     * @param int    $measure_choose_id 措施配置表ID
+     * @param int    $measure_id        措施ID
+     * @param string $item_order_number 子单号
      *
      * @throws \Exception
      * @author lzh
@@ -949,12 +949,13 @@ class WorkOrderList extends Model
                     $colorId = $changeLens['color_id'];
                     $coatingId = $changeLens['coating_type'];
                     $recipe_type = $changeLens['recipe_type'];
-                    !$recipe_type && exception('请选择处方类型');
+
 
                     //获取镜片、镀膜等名称
                     if ($work['work_platform'] == 13 || $work['work_platform'] == 14) {
                         $lensCoatName = [];
                     } else {
+                        !$recipe_type && exception('请选择处方类型');
                         $lensCoatName = $this->getLensCoatingName($platform_type, $lensId, $coatingId, $colorId, $recipe_type);
                     }
                     //镜片、镀膜序列化信息
@@ -1072,12 +1073,12 @@ class WorkOrderList extends Model
                         $colorId = $changeLens['color_id'][$key];
                         $coatingId = $changeLens['coating_type'][$key];
                         $recipe_type = $changeLens['recipe_type'][$key];
-                        !$recipe_type && exception('请选择处方类型');
 
                         //获取镜片、镀膜等名称
                         if ($work['work_platform'] == 13 || $work['work_platform'] == 14) {
                             $lensCoatName = [];
                         } else {
+                            !$recipe_type && exception('请选择处方类型');
                             $lensCoatName = $this->getLensCoatingName($platform_type, $lensId, $coatingId, $colorId, $recipe_type);
                         }
 
@@ -1169,7 +1170,7 @@ class WorkOrderList extends Model
      *
      * @Description
      * @return void
-     * @since 2020/04/23 17:02:32
+     * @since  2020/04/23 17:02:32
      * @author lsw
      */
     public function changeFrameOld($params, $work_id, $measure_choose_id, $measure_id)
@@ -1215,11 +1216,11 @@ class WorkOrderList extends Model
     /**
      * 更换镜框 - 新
      *
-     * @param  array  $params  页面传参
-     * @param  int  $work_id  工单ID
-     * @param  int  $measure_choose_id  措施配置表ID
-     * @param  int  $measure_id  措施ID
-     * @param  string  $item_order_number  子单号
+     * @param array  $params            页面传参
+     * @param int    $work_id           工单ID
+     * @param int    $measure_choose_id 措施配置表ID
+     * @param int    $measure_id        措施ID
+     * @param string $item_order_number 子单号
      *
      * @Description
      * @return mixed
@@ -1298,11 +1299,11 @@ class WorkOrderList extends Model
     /**
      * 取消操作 - 新
      *
-     * @param  array  $params  页面传参
-     * @param  int  $work_id  工单ID
-     * @param  int  $measure_choose_id  措施配置表ID
-     * @param  int  $measure_id  措施ID
-     * @param  string  $item_order_number  子单号
+     * @param array  $params            页面传参
+     * @param int    $work_id           工单ID
+     * @param int    $measure_choose_id 措施配置表ID
+     * @param int    $measure_id        措施ID
+     * @param string $item_order_number 子单号
      *
      * @Description
      * @return mixed
@@ -1366,23 +1367,23 @@ class WorkOrderList extends Model
     /**
      * 根据id获取镜片，镀膜的名称
      *
-     * @param  int  $siteType  网站类型
-     * @param  int  $lens_id  镜片ID
-     * @param  int  $coating_id  镀膜ID
-     * @param  int  $color_id  颜色ID
-     * @param  string  $prescription_type  处方类型
+     * @param int    $siteType          网站类型
+     * @param int    $lens_id           镜片ID
+     * @param int    $coating_id        镀膜ID
+     * @param int    $color_id          颜色ID
+     * @param string $prescription_type 处方类型
      *
      * @return array
      * @author lzh
      */
     public function getLensCoatingName($siteType, $lens_id, $coating_id, $color_id, $prescription_type)
     {
-        $key = $siteType.'_get_lens';
+        $key = $siteType . '_get_lens';
         $data = Cache::get($key);
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
-                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized'];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized','PhotochromicBlueLightBlocking'=>'PhotochromicBlueLightBlocking','Night vision'=>'Night vision'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
             } else {
@@ -1537,7 +1538,7 @@ class WorkOrderList extends Model
                 $measure_id = $changeSku['measure_id'];
             }
             $postData = array_merge($postData, $postDataCommon);
-            $postDatas  = serialize($postData);
+            $postDatas = serialize($postData);
             Log::write("补发单创建请求");
             Log::write($postDatas);
             Log::write("补发单创建请求two");
@@ -1629,7 +1630,7 @@ class WorkOrderList extends Model
     public function getEditReissueLensOld($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '', $is_new_version = 0)
     {
         $url = '';
-        $key = $siteType.'_getlens_'.$is_new_version;
+        $key = $siteType . '_getlens_' . $is_new_version;
         //$data = Cache::get($key);
         if (!$data) {
             if ($is_new_version == 1) {
@@ -1665,12 +1666,12 @@ class WorkOrderList extends Model
     /**
      * 获取修改处方(编辑的时候带出存储的信息)
      *
-     * @param  int  $siteType  网站类型
-     * @param  array  $showPrescriptions  镜片类型列表
-     * @param  int  $type  操作类型：1补发 2更改镜片 3赠品
-     * @param  array  $info
-     * @param  string  $operate_type
-     * @param  string  $item_order_number  子订单号
+     * @param int    $siteType          网站类型
+     * @param array  $showPrescriptions 镜片类型列表
+     * @param int    $type              操作类型：1补发 2更改镜片 3赠品
+     * @param array  $info
+     * @param string $operate_type
+     * @param string $item_order_number 子订单号
      *
      * @return array|bool
      * @throws \think\Exception
@@ -1679,12 +1680,12 @@ class WorkOrderList extends Model
     public function getEditReissueLens($siteType, $showPrescriptions, $type = 1, $info = [], $operate_type = '', $item_order_number = '')
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
-        $cache_key = $siteType.'_get_lens';
+        $cache_key = $siteType . '_get_lens';
         //$data = Cache::get($cache_key);
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
-                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized'];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized','PhotochromicBlueLightBlocking'=>'PhotochromicBlueLightBlocking','Night vision'=>'Night vision'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
             } else {
@@ -1725,8 +1726,8 @@ class WorkOrderList extends Model
     /**
      * 审核
      *
-     * @param $work_id
-     * @param  array  $params
+     * @param       $work_id
+     * @param array $params
      *
      * @return bool
      * @throws \think\db\exception\DataNotFoundException
@@ -1926,7 +1927,7 @@ class WorkOrderList extends Model
     /**
      * 工单绑定有异常则修改为已处理
      *
-     * @param  object  $work  工单表数据
+     * @param object $work 工单表数据
      *
      * @return array
      * @author lzh
@@ -2056,9 +2057,9 @@ class WorkOrderList extends Model
     /**
      * 审核成功后自动完成处理相关流程
      *
-     * @param  object  $orderRecept  承接表数据
-     * @param  int  $measure_choose_id  措施配置表ID
-     * @param  object  $work  工单表数据
+     * @param object $orderRecept       承接表数据
+     * @param int    $measure_choose_id 措施配置表ID
+     * @param object $work              工单表数据
      *
      * @return bool
      * @author lzh
@@ -2095,15 +2096,15 @@ class WorkOrderList extends Model
      *
      * @Description
      *
-     * @param [type] $id   承接表ID
-     * @param [type] $work_id 工单表ID
-     * @param [type] $measure_id 措施表ID
-     * @param [type] $success 是否成功 1 处理成功 2 处理失败
-     * @param [type] $process_note 处理备注
+     * @param  [type] $id   承接表ID
+     * @param  [type] $work_id 工单表ID
+     * @param  [type] $measure_id 措施表ID
+     * @param  [type] $success 是否成功 1 处理成功 2 处理失败
+     * @param  [type] $process_note 处理备注
      *
      * @return boolean
      * @author lsw
-     * @since 2020/04/21 10:13:28
+     * @since  2020/04/21 10:13:28
      */
     public function handleRecept($id, $work_id, $measure_id, $recept_group_id, $success, $process_note, $is_auto_complete, $barcode)
     {
@@ -2160,7 +2161,7 @@ class WorkOrderList extends Model
                             $value['change_sku'] = $platform_info['sku'];
                         }
                         for ($i = 1; $i <= $value['change_number']; $i++) {
-                            $product_bar_code_item->where(['code' => $barcode[$value['change_sku'].'_'.$i]])
+                            $product_bar_code_item->where(['code' => $barcode[$value['change_sku'] . '_' . $i]])
                                 ->update(['item_order_number' => $work->platform_order, 'library_status' => 2, 'out_stock_time' => date('Y-m-d H:i:s')]);
                         }
                     }
@@ -2579,8 +2580,8 @@ class WorkOrderList extends Model
             'wo_refund_money_percent' => $this->wo_refund_money_percent($premonth_startdate, $premonth_enddate, $platform, 1),
         ];
         //今年
-        $year_startdate = date("Y", time())."-1"."-1"; //本年开始
-        $year_enddate = date("Y", time())."-12"."-31"." 23:59:59"; //本年结束
+        $year_startdate = date("Y", time()) . "-1" . "-1"; //本年开始
+        $year_enddate = date("Y", time()) . "-12" . "-31" . " 23:59:59"; //本年结束
         $year = [
             'wo_num'                  => $this->wo_sum($year_startdate, $year_enddate, $platform, 1),
             'wo_complete_num'         => $this->wo_complete_num($year_startdate, $year_enddate, $platform, 1),
@@ -2662,7 +2663,7 @@ class WorkOrderList extends Model
         $count = $this->alias('z')->join('fa_work_order_measure m', 'z.id=m.work_id')->where($map)->count();
         $sum = $complete_count == 0 ? 0 : round($count / $complete_count * 100, 2);
 
-        return $sum ? $sum.'%' : 0;
+        return $sum ? $sum . '%' : 0;
     }
 
     /**
@@ -2682,7 +2683,7 @@ class WorkOrderList extends Model
         $count = $this->where($map)->count();
         $sum = $complete_count == 0 ? 0 : round($count / $complete_count * 100, 2);
 
-        return $sum ? $sum.'%' : 0;
+        return $sum ? $sum . '%' : 0;
     }
 
     /**
@@ -2701,7 +2702,7 @@ class WorkOrderList extends Model
         $money = $this->where($map)->where('is_refund', 1)->sum('refund_money');
         $sum = $complete_money == 0 ? 0 : round($money / $complete_money * 100, 2);
 
-        return $sum ? $sum.'%' : 0;
+        return $sum ? $sum . '%' : 0;
     }
 
     /*

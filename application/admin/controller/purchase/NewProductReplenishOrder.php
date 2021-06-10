@@ -68,7 +68,7 @@ class NewProductReplenishOrder extends Backend
                 $map = array();
             }
             $this->request->get(['filter' => json_encode($filter)]);
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
 
             $total = $this->replenish
                 ->where($where)
@@ -110,7 +110,7 @@ class NewProductReplenishOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where('replenish_id', $replenish_id)
                 ->where($where)
@@ -195,7 +195,7 @@ class NewProductReplenishOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where(['is_del' => 1, 'is_verify' => 1, 'replenish_id' => $replenish_id])
                 ->where($where)
@@ -430,7 +430,7 @@ class NewProductReplenishOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->list
                 ->where($map)
                 ->where($where)
@@ -503,7 +503,7 @@ class NewProductReplenishOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->list
                 ->where($map)
                 ->where($where)
@@ -528,10 +528,10 @@ class NewProductReplenishOrder extends Backend
                         $websiteType = 'Voogueme';
                         break;
                     case PlatformType::NIHAO_PLAT:
-                        $websiteType = 'Nihao';
+                        $websiteType = 'Meeloog';
                         break;
                     case PlatformType::MEELOOG_PLAT:
-                        $websiteType = 'Meeloog';
+                        $websiteType = 'Vicmoo';
                         break;
                     case PlatformType::WESEE_PLAT:
                         $websiteType = 'Weseeoptical';
@@ -894,16 +894,6 @@ class NewProductReplenishOrder extends Backend
                 }
             }
             if ($v['website_type'] == 3){
-                $v['site_name'] = 'nihao';
-
-                $fenpei = Db::name('new_product_replenish_list')->where(['sku'=>$v['sku'],'replenish_id'=>$v['replenish_id']])->find();
-                if ($fenpei['real_dis_num'] > 0){
-                    // dump('sku:'.$fenpei['sku'].'已采购');
-                }else{
-                    $arr['nihao'][$k] = $v;
-                }
-            }
-            if ($v['website_type'] == 4){
                 $v['site_name'] = 'meeloog';
 
                 $fenpei = Db::name('new_product_replenish_list')->where(['sku'=>$v['sku'],'replenish_id'=>$v['replenish_id']])->find();
@@ -911,6 +901,16 @@ class NewProductReplenishOrder extends Backend
                     // dump('sku:'.$fenpei['sku'].'已采购');
                 }else{
                     $arr['meeloog'][$k] = $v;
+                }
+            }
+            if ($v['website_type'] == 4){
+                $v['site_name'] = 'vicmoo';
+
+                $fenpei = Db::name('new_product_replenish_list')->where(['sku'=>$v['sku'],'replenish_id'=>$v['replenish_id']])->find();
+                if ($fenpei['real_dis_num'] > 0){
+                    // dump('sku:'.$fenpei['sku'].'已采购');
+                }else{
+                    $arr['vicmoo'][$k] = $v;
                 }
             }
             if ($v['website_type'] == 5){
