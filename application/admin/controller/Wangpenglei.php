@@ -152,7 +152,6 @@ class Wangpenglei extends Backend
             echo $v['sku'] . "\n";
         }
         echo 'ok';
-        die;
     }
 
     /**
@@ -195,7 +194,6 @@ class Wangpenglei extends Backend
             usleep(20000);
         }
         echo 'ok';
-        die;
     }
 
     /**
@@ -235,7 +233,6 @@ class Wangpenglei extends Backend
             usleep(20000);
         }
         echo 'ok';
-        die;
     }
 
     /**
@@ -263,7 +260,6 @@ class Wangpenglei extends Backend
             usleep(20000);
         }
         echo 'ok';
-        die;
     }
 
     /**
