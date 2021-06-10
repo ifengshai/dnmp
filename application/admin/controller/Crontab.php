@@ -3160,6 +3160,9 @@ class Crontab extends Backend
             case 12:
                 $model = Db::connect('database.db_voogueme_acc');
                 break;
+            case 15:
+                $model = Db::connect('database.db_zeelool_fr');
+                break;
             default:
                 $model = false;
                 break;
@@ -3649,6 +3652,9 @@ class Crontab extends Backend
                 break;
             case 12:
                 $model = Db::connect('database.db_voogueme_acc');
+                break;
+            case 15:
+                $model = Db::connect('database.db_zeelool_fr');
                 break;
             default:
                 $model = false;
