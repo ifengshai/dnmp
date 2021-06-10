@@ -82,7 +82,7 @@ class AsyncEs extends BaseElasticsearch
         foreach($orders as $order){
             $value = array_map(function($v){
                 return $v === null ? 0 : $v;
-            },collection($order)->toArray());
+            },$order->toArray());
             dump($order);
 dump($value);die;
             //nihao站的终端转换
