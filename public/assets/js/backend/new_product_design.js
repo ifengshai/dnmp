@@ -41,7 +41,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     multi_url: 'new_product_design/multi',
                     table: 'new_product_design',
                 },
-                pageList: [10, 50,100,300,500,]
+                pageList: [10, 50,100,200]
             });
 
             var table = $("#table");
@@ -423,7 +423,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                              // formatter: Table.api.formatter.operate
 
                             formatter: function (value, row, index) { //隐藏自定义的视频按钮
-                                console.log(Config);
                                 var that = $.extend({}, this);
                                 var table = $(that.table).clone(true);
                                 //权限判断
