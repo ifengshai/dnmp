@@ -312,7 +312,7 @@ class NewProductDesign extends Backend
             }
             if ($sortPlat && in_array($sortPlat, $allPlat)) {
                 $lastNames = array_column($list,$sortPlat);
-                array_multisort($lastNames,$order == 'desc'? SORT_DESC:SORT_ASC,SORT_STRING ,$list);
+                array_multisort($lastNames,$order == 'desc'? SORT_DESC:SORT_ASC,SORT_NUMERIC,$list);
             }
 
             $result = ["total" => $total, "label" => $map['a.status'] ? $map['a.status'] : 0, "rows" => $list];
