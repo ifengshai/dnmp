@@ -88,7 +88,7 @@ class SingleItems extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee','zeelool_de','zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee','zeelool_de','zeelool_jp','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -312,7 +312,7 @@ class SingleItems extends Backend
      */
     function prescrtion_data($site = 1,$timeStr = '',$sku = ''){
         $orderNum = $this->prescrtion_num('',$site,$timeStr,$sku);
-        if($site == 1 || $site == 2 || $site == 3 || $site == 10 || $site == 11){
+        if($site == 1 || $site == 2 || $site == 3 || $site == 10 || $site == 11 || $site == 15){
             $singleVisionNum = $this->prescrtion_num('SingleVision',$site,$timeStr,$sku);
             $singleVisionArr = array(
                 'name'=>'single vision',
@@ -364,7 +364,7 @@ class SingleItems extends Backend
                     'value'=>$frameOnlyNum,
                 );
                 $arr = [$singleVisionArr,$progressiveArr,$readingGlassesArr,$readingGlassesNoArr,$noPrescriptionArr,$sunglassesArr,$sunglassesNoArr,$sportsProgressiveArr,$frameOnlyArr];
-            }elseif($site == 2 || $site == 10 || $site == 11){
+            }elseif($site == 2 || $site == 10 || $site == 11 || $site == 15){
                 $readingGlassesNum = $this->prescrtion_num('ReadingGlasses',$site,$timeStr,$sku);
                 $readingGlassesArr = array(
                     'name'=>'reading glasses',

@@ -28,7 +28,7 @@ class OrderPrescriptionNew extends Backend
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp', 'wesee'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp', 'wesee','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -86,7 +86,7 @@ class OrderPrescriptionNew extends Backend
         ];
         if ($site == 3) {
             $reading_glasses_num = $this->prescrtion_num('Reading Glasses', $data);
-        } elseif ($site == 10 || $site == 11) {
+        } elseif ($site == 10 || $site == 11 || $site == 15) {
             $reading_glasses_num = $this->prescrtion_num('ReadingGlasses', $data);
         } else {
             $reading_glasses_num = $this->prescrtion_num('Readingglasses', $data);
@@ -97,7 +97,7 @@ class OrderPrescriptionNew extends Backend
             'num'  => $reading_glasses_num,
             'rate' => $reading_glasses_rate,
         ];
-        if ($site == 2 || $site == 10 || $site == 11) {
+        if ($site == 2 || $site == 10 || $site == 11 || $site == 15) {
             $reading_glassesno_num = $this->prescrtion_num('ReadingNoprescription', $data);
         } elseif ($site == 3) {
             $reading_glassesno_num = $this->prescrtion_num('Reading Glasses2', $data);
@@ -110,9 +110,9 @@ class OrderPrescriptionNew extends Backend
             'num'  => $reading_glassesno_num,
             'rate' => $reading_glassesno_rate,
         ];
-        if ($site == 2 || $site == 10 || $site == 11 || $site == 5) {
+        if ($site == 2 || $site == 10 || $site == 11 || $site == 5 || $site == 15) {
             $no_prescription_num1 = $this->prescrtion_num('NonPrescription', $data);
-            $no_prescription_num2 = $this->prescrtion_num('Noprescription', $datar);
+            $no_prescription_num2 = $this->prescrtion_num('Noprescription', $data);
             $no_prescription_num = $no_prescription_num1 + $no_prescription_num2;
         } else {
             $no_prescription_num = $this->prescrtion_num('NonPrescription', $data);
@@ -204,9 +204,7 @@ class OrderPrescriptionNew extends Backend
     {
         if ($site == 3 || $site == 2) {
             $type = [4.95, 8.95, 9.95];
-        } elseif ($site == 10) {
-            $type = [4.95, 8.95, 9.95];
-        } elseif ($site == 11) {
+        } elseif ($site == 10 || $site == 11 || $site == 15) {
             $type = [4.95, 8.95, 9.95];
         } elseif ($site == 1) {
             $type = [0, 5, 9];

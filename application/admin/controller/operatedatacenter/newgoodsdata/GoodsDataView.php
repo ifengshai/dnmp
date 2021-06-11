@@ -41,7 +41,7 @@ class GoodsDataView extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee','zeelool_de','zeelool_jp'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee','zeelool_de','zeelool_jp','zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -72,6 +72,9 @@ class GoodsDataView extends Backend
                     $goods_type = [1 => '平光镜', 2 => '太阳镜', 6 => '配饰'];
                     break;
                 case 11:
+                    $goods_type = [1 => '平光镜', 2 => '太阳镜', 6 => '配饰'];
+                    break;
+                case 15:
                     $goods_type = [1 => '平光镜', 2 => '太阳镜', 6 => '配饰'];
                     break;
             }
@@ -217,6 +220,11 @@ class GoodsDataView extends Backend
                     $sun_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 2)->where('site', 11)->sum('glass_num');
                     $other_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 6)->where('site', 11)->sum('glass_num');
                     break;
+                case 15:
+                    $glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 1)->where('site', 15)->sum('glass_num');
+                    $sun_glass_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 2)->where('site', 15)->sum('glass_num');
+                    $other_num = Db::name('datacenter_goods_type_data')->where($map)->where('goods_type', 6)->where('site', 15)->sum('glass_num');
+                    break;
                 default:
                     $model = false;
                     break;
@@ -232,7 +240,7 @@ class GoodsDataView extends Backend
             $other_num = $other_num ? $other_num : 0;
             $total_num = $glass_num + $sun_glass_num + $run_glass_num + $old_glass_num + $son_glass_num + $other_num;
         }
-        $data = compact('a_plus_data', 'a_data', 'b_data', 'c_plus_data', 'd_data', 'e_data', 'f_data', 'glass_num', 'sun_glass_num', 'run_glass_num', 'old_glass_num', 'son_glass_num', 'other_num', 'total_num');
+        $data = compact('glass_num', 'sun_glass_num', 'run_glass_num', 'old_glass_num', 'son_glass_num', 'other_num', 'total_num');
         $this->success('', '', $data);
     }
 
@@ -389,6 +397,9 @@ class GoodsDataView extends Backend
                 break;
             case 11:
                 $model = Db::connect('database.db_zeelool_jp');
+                break;
+            case 15:
+                $model = Db::connect('database.db_zeelool_fr');
                 break;
             default:
                 $model = false;
@@ -818,6 +829,10 @@ class GoodsDataView extends Backend
                     $glass = $this->other_key_plat($order_platform, 1, $time_str);
                     $sun_glass = $this->other_key_plat($order_platform, 2, $time_str);
                     break;
+                case 15:
+                    $glass = $this->other_key_plat($order_platform, 1, $time_str);
+                    $sun_glass = $this->other_key_plat($order_platform, 2, $time_str);
+                    break;
                 default:
                     break;
             }
@@ -860,6 +875,9 @@ class GoodsDataView extends Backend
                     break;
                 case 11:
                     $model = Db::connect('database.db_zeelool_jp');
+                    break;
+                case 15:
+                    $model = Db::connect('database.db_zeelool_fr');
                     break;
                 default:
                     $model = false;
