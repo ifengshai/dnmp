@@ -197,6 +197,7 @@ class NewProductDesign extends Backend
             $itemStatusIsNew = array_column($itemStatusIsNew,null,'sku');
             $platStock = collection($platStock)->toArray();
             $itemCategory= new ItemCategory();
+            $itemCategoryAll = $itemCategory->column('name','id');
             $platformType = ['0','Z','V','N','M','W','0','0','A','Es','De','Jp','Chic','Z_cn','Ali','Z_fr'];
             foreach ($list as $key=>$item){
                 $list[$key]['label'] = $map['a.status'] ? $map['a.status'] : 0;
@@ -299,7 +300,8 @@ class NewProductDesign extends Backend
                             return $carry;
                         }
                     }) ?? '-';
-                $list[$key]['category'] =$itemCategory->where('id',$itemStatusIsNew[$item['sku']]['category_id'])->value('name');
+//                $list[$key]['category'] =$itemCategory->where('id',$itemStatusIsNew[$item['sku']]['category_id'])->value('name');
+                $list[$key]['category'] =$itemCategoryAll[$itemStatusIsNew[$item['sku']]['category_id']];
                 $list[$key]['is_new'] = $itemStatusIsNew[$item['sku']]['is_new'];
                 //$list[$key]['addtime'] = Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime') ? Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime'):'';
                 $list[$key]['location_code'] = Db::name('purchase_sample')->alias('a')->join(['fa_purchase_sample_location' => 'b'],'a.location_id=b.id')->where('a.sku',$item['sku'])->value('b.location');
