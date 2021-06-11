@@ -71,7 +71,6 @@ class Kuaidi100
         return json_decode($data, true);
     }
 
-
     /**
      * 设置第三方订单快递100订阅推送信息
      *
