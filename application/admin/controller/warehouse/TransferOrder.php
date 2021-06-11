@@ -611,11 +611,8 @@ class TransferOrder extends Backend
                 case PlatformType::VOOGUEME:
                     $outLabel = 2;
                     break;
-                case PlatformType::NIHAO:
-                    $outLabel = 3;
-                    break;
                 case PlatformType::MEELOOG:
-                    $outLabel = 4;
+                    $outLabel = 3;
                     break;
                 case PlatformType::WESEE:
                     $outLabel = 5;
