@@ -611,10 +611,10 @@ class TransferOrder extends Backend
                 case PlatformType::VOOGUEME:
                     $outLabel = 2;
                     break;
-                case PlatformType::NIHAO:
+                case PlatformType::MEELOOG:
                     $outLabel = 3;
                     break;
-                case PlatformType::MEELOOG:
+                case 'Vicmoo':
                     $outLabel = 4;
                     break;
                 case PlatformType::WESEE:
@@ -655,11 +655,11 @@ class TransferOrder extends Backend
                 case PlatformType::VOOGUEME:
                     $inLabel = 2;
                     break;
-                case PlatformType::NIHAO:
+                case PlatformType::MEELOOG:
                     $inLabel = 3;
                     break;
-                case PlatformType::MEELOOG:
-                    $inLabel = 4;
+                case 'Vicmoo':
+                    $outLabel = 4;
                     break;
                 case PlatformType::WESEE:
                     $inLabel = 5;
