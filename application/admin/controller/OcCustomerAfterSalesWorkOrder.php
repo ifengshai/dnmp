@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use fast\Http;
 use Think\Db;
 use Think\Log;
 use think\Request;
@@ -77,7 +78,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
             unset($filter['site']);
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
 
 
             $total = $this->model
@@ -270,10 +271,44 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         $row =$model->table('oc_customer_after_sales_work_order')->where('id',$ids)->find();
         if ($row['status'] == 1){
             $model->table('oc_customer_after_sales_work_order')->where('id',$ids)->update(['status'=>2]);
+            $url  = config('url.zeelool_url').'magic/customer/updateTicket';
+            $value['ticket_id'] = $ids;
+            $value['status'] = 2;
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']); //在HTTP请求中包含一个"User-Agent: "头的字符串。
+            curl_setopt($curl, CURLOPT_HEADER, 0); //启用时会将头文件的信息作为数据流输出。
+            curl_setopt($curl, CURLOPT_POST, true); //发送一个常规的Post请求
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $value);//Post提交的数据包
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1); //启用时会将服务器服务器返回的"Location: "放在header中递归的返回给服务器，使用CURLOPT_MAXREDIRS可以限定递归返回的数量。
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); //文件流形式
+            curl_setopt($curl, CURLOPT_TIMEOUT, 20); //设置cURL允许执行的最长秒数。
+            $content =json_decode(curl_exec($curl),true);
+            curl_close($curl);
+            if ($content['code'] !==200){
+                $this->success('信息更新失败,请联系网站');
+            }
         }
         if ($this->request->isPost()){
             $params = $this->request->post("row/a");
             $updataQueertion =$model->table('oc_customer_after_sales_work_order')->where('id',$params['id'])->update(['status'=>3,'handler_name'=>$this->auth->nickname,'completed_at'=>date('Y-m-d H:i:s',time())]);
+            $url  = config('url.zeelool_url').'magic/customer/updateTicket';
+            $value['ticket_id'] = $ids;
+            $value['status'] = 3;
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']); //在HTTP请求中包含一个"User-Agent: "头的字符串。
+            curl_setopt($curl, CURLOPT_HEADER, 0); //启用时会将头文件的信息作为数据流输出。
+            curl_setopt($curl, CURLOPT_POST, true); //发送一个常规的Post请求
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $value);//Post提交的数据包
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1); //启用时会将服务器服务器返回的"Location: "放在header中递归的返回给服务器，使用CURLOPT_MAXREDIRS可以限定递归返回的数量。
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); //文件流形式
+            curl_setopt($curl, CURLOPT_TIMEOUT, 20); //设置cURL允许执行的最长秒数。
+            $content =json_decode(curl_exec($curl),true);
+            curl_close($curl);
+            if ($content['code'] !==200){
+                $this->success('信息更新失败,请联系网站');
+            }
             if ($updataQueertion){
                 $this->success('操作成功','oc_customer_after_sales_work_order/index');
             }else{
