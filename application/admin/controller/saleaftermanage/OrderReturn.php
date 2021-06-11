@@ -689,6 +689,53 @@ class OrderReturn extends Backend
             $workResult = $workList->where(['platform_order' => $v['increment_id']])->select();
             $workResult = collection($workResult)->toArray();
             foreach ($workResult as &$vv) {
+                //排列sku
+                if ($vv['order_sku']) {
+                    $vv['order_sku_arr'] = explode(',', $v['order_sku']);
+                }
+
+                //工单类型
+                if ($vv['work_type'] == 1) {
+                    $vv['work_type_str'] = '客服工单';
+                } else {
+                    $vv['work_type_str'] = '仓库工单';
+                }
+
+                //工单等级
+                if ($vv['work_level'] == 1) {
+                    $vv['work_level_str'] = '低';
+                } elseif ($vv['work_level'] == 2) {
+                    $vv['work_level_str'] = '中';
+                } elseif ($vv['work_level'] == 3) {
+                    $vv['work_level_str'] = '高';
+                }
+
+                switch ($vv['work_status']) {
+                    case 0:
+                        $vv['work_status'] = '取消';
+                        break;
+                    case 1:
+                        $vv['work_status'] = '新建';
+                        break;
+                    case 2:
+                        $vv['work_status'] = '待审核';
+                        break;
+                    case 3:
+                        $vv['work_status'] = '待处理';
+                        break;
+                    case 4:
+                        $vv['work_status'] = '审核拒绝';
+                        break;
+                    case 5:
+                        $vv['work_status'] = '部分处理';
+                        break;
+                    case 6:
+                        $vv['work_status'] = '已处理';
+                        break;
+                    default:
+                        break;
+                }
+
 
                 $step_arr = WorkOrderMeasure::where('work_id', $vv['id'])->select();
                 $step_arr = collection($step_arr)->toArray();
