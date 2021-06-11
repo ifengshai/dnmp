@@ -2320,6 +2320,7 @@ class TrackReg extends Backend
         $operate_model->table('sales_flat_order')->query("set time_zone='+8:00'");
 
         $date_time = date('Y-m-d', strtotime("-1 day"));
+        $date_time = '2021-06-08';
         //查询时间
         $arr = [];
         $arr['site'] = 15;
@@ -2976,13 +2977,13 @@ class TrackReg extends Backend
     //ga的数据单独摘出来跑 防止ga接口数据报错 2020.11.2防止了ga的数据报错
     public function only_ga_data()
     {
-        $this->getGaData(1);   //zeelool
+//        $this->getGaData(1);   //zeelool
 //        $this->getGaData(2);   //voogueme
 //        $this->getGaData(3);   //nihao
 //        $this->getGaData(5);   //批发站
 //        $this->getGaData(10);  //de站
 //        $this->getGaData(11);  //jp站
-//        $this->getGaData(15);  //fr站
+        $this->getGaData(15);  //fr站
         echo "ok";
     }
 
