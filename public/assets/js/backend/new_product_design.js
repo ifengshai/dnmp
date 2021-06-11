@@ -40,7 +40,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     del_url: 'new_product_design/del',
                     multi_url: 'new_product_design/multi',
                     table: 'new_product_design',
-                }
+                },
+                pageList: [10, 50,100,300,500,]
             });
 
             var table = $("#table");
@@ -82,19 +83,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('序号'),operate: false},
                         {field: 'sku', title: __('Sku')},
-                        {field: 'zeelool', title: __('Z虚拟仓库存'),operate: false,visible: false},
-                        {field: 'voogueme', title: __('V虚拟仓库存'),operate: false,visible: false},
-                        {field: 'meeloog', title: __('M虚拟仓库存'),operate: false,visible: false},
-                        {field: 'vicmoo', title: __('Vicmoo虚拟仓库存'),operate: false,visible: false},
-                        {field: 'wesee', title: __('W虚拟仓库存'),operate: false,visible: false},
-                        {field: 'amazon', title: __('amazon虚拟仓库存'),operate: false,visible: false},
-                        {field: 'zeelool_es', title: __('Es虚拟仓库存'),operate: false,visible: false},
-                        {field: 'zeelool_de', title: __('De虚拟仓库存'),operate: false,visible: false},
-                        {field: 'zeelool_jp', title: __('Jp虚拟仓库存'),operate: false,visible: false},
-                        {field: 'voogmechic', title: __('chic虚拟仓库存'),operate: false,visible: false},
-                        {field: 'zeelool_cn', title: __('z_cn虚拟仓库存'),operate: false,visible: false},
-                        {field: 'alibaba', title: __('alibaba虚拟仓库存'),operate: false,visible: false},
-                        {field: 'zeelool_fr', title: __('Fr虚拟仓库存'),operate: false,visible: false},
+                        {field: 'zeelool', title: __('Z虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'voogueme', title: __('V虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'meeloog', title: __('M虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'vicmoo', title: __('Vicmoo虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'wesee', title: __('W虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'amazon', title: __('amazon虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'zeelool_es', title: __('Es虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'zeelool_de', title: __('De虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'zeelool_jp', title: __('Jp虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'voogmechic', title: __('chic虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'zeelool_cn', title: __('z_cn虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'alibaba', title: __('alibaba虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'zeelool_fr', title: __('Fr虚拟仓库存'),operate: false,visible: false,sortable: true},
                         {field: 'category', title: __('商品分类'),operate: false},
                         {
                             field: 'item_status', title: __('商品状态'),
