@@ -893,62 +893,27 @@ class GoodsDataView extends Backend
         $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
         //求出眼镜所有sku
         $frame_sku = $this->itemPlatformSku->getDifferencePlatformSku(1, $platform);
-        if($platform == 5){
-            //某个类型的求出眼镜的销售额 base_price  base_discount_amount 太阳镜
-            $frame_money = $this->orderitemoption
-                ->alias('i')
-                ->join('fa_order o', 'i.magento_order_id=o.entity_id and i.site=o.site', 'left')
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('sku', 'in', $frame_sku)
-                ->where('i.goods_type', $goods_type)
-                ->value('sum(base_original_price-i.base_discount_amount) as price');
-            $frame_money = $frame_money ? round($frame_money, 2) : 0;
-            //某个类型的眼镜的销售副数
-            $frame_sales_num = $this->orderitemoption
-                ->alias('i')
-                ->join('fa_order o', 'i.magento_order_id=o.entity_id and i.site=o.site', 'left')
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('i.goods_type', $goods_type)
-                ->where('i.sku', 'in', $frame_sku)
-                ->sum('i.qty');
-            //某个类型的眼镜平均副金额
-            $frame_avg_money = $frame_sales_num > 0 ? round(($frame_money / $frame_sales_num), 2) : 0;
-        }else{
-            //某个类型的求出眼镜的销售额 base_price  base_discount_amount 太阳镜
-            $frame_money_price = $model->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where('p.goods_type', '=', $goods_type)
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('m.sku', 'in', $frame_sku)
-                ->sum('m.base_price');
-            //某个类型的眼镜的折扣价格
-            $frame_money_discount = $model->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where('p.goods_type', '=', $goods_type)
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('m.sku', 'in', $frame_sku)
-                ->sum('m.base_discount_amount');
-            //某个类型的眼镜的实际销售额
-            $frame_money = round(($frame_money_price - $frame_money_discount), 2);
-            //某个类型的眼镜的销售副数
-            $frame_sales_num = $model->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where('p.goods_type', '=', $goods_type)
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('m.sku', 'in', $frame_sku)
-                ->sum('m.qty_ordered');
-            //某个类型的眼镜平均副金额
-            $frame_avg_money = $frame_sales_num > 0 ? round(($frame_money / $frame_sales_num), 2) : 0;
-        }
-
+        //某个类型的求出眼镜的销售额 base_price  base_discount_amount 太阳镜
+        $frame_money = $this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id and i.site=o.site', 'left')
+            ->where($whereItem)
+            ->where($itemMap)
+            ->where('sku', 'in', $frame_sku)
+            ->where('i.goods_type', $goods_type)
+            ->value('sum(base_original_price-i.base_discount_amount) as price');
+        $frame_money = $frame_money ? round($frame_money, 2) : 0;
+        //某个类型的眼镜的销售副数
+        $frame_sales_num = $this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id and i.site=o.site', 'left')
+            ->where($whereItem)
+            ->where($itemMap)
+            ->where('i.goods_type', $goods_type)
+            ->where('i.sku', 'in', $frame_sku)
+            ->sum('i.qty');
+        //某个类型的眼镜平均副金额
+        $frame_avg_money = $frame_sales_num > 0 ? round(($frame_money / $frame_sales_num), 2) : 0;
         //光学镜
         if ($goods_type == 1){
             $frame_onsales_lilist = Db::name('datacenter_sku_day')
@@ -975,137 +940,67 @@ class GoodsDataView extends Backend
                 $frame_onsales_num = $this->itemPlatformSku->putawayDifferenceSku(1, $platform);
             }
         }else{
-            //其他类型眼镜
-            if($platform == 5){
-                $frame_onsales_num = $this->orderitemoption
-                    ->alias('i')
-                    ->join('fa_order o', 'i.magento_order_id=o.entity_id and i.site=o.site', 'left')
-                    ->where($whereItem)
-                    ->where('i.goods_type', $goods_type)
-                    ->count('distinct i.sku');
-            }else{
-                $frame_onsales_num = $model->table('sales_flat_order_item m')
-                    ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                    ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                    ->where('p.goods_type', '=', $goods_type)
-                    ->where($whereItem)
-                    ->count('distinct m.sku');
-            }
+            $frame_onsales_num = $this->orderitemoption
+                ->alias('i')
+                ->join('fa_order o', 'i.magento_order_id=o.entity_id and i.site=o.site', 'left')
+                ->where($whereItem)
+                ->where('i.goods_type', $goods_type)
+                ->count('distinct i.sku');
         }
         //求出所有新品眼镜sku
         $frame_new_sku = $this->itemPlatformSku->getDifferencePlatformNewSku(1, $platform);
-        if($platform == 5){
-            //某个类型的眼镜动销数
-            $frame_in_print_num = $this->orderitemoption
-                ->alias('i')
-                ->join('fa_order o', 'i.magento_order_id=o.entity_id and i.site=o.site', 'left')
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('i.goods_type', $goods_type)
-                ->where('i.sku', 'in', $frame_sku)
-                ->count('distinct i.sku');
-            //求出某个类型的新品眼镜的销售额 base_price  base_discount_amount
-            $frame_new_money =$this->orderitemoption
-                ->alias('i')
-                ->join('fa_order o', 'i.magento_order_id=o.entity_id and i.site=o.site', 'left')
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('i.goods_type', $goods_type)
-                ->where('i.sku', 'in', $frame_new_sku)
-                ->value('sum(base_original_price-i.base_discount_amount) as price');
-            $frame_new_money = $frame_new_money ? round($frame_new_money, 2) : 0;
-            //某个类型的眼镜下单客户数
-            $frame_order_customer = $this->orderitemoption
-                ->alias('i')
-                ->join('fa_order o', 'i.magento_order_id=o.entity_id and o.site=i.site', 'left')
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('i.goods_type', $goods_type)
-                ->where('i.sku', 'in', $frame_sku)
-                ->count('distinct o.customer_email');
+        //某个类型的眼镜动销数
+        $frame_in_print_num = $this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id and i.site=o.site', 'left')
+            ->where($whereItem)
+            ->where($itemMap)
+            ->where('i.goods_type', $goods_type)
+            ->where('i.sku', 'in', $frame_sku)
+            ->count('distinct i.sku');
+        //求出某个类型的新品眼镜的销售额 base_price  base_discount_amount
+        $frame_new_money =$this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id and i.site=o.site', 'left')
+            ->where($whereItem)
+            ->where($itemMap)
+            ->where('i.goods_type', $goods_type)
+            ->where('i.sku', 'in', $frame_new_sku)
+            ->value('sum(base_original_price-i.base_discount_amount) as price');
+        $frame_new_money = $frame_new_money ? round($frame_new_money, 2) : 0;
+        //某个类型的眼镜下单客户数
+        $frame_order_customer = $this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id and o.site=i.site', 'left')
+            ->where($whereItem)
+            ->where($itemMap)
+            ->where('i.goods_type', $goods_type)
+            ->where('i.sku', 'in', $frame_sku)
+            ->count('distinct o.customer_email');
 
-            $frame_new_list = $this->orderitemoption
-                ->alias('i')
-                ->join('fa_order o', 'i.magento_order_id=o.entity_id and o.site=i.site', 'left')
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('i.goods_type', $goods_type)
-                ->where('i.sku', 'in', $frame_new_sku)
-                ->group('i.sku')
-                ->field('i.sku')
-                ->select();
-            //某个类型的新品眼镜动销数
-            $frame_new_in_print_num = $this->orderitemoption
-                ->alias('i')
-                ->join('fa_order o', 'i.magento_order_id=o.entity_id and o.site=i.site', 'left')
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('i.goods_type', $goods_type)
-                ->where('i.sku', 'in', $frame_new_sku)
-                ->count('distinct i.sku');
-        }else{
-            //某个类型的眼镜动销数
-            $frame_in_print_num = $model->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where('p.goods_type', '=', $goods_type)
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('m.sku', 'in', $frame_sku)
-                ->count('distinct m.sku');
-            //求出某个类型的新品眼镜的销售额 base_price  base_discount_amount
-            $frame_new_money_price = $model->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where('p.goods_type', '=', $goods_type)
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('m.sku', 'in', $frame_new_sku)
-                ->sum('m.base_price');
-            //某个类型的新品眼镜的折扣价格
-            $frame_new_money_discount = $model->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where('p.goods_type', '=', $goods_type)
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('m.sku', 'in', $frame_new_sku)
-                ->sum('m.base_discount_amount');
-            //某个类型的新品眼镜的实际销售额
-            $frame_new_money = round(($frame_new_money_price - $frame_new_money_discount), 2);
-            //某个类型的眼镜下单客户数
-            $frame_order_customer = $model->table('sales_flat_order o')
-                ->join('sales_flat_order_item m', 'o.entity_id=m.order_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where('p.goods_type', '=', $goods_type)
-                ->where($whereItem)
-                ->where('m.sku', 'in', $frame_sku)
-                ->where($itemMap)
-                ->count('distinct o.customer_email');
-            $frame_new_list = $model->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where('p.goods_type', '=', $goods_type)
-                ->where($whereItem)
-                // ->where($itemMap)
-                ->where('m.sku', 'in', $frame_new_sku)
-                ->distinct(true)
-                ->field('m.sku')
-                ->select();
-            //某个类型的新品眼镜动销数
-            $frame_new_in_print_num = $model->table('sales_flat_order_item m')
-                ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-                ->join('sales_flat_order_item_prescription p', 'm.item_id=p.item_id', 'left')
-                ->where('p.goods_type', '=', $goods_type)
-                ->where($whereItem)
-                ->where($itemMap)
-                ->where('m.sku', 'in', $frame_new_sku)
-                ->count('distinct m.sku');
-        }
+        $frame_new_list = $this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id and o.site=i.site', 'left')
+            ->where($whereItem)
+            ->where($itemMap)
+            ->where('i.goods_type', $goods_type)
+            ->where('i.sku', 'in', $frame_new_sku)
+            ->group('i.sku')
+            ->field('i.sku')
+            ->select();
+        //某个类型的新品眼镜动销数
+        $frame_new_in_print_num = $this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id and o.site=i.site', 'left')
+            ->where($whereItem)
+            ->where($itemMap)
+            ->where('i.goods_type', $goods_type)
+            ->where('i.sku', 'in', $frame_new_sku)
+            ->count('distinct i.sku');
+
         $frame_in_print_rate = $frame_onsales_num ? round(($frame_in_print_num/$frame_onsales_num)*100, 2).'%' : 0;
         //某个类型的眼镜客户平均副数
         $frame_avg_customer = $frame_order_customer ? round(($frame_sales_num / $frame_order_customer), 2) : 0;
-
         //求某个类型的新品眼镜的数量
         $item = new Item();
         $item_platform = new ItemPlatformSku();

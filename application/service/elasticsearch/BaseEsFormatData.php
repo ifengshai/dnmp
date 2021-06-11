@@ -32,7 +32,7 @@ class BaseEsFormatData
                 $siteName = 'VOOGUEME';
                 break;
             case Site::NIHAO;
-                $siteName = 'NIHAO';
+                $siteName = 'MEELOOG';
                 break;
             case Site::ZEELOOL_DE;
                 $siteName = 'ZEELOOL_DE';
@@ -43,6 +43,10 @@ class BaseEsFormatData
             case Site::WESEEOPTICAL;
                 $siteName = 'WESEEOPTICAL';
                 break;
+            case Site::ZEELOOL_FR;
+                $siteName = 'ZEELOOL_FR';
+                break;
+
         }
 
         return $siteName;
