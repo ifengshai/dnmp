@@ -150,6 +150,12 @@ class NewProductDesign extends Backend
                 return $this->selectpage();
             }
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
+            //为了排序
+            $allPlat = ['zeelool','voogueme','meeloog','vicmoo','wesee','amazon','zeelool_es','zeelool_de','zeelool_jp','voogmechic','zeelool_cn','alibaba','zeelool_fr'];
+            if (in_array($sort, $allPlat)) {
+                $sortPlat = $sort;
+                $sort = 'id';
+            }
             $total = $this->model
                 ->alias('a')
                 ->join('new_product_design_log b', 'b.design_id=a.id ', 'left')
@@ -183,35 +189,118 @@ class NewProductDesign extends Backend
                 $row->visible(['id', 'sku', 'status', 'responsible_id', 'create_time', 'addtime']);
             }
             $list = collection($list)->toArray();
+            $skuList = array_column($list,'sku');
             $itemPlatform = new ItemPlatformSku();
-
+            $platStock = $itemPlatform->where('sku','in',$skuList)->field('stock,platform_type,sku')->select();
+            $itemStatusIsNew = $Item->where('sku','in',$skuList)->field('sku,item_status,is_new,available_stock,category_id')->select();
+            $itemStatusIsNew = collection($itemStatusIsNew)->toArray();
+            $itemStatusIsNew = array_column($itemStatusIsNew,null,'sku');
+            $platStock = collection($platStock)->toArray();
             $itemCategory= new ItemCategory();
             $platformType = ['0','Z','V','N','M','W','0','0','A','Es','De','Jp','Chic','Z_cn','Ali','Z_fr'];
             foreach ($list as $key=>$item){
-                $platStock = $itemPlatform->where('sku',$item['sku'])->column('stock','platform_type');
                 $list[$key]['label'] = $map['a.status'] ? $map['a.status'] : 0;
                 if ($item['responsible_id'] !==null){
                     $list[$key]['responsible_id'] = $admin->where('id',$item['responsible_id'])->value('nickname');
                 }else{
                     $list[$key]['responsible_id'] = '暂无';
                 }
-                $itemStatusIsNew = $Item->where(['sku'=>$item['sku']])->field('item_status,is_new,available_stock,category_id')->find();
-                $list[$key]['item_status'] =$itemStatusIsNew->item_status;
-                $list[$key]['zeelool'] =isset($platStock[1]) ? $platStock[1] : '-';
-                $list[$key]['voogueme'] =isset($platStock[2]) ? $platStock[2] : '-';
-                $list[$key]['meeloog'] =isset($platStock[3]) ? $platStock[3] : '-';
-                $list[$key]['vicmoo'] =isset($platStock[4]) ? $platStock[4] : '-';
-                $list[$key]['wesee'] =isset($platStock[5]) ? $platStock[5] : '-';
-                $list[$key]['amazon'] =isset($platStock[8]) ? $platStock[8] : '-';
-                $list[$key]['zeelool_es'] =isset($platStock[9]) ? $platStock[9] : '-';
-                $list[$key]['zeelool_de'] =isset($platStock[10]) ? $platStock[10] : '-';
-                $list[$key]['zeelool_jp'] =isset($platStock[11]) ? $platStock[11] : '-';
-                $list[$key]['voogmechic'] =isset($platStock[12]) ? $platStock[12] : '-';
-                $list[$key]['zeelool_cn'] =isset($platStock[13]) ? $platStock[13] : '-';
-                $list[$key]['alibaba'] =isset($platStock[14]) ? $platStock[14] : '-';
-                $list[$key]['zeelool_fr'] =isset($platStock[15]) ? $platStock[15] : '-';
-                $list[$key]['category'] =$itemCategory->where('id',$itemStatusIsNew->category_id)->value('name');
-                $list[$key]['is_new'] = $itemStatusIsNew->is_new;
+
+                $list[$key]['item_status'] =$itemStatusIsNew[$item['sku']]['item_status'];
+
+                $list[$key]['zeelool'] = array_reduce($platStock,function($carry,$val)use($item){
+                    if ($val['sku'] == $item['sku'] && $val['platform_type'] == 1){
+                        return $val['stock'];
+                    }else{
+                        return $carry;
+                    }
+                }) ?? '-';
+                $list[$key]['voogueme'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 2){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['meeloog'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 3){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['vicmoo'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 4){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['wesee'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 5){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['amazon'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 8){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['zeelool_es'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 9){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['zeelool_de'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 10){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['zeelool_jp'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 11){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['voogmechic'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 12){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['zeelool_cn'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 13){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['alibaba'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 14){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['zeelool_fr'] = array_reduce($platStock,function($carry,$val)use($item){
+                        if ($val['sku'] == $item['sku'] && $val['platform_type'] == 15){
+                            return $val['stock'];
+                        }else{
+                            return $carry;
+                        }
+                    }) ?? '-';
+                $list[$key]['category'] =$itemCategory->where('id',$itemStatusIsNew[$item['sku']]['category_id'])->value('name');
+                $list[$key]['is_new'] = $itemStatusIsNew[$item['sku']]['is_new'];
                 //$list[$key]['addtime'] = Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime') ? Db::name('new_product_design_log')->where('design_id',$item['id'])->order('addtime desc')->value('addtime'):'';
                 $list[$key]['location_code'] = Db::name('purchase_sample')->alias('a')->join(['fa_purchase_sample_location' => 'b'],'a.location_id=b.id')->where('a.sku',$item['sku'])->value('b.location');
                 $list[$key]['platform'] =$itemPlatform->where('sku',$item['sku'])->order('platform_type asc')->column('platform_type');
@@ -219,6 +308,11 @@ class NewProductDesign extends Backend
                     $list[$key]['platform'][$k1] = $platformType[$v1];
                 }
             }
+            if ($sortPlat && in_array($sortPlat, $allPlat)) {
+                $lastNames = array_column($list,$sortPlat);
+                array_multisort($lastNames,$order == 'desc'? SORT_DESC:SORT_ASC,SORT_STRING ,$list);
+            }
+
             $result = ["total" => $total, "label" => $map['a.status'] ? $map['a.status'] : 0, "rows" => $list];
 
             return json($result);
@@ -285,35 +379,35 @@ class NewProductDesign extends Backend
                 }
 
             }
-            if ($data['attributeType'] ==32){
-                if($data['row']['box_height']<0.1){
-                    $this->error('请输入正确的高度数值');
-                }
-                if($data['row']['box_width']<0.1){
-                    $this->error('请输入正确的宽度数值');
-                }
-            }
-            if ($data['attributeType'] ==35){
-                if($data['row']['earrings_height']<0.1){
-                    $this->error('请输入正确的高度数值');
-                }
-                if($data['row']['earrings_width']<0.1){
-                    $this->error('请输入正确的宽度数值');
-                }
-            }
-            if ($data['attributeType'] ==38){
-                if($data['row']['eyeglasses_chain']<0.1){
-                    $this->error('请输入正确的周长数值数值');
-                }
-            }
-            if ($data['attributeType'] ==34 ||$data['attributeType'] ==39){
-                if($data['row']['necklace_perimeter']<0.1){
-                    $this->error('请输入正确的周长数值');
-                }
-                if($data['row']['necklace_chain']<0.1){
-                    $this->error('请输入正确的延长链数值');
-                }
-            }
+//            if ($data['attributeType'] ==32){
+//                if($data['row']['box_height']<0.1){
+//                    $this->error('请输入正确的高度数值');
+//                }
+//                if($data['row']['box_width']<0.1){
+//                    $this->error('请输入正确的宽度数值');
+//                }
+//            }
+//            if ($data['attributeType'] ==35){
+//                if($data['row']['earrings_height']<0.1){
+//                    $this->error('请输入正确的高度数值');
+//                }
+//                if($data['row']['earrings_width']<0.1){
+//                    $this->error('请输入正确的宽度数值');
+//                }
+//            }
+//            if ($data['attributeType'] ==38){
+//                if($data['row']['eyeglasses_chain']<0.1){
+//                    $this->error('请输入正确的周长数值数值');
+//                }
+//            }
+//            if ($data['attributeType'] ==34 ||$data['attributeType'] ==39){
+//                if($data['row']['necklace_perimeter']<0.1){
+//                    $this->error('请输入正确的周长数值');
+//                }
+//                if($data['row']['necklace_chain']<0.1){
+//                    $this->error('请输入正确的延长链数值');
+//                }
+//            }
             $this->model->startTrans();
             $itemAttribute->startTrans();
             try {
