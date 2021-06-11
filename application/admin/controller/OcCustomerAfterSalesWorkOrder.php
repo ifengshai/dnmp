@@ -95,7 +95,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 ->select();
 
             foreach ($list as $row) {
-                $row->visible(['id','email','increment_id','order_type','problem_type','concrete_problem','status','created_at','completed_at','handler_name']);
+                $row->visible(['id','email','increment_id','order_type','problem_type','concrete_problem','status','created_at','completed_at','handler_name','type']);
 
             }
             $list = collection($list)->toArray();
@@ -249,6 +249,60 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
         $this->assign('type',$type);
         $this->assign('row',$row);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 客户投诉处理
+     * @param null $ids
+     *
+     * @return string
+     * @throws \think\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
+     * @author jianghaohui
+     * @date   2021/6/7 11:22:14
+     */
+    public function complaints_detail($ids = null){
+        $model = Db::connect('database.db_zeelool');
+        $row =$model->table('oc_customer_after_sales_work_order')->where('id',$ids)->find();
+        if ($row['status'] == 1){
+            $model->table('oc_customer_after_sales_work_order')->where('id',$ids)->update(['status'=>2]);
+        }
+        if ($this->request->isPost()){
+            $params = $this->request->post("row/a");
+            $updataQueertion =$model->table('oc_customer_after_sales_work_order')->where('id',$params['id'])->update(['status'=>3,'handler_name'=>$this->auth->nickname,'completed_at'=>date('Y-m-d H:i:s',time())]);
+            if ($updataQueertion){
+                $this->success('操作成功','oc_customer_after_sales_work_order/index');
+            }else{
+                $this->error('操作失败');
+            }
+        }
+        $url =config('url.zeelool_url').'/media/';
+
+        $fileArray =!empty($row['images']) ? explode('|',$row['images']):[];
+        $photoHref = [];
+        $fileUrl = [];
+        foreach ($fileArray as $key=>$item){
+            if (in_array(substr($item,strripos($item,".")+1),['jpg','png','jpeg','gif','bmp'])){
+                $photoHref[$key]= $url.$item;
+            }else{
+                $fileUrl[$key] = $url.$item;
+            }
+        }
+        if (!empty($fileArray)){
+            $row['pic'] = $photoHref;
+            $row['file'] = $fileUrl;
+        }else{
+            $row['pic'] = [];
+            $row['file'] = [];
+        }
+
+        $this->assign('row',$row);
+
+
         return $this->view->fetch();
     }
 
