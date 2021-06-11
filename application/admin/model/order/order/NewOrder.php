@@ -211,4 +211,15 @@ class NewOrder extends Model
     {
         return $this->hasMany(NewOrderItemProcess::class, 'order_id', 'id');
     }
+
+    /**
+     * 关联子订单表
+     * @return HasMany
+     * @author wpl
+     * @date   2021/5/17 18:44
+     */
+    public function newOrderItemOption(): HasMany
+    {
+        return $this->hasMany(newOrderItemOption::class, 'order_id', 'id');
+    }
 }

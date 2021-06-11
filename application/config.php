@@ -294,6 +294,8 @@ return [
     'kuaidi100'                          => [
         //订阅推送回调地址
         'callback' => 'https://mojing.nextmar.com/admin_1biSSnWyfW.php/purchase/purchase_order/callback',
+
+        'order_callback' => 'https://mojing.nextmar.com/api/third_api/callback',
     ],
 
     //后台地址

@@ -6,6 +6,7 @@ use app\common\controller\Api;
 use app\admin\model\OrderNode;
 use app\admin\model\OrderNodeDetail;
 use app\admin\model\OrderNodeCourier;
+use fast\Kuaidi100;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
@@ -277,19 +278,44 @@ class SelfApi extends Api
         $this->asyncEs->updateEsById('mojing_track', $arr);
 
 
-        //插入节点子表
-        (new OrderNodeDetail())->allowField(true)->save([
-            'order_number'       => $order_number,
-            'order_id'           => $order_id,
-            'content'            => 'Order leave warehouse, waiting for being picked up.',
-            'site'               => $site,
-            'create_time'        => date('Y-m-d H:i:s'),
-            'order_node'         => 2,
-            'node_type'          => 7,
-            'shipment_type'      => $title,
-            'shipment_data_type' => $shipment_data_type,
-            'track_number'       => $track_number,
-        ]);
+        if ($site == 13) {
+            //插入节点子表
+            (new OrderNodeDetail())->allowField(true)->save([
+                'order_number'       => $order_number,
+                'order_id'           => $order_id,
+                'content'            => '订单离开仓库, 等待揽收',
+                'site'               => $site,
+                'create_time'        => date('Y-m-d H:i:s'),
+                'order_node'         => 2,
+                'node_type'          => 7,
+                'shipment_type'      => $title,
+                'shipment_data_type' => $shipment_data_type,
+                'track_number'       => $track_number,
+            ]);
+        } else {
+            //插入节点子表
+            (new OrderNodeDetail())->allowField(true)->save([
+                'order_number'       => $order_number,
+                'order_id'           => $order_id,
+                'content'            => 'Order leave warehouse, waiting for being picked up.',
+                'site'               => $site,
+                'create_time'        => date('Y-m-d H:i:s'),
+                'order_node'         => 2,
+                'node_type'          => 7,
+                'shipment_type'      => $title,
+                'shipment_data_type' => $shipment_data_type,
+                'track_number'       => $track_number,
+            ]);
+        }
+
+        if ($site == 13) {
+            $carrierId = $this->getThirdCarrier($shipment_data_type);
+            //订阅快递100推送
+            Kuaidi100::setThirdPoll($carrierId, $track_number, $order_number);
+
+            $this->success('提交成功', [], 200);
+        }
+
 
         //注册17track
         $title = strtolower(str_replace(' ', '-', $title));
@@ -363,6 +389,42 @@ class SelfApi extends Api
         }
 
         return ['title' => $title, 'carrierId' => $carrierId];
+    }
+
+    /**
+     * 第三方物流匹配
+     *
+     * @param $shipment_data_type
+     *
+     * @return string
+     * @author wangpenglei
+     * @date   2021/6/10 14:17
+     */
+    protected function getThirdCarrier($shipment_data_type): string
+    {
+        $carrierId = '';
+        switch ($shipment_data_type) {
+            case '圆通速递':
+                $carrierId = 'yuantong';
+                break;
+            case '韵达快递':
+                $carrierId = 'yunda';
+                break;
+            case '中通快递':
+                $carrierId = 'zhongtong';
+                break;
+            case '顺丰速运':
+                $carrierId = 'shunfeng';
+                break;
+            case '申通快递':
+                $carrierId = 'shentong';
+                break;
+            default:
+                break;
+
+        }
+
+        return $carrierId;
     }
 
     /**

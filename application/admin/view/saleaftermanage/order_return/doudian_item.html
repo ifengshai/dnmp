@@ -1,0 +1,335 @@
+<style>
+    .caigou {
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        padding: 10px;
+        width: 100%;
+
+        margin-bottom: 10px;
+    }
+
+    .caigou #caigou-table {
+        width: 100%;
+        height: 130px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .caigou #caigou-table tr {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        line-height: 50px;
+    }
+
+    .caigou #caigou-table tr th {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .caigou #caigou-table tr td {
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(188, 188, 188, 1);
+        border-radius: 6px;
+    }
+
+    .caigou #caigou-table tr td input {
+
+        width: 250px;
+    }
+</style>
+
+{notempty name="orderList"}
+
+<div class="order-list-wrap">
+    <h2>订单信息列表</h2>
+    <div class="table-responsive">
+        <ul class="order-list" >
+            <li style="width: 5%">类型</li>
+            <li style="width: 10%">订单号</li>
+            <li style="width: 10%">物流渠道</li>
+            <li  style="width: 10%">快递单号</li>
+            <li style="width: 10%">快递名称</li>
+            <li style="width: 10%">订单状态</li>
+            <li style="width: 5%">数量</li>
+            <li style="width: 5%">币种</li>
+            <li style="width: 10%">原币种<br>支付金额</li>
+            <li style="width: 5%">运费</li>
+            <li style="width:10%">创建时间</li>
+            <li style="width: 10%">操作</li>
+        </ul>
+
+        {foreach $orderList as $k => $orderInfoList}
+        <ul class="order-list"  >
+            <li  style="width: 5%"class="normal">{$orderInfoList.order_type}</li>
+            <li style="width: 10%">{$orderInfoList.increment_id}</li>
+            <li style="width: 10%">{$orderInfoList.agent_way_title}</li>
+
+            <li style="width: 10%;"  class="option"  >
+                <button type="button" class="logistics"  data-id="{$orderInfoList.entity_id}" style="white-space: normal !important;" >{$orderInfoList.track_number}</button>
+            </li>
+            <li style="width: 10%">{$orderInfoList.agent_way_title}</li>
+            <li style="width: 10%">{$orderInfoList.status}</li>
+            <li style="width: 5%">{$orderInfoList.total_qty_ordered}</li>
+            <li style="width: 5%">{$orderInfoList.order_currency_code}</li>
+            <li style="width: 10%">{:round($orderInfoList.base_grand_total,2)}</li>
+            <li style="width: 5%">{:round($orderInfoList.base_shipping_amount,2)}</li>
+            <li style="width:10%">{$orderInfoList.created_at}</li>
+            <li style="width: 10%" class="option">
+                <button type="button" class="addOrder" data-id="{$orderInfoList.increment_id}">增加工单</button>
+                <button type="button" class='machiningBtn' data-id="{$orderInfoList.increment_id}">配货记录</button>
+                <button class="detail-btn" type="button">展开详情</button>
+            </li>
+
+            <li class="detail-wrap" style="display: none;">
+
+                <div class="product-list">
+                    <h3>商品列表</h3>
+                    <table>
+                        <tr>
+                            <th>子单号</th>
+                            <th>Product</th>
+                            <th>Lens</th>
+                            <th>Prescription Type</th>
+                            <th>Frame Price</th>
+                            <th>Lens Type Price</th>
+                            <th>Lens Price</th>
+                            <th>Original price</th>
+                            <th>Discount</th>
+                            <th>Row Total</th>
+                            <th>虚拟仓库存</th>
+                        </tr>
+                        {if $orderInfoList.item}
+                        {foreach $orderInfoList.item as $itemInfoList}
+                        <tr>
+                            <td>{:$itemInfoList.item_order_number}</td>
+                            <td>
+                                <ul class="product-info">
+                                    <li>{$itemInfoList.name}</li>
+                                    <li>SKU：{$itemInfoList.sku} </li>
+                                    <li>Qty：1</li>
+                                </ul>
+                            </td>
+                            <td class="lens-wrap-td">
+                                {if $itemInfoList.web_lens_name || $itemInfoList.coatiing_name}
+                                <ul class="lens-wrap">
+                                    <li style="display:block;">
+                                        <span class="name">{$itemInfoList.lenstype_data_name}</span>
+                                        <span class="price">{$itemInfoList.lenstype_base_price}</span>
+                                        <span class="name">{$itemInfoList.web_lens_name}</span>
+                                        <span class="price">{$itemInfoList.index_price}</span>
+
+                                    </li>
+                                    <li>
+                                        <span class="name">{$itemInfoList.coatiing_name}</span>
+                                        <span>{$itemInfoList.coatiing_price}</span>
+                                    </li>
+                                </ul>
+                                {/if}
+                            </td>
+                            <td class="pres-type">
+                                <table>
+                                    <tr>
+                                        <th class="type" colspan="5">
+                                            {$itemInfoList.prescription_type}</th>
+                                    </tr>
+                                    <tr>
+                                        <th></th>
+                                        <th>SPH</th>
+                                        <th>CYL</th>
+                                        <th>Axis</th>
+                                        <th>ADD</th>
+                                    </tr>
+                                    <tr>
+                                        <th>OD</th>
+                                        <td>{$itemInfoList.od_sph}</td>
+                                        <td>{:urldecode($itemInfoList.od_cyl)}</td>
+                                        <td>{$itemInfoList.od_axis}</td>
+                                        {if $itemInfoList.total_add}
+                                        <td rowspan="2">{$itemInfoList.total_add}</td>
+                                        {else/}
+                                        <td>{$itemInfoList.od_add}</td>
+                                        {/if}
+                                    </tr>
+                                    <tr>
+                                        <th>OS</th>
+                                        <td>{$itemInfoList.os_sph}</td>
+                                        <td>{:urldecode($itemInfoList.os_cyl)}</td>
+                                        <td>{$itemInfoList.os_axis}</td>
+                                        {if !$itemInfoList.total_add}
+                                        <td>{$itemInfoList.os_add}</td>
+                                        {/if}
+                                    </tr>
+                                    <tr>
+                                        <th>PD</th>
+                                        {if $itemInfoList.pd}
+                                        <td>{$itemInfoList.pd}</td>
+                                        <td></td>
+                                        {else/}
+                                        <td class="pd">{$itemInfoList.pd_r} <span>(OD)</span></td>
+                                        <td class="pd">{$itemInfoList.pd_l} <span>(OS)</span></td>
+                                        {/if}
+
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    {if $itemInfoList.prismcheck == 'on'}
+                                    <tr>
+                                        <th></th>
+                                        <th> Prism Horizontal</th>
+                                        <th>Base Direction</th>
+                                        <th>Prism Vertical</th>
+                                        <th>Base Direction</th>
+                                    </tr>
+                                    <tr>
+                                        <th>OD</th>
+                                        <td>{$itemInfoList.od_pv}</td>
+                                        <td>{$itemInfoList.od_bd}</td>
+                                        <td>{$itemInfoList.od_pv_r}</td>
+                                        <td>{$itemInfoList.od_bd_r}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>OS</th>
+                                        <td>{$itemInfoList.os_pv}</td>
+                                        <td>{$itemInfoList.os_bd}</td>
+                                        <td>{$itemInfoList.os_pv_r}</td>
+                                        <td>{$itemInfoList.os_bd_r}</td>
+                                    </tr>
+                                    {/if}
+                                </table>
+                            </td>
+                            <td>{:round($itemInfoList.frame_price,2)}</td>
+                            <td>{:round($itemInfoList.lenstype_base_price,2)}</td>
+                            <td>{:round($itemInfoList.index_price,2)}</td>
+                            <td>{:round($itemInfoList.original_price,2)}</td>
+                            <td>{:round($itemInfoList.discount_amount,2)}</td>
+                            <td>{:round($itemInfoList['base_row_total']-$itemInfoList['discount_amount'],2)}</td>
+                            <td>{$itemInfoList.stock}</td>
+                        </tr>
+                        {/foreach}
+                        {/if}
+                    </table>
+                </div>
+
+                {notempty name="orderInfoList.workOrderList"}
+
+                <div class="list-wrap">
+                    <div>
+                        <h3>工单列表</h3>
+                        <table>
+                            <tr>
+                                <th>序号</th>
+                                <th>ID</th>
+                                <th>工单类型</th>
+                                <th>优惠券</th>
+                                <th>补发订单号</th>
+                                <th>SKU</th>
+                                <th>工单级别</th>
+                                <th>问题类型</th>
+                                <th>相关人员</th>
+                                <th>承接人</th>
+                                <th>措施状态</th>
+                                <th>工单状态</th>
+                                <th>时间</th>
+                                <th>操作</th>
+
+                            </tr>
+                            {foreach $orderInfoList.workOrderList as $k => $workorder}
+                            <tr>
+                                <td>{$k+1}</td>
+                                <td>{$workorder.id}</td>
+                                <td>{$workorder.work_type_str}</td>
+                                <td>{$workorder.coupon_str}</td>
+                                <td>{$workorder.replacement_order}</td>
+                                <td>{$workorder.order_sku}</td>
+                                <td class="leave">
+                                    {$workorder.work_level_str}
+                                </td>
+                                <td>{$workorder.problem_type_content}</td>
+                                <td>
+                                    <ul>
+                                        <li><span class="name">工单创建人:</span><span>{$workorder.create_user_name}</span>
+                                        </li>
+                                        <li><span
+                                                class="name">实际审核人:</span><span>{$workorder.operation_user_name}</span>
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        {foreach $workorder.step as $step}
+                                        <li>
+                                            <span
+                                                    class="name">{$step.measure_content}:</span><span>{$step.recept_user}</span>
+                                        </li>
+                                        {/foreach}
+
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul>
+                                        {foreach $workorder.step as $step}
+                                        <li>
+                                            <span class="name">{$step.measure_content}:</span>
+                                            <span>{$step.operation_type}</span>
+                                        </li>
+                                        {/foreach}
+
+                                    </ul>
+                                </td>
+                                <td class="status ">{$workorder.work_status}</td>
+
+                                <td>
+                                    <ul>
+                                        <li>
+                                            创建时间：{$workorder.create_time}
+                                        </li>
+                                        <li>
+                                            提交时间：{$workorder.submit_time}
+                                        </li>
+                                        <li>
+                                            审核时间：{$workorder.check_time}
+                                        </li>
+                                        <li>
+                                            完成时间：{$workorder.complete_time}
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <a href="{:url('saleaftermanage/work_order_list/index')}?work_id={$workorder.id}"
+                                       class="btn btn-primary btn-xs btn-click btn-addtabs" data-table-id="table"
+                                       data-field-index="11" data-row-index="0" data-button-index="3" title="售后工单列表"><i
+                                            class="fa fa-list"></i>查看</a>
+                                </td>
+
+                            </tr>
+                            {/foreach}
+                        </table>
+                    </div>
+                </div>
+
+                {/notempty}
+
+            </li>
+
+        </ul>
+        {/foreach}
+
+    </div>
+</div>
+{/notempty}
+
