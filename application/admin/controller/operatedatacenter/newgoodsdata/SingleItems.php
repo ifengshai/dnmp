@@ -62,13 +62,13 @@ class SingleItems extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->group('o.entity_id')
                 ->count();
             $list = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->group('o.entity_id')
                 ->order('o.payment_time','desc')
@@ -122,13 +122,13 @@ class SingleItems extends Backend
             $where['o.order_type'] = $map['o.order_type'] = 1;
             $total = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->count('distinct magento_order_id');
             //整站订单量
             $wholePlatformOrderNum = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($where)
                 ->count('distinct magento_order_id');
             //订单占比
@@ -136,7 +136,7 @@ class SingleItems extends Backend
             //平均订单副数
             $wholeGlass = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->sum('i.qty');//sku总副数
             $avgOrderGlass = $total ? round($wholeGlass / $total, 2) : 0;
@@ -144,7 +144,7 @@ class SingleItems extends Backend
             $where1['i.index_price|i.coating_price'] = ['>',0];
             $payLens = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->where($where1)
                 ->count('distinct magento_order_id');
@@ -153,7 +153,7 @@ class SingleItems extends Backend
             //只买一副的订单
             $onlyOneGlassNum = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->where('total_qty_ordered',1)
                 ->count('distinct magento_order_id');
@@ -162,7 +162,7 @@ class SingleItems extends Backend
             //订单总金额
             $glassSql = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->field('distinct magento_order_id')
                 ->buildSql();
@@ -177,7 +177,7 @@ class SingleItems extends Backend
             //该sku的总副数金额
             $sumSkuTotal = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->value('sum(base_original_price-i.base_discount_amount) as price');
             //平均每副订单金额
@@ -185,7 +185,7 @@ class SingleItems extends Backend
             //关联购买
             $orderIds = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->field('distinct magento_order_id')
                 ->buildSql();
@@ -198,7 +198,7 @@ class SingleItems extends Backend
                 ->group('sku')
                 ->order('count desc')
                 ->column('sum(qty) count','sku');
-            $data = compact('sku', 'arraySku', 'total', 'orderPlatformList', 'wholePlatformOrderNum', 'orderRate', 'avgOrderGlass', 'payLens', 'payLensRate', 'onlyOneGlassNum', 'onlyOneGlassRate', 'everyPrice', 'wholePrice','everyMoney');
+            $data = compact('sku', 'arraySku', 'total', 'wholePlatformOrderNum', 'orderRate', 'avgOrderGlass', 'payLens', 'payLensRate', 'onlyOneGlassNum', 'onlyOneGlassRate', 'everyPrice', 'wholePrice','everyMoney');
             $this->success('', '', $data);
         }
     }
@@ -233,7 +233,7 @@ class SingleItems extends Backend
             //在时间段内进行过购买行为的用户
             $emails = $this->order
                 ->alias("o")
-                ->join("fa_order_item_option i","o.entity_id=i.magento_order_id")
+                ->join("fa_order_item_option i","o.entity_id=i.magento_order_id and o.site=i.site")
                 ->where($map)
                 ->where($mapSku)
                 ->where($userWhere)
@@ -245,7 +245,7 @@ class SingleItems extends Backend
             //是否产生购买行为
             $againUserSql = $this->order
                 ->alias("o")
-                ->join("fa_order_item_option i","o.entity_id=i.magento_order_id")
+                ->join("fa_order_item_option i","o.entity_id=i.magento_order_id and o.site=i.site")
                 ->where($map)
                 ->where($orderWhere)
                 ->where($arrWhere)
@@ -259,7 +259,7 @@ class SingleItems extends Backend
             //总人数
             $count = $this->order
                 ->alias("o")
-                ->join("fa_order_item_option i","o.entity_id=i.magento_order_id")
+                ->join("fa_order_item_option i","o.entity_id=i.magento_order_id and o.site=i.site")
                 ->where($map)
                 ->where($mapSku)
                 ->where($userWhere)
@@ -518,7 +518,7 @@ class SingleItems extends Backend
         }
         $count = $this->order
             ->alias('o')
-            ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+            ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
             ->where($where)
             ->sum('i.qty');
         return $count;
@@ -608,7 +608,7 @@ class SingleItems extends Backend
         ini_set('memory_limit', '512M');
         $time_str = input('time_str') ? input('time_str') : '';
         $sku = input('sku');
-        $map['o.site'] = input('order_platform') ? input('order_platform') : 1;
+        $map['o.site'] = $site = input('order_platform') ? input('order_platform') : 1;
         //时间
         if ($time_str) {
             $createat = explode(' ', $time_str);
@@ -624,7 +624,7 @@ class SingleItems extends Backend
         //关联购买
         $orderIds = $this->order
             ->alias('o')
-            ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+            ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
             ->where($map)
             ->field('distinct magento_order_id')
             ->buildSql();
@@ -632,6 +632,7 @@ class SingleItems extends Backend
         $orderIdsWhere[] = ['exp', Db::raw("magento_order_id in " . $orderIds)];
         $arraySku = $this->orderitemoption
             ->where($orderIdsWhere)
+            ->where('site',$site)
             ->where('sku','not like',$sku . '%')
             ->group('sku')
             ->order('count desc')

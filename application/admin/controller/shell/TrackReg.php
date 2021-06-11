@@ -2911,8 +2911,13 @@ class TrackReg extends Backend
             ],
         ];
         $where['o.site'] = $site;
-        $order = $this->order->alias('o')->join('fa_order_item_option i',
-            'o.entity_id=i.magento_order_id')->field('i.sku,count(*) as count')->where($where)->group('i.sku')->select();
+        $order = $this->order
+            ->alias('o')
+            ->join('fa_order_item_option i', 'o.entity_id=i.magento_order_id and o.site=i.site')
+            ->field('i.sku,count(*) as count')
+            ->where($where)
+            ->group('i.sku')
+            ->select();
         $grade1 = 0;
         $grade2 = 0;
         $grade3 = 0;
@@ -3545,7 +3550,7 @@ class TrackReg extends Backend
         $list = collection($list)->toArray();
         $skuDatas = $this->order
             ->alias('o')
-            ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+            ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
             ->where($orderWhere)
             ->whereIn('sku',array_column($list,'platform_sku'))
             ->field('sku,magento_order_id,qty,base_original_price,base_original_price,i.base_discount_amount,i.lens_price,i.coating_price')

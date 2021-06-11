@@ -98,14 +98,14 @@ class skuTypeDayAsynData extends Command
         //某个品类眼镜的销售副数
         $frame_sales_num = $this->orderitemoption
             ->alias('i')
-            ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id and o.site=i.site', 'left')
             ->where($timeWhere)
             ->where($where)
             ->sum('i.qty');
         //眼镜的折扣价格
         $frame_money = $this->orderitemoption
             ->alias('i')
-            ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id and o.site=i.site', 'left')
             ->where($timeWhere)
             ->where($where)
             ->value('sum(base_original_price-i.base_discount_amount) as price');

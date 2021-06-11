@@ -95,11 +95,12 @@ class GoodsChange extends Backend
                 //订单金额
                 $orderIds = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option i','o.entity_id=i.magento_order_id')
+                    ->join('fa_order_item_option i','o.entity_id=i.magento_order_id and i.site=o.site')
                     ->where($orderWhere)
                     ->where('i.sku',$v['platform_sku'])
                     ->column('magento_order_id');
                 $orderTotal = $this->order
+                    ->where('site',$order_platform)
                     ->where('entity_id','in',$orderIds)
                     ->sum('base_grand_total');
                 $list[$k]['sku_grand_total'] = $orderTotal ?? 0;
@@ -210,11 +211,12 @@ class GoodsChange extends Backend
 
                 $orderIds = $this->order
                     ->alias('o')
-                    ->join('fa_order_item_option i','o.entity_id=i.magento_order_id')
+                    ->join('fa_order_item_option i','o.entity_id=i.magento_order_id and o.site=i.site')
                     ->where($orderWhere)
                     ->where('i.sku',$v['platform_sku'])
                     ->column('magento_order_id');
                 $orderTotal = $this->order
+                    ->where('site',$order_platform)
                     ->where('entity_id','in',$orderIds)
                     ->sum('base_grand_total');
                 $tmpRow['sku_grand_total'] = $orderTotal ?? 0;

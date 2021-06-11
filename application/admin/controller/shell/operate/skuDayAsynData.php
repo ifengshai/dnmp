@@ -79,7 +79,7 @@ class skuDayAsynData extends Command
             $sku_data = collection($sku_data)->toArray();
             $skuDatas = $this->order
                 ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id')
+                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($orderWhere)
                 ->whereIn('sku',array_column($sku_data,'platform_sku'))
                 ->field('sku,magento_order_id,qty,base_original_price,base_original_price,i.base_discount_amount,i.lens_price,i.coating_price')
