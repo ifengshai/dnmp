@@ -133,7 +133,7 @@ class NewProduct extends Backend
             //     $this->request->get(['filter' => json_encode($filter)]);
             // }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
 
             $total = $this->model
                 ->with(['supplier', 'newproductattribute'])
@@ -196,9 +196,11 @@ class NewProduct extends Backend
                 $v['available_stock'] = $stock[$v['sku']] ?: 0;
                 $v['platform_type'] = trim($arr[$v['sku']], ',');
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -485,6 +487,7 @@ class NewProduct extends Backend
             }
             $this->error(__('Parameter %s can not be empty', ''));
         }
+
         return $this->view->fetch();
     }
 
@@ -580,6 +583,7 @@ class NewProduct extends Backend
         $this->assign('AllSupplier', $allSupplier);
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
 
@@ -636,6 +640,7 @@ class NewProduct extends Backend
         $this->assign('AllSupplier', $allSupplier);
         $this->view->assign('template', $this->category->getAttrCategoryById($row['category_id']));
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
 
@@ -703,6 +708,7 @@ class NewProduct extends Backend
             } else {
                 $data = $this->fetch('attribute');
             }
+
             return $this->success('ok', '', $data);
         } else {
             return $this->error(__('404 Not Found'));
@@ -719,6 +725,7 @@ class NewProduct extends Backend
             if (!$data) {
                 return $this->error('现在没有采购城市,请去添加', '', 'error', 0);
             }
+
             return $this->success('', '', $data, 0);
         } else {
             return $this->error(__('404 Not Found'));
@@ -825,6 +832,7 @@ class NewProduct extends Backend
             if (!$json) {
                 $json = [0 => '请添加商品分类'];
             }
+
             return json($json);
         } else {
             $this->error('404 Not found');
@@ -841,6 +849,7 @@ class NewProduct extends Backend
             if (!$json) {
                 $json = [0 => '请添加商品分类'];
             }
+
             return json($json);
         } else {
             $this->error('请求出错！！');
@@ -892,9 +901,9 @@ class NewProduct extends Backend
             if ($row['item_status'] != 1 && $row['item_status'] != 2) {
                 $this->error('此状态不能同步');
             }
-            $isExist = $itemPlatformSku->where('platform_type',$site)->where('sku',$row['sku'])->find();
-            if ($isExist['id'] > 0){
-                $this->error('此sku在相应站点已有映射关系'.$isExist['platform_sku'].'，请检查');
+            $isExist = $itemPlatformSku->where('platform_type', $site)->where('sku', $row['sku'])->find();
+            if ($isExist['id'] > 0) {
+                $this->error('此sku在相应站点已有映射关系' . $isExist['platform_sku'] . '，请检查');
             }
             $map['id'] = $ids;
             $map['item_status'] = 1;
@@ -932,7 +941,7 @@ class NewProduct extends Backend
                 $skuParams['name'] = $row['name'];
                 $skuParams['category_id'] = $row['category_id'];
 
-                $result =$itemPlatformSku->addPlatformSku($skuParams);
+                $result = $itemPlatformSku->addPlatformSku($skuParams);
                 $this->success('审核成功');
             } else {
                 $this->error('审核失败');
@@ -944,6 +953,7 @@ class NewProduct extends Backend
         $magentoplatformarr = array_column($this->magentoplatform->getAuthSite(), 'name', 'id');
 
         $this->assign('platformarr', $magentoplatformarr);
+
         return $this->fetch('check');
     }
 
@@ -953,13 +963,13 @@ class NewProduct extends Backend
 
     public function passaudits()
     {
-        $ids  = input('param.ids');
+        $ids = input('param.ids');
 
         if ($this->request->isAjax()) {
 
             $site = input('site');
             //查询所选择的数据
-            $where['new_product.id'] =   ['in', $ids];
+            $where['new_product.id'] = ['in', $ids];
             $row = $this->model->where($where)->with(['newproductattribute'])->select();
 
             if (!$row) {
@@ -967,8 +977,8 @@ class NewProduct extends Backend
             }
             $row = collection($row)->toArray();
 
-            $test = array();
-            foreach ($row  as $key => $item) {
+            $test = [];
+            foreach ($row as $key => $item) {
                 if ($item['item_status'] != 1 && $item['item_status'] != 2) {
                     $this->error($item['sku'] . '数据状态不能同步');
                 }
@@ -1015,8 +1025,9 @@ class NewProduct extends Backend
             }
             $this->success('审核成功');
         } else {
-            if ($ids)
+            if ($ids) {
                 $where['id'] = ['in', $ids];
+            }
             $find = $this->model->where($where)->field('sku')->select();
             $sku = implode(',', array_column($find, 'sku'));
             //查询对应平台
@@ -1026,6 +1037,7 @@ class NewProduct extends Backend
             $this->assign('platformarr', $magentoplatformarr);
             $this->assign('sku', $sku);
             $this->assign('ids', $ids);
+
             return $this->fetch('checkall');
         }
     }
@@ -1160,7 +1172,7 @@ class NewProduct extends Backend
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['sku']) {
-                $map['a.sku'] = ['like', '%'.trim($filter['sku']).'%'];
+                $map['a.sku'] = ['like', '%' . trim($filter['sku']) . '%'];
                 unset($filter['sku']);
             }
             if ($filter['category_id']) {
@@ -1228,7 +1240,8 @@ class NewProduct extends Backend
                 }
             }
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
 
@@ -1240,6 +1253,7 @@ class NewProduct extends Backend
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
         $this->assign('magentoplatformarr', $magentoplatformarr);
+
         return $this->view->fetch();
     }
 
@@ -1262,6 +1276,10 @@ class NewProduct extends Backend
             $params = $this->request->post("row/a");
             $mapping = new \app\admin\model\NewProductMapping();
             //判断如果有此SKU 则累加补货数量 否则添加
+            $skuCount = $platform->where(['sku' => $params['sku'], 'platform_type' => $params['website_type']])->count();
+            if ($skuCount < 1) {
+                $this->error('选择的站点没有此SKU');
+            }
             $count = $mapping->where(['website_type' => $params['website_type'], 'sku' => $params['sku'], 'type' => $params['type'], 'is_show' => 1])->count();
             $params['create_time'] = date('Y-m-d H:i:s');
             $params['create_person'] = session('admin.nickname');
@@ -1283,6 +1301,7 @@ class NewProduct extends Backend
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         $this->assign('platformarr', $magentoplatformarr);
         $this->assign('row', $row);
+
         return $this->fetch();
     }
 
@@ -1316,21 +1335,21 @@ class NewProduct extends Backend
             if ($filter['website_type']) {
                 unset($map['website_type']);
             }
-            if ($filter['is_spot']){
-                $sku = $this->item->where(['is_spot' =>$filter['is_spot']])->column('sku');
-                if ($sku){
-                    $map['sku'] = ['in',$sku];
+            if ($filter['is_spot']) {
+                $sku = $this->item->where(['is_spot' => $filter['is_spot']])->column('sku');
+                if ($sku) {
+                    $map['sku'] = ['in', $sku];
                 }
                 unset($filter['is_spot']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            }else{
-              if ($filter['is_spot'] ==0){
-                  unset($filter['is_spot']);
-                  $this->request->get(['filter' => json_encode($filter)]);
-              }
+            } else {
+                if ($filter['is_spot'] == 0) {
+                    unset($filter['is_spot']);
+                    $this->request->get(['filter' => json_encode($filter)]);
+                }
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where('is_show', 1)
@@ -1365,7 +1384,8 @@ class NewProduct extends Backend
                 $v['on_way_stock'] = $stock[$v['sku']]['on_way_stock'] ?: 0;
                 $v['is_spot'] = $this->item->where(['sku' => $v['sku']])->value('is_spot');
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
 
@@ -1377,6 +1397,7 @@ class NewProduct extends Backend
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
         $this->assign('magentoplatformarr', $magentoplatformarr);
+
         return $this->view->fetch();
     }
 
@@ -1440,6 +1461,7 @@ class NewProduct extends Backend
     /**
      * *@param  [type] $arr [二维数组]
      * @param  [type] $key [键名]
+     *
      * @return [type]      [新的二维数组]
      * Created by Phpstorm.
      * User: jhh
@@ -1448,7 +1470,7 @@ class NewProduct extends Backend
      */
     function array_group_by($arr, $key)
     {
-        $grouped = array();
+        $grouped = [];
         foreach ($arr as $value) {
             $grouped[$value[$key]][] = $value;
         }
@@ -1459,6 +1481,7 @@ class NewProduct extends Backend
                 $grouped[$key] = call_user_func_array('array_group_by', $parms);
             }
         }
+
         return $grouped;
     }
 
@@ -1584,7 +1607,7 @@ class NewProduct extends Backend
                 return $this->selectpage();
             }
             $this->model = new \app\admin\model\NewProductNotSatisfied();
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where('type', 1)
@@ -1599,9 +1622,11 @@ class NewProduct extends Backend
                 ->select();
             $list = collection($list)->toArray();
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -1676,7 +1701,7 @@ class NewProduct extends Backend
      *
      * @Description
      * @return void
-     * @since 2020/02/28 14:45:39
+     * @since  2020/02/28 14:45:39
      * @author wpl
      */
     public function batch_export_xls()
@@ -1719,7 +1744,7 @@ class NewProduct extends Backend
         }
 
 
-        list($where) = $this->buildparams();
+        [$where] = $this->buildparams();
 
         $list = $this->model->alias('a')
             ->join(['fa_supplier' => 'b'], 'a.supplier_id=b.id')
@@ -1755,7 +1780,7 @@ class NewProduct extends Backend
             } else {
                 $status = '新建';
             }
-            $skuName = $item->where('sku',$value['sku'])->value('name');
+            $skuName = $item->where('sku', $value['sku'])->value('name');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $status);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $skuName);
         }
@@ -1773,7 +1798,7 @@ class NewProduct extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -1819,7 +1844,6 @@ class NewProduct extends Backend
         $where['a.origin_sku'] = ['like', '%' . 'RN' . '%'];
         $list = $this->model
             ->alias('a')
-
             ->join(['fa_new_product_attribute' => 'b'], 'a.id = b.item_id')
             ->join(['fa_supplier' => 'c'], 'a.supplier_id=c.id')
             ->field('a.*,b.accessory_color,b.accessory_texture,c.supplier_name')
@@ -1878,7 +1902,7 @@ class NewProduct extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -1989,25 +2013,25 @@ class NewProduct extends Backend
                 unset($filter['create_time']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            if ($filter['is_spot']){
-                $sku = $this->item->where(['is_spot' =>$filter['is_spot']])->column('sku');
-                if ($sku){
-                    $map['a.sku'] = ['in',$sku];
+            if ($filter['is_spot']) {
+                $sku = $this->item->where(['is_spot' => $filter['is_spot']])->column('sku');
+                if ($sku) {
+                    $map['a.sku'] = ['in', $sku];
                 }
                 unset($filter['is_spot']);
                 $this->request->get(['filter' => json_encode($filter)]);
-            }else{
-                if ($filter['is_spot'] ==0){
+            } else {
+                if ($filter['is_spot'] == 0) {
                     unset($filter['is_spot']);
                     $this->request->get(['filter' => json_encode($filter)]);
                 }
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model->alias('a')
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id', 'left')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order_item' => 'e'], 'a.sku=e.sku', 'left')
-                ->join(['fa_purchase_order' => 'd'], 'e.purchase_id = d.id and b.id = d.replenish_id','left')
+                ->join(['fa_purchase_order' => 'd'], 'e.purchase_id = d.id and b.id = d.replenish_id', 'left')
                 ->where($where)
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
@@ -2020,7 +2044,7 @@ class NewProduct extends Backend
                 ->join(['fa_new_product_replenish' => 'b'], 'a.replenish_id=b.id', 'left')
                 ->join(['fa_new_product_replenish_list' => 'c'], 'a.replenish_id=c.replenish_id and a.sku = c.sku', 'left')
                 ->join(['fa_purchase_order_item' => 'e'], 'a.sku=e.sku', 'left')
-                ->join(['fa_purchase_order' => 'd'], 'e.purchase_id = d.id and b.id = d.replenish_id','left')
+                ->join(['fa_purchase_order' => 'd'], 'e.purchase_id = d.id and b.id = d.replenish_id', 'left')
                 ->where($where)
                 ->where('is_show', 0)
                 ->where('a.replenish_id<>0')
@@ -2030,10 +2054,11 @@ class NewProduct extends Backend
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-             foreach ($list as $k=>$v) {
-                 $list[$k]['is_spot'] = $this->item->where(['sku' => $v['sku']])->value('is_spot');
-             }
-            $result = array("total" => $total, "rows" => $list);
+            foreach ($list as $k => $v) {
+                $list[$k]['is_spot'] = $this->item->where(['sku' => $v['sku']])->value('is_spot');
+            }
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
         //查询对应平台权限
@@ -2044,6 +2069,7 @@ class NewProduct extends Backend
         $this->assignconfig('label', $site);
         $this->assign('site', $site);
         $this->assign('magentoplatformarr', $magentoplatformArr);
+
         return $this->view->fetch();
     }
 
@@ -2071,7 +2097,7 @@ class NewProduct extends Backend
             $check_order_item = new \app\admin\model\warehouse\CheckItem();
             $in_stock = new \app\admin\model\warehouse\Instock();
             $in_stock_item = new \app\admin\model\warehouse\InstockItem();
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $map['a.purchase_id'] = $purchase_id;
             $total = $this->model->alias('a')
                 ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
@@ -2118,11 +2144,13 @@ class NewProduct extends Backend
                 $v['instock_num'] = $instock_num;
             }
             unset($v);
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
 
         $this->assignconfig('purchase_id', input('purchase_id'));
+
         return $this->view->fetch();
     }
 
@@ -2283,13 +2311,13 @@ class NewProduct extends Backend
                 empty($replenishNum) && $this->error(__('导入失败,商品 ' . $sku . ' 补货数量不能为空！'));
 
                 $params[$sku] = [
-                    'website_type' => $label,
-                    'sku' => $sku,
-                    'create_time' => date('Y-m-d H:i:s'),
+                    'website_type'  => $label,
+                    'sku'           => $sku,
+                    'create_time'   => date('Y-m-d H:i:s'),
                     'create_person' => session('admin.nickname'),
                     'replenish_num' => $replenishNum,
-                    'type' => $typeArr[$typeName],
-                    'category_id' => $categoryId,
+                    'type'          => $typeArr[$typeName],
+                    'category_id'   => $categoryId,
                 ];
             }
 
@@ -2423,7 +2451,6 @@ class NewProduct extends Backend
     // }
 
 
-
     /**
      * M站饰品站脚本数据
      *
@@ -2435,7 +2462,7 @@ class NewProduct extends Backend
         Db::startTrans();
         try {
             foreach ($list as $key => $value) {
-                $supplier_id =  Db::table('fa_supplier')->where('supplier_name', $value['供应商名称'])->value('id');
+                $supplier_id = Db::table('fa_supplier')->where('supplier_name', $value['供应商名称'])->value('id');
                 if (empty($supplier_id)) {
                     $supplier_id = 0;
                 }
@@ -2493,7 +2520,7 @@ class NewProduct extends Backend
                 $add['presell_residue_num'] = $skuParams['presell_residue_num'] = 100;
                 $add['presell_num'] = $skuParams['presell_num'] = 100;
                 $add['presell_create_time'] = $skuParams['presell_start_time'] = '2021-01-21 00:00:00';
-                $add['presell_end_time'] = $skuParams['presell_end_time'] =  '2022-01-21 00:00:00';
+                $add['presell_end_time'] = $skuParams['presell_end_time'] = '2022-01-21 00:00:00';
                 $magento_platform = new \app\admin\model\platformManage\MagentoPlatform();
                 $prefix = $magento_platform->getMagentoPrefix($skuParams['platform_type']);
                 //判断前缀是否存在
@@ -2502,7 +2529,7 @@ class NewProduct extends Backend
                 }
                 //监测平台sku是否存在
                 $itemPlatfromSku = new  ItemPlatformSku();
-                $platformSkuExists = $itemPlatfromSku->getTrueSku($prefix .  $skuParams['site']['sku'],  $skuParams['site']['site']);
+                $platformSkuExists = $itemPlatfromSku->getTrueSku($prefix . $skuParams['site']['sku'], $skuParams['site']['site']);
                 if ($platformSkuExists) {
                     return false;
                 }
@@ -2511,7 +2538,7 @@ class NewProduct extends Backend
                 $skuParams['create_person'] = $value['创建人'];
                 $skuParams['create_time'] = date("Y-m-d H:i:s", time());
                 //添加stock库商品表信息
-                $Stock =  Db::connect('database.db_stock');
+                $Stock = Db::connect('database.db_stock');
                 $Stock->table('fa_item_platform_sku')->insert($skuParams);
                 //                    $add['item_status'] = 3;
                 //                    unset($add['link']);
@@ -2544,13 +2571,14 @@ class NewProduct extends Backend
      * @date   2021/4/24 10:20
      * 运营补货需求购物车
      */
-    public function printing_batch_export_xls(){
+    public function printing_batch_export_xls()
+    {
         $this->model = new \app\admin\model\NewProductMapping();
         $value = input('param.filter');
-        $filter = json_decode($value,true);
-        if (empty($filter)){
-            $map['website_type'] =1;
-        }else{
+        $filter = json_decode($value, true);
+        if (empty($filter)) {
+            $map['website_type'] = 1;
+        } else {
             $map['website_type'] = $filter['website_type'];
         }
         $list = $this->model
@@ -2564,18 +2592,18 @@ class NewProduct extends Backend
         foreach ($list as &$v) {
             $v['category_name'] = $category[$v['category_id']];
             $v['is_spot'] = $this->item->where(['sku' => $v['sku']])->value('is_spot');
-            if ($v['is_spot'] ==1){
+            if ($v['is_spot'] == 1) {
                 $v['is_spot'] = '大货';
-            }elseif ($v['is_spot'] ==2){
+            } elseif ($v['is_spot'] == 2) {
                 $v['is_spot'] = '现货';
-            }else{
+            } else {
                 $v['is_spot'] = '-';
             }
-            if ($v['type'] ==1){
+            if ($v['type'] == 1) {
                 $v['type'] = '月度计划';
-            }elseif ($v['type'] ==2){
+            } elseif ($v['type'] == 2) {
                 $v['type'] = '周度计划';
-            }else{
+            } else {
                 $v['type'] = '日度计划';
             }
         }
@@ -2612,7 +2640,7 @@ class NewProduct extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
