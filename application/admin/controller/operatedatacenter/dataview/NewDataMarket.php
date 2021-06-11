@@ -269,7 +269,7 @@ class NewDataMarket extends Backend
         $orderWhere['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
         $salesNum = $this->orderitemoption
             ->alias('i')
-            ->join('fa_order o','o.entity_id=i.magento_order_id')
+            ->join('fa_order o','o.entity_id=i.magento_order_id and o.site=i.site')
             ->where($orderWhere)
             ->sum('i.qty');
         //周转月数
@@ -289,7 +289,7 @@ class NewDataMarket extends Backend
         //新品SKU30天内销量
         $newSalesNum = $this->orderitemoption
             ->alias('i')
-            ->join('fa_order o','o.entity_id=i.magento_order_id')
+            ->join('fa_order o','o.entity_id=i.magento_order_id and o.site=i.site')
             ->where($orderWhere)
             ->where('i.sku','in',$skus)
             ->sum('i.qty');

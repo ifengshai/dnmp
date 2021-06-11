@@ -120,7 +120,7 @@ class GoodsDataDetail extends Backend
                 $orderWhere['o.site'] = $value['platform_type'];
                 $list[$key]['sales_num'] = $this->orderitemoption
                     ->alias('i')
-                    ->join('fa_order o','i.magento_order_id=o.entity_id')
+                    ->join('fa_order o','i.magento_order_id=o.entity_id and o.site=i.site')
                     ->where($orderWhere)
                     ->sum('i.qty');
                 //获取sku的等级
@@ -326,7 +326,7 @@ class GoodsDataDetail extends Backend
                     $orderWhere['o.site'] = $val['platform_type'];
                     $sales_num = $this->orderitemoption
                         ->alias('i')
-                        ->join('fa_order o','i.magento_order_id=o.entity_id')
+                        ->join('fa_order o','i.magento_order_id=o.entity_id and o.site=i.site')
                         ->where($orderWhere)
                         ->sum('i.qty');
                     $index1 = array_keys($column_name,'sales_num');
