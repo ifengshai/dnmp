@@ -8,6 +8,8 @@ use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
+use app\admin\model\saleaftermanage\WorkOrderMeasure;
+use app\admin\model\saleaftermanage\WorkOrderRecept;
 use think\Db;
 use think\Cache;
 use app\common\controller\Backend;
@@ -686,7 +688,30 @@ class OrderReturn extends Backend
             $workList = new \app\admin\model\saleaftermanage\WorkOrderList();
             $workResult = $workList->where(['platform_order' => $v['increment_id']])->select();
             $workResult = collection($workResult)->toArray();
+            foreach ($workResult as &$vv) {
+
+                $step_arr = WorkOrderMeasure::where('work_id', $vv['id'])->select();
+                $step_arr = collection($step_arr)->toArray();
+                foreach ($step_arr as $keys => $values) {
+                    $recept = WorkOrderRecept::where('measure_id', $values['id'])->where('work_id', $vv['id'])->select();
+                    $recept_arr = collection($recept)->toArray();
+                    $step_arr[$keys]['recept_user'] = implode(',', array_column($recept_arr, 'recept_person'));
+
+                    $step_arr[$keys]['recept'] = $recept_arr;
+                    if ($values['operation_type'] == 0) {
+                        $step_arr[$keys]['operation_type'] = '未处理';
+                    } elseif ($values['operation_type'] == 1) {
+                        $step_arr[$keys]['operation_type'] = '处理完成';
+                    } elseif ($values['operation_type'] == 2) {
+                        $step_arr[$keys]['operation_type'] = '处理失败';
+                    }
+                }
+
+                $vv['step'] = $step_arr;
+            }
+            unset($vv);
             $orderList[$k]['workOrderList'] = $workResult;
+
 
         }
         //上传订单平台
