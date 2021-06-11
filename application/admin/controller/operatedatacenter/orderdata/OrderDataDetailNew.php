@@ -15,16 +15,19 @@ class OrderDataDetailNew extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
         $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
         $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->zeeloolfr = new \app\admin\model\order\order\ZeeloolFr();
         $this->zeeloolOperate  = new \app\admin\model\operatedatacenter\Zeelool;
         $this->vooguemeOperate  = new \app\admin\model\operatedatacenter\Voogueme;
         $this->nihaoOperate  = new \app\admin\model\operatedatacenter\Nihao;
         $this->zeelooldeOperate  = new \app\admin\model\operatedatacenter\ZeeloolDe();
         $this->zeelooljpOperate  = new \app\admin\model\operatedatacenter\ZeeloolJp();
+        $this->zeeloolfrOperate  = new \app\admin\model\operatedatacenter\ZeeloolFr();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
     /**
@@ -46,28 +49,25 @@ class OrderDataDetailNew extends Backend
                 unset($filter['one_time-operate']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
+            $site = $filter['order_platform'];
             if($filter['order_platform'] == 2){
                 $order_model = $this->voogueme;
                 $web_model = Db::connect('database.db_voogueme');
-                $site = 2;
             }elseif($filter['order_platform'] == 3){
                 $order_model = $this->nihao;
                 $web_model = Db::connect('database.db_nihao');
-                $site = 3;
             }elseif($filter['order_platform'] == 10){
                 $order_model = $this->zeeloolde;
                 $web_model = Db::connect('database.db_zeelool_de');
-                $site = 10;
             }elseif($filter['order_platform'] == 11){
                 $order_model = $this->zeelooljp;
                 $web_model = Db::connect('database.db_zeelool_jp');
-                $site = 11;
-            }elseif($filter['order_platform'] == 5){
-                $site = 5;
+            }elseif($filter['order_platform'] == 15){
+                $order_model = $this->zeeloolfr;
+                $web_model = Db::connect('database.db_zeelool_fr');
             }else {
                 $order_model = $this->zeelool;
                 $web_model = Db::connect('database.db_zeelool');
-                $site = 1;
             }
 
             $map = [];
@@ -410,20 +410,17 @@ class OrderDataDetailNew extends Backend
                     $payment = $web_model->table('sales_flat_order_payment')->where($payment_where)->value('method');
                     $arr[$i]['payment_method'] = $payment == 'oceanpayment_creditcard' ? '钱海' : 'Paypal';  //支付方式
                     //处方信息
-                    $prescription_where['order_id'] = $value['entity_id'];
-                    $frame_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('frame_price');
+                    $prescription_where['magento_order_id'] = $value['entity_id'];
+                    $prescription_where['site'] = $site;
+                    $frame_price = $this->orderitemoption->where($prescription_where)->sum('frame_price');
                     $arr[$i]['frame_price'] = round($frame_price,2);
-                    $arr[$i]['frame_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->count();
-                    if($site == 3){
-                        $arr[$i]['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('third_id','neq','')->count();
-                    }else{
-                        $arr[$i]['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('index_id','neq','')->count();
-                    }
-                    $arr[$i]['is_box_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('goods_type',6)->count();
-                    $lens_price = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->sum('index_price');
+                    $arr[$i]['frame_num'] = $this->orderitemoption->where($prescription_where)->sum('qty');
+                    $arr[$i]['lens_num'] = $this->orderitemoption->where($prescription_where)->where('lens_number','neq','')->sum('qty');
+                    $arr[$i]['is_box_num'] = $this->orderitemoption->where($prescription_where)->where('goods_type',6)->sum('qty');
+                    $lens_price = $this->orderitemoption->where($prescription_where)->sum('index_price');
                     $arr[$i]['lens_price'] = round($lens_price,2);
                     $arr[$i]['telephone'] = $shipping['telephone'];
-                    $skus = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->column('sku');
+                    $skus = $this->orderitemoption->where($prescription_where)->column('sku');
                     $skus = collection($skus)->toArray();
                     $arr[$i]['sku'] = implode(',',$skus);
                     $arr[$i]['register_time'] = $register_time;
@@ -439,7 +436,7 @@ class OrderDataDetailNew extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key=>$val){
-            if(!in_array($val['name'],['zeelool','voogueme','meeloog','zeelool_de','zeelool_jp','wesee'])){
+            if(!in_array($val['name'],['zeelool','voogueme','meeloog','zeelool_de','zeelool_jp','wesee','zeelool_fr'])){
                 unset($magentoplatformarr[$key]);
             }
         }
@@ -601,27 +598,25 @@ class OrderDataDetailNew extends Backend
         }
         // 将标题名称通过fputcsv写到文件句柄
         fputcsv($fp, $field_arr);
-
+        $site = $order_platform;
         if($order_platform == 2){
             $order_model = $this->voogueme;
             $web_model = Db::connect('database.db_voogueme');
-            $site = 2;
         }elseif($order_platform == 3){
             $order_model = $this->nihao;
             $web_model = Db::connect('database.db_nihao');
-            $site = 3;
         }elseif($order_platform == 10){
             $order_model = $this->zeeloolde;
             $web_model = Db::connect('database.db_zeelool_de');
-            $site = 10;
         }elseif($order_platform == 11){
             $order_model = $this->zeelooljp;
             $web_model = Db::connect('database.db_zeelool_jp');
-            $site = 11;
+        }elseif($order_platform == 15){
+            $order_model = $this->zeeloolfr;
+            $web_model = Db::connect('database.db_zeelool_fr');
         }else{
             $order_model = $this->zeelool;
             $web_model = Db::connect('database.db_zeelool');
-            $site = 1;
         }
         $web_model->table('customer_entity')->query("set time_zone='+8:00'");
         $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
@@ -867,8 +862,9 @@ class OrderDataDetailNew extends Backend
                 }
                 if(in_array('frame_price',$column_name) || in_array('frame_num',$column_name) || in_array('lens_price',$column_name)){
                     //处方信息
-                    $prescription_where['order_id'] = $val['entity_id'];
-                    $frame_info = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->field('sum(frame_price) frame_amount,count(id) count,sum(index_price) lens_amount,sku')->select();
+                    $prescription_where['magento_order_id'] = $val['entity_id'];
+                    $prescription_where['site'] = $site;
+                    $frame_info = $this->orderitemoption->where($prescription_where)->field('sum(frame_price) frame_amount,sum(qty) count,sum(index_price) lens_amount,sku')->select();
                     $frame_info = collection($frame_info)->toArray();
                     $index1 = array_keys($column_name,'frame_price');
                     if($index1){
@@ -885,27 +881,22 @@ class OrderDataDetailNew extends Backend
                 }
                 if(in_array('sku',$column_name)){
                     $prescription_where['order_id'] = $val['entity_id'];
-                    $skus = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->column('sku');
+                    $skus = $this->orderitemoption->where($prescription_where)->column('sku');
                     $index = array_keys($column_name,'sku');
                     $tmpRow[$index[0]] =implode('|',$skus);
 
                 }
                 if(in_array('lens_num',$column_name)){
                     $prescription_where['order_id'] = $val['entity_id'];
-                    if($site == 3){
-                        $val['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('third_id','neq','')->count();
-                    }else{
-                        $val['lens_num'] = $web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('index_id','neq','')->count();
-                    }
+                    $val['lens_num'] = $this->orderitemoption->where($prescription_where)->where('lens_number','neq','')->sum('qty');
                     $index = array_keys($column_name,'lens_num');
                     $tmpRow[$index[0]] =$val['lens_num'];
                 }
                 if(in_array('is_box_num',$column_name)){
                     $prescription_where['order_id'] = $val['entity_id'];
                     $index = array_keys($column_name,'is_box_num');
-                    $tmpRow[$index[0]] =$web_model->table('sales_flat_order_item_prescription')->where($prescription_where)->where('goods_type',6)->count();
+                    $tmpRow[$index[0]] =$this->orderitemoption->where($prescription_where)->where('goods_type',6)->sum('qty');
                 }
-
                 ksort($tmpRow);
                 $rows = array();
                 foreach ( $tmpRow as $export_obj){

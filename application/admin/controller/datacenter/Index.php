@@ -139,7 +139,7 @@ class Index extends Backend
                 $v['es_num'] = $sales_num_list[9][$v['es_sku']] ?: 0;
                 $v['de_num'] = $sales_num_list[10][$v['de_sku']] ?: 0;
                 $v['jp_num'] = $sales_num_list[11][$v['jp_sku']] ?: 0;
-                $v['fr_num'] = $sales_num_list[11][$v['fr_sku']] ?: 0;
+                $v['fr_num'] = $sales_num_list[15][$v['fr_sku']] ?: 0;
                 $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'] + $v['fr_num'];
             }
             unset($v);
