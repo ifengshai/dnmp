@@ -40,7 +40,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     del_url: 'new_product_design/del',
                     multi_url: 'new_product_design/multi',
                     table: 'new_product_design',
-                }
+                },
+                pageList: [10, 50,100,300,500,]
             });
 
             var table = $("#table");
