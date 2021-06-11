@@ -266,7 +266,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
      * @date   2021/6/7 11:22:14
      */
     public function complaints_detail($ids = null){
-        $model = Db::connect('database.db_zeelool_online');
+        $model = Db::connect('database.db_zeelool');
         $row =$model->table('oc_customer_after_sales_work_order')->where('id',$ids)->find();
         if ($row['status'] == 1){
             $model->table('oc_customer_after_sales_work_order')->where('id',$ids)->update(['status'=>2]);
