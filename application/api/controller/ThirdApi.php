@@ -366,7 +366,7 @@ class ThirdApi extends Api
             $data = [];
             $data['create_time'] = $v['time'];
             $data['content'] = $v['context'];
-            $data['courier_status'] = $v['status'];
+            $data['courier_status'] = $v['status'] ?: '';
             $data['site'] = 13;
             $data['order_id'] = $orderList['order_id'];
             $data['order_number'] = $orderList['order_number'];
