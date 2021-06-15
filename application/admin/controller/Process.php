@@ -18,7 +18,7 @@ use fast\Excel;
 use think\Exception;
 use think\Model;
 
-class process extends Backend
+class Process extends Backend
 {
 
     protected $noNeedLogin = ['*'];
