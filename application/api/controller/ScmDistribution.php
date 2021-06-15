@@ -516,10 +516,17 @@ class ScmDistribution extends Scm
             } else {
                 //判断是否定制片且未处理状态
                 if (0 == $item_process_info['customize_status'] && 3 == $item_process_info['order_prescription_type']) {
+
+                    $stockId = $item_process_info['stock_id'];
+                    if ($stockId == 2) {
+                        $occupy = 5;
+                    } else {
+                        $occupy = 10000;
+                    }
                     //暂存自动分配库位
                     $stock_house_info = $this->_stock_house
                         ->field('id,coding')
-                        ->where(['status' => 1, 'type' => 3, 'stock_id' => $item_process_info['stock_id'], 'occupy' => ['<', 10000]])
+                        ->where(['status' => 1, 'type' => 3, 'stock_id' => $item_process_info['stock_id'], 'occupy' => ['<', $occupy]])
                         ->order('occupy', 'desc')
                         ->find();
                     if (!empty($stock_house_info)) {
