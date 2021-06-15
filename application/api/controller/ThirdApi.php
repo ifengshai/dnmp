@@ -352,7 +352,7 @@ class ThirdApi extends Api
         $orderNode = new OrderNode();
         $orderList = $orderNode->where(['order_number' => $order_number, 'site' => 13])->find();
         if (!$orderList) {
-            $paths = ROOT_PATH . "/public/uploads/kuaidi100.log";
+            $paths = "/var/www/mojing/public/uploads/kuaidi100_error.log";
             $path_txt = date('Y-m-d H:i:s', time()) . '单号：' . $order_number . "\n" . '内容:' . serialize($params) . "\n";
             file_put_contents($paths, $path_txt, FILE_APPEND);
         }
