@@ -1,12 +1,12 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump-to'], function ($, undefined, Backend, Table, Form) {
-    $.ajax({
-        url: "warehouse/stock_house/shelf_number1",
-        async: false,
-        success: function (obj) {
-            console.log(obj)
-            province = obj;
-        }
-    });
+    // $.ajax({
+    //     url: "warehouse/stock_house/shelf_number1",
+    //     async: false,
+    //     success: function (obj) {
+    //         console.log(obj)
+    //         province = obj;
+    //     }
+    // });
     var Controller = {
         index: function () {
             // 初始化表格参数配置
@@ -44,15 +44,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         {
                             field: 'shelf_number',
                             title: __('货架号'),
-                            searchList: province, formatter: function (value) {
-                                for (var index in province) {
-                                    if (value == index) {
-                                        return province[index];
-                                    }
-                                }
-                            },
-                            formatter: Table.api.formatter.shelf_number
-
                         },
                         { field: 'area_coding', title: __('库区编码') },
                         { field: 'coding', title: __('Coding'), operate: 'like' },
