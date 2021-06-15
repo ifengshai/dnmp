@@ -40,7 +40,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             title: __('问题分类'),
                             searchList: { 1: '客户投诉', 2: '订单问题'},
                             formatter: Table.api.formatter.status,
-                            visible: false
+                            visible: true
                         },
                         {field: 'id', title: __('ID')},
                         {
