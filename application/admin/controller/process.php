@@ -18,7 +18,7 @@ use fast\Excel;
 use think\Exception;
 use think\Model;
 
-class Wangpenglei extends Backend
+class process extends Backend
 {
 
     protected $noNeedLogin = ['*'];
@@ -1526,5 +1526,31 @@ class Wangpenglei extends Backend
             $order->where(['id' => $v['id']])->update(['picking_sort' => $location_data['picking_sort']]);
         }
 
+    }
+
+
+    /**
+     * 库位排序
+     * @author wpl
+     * @date   2021/6/5 10:26
+     */
+    public function set_store_house()
+    {
+        $stock_house = new StockHouse();
+        $list = Db::table('fa_zz_temp2')->select();
+        foreach ($list as $k => $v) {
+            $params = [];
+            $params['coding'] = $v['store_house'];
+            $params['status'] = 1;
+            $params['createtime'] = date('Y-m-d H:i:s');
+            $params['create_person'] = 'admin';
+            $params['type'] = 3;
+            $params['shelf_number'] = 'D';
+            $params['volume'] = 5;
+            $params['stock_id'] = 2;
+            $stock_house->insert($params);
+            echo $k . "\n";
+        }
+        echo "ok";
     }
 }
