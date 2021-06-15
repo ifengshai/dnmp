@@ -895,14 +895,26 @@ class OrderReturn extends Backend
     {
         $entity_id = input('param.entity_id');
         $site = input('param.order_platform');
-        //获取订单信息对应的所有物流信息
-        $courier = Db::name('order_node_courier')
-            ->alias('a')
-            ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
-            ->where('a.order_id', $entity_id)->where('a.site', $site)
-            ->order('create_time desc')
-            ->field('a.content,a.create_time,a.site,a.track_number,a.shipment_data_type')
-            ->select();
+        if ($site == 13) {
+            //获取订单信息对应的所有物流信息
+            $courier = Db::name('order_node_courier_third')
+                ->alias('a')
+                ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
+                ->where('a.order_id', $entity_id)->where('a.site', $site)
+                ->order('create_time desc')
+                ->field('a.content,a.create_time,a.site,a.track_number,a.shipment_data_type')
+                ->select();
+        } else {
+            //获取订单信息对应的所有物流信息
+            $courier = Db::name('order_node_courier')
+                ->alias('a')
+                ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
+                ->where('a.order_id', $entity_id)->where('a.site', $site)
+                ->order('create_time desc')
+                ->field('a.content,a.create_time,a.site,a.track_number,a.shipment_data_type')
+                ->select();
+        }
+
         $courier_one = $courier[0];
         unset($courier[0]);
         $courier_two = array_values($courier);
