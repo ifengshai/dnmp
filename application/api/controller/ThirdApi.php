@@ -381,6 +381,7 @@ class ThirdApi extends Api
                     $update_order_node['order_node'] = 4;
                     $update_order_node['node_type'] = 40;
                     $update_order_node['update_time'] = $v['time'];
+                    $update_order_node['signing_time'] = $v['time'];
                     Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
 
                     $order_node_detail['order_node'] = 4;
