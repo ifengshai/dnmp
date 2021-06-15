@@ -75,9 +75,8 @@ class StockHouse extends Backend
                 unset($filter['stock_name']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            if (isset($filter['shelf_number'])) {
-                $shelfNumber = $this->shelf_number1();
-                $map['shelf_number'] = ['=', $shelfNumber[$filter['shelf_number']]];
+            if ($filter['shelf_number']) {
+                $map['shelf_number'] = $filter['shelf_number'];
                 unset($filter['shelf_number']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
