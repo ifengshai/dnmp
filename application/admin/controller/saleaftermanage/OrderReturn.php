@@ -899,7 +899,7 @@ class OrderReturn extends Backend
             //获取订单信息对应的所有物流信息
             $courier = Db::name('order_node_courier_third')
                 ->alias('a')
-                ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
+                ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id and a.site=b.site')
                 ->where('a.order_id', $entity_id)->where('a.site', $site)
                 ->order('create_time desc')
                 ->field('a.content,a.create_time,a.site,a.track_number,a.shipment_data_type')
@@ -908,7 +908,7 @@ class OrderReturn extends Backend
             //获取订单信息对应的所有物流信息
             $courier = Db::name('order_node_courier')
                 ->alias('a')
-                ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id')
+                ->join(['fa_order_node' => 'b'], 'a.order_id=b.order_id and a.site=b.site')
                 ->where('a.order_id', $entity_id)->where('a.site', $site)
                 ->order('create_time desc')
                 ->field('a.content,a.create_time,a.site,a.track_number,a.shipment_data_type')
