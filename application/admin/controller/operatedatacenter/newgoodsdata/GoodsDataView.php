@@ -847,10 +847,10 @@ class GoodsDataView extends Backend
         //默认7天数据
         if ($time) {
             $time = explode(' ', $time);
-            $map['payment_time'] = $itemMap['o.payment_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            $map['payment_time'] = $itemMap['o.payment_time'] = ['between', [strtotime($time[0] . ' ' . $time[1]), strtotime($time[3] . ' ' . $time[4])]];
             $maps['day_date'] = ['between', [$time[0] , $time[3]]];
         } else {
-            $map['payment_time'] = $itemMap['o.payment_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-7 day')), date('Y-m-d H:i:s', time())]];
+            $map['payment_time'] = $itemMap['o.payment_time'] = ['between', [strtotime(date('Y-m-d 00:00:00', strtotime('-7 day'))), time()]];
             $maps['day_date'] = ['between', [date('Y-m-d', strtotime('-7 day')), date('Y-m-d', time())]];
         }
         $arr = Cache::get('newGoodsData_platformOrderInfo1' . $platform . $goods_type . md5(serialize($map)));
@@ -859,37 +859,6 @@ class GoodsDataView extends Backend
         }
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-        if($platform != 5){
-            switch ($platform) {
-                case 1:
-                    $model = Db::connect('database.db_zeelool');
-                    break;
-                case 2:
-                    $model = Db::connect('database.db_voogueme');
-                    break;
-                case 3:
-                    $model = Db::connect('database.db_nihao');
-                    break;
-                case 10:
-                    $model = Db::connect('database.db_zeelool_de');
-                    break;
-                case 11:
-                    $model = Db::connect('database.db_zeelool_jp');
-                    break;
-                case 15:
-                    $model = Db::connect('database.db_zeelool_fr');
-                    break;
-                default:
-                    $model = false;
-                    break;
-            }
-            if (false == $model) {
-                return false;
-            }
-            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
-            $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-            $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-        }
         $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
         //求出眼镜所有sku
         $frame_sku = $this->itemPlatformSku->getDifferencePlatformSku(1, $platform);
