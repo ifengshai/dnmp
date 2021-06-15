@@ -342,18 +342,17 @@ class ThirdApi extends Api
         }
         $params = $this->request->post('param');
         $params = htmlspecialchars_decode($params);
-        file_put_contents("/var/www/mojing/public/uploads/kuaidi100_error.log", serialize($params) . "\n", FILE_APPEND);
-        $params = json_decode($params, true);
-        file_put_contents("/var/www/mojing/public/uploads/kuaidi100_error.log", serialize($params) . "\n", FILE_APPEND);
+        file_put_contents("/var/www/mojing/public/uploads/kuaidi100_error.log", $params, FILE_APPEND);
         if (!$params) {
             return json(['result' => false, 'returnCode' => 304, 'message' => '未接收到数据']);
         }
+        $params = json_decode($params, true);
         //根据单号查询
         $orderNode = new OrderNode();
         $orderList = $orderNode->where(['order_number' => $order_number, 'site' => 13])->find();
         if (!$orderList) {
             $paths = "/var/www/mojing/public/uploads/kuaidi100_error.log";
-            $path_txt = date('Y-m-d H:i:s', time()) . '单号：' . $order_number . "\n" . '内容:' . serialize($params) . "\n";
+            $path_txt = date('Y-m-d H:i:s', time()) . '单号：' . $order_number . "\n" . '内容:' . $params . "\n";
             file_put_contents($paths, $path_txt, FILE_APPEND);
         }
 
