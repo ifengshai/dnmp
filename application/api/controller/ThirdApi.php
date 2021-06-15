@@ -341,6 +341,7 @@ class ThirdApi extends Api
             return json(['result' => false, 'returnCode' => 302, 'message' => '参数丢失']);
         }
         $params = $this->request->post('param');
+        $params = htmlspecialchars_decode($params);
         file_put_contents("/var/www/mojing/public/uploads/kuaidi100_error.log", serialize($params) . "\n", FILE_APPEND);
         $params = json_decode($params, true);
         file_put_contents("/var/www/mojing/public/uploads/kuaidi100_error.log", serialize($params) . "\n", FILE_APPEND);
