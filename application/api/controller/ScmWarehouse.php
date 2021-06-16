@@ -4721,7 +4721,7 @@ class ScmWarehouse extends Scm
             }
         }
         $res1 = LockService::addLock($transferOrderDetail['id']);
-        if ($res1 == false){
+        if ($res1 === false){
             $this->error(__('服务异常,重复提交或加锁失败,请联系管理员！！'), '', 524);
         }
         $realInstokcNum = count($arr);
@@ -4762,7 +4762,7 @@ class ScmWarehouse extends Scm
         }
         $res3 = LockService::releaseLock($transferOrderDetail['id'], $res1);
         if ($res !== false) {
-            if ($res3 == true){
+            if ($res3 === true){
                 $this->success('提交成功', '', 200);
             }else{
                 $this->error(__('实体仓调拨单'.$transferOrderDetail['transfer_order_number'].'解锁失败，请记录id'.$transferOrderDetail['id'].'反馈至产品经理'), '', 525);
