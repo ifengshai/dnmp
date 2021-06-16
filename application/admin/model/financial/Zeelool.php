@@ -166,7 +166,7 @@ class Zeelool extends Model
         $sku_list = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('purchase_price', 'sku');
 
         $whereFrame['o.status'] = ['in', ['complete', 'free_processing', 'processing', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
-        $whereFrame['o.created_at'] = ['between', [$start_time, $end_time]];
+        $whereFrame['o.payment_time'] = ['between', [$start_time, $end_time]];
         $whereFrame['o.order_type'] = 1;
         //Db::connect('database.db_zeelool')->query("SET time_zone = '+8:00'");
         $all_frame_result = Db::connect('database.db_zeelool')->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
