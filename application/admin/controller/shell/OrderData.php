@@ -440,9 +440,9 @@ class OrderData extends Backend
                                     $options['index_price'] = $v['lens_total_price'];
                                     $options['frame_color'] = $v['goods_color'];
                                     $options['goods_type'] = $v['goods_type'];
-                                    $options['base_original_price'] = $v['base_goods_price'];
+                                    $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
                                     $options['base_discount_amount'] = $v['base_goods_discounts_price'];
-                                    $options['single_base_original_price'] = round($v['base_goods_price'] / $v['goods_count'], 4);
+                                    $options['single_base_original_price'] = $v['base_goods_price'];
                                     $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
                                     $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
@@ -492,9 +492,9 @@ class OrderData extends Backend
                                     $options['qty'] = $v['goods_count'];
                                     $options['base_row_total'] = $v['original_total_price'];
 
-                                    $options['base_original_price'] = $v['base_goods_price'];
+                                    $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
                                     $options['base_discount_amount'] = $v['base_goods_discounts_price'];
-                                    $options['single_base_original_price'] = round($v['base_goods_price'] / $v['goods_count'], 4);
+                                    $options['single_base_original_price'] = $v['base_goods_price'];
                                     $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
 
                                     $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
@@ -545,9 +545,9 @@ class OrderData extends Backend
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
                                     $options['product_id'] = $v['product_id'];
-                                    $options['base_original_price'] = $v['base_original_price'];
+                                    $options['base_original_price'] = round($v['base_original_price'] * $v['qty_ordered'], 4);
                                     $options['base_discount_amount'] = $v['base_discount_amount'];
-                                    $options['single_base_original_price'] = round($v['base_original_price'] / $v['qty_ordered'], 4);
+                                    $options['single_base_original_price'] = $v['base_original_price'];
                                     $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
                                     $order_prescription_type = $options['order_prescription_type'];
                                     $is_prescription_abnormal = $options['is_prescription_abnormal'];
@@ -570,7 +570,7 @@ class OrderData extends Backend
                                         $this->orderitemprocess->insertAll($data);
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                        if (($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3)  && in_array($site, [2, 3])) {
+                                        if (($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3) && in_array($site, [2, 3])) {
                                             $order_lens_type[$site][$v['order_id']] = 3;
                                             $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
                                             $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
@@ -611,9 +611,9 @@ class OrderData extends Backend
                                     $options['sku'] = $v['sku'];
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
-                                    $options['base_original_price'] = $v['base_original_price'];
+                                    $options['base_original_price'] = round($v['base_original_price'] * $v['qty_ordered'], 4);
                                     $options['base_discount_amount'] = $v['base_discount_amount'];
-                                    $options['single_base_original_price'] = round($v['base_original_price'] / $v['qty_ordered'], 4);
+                                    $options['single_base_original_price'] = $v['base_original_price'];
                                     $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
                                     $order_prescription_type = $options['order_prescription_type'] ?: '';
                                     unset($options['order_prescription_type']);
