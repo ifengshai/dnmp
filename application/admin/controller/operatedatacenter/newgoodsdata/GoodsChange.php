@@ -64,7 +64,7 @@ class GoodsChange extends Backend
             $map['day_date'] = ['between', [$createat[0], $createat[3]]];
             $orderWhere['o.site'] = $order_platform;
             $orderWhere['o.order_type'] = 1;
-            $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+            $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
             $orderWhere['o.payment_time'] = ['between', [strtotime($createat[0]), $lastDay]];
             unset($filter['time_str']);
             unset($filter['create_time-operate']);
@@ -185,7 +185,7 @@ class GoodsChange extends Backend
         $lastDay = strtotime(date('Y-m-d', strtotime('-1 day')));
         $orderWhere['o.site'] = $order_platform;
         $orderWhere['o.order_type'] = 1;
-        $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+        $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
         $orderWhere['o.payment_time'] = ['between', [strtotime($createat[0]), $lastDay]];
         $pre_count = 5000;
         for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){

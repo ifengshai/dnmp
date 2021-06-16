@@ -666,7 +666,8 @@ class CoupnAnalytics extends Backend
                 'paypal_reversed',
                 'payment_review',
                 'paypal_canceled_reversal',
-                'delivered'
+                'delivered',
+                'delivery'
             ]
         ];
         $map['o.order_type'] = 1;
@@ -794,7 +795,8 @@ class CoupnAnalytics extends Backend
                 'paypal_reversed',
                 'payment_review',
                 'paypal_canceled_reversal',
-                'delivered'
+                'delivered',
+                'delivery'
             ]
         ];
         $map['order_type'] = ['=', 1];

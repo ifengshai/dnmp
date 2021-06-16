@@ -2045,7 +2045,7 @@ class Test4 extends Controller
         $start_time = strtotime($start);
         $end_time = strtotime($end);
         $where['o.payment_time'] = ['between', [$start_time, $end_time]];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
         $where['o.site'] = $site;
         $order = $this->order->alias('o')->join('fa_order_item_option i', 'o.entity_id=i.order_id')->field('i.sku,count(*) as count')->where($where)->group('i.sku')->select();
         $grade1 = 0;
@@ -2658,7 +2658,7 @@ class Test4 extends Controller
                 $start = strtotime($val['date_time']);
                 $end = strtotime($val['date_time'] . ' 23:59:59');
                 $where['o.payment_time'] = ['between', [$start, $end]];
-                $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+                $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
                 $arr['order_num'] = $order->alias('o')->where($where)->count();
 
                 $map1['p.order_prescription_type'] = 1;
@@ -2746,7 +2746,7 @@ class Test4 extends Controller
                 $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
 
                 //上个月总的销售数量（副数）
-                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
                 $sales_num = $order->where($where)->sum('total_qty_ordered');
                 $arr2['purchase_num'] = $purchase_num;
                 $arr2['sales_num'] = $sales_num;
@@ -2756,7 +2756,7 @@ class Test4 extends Controller
                 //上个月总的采购数量（副数）
                 $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
                 //上个月总的销售数量（副数）
-                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
                 $sales_num = $order->where($where)->sum('total_qty_ordered');
                 $arr3['purchase_num'] = $purchase_num;
                 $arr3['sales_num'] = $sales_num;

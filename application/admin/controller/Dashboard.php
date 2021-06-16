@@ -64,7 +64,7 @@ class Dashboard extends Backend
         $etime = date("Y-m-d H:i:s", time());
         $where['created_at'] = ['between', [$stime, $etime]];
         $zelool = new \app\admin\model\order\order\Zeelool;
-        $where['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'creditcard_proccessing', 'complete', 'delivered']];
+        $where['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'creditcard_proccessing', 'complete', 'delivered','delivery']];
         $where['order_type'] = ['not in', [4, 5]];
         $zeelool_count = $zelool->where($where)->count(1);
         $zeelool_total = $zelool->where($where)->sum('base_grand_total');

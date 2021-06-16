@@ -163,7 +163,7 @@ class Dashboard extends Backend
                 'store_id' => $platform,
                 'status' => [
                     'in',
-                    ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']
+                    ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']
                 ],
                 'created_at' => ['between', [strtotime($start_time), strtotime($end_time) + 86400]]
             ])

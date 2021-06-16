@@ -2046,7 +2046,7 @@ class Distribution extends Backend
                 $count = $this->model->alias('a')
                     ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                     ->where(['wave_order_id' => $v, 'is_print' => 0, 'distribution_status' => ['<>', 0]])
-                    ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']]])
+                    ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']]])
                     ->count();
                 if ($count > 0) {
                     $status = 1;

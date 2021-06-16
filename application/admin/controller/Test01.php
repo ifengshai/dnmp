@@ -785,7 +785,7 @@ class Test01 extends Backend
 
 
         $map['sku'] = ['like', 'ZOP049594-01' . '%'];
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
         $map['a.order_type'] = ['=', 1];
         $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $data . "'")];
         //某个sku当天的订单数
@@ -828,7 +828,7 @@ class Test01 extends Backend
         // dump($z_sku_list);
         foreach ($z_sku_list as $k => $v) {
             $map['sku'] = ['like', $v['platform_sku'] . '%'];
-            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
             $map['a.order_type'] = ['=', 1];
             $time_where[] = ['exp', Db::raw("DATE_FORMAT(a.created_at, '%Y-%m-%d') = '" . $v['day_date'] . "'")];
             //sku销售总副数

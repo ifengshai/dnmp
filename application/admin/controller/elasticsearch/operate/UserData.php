@@ -234,7 +234,7 @@ class UserData extends BaseElasticsearch
         }
 
         $customerWhere['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $orderWhere['order_type'] = 1;
         //用户统计
         $customer = $model
