@@ -12,7 +12,6 @@ use app\admin\model\warehouse\StockTransferOutOrderItem;
 use app\admin\model\warehouse\WarehouseTransferOrder;
 use app\admin\model\warehouse\WarehouseTransferOrderItem;
 use app\admin\model\warehouse\WarehouseTransferOrderItemCode;
-use Lock_Service;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -41,6 +40,7 @@ use app\admin\model\warehouse\StockSku;
 use app\admin\model\warehouse\WarehouseArea;
 use app\admin\model\warehouse\StockHouse;
 use Think\Log;
+use Util\Lock_Service;
 
 /**
  * 供应链出入库接口类

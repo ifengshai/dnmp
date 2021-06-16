@@ -1,5 +1,10 @@
 <?php
 
+namespace Util;
+
+
+use Redis;
+
 /**
  * Class Lock_Service 单据锁服务
  */
