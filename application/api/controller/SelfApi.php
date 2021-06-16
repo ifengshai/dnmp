@@ -2322,6 +2322,9 @@ class SelfApi extends Api
             if (!$row) {
                 $this->error(__('订单记录不存在'), [], 400);
             }
+            if ($row['track_number']==$track_number){
+                continue;
+            }
 
             //如果已发货 则不再更新发货时间
             //更新节点主表
@@ -3368,7 +3371,9 @@ class SelfApi extends Api
             if (!$row) {
                 $this->error(__('订单记录不存在'), [], 400);
             }
-
+            if ($row['track_number']==$track_number){
+                continue;
+            }
             //如果已发货 则不再更新发货时间
             //更新节点主表
             $row->allowField(true)->save([
@@ -4600,7 +4605,9 @@ class SelfApi extends Api
             if (!$row) {
                 $this->error(__('订单记录不存在'), [], 400);
             }
-
+            if ($row['track_number']==$track_number){
+                continue;
+            }
             //如果已发货 则不再更新发货时间
             //更新节点主表
             $row->allowField(true)->save([
@@ -6273,7 +6280,9 @@ class SelfApi extends Api
             if (!$row) {
                 $this->error(__('订单记录不存在'), [], 400);
             }
-
+            if ($row['track_number']==$track_number){
+                continue;
+            }
             //如果已发货 则不再更新发货时间
             //更新节点主表
             $row->allowField(true)->save([
@@ -6670,7 +6679,9 @@ class SelfApi extends Api
             if (!$row) {
                 $this->error(__('订单记录不存在'), [], 400);
             }
-
+            if ($row['track_number']==$track_number){
+                continue;
+            }
             //如果已发货 则不再更新发货时间
             //更新节点主表
             $row->allowField(true)->save([
