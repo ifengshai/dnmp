@@ -1223,12 +1223,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
@@ -1275,12 +1276,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $status_where['order_type'] = 1;
@@ -1450,12 +1452,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
@@ -1509,12 +1512,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $status_where['order_type'] = 1;
@@ -1680,12 +1684,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
@@ -1909,12 +1914,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $arr['order_num'] = $this->order->where($order_where)->where('order_type', 1)->count();
@@ -1960,12 +1966,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $status_where['order_type'] = 1;
@@ -2129,12 +2136,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $arr['order_num'] = $this->order->where($order_where)->where('order_type', 1)->count();
@@ -2180,12 +2188,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $status_where['order_type'] = 1;
@@ -2349,12 +2358,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $arr['order_num'] = $this->order->where($order_where)->where('order_type', 1)->count();
@@ -2400,12 +2410,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $status_where['order_type'] = 1;
@@ -2902,12 +2913,13 @@ class TrackReg extends Backend
             'in',
             [
                 'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
+'processing',
+'complete',
+'paypal_reversed',
+'payment_review',
+'paypal_canceled_reversal',
+'delivered',
+'delivery'
             ],
         ];
         $where['o.site'] = $site;
@@ -3213,7 +3225,7 @@ class TrackReg extends Backend
         $seven_days = $start.' 00:00:00 - '.$start.' 23:59:59';
         $createat = explode(' ', $seven_days);
         $where['o.payment_time'] = ['between', [strtotime($createat[0].' '.$createat[1]), strtotime($createat[3].' '.$createat[4])]];
-        $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $where['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $where['order_type'] = 1;
         $where['o.site'] = $plat;
         $where['goods_type'] = $goods_type;

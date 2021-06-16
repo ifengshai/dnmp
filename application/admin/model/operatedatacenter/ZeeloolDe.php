@@ -275,7 +275,7 @@ class ZeeloolDe extends Model
         $where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $where['customer_id'] = ['>',0];
         $where['order_type'] = 1;
-        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
 
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
         $order = $this->model
@@ -319,7 +319,7 @@ class ZeeloolDe extends Model
         $map_where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['payment_time'] = ['lt',$createat[0]];
 
-        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $map['order_type'] = 1;
         $map1['customer_id'] = ['>',0];
 
@@ -366,7 +366,7 @@ class ZeeloolDe extends Model
         $map_where['o.payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['o.payment_time'] = ['lt',$createat[0]];
 
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $map['o.order_type'] = 1;
         $map1['o.customer_id'] = ['>',0];
         $map['c.is_vip'] = 1;
@@ -474,7 +474,7 @@ class ZeeloolDe extends Model
      */
     public function getOrderUnitPrice($time_str = '',$time_str2 = '')
     {
-        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $map['order_type'] = 1;
             if(!$time_str){
                 $start = date('Y-m-d', strtotime('-6 day'));
@@ -608,7 +608,7 @@ class ZeeloolDe extends Model
         return $arr;
     }
     public function getMoneyOrderNumInfo($num,$time_str = ''){
-        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $map_where['order_type'] = 1;
         switch ($num){
             case 0:
@@ -663,7 +663,7 @@ class ZeeloolDe extends Model
         return $arr;
     }
     public function getOrderShippingInfo($num,$time_str = ''){
-        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $map_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $map_where['order_type'] = 1;
         switch ($num){
             case 0:
@@ -1252,7 +1252,7 @@ class ZeeloolDe extends Model
         }
         $createat = explode(' ', $time_str);
         $order_where['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $order_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $order_where['oa.address_type'] = 'shipping';
         $order_where['o.order_type'] = 1;
         //获取所有的订单的国家

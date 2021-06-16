@@ -82,7 +82,7 @@ class UserDataDetail extends Backend
                     $end = date('Y-m-d 23:59:59');
                     $map['o.created_at'] = ['between', [$start, $end]];
                 }
-                $map['o.order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                $map['o.order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
                 unset($filter['one_time-operate']);
                 unset($filter['time_str']);
                 unset($filter['order_platform']);
@@ -115,7 +115,7 @@ class UserDataDetail extends Backend
                     $list[$key]['email'] = $value['email'];          //注册邮箱
                     $list[$key]['created_at'] = $value['created_at'];  //注册时间
                     $order_where['user_id'] = $value['id'];
-                    $order_status_where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                    $order_status_where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
                     $order = $web_model->table('orders')->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_actual_amount_paid) total')->select();
                     $list[$key]['order_num'] = $order[0]['count'];  //总支付订单数
                     $list[$key]['order_amount'] = $order[0]['total'];//总订单金额
@@ -147,7 +147,7 @@ class UserDataDetail extends Backend
                 $end = date('Y-m-d 23:59:59');
                 $map['o.created_at'] = ['between', [$start, $end]];
             }
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
             $map['o.customer_id'] = ['>',0];
             $web_model->table('sales_flat_order')->query("set time_zone='+8:00'");
             unset($filter['one_time-operate']);
@@ -182,7 +182,7 @@ class UserDataDetail extends Backend
                 $list[$key]['email'] = $value['email'];          //注册邮箱
                 $list[$key]['created_at'] = $value['created_at'];  //注册时间
                 $order_where['customer_id'] = $value['entity_id'];
-                $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
                 $order = $order_model->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_grand_total) total')->select();
                 $list[$key]['order_num'] = $order[0]['count'];  //总支付订单数
                 $list[$key]['order_amount'] = $order[0]['total'];//总订单金额

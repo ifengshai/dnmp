@@ -101,7 +101,7 @@ class TimeData extends Backend
         if(!$cache_arr){
             $time_where['created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
             $itemtime_where['i.created_at'] = ['between', [$start.' 00:00:00',$end.' 23:59:59']];
-            $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+            $order_time['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
             $order_time['o.order_type'] = 1;
             //订单数据
             $order_resultList = $web_model->table('sales_flat_order')

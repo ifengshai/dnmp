@@ -266,7 +266,7 @@ class NewDataMarket extends Backend
         $orderWhere['payment_time'] = ['between',[$start,$end]];
         $orderWhere['order_type'] = 1;
         $orderWhere['o.site'] = $site;
-        $orderWhere['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $orderWhere['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $salesNum = $this->orderitemoption
             ->alias('i')
             ->join('fa_order o','o.entity_id=i.magento_order_id and o.site=i.site')
