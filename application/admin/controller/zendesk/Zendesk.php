@@ -543,7 +543,11 @@ class Zendesk extends Backend
                     //获取签名
                     $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                     //获取zendesk用户的昵称
-                    $zendeskAgentInfo = Db::name('zendesk_agents')->where('admin_id',session('admin.id'))->field('nickname,account_level')->find();
+                    $zendeskAgentInfo = Db::name('zendesk_agents')
+                        ->where('type',$ticket->type)
+                        ->where('admin_id',session('admin.id'))
+                        ->field('nickname,account_level')
+                        ->find();
                     $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
                     //替换签名中的昵称
                     if(strpos($sign,'{{agent.name}}')!==false){
@@ -669,7 +673,11 @@ class Zendesk extends Backend
                 //获取签名
                 $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                 //获取当前评论的用户的昵称
-                $zendeskAgentInfo = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->field('nickname,account_level')->find();
+                $zendeskAgentInfo = Db::name('zendesk_agents')
+                    ->where('type',$ticket->type)
+                    ->where('admin_id',$comment->due_id)
+                    ->field('nickname,account_level')
+                    ->find();
                 $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
                 //替换签名中的昵称
                 if(strpos($sign,'{{agent.name}}')!==false){
@@ -818,7 +826,11 @@ class Zendesk extends Backend
                 //获取签名
                 $sign = Db::name('zendesk_signvalue')->where('site',$ticket->type)->value('signvalue');
                 //获取当前评论的用户的昵称
-                $zendeskAgentInfo = Db::name('zendesk_agents')->where('admin_id',$comment->due_id)->field('nickname,account_level')->find();
+                $zendeskAgentInfo = Db::name('zendesk_agents')
+                    ->where('type',$ticket->type)
+                    ->where('admin_id',$comment->due_id)
+                    ->field('nickname,account_level')
+                    ->find();
                 $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
                 //替换签名中的昵称
                 if(strpos($sign,'{{agent.name}}')!==false){
