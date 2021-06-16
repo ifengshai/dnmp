@@ -4674,8 +4674,13 @@ class ScmWarehouse extends Scm
     public function stock_code_instock_add()
     {
         $transferOrderItemId = $this->request->request('transfer_order_item_id');
+        $res1 = LockService::addLock($transferOrderItemId);
+        if (!$res1){
+            $this->error(__('服务异常,重复提交或加锁失败,请联系管理员！！'), '', 524);
+        }
         $transferOrderItemDetail = $this->_stock_transfer_order_item->where('id', $transferOrderItemId)->find();
         $transferOrderDetail = $this->_stock_transfer_order->where('id', $transferOrderItemDetail['transfer_order_id'])->find();
+
         if ($transferOrderDetail['status'] !== 5) {
             $this->error(__('实体仓调拨单非待入库状态，禁止提交！！'), '', 524);
         }
@@ -4720,10 +4725,7 @@ class ScmWarehouse extends Scm
                 $key += 1;
             }
         }
-        $res1 = LockService::addLock($transferOrderDetail['id']);
-        if (!$res1){
-            $this->error(__('服务异常,重复提交或加锁失败,请联系管理员！！'), '', 524);
-        }
+
         $realInstokcNum = count($arr);
         $res = false;
         $this->_stock_transfer_order_item->startTrans();
@@ -4760,13 +4762,13 @@ class ScmWarehouse extends Scm
             $this->_stock_transfer_order_item_code->rollback();
             $this->error($e->getMessage(), [], 444);
         }
-//        $res3 = LockService::releaseLock($transferOrderDetail['id'], $res1);
+        $res3 = LockService::releaseLock($transferOrderItemId, $res1);
         if ($res !== false) {
-//            if ($res3 === true){
+            if ($res3 === true){
                 $this->success('提交成功', '', 200);
-//            }else{
-//                $this->error(__('实体仓调拨单'.$transferOrderDetail['transfer_order_number'].'解锁失败，请记录id'.$transferOrderDetail['id'].'反馈至产品经理'), '', 525);
-//            }
+            }else{
+                $this->error(__('实体仓调拨单'.$transferOrderDetail['transfer_order_number'].'解锁失败，请记录id'.$transferOrderDetail['id'].'反馈至产品经理'), '', 525);
+            }
         } else {
             $this->error(__('No rows were inserted'), '', 525);
         }
