@@ -18,7 +18,7 @@ class LockService
     /**
      * 单据锁默认超时时间（秒）
      */
-    const REDIS_LOCK_DEFAULT_EXPIRE_TIME = 86400;
+    const REDIS_LOCK_DEFAULT_EXPIRE_TIME = 30;
 
     /**
      * 加单据锁
