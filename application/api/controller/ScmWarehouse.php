@@ -12,6 +12,7 @@ use app\admin\model\warehouse\StockTransferOutOrderItem;
 use app\admin\model\warehouse\WarehouseTransferOrder;
 use app\admin\model\warehouse\WarehouseTransferOrderItem;
 use app\admin\model\warehouse\WarehouseTransferOrderItemCode;
+use Lock_Service;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -4719,6 +4720,10 @@ class ScmWarehouse extends Scm
                 $key += 1;
             }
         }
+        $res1 = Lock_Service::addLock($transferOrderDetail['id']);
+        if ($res1 == false){
+            $this->error(__('服务异常,加锁失败,请联系管理员！！'), '', 524);
+        }
         $realInstokcNum = count($arr);
         $res = false;
         $this->_stock_transfer_order_item->startTrans();
@@ -4755,8 +4760,13 @@ class ScmWarehouse extends Scm
             $this->_stock_transfer_order_item_code->rollback();
             $this->error($e->getMessage(), [], 444);
         }
+        $res3 = Lock_Service::releaseLock($transferOrderDetail['id'], $res1);
         if ($res !== false) {
-            $this->success('提交成功', '', 200);
+            if ($res3 == true){
+                $this->success('提交成功', '', 200);
+            }else{
+                $this->error(__('实体仓调拨单'.$transferOrderDetail['transfer_order_number'].'解锁失败，请记录id'.$transferOrderDetail['id'].'反馈至产品经理'), '', 525);
+            }
         } else {
             $this->error(__('No rows were inserted'), '', 525);
         }
