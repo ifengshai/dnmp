@@ -89,7 +89,7 @@ class LockService
     /**
      * Redis配置：IP
      */
-    const REDIS_CONFIG_HOST = '127.0.0.1';
+    const REDIS_CONFIG_HOST = '172.31.4.240';
 
     /**
      * Redis配置：端口
