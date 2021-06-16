@@ -40,7 +40,7 @@ use app\admin\model\warehouse\StockSku;
 use app\admin\model\warehouse\WarehouseArea;
 use app\admin\model\warehouse\StockHouse;
 use Think\Log;
-use Util\Lock_Service;
+use Util\LockService;
 
 /**
  * 供应链出入库接口类
@@ -4720,7 +4720,7 @@ class ScmWarehouse extends Scm
                 $key += 1;
             }
         }
-        $res1 = Lock_Service::addLock($transferOrderDetail['id']);
+        $res1 = LockService::addLock($transferOrderDetail['id']);
         if ($res1 == false){
             $this->error(__('服务异常,加锁失败,请联系管理员！！'), '', 524);
         }
@@ -4760,7 +4760,7 @@ class ScmWarehouse extends Scm
             $this->_stock_transfer_order_item_code->rollback();
             $this->error($e->getMessage(), [], 444);
         }
-        $res3 = Lock_Service::releaseLock($transferOrderDetail['id'], $res1);
+        $res3 = LockService::releaseLock($transferOrderDetail['id'], $res1);
         if ($res !== false) {
             if ($res3 == true){
                 $this->success('提交成功', '', 200);

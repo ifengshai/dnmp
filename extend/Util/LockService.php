@@ -8,7 +8,7 @@ use Redis;
 /**
  * Class Lock_Service 单据锁服务
  */
-class Lock_Service
+class LockService
 {
     /**
      * 单据锁redis key模板
