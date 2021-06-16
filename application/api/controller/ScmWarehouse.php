@@ -4722,7 +4722,7 @@ class ScmWarehouse extends Scm
         }
         $res1 = LockService::addLock($transferOrderDetail['id']);
         if ($res1 == false){
-            $this->error(__('服务异常,加锁失败,请联系管理员！！'), '', 524);
+            $this->error(__('服务异常,重复提交或加锁失败,请联系管理员！！'), '', 524);
         }
         $realInstokcNum = count($arr);
         $res = false;
