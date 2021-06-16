@@ -90,7 +90,7 @@ class CoupnAnalytics extends Backend
                     break;
                 case 15:
                     $model = Db::connect('database.db_zeelool_fr');
-                    $salesrule = Db::connect('database.db_zeelool_fr_online');
+                    $salesrule = Db::connect('database.db_zeelool_fr');
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -238,7 +238,7 @@ class CoupnAnalytics extends Backend
                     break;
                 case 15:
                     $model = Db::connect('database.db_zeelool_fr');
-                    $salesrule = Db::connect('database.db_zeelool_fr_online');
+                    $salesrule = Db::connect('database.db_zeelool_fr');
                     break;
             }
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
@@ -373,7 +373,7 @@ class CoupnAnalytics extends Backend
                     break;
                 case 15:
                     $model = Db::connect('database.db_zeelool_fr');
-                    $salesrule = Db::connect('database.db_zeelool_fr_online');
+                    $salesrule = Db::connect('database.db_zeelool_fr');
                     $plat = new \app\admin\model\operatedatacenter\ZeeloolFr();
                     break;
             }
@@ -530,7 +530,7 @@ class CoupnAnalytics extends Backend
                     break;
                 case 15:
                     $model = Db::connect('database.db_zeelool_fr');
-                    $salesrule = Db::connect('database.db_zeelool_fr_online');
+                    $salesrule = Db::connect('database.db_zeelool_fr');
                     $plat = new \app\admin\model\operatedatacenter\ZeeloolFr();
                     break;
             }
@@ -775,7 +775,7 @@ class CoupnAnalytics extends Backend
                 break;
             case 15:
                 $model = Db::connect('database.db_zeelool_fr');
-                $salesrule = Db::connect('database.db_zeelool_fr_online');
+                $salesrule = Db::connect('database.db_zeelool_fr');
                 break;
         }
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");

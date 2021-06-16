@@ -39,13 +39,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 $("#time_str").val('')
                 getData();
             });
-            $('#time_str').change(function () {
-                getData();
-            })
-            $('#order_platform').change(function () {
-                getData();
-            })
-            $('#change_submit_form').submit(function(){
+        
+            $('#change_submit').submit(function(){
                 getData();
                 return false;
             })

@@ -153,17 +153,18 @@ class SkuDetailNew extends Backend
             ->field('a.*,b.increment_id,b.customer_email,b.payment_time,b.id as bid')
             ->select();
         $order = [];
+        $i = 0;
         foreach ($list as $key => $val) {
-            $order[$key]['id'] = $key + 1;
-            $order[$key]['sku'] = $val->sku;
-            $order[$key]['prescription_type'] = $val->prescription_type;
-            $order[$key]['coating_name'] = $val->coating_name;
-            $order[$key]['frame_price'] = $val->frame_price;
-            $order[$key]['increment_id'] = $val->order->increment_id;
-            $order[$key]['customer_email'] = $val->order->customer_email;
-            $order[$key]['payment_time'] = date('Y-m-d H:i:s',$val->order->payment_time);
-            $order[$key]['frame_price'] = round($val['frame_price'], 2);
-            $order[$key]['index_price'] = round($val['index_price'], 2);
+            $order[$i]['id'] = $key + 1;
+            $order[$i]['sku'] = $val->sku;
+            $order[$i]['increment_id'] = $val->order->increment_id;
+            $order[$i]['payment_time'] = date('Y-m-d H:i:s',$val->order->payment_time);
+            $order[$i]['customer_email'] = $val->order->customer_email;
+            $order[$i]['prescription_type'] = $val->prescription_type;
+            $order[$i]['coating_name'] = $val->coating_name;
+            $order[$i]['frame_price'] = round($val['frame_price'], 2);
+            $order[$i]['index_price'] = round($val['index_price'], 2);
+            $i++;
         }
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
@@ -181,14 +182,14 @@ class SkuDetailNew extends Backend
 
         $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
         $spreadsheet->setActiveSheetIndex(0);
-        foreach ($list as $k=>$v){
+        foreach ($order as $k=>$v){
             $spreadsheet->getActiveSheet()->setCellValue('A' . ($k * 1 + 2), $v['id']);
             $spreadsheet->getActiveSheet()->setCellValue('B' . ($k * 1 + 2), $v['sku']);
             $spreadsheet->getActiveSheet()->setCellValue('C' . ($k * 1 + 2), $v['increment_id']);
             $spreadsheet->getActiveSheet()->setCellValue('D' . ($k * 1 + 2), $v['payment_time']);
             $spreadsheet->getActiveSheet()->setCellValue('E' . ($k * 1 + 2), $v['customer_email']);
             $spreadsheet->getActiveSheet()->setCellValue('F' . ($k * 1 + 2), $v['prescription_type']);
-            $spreadsheet->getActiveSheet()->setCellValue('G' . ($k * 1 + 2), $v['coatiing_name']);
+            $spreadsheet->getActiveSheet()->setCellValue('G' . ($k * 1 + 2), $v['coating_name']);
             $spreadsheet->getActiveSheet()->setCellValue('H' . ($k * 1 + 2), $v['frame_price']);
             $spreadsheet->getActiveSheet()->setCellValue('I' . ($k * 1 + 2), $v['index_price']);
         }

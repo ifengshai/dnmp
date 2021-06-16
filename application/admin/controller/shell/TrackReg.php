@@ -3488,7 +3488,7 @@ class TrackReg extends Backend
             } elseif ($value['site'] == 11) {
                 $model = Db::connect('database.db_zeelool_jp_online');
             } else{
-                $model = Db::connect('database.db_zeelool_fr_online');
+                $model = Db::connect('database.db_zeelool_fr');
             }
             $unique_pageviews = 0;
 
@@ -3647,7 +3647,7 @@ class TrackReg extends Backend
                 $model = Db::connect('database.db_zeelool_jp_online');
                 break;
             case 15:
-                $model = Db::connect('database.db_zeelool_fr_online');
+                $model = Db::connect('database.db_zeelool_fr');
                 break;
         }
         //购物车数量
@@ -4348,7 +4348,7 @@ class TrackReg extends Backend
                     $model = Db::connect('database.db_zeelool_jp_online');
                     break;
                 case 15:
-                    $model = Db::connect('database.db_zeelool_fr_online');
+                    $model = Db::connect('database.db_zeelool_fr');
                     break;
             }
             if($value['platform_type'] == 5){
