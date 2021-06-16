@@ -4684,6 +4684,9 @@ class ScmWarehouse extends Scm
         if ($transferOrderDetail['status'] !== 5) {
             $this->error(__('实体仓调拨单非待入库状态，禁止提交！！'), '', 524);
         }
+        if ($transferOrderItemDetail['status'] !== 1) {
+            $this->error(__('实体仓调拨单子单已入库，禁止提交！！'), '', 524);
+        }
         if (empty($transferOrderItemDetail)) {
             $this->error(__('实体仓调拨单子单不存在，请检查！！'), '', 524);
         }
