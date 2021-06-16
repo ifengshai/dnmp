@@ -265,6 +265,7 @@ class GoodsDataView extends Backend
             }
             //查询符合条件的商品sku
             $skusSum = Db::name('datacenter_sku_day')
+                ->where('platform_sku','not like','%Price%')
                 ->where($map)
                 ->column('sku');
             $stockSum = $this->model
