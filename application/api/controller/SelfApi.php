@@ -1511,8 +1511,8 @@ class SelfApi extends Api
             $order_id = $dataOrder['entity_id']; //订单id
             $order_number = $dataOrder['increment_id']; //订单号
             $site =$dataOrder['site']; //站点
-            $title = $dataOrder['USPS']; //运营商
-            $shipment_data_type = $dataOrder['加诺']; //渠道名称
+            $title = "USPS"; //运营商
+            $shipment_data_type = "加诺"; //渠道名称
             $track_number =$dataOrder['track_number']; //快递单号
 
 
