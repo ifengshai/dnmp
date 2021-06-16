@@ -36,7 +36,7 @@ class SupplyDullDataSync extends Command
             ->with('category')
             ->whereIn('platform_type',
                 [
-                    Site::ZEELOOL, Site::VOOGUEME, Site::NIHAO, Site::ZEELOOL_DE, Site::ZEELOOL_JP,
+                    Site::ZEELOOL, Site::VOOGUEME, Site::NIHAO, Site::ZEELOOL_DE, Site::ZEELOOL_JP,Site::ZEELOOL_FR,
                     Site::WESEEOPTICAL
                 ])
             ->where('grade', '<>', '')
