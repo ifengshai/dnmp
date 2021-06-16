@@ -514,7 +514,7 @@ class Test4 extends Controller
             //订单数
             $order_where = [];
             $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
             $arr['order_num'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->count();
             //销售额
             $arr['sales_total_money'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->sum('base_grand_total');
@@ -596,7 +596,7 @@ class Test4 extends Controller
             //订单数
             $order_where = [];
             $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
-            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
             $arr['order_num'] = $this->zeelooljp->where($order_where)->where('order_type', 1)->count();
             //销售额
             $arr['sales_total_money'] = $this->zeelooljp->where($order_where)->where('order_type', 1)->sum('base_grand_total');
@@ -905,7 +905,7 @@ class Test4 extends Controller
         $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
         $model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         //$whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing')";
-        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
+        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery')";
         //某个品类眼镜的销售副数
         $frame_sales_num = $model->table('sales_flat_order_item m')
             ->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')

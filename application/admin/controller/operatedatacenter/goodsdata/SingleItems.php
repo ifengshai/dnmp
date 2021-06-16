@@ -72,7 +72,7 @@ class SingleItems extends Backend
                 $order_model = Db::connect('database.db_zeelool');
             }
             $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
             $map['o.order_type'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $order_model

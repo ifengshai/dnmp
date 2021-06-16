@@ -444,7 +444,7 @@ class SupplyData extends Backend
         $start = strtotime($date);
         $end = strtotime($date.' 23:59:59');
         $where['o.payment_time'] = ['between',[$start,$end]];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $arr['order_num'] = $this->order->alias('o')->where($where)->count();
 
         $map1['p.order_prescription_type'] = 1;

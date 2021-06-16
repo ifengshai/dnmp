@@ -78,7 +78,7 @@ class OperateData extends Backend
         }else{
             $order_where['order_type'] = 1;
         }
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
@@ -323,7 +323,7 @@ class OperateData extends Backend
         }else{
             $order_where['order_type'] = 1;
         }
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
@@ -568,7 +568,7 @@ class OperateData extends Backend
         }else{
             $order_where['order_type'] = 1;
         }
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
@@ -813,7 +813,7 @@ class OperateData extends Backend
         }else{
             $order_where['order_type'] = 1;
         }
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
@@ -1058,7 +1058,7 @@ class OperateData extends Backend
         }else{
             $order_where['order_type'] = 1;
         }
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
@@ -1303,7 +1303,7 @@ class OperateData extends Backend
         }else{
             $order_where['order_type'] = 1;
         }
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
@@ -1548,7 +1548,7 @@ class OperateData extends Backend
         }else{
             $order_where['order_type'] = 1;
         }
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
@@ -1809,7 +1809,7 @@ class OperateData extends Backend
         }else{
             $order_where['order_type'] = 1;
         }
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
@@ -1888,7 +1888,7 @@ class OperateData extends Backend
         $order_where = [];
         $order_where['o.order_type'] = 1;
         $order_success_where = [];
-        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];

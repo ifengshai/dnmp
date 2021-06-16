@@ -183,7 +183,7 @@ class OrderPrescription extends Backend
         $order_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         $createat = explode(' ', $time_str);
         $where['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $where['o.order_type'] = 1;
         $map['p.prescription_type'] = $flag;
         if($flag){
@@ -217,7 +217,7 @@ class OrderPrescription extends Backend
         }
         $createat = explode(' ', $time_str);
         $where['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $where['o.order_type'] = 1;
         $coating_num1 = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where('coating_id','coating_1')->count();
         $coating_num2 = $order_model->table('sales_flat_order_item_prescription')->alias('p')->join('sales_flat_order o','p.order_id=o.entity_id')->where($where)->where('coating_id','coating_2')->count();

@@ -410,7 +410,7 @@ class GoodsDataView extends Backend
         }
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('sales_flat_order_item')->query("set time_zone='+8:00'");
-        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
+        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery')";
 
         //求出眼镜所有sku
         $frame_sku = $this->itemPlatformSku->getDifferencePlatformSku(1, $platform);
@@ -859,7 +859,7 @@ class GoodsDataView extends Backend
         }
         $this->item = new \app\admin\model\itemmanage\Item;
         $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku;
-        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered')";
+        $whereItem = " o.status in ('free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery')";
         //求出眼镜所有sku
         $frame_sku = $this->itemPlatformSku->getDifferencePlatformSku(1, $platform);
         //某个类型的求出眼镜的销售额 base_price  base_discount_amount 太阳镜

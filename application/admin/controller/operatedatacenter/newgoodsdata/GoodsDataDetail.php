@@ -115,7 +115,7 @@ class GoodsDataDetail extends Backend
                 //最近30天的销量
                 $orderWhere['payment_time'] = ['between',[$start,$end]];
                 $orderWhere['order_type'] = 1;
-                $orderWhere['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                $orderWhere['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
                 $orderWhere['sku'] = ['like',$value['platform_sku'].'%'];
                 $orderWhere['o.site'] = $value['platform_type'];
                 $list[$key]['sales_num'] = $this->orderitemoption
@@ -321,7 +321,7 @@ class GoodsDataDetail extends Backend
                 if(in_array('sales_num',$column_name) || in_array('turn_days',$column_name)){
                     $orderWhere['payment_time'] = ['between',[$startTime,$endTime]];
                     $orderWhere['order_type'] = 1;
-                    $orderWhere['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered']];
+                    $orderWhere['o.status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
                     $orderWhere['sku'] = ['like',$val['platform_sku'].'%'];
                     $orderWhere['o.site'] = $val['platform_type'];
                     $sales_num = $this->orderitemoption
