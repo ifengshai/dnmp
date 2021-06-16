@@ -3085,6 +3085,7 @@ class SelfApi extends Api
                 dump('物流接口注册失败！！'. $track['data']['rejected']['error']['code']);
             }
             dump($order_number);
+            sleep(3);
         }
         //校验参数
 
@@ -4319,6 +4320,7 @@ class SelfApi extends Api
                 dump('物流接口注册失败！！'. $track['data']['rejected']['error']['code']);
             }
             dump($order_number);
+            sleep(3);
         }
         //校验参数
 
@@ -5994,6 +5996,7 @@ class SelfApi extends Api
                 dump('物流接口注册失败！！'. $track['data']['rejected']['error']['code']);
             }
             dump($order_number);
+            sleep(3);
         }
         //校验参数
 
@@ -6393,6 +6396,7 @@ class SelfApi extends Api
                 dump('物流接口注册失败！！'. $track['data']['rejected']['error']['code']);
             }
             dump($order_number);
+            sleep(3);
         }
         //校验参数
 
