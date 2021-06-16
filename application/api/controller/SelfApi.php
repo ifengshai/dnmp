@@ -1179,7 +1179,8 @@ class SelfApi extends Api
         }
     }
 
-    public function dealTrack1()
+
+    public function deal_track01()
     {
         $arr=[
             '400636696',
