@@ -88,7 +88,7 @@ class Weseeoptical extends Model
         }
         $map['b.sku'] = ['not like', '%Price%'];
         $map['b.site'] = 5;
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
         $res = Db::connect('database.db_mojing_order')->table('fa_order')
             ->where($map)
             ->where($where)
@@ -110,7 +110,7 @@ class Weseeoptical extends Model
             $map['b.sku'] = ['not like', '%Price%'];
         }
         $map['b.site'] = ['=',5];
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
         $res = Db::connect('database.db_mojing_order')->table('fa_order')
             ->where($map)
             ->where($where)

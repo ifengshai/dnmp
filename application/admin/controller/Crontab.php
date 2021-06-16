@@ -2342,7 +2342,7 @@ class Crontab extends Backend
         $map['created_at'] = $date['created_at'] = $update['updated_at'] = ['between', [$stime, $etime]];
         $map['status'] = [
             'in',
-            ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']
+            ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']
         ];
         $map['order_type'] = 1;
         $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);

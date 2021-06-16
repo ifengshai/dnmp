@@ -168,7 +168,7 @@ class RepurchaseAsynData extends Command
         //订单查询条件
         $where['site'] = $site;
         $where['order_type'] = 1;
-        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
         $where['payment_time'] = ['between',[$startTime,$endTime]];
         //获取当前时间段内的用户人数
         $sql1 = $this->order
@@ -211,7 +211,7 @@ class RepurchaseAsynData extends Command
                 'paypal_reversed',
                 'payment_review',
                 'paypal_canceled_reversal',
-                'delivered'
+                'delivered',
             ]
         ];
         $where1['payment_time'] = ['between', [$startTime1, $endTime1]];
@@ -260,7 +260,7 @@ class RepurchaseAsynData extends Command
         $allMonth = $this->getDateFromRange('2018-12-01', '2021-03-01');
         $where['site'] = $site;
         $where['order_type'] = 1;
-        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
         foreach ($allMonth as $v) {
             //获取当前月份的开始时间和结束时间
             $nowMonthStart = $v . '-01';

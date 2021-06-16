@@ -242,7 +242,8 @@ class DataMarket extends Backend
                 'paypal_reversed',
                 'payment_review',
                 'paypal_canceled_reversal',
-                'delivered'
+                'delivered',
+                'delivery'
             ]
         ];
         //订单销售数量

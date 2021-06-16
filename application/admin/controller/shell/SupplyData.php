@@ -504,7 +504,7 @@ class SupplyData extends Backend
             //上个月总的采购数量（副数）
             $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
             //上个月总的销售数量（副数）
-            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
             $sales_num = $this->order->where($where)->sum('total_qty_ordered');
             $arr2['purchase_num'] = $purchase_num;
             $arr2['sales_num'] = $sales_num;
@@ -514,7 +514,7 @@ class SupplyData extends Backend
             //上个月总的采购数量（副数）
             $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
             //上个月总的销售数量（副数）
-            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+            $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
             $sales_num = $this->order->where($where)->sum('total_qty_ordered');
             $arr3['purchase_num'] = $purchase_num;
             $arr3['sales_num'] = $sales_num;
@@ -583,7 +583,7 @@ class SupplyData extends Backend
         $where['status'] = 2;
         $order_where['payment_time'] = ['between', [$start, $end]];  //修改
         $order_where['order_type'] = ['<>', 5];
-        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
         $order_where['o.site'] = $site;
         //站点订单销售数量
         $order_sales_num = $this->order->alias('o')->join('fa_order_item_option i', 'o.entity_id=i.order_id')->where($order_where)->sum('i.qty');

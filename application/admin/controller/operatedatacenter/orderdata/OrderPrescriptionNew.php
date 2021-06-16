@@ -222,7 +222,7 @@ class OrderPrescriptionNew extends Backend
             ->join(['fa_order' => 'b'], 'b.id= a.order_id')
             ->where([
                 'b.payment_time' => ['between', [$begin, $end]],
-                'b.status'       => ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']],
+                'b.status'       => ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']],
                 'b.order_type'   => 1,
             ])
             ->where(['a.site' => $site])
@@ -295,7 +295,7 @@ class OrderPrescriptionNew extends Backend
             ->join(['fa_order' => 'b'], 'b.id= a.order_id')
             ->where([
                 'b.payment_time' => ['between', [$begin, $end]],
-                'b.status'       => ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']],
+                'b.status'       => ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']],
                 'b.order_type'   => 1,
             ])
             ->where(['a.site' => $site])

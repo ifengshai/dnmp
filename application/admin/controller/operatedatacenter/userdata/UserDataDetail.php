@@ -351,7 +351,7 @@ class UserDataDetail extends Backend
             if ($customer_type) {
                 $map['c.group_id'] = $customer_type;
             }
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
             $total_export_count = $web_model
                 ->table('orders')
                 ->alias('o')
@@ -384,7 +384,7 @@ class UserDataDetail extends Backend
                     $created_at_index = array_keys($column_name, 'created_at');
                     $tmpRow[$created_at_index[0]] = $val['created_at'];
                     $order_where['user_id'] = $val['id'];
-                    $order_status_where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+                    $order_status_where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
                     if (in_array('order_num', $column_name)) {
                         //总支付订单数
                         $index = array_keys($column_name, 'order_num');
@@ -452,7 +452,7 @@ class UserDataDetail extends Backend
             if ($customer_type) {
                 $map['c.group_id'] = $customer_type;
             }
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
             $map['o.customer_id'] = ['>', 0];
             $total_export_count = $web_model
                 ->table('sales_flat_order')
@@ -486,7 +486,7 @@ class UserDataDetail extends Backend
                     $created_at_index = array_keys($column_name, 'created_at');
                     $tmpRow[$created_at_index[0]] = $val['created_at'];
                     $order_where['customer_id'] = $val['entity_id'];
-                    $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+                    $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
                     if (in_array('order_num', $column_name)) {
                         //总支付订单数
                         $index = array_keys($column_name, 'order_num');

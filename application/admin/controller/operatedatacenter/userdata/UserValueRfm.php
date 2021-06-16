@@ -422,7 +422,7 @@ class UserValueRfm extends Backend
             $start = date('Y-m-d', strtotime("$today -12 month") - 8 * 3600);
             $end = date('Y-m-d 23:59:59', strtotime($today) - 8 * 3600);
             $time_where['created_at'] = ['between', [$start, $end]];
-            $where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+            $where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
             $where['order_type'] = 1;
             $count = $web_model->table('users')->where($time_where)->count();
 

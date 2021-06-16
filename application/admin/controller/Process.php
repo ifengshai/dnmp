@@ -215,7 +215,7 @@ class Process extends Backend
             $skus = [];
             $skus = $this->itemplatformsku->where(['sku' => $v])->column('platform_sku');
             $map['a.sku'] = ['in', array_filter($skus)];
-            $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
+            $map['b.status'] = ['in', ['processing', 'complete', 'delivered','delivery']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
             $map['c.check_status'] = 0; //未审单计算订单占用
             $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
@@ -340,7 +340,7 @@ class Process extends Backend
                     $available_num = abs($available_stock);
                     $skus = $platform->where(['sku' => $v])->column('platform_sku');
                     $map['a.sku'] = ['in', $skus];
-                    $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
+                    $map['b.status'] = ['in', ['processing', 'complete', 'delivered','delivery']];
                     $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
                     $map['c.check_status'] = 0; //未审单计算订单占用
                     $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
@@ -363,7 +363,7 @@ class Process extends Backend
                 } else {
                     foreach ($item_platform_sku as $key => $val) {
                         $map['a.sku'] = $val['platform_sku'];
-                        $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
+                        $map['b.status'] = ['in', ['processing', 'complete', 'delivered','delivery']];
                         $map['c.check_status'] = 0; //未审单计算订单占用
                         $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
                         $map['c.is_repeat'] = 0;
@@ -569,7 +569,7 @@ class Process extends Backend
             ];
 
             $map['a.sku'] = ['in', array_filter($skus)];
-            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
             $map['b.created_at'] = ['between', [strtotime('2021-01-28 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
             $map['b.site'] = $v['site'];
@@ -640,7 +640,7 @@ class Process extends Backend
             // $first = $res[0];
             // $last = end($res);
             $map['a.sku'] = ['in', array_filter($skus)];
-            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
             $map['b.created_at'] = ['between', [strtotime('2020-12-01 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
             // $map['b.site'] = $v['site'];
@@ -760,7 +760,7 @@ class Process extends Backend
         ini_set('memory_limit', '1512M');
         $order = new \app\admin\model\order\Order();
         $lensdata = new \app\admin\model\order\order\LensData();
-        $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']];
+        $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
         $where['a.created_at'] = ['between', [strtotime(date('2021-03-01 00:00:00')), strtotime(date('2021-03-25 23:59:59'))]];
         $where['d.is_repeat'] = 0;
         $where['d.is_split'] = 0;
@@ -1162,7 +1162,7 @@ class Process extends Backend
             $count = $orderItem->alias('a')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where(['wave_order_id' => $v['id'], 'is_print' => 0, 'distribution_status' => ['<>', 0]])
-                ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered']]])
+                ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']]])
                 ->count();
             if ($count > 0) {
                 $status = 1;
