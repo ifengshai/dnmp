@@ -150,18 +150,18 @@ class SkuDetailNew extends Backend
             ])
             ->where(['a.site' => $site])
             ->where($whereSku)
-            ->field('a.*,b.increment_id,b.customer_email,b.payment_time,b.id as bid')
+            ->field('a.sku,a.prescription_type,a.coating_name,b.increment_id,b.customer_email,b.payment_time,b.id as bid')
             ->select();
         $order = [];
         $i = 0;
         foreach ($list as $key => $val) {
             $order[$i]['id'] = $key + 1;
-            $order[$i]['sku'] = $val->sku;
-            $order[$i]['increment_id'] = $val->order->increment_id;
-            $order[$i]['payment_time'] = date('Y-m-d H:i:s',$val->order->payment_time);
-            $order[$i]['customer_email'] = $val->order->customer_email;
-            $order[$i]['prescription_type'] = $val->prescription_type;
-            $order[$i]['coating_name'] = $val->coating_name;
+            $order[$i]['sku'] = $val['sku'];
+            $order[$i]['increment_id'] = $val['increment_id'];
+            $order[$i]['payment_time'] = date('Y-m-d H:i:s',$val['payment_time']);
+            $order[$i]['customer_email'] = $val['customer_email'];
+            $order[$i]['prescription_type'] = $val['prescription_type'];
+            $order[$i]['coating_name'] = $val['coating_name'];
             $order[$i]['frame_price'] = round($val['frame_price'], 2);
             $order[$i]['index_price'] = round($val['index_price'], 2);
             $i++;

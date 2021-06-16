@@ -40,7 +40,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 getData();
             });
         
-            $('#change_submit').submit(function(){
+            $('#change_submit').click(function(){
                 getData();
                 return false;
             })
