@@ -57,7 +57,7 @@ class skuDayAsynData extends Command
                 $model = Db::connect('database.db_zeelool_jp_online');
                 break;
             case 15:
-                $model = Db::connect('database.db_zeelool_fr_online');
+                $model = Db::connect('database.db_zeelool_fr');
                 break;
         }
 
@@ -165,7 +165,7 @@ class skuDayAsynData extends Command
                 $model = Db::connect('database.db_zeelool_jp_online');
                 break;
             case 15:
-                $model = Db::connect('database.db_zeelool_fr_online');
+                $model = Db::connect('database.db_zeelool_fr');
                 break;
         }
         $cartWhere['a.base_grand_total'] = ['>',0];
