@@ -2025,18 +2025,7 @@ class SelfApi extends Api
                 'track_number'       => $track_number,
             ]);
 
-            //注册17track
-            $title = strtolower(str_replace(' ', '-', $title));
-            $carrier = $this->getCarrier($title);
-            $shipment_reg[0]['number'] = $track_number;
-            $shipment_reg[0]['carrier'] = $carrier['carrierId'];
-            $track = $this->regitster17Track($shipment_reg);
 
-            if (count($track['data']['rejected']) > 0) {
-                dump('物流接口注册失败！！'. $track['data']['rejected']['error']['code']);
-            }
-            dump($order_number);
-            sleep(3);
         }
         //校验参数
 
@@ -3074,18 +3063,7 @@ class SelfApi extends Api
                 'track_number'       => $track_number,
             ]);
 
-            //注册17track
-            $title = strtolower(str_replace(' ', '-', $title));
-            $carrier = $this->getCarrier($title);
-            $shipment_reg[0]['number'] = $track_number;
-            $shipment_reg[0]['carrier'] = $carrier['carrierId'];
-            $track = $this->regitster17Track($shipment_reg);
 
-            if (count($track['data']['rejected']) > 0) {
-                dump('物流接口注册失败！！'. $track['data']['rejected']['error']['code']);
-            }
-            dump($order_number);
-            sleep(3);
         }
         //校验参数
 
@@ -4309,18 +4287,6 @@ class SelfApi extends Api
                 'track_number'       => $track_number,
             ]);
 
-            //注册17track
-            $title = strtolower(str_replace(' ', '-', $title));
-            $carrier = $this->getCarrier($title);
-            $shipment_reg[0]['number'] = $track_number;
-            $shipment_reg[0]['carrier'] = $carrier['carrierId'];
-            $track = $this->regitster17Track($shipment_reg);
-
-            if (count($track['data']['rejected']) > 0) {
-                dump('物流接口注册失败！！'. $track['data']['rejected']['error']['code']);
-            }
-            dump($order_number);
-            sleep(3);
         }
         //校验参数
 
@@ -5985,18 +5951,7 @@ class SelfApi extends Api
                 'track_number'       => $track_number,
             ]);
 
-            //注册17track
-            $title = strtolower(str_replace(' ', '-', $title));
-            $carrier = $this->getCarrier($title);
-            $shipment_reg[0]['number'] = $track_number;
-            $shipment_reg[0]['carrier'] = $carrier['carrierId'];
-            $track = $this->regitster17Track($shipment_reg);
 
-            if (count($track['data']['rejected']) > 0) {
-                dump('物流接口注册失败！！'. $track['data']['rejected']['error']['code']);
-            }
-            dump($order_number);
-            sleep(3);
         }
         //校验参数
 
@@ -6384,19 +6339,6 @@ class SelfApi extends Api
                 'shipment_data_type' => $shipment_data_type,
                 'track_number'       => $track_number,
             ]);
-
-            //注册17track
-            $title = strtolower(str_replace(' ', '-', $title));
-            $carrier = $this->getCarrier($title);
-            $shipment_reg[0]['number'] = $track_number;
-            $shipment_reg[0]['carrier'] = $carrier['carrierId'];
-            $track = $this->regitster17Track($shipment_reg);
-
-            if (count($track['data']['rejected']) > 0) {
-                dump('物流接口注册失败！！'. $track['data']['rejected']['error']['code']);
-            }
-            dump($order_number);
-            sleep(3);
         }
         //校验参数
 
