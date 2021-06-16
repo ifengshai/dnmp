@@ -44,10 +44,6 @@ class LockService
 
         //根据模板，结合单据ID，生成唯一Redis key（一般来说，单据ID在业务中系统中唯一的）
         $strKey = sprintf(self::REDIS_LOCK_KEY_TEMPLATE, $intOrderId);
-        $val = $objRedisConn->get($strKey);
-        if ($val){
-            return false;
-        }
 
         //加锁（通过Redis setnx指令实现，从Redis 2.6.12开始，通过set指令可选参数也可以实现setnx，同时可原子化地设置超时时间）
         $bolRes = $objRedisConn->set($strKey, $intUniqueLockId, ['nx', 'ex' => $intExpireTime]);
