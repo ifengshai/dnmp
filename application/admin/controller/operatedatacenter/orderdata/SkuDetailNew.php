@@ -150,7 +150,7 @@ class SkuDetailNew extends Backend
             ])
             ->where(['a.site' => $site])
             ->where($whereSku)
-            ->field('a.sku,a.prescription_type,a.coating_name,b.increment_id,b.customer_email,b.payment_time,b.id as bid')
+            ->field('a.sku,a.prescription_type,a.coating_name,a.frame_price,a.index_price,b.increment_id,b.customer_email,b.payment_time,b.id as bid')
             ->select();
         $order = [];
         $i = 0;
