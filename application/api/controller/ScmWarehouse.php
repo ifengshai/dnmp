@@ -4762,13 +4762,13 @@ class ScmWarehouse extends Scm
             $this->_stock_transfer_order_item_code->rollback();
             $this->error($e->getMessage(), [], 444);
         }
-//        $res3 = LockService::releaseLock($transferOrderItemId, $res1);
+        $res3 = LockService::releaseLock($transferOrderItemId, $res1);
         if ($res !== false) {
-//            if ($res3 === true){
+            if ($res3){
                 $this->success('提交成功', '', 200);
-//            }else{
-//                $this->error(__('实体仓调拨单'.$transferOrderDetail['transfer_order_number'].'解锁失败，请记录id'.$transferOrderDetail['id'].'反馈至产品经理'), '', 525);
-//            }
+            }else{
+                $this->error(__('实体仓调拨单'.$transferOrderDetail['transfer_order_number'].'解锁失败，请记录id'.$transferOrderDetail['id'].'反馈至产品经理'), '', 525);
+            }
         } else {
             $this->error(__('No rows were inserted'), '', 525);
         }

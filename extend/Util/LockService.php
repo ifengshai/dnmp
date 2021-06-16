@@ -74,15 +74,16 @@ class LockService
         $strKey = sprintf(self::REDIS_LOCK_KEY_TEMPLATE, $intOrderId);
 
         //监听Redis key防止在【比对lock id】与【解锁事务执行过程中】被修改或删除，提交事务后会自动取消监控，其他情况需手动解除监控
-        $objRedisConn->watch($strKey);
-        if ($intLockId == $objRedisConn->get($strKey)) {
-            $objRedisConn->multi()->del($strKey)->exec();
+//        $objRedisConn->watch($strKey);
+//        if ($intLockId == $objRedisConn->get($strKey)) {
+//            $objRedisConn->multi()->del($strKey)->exec();
+        ;
 
-            return true;
-        }
-        $objRedisConn->unwatch();
+//            return true;
+//        }
+//        $objRedisConn->unwatch();
 
-        return false;
+        return $objRedisConn->del($strKey);
     }
 
     /**
