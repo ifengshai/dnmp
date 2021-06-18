@@ -1633,10 +1633,69 @@ class Process extends Backend
             ];
             $order_where['created_at'] = ['between', [strtotime($v['day_date']), strtotime($v['day_date']) + 86399]];
             $order_where['site'] = 2;
-            $order_num = $order->where($order_where)->where('order_type', 1)->count();
+            $arr = [];
+            $arr['order_num'] = $order->where($order_where)->where('order_type', 1)->count();
+            //销售额
+            $arr['sales_total_money'] = $order->where($order_where)->where('order_type',
+                1)->sum('base_grand_total');
+            //邮费
+            $arr['shipping_total_money'] = $order->where($order_where)->where('order_type',
+                1)->sum('base_shipping_amount');
+            $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
+            //中位数
+            $sales_total_money = $order->where($order_where)->where('order_type', 1)->column('base_grand_total');
+            $arr['order_total_midnum'] = $this->median($sales_total_money);
+            //标准差
+            $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+            //补发订单数
+            $arr['replacement_order_num'] = $order->where($order_where)->where('order_type', 4)->count();
+            //补发销售额
+            $arr['replacement_order_total'] = $order->where($order_where)->where('order_type',
+                4)->sum('base_grand_total');
+            //网红订单数
+            $arr['online_celebrity_order_num'] = $order->where($order_where)->where('order_type', 3)->count();
+            //补发销售额
+            $arr['online_celebrity_order_total'] = $order->where($order_where)->where('order_type',
+                3)->sum('base_grand_total');
 
-            $dataCenter->where('id', $v['id'])->update(['order_num' => $order_num]);
+            $dataCenter->where('id', $v['id'])->update($arr);
         }
-
     }
+
+
+    /**
+     *计算中位数 中位数：是指一组数据从小到大排列，位于中间的那个数。可以是一个（数据为奇数），也可以是2个的平均（数据为偶数）
+     */
+    public function median($numbers)
+    {
+        sort($numbers);
+        $totalNumbers = count($numbers);
+        $mid = floor($totalNumbers / 2);
+
+        return ($totalNumbers % 2) === 0 ? ($numbers[$mid - 1] + $numbers[$mid]) / 2 : $numbers[$mid];
+    }
+
+    /**
+     * @param $arr
+     *
+     * @return float|int
+     * @author wangpenglei
+     * @date   2021/6/18 10:52
+     */
+    public function getVariance($arr)
+    {
+        $length = count($arr);
+        if ($length == 0) {
+            return 0;
+        }
+        $average = array_sum($arr) / $length;
+        $count = 0;
+        foreach ($arr as $v) {
+            $count += pow($average - $v, 2);
+        }
+        $variance = $count / $length;
+
+        return sqrt($variance);
+    }
+
 }
