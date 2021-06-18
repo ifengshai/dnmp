@@ -1566,49 +1566,77 @@ class Process extends Backend
      */
     public function export_sku_data()
     {
-        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
-        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $order = new \app\admin\model\order\order\NewOrderItemProcess();
+        $itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         $this->item = new \app\admin\model\itemmanage\Item;
-        $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->chunk(1000, function ($row) {
+        $productbarcode = new ProductBarCodeItem();
+        $headList = ['SKU', '仓库', '总库存', '仓库实时库存', '大货区库存', '货架区库存', '拣货区库存', '最近1个月的销量'];
+        $z = 0;
+        $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->chunk(1000, function ($row) use ($productbarcode,$itemplatformsku,$order,$headList,&$z) {
             $data = [];
             $stock_id = [1, 2];
+            $i = 0;
             foreach ($row as $key => $val) {
-                foreach ($stock_id as $k => $v) {
+                $skus = [];
+                $skus = $itemplatformsku->where(['sku' => $val['sku']])->column('platform_sku');
 
+                //查询最近一个月销量
+                $order_where['b.status'] = [
+                    'in',
+                    [
+                        'processing',
+                        'complete',
+                        'delivered',
+                        'delivery',
+                    ],
+                ];
+                $order_where['b.created_at'] = ['between', [strtotime('2021-05-18'), strtotime('2021-06-18') + 86399]];
+                $order_where['a.sku'] = ['in', $skus];
+
+                $order_num = $order->alias('a')->where($order_where)->where('order_type', 1)
+                    ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                    ->count(1);
+
+                foreach ($stock_id as $k => $v) {
+                    $data[$i]['sku'] = $val['sku'];
+                    $data[$i]['stock_id'] = $v == 1 ? '郑州' : '丹阳';
+                    $data[$i]['stock'] = $val['stock'];
+                    $data[$i]['real_stock'] = $productbarcode
+                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1])
+                        ->where("item_order_number=''")
+                        ->count();
+
+                    $dahuo_location_id = $v == 1 ? 1 : 4;
+                    $data[$i]['dahuo_stock'] = $productbarcode
+                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1, 'location_id' => $dahuo_location_id])
+                        ->where("item_order_number=''")
+                        ->count();
+
+                    $huojia_location_id = $v == 1 ? 2 : 5;
+                    $data[$i]['huojia_stock'] = $productbarcode
+                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1, 'location_id' => $huojia_location_id])
+                        ->where("item_order_number=''")
+                        ->count();
+
+                    $jianhuojia_location_id = $v == 1 ? 3 : 6;
+                    $data[$i]['jianhuojia_stock'] = $productbarcode
+                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1, 'location_id' => $jianhuojia_location_id])
+                        ->where("item_order_number=''")
+                        ->count();
+                    $data[$i]['xiaoliang'] = $order_num;
+
+                    $i++;
                 }
             }
 
+            if ($z > 0) {
+                $headList = [];
+            }
+
+            $z++;
+            Excel::writeCsv($data, $headList, '/uploads/financeCost/sku.csv', false);
         });
 
-
-        foreach ($list as $k => $v) {
-            if ($v['site'] == 1) {
-                $sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
-            } elseif ($v['site'] == 2) {
-                $sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
-            } elseif ($v['site'] == 3) {
-                $sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
-            }
-            $skus = [];
-            $skus = [
-                $sku,
-            ];
-
-            $map['a.sku'] = ['in', array_filter($skus)];
-            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered', 'delivery']];
-            $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
-            $map['b.created_at'] = ['between', [strtotime('2021-01-28 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
-            $map['b.site'] = $v['site'];
-            $sales_money = $this->orderitemprocess->alias('a')->where($map)
-                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
-                ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
-                ->sum('c.base_row_total');
-
-            $list[$k]['sales_money'] = $sales_money;
-        }
-        $headlist = ['sku', '站点', '销售额'];
-        Excel::writeCsv($list, $headlist, '12月份sku销量');
-        die;
     }
 
     /**
