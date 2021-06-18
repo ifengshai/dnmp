@@ -1436,7 +1436,7 @@ class Zeelool extends Model
             ->table('sales_flat_order')
             ->field('customer_group_id,sum(base_grand_total) as total,count(*) as count')
             ->group('customer_group_id')
-            ->where('customer_group_id','>',0)
+            //->where('customer_group_id','>',0)
             ->where($customerWhere)
             ->where($orderWhere)
             ->select();
@@ -1444,7 +1444,7 @@ class Zeelool extends Model
             ->table('sales_flat_order')
             ->where($customerWhere)
             ->where($orderWhere)
-            ->where('customer_group_id','>',0)
+            //->where('customer_group_id','>',0)
             ->sum('base_grand_total');
         $result = [];
         $customerCount = 0;
@@ -1453,6 +1453,9 @@ class Zeelool extends Model
         }
         foreach($order as $k => $v){
             switch($v['customer_group_id']) {
+                case 0:
+                    $name = '游客';
+                    break;
                 case 1:
                     $name = '普通用户';
                     break;
