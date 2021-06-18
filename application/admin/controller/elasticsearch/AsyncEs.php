@@ -307,6 +307,43 @@ class AsyncEs extends BaseElasticsearch
         },'id','desc');
 
     }
+    /**
+     * 批量更新数据
+     * @author huangbinbin
+     * @date   2021/6/18 18:20
+     */
+    public function asyncUpdateTrack()
+    {
+        OrderNode::where('update_time','>=','2021-04-15 00:00:00')->chunk(10000,function($track){
+            $data = array_map(function($value) {
+                $value = array_map(function($v){
+                    return $v === null ? 0 : $v;
+                },$value);
+                $mergeData = strtotime($value['delivery_time']);
+                $delivery_error_flag = strtotime($value['signing_time']) < $mergeData+172800 ? 1 : 0;
+                $insertData = [
+                    'id' => $value['id'],
+                    'order_node' => $value['order_node'],
+                    'node_type' => $value['node_type'],
+                    'site' => $value['site'],
+                    'order_id' => $value['order_id'],
+                    'order_number' => $value['order_number'],
+                    'shipment_type' => $value['shipment_type'],
+                    'shipment_data_type' => $value['shipment_data_type'],
+                    'track_number' => $value['track_number'],
+                    'signing_time' => $value['signing_time'] ? strtotime($value['signing_time']) : 0,
+                    'delivery_time' => $mergeData,
+                    'delivery_error_flag' => $delivery_error_flag,
+                    'shipment_last_msg' => $value['shipment_last_msg'],
+                    'delievered_days' => (strtotime($value['signing_time'])-$mergeData)/86400,
+                    'wait_time' => abs(strtotime($value['signing_time'])-$mergeData),
+                ];
+                return $this->formatDate($insertData,$mergeData);
+            },collection($track)->toArray());
+            $this->esService->updateMutilToEs('mojing_track',$data);
+        },'id','desc');
+
+    }
 
 
 }

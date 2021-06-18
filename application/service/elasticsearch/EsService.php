@@ -59,7 +59,7 @@ class EsService
      * @author crasphb
      * @date   2021/4/1 14:46
      */
-    public function createIndex(string $index = '', array $selfProperties = [])
+    public function createIndex($index = '', array $selfProperties = [])
     {
 
         $properties = array_merge($selfProperties, $this->commonProperties);
@@ -69,14 +69,14 @@ class EsService
     /**
      * 创建索引
      *
-     * @param string $indexName  索引名称
-     * @param array  $properties mapping数组
+     * @param  $indexName  索引名称
+     * @param   $properties mapping数组
      *
      * @return array|mixed
      * @author crasphb
      * @date   2021/4/1 14:14
      */
-    public function createEsIndex(string $indexName = '', array $properties = [])
+    public function createEsIndex($indexName = '', array $properties = [])
     {
         $params = [
             'index' => $indexName,
@@ -146,6 +146,35 @@ class EsService
             echo $e->getMessage();
         }
 
+    }
+
+    /**
+     * 批量更新
+     * @param $indexName
+     * @param $view
+     *
+     * @return array|callable
+     * @author huangbinbin
+     * @date   2021/6/18 18:20
+     */
+    public function updateMutilToEs($indexName, $view)
+    {
+        foreach ($view as $key => $val) {
+            $params['body'][] = [
+                'update' => [
+                    '_index' => $indexName,
+                    '_type'  => '_doc',
+                    '_id' => $val['id'],
+                ],
+            ];
+
+            $params['body'][] = $val;
+        }
+        try {
+            return $this->esClient->bulk($params);
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+        }
     }
 
     /**
