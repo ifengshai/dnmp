@@ -31,13 +31,13 @@ class StockHouse extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['print_label', 'stock_print_label', 'import'];
+    protected $noNeedRight = ['print_label', 'stock_print_label', 'import', 'temporaryImport'];
 
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\StockHouse;
-        $this->assignconfig('warehourseStock',getStockHouse());
+        $this->assignconfig('warehourseStock', getStockHouse());
 
     }
 
@@ -63,14 +63,14 @@ class StockHouse extends Backend
             //自定义sku搜索
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['area_coding']) {
-                $areaId= Db::name('warehouse_area')->where('coding', $filter['area_coding'])->value('id');
-                $allStoreId= Db::name('store_house')->where('area_id', $areaId)->column('id');
+                $areaId = Db::name('warehouse_area')->where('coding', $filter['area_coding'])->value('id');
+                $allStoreId = Db::name('store_house')->where('area_id', $areaId)->column('id');
                 $map['id'] = ['in', $allStoreId];
                 unset($filter['area_coding']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
             if ($filter['stock_name']) {
-                $stockId = Db::name('warehouse_stock')->where('name','like', '%'.$filter['stock_name'].'%')->column('id');
+                $stockId = Db::name('warehouse_stock')->where('name', 'like', '%' . $filter['stock_name'] . '%')->column('id');
                 $map['stock_id'] = ['in', $stockId];
                 unset($filter['stock_name']);
                 $this->request->get(['filter' => json_encode($filter)]);
@@ -106,10 +106,11 @@ class StockHouse extends Backend
             foreach ($list as $k => $v) {
                 $list[$k]['area_coding'] = $areaCoding[$v['area_id']];
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -134,7 +135,7 @@ class StockHouse extends Backend
                 //判断选择的库位是否已存在
                 if (2 == $type) {
                     $params['location'] = $params['coding'];
-                    $params['coding'] = $params['subarea'].'-'.$params['location'];
+                    $params['coding'] = $params['subarea'] . '-' . $params['location'];
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
@@ -219,7 +220,7 @@ class StockHouse extends Backend
                 //判断选择的库位是否已存在
                 if (2 == $type) {
                     $params['location'] = $params['coding'];
-                    $params['coding'] = $params['subarea'].'-'.$params['location'];
+                    $params['coding'] = $params['subarea'] . '-' . $params['location'];
                 }
                 $map['type'] = $type;
                 $map['coding'] = $params['coding'];
@@ -269,7 +270,7 @@ class StockHouse extends Backend
         $this->view->assign("type", $type);
         $this->view->assign("row", $row);
         //所有库区编码id
-        $area_coding = Db::name('warehouse_area')->where('stock_id',$row['stock_id'])->column('coding', 'id');
+        $area_coding = Db::name('warehouse_area')->where('stock_id', $row['stock_id'])->column('coding', 'id');
         $this->assign('area_coding', $area_coding);
 
         return $this->view->fetch();
@@ -323,10 +324,11 @@ class StockHouse extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -359,10 +361,11 @@ class StockHouse extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -395,10 +398,11 @@ class StockHouse extends Backend
                 ->select();
 
             $list = collection($list)->toArray();
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -437,11 +441,11 @@ EOF;
         $file_content = '';
         foreach ($stock_house_info as $key => $value) {
             //检测文件夹
-            $dir = ROOT_PATH."public".DS."uploads".DS."stock_house".DS."all";
+            $dir = ROOT_PATH . "public" . DS . "uploads" . DS . "stock_house" . DS . "all";
             !file_exists($dir) && mkdir($dir, 0777, true);
 
             //生成条形码
-            $fileName = $dir.DS.$value['coding'].".png";
+            $fileName = $dir . DS . $value['coding'] . ".png";
             $this->generate_barcode($value['coding'], $fileName);
 
             //拼接条形码
@@ -449,11 +453,11 @@ EOF;
             $file_content .= "
 <div style='display:list-item;margin: 0mm auto;padding-top:4mm;padding-right:2mm;text-align:center;'>
 <p>库位条形码</p>
-<img src='".$img_url."' style='width:36mm'>
+<img src='" . $img_url . "' style='width:36mm'>
 </div>";
         }
 
-        echo $file_header.$file_content;
+        echo $file_header . $file_content;
     }
 
 
@@ -722,7 +726,7 @@ EOF;
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['货架号', '库区编码', '库位编码', '库容', '库位名称', '备注', '拣货顺序','实体仓id'];
+        $listName = ['货架号', '库区编码', '库位编码', '库容', '库位名称', '备注', '拣货顺序', '实体仓id'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -765,24 +769,152 @@ EOF;
             if (empty($v[2]) || empty($v[1]) || empty($v[7])) {
                 $this->error('库位编码不能为空，请检查！！');
             }
-            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->where('stock_id',$v[7])->value('id');
+            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->where('stock_id', $v[7])->value('id');
             if (empty($area_id)) {
                 $this->error('库区编码错误，请检查！！');
             }
-            $is_exist_coding = $this->model->where('coding', $v[2])->where('area_id', $area_id)->where('stock_id',$v[7])->find();
+            $is_exist_coding = $this->model->where('coding', $v[2])->where('area_id', $area_id)->where('stock_id', $v[7])->find();
             if (!empty($is_exist_coding)) {
                 $this->error('当前库区已存在此库位编码，请检查！！');
             }
         }
         foreach ($data as $k => $v) {
-            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->where('stock_id',$v[7])->value('id');
-            $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3], 'picking_sort' => $v[6],'stock_id' => $v[7]]);
+            $area_id = Db::name('warehouse_area')->where('coding', $v[1])->where('stock_id', $v[7])->value('id');
+            $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3], 'picking_sort' => $v[6], 'stock_id' => $v[7]]);
         }
         if ($result) {
             $this->success('导入成功！！');
         } else {
             $this->error('导入失败！！');
         }
+    }
+
+    /**
+     * 暂存库位号导入
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @author wangpenglei
+     * @date   2021/6/18 15:28
+     */
+    public function temporaryImport()
+    {
+        $file = $this->request->request('file');
+        if (!$file) {
+            $this->error(__('Parameter %s can not be empty', 'file'));
+        }
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        if (!is_file($filePath)) {
+            $this->error(__('No results were found'));
+        }
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
+            $this->error(__('Unknown data format'));
+        }
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+        //模板文件列名
+        $listName = ['所属分仓', '货架号', '库位编码', '库位名称', '库容'];
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $fields[] = $val;
+                }
+            }
+            // 模板文件不正确
+            if ($listName !== $fields) {
+                throw new Exception("模板文件不正确！！");
+            }
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getCalculatedValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+        if (!$data) {
+            $this->error('未导入任何数据！！');
+        }
+
+        //检测库存编码是否有重复
+        $list = array_column($data, '2');
+        if (count($list) != count(array_unique($list))) {
+            $this->error('表格库位编码有重复！！请仔细核对库位编码');
+        }
+
+        foreach ($data as $k => &$v) {
+            if ($v[0] == '郑州仓' || $v[0] == '郑州') {
+                $v[0] = 1;
+            } elseif ($v[0] == '丹阳仓' || $v[0] == '丹阳') {
+                $v[0] = 2;
+            }
+
+            if (empty($v[0]) || empty($v[2]) || empty($v[1])) {
+                $this->error('所属分仓、货架号、库位编码不能为空，请检查！！');
+            }
+
+            $is_exist_coding = $this->model->where('coding', $v[2])->where('type', 3)->where('stock_id', $v[0])->find();
+            if (!empty($is_exist_coding)) {
+                $this->error('当前仓库已存在此库位编码，请检查！！' . $v[2]);
+            }
+
+            $this->model->insert([
+                'coding'        => $v[2],
+                'type'          => 3,
+                'library_name'  => $v[3],
+                'createtime'    => date('Y-m-d H:i:s', time()),
+                'create_person' => session('admin.nickname'),
+                'shelf_number'  => $v[1],
+                'volume'        => $v[4],
+                'stock_id'      => $v[0],
+            ]);
+
+        }
+
+        $this->success('导入成功！！');
     }
 
 
@@ -792,6 +924,7 @@ EOF;
         $unique_arr = array_unique($arr);
         // 获取重复数据的数组
         $repeat_arr = array_diff_assoc($arr, $unique_arr);
+
         return $repeat_arr;
     }
 
@@ -810,6 +943,7 @@ EOF;
     public function shelf_number1()
     {
         $data = (new \app\admin\model\warehouse\StockHouse())->get_shelf_number();
+
         return $data;
     }
 

@@ -220,6 +220,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     index_url: 'warehouse/stock_house/temporary_shelf' + location.search,
                     add_url: 'warehouse/stock_house/add?type=3',
                     edit_url: 'warehouse/stock_house/edit?type=3',
+                    import_url: 'warehouse/stock_house/temporaryImport',
                     table: 'temporary_shelf'
                 }
             });
