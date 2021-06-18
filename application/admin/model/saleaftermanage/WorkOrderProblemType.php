@@ -57,7 +57,9 @@ class WorkOrderProblemType extends Model
         //全部
         if ($site < 10) {
             $map['work_platform'] = $site;
-        } 
+        }else{
+            $map['work_platform'] = ['in',[1,2,3]];
+        }
         
         $work_data = $work->where($map)->field('problem_type_id,count(*) as num')->group('problem_type_id')->select();
 
