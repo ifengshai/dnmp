@@ -1185,7 +1185,6 @@ class SelfApi extends Api
 
         $model=new OrderProcess();
         $arr =$model->where("agent_code='jianuo' and complete_time >1619798400 ")
-            ->limit(1000)
             ->select();
         foreach ($arr as $value){
             $order_id = $value['entity_id']; //订单id
@@ -1199,7 +1198,7 @@ class SelfApi extends Api
             //查询节点主表记录
             $row = (new OrderNode())->where(['order_number' => $order_number])->find();
             if (!$row) {
-                $this->error(__('订单记录不存在'), [], 400);
+                continue;
             }
             if ($row['track_number']==$track_number){
                 dump($value);
@@ -1208,14 +1207,14 @@ class SelfApi extends Api
 
             //如果已发货 则不再更新发货时间
             //更新节点主表
-            /*$row->allowField(true)->save([
+            $row->allowField(true)->save([
                 'order_node'         => 2,
                 'node_type'          => 7,
                 'update_time'        => date('Y-m-d H:i:s'),
                 'shipment_type'      => $title,
                 'shipment_data_type' => $shipment_data_type,
                 'track_number'       => $track_number,
-                'delivery_time'      => date('Y-m-d H:i:s'),
+                'delivery_time'      => date('Y-m-d H:i:s',$value['complete_time']),
             ]);
 
 
@@ -1231,8 +1230,9 @@ class SelfApi extends Api
                 'shipment_type'      => $title,
                 'shipment_data_type' => $shipment_data_type,
                 'track_number'       => $track_number,
-            ]);*/
+            ]);
 
+            dump($order_number,$track_number);
 
         }
         //校验参数
