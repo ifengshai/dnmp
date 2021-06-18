@@ -1183,6 +1183,8 @@ class SelfApi extends Api
     public function deal_track01()
     {
 
+        ini_set('memory_limit', '1512M');
+        set_time_limit(0);
         $model=new OrderProcess();
         $arr =$model->where("agent_code='jianuo' and complete_time >1619798400 ")
             ->select();
