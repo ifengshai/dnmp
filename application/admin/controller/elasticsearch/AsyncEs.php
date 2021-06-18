@@ -340,7 +340,7 @@ class AsyncEs extends BaseElasticsearch
                 ];
                 return $this->formatDate($insertData,$mergeData);
             },collection($track)->toArray());
-            $this->esService->updateMutilToEs('mojing_track',$data);
+            print_r($this->esService->updateMutilToEs('mojing_track',$data));
         },'id','desc');
 
     }
