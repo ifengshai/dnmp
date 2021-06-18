@@ -521,7 +521,7 @@ class ScmDistribution extends Scm
                     if ($stockId == 2) {
                         $occupy = 5;
                     } else {
-                        $occupy = 10000;
+                        $occupy = 3;
                     }
                     //暂存自动分配库位
                     $stock_house_info = $this->_stock_house
