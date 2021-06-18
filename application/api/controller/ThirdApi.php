@@ -171,6 +171,11 @@ class ThirdApi extends Api
                     if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
                         $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
+                        if ($data['e'] == 40) {
+                            $order_node_date['order_node'] = 3;
+                            $order_node_date['node_type'] = 10;
+                        }
+
                         if (($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 10) || ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 11)) {
                             $update_order_node['order_node'] = 4;
                             $update_order_node['node_type'] = $data['e'];
