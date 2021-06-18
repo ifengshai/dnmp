@@ -6,6 +6,8 @@ use app\admin\controller\zendesk\Notice;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\lens\LensPrice;
+use app\admin\model\operatedatacenter\DatacenterDay;
+use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\warehouse\StockHouse;
@@ -215,7 +217,7 @@ class Process extends Backend
             $skus = [];
             $skus = $this->itemplatformsku->where(['sku' => $v])->column('platform_sku');
             $map['a.sku'] = ['in', array_filter($skus)];
-            $map['b.status'] = ['in', ['processing', 'complete', 'delivered','delivery']];
+            $map['b.status'] = ['in', ['processing', 'complete', 'delivered', 'delivery']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
             $map['c.check_status'] = 0; //未审单计算订单占用
             $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
@@ -340,7 +342,7 @@ class Process extends Backend
                     $available_num = abs($available_stock);
                     $skus = $platform->where(['sku' => $v])->column('platform_sku');
                     $map['a.sku'] = ['in', $skus];
-                    $map['b.status'] = ['in', ['processing', 'complete', 'delivered','delivery']];
+                    $map['b.status'] = ['in', ['processing', 'complete', 'delivered', 'delivery']];
                     $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
                     $map['c.check_status'] = 0; //未审单计算订单占用
                     $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
@@ -363,7 +365,7 @@ class Process extends Backend
                 } else {
                     foreach ($item_platform_sku as $key => $val) {
                         $map['a.sku'] = $val['platform_sku'];
-                        $map['b.status'] = ['in', ['processing', 'complete', 'delivered','delivery']];
+                        $map['b.status'] = ['in', ['processing', 'complete', 'delivered', 'delivery']];
                         $map['c.check_status'] = 0; //未审单计算订单占用
                         $map['b.created_at'] = ['between', [strtotime('2021-01-01 00:00:00'), time()]]; //时间节点
                         $map['c.is_repeat'] = 0;
@@ -569,7 +571,7 @@ class Process extends Backend
             ];
 
             $map['a.sku'] = ['in', array_filter($skus)];
-            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
+            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered', 'delivery']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
             $map['b.created_at'] = ['between', [strtotime('2021-01-28 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
             $map['b.site'] = $v['site'];
@@ -640,7 +642,7 @@ class Process extends Backend
             // $first = $res[0];
             // $last = end($res);
             $map['a.sku'] = ['in', array_filter($skus)];
-            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
+            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered', 'delivery']];
             $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
             $map['b.created_at'] = ['between', [strtotime('2020-12-01 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
             // $map['b.site'] = $v['site'];
@@ -760,7 +762,7 @@ class Process extends Backend
         ini_set('memory_limit', '1512M');
         $order = new \app\admin\model\order\Order();
         $lensdata = new \app\admin\model\order\order\LensData();
-        $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
+        $where['a.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered', 'delivery']];
         $where['a.created_at'] = ['between', [strtotime(date('2021-03-01 00:00:00')), strtotime(date('2021-03-25 23:59:59'))]];
         $where['d.is_repeat'] = 0;
         $where['d.is_split'] = 0;
@@ -1162,7 +1164,7 @@ class Process extends Backend
             $count = $orderItem->alias('a')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where(['wave_order_id' => $v['id'], 'is_print' => 0, 'distribution_status' => ['<>', 0]])
-                ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']]])
+                ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered', 'delivery']]])
                 ->count();
             if ($count > 0) {
                 $status = 1;
@@ -1552,5 +1554,89 @@ class Process extends Backend
             echo $k . "\n";
         }
         echo "ok";
+    }
+
+
+    /**
+     * 导出数据-定期清理不卖的SKU
+     * @throws \think\db\exception\BindParamException
+     * @throws \think\exception\PDOException
+     * @author wangpenglei
+     * @date   2021/6/18 9:00
+     */
+    public function export_sku_data()
+    {
+        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->chunk(1000, function ($row) {
+            $data = [];
+            $stock_id = [1, 2];
+            foreach ($row as $key => $val) {
+                foreach ($stock_id as $k => $v) {
+
+                }
+            }
+
+        });
+
+
+        foreach ($list as $k => $v) {
+            if ($v['site'] == 1) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 1);
+            } elseif ($v['site'] == 2) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 2);
+            } elseif ($v['site'] == 3) {
+                $sku = $this->itemplatformsku->getWebSku($v['sku'], 3);
+            }
+            $skus = [];
+            $skus = [
+                $sku,
+            ];
+
+            $map['a.sku'] = ['in', array_filter($skus)];
+            $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered', 'delivery']];
+            $map['a.distribution_status'] = ['<>', 0]; //排除取消状态
+            $map['b.created_at'] = ['between', [strtotime('2021-01-28 00:00:00'), strtotime('2021-02-31 23:59:59')]]; //时间节点
+            $map['b.site'] = $v['site'];
+            $sales_money = $this->orderitemprocess->alias('a')->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->join(['fa_order_item_option' => 'c'], 'a.order_id = c.order_id and a.option_id = c.id')
+                ->sum('c.base_row_total');
+
+            $list[$k]['sales_money'] = $sales_money;
+        }
+        $headlist = ['sku', '站点', '销售额'];
+        Excel::writeCsv($list, $headlist, '12月份sku销量');
+        die;
+    }
+
+    /**
+     * 更新V站每天订单数
+     * @author wangpenglei
+     * @date   2021/6/18 10:04
+     */
+    public function update_voogueme_order()
+    {
+        $order = new NewOrder();
+        $dataCenter = new DatacenterDay();
+        $list = $dataCenter->where(['site' => 2, 'day_date' => ['>=', '2021-05-01']])->select();
+        foreach ($list as $k => $v) {
+            $order_where['status'] = [
+                'in',
+                [
+                    'processing',
+                    'complete',
+                    'delivered',
+                    'delivery',
+                ],
+            ];
+            $order_where['created_at'] = ['between', [strtotime($v['day_date']), strtotime($v['day_date']) + 86399]];
+            $order_where['site'] = 2;
+            $order_num = $order->where($order_where)->where('order_type', 1)->count();
+
+            $dataCenter->where('id', $v['id'])->update(['order_num' => $order_num]);
+        }
+
     }
 }
