@@ -420,7 +420,7 @@ class GoodsDataView extends Backend
             ->where($whereItem)
             ->where('sku', 'in', $frame_sku)
             ->where($itemMap)
-            ->sum('base_row_total-mw_rewardpoint_discount/total_qty_ordered-i.base_discount_amount');
+            ->value('sum(base_row_total-mw_rewardpoint_discount/total_qty_ordered-i.base_discount_amount) price');
         //眼镜的实际销售额
         $frame_money = round($frame_money_discount, 2);
         //眼镜的销售副数
@@ -440,7 +440,7 @@ class GoodsDataView extends Backend
             ->where($whereItem)
             ->where('sku', 'in', $decoration_sku)
             ->where($itemMap)
-            ->sum('base_row_total-mw_rewardpoint_discount/total_qty_ordered-i.base_discount_amount');
+            ->value('sum(base_row_total-mw_rewardpoint_discount/total_qty_ordered-i.base_discount_amount) price');
         //配饰的实际销售额
         $decoration_money = round($decoration_money_discount, 2);
         //配饰的销售副数
@@ -488,7 +488,7 @@ class GoodsDataView extends Backend
             ->where($whereItem)
             ->where('i.sku', 'in', $frame_new_sku)
             ->where($itemMap)
-            ->sum('base_row_total-mw_rewardpoint_discount/total_qty_ordered-i.base_discount_amount');
+            ->value('sum(base_row_total-mw_rewardpoint_discount/total_qty_ordered-i.base_discount_amount) price');
         //新品眼镜的实际销售额
         $frame_new_money = round($frame_new_money_price, 2);
         //求出新品配饰的销售额
@@ -498,7 +498,7 @@ class GoodsDataView extends Backend
             ->where($whereItem)
             ->where('i.sku', 'in', $decoration_new_sku)
             ->where($itemMap)
-            ->sum('base_row_total-mw_rewardpoint_discount/total_qty_ordered-i.base_discount_amount');
+            ->value('sum(base_row_total-mw_rewardpoint_discount/total_qty_ordered-i.base_discount_amount) price');
         //求出新品配饰的实际销售额
         $decoration_new_money = round($decoration_new_money_price, 2);
         //眼镜下单客户数
