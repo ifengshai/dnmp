@@ -6,6 +6,8 @@ use app\admin\controller\zendesk\Notice;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\lens\LensPrice;
+use app\admin\model\operatedatacenter\DatacenterDay;
+use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\warehouse\StockHouse;
@@ -1607,5 +1609,34 @@ class Process extends Backend
         $headlist = ['sku', '站点', '销售额'];
         Excel::writeCsv($list, $headlist, '12月份sku销量');
         die;
+    }
+
+    /**
+     * 更新V站每天订单数
+     * @author wangpenglei
+     * @date   2021/6/18 10:04
+     */
+    public function update_voogueme_order()
+    {
+        $order = new NewOrder();
+        $dataCenter = new DatacenterDay();
+        $list = $dataCenter->where(['site' => 2, 'day_date' => ['>=', '2021-05-01']])->select();
+        foreach ($list as $k => $v) {
+            $order_where['status'] = [
+                'in',
+                [
+                    'processing',
+                    'complete',
+                    'delivered',
+                    'delivery',
+                ],
+            ];
+            $order_where['created_at'] = ['between', [strtotime($v['day_date']), strtotime($v['day_date']) + 86399]];
+            $order_where['site'] = 2;
+            $order_num = $order->where($order_where)->where('order_type', 1)->count();
+
+            $dataCenter->where('id', $v['id'])->update(['order_num' => $order_num]);
+        }
+
     }
 }
