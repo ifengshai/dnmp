@@ -1203,7 +1203,6 @@ class SelfApi extends Api
                 continue;
             }
             if ($row['track_number']==$track_number){
-                dump($value);
                 continue;
             }
 
