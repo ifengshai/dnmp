@@ -1232,7 +1232,7 @@ class SelfApi extends Api
                 'track_number'       => $track_number,
             ]);
 
-            dump($order_number,$track_number);
+            dump("order_number:".$order_number."/track_number:".$track_number);
 
         }
         //校验参数
