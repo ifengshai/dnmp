@@ -2157,9 +2157,9 @@ class CustomerService extends Backend
             $platform    = input('order_platform', 1);
             if ($create_time) {
                 $time = explode(' ', $create_time);
-                $map['create_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+                $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
             } else {
-                $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+                $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
             }
             $site = input('platform', 1); //默认zeelool
             $key = input('key');
@@ -2204,9 +2204,9 @@ class CustomerService extends Backend
 
         if ($create_time) {
             $time = explode(' ', $create_time);
-            $map['create_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
+            $map['complete_time'] = ['between', [$time[0] . ' ' . $time[1], $time[3] . ' ' . $time[4]]];
         } else {
-            $map['create_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
+            $map['complete_time'] = ['between', [date('Y-m-d 00:00:00', strtotime('-6 day')), date('Y-m-d H:i:s', time())]];
         }
 
         //问题大分类统计、措施统计
