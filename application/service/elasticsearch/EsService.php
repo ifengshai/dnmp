@@ -161,7 +161,7 @@ class EsService
     {
         foreach ($view as $key => $val) {
             $params['body'][] = [
-                'update' => [
+                'index' => [
                     '_index' => $indexName,
                     '_type'  => '_doc',
                     '_id' => $val['id'],
