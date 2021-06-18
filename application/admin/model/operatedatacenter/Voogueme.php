@@ -1244,7 +1244,7 @@ class Voogueme extends Model
         }
         $createat = explode(' ', $time_str);
         $customerWhere['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $orderWhere['order_type'] = 1;
         $order = Db::connect('database.db_voogueme')
             ->table('sales_flat_order')
