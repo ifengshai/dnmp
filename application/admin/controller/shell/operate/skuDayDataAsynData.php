@@ -15,22 +15,28 @@ class skuDayDataAsynData extends Command
     protected function configure()
     {
         $this->setName('sku_day_data')
+            ->addArgument('start')
+            ->addArgument('end')
             ->setDescription('sku_day_data run');
     }
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getSkuDayData();
+        $start = $input->getArgument('start');
+        $end = $input->getArgument('end');
+
+        $this->getSkuDayData($start,$end);
+
         $output->writeln("All is ok");
     }
 
-    public function getSkuDayData()
+    public function getSkuDayData($start,$end)
     {
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
-        $tStart = strtotime('2021-01-01');
-        $tend = time();
+        $tStart = strtotime($start);
+        $tend = strtotime($end);
         for($i = $tStart;$i<$tend;$i+=3600*24){
             $data = date('Y-m-d', $i);
             $start = $i;
