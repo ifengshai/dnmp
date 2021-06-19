@@ -3582,7 +3582,7 @@ class TrackReg extends Backend
             ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
             ->where($orderWhere)
             ->whereIn('sku', array_column($list, 'platform_sku'))
-            ->field('sku,magento_order_id,qty,base_original_price,base_original_price,i.base_discount_amount,i.lens_price,i.coating_price')
+            ->field('sku,magento_order_id,qty,base_row_total,mw_rewardpoint_discount,total_qty_ordered,i.base_discount_amount,i.lens_price,i.coating_price')
             ->select();
         $skuArr = [];
         foreach ($skuDatas as $key => $value) {
@@ -3591,8 +3591,8 @@ class TrackReg extends Backend
             if ($value['lens_price'] > 0 || $value['coating_price'] > 0) {
                 $skuArr[$value['sku']]['pay_lens_num'] += $value['qty'];
             }
-            $skuArr[$value['sku']]['sku_grand_total'] += $value['base_original_price'];
-            $skuArr[$value['sku']]['sku_row_total'] += $value['base_original_price'] - $value['base_discount_amount'];
+            $skuArr[$value['sku']]['sku_grand_total'] += $value['base_row_total']-$value['mw_rewardpoint_discount']/$value['total_qty_ordered']-$value['base_discount_amount'];
+            $skuArr[$value['sku']]['sku_row_total'] += $value['base_row_total'];
         }
         foreach ($list as $k => $v) {
             if (!empty($skuArr[$v['platform_sku']]['order_num'])) {
