@@ -17,6 +17,7 @@ use app\admin\model\operatedatacenter\Weseeoptical;
 use app\admin\model\operatedatacenter\Zeelool;
 use app\admin\model\operatedatacenter\ZeeloolDe;
 use app\admin\model\operatedatacenter\ZeeloolJp;
+use app\admin\model\order\order\ZeeloolFr;
 use app\admin\model\platformmanage\MagentoPlatform;
 use app\admin\model\web\WebUsers;
 use app\enum\Site;
@@ -213,6 +214,9 @@ class AllData extends BaseElasticsearch
                 case Site::WESEEOPTICAL:
                     $model = new Weseeoptical();
                     break;
+                case Site::ZEELOOL_FR:
+                    $model = new ZeeloolFr();
+                    break;
             }
             //时间
             $timeStr = $timeStr ? $timeStr : $nowDay;
@@ -257,6 +261,9 @@ class AllData extends BaseElasticsearch
                     break;
                 case Site::WESEEOPTICAL:
                     $model = new Weseeoptical();
+                    break;
+                case Site::ZEELOOL_FR:
+                    $model = new ZeeloolFr();
                     break;
             }
             //时间
