@@ -49,7 +49,7 @@ class OrderDataDetailNew extends Backend
                 unset($filter['one_time-operate']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-            $site = $filter['order_platform'];
+            $site = $filter['order_platform'] ?? 1;
             if($filter['order_platform'] == 2){
                 $order_model = $this->voogueme;
                 $web_model = Db::connect('database.db_voogueme');
