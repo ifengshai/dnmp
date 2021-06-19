@@ -259,7 +259,8 @@ class GoodsDataView extends Backend
                 $createat = explode(' ', $seven_days);
             }
             $map['site'] = $params['order_platform'] ? $params['order_platform'] : 1;
-            $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $day_date = date('Y-m-d', strtotime('-1 day'));
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             if ($params['goods_type']) {
                 $map['goods_type'] = $params['goods_type'];
             }
@@ -267,23 +268,36 @@ class GoodsDataView extends Backend
             $skusSum = Db::name('datacenter_sku_day')
                 ->where('platform_sku','not like','%Price%')
                 ->where($map)
+                ->where('day_date',$day_date)
                 ->column('sku');
             $stockSum = $this->model
                 ->where(['is_open'=>1,'is_del'=>1])
                 ->where('category_id','neq',43)
                 ->where('sku','in',$skusSum)
-                ->field('sum(stock-distribution_occupy_stock) real_time_stock,sum(stock) stock')
-                ->find();
+                ->value('sum(stock-distribution_occupy_stock) real_time_stock');
+            $skuStockSum = $this->item_platform
+                ->where('platform_type',$map['site'])
+                ->where('platform_sku','not like','%Price%')
+                ->where('sku','in',$skusSum)
+                ->value('sum(stock) stock');
             //根据产品等级统计总数据
             $sumData = Db::name('datacenter_sku_day')
                 ->where($map)
-                ->field('count(*) sku_num,sum(glass_num) sales_num,sum(sku_row_total) sales_total')
+                ->where('day_date',$day_date)
+                ->field('count(*) sku_num')
+                ->find();
+            //根据产品等级统计总销售数据
+            $salesSum = Db::name('datacenter_sku_day')
+                ->where($map)
+                ->where($where)
+                ->field('sum(glass_num) sales_num,sum(sku_grand_total) sales_total')
                 ->find();
             //根据产品等级分组数据
             $dataCenterDay = Db::name('datacenter_sku_day')
                 ->where($map)
+                ->where('day_date',$day_date)
                 ->group('goods_grade')
-                ->field('site,goods_grade,count(*) sku_num,sum(glass_num) sales_num,sum(sku_row_total) sales_total')
+                ->field('site,goods_grade,count(*) sku_num,sum(glass_num) sales_num,sum(sku_grand_total) sales_total')
                 ->select();
             $sort = ['A+' => 1, 'A' => 2, 'B' => 3, 'C+' => 4, 'C' => 5, 'D' => 6, 'E' => 7, 'F' => 8, 'Z' => 9];
             foreach($dataCenterDay as $key=>$value){
@@ -291,24 +305,35 @@ class GoodsDataView extends Backend
                 $dataCenterDay[$key]['sort'] = $sort[$value['goods_grade']];
                 $dataCenterDay[$key]['sku_num'] = $value['sku_num'];
                 $dataCenterDay[$key]['sku_num_rate'] = $sumData['sku_num'] ? round($value['sku_num']/$sumData['sku_num']*100,2) : 0;
-                $dataCenterDay[$key]['sales_num'] = $value['sales_num'];
-                $dataCenterDay[$key]['sales_num_rate'] = $sumData['sales_num'] ? round($value['sales_num']/$sumData['sales_num']*100,2) : 0;
-                $dataCenterDay[$key]['sales_total'] = $value['sales_total'];
-                $dataCenterDay[$key]['sales_total_rate'] = $sumData['sales_total'] ? round($value['sales_total']/$sumData['sales_total']*100,2) : 0;
                 //处于该等级的商品sku
                 $skus = Db::name('datacenter_sku_day')
                     ->where($map)
+                    ->where('day_date',$day_date)
                     ->where('goods_grade',$value['goods_grade'])
                     ->column('sku');
+                $order = Db::name('datacenter_sku_day')
+                    ->where($map)
+                    ->where($where)
+                    ->where('sku','in',$skus)
+                    ->field('sum(glass_num) sales_num,sum(sku_grand_total) sales_total')
+                    ->find();
+                $dataCenterDay[$key]['sales_num'] = $order['sales_num'];
+                $dataCenterDay[$key]['sales_num_rate'] = $salesSum['sales_num'] ? round($order['sales_num']/$salesSum['sales_num']*100,2) : 0;
+                $dataCenterDay[$key]['sales_total'] = $order['sales_total'];
+                $dataCenterDay[$key]['sales_total_rate'] = $salesSum['sales_total'] ? round($order['sales_total']/$salesSum['sales_total']*100,2) : 0;
                 $stockInfo = $this->model
                     ->where(['is_open'=>1,'is_del'=>1])
                     ->where('category_id','neq',43)
                     ->where('sku','in',$skus)
-                    ->field('sum(stock-distribution_occupy_stock) real_time_stock,sum(stock) stock')
-                    ->find();
-                $dataCenterDay[$key]['real_time_stock'] = $stockInfo['real_time_stock'];
-                $dataCenterDay[$key]['real_time_stock_rate'] = $stockSum['real_time_stock'] ? round($stockInfo['real_time_stock']/$stockSum['real_time_stock']*100,2) : 0;
-                $dataCenterDay[$key]['stock'] = $stockInfo['stock'];
+                    ->value('sum(stock-distribution_occupy_stock) real_time_stock');
+                $skuStock = $this->item_platform
+                    ->where('platform_type',$map['site'])
+                    ->where('platform_sku','not like','%Price%')
+                    ->where('sku','in',$skus)
+                    ->value('sum(stock) stock');
+                $dataCenterDay[$key]['real_time_stock'] = $skuStock;
+                $dataCenterDay[$key]['real_time_stock_rate'] = $skuStockSum ? round($skuStock/$skuStockSum*100,2) : 0;
+                $dataCenterDay[$key]['stock'] = $stockInfo;
             }
             $dataCenterDay = array_column($dataCenterDay,null,'sort');
             ksort($dataCenterDay);
@@ -316,13 +341,13 @@ class GoodsDataView extends Backend
                 'grade' => '合计',
                 'sku_num' => $sumData['sku_num'],
                 'sku_num_rate' => '100',
-                'sales_num' => $sumData['sales_num'],
+                'sales_num' => $salesSum['sales_num'],
                 'sales_num_rate' => '100',
-                'sales_total' => $sumData['sales_total'],
+                'sales_total' => $salesSum['sales_total'],
                 'sales_total_rate' => '100',
-                'real_time_stock' => $stockSum['real_time_stock'],
+                'real_time_stock' => $skuStockSum,
                 'real_time_stock_rate' => '100',
-                'stock' => $stockSum['stock']
+                'stock' => $stockSum
             );
             $str = '';
             foreach ($dataCenterDay as $v){

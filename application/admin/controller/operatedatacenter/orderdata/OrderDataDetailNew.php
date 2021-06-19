@@ -45,6 +45,7 @@ class OrderDataDetailNew extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
+            $site = $filter['order_platform'];
             if($filter['one_time-operate']){
                 unset($filter['one_time-operate']);
                 $this->request->get(['filter' => json_encode($filter)]);
