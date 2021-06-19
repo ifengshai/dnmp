@@ -45,10 +45,6 @@ class OrderDataDetailNew extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
-            if($filter['one_time-operate']){
-                unset($filter['one_time-operate']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
             $site = $filter['order_platform'];
             if($filter['order_platform'] == 2){
                 $order_model = $this->voogueme;
@@ -129,6 +125,7 @@ class OrderDataDetailNew extends Backend
             }else{
                 $refund = 0;
             }
+            unset($filter['one_time-operate']);
             unset($filter['time_str']);
             unset($filter['order_platform']);
             unset($filter['increment_id']);
@@ -421,7 +418,6 @@ class OrderDataDetailNew extends Backend
                     $arr[$i]['lens_price'] = round($lens_price,2);
                     $arr[$i]['telephone'] = $shipping['telephone'];
                     $skus = $this->orderitemoption->where($prescription_where)->column('sku');
-                    $skus = collection($skus)->toArray();
                     $arr[$i]['sku'] = implode(',',$skus);
                     $arr[$i]['register_time'] = $register_time;
                     $arr[$i]['register_email'] = $register_email;
