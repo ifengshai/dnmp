@@ -45,11 +45,6 @@ class OrderDataDetailNew extends Backend
                 return $this->selectpage();
             }
             $filter = json_decode($this->request->get('filter'), true);
-            $site = $filter['order_platform'];
-            if($filter['one_time-operate']){
-                unset($filter['one_time-operate']);
-                $this->request->get(['filter' => json_encode($filter)]);
-            }
             $site = $filter['order_platform'] ?? 1;
             if($filter['order_platform'] == 2){
                 $order_model = $this->voogueme;
@@ -130,6 +125,7 @@ class OrderDataDetailNew extends Backend
             }else{
                 $refund = 0;
             }
+            unset($filter['one_time-operate']);
             unset($filter['time_str']);
             unset($filter['order_platform']);
             unset($filter['increment_id']);
@@ -201,7 +197,7 @@ class OrderDataDetailNew extends Backend
                     $arr[$i]['store_id'] = $store_id;
                     $arr[$i]['coupon_code'] = $value['coupon_code'];
                     $arr[$i]['coupon_rule_name'] = $order_model->table('user_coupons')->alias('a')
-                    ->join('discount_coupons b','b.id=a.discount_coupon_id')->field('b.*')->value('b.name');
+                        ->join('discount_coupons b','b.id=a.discount_coupon_id')->field('b.*')->value('b.name');
                     $arr[$i]['shipping_method'] = $value['shipping_method'];  //快递类别
                     $value['firstname'] = mb_convert_encoding( $value['firstname'], 'UTF-8', 'UTF-8,GBK,GB2312,BIG5' );
                     $value['lastname'] = mb_convert_encoding( $value['lastname'], 'UTF-8', 'UTF-8,GBK,GB2312,BIG5' );
@@ -422,7 +418,6 @@ class OrderDataDetailNew extends Backend
                     $arr[$i]['lens_price'] = round($lens_price,2);
                     $arr[$i]['telephone'] = $shipping['telephone'];
                     $skus = $this->orderitemoption->where($prescription_where)->column('sku');
-                    $skus = collection($skus)->toArray();
                     $arr[$i]['sku'] = implode(',',$skus);
                     $arr[$i]['register_time'] = $register_time;
                     $arr[$i]['register_email'] = $register_email;
@@ -864,7 +859,7 @@ class OrderDataDetailNew extends Backend
                 if(in_array('frame_price',$column_name) || in_array('frame_num',$column_name) || in_array('lens_price',$column_name)){
                     //处方信息
                     $prescription_where['magento_order_id'] = $val['entity_id'];
-                    $prescription_where['site'] = $site;
+                    $prescription_where['site'] = $order_platform;
                     $frame_info = $this->orderitemoption->where($prescription_where)->field('sum(frame_price) frame_amount,sum(qty) count,sum(index_price) lens_amount,sku')->select();
                     $frame_info = collection($frame_info)->toArray();
                     $index1 = array_keys($column_name,'frame_price');
@@ -881,20 +876,23 @@ class OrderDataDetailNew extends Backend
                     }
                 }
                 if(in_array('sku',$column_name)){
-                    $prescription_where['order_id'] = $val['entity_id'];
+                    $prescription_where['magento_order_id'] = $val['entity_id'];
+                    $prescription_where['site'] = $order_platform;
                     $skus = $this->orderitemoption->where($prescription_where)->column('sku');
                     $index = array_keys($column_name,'sku');
                     $tmpRow[$index[0]] =implode('|',$skus);
 
                 }
                 if(in_array('lens_num',$column_name)){
-                    $prescription_where['order_id'] = $val['entity_id'];
+                    $prescription_where['magento_order_id'] = $val['entity_id'];
+                    $prescription_where['site'] = $order_platform;
                     $val['lens_num'] = $this->orderitemoption->where($prescription_where)->where('lens_number','neq','')->sum('qty');
                     $index = array_keys($column_name,'lens_num');
                     $tmpRow[$index[0]] =$val['lens_num'];
                 }
                 if(in_array('is_box_num',$column_name)){
-                    $prescription_where['order_id'] = $val['entity_id'];
+                    $prescription_where['magento_order_id'] = $val['entity_id'];
+                    $prescription_where['site'] = $order_platform;
                     $index = array_keys($column_name,'is_box_num');
                     $tmpRow[$index[0]] =$this->orderitemoption->where($prescription_where)->where('goods_type',6)->sum('qty');
                 }
