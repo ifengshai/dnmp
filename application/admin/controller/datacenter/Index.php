@@ -1506,7 +1506,7 @@ class Index extends Backend
 
             $v['jp_sku'] = $platform_list[11];
 
-            $v['fr_sku'] = $platform_list[11];
+            $v['fr_sku'] = $platform_list[15];
 
             $skus = array_merge($skus, array_values($platform_list));
         }
@@ -1524,7 +1524,7 @@ class Index extends Backend
             $v['es_num'] = $sales_num_list[9][$v['es_sku']] ?: 0;
             $v['de_num'] = $sales_num_list[10][$v['de_sku']] ?: 0;
             $v['jp_num'] = $sales_num_list[11][$v['jp_sku']] ?: 0;
-            $v['fr_num'] = $sales_num_list[11][$v['fr_sku']] ?: 0;
+            $v['fr_num'] = $sales_num_list[15][$v['fr_sku']] ?: 0;
             $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'] +$v['fr_num'];
             unset($v['z_sku']);
             unset($v['v_sku']);
@@ -1538,7 +1538,7 @@ class Index extends Backend
         }
         unset($v);
         $headlist = [
-            'sku', '可用库存', '在途库存', 'Z站销量', 'V站销量', 'N站销量','M站销量', 'W站销量', '西语站销量', '德语站销量', '日语站销量', '总销量'
+            'sku', '可用库存', '在途库存', 'Z站销量', 'V站销量', 'N站销量','M站销量', 'W站销量', '西语站销量', '德语站销量', '日语站销量', '法语站销量','总销量'
         ];
         $fileName = 'SKU销量统计';
         Excel::writeCsv($list, $headlist, $fileName, true);
