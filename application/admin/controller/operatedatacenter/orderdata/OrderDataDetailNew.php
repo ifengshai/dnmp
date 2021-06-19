@@ -863,7 +863,7 @@ class OrderDataDetailNew extends Backend
                 if(in_array('frame_price',$column_name) || in_array('frame_num',$column_name) || in_array('lens_price',$column_name)){
                     //处方信息
                     $prescription_where['magento_order_id'] = $val['entity_id'];
-                    $prescription_where['site'] = $site;
+                    $prescription_where['site'] = $order_platform;
                     $frame_info = $this->orderitemoption->where($prescription_where)->field('sum(frame_price) frame_amount,sum(qty) count,sum(index_price) lens_amount,sku')->select();
                     $frame_info = collection($frame_info)->toArray();
                     $index1 = array_keys($column_name,'frame_price');
@@ -880,20 +880,23 @@ class OrderDataDetailNew extends Backend
                     }
                 }
                 if(in_array('sku',$column_name)){
-                    $prescription_where['order_id'] = $val['entity_id'];
+                    $prescription_where['magento_order_id'] = $val['entity_id'];
+                    $prescription_where['site'] = $order_platform;
                     $skus = $this->orderitemoption->where($prescription_where)->column('sku');
                     $index = array_keys($column_name,'sku');
                     $tmpRow[$index[0]] =implode('|',$skus);
 
                 }
                 if(in_array('lens_num',$column_name)){
-                    $prescription_where['order_id'] = $val['entity_id'];
+                    $prescription_where['magento_order_id'] = $val['entity_id'];
+                    $prescription_where['site'] = $order_platform;
                     $val['lens_num'] = $this->orderitemoption->where($prescription_where)->where('lens_number','neq','')->sum('qty');
                     $index = array_keys($column_name,'lens_num');
                     $tmpRow[$index[0]] =$val['lens_num'];
                 }
                 if(in_array('is_box_num',$column_name)){
-                    $prescription_where['order_id'] = $val['entity_id'];
+                    $prescription_where['magento_order_id'] = $val['entity_id'];
+                    $prescription_where['site'] = $order_platform;
                     $index = array_keys($column_name,'is_box_num');
                     $tmpRow[$index[0]] =$this->orderitemoption->where($prescription_where)->where('goods_type',6)->sum('qty');
                 }
