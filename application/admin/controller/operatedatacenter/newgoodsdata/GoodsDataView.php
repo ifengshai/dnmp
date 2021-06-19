@@ -272,18 +272,22 @@ class GoodsDataView extends Backend
                 ->where(['is_open'=>1,'is_del'=>1])
                 ->where('category_id','neq',43)
                 ->where('sku','in',$skusSum)
-                ->field('sum(stock-distribution_occupy_stock) real_time_stock,sum(stock) stock')
-                ->find();
+                ->value('sum(stock-distribution_occupy_stock) real_time_stock');
+            $skuStockSum = $this->item_platform
+                ->where('platform_type',$map['site'])
+                ->where('platform_sku','not','%Price%')
+                ->where('sku','in',$skusSum)
+                ->value('sum(stock) stock');
             //根据产品等级统计总数据
             $sumData = Db::name('datacenter_sku_day')
                 ->where($map)
-                ->field('count(*) sku_num,sum(glass_num) sales_num,sum(sku_row_total) sales_total')
+                ->field('count(*) sku_num,sum(glass_num) sales_num,sum(sku_grand_total) sales_total')
                 ->find();
             //根据产品等级分组数据
             $dataCenterDay = Db::name('datacenter_sku_day')
                 ->where($map)
                 ->group('goods_grade')
-                ->field('site,goods_grade,count(*) sku_num,sum(glass_num) sales_num,sum(sku_row_total) sales_total')
+                ->field('site,goods_grade,count(*) sku_num,sum(glass_num) sales_num,sum(sku_grand_total) sales_total')
                 ->select();
             $sort = ['A+' => 1, 'A' => 2, 'B' => 3, 'C+' => 4, 'C' => 5, 'D' => 6, 'E' => 7, 'F' => 8, 'Z' => 9];
             foreach($dataCenterDay as $key=>$value){
@@ -304,11 +308,15 @@ class GoodsDataView extends Backend
                     ->where(['is_open'=>1,'is_del'=>1])
                     ->where('category_id','neq',43)
                     ->where('sku','in',$skus)
-                    ->field('sum(stock-distribution_occupy_stock) real_time_stock,sum(stock) stock')
-                    ->find();
-                $dataCenterDay[$key]['real_time_stock'] = $stockInfo['real_time_stock'];
-                $dataCenterDay[$key]['real_time_stock_rate'] = $stockSum['real_time_stock'] ? round($stockInfo['real_time_stock']/$stockSum['real_time_stock']*100,2) : 0;
-                $dataCenterDay[$key]['stock'] = $stockInfo['stock'];
+                    ->value('sum(stock-distribution_occupy_stock) real_time_stock');
+                $skuStock = $this->item_platform
+                    ->where('platform_type',$map['site'])
+                    ->where('platform_sku','not','%Price%')
+                    ->where('sku','in',$skus)
+                    ->value('sum(stock) stock');
+                $dataCenterDay[$key]['real_time_stock'] = $skuStock;
+                $dataCenterDay[$key]['real_time_stock_rate'] = $skuStockSum ? round($skuStock/$skuStockSum*100,2) : 0;
+                $dataCenterDay[$key]['stock'] = $stockInfo;
             }
             $dataCenterDay = array_column($dataCenterDay,null,'sort');
             ksort($dataCenterDay);
@@ -320,9 +328,9 @@ class GoodsDataView extends Backend
                 'sales_num_rate' => '100',
                 'sales_total' => $sumData['sales_total'],
                 'sales_total_rate' => '100',
-                'real_time_stock' => $stockSum['real_time_stock'],
+                'real_time_stock' => $skuStockSum,
                 'real_time_stock_rate' => '100',
-                'stock' => $stockSum['stock']
+                'stock' => $stockSum
             );
             $str = '';
             foreach ($dataCenterDay as $v){
