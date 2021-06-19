@@ -259,7 +259,8 @@ class GoodsDataView extends Backend
                 $createat = explode(' ', $seven_days);
             }
             $map['site'] = $params['order_platform'] ? $params['order_platform'] : 1;
-            $map['day_date'] = ['between', [$createat[0], $createat[3]]];
+            $day_date = date('Y-m-d', strtotime('-1 day'));
+            $where['day_date'] = ['between', [$createat[0], $createat[3]]];
             if ($params['goods_type']) {
                 $map['goods_type'] = $params['goods_type'];
             }
@@ -267,6 +268,7 @@ class GoodsDataView extends Backend
             $skusSum = Db::name('datacenter_sku_day')
                 ->where('platform_sku','not like','%Price%')
                 ->where($map)
+                ->where('day_date',$day_date)
                 ->column('sku');
             $stockSum = $this->model
                 ->where(['is_open'=>1,'is_del'=>1])
@@ -281,11 +283,19 @@ class GoodsDataView extends Backend
             //根据产品等级统计总数据
             $sumData = Db::name('datacenter_sku_day')
                 ->where($map)
-                ->field('count(*) sku_num,sum(glass_num) sales_num,sum(sku_grand_total) sales_total')
+                ->where('day_date',$day_date)
+                ->field('count(*) sku_num')
+                ->find();
+            //根据产品等级统计总销售数据
+            $salesSum = Db::name('datacenter_sku_day')
+                ->where($map)
+                ->where($where)
+                ->field('sum(glass_num) sales_num,sum(sku_grand_total) sales_total')
                 ->find();
             //根据产品等级分组数据
             $dataCenterDay = Db::name('datacenter_sku_day')
                 ->where($map)
+                ->where('day_date',$day_date)
                 ->group('goods_grade')
                 ->field('site,goods_grade,count(*) sku_num,sum(glass_num) sales_num,sum(sku_grand_total) sales_total')
                 ->select();
@@ -295,15 +305,22 @@ class GoodsDataView extends Backend
                 $dataCenterDay[$key]['sort'] = $sort[$value['goods_grade']];
                 $dataCenterDay[$key]['sku_num'] = $value['sku_num'];
                 $dataCenterDay[$key]['sku_num_rate'] = $sumData['sku_num'] ? round($value['sku_num']/$sumData['sku_num']*100,2) : 0;
-                $dataCenterDay[$key]['sales_num'] = $value['sales_num'];
-                $dataCenterDay[$key]['sales_num_rate'] = $sumData['sales_num'] ? round($value['sales_num']/$sumData['sales_num']*100,2) : 0;
-                $dataCenterDay[$key]['sales_total'] = $value['sales_total'];
-                $dataCenterDay[$key]['sales_total_rate'] = $sumData['sales_total'] ? round($value['sales_total']/$sumData['sales_total']*100,2) : 0;
                 //处于该等级的商品sku
                 $skus = Db::name('datacenter_sku_day')
                     ->where($map)
+                    ->where('day_date',$day_date)
                     ->where('goods_grade',$value['goods_grade'])
                     ->column('sku');
+                $order = Db::name('datacenter_sku_day')
+                    ->where($map)
+                    ->where($where)
+                    ->where('sku','in',$skus)
+                    ->field('sum(glass_num) sales_num,sum(sku_grand_total) sales_total')
+                    ->find();
+                $dataCenterDay[$key]['sales_num'] = $order['sales_num'];
+                $dataCenterDay[$key]['sales_num_rate'] = $salesSum['sales_num'] ? round($order['sales_num']/$salesSum['sales_num']*100,2) : 0;
+                $dataCenterDay[$key]['sales_total'] = $order['sales_total'];
+                $dataCenterDay[$key]['sales_total_rate'] = $salesSum['sales_total'] ? round($order['sales_total']/$salesSum['sales_total']*100,2) : 0;
                 $stockInfo = $this->model
                     ->where(['is_open'=>1,'is_del'=>1])
                     ->where('category_id','neq',43)
