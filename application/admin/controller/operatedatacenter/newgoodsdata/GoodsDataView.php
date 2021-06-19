@@ -275,7 +275,7 @@ class GoodsDataView extends Backend
                 ->value('sum(stock-distribution_occupy_stock) real_time_stock');
             $skuStockSum = $this->item_platform
                 ->where('platform_type',$map['site'])
-                ->where('platform_sku','not','%Price%')
+                ->where('platform_sku','not like','%Price%')
                 ->where('sku','in',$skusSum)
                 ->value('sum(stock) stock');
             //根据产品等级统计总数据
@@ -311,7 +311,7 @@ class GoodsDataView extends Backend
                     ->value('sum(stock-distribution_occupy_stock) real_time_stock');
                 $skuStock = $this->item_platform
                     ->where('platform_type',$map['site'])
-                    ->where('platform_sku','not','%Price%')
+                    ->where('platform_sku','not like','%Price%')
                     ->where('sku','in',$skus)
                     ->value('sum(stock) stock');
                 $dataCenterDay[$key]['real_time_stock'] = $skuStock;
