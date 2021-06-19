@@ -20,16 +20,11 @@ class skuDayDataAsynData extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        $this->getSkuDayData(1);
-        $this->getSkuDayData(2);
-        $this->getSkuDayData(3);
-        $this->getSkuDayData(5);
-        $this->getSkuDayData(10);
-        $this->getSkuDayData(11);
+        $this->getSkuDayData();
         $output->writeln("All is ok");
     }
 
-    public function getSkuDayData($site)
+    public function getSkuDayData()
     {
         $_item_platform_sku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $this->order = new \app\admin\model\order\order\NewOrder();
@@ -40,39 +35,34 @@ class skuDayDataAsynData extends Command
             $data = date('Y-m-d', $i);
             $start = $i;
             $end = strtotime(date('Y-m-d 23:59:59', $i));
-
             $orderWhere['o.payment_time'] = ['between',[$start,$end]];
-            $orderWhere['o.site'] = $site;
             $orderWhere['o.order_type'] = 1;
             $orderWhere['o.status'] = ['in',['free_processing','processing', 'complete', 'paypal_reversed', 'payment_review','paypal_canceled_reversal', 'delivered']];
             $sku_data = Db::name('datacenter_sku_day')
-                ->where(['site' => $site,'day_date'=>$data])
-                ->field('id,platform_sku')
+                ->where(['day_date'=>$data])
+                ->field('id,platform_sku,site')
                 ->select();
-            $sku_data = collection($sku_data)->toArray();
             $skuDatas = $this->order
                 ->alias('o')
                 ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and i.site=o.site')
                 ->where($orderWhere)
-                ->whereIn('sku',array_column($sku_data,'platform_sku'))
-                ->field('sku,qty,i.lens_price,i.coating_price')
+                ->group('sku,site')
+                ->field('sku,i.site,sum(base_row_total-mw_rewardpoint_discount/qty-i.base_discount_amount) sku_grand_total,sum(base_row_total) sku_row_total')
                 ->select();
-            $skuArr = [];
-            foreach ($skuDatas as $key=>$value){
-                if($value['lens_price']>0 || $value['coating_price']>0){
-                    $skuArr[$value['sku']]['pay_lens_num'] += $value['qty'];
-                }
-            }
             //当前站点的所有sku映射关系
-            foreach ($sku_data as $k => $v) {
-                $pay_lens_num = $skuArr[$v['platform_sku']]['pay_lens_num'] ? $skuArr[$v['platform_sku']]['pay_lens_num'] : 0;
-                Db::name('datacenter_sku_day')
-                    ->where('id',$v['id'])
-                    ->update(['pay_lens_num'=>$pay_lens_num]);
-                echo $v['id'].' is ok'."\n";
+            foreach ($sku_data as $v) {
+                foreach ($skuDatas as $item){
+                    if($v['platform_sku'] == $item['sku'] && $v['site'] == $item['site']){
+                        $sku_grand_total = $item['sku_grand_total'];
+                        $sku_row_total = $item['sku_row_total'];
+                        Db::name('datacenter_sku_day')
+                            ->where('id',$v['id'])
+                            ->update(['sku_grand_total'=>$sku_grand_total,'sku_row_total'=>$sku_row_total]);
+                        echo $v['id'].' is ok'."\n";
+                    }
+                }
                 usleep(10000);
             }
         }
     }
-
 }
