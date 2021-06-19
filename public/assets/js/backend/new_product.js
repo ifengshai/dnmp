@@ -789,7 +789,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                         { field: 'replenish_num', title: __('补货需求数量'), operate: false },
                         { field: 'distribute_count', title: __('分配数量'), operate: false },
                         {
-                            field: 'status', title: __('需求分配状态'), custom: { 1: 'success', 2: 'danger', 3: 'success', 4: 'success' },
+                            field: 'status', title: __('补货需求单状态'), custom: { 1: 'success', 2: 'danger', 3: 'success', 4: 'success' },
                             searchList: { 1: '待分配', 2: '待处理', 3: '部分处理', 4: '已处理' }, operate: false,
                             formatter: Table.api.formatter.status
                         },
