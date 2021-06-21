@@ -763,6 +763,10 @@ class TrackReg extends Backend
         if (empty($arr)){
             $this->replenish->where('id',$res)->delete();
             $this->model->where('replenish_id',$res)->delete();
+            $ids = $this->model
+                ->where(['is_show' => 1, 'type' => 1])
+                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+                ->setField('is_show', 0);
             echo('所有需求都被过滤，不生成补货需求单');
             die;
         }
@@ -890,6 +894,11 @@ class TrackReg extends Backend
         if (empty($arr)){
             $this->replenish->where('id',$res)->delete();
             $this->model->where('replenish_id',$res)->delete();
+            //更新计划补货列表
+            $ids = $this->model
+                ->where(['is_show' => 1, 'type' => 2])
+                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
+                ->setField('is_show', 0);
             echo('所有需求都被过滤，不生成补货需求单');
             die;
         }
@@ -979,6 +988,11 @@ class TrackReg extends Backend
         if (empty($arr)){
             $this->replenish->where('id',$res)->delete();
             $this->model->where('replenish_id',$res)->delete();
+            //更新计划补货列表
+            $ids = $this->model
+                ->where(['is_show' => 1, 'type' => 3])
+                ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
+                ->setField('is_show', 0);
             echo('所有需求都被过滤，不生成补货需求单');
             die;
         }
