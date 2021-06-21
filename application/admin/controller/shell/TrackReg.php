@@ -760,6 +760,12 @@ class TrackReg extends Backend
                 $number += 1;
             }
         }
+        if (empty($arr)){
+            $this->replenish->where('id',$res)->delete();
+            $this->model->where('replenish_id',$res)->delete();
+            echo('所有需求都被过滤，不生成补货需求单');
+            die;
+        }
         //插入补货需求单子表 关联主表 new_product_replenish_order 关联字段replenish_id
         $result = $this->order->allowField(true)->saveAll($arr);
         //更新计划补货列表
@@ -881,6 +887,12 @@ class TrackReg extends Backend
                 $number += 1;
             }
         }
+        if (empty($arr)){
+            $this->replenish->where('id',$res)->delete();
+            $this->model->where('replenish_id',$res)->delete();
+            echo('所有需求都被过滤，不生成补货需求单');
+            die;
+        }
         //插入补货需求单表
         $result = $this->order->allowField(true)->saveAll($arr);
         //更新计划补货列表
@@ -963,6 +975,12 @@ class TrackReg extends Backend
                 $arr[$number]['replenish_id'] = $res;
                 $number += 1;
             }
+        }
+        if (empty($arr)){
+            $this->replenish->where('id',$res)->delete();
+            $this->model->where('replenish_id',$res)->delete();
+            echo('所有需求都被过滤，不生成补货需求单');
+            die;
         }
         //插入补货需求单表
         $result = $this->order->allowField(true)->saveAll($arr);
