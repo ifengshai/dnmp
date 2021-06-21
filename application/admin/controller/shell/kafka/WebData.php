@@ -280,7 +280,7 @@ class WebData extends Backend
                 $params = [];
                 foreach ($carts as $key => $v) {
 
-                    $count = Db::name('web_shopping_cart')->where(['entity_id' => $v['entity_id'], 'site' => $v['site']])->count();
+                    $count = Db::name('web_shopping_cart')->where(['entity_id' => $v['entity_id'], 'site' => $site])->count();
                     if ($count > 0) {
                         continue;
                     }
