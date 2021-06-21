@@ -270,9 +270,9 @@ class WebData extends Backend
             $res = Db::connect('database.db_voogueme_acc');
         }
 
-        $starttime = strtotime('2021-06-19 01:00:00');
-        $endtime = strtotime('2021-06-19 23:00:00');
-        $res->table('sales_flat_quote')
+        $starttime = '2021-06-19 18:00:00';
+        $endtime = '2021-06-19 23:00:00';
+        $list = $res->table('sales_flat_quote')
             ->where(['created_at' => ['between', [$starttime, $endtime]]])
             ->field('entity_id,store_id,is_active,items_count,items_qty,base_currency_code,quote_currency_code,grand_total,base_grand_total,customer_email,customer_id,updated_at,created_at')
             ->chunk(10000, function ($carts) use ($site) {
@@ -301,8 +301,6 @@ class WebData extends Backend
                     $params[$key]['updated_at'] = strtotime($v['updated_at']) ?: 0;
                     echo $v['entity_id'] . PHP_EOL;
                 }
-
-                dump($params);
                 Db::name('web_shopping_cart')->insertAll(array_values($params));
             });
     }
