@@ -302,6 +302,7 @@ class WebData extends Backend
                     echo $v['entity_id'] . PHP_EOL;
                 }
 
+                dump($params);
                 Db::name('web_shopping_cart')->insertAll(array_values($params));
             });
     }
