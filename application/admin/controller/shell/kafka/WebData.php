@@ -18,8 +18,8 @@ use app\admin\model\web\WebShoppingCart;
 /**
  * Class WebData
  * @package app\admin\controller\shell
- * @author wpl
- * @date   2021/4/14 17:27
+ * @author  wpl
+ * @date    2021/4/14 17:27
  */
 class WebData extends Backend
 {
@@ -122,7 +122,7 @@ class WebData extends Backend
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
                         $key = $message->key;
-                        echo $payload['database'].'-'.$payload['type'].'-'.$payload['table'];
+                        echo $payload['database'] . '-' . $payload['type'] . '-' . $payload['table'];
                         //根据kafka中不同key，调用对应方法传递处理数据
                         //对该条message进行处理，比如用户数据同步， 记录日志。
                         if ($payload) {
@@ -242,9 +242,7 @@ class WebData extends Backend
 
     public function process_list_de()
     {
-        $this->process_data(10);
-        $this->process_data(11);
-        $this->process_data(12);
+        $this->process_data(2);
         echo "ok";
     }
 
@@ -271,28 +269,40 @@ class WebData extends Backend
         } elseif ($site == 12) {
             $res = Db::connect('database.db_voogueme_acc');
         }
-        $res->table('sales_flat_quote')->field('entity_id,store_id,is_active,items_count,items_qty,base_currency_code,quote_currency_code,grand_total,base_grand_total,customer_email,customer_id,updated_at,created_at')->chunk(10000,function($carts) use ($site) {
-            $carts = collection($carts)->toArray();
-            $params = [];
-            foreach($carts as $key => $v){
-                $params[$key]['entity_id'] = $v['entity_id'];
-                $params[$key]['store_id'] = $v['store_id'] ?: 0;
-                $params[$key]['is_active'] = $v['is_active'] ?: 0;
-                $params[$key]['site'] = $site;
-                $params[$key]['items_count'] = $v['items_count'] ?: 0;
-                $params[$key]['items_qty'] = $v['items_qty'] ?: 0;
-                $params[$key]['base_currency_code'] = $v['base_currency_code'] ?: 0;
-                $params[$key]['quote_currency_code'] = $v['quote_currency_code'] ?: 0;
-                $params[$key]['grand_total'] = $v['grand_total'] ?: 0;
-                $params[$key]['base_grand_total'] = $v['base_grand_total'] ?: 0;
-                $params[$key]['customer_id'] = $v['customer_id'] ?: 0;
-                $params[$key]['customer_email'] = $v['customer_email'] ?: '';
-                $params[$key]['created_at'] = strtotime($v['created_at']) ?: 0;
-                $params[$key]['updated_at'] = strtotime($v['updated_at']) ?: 0;
-                echo $v['entity_id'] . PHP_EOL;
-            }
-            Db::name('web_shopping_cart')->insertAll($params);
-        });
+
+        $starttime = strtotime('2021-06-19 10:00:00');
+        $endtime = strtotime('2021-06-19 23:00:00');
+        $res->table('sales_flat_quote')
+            ->where(['created_at' => ['between', [$starttime, $endtime]]])
+            ->field('entity_id,store_id,is_active,items_count,items_qty,base_currency_code,quote_currency_code,grand_total,base_grand_total,customer_email,customer_id,updated_at,created_at')
+            ->chunk(10000, function ($carts) use ($site) {
+                $carts = collection($carts)->toArray();
+                $params = [];
+                foreach ($carts as $key => $v) {
+
+                    $count = Db::name('web_shopping_cart')->where(['entity_id' => $v['entity_id'], 'site' => $v['site']])->count();
+                    if ($count > 0) {
+                        continue;
+                    }
+
+                    $params[$key]['entity_id'] = $v['entity_id'];
+                    $params[$key]['store_id'] = $v['store_id'] ?: 0;
+                    $params[$key]['is_active'] = $v['is_active'] ?: 0;
+                    $params[$key]['site'] = $site;
+                    $params[$key]['items_count'] = $v['items_count'] ?: 0;
+                    $params[$key]['items_qty'] = $v['items_qty'] ?: 0;
+                    $params[$key]['base_currency_code'] = $v['base_currency_code'] ?: 0;
+                    $params[$key]['quote_currency_code'] = $v['quote_currency_code'] ?: 0;
+                    $params[$key]['grand_total'] = $v['grand_total'] ?: 0;
+                    $params[$key]['base_grand_total'] = $v['base_grand_total'] ?: 0;
+                    $params[$key]['customer_id'] = $v['customer_id'] ?: 0;
+                    $params[$key]['customer_email'] = $v['customer_email'] ?: '';
+                    $params[$key]['created_at'] = strtotime($v['created_at']) ?: 0;
+                    $params[$key]['updated_at'] = strtotime($v['updated_at']) ?: 0;
+                    echo $v['entity_id'] . PHP_EOL;
+                }
+                Db::name('web_shopping_cart')->insertAll(array_values($params));
+            });
     }
 
 
