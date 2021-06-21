@@ -242,7 +242,12 @@ class WebData extends Backend
 
     public function process_list_de()
     {
-        $this->process_data(2);
+        $this->process_data(1);
+        $this->process_data(3);
+        $this->process_data(9);
+        $this->process_data(10);
+        $this->process_data(11);
+        $this->process_data(12);
         echo "ok";
     }
 
