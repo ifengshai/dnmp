@@ -1339,10 +1339,10 @@ class Process extends Backend
 
     public function test()
     {
-        $type = 1;
-        $site = 'zeelool';
-        $start = '2021-05-14T13:00:00Z';
-        $end = '2021-05-16T23:59:59Z';
+        $type = 2;
+        $site = 'voogueme';
+        $start = '2021-05-19T01:00:00Z';
+        $end = '2021-05-19T23:59:59Z';
 
         $this->asyncTicketHttps($type, $site, $start, $end);
     }
