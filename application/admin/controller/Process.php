@@ -1354,7 +1354,7 @@ class Process extends Backend
         $time = input('time');
         for ($i = 0; $i < 24; $i++) {
             $start = '2021-06-'.$time.'T' . $i . ':00:00Z';
-            $end = '2021-06-1'.$time.'T' . $i . ':59:59Z';
+            $end = '2021-06-'.$time.'T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(10000);
