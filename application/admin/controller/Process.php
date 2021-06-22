@@ -1349,7 +1349,7 @@ class Process extends Backend
 
     public function test011()
     {
-        dump($_GET);
+        dump(input());
         die;
         $type = 1;
         $site = 'zeelool';
