@@ -1349,8 +1349,8 @@ class Process extends Backend
 
     public function test011()
     {
-        $type = 3;
-        $site = 'nihao';
+        $type = 1;
+        $site = 'zeelool';
         for ($i = 0; $i < 24; $i++) {
             $start = '2021-06-19T' . $i . ':00:00Z';
             $end = '2021-06-19T' . $i . ':59:59Z';
