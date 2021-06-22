@@ -1349,6 +1349,8 @@ class Process extends Backend
 
     public function test011()
     {
+        dump($_GET);
+        die;
         $type = 1;
         $site = 'zeelool';
         for ($i = 0; $i < 24; $i++) {
