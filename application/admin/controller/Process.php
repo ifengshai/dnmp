@@ -1349,11 +1349,11 @@ class Process extends Backend
 
     public function test011()
     {
-        $type = 1;
-        $site = 'zeelool';
-        for ($i = 0; $i < 9; $i++) {
-            $start = '2021-05-18T' . $i . ':00:00Z';
-            $end = '2021-05-18T' . $i . ':59:59Z';
+        $type = 2;
+        $site = 'voogueme';
+        for ($i = 0; $i < 24; $i++) {
+            $start = '2021-06-19T' . $i . ':00:00Z';
+            $end = '2021-06-19T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(10000);
