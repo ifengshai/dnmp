@@ -37,7 +37,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'order_type', title: __('订单类型'), custom: { 1: 'blue', 2: 'blue', 3: 'blue', 4: 'blue', 5: 'blue', 6: 'blue', 10: 'blue' ,41:'black'}, searchList: { 1: '普通订单', 2: '批发单', 3: '网红单', 4: '补发单', 5: '补差价', 6: '一件代发', 7: '手动补单', 10: '货到付款',41:'虚拟订单'}, formatter: Table.api.formatter.status },
                         // { field: 'sku', title: __('SKU'), operate: 'like', visible: false },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', visible: false },
-                        { field: 'created_at', title: __('创建时间'), operate: false },
+                        { field: 'created_at', title: __('创建时间'), sortable: true, operate: false },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {
