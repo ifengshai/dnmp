@@ -1263,6 +1263,16 @@ class Notice extends Controller
     }
 
     /**
+     * 新邮件分配逻辑
+     * @author miaojingjing
+     * @date   2021/6/23 14:11:36
+     */
+    public function shellEmailDistribution()
+    {
+        Zendesk::shellEmailDistribution();
+    }
+
+    /**
      * 获取邮件模板
      * @return mixed
      * @throws \Exception

@@ -32,7 +32,8 @@ class UpdateZendeskCommentsTable extends Migrator
         $table = $this->table('zendesk');
         $table
             ->addColumn('assign_id_next', 'integer', array('limit' => 11,'default' => 0,'signed'=>false, 'comment' => '第二承接人'))
-            ->addColumn('flag', 'integer', ['limit' => MysqlAdapter::INT_TINY, 'default' => 0, 'comment' => '标识：1：紧急,2:疑难'])
+            ->addColumn('is_urgency', 'integer', ['limit' => 1, 'default' => 0, 'comment' => '是否紧急：1：紧急'])
+            ->addColumn('is_difficult', 'integer', ['limit' => 1, 'default' => 0, 'comment' => '是否疑难：1：疑难'])
             ->update();
     }
 }
