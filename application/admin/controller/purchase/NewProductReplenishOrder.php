@@ -519,7 +519,7 @@ class NewProductReplenishOrder extends Backend
             foreach ($list as $k => $v) {
                 $newProductReplenishOrder = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
                 //通过sku和实际补货需求数量获取 补货需求清单中的站点
-                $websiteType =  Db::name('new_product_mapping')->where('replenish_num', $newProductReplenishOrder)->where('sku',$v['sku'])->value('website_type');
+                $websiteType =  Db::name('new_product_mapping')->where('replenish_num', $newProductReplenishOrder)->where('replenish_id', $id)->where('sku',$v['sku'])->value('website_type');
                 switch ($websiteType){
                     case PlatformType::ZEELOOL_PLAT:
                         $websiteType = 'Zeelool';
