@@ -1148,7 +1148,7 @@ Please close this window and try again.");
                 //被合并的状态closed，添加content，tag：closed_by_merge
                 $this->model->where('ticket_id', $ids)->update([
                     'status' => '5',
-                    'tags' => $tagIds,
+                    'tags' =>  v,
                     'assignee_id' => $agent_id,
                     'assign_id' => session('admin.id'),
                     'due_id' => session('admin.id'),
