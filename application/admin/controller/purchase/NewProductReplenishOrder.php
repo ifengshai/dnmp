@@ -519,48 +519,51 @@ class NewProductReplenishOrder extends Backend
             foreach ($list as $k => $v) {
                 $newProductReplenishOrder = Db::name('new_product_replenish_order')->where('id', $v['replenish_order_id'])->value('replenishment_num');
                 //通过sku和实际补货需求数量获取 补货需求清单中的站点
-                $websiteType =  Db::name('new_product_mapping')->where('replenish_num', $newProductReplenishOrder)->where('replenish_id', $id)->where('sku',$v['sku'])->value('website_type');
-                switch ($websiteType){
-                    case PlatformType::ZEELOOL_PLAT:
-                        $websiteType = 'Zeelool';
-                        break;
-                    case PlatformType::VOOGUEME_PLAT:
-                        $websiteType = 'Voogueme';
-                        break;
-                    case PlatformType::NIHAO_PLAT:
-                        $websiteType = 'Meeloog';
-                        break;
-                    case PlatformType::MEELOOG_PLAT:
-                        $websiteType = 'Vicmoo';
-                        break;
-                    case PlatformType::WESEE_PLAT:
-                        $websiteType = 'Weseeoptical';
-                        break;
-                    case PlatformType::AMAZON_PLAT:
-                        $websiteType = 'Amazon';
-                        break;
-                    case PlatformType::ZEELOOL_ES_PLAT:
-                        $websiteType = 'Zeelool_de';
-                        break;
-                    case PlatformType::ZEELOOL_DE_PLAT:
-                        $websiteType = 'Zeelool_es';
-                        break;
-                    case PlatformType::ZEELOOL_JP_PLAT:
-                        $websiteType = 'Zeelool_jp';
-                        break;
-                    case PlatformType::VOOGMECHIC_PLAT:
-                        $websiteType = 'Voogmehic';
-                        break;
-                    case PlatformType::ZEELOOL_CN_PLAT:
-                        $websiteType = 'Zeelool_cn';
-                        break;
-                    case PlatformType::ALIBABA_PLAT:
-                        $websiteType = 'Alibaba';
-                        break;
-                    case PlatformType::ZEELOOL_FR_PLAT:
-                        $websiteType = 'Zeelool_fr';
-                        break;
+                $websiteType =  Db::name('new_product_mapping')->where('replenish_id', $id)->where('sku',$v['sku'])->column('website_type');
+                foreach ($websiteType as $sk=>$sv){
+                    switch ($sv){
+                        case PlatformType::ZEELOOL_PLAT:
+                            $websiteType[$sk] = 'Zeelool';
+                            break;
+                        case PlatformType::VOOGUEME_PLAT:
+                            $websiteType[$sk] = 'Voogueme';
+                            break;
+                        case PlatformType::NIHAO_PLAT:
+                            $websiteType[$sk] = 'Meeloog';
+                            break;
+                        case PlatformType::MEELOOG_PLAT:
+                            $websiteType[$sk] = 'Vicmoo';
+                            break;
+                        case PlatformType::WESEE_PLAT:
+                            $websiteType[$sk] = 'Weseeoptical';
+                            break;
+                        case PlatformType::AMAZON_PLAT:
+                            $websiteType[$sk] = 'Amazon';
+                            break;
+                        case PlatformType::ZEELOOL_ES_PLAT:
+                            $websiteType[$sk] = 'Zeelool_de';
+                            break;
+                        case PlatformType::ZEELOOL_DE_PLAT:
+                            $websiteType[$sk] = 'Zeelool_es';
+                            break;
+                        case PlatformType::ZEELOOL_JP_PLAT:
+                            $websiteType[$sk] = 'Zeelool_jp';
+                            break;
+                        case PlatformType::VOOGMECHIC_PLAT:
+                            $websiteType[$sk] = 'Voogmehic';
+                            break;
+                        case PlatformType::ZEELOOL_CN_PLAT:
+                            $websiteType[$sk] = 'Zeelool_cn';
+                            break;
+                        case PlatformType::ALIBABA_PLAT:
+                            $websiteType[$sk] = 'Alibaba';
+                            break;
+                        case PlatformType::ZEELOOL_FR_PLAT:
+                            $websiteType[$sk] = 'Zeelool_fr';
+                            break;
+                    }
                 }
+                $websiteType == implode(',',$websiteType);
                 $list[$k]['num'] = $newProductReplenishOrder;
                 $list[$k]['website_type'] = $websiteType;
             }
