@@ -3,33 +3,30 @@
 namespace app\admin\model\zendesk;
 
 use think\Model;
+use traits\model\SoftDelete;
 
 
 class ZendeskMailTemplate extends Model
 {
-
-    
-
-    
-
+    use SoftDelete;
     // 表名
     protected $name = 'zendesk_mail_template';
+
     
     // 自动写入时间戳字段
-    protected $autoWriteTimestamp = false;
+    protected $autoWriteTimestamp = 'datetime';
 
     // 定义时间戳字段名
     protected $createTime = false;
     protected $updateTime = false;
-    protected $deleteTime = false;
+    protected $deleteTime = 'delete_time';
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     // 追加属性
     protected $append = [
         'used_time_text'
     ];
-    
 
-    
 
 
 

@@ -821,7 +821,7 @@ return [
     'platform'=>[
         1=>'zeelool',
         2=>'voogueme',
-        3=>'nihao'
+        3=>'meeloog'
     ],
     'customer_problem_classify_arr' => [
         //订单修改

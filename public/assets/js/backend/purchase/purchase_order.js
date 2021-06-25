@@ -125,12 +125,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             searchList: {0: '否', 1: '是'},
                             formatter: Table.api.formatter.status
                         },
-                        {
-                            field: 'is_in_stock', title: __('是否为退货入库'),
-                            custom: {0: 'danger', 1: 'success'},
-                            searchList: {0: '否', 1: '是'},
-                            formatter: Table.api.formatter.status
-                        },
+                        {field: 'arrival_time', title: __('预计出货时间'), operate: 'RANGE', addclass: 'datetimerange'},
                         {
                             field: 'factory_type', title: __('工厂类型'),
                             custom: {0: 'danger', 1: 'success'},
