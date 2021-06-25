@@ -351,7 +351,7 @@ class UserDataDetail extends Backend
             if ($customer_type) {
                 $map['c.group_id'] = $customer_type;
             }
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
+            $map['o.order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
             $total_export_count = $web_model
                 ->table('orders')
                 ->alias('o')
