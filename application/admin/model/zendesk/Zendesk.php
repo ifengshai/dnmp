@@ -541,7 +541,11 @@ class Zendesk extends Model
                 if ($ticket['channel'] == 'voice') {
                     continue;
                 }
-                $isVip = Zendesk::isVipCustomer($ticket['type'], $ticket->email);
+                if($ticket['type'] != 3){
+                    $isVip = Zendesk::isVipCustomer($ticket['type'], $ticket->email);
+                }else{
+                    $isVip = 0;
+                }
                 Zendesk::emailDistribution($ticket, $isVip);
             }
         }
