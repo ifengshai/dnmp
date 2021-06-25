@@ -2622,6 +2622,8 @@ class WorkOrderList extends Model
         $map['work_status'] = ['not in', '0,4,7'];
         if ($platform != 0) {
             $map['work_platform'] = $platform;
+        }else{
+            $map['work_platform'] = ['in','1,2,3'];
         }
 
         $count = $this->where($map)->count();
@@ -2640,6 +2642,8 @@ class WorkOrderList extends Model
         $map['work_status'] = 6;
         if ($platform != 0) {
             $map['work_platform'] = $platform;
+        }else{
+            $map['work_platform'] = ['in','1,2,3'];
         }
         $count = $this->where($map)->count();
 
@@ -2658,6 +2662,8 @@ class WorkOrderList extends Model
         $map['z.work_status'] = 6;
         if ($platform != 0) {
             $map['z.work_platform'] = $platform;
+        }else{
+            $map['work_platform'] = ['in','1,2,3'];
         }
         $map['m.measure_choose_id'] = 7;
         $count = $this->alias('z')->join('fa_work_order_measure m', 'z.id=m.work_id')->where($map)->count();
@@ -2679,6 +2685,8 @@ class WorkOrderList extends Model
         $map['work_status'] = 6;
         if ($platform != 0) {
             $map['work_platform'] = $platform;
+        }else{
+            $map['work_platform'] = ['in','1,2,3'];
         }
         $count = $this->where($map)->count();
         $sum = $complete_count == 0 ? 0 : round($count / $complete_count * 100, 2);
@@ -2697,6 +2705,8 @@ class WorkOrderList extends Model
         $map['work_status'] = 6;
         if ($platform != 0) {
             $map['work_platform'] = $platform;
+        }else{
+            $map['work_platform'] = ['in','1,2,3'];
         }
         $complete_money = $this->where($map)->sum('base_grand_total');
         $money = $this->where($map)->where('is_refund', 1)->sum('refund_money');

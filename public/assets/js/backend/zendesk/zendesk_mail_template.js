@@ -8,8 +8,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'zendesk/zendesk_mail_template/index' + location.search,
                     add_url: 'zendesk/zendesk_mail_template/add',
                     edit_url: 'zendesk/zendesk_mail_template/edit',
-                    //del_url: 'zendesk/zendesk_mail_template/del',
-                    multi_url: 'zendesk/zendesk_mail_template/multi',
+                    del_url: 'zendesk/zendesk_mail_template/del',
+                    // multi_url: 'zendesk/zendesk_mail_template/multi',
                     table: 'zendesk_mail_template',
                 }
             });
@@ -153,7 +153,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                         
                                 }
 
-                            }                            
+                            },
+                            {
+                                name: 'del',
+                                text: '删除',
+                                title: __('删除'),
+                                classname: 'btn btn-xs btn-danger btn-delone',
+                                icon: 'fa fa-trash',
+                                url:  'zendesk/zendesk_mail_template/del',
+                                callback: function (data) {
+                                    Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                },
+                                visible: function (row) {
+                                    return true;
+                                }
+                            },
                         ]
                         }
                     ]
