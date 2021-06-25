@@ -816,7 +816,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 5: '12:00-14:59:59',
                                 6: '15:00-17:59:59',
                                 7: '18:00-20:59:59',
-                                8: '21:00-23:59:59'
+                                8: '21:00-23:59:59',
+                                9: '加诺补发加急订单'
                             },
                             formatter: Table.api.formatter.status
                         },
