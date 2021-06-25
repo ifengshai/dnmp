@@ -198,6 +198,11 @@ class Notice extends Controller
                     'update_time' => date('Y-m-d H:i:s', (strtotime(str_replace(['T', 'Z'], [' ', ''], $comment->created_at))+8*3600)),
                 ]);
             }
+            //判断邮件中用户是否回复了三次，回复三次标记为紧急
+            $zendeskCommentsArr = Db::name('zendesk_comments')->where('ticket_id',$id)->column('is_admin');
+            if(!in_array(1,$zendeskCommentsArr) && count($zendeskCommentsArr) >= 3){
+                Db::name('zendesk')->where('id',$zid)->update(['is_urgency'=>1]);
+            }
             Db::commit();
             //写入附表
         } catch (Exception $e) {
@@ -307,6 +312,12 @@ class Notice extends Controller
                     ]);
                 }
             }
+            //判断邮件中用户是否回复了三次，回复三次标记为紧急
+            $zendeskCommentsArr = Db::name('zendesk_comments')->where('ticket_id',$id)->column('is_admin');
+            if(!in_array(1,$zendeskCommentsArr) && count($zendeskCommentsArr) >= 3){
+                Db::name('zendesk')->where('id',$zendesk->id)->update(['is_urgency'=>1]);
+            }
+
             Db::commit();
         } catch (Exception $e) {
             file_put_contents('/var/www/mojing/runtime/log/zendesk.txt',"auto_update:" . $id."\r\n",FILE_APPEND);
