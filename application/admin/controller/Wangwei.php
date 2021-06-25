@@ -80,7 +80,8 @@ class Wangwei extends Backend
                     $replacementOrder = $res['increment_id'] ?? '';
                     if(!$replacementOrder) {
                         file_put_contents('./wangwei_error.log',$incrementId,FILE_APPEND);
-                        exception('请求补发失败');
+                        echo '请求补发失败'.PHP_EOL;
+                        return false;
                     }
 
                     $workOrderChangeSkusAll = [];
@@ -135,8 +136,10 @@ class Wangwei extends Backend
                     echo "补发单SUCCESS - ". $replacementOrder. PHP_EOL;
                 } catch (Exception $e) {
                     file_put_contents('./wangwei.log',$incrementId,FILE_APPEND);
-                    exception($e->getMessage());
+                    echo $e->getMessage().PHP_EOL;
+                    return false;
                 }
+                return true;
             }
         }
     }
