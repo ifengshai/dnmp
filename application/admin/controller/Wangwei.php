@@ -8,14 +8,21 @@
 namespace app\admin\controller;
 
 
+use app\admin\model\itemmanage\Item;
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrderItemOption;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\saleaftermanage\WorkOrderList;
+use app\admin\model\saleaftermanage\WorkOrderMeasure;
+use app\admin\model\StockLog;
 use app\common\controller\Backend;
+use think\Controller;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use think\Exception;
 use think\exception\DbException;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 use think\Log;
 use think\Model;
 use think\Request;
@@ -132,7 +139,7 @@ class Wangwei extends Backend
                     //回写主表
                     WorkOrderList::where('id',$workId)->setField('replacement_order', $replacementOrder);
 
-                    $this->work->deductionStock($workId, $measureId);
+                    $this->deductionStock($workId, $measureId);
                     file_put_contents('./wangwei_suceess.log',$incrementId.PHP_EOL,FILE_APPEND);
                     echo "补发单SUCCESS - ". $replacementOrder. PHP_EOL;
                 } catch (Exception $e) {
@@ -143,6 +150,137 @@ class Wangwei extends Backend
                 return true;
             }
         }
+    }
+    //扣减库存逻辑
+    public function deductionStock($work_id, $measure_id)
+    {
+        $measuerInfo = 5;
+        $workOrderList = WorkOrderList::where(['id' => $work_id])->field('id,work_platform,platform_order,replacement_order')->find();
+        $whereMeasure['work_id'] = $work_id;
+        $whereMeasure['measure_id'] = $measure_id;
+        $whereMeasure['change_type'] = $measuerInfo;
+        $result = WorkOrderChangeSku::where($whereMeasure)->field('id,increment_id,platform_type,change_type,original_sku,original_number,change_sku,change_number,item_order_number')->select();
+        if (!$result) {
+            return false;
+        }
+
+        $result = collection($result)->toArray();
+        if (5 == $measuerInfo) {//补发
+            $info = $this->workPresent($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result, 2);
+        }
+
+        return $info;
+    }
+    /**
+     * 赠品、补发-库存处理
+     * @param int $work_id 工单ID
+     * @param int $order_platform 平台类型
+     * @param string $increment_id 订单号
+     * @param array $change_row change_sku表数据
+     * @param int $type 类型：1增品 2补发
+     * @Author lzh
+     * @return bool
+     */
+    public function workPresent($work_id, $order_platform, $increment_id, $change_row, $type)
+    {
+        if (!$work_id || !$order_platform || !$increment_id || !$change_row) return false;
+
+        $_item = new Item();
+        $_platform_sku = new  ItemPlatformSku();
+        $_stock_log = new StockLog();
+
+        foreach ($change_row as $v) {
+            //获取sku
+            $arr = explode('-', trim($v['original_sku']));
+            $original_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['original_sku']);
+
+            if (!$original_sku) continue;
+
+            //sku数量
+            $original_number = $v['original_number'];
+            //仓库sku、库存
+            $warehouse_original_info = $_platform_sku
+                ->field('sku,stock')
+                ->where(['platform_sku'=>$original_sku, 'platform_type' => $order_platform])
+                ->find()
+            ;
+            $warehouse_original_sku = $warehouse_original_info['sku'];
+
+            //获取当前可用库存、总库存
+            $item_before = $_item
+                ->field('available_stock,occupy_stock,stock')
+                ->where(['sku' => $warehouse_original_sku])
+                ->find();
+
+            //开启事务
+            $_item->startTrans();
+            $_platform_sku->startTrans();
+            $_stock_log->startTrans();
+            try {
+                if (1 == $type) { //赠品
+                    //减少可用库存、总库存
+                    $_item
+                        ->where(['sku' => $warehouse_original_sku])
+                        ->dec('available_stock', $original_number)
+                        ->dec('stock', $original_number)
+                        ->update();
+                } else { //补发
+                    //减少可用库存，增加占用库存
+                    $_item
+                        ->where(['sku' => $warehouse_original_sku])
+                        ->dec('available_stock', $original_number)
+                        ->inc('occupy_stock', $original_number)->update();
+                }
+
+                //扣减对应站点虚拟库存
+                $_platform_sku
+                    ->where(['sku' => $warehouse_original_sku, 'platform_type' => $order_platform])
+                    ->setDec('stock', $original_number);
+
+                //记录库存日志
+                $_stock_log->setData([
+                    'type'                      => 2,
+                    'site'                      => $order_platform,
+                    'modular'                   => 1 == $type ? 9 : 8,
+                    'change_type'               => 1 == $type ? 15 : 14,
+                    'source'                    => 1,
+                    'sku'                       => $warehouse_original_sku,
+                    'number_type'              => 1,
+                    'order_number'              => $increment_id,
+                    'public_id'                 => $work_id,
+                    'available_stock_before'    => $item_before['available_stock'],
+                    'available_stock_change'    => -$original_number,
+                    'stock_before'              => 1 == $type ? $item_before['stock'] : 0,
+                    'stock_change'              => 1 == $type ? -$original_number : 0,
+                    'occupy_stock_before'       => 2 == $type ? $item_before['occupy_stock'] : 0,
+                    'occupy_stock_change'       => 2 == $type ? $original_number : 0,
+                    'fictitious_before'         => $warehouse_original_info['stock'],
+                    'fictitious_change'         => -$original_number,
+                    'create_person'             => session('admin.nickname'),
+                    'create_time'               => time()
+                ]);
+
+                $_item->commit();
+                $_platform_sku->commit();
+                $_stock_log->commit();
+            } catch (ValidateException $e) {
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                $_item->rollback();
+                $_platform_sku->rollback();
+                $_stock_log->rollback();
+                $this->error($e->getMessage());
+            }
+        }
+        return true;
     }
 
     /**
