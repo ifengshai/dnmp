@@ -79,6 +79,7 @@ class Wangwei extends Backend
 
                     $replacementOrder = $res['increment_id'] ?? '';
                     if(!$replacementOrder) {
+                        file_put_contents('./wangwei_error.log',$incrementId,FILE_APPEND);
                         exception('请求补发失败');
                     }
 
