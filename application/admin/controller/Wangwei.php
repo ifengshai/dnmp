@@ -139,7 +139,8 @@ class Wangwei extends Backend
                     //回写主表
                     WorkOrderList::where('id',$workId)->setField('replacement_order', $replacementOrder);
 
-                    $this->deductionStock($workId, $measureId);
+                    $res = $this->deductionStock($workId, $measureId);
+                    dump($res);
                     file_put_contents('./wangwei_suceess.log',$incrementId.PHP_EOL,FILE_APPEND);
                     echo "补发单SUCCESS - ". $replacementOrder. PHP_EOL;
                 } catch (Exception $e) {
