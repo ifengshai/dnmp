@@ -395,6 +395,8 @@ class ScmDistribution extends Scm
             5 => '印logo',
             6 => '成品质检',
             7 => '合单',
+            8 => '审单',
+            9 => '审单',
         ];
         // $check_status != $item_process_info['distribution_status'] && $this->error(__('只有' . $status_arr[$check_status] . '状态才能操作'), [], 405);
         $check_status != $item_process_info['distribution_status'] && $this->error(__('去' . $status_arr1[$item_process_info['distribution_status']]), [], 405);
@@ -1978,6 +1980,7 @@ class ScmDistribution extends Scm
                 ->limit($offset, $limit)
                 ->order('order_prescription_type')
                 ->select();
+
             foreach (array_filter($list) as $k => $v) {
                 $list[$k]['coding'] = $this->_stock_house->where('id', $v['store_house_id'])->value('coding');
                 !empty($v['combine_time']) && $list[$k]['combine_time'] = date('Y-m-d H:i:s', $v['combine_time']);
