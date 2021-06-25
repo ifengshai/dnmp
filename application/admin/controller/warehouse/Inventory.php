@@ -31,7 +31,7 @@ class Inventory extends Backend
      */
     protected $model = null;
 
-    protected $noNeedLogin = ['workPresent'];
+    protected $noNeedLogin = ['*'];
 
     public function _initialize()
     {
