@@ -1799,6 +1799,7 @@ class Process extends Backend
                 $measureParams['create_time'] = date('Y-m-d H:i:s');
                 $measureParams['operation_type'] = 1;
                 $measureParams['operation_time'] = date('Y-m-d H:i:s');
+                $measureParams['sku_change_type'] = 5;
                 $measureId = $measure->insertGetId($measureParams);
                 if (!$measureId) {
                     throw new Exception('插入失败');
