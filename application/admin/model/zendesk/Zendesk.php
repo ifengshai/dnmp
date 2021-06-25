@@ -495,7 +495,8 @@ class Zendesk extends Model
     public static function shellEmailDistribution()
     {
         $now_date = date('Y-m-d H:i:s');
-        $limit_date = date('Y-m-d 16:00:00');
+//        $limit_date = date('Y-m-d 16:00:00');
+        $limit_date = date('Y-m-d 23:00:00');
         if($now_date<$limit_date) {
             //当天下午4点半之后不进行分配操作
             //1，判断今天有无task，无，创建
