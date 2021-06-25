@@ -519,7 +519,7 @@ class Distribution extends Backend
                 if ($list[$key]['oprate_created_at'] == '') {
                     $list[$key]['oprate_created_at'] == '暂无';
                 } else {
-                    $list[$key]['oprate_created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+                    $list[$key]['oprate_created_at'] = date('Y-m-d H:i:s', $value['oprate_created_at']);
                 }
                 $list[$key]['stock_house_num'] = $stock_house_num;
                 $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
