@@ -43,7 +43,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: {1: '邮件组', 2: '电话组'},
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'count', title: __('Count')},
+                        // {field: 'count', title: __('Count')},
                         {
                             field: 'operate',
                             title: __('Operate'),
