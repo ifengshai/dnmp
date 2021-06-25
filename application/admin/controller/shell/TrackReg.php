@@ -986,6 +986,25 @@ class TrackReg extends Backend
                 $number += 1;
             }
         }
+        //饰品站被过滤的部分需要重新加入补货需求单 取消过滤状态
+        $skuListVoogmechic = $this->model
+            ->where(['is_show' => 1, 'type' => 3 ,'website_type'=>12,'is_filter'=>2])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
+            ->field('id,sku,website_type,replenish_num')
+            ->select();
+        $skuListVoogmechicUpdate = $this->model
+            ->where(['is_show' => 1, 'type' => 3 ,'website_type'=>12,'is_filter'=>2])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
+            ->setField('is_filter',1);
+        foreach ($skuListVoogmechic as $ck => $cv) {
+            $arr[$number]['sku'] = $cv['sku'];
+            $arr[$number]['replenishment_num'] = $cv['replenish_num'];
+            $arr[$number]['create_person'] = 'Admin';
+            $arr[$number]['create_time'] = date('Y-m-d H:i:s');
+            $arr[$number]['type'] = 3;
+            $arr[$number]['replenish_id'] = $res;
+            $number += 1;
+        }
         if (empty($arr)){
             $this->replenish->where('id',$res)->delete();
             $this->model->where('replenish_id',$res)->delete();
@@ -997,6 +1016,7 @@ class TrackReg extends Backend
             echo('所有需求都被过滤，不生成补货需求单');
             die;
         }
+
         //插入补货需求单表
         $result = $this->order->allowField(true)->saveAll($arr);
         //更新计划补货列表
