@@ -256,7 +256,7 @@ class Wangwei extends Backend
                     'occupy_stock_change'       => 2 == $type ? $original_number : 0,
                     'fictitious_before'         => $warehouse_original_info['stock'],
                     'fictitious_change'         => -$original_number,
-                    'create_person'             => session('admin.nickname'),
+                    'create_person'             => '王伟',
                     'create_time'               => time()
                 ]);
 
