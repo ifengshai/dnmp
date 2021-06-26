@@ -141,7 +141,7 @@ class Wangwei extends Backend
                     WorkOrderChangeSku::insertAll($workOrderChangeSkusAll);
                     //回写主表
                     WorkOrderList::where('id', $workId)->setField('replacement_order', $replacementOrder);
-
+                    file_put_contents('./wangwei_suceess.log',$replacementOrder.PHP_EOL,FILE_APPEND);
                     $this->work->deductionStock($workId, $measureId);
                     echo "补发单SUCCESS - " . $replacementOrder . PHP_EOL;
                 } catch (Exception $e) {
