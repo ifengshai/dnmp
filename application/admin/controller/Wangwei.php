@@ -57,7 +57,7 @@ class Wangwei extends Backend
         $workId = input('workid');
         $incrementId = input('incrementid');
         $measureId = input('measureid');
-        $this->createOrder($siteType, $workId,$incrementId,$measureId);
+        $this->createOrder($siteType, $workId, $incrementId, $measureId);
     }
 
     /**
@@ -70,10 +70,10 @@ class Wangwei extends Backend
      * @throws ModelNotFoundException
      * @throws DbException
      */
-    public function createOrder($siteType, $workId,$incrementId,$measureId)
+    public function createOrder($siteType, $workId, $incrementId, $measureId)
     {
         echo 'createOrder' . PHP_EOL;
-        $orderDetail = $this->getOrderDetail($siteType,$incrementId);
+        $orderDetail = $this->getOrderDetail($siteType, $incrementId);
 
         //如果存在补发单的措施
         if ($orderDetail) {
@@ -88,7 +88,10 @@ class Wangwei extends Backend
 
                     $replacementOrder = $res['increment_id'] ?? '';
                     if (!$replacementOrder) {
-                        exception('请求补发失败');
+                        file_put_contents('./wangwei_error.log', $incrementId . PHP_EOL, FILE_APPEND);
+                        echo '请求补发失败' . PHP_EOL;
+
+                        return false;
                     }
 
                     $workOrderChangeSkusAll = [];
@@ -2105,7 +2108,7 @@ class Wangwei extends Backend
          * 第八波次：21:00-23:59:59
          *
          */
-        $where['a.increment_id'] = ['in',$order_number];
+        $where['a.increment_id'] = ['in', $order_number];
 
         $list = $this->order->where($where)->alias('a')
             ->field('b.id,b.sku,a.created_at,a.updated_at,entity_id,a.site,a.is_custom_lens,a.stock_id')
