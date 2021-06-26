@@ -648,14 +648,7 @@ class Wangwei extends Backend
 
             $stockId = 1; //郑州仓
 
-            $params = [];
-            $params['wave_order_number'] = 'BC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
-            $params['type'] = 1;
-            $params['wave_time_type'] = 9;
-            $params['stock_id'] = $stockId;
-            $params['order_date'] = time();
-            $params['createtime'] = time();
-            $id = $waveOrder->insertGetId($params);
+            $id = 1413;
 
             //转换平台SKU
             $sku = $itemPlatform->getTrueSku($v['sku'], $v['site']);
