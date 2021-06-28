@@ -153,7 +153,7 @@ class WorkOrderList extends Backend
             }
             $work_id = input('work_id');
             if ($work_id) {
-                $map['id'] = $work_id;
+                $map['WorkOrderList.id'] = $work_id;
             }
             //选项卡我的任务切换
             $filter = json_decode($this->request->get('filter'), true);
@@ -186,7 +186,7 @@ class WorkOrderList extends Backend
             }
             if ($filter['recept_person']) {
                 $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
-                $map['id'] = ['in', $workIds];
+                $map['WorkOrderList.id'] = ['in', $workIds];
                 unset($filter['recept_person']);
             }
             if ($filter['stock_id']) {
@@ -194,15 +194,23 @@ class WorkOrderList extends Backend
                 $map['stock_id'] = $stockId;
                 unset($filter['stock_id']);
             }
+
+            if ($filter['id']) {
+                $map['WorkOrderList.id'] = $filter['id'];
+                unset($filter['id']);
+            }
+
             //筛选措施
+            $hasWhere = [];
             if ($filter['measure_choose_id']) {
-                $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
-                if (!empty($map['id'])) {
-                    $newWorkIds = array_intersect($workIds, $measuerWorkIds);
-                    $map['id'] = ['in', $newWorkIds];
-                } else {
-                    $map['id'] = ['in', $measuerWorkIds];
-                }
+//                $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
+//                if (!empty($map['id'])) {
+//                    $newWorkIds = array_intersect($workIds, $measuerWorkIds);
+//                    $map['id'] = ['in', $newWorkIds];
+//                } else {
+//                    $map['id'] = ['in', $measuerWorkIds];
+//                }
+                $hasWhere['measure_choose_id'] = ['in',$filter['measure_choose_id']];
                 unset($filter['measure_choose_id']);
             }
             if ($filter['payment_time']) {
@@ -211,16 +219,22 @@ class WorkOrderList extends Backend
                 unset($filter['payment_time']);
             }
 
+            if ($filter['create_time']) {
+                $createat = explode(' ', $filter['create_time']);
+                $map1['WorkOrderList.create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+                unset($filter['create_time']);
+            }
+
             $this->request->get(['filter' => json_encode($filter)]);
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
-            $total = $this->model
+            $total = $this->model->hasWhere('workOrderMeasure', $hasWhere)
                 ->where($where)
                 ->where($map)
                 ->where($map1)
                 ->where($map2)
                 ->order($sort, $order)
                 ->count();
-            $list = $this->model
+            $list = $this->model->hasWhere('workOrderMeasure', $hasWhere)
                 ->where($where)
                 ->where($map)
                 ->where($map1)
