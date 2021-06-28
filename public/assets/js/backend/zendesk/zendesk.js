@@ -236,7 +236,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                 }
 
             });
-
         },
         add: function () {
             Controller.api.bindevent();

@@ -411,19 +411,19 @@ class Zendesk extends Model
                 if($ticket->channel == 'voice') {continue;}
                 //判断是否有承接人，并且该承接人在职，并且站点和当前邮件的站点一致
                 $recipient = Db::name('zendesk')
-                        ->alias('z')
-                        ->join('fa_admin a','z.assign_id=a.id')
-                        ->join('fa_zendesk_agents za','z.assign_id = za.admin_id')
-                        ->where(['a.status'=>['neq','hidden'],'za.count'=>['neq',0],'za.type'=>$ticket->getType(),'z.id'=>$ticket->id])
-                        ->field('z.assign_id,za.agent_id,z.id')
-                        ->find();
+                    ->alias('z')
+                    ->join('fa_admin a','z.assign_id=a.id')
+                    ->join('fa_zendesk_agents za','z.assign_id = za.admin_id')
+                    ->where(['a.status'=>['neq','hidden'],'za.count'=>['neq',0],'za.type'=>$ticket->getType(),'z.id'=>$ticket->id])
+                    ->field('z.assign_id,za.agent_id,z.id')
+                    ->find();
                 if($recipient['id']){
                     $assign_id = $recipient['assign_id'];
                     $assignee_id = $recipient['agent_id'];
                     //有承接人，判断该承接人是否上班
                     $customer_task = ZendeskTasks::whereTime('create_time', 'today')
-                            ->where(['admin_id' => $assign_id])
-                            ->find();
+                        ->where(['admin_id' => $assign_id])
+                        ->find();
                     if($customer_task->id){
                         //承接人上班，判断工作量是否满额
                         if($customer_task->target_count > $customer_task->complete_count){
@@ -433,11 +433,11 @@ class Zendesk extends Model
                         }else{
                             //承接人任务量满额，分配给任务量最少的人
                             $task = ZendeskTasks::whereTime('create_time', 'today')
-                            ->where(['type' => $ticket->getType()])
-                            ->where('surplus_count','>',0)
-                            ->order('complete_count', 'asc')
-                            ->limit(1)
-                            ->find();
+                                ->where(['type' => $ticket->getType()])
+                                ->where('surplus_count','>',0)
+                                ->order('complete_count', 'asc')
+                                ->limit(1)
+                                ->find();
                             $due_id = $task->admin_id;
                         }
                     }else{
@@ -453,11 +453,11 @@ class Zendesk extends Model
                 }else{
                     //没有承接人，承接并分配给任务量最少的人
                     $task = ZendeskTasks::whereTime('create_time', 'today')
-                    ->where(['type' => $ticket->getType()])
-                    ->where('surplus_count','>',0)
-                    ->order('complete_count', 'asc')
-                    ->limit(1)
-                    ->find();
+                        ->where(['type' => $ticket->getType()])
+                        ->where('surplus_count','>',0)
+                        ->order('complete_count', 'asc')
+                        ->limit(1)
+                        ->find();
                     $assign_id = $task->admin_id;
                     $assignee_id = $task->assignee_id;
                     $due_id = $task->admin_id;
@@ -491,6 +491,1073 @@ class Zendesk extends Model
         }
 
         echo "ok";
+    }
+    public static function shellEmailDistribution()
+    {
+        $now_date = date('Y-m-d H:i:s');
+        $limit_date = date('Y-m-d 16:00:00');
+        if($now_date<$limit_date) {
+            //当天下午4点半之后不进行分配操作
+            //1，判断今天有无task，无，创建
+            $tasks = ZendeskTasks::whereTime('create_time', 'today')->find();
+            if (!$tasks) {
+                //创建所有的tasks
+                //获取所有的agents
+                $agents = Db::name('zendesk_admin')
+                    ->alias('z')->join(['fa_admin' => 'a'],'z.admin_id=a.id')
+                    ->field('z.*,a.userid')
+                    ->where('a.status', '<>', 'hidden')
+                    ->where('z.count', '<>',0)
+                    ->select();
+                //查询该用户今天是否休息
+                $userlist_arr = array_filter(array_column($agents, 'userid'));
+                $userlist_str = implode(',', $userlist_arr);
+                $time = strtotime(date('Y-m-d 0:0:0', time()));
+                //通过接口获取休息人员名单
+                $ding = new \app\api\controller\Ding;
+                $restuser_arr = $ding->getRestList($userlist_str, $time);
+                foreach ($agents as $agent) {
+                    if (!in_array($agent['admin_id'], $restuser_arr)) {
+                        ZendeskTasks::create([
+                            'admin_id' => $agent['admin_id'],
+                            'leave_count' => 0,
+                            'target_count' => $agent['count'],
+                            'surplus_count' => $agent['count'],
+                            'complete_count' => 0,
+                            'check_count' => $agent['count'],
+                            'apply_count' => 0,
+                            'complete_apply_count' => 0
+                        ]);
+                    }
+                }
+            }
+            //获取所有的open和new的邮件
+            $waitTickets = self::where([
+                'status' => ['in', '1,2'],
+                'channel' => ['neq', 'voice'],
+                'is_hide' => 1
+            ])->order('is_urgency desc,is_difficult desc,zendesk_update_time asc')->select();
+            foreach ($waitTickets as $ticket) {
+                if ($ticket['channel'] == 'voice') {
+                    continue;
+                }
+                if($ticket['type'] != 3){
+                    $isVip = Zendesk::isVipCustomer($ticket['type'], $ticket->email);
+                }else{
+                    $isVip = 0;
+                }
+                Zendesk::emailDistribution($ticket, $isVip);
+            }
+        }
+        echo "ok";
+    }
+
+    /**
+     * 邮件分配逻辑
+     * @param $ticket 邮件内容
+     * @param $isVip  邮件中的用户是否是vip用户
+     * @author miaojingjing
+     * @date   2021/6/22 14:03:06
+     */
+    public function emailDistribution($ticket,$isVip)
+    {
+        //第一承接人信息
+        $firstAssignInfo = Db::name('zendesk')
+            ->alias('z')
+            ->join('fa_admin a','z.assign_id=a.id','left')
+            ->join('fa_zendesk_admin za','z.assign_id = za.admin_id','left')
+            ->where('z.id',$ticket->id)
+            ->field('z.assign_id,z.id,a.status,za.count,za.group')
+            ->find();
+        //第二承接人信息
+        $nextAssignInfo = Db::name('zendesk')
+            ->alias('z')
+            ->join('fa_admin a','z.assign_id_next=a.id','left')
+            ->join('fa_zendesk_admin za','z.assign_id_next = za.admin_id','left')
+            ->where('z.id',$ticket->id)
+            ->field('z.assign_id_next,z.id,a.status,za.count,za.group')
+            ->find();
+        Zendesk::distribute($ticket,$firstAssignInfo,$nextAssignInfo,$isVip);
+    }
+    /**
+     * 分配逻辑
+     * @param $ticket
+     * @param $firstAssignInfo
+     * @param $nextAssignInfo
+     * @param $isVip
+     * @throws Exception
+     * @author miaojingjing
+     * @date   2021/6/22 18:01:21
+     */
+    public function distribute($ticket,$firstAssignInfo,$nextAssignInfo,$isVip)
+    {
+        $date = date('Y-m-d H:i:s', time());
+        if($firstAssignInfo['assign_id'] != 0){
+            $firstAssignTask = ZendeskTasks::whereTime('create_time', 'today')
+                ->where('admin_id',$firstAssignInfo['assign_id'])
+                ->find();
+        }
+        if($nextAssignInfo['assign_id_next'] != 0){
+            $nextAssignTask = ZendeskTasks::whereTime('create_time', 'today')
+                ->where('admin_id',$nextAssignInfo['assign_id_next'])
+                ->find();
+        }
+        $ticketArr = [];
+        $ticketArr['is_hide'] = 0;
+        $taskArr = [];
+        $group = $isVip == 1 ? 1 : 0;
+        if($ticket->is_difficult == 1 && $isVip == 0){
+            //普通用户有疑难标记，交给任务量最少的
+            $task = Db::name('zendesk_tasks')
+                ->alias('t')
+                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                ->whereTime('t.create_time', 'today')
+                ->where('surplus_count','>',0)
+                ->where('group',1)
+                ->order('complete_count', 'asc')
+                ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                ->limit(1)
+                ->find();
+            if($task['admin_id']){
+                $ticketArr['due_id'] = $task['admin_id'];
+                $ticketArr['assign_time'] = $date;
+                Db::name('zendesk')
+                    ->where('id',$ticket->id)
+                    ->update($ticketArr);
+                $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                $taskArr['complete_count'] = $task['complete_count'] + 1;
+                $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                Db::name('zendesk_tasks')
+                    ->where('id',$task['id'])
+                    ->update($taskArr);
+                echo $ticket->id.' due_id:'.$task['admin_id'].',1'."\n";
+                usleep(10000);
+            }
+        }else{
+            //判断是否有第一承接人
+            if($firstAssignInfo['assign_id'] != 0){
+                //有第一承接人，判断第一承接人是否离职
+                if($firstAssignInfo['status'] == 'hidden'){
+                    //第一承接人离职，判断是否有第二承接人
+                    if($nextAssignInfo['assign_id_next'] != 0){
+                        //有第二承接人，判断第二承接人是否离职
+                        if($nextAssignInfo['status'] == 'hidden'){
+                            //第二承接人离职，分配给其他人未分满VIP组人员，并将此人标记为第一承接人
+                            $task = Db::name('zendesk_tasks')
+                                ->alias('t')
+                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                ->whereTime('t.create_time', 'today')
+                                ->where('surplus_count','>',0)
+                                ->where('group',$group)
+                                ->order('complete_count', 'asc')
+                                ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                ->limit(1)
+                                ->find();
+                            if($task['admin_id']){
+                                $ticketArr['assign_id'] = $task['admin_id'];
+                                $ticketArr['assign_id_next'] = 0;
+                                $ticketArr['due_id'] = $task['admin_id'];
+                                $ticketArr['assign_time'] = $date;
+                                Db::name('zendesk')
+                                    ->where('id',$ticket->id)
+                                    ->update($ticketArr);
+                                $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                Db::name('zendesk_tasks')
+                                    ->where('id',$task['id'])
+                                    ->update($taskArr);
+                                echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',2'."\n";
+                                usleep(10000);
+                            }
+                        }else{
+                            //判断第二承接人是否为vip组
+                            if($nextAssignInfo['group'] == $group){
+                                //第二承接人在职，判断第二承接人是否上班并任务是否分满
+                                if($nextAssignInfo['count'] != 0){
+                                    //第二承接人上班，判断任务是否分满
+                                    if($nextAssignTask['surplus_count'] > 0){
+                                        //未分满，将该邮件分配给第二承接人，并将第一承接人修改为该承接人，第二承接人置空
+                                        $ticketArr['assign_id'] = $nextAssignInfo['assign_id_next'];
+                                        $ticketArr['assign_id_next'] = 0;
+                                        $ticketArr['due_id'] = $nextAssignInfo['assign_id_next'];
+                                        $ticketArr['assign_time'] = $date;
+                                        Db::name('zendesk')
+                                            ->where('id',$ticket->id)
+                                            ->update($ticketArr);
+                                        $taskArr['surplus_count'] = $nextAssignTask['surplus_count'] - 1;
+                                        $taskArr['complete_count'] = $nextAssignTask['complete_count'] + 1;
+                                        $taskArr['complete_apply_count'] = $nextAssignTask['complete_apply_count'] + 1;
+                                        Db::name('zendesk_tasks')
+                                            ->where('id',$nextAssignTask['id'])
+                                            ->update($taskArr);
+                                        echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:0 due_id:'.$nextAssignInfo['assign_id_next'].',3'."\n";
+                                        usleep(10000);
+                                    }else{
+                                        //任务已分满，将邮件分配给任务量最少的人
+                                        $task = Db::name('zendesk_tasks')
+                                            ->alias('t')
+                                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                            ->whereTime('t.create_time', 'today')
+                                            ->where('surplus_count','>',0)
+                                            ->where('group',$group)
+                                            ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                            ->order('complete_count', 'asc')
+                                            ->limit(1)
+                                            ->find();
+                                        if($task['admin_id']){
+                                            $ticketArr['assign_id'] = $nextAssignInfo['assign_id_next'];
+                                            $ticketArr['assign_id_next'] = $task['admin_id'];
+                                            $ticketArr['due_id'] = $task['admin_id'];
+                                            $ticketArr['assign_time'] = $date;
+                                            Db::name('zendesk')
+                                                ->where('id',$ticket->id)
+                                                ->update($ticketArr);
+                                            $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                            $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                            $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                            Db::name('zendesk_tasks')
+                                                ->where('id',$task['id'])
+                                                ->update($taskArr);
+                                            echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',4'."\n";
+                                            usleep(10000);
+                                        }
+                                    }
+                                }else{
+                                    //第二承接人不上班，将邮件分配给任务量最少的人
+                                    $task = Db::name('zendesk_tasks')
+                                        ->alias('t')
+                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                        ->whereTime('t.create_time', 'today')
+                                        ->where('surplus_count','>',0)
+                                        ->where('group',$group)
+                                        ->order('complete_count', 'asc')
+                                        ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                        ->limit(1)
+                                        ->find();
+                                    if($task['admin_id']){
+                                        $ticketArr['assign_id'] = $nextAssignInfo['assign_id_next'];
+                                        $ticketArr['assign_id_next'] = $task['admin_id'];
+                                        $ticketArr['due_id'] = $task['admin_id'];
+                                        $ticketArr['assign_time'] = $date;
+                                        Db::name('zendesk')
+                                            ->where('id',$ticket->id)
+                                            ->update($ticketArr);
+                                        $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                        $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                        $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                        Db::name('zendesk_tasks')
+                                            ->where('id',$task['id'])
+                                            ->update($taskArr);
+                                        echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',5'."\n";
+                                        usleep(10000);
+                                    }
+                                }
+                            }else{
+                                //第二承接人不是VIP组成员，将任务分给任务量最少的人
+                                $task = Db::name('zendesk_tasks')
+                                    ->alias('t')
+                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                    ->whereTime('t.create_time', 'today')
+                                    ->where('surplus_count','>',0)
+                                    ->where('group',$group)
+                                    ->order('complete_count', 'asc')
+                                    ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                    ->limit(1)
+                                    ->find();
+                                if($task['admin_id']){
+                                    $ticketArr['assign_id'] = $task['admin_id'];
+                                    $ticketArr['assign_id_next'] = 0;
+                                    $ticketArr['due_id'] = $task['admin_id'];
+                                    $ticketArr['assign_time'] = $date;
+                                    Db::name('zendesk')
+                                        ->where('id',$ticket->id)
+                                        ->update($ticketArr);
+                                    $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                    $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                    $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                    Db::name('zendesk_tasks')
+                                        ->where('id',$task['id'])
+                                        ->update($taskArr);
+                                    echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',6'."\n";
+                                    usleep(10000);
+                                }
+                            }
+                        }
+                    }else{
+                        //没有第二承接人，把任务分配给最少的人
+                        $task = Db::name('zendesk_tasks')
+                            ->alias('t')
+                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                            ->whereTime('t.create_time', 'today')
+                            ->where('surplus_count','>',0)
+                            ->where('group',$group)
+                            ->order('complete_count', 'asc')
+                            ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                            ->limit(1)
+                            ->find();
+                        if($task['admin_id']){
+                            $ticketArr['assign_id'] = $task['admin_id'];
+                            $ticketArr['due_id'] = $task['admin_id'];
+                            $ticketArr['assign_time'] = $date;
+                            Db::name('zendesk')
+                                ->where('id',$ticket->id)
+                                ->update($ticketArr);
+                            $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                            $taskArr['complete_count'] = $task['complete_count'] + 1;
+                            $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                            Db::name('zendesk_tasks')
+                                ->where('id',$task['id'])
+                                ->update($taskArr);
+                            echo $ticket->id.' assign_id:'.$task['admin_id'].' due_id:'.$task['admin_id'].',7'."\n";
+                            usleep(10000);
+                        }
+                    }
+                }else{
+                    //第一承接人没有离职，判断第一承接人是否是VIP组成员
+                    if($firstAssignInfo['group'] == $group){
+                        //第一承接人是VIP组成员，判断第一承接人是否上班
+                        if($firstAssignInfo['count'] != 0){
+                            //第一承接人上班，判断是否任务分配满
+                            if($firstAssignTask['surplus_count'] > 0){
+                                //任务未分配满，将任务分配给第一承接人
+                                $ticketArr['due_id'] = $firstAssignInfo['assign_id'];
+                                $ticketArr['assign_time'] = $date;
+                                Db::name('zendesk')
+                                    ->where('id',$ticket->id)
+                                    ->update($ticketArr);
+                                $taskArr['surplus_count'] = $firstAssignTask['surplus_count'] - 1;
+                                $taskArr['complete_count'] = $firstAssignTask['complete_count'] + 1;
+                                $taskArr['complete_apply_count'] = $firstAssignTask['complete_apply_count'] + 1;
+                                Db::name('zendesk_tasks')
+                                    ->where('id',$firstAssignTask['id'])
+                                    ->update($taskArr);
+                                echo $ticket->id.' due_id:'.$firstAssignInfo['assign_id'].',8'."\n";
+                                usleep(10000);
+                            }else{
+                                //任务分配满，判断是否有第二承接人
+                                if($nextAssignInfo['assign_id_next'] != 0){
+                                    //有第二承接人，判断第二承接人是否离职
+                                    if($nextAssignInfo['status'] == 'hidden'){
+                                        //第二承接人离职，分配给其他人未分满VIP组人员，并将此人标记为第二承接人
+                                        $task = Db::name('zendesk_tasks')
+                                            ->alias('t')
+                                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                            ->whereTime('t.create_time', 'today')
+                                            ->where('surplus_count','>',0)
+                                            ->where('group',$group)
+                                            ->order('complete_count', 'asc')
+                                            ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                            ->limit(1)
+                                            ->find();
+                                        if($task['admin_id']){
+                                            $ticketArr['assign_id_next'] = $task['admin_id'];
+                                            $ticketArr['due_id'] = $task['admin_id'];
+                                            $ticketArr['assign_time'] = $date;
+                                            Db::name('zendesk')
+                                                ->where('id',$ticket->id)
+                                                ->update($ticketArr);
+                                            $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                            $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                            $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                            Db::name('zendesk_tasks')
+                                                ->where('id',$task['id'])
+                                                ->update($taskArr);
+                                            echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',9'."\n";
+                                            usleep(10000);
+                                        }
+                                    }else{
+                                        //判断第二承接人是否为vip组
+                                        if($nextAssignInfo['group'] == $group){
+                                            //第二承接人在职，判断第二承接人是否上班并任务是否分满
+                                            if($nextAssignInfo['count'] != 0){
+                                                //第二承接人上班，判断任务是否分满
+                                                if($nextAssignTask['surplus_count'] > 0){
+                                                    //未分满，将该邮件分配给第二承接人，并将第一承接人修改为该承接人，第二承接人置空
+                                                    $ticketArr['due_id'] = $nextAssignInfo['assign_id_next'];
+                                                    $ticketArr['assign_time'] = $date;
+                                                    Db::name('zendesk')
+                                                        ->where('id',$ticket->id)
+                                                        ->update($ticketArr);
+                                                    $taskArr['surplus_count'] = $nextAssignTask['surplus_count'] - 1;
+                                                    $taskArr['complete_count'] = $nextAssignTask['complete_count'] + 1;
+                                                    $taskArr['complete_apply_count'] = $nextAssignTask['complete_apply_count'] + 1;
+                                                    Db::name('zendesk_tasks')
+                                                        ->where('id',$nextAssignTask['id'])
+                                                        ->update($taskArr);
+                                                    echo $ticket->id.' due_id:'.$nextAssignInfo['assign_id_next'].',10'."\n";
+                                                    usleep(10000);
+                                                }else{
+                                                    //任务已分满，将邮件分配给任务量最少的人
+                                                    $task = Db::name('zendesk_tasks')
+                                                        ->alias('t')
+                                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                        ->whereTime('t.create_time', 'today')
+                                                        ->where('surplus_count','>',0)
+                                                        ->where('group',$group)
+                                                        ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                                        ->order('complete_count', 'asc')
+                                                        ->limit(1)
+                                                        ->find();
+                                                    if($task['admin_id']){
+                                                        $ticketArr['due_id'] = $task['admin_id'];
+                                                        $ticketArr['assign_time'] = $date;
+                                                        Db::name('zendesk')
+                                                            ->where('id',$ticket->id)
+                                                            ->update($ticketArr);
+                                                        $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                                        $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                                        $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                                        Db::name('zendesk_tasks')
+                                                            ->where('id',$task['id'])
+                                                            ->update($taskArr);
+                                                        echo $ticket->id.' due_id:'.$task['admin_id'].',11'."\n";
+                                                        usleep(10000);
+                                                    }
+                                                }
+                                            }else{
+                                                //第二承接人不上班，将邮件分配给任务量最少的人
+                                                $task = Db::name('zendesk_tasks')
+                                                    ->alias('t')
+                                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                    ->whereTime('t.create_time', 'today')
+                                                    ->where('surplus_count','>',0)
+                                                    ->where('group',$group)
+                                                    ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                                    ->order('complete_count', 'asc')
+                                                    ->limit(1)
+                                                    ->find();
+                                                if($task['admin_id']){
+                                                    $ticketArr['due_id'] = $task['admin_id'];
+                                                    $ticketArr['assign_time'] = $date;
+                                                    Db::name('zendesk')
+                                                        ->where('id',$ticket->id)
+                                                        ->update($ticketArr);
+                                                    $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                                    $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                                    $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                                    Db::name('zendesk_tasks')
+                                                        ->where('id',$task['id'])
+                                                        ->update($taskArr);
+                                                    echo $ticket->id.' due_id:'.$task['admin_id'].',12'."\n";
+                                                    usleep(10000);
+                                                }
+                                            }
+                                        }else{
+                                            //第二承接人不是VIP组成员，将任务分给任务量最少的人
+                                            $task = Db::name('zendesk_tasks')
+                                                ->alias('t')
+                                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                ->whereTime('t.create_time', 'today')
+                                                ->where('surplus_count','>',0)
+                                                ->where('group',$group)
+                                                ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                                ->order('complete_count', 'asc')
+                                                ->limit(1)
+                                                ->find();
+                                            if($task['admin_id']){
+                                                $ticketArr['assign_id_next'] = $task['admin_id'];
+                                                $ticketArr['due_id'] = $task['admin_id'];
+                                                $ticketArr['assign_time'] = $date;
+                                                Db::name('zendesk')
+                                                    ->where('id',$ticket->id)
+                                                    ->update($ticketArr);
+                                                $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                                $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                                $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                                Db::name('zendesk_tasks')
+                                                    ->where('id',$task['id'])
+                                                    ->update($taskArr);
+                                                echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',13'."\n";
+                                                usleep(10000);
+                                            }
+                                        }
+                                    }
+                                }else{
+                                    //没有第二承接，将任务分配给任务量最少的人
+                                    $task = Db::name('zendesk_tasks')
+                                        ->alias('t')
+                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                        ->whereTime('t.create_time', 'today')
+                                        ->where('surplus_count','>',0)
+                                        ->where('group',$group)
+                                        ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                        ->order('complete_count', 'asc')
+                                        ->limit(1)
+                                        ->find();
+                                    if($task['admin_id']){
+                                        $ticketArr['assign_id_next'] = $task['admin_id'];
+                                        $ticketArr['due_id'] = $task['admin_id'];
+                                        $ticketArr['assign_time'] = $date;
+                                        Db::name('zendesk')
+                                            ->where('id',$ticket->id)
+                                            ->update($ticketArr);
+                                        $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                        $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                        $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                        Db::name('zendesk_tasks')
+                                            ->where('id',$task['id'])
+                                            ->update($taskArr);
+                                        echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',14'."\n";
+                                        usleep(10000);
+                                    }
+                                }
+                            }
+                        }else{
+                            //第一承接人没有上班，判断是否有第二承接人
+                            if($nextAssignInfo['assign_id_next'] != 0){
+                                //有第二承接人，判断第二承接人是否离职
+                                if($nextAssignInfo['status'] == 'hidden'){
+                                    //第二承接人离职，分配给其他人未分满VIP组人员，并将此人标记为第二承接人
+                                    $task = Db::name('zendesk_tasks')
+                                        ->alias('t')
+                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                        ->whereTime('t.create_time', 'today')
+                                        ->where('surplus_count','>',0)
+                                        ->where('group',$group)
+                                        ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                        ->order('complete_count', 'asc')
+                                        ->limit(1)
+                                        ->find();
+                                    if($task['admin_id']){
+                                        $ticketArr['assign_id_next'] = $task['admin_id'];
+                                        $ticketArr['due_id'] = $task['admin_id'];
+                                        $ticketArr['assign_time'] = $date;
+                                        Db::name('zendesk')
+                                            ->where('id',$ticket->id)
+                                            ->update($ticketArr);
+                                        $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                        $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                        $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                        Db::name('zendesk_tasks')
+                                            ->where('id',$task['id'])
+                                            ->update($taskArr);
+                                        echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',15'."\n";
+                                        usleep(10000);
+                                    }
+                                }else{
+                                    //判断第二承接人是否为vip组
+                                    if($nextAssignInfo['group'] == $group){
+                                        //第二承接人在职，判断第二承接人是否上班并任务是否分满
+                                        if($nextAssignInfo['count'] != 0){
+                                            //第二承接人上班，判断任务是否分满
+                                            if($nextAssignTask['surplus_count'] > 0){
+                                                //未分满，将该邮件分配给第二承接人，并将第一承接人修改为该承接人，第二承接人置空
+                                                $ticketArr['due_id'] = $nextAssignInfo['assign_id_next'];
+                                                $ticketArr['assign_time'] = $date;
+                                                Db::name('zendesk')
+                                                    ->where('id',$ticket->id)
+                                                    ->update($ticketArr);
+                                                $taskArr['surplus_count'] = $nextAssignTask['surplus_count'] - 1;
+                                                $taskArr['complete_count'] = $nextAssignTask['complete_count'] + 1;
+                                                $taskArr['complete_apply_count'] = $nextAssignTask['complete_apply_count'] + 1;
+                                                Db::name('zendesk_tasks')
+                                                    ->where('id',$nextAssignTask['id'])
+                                                    ->update($taskArr);
+                                                echo $ticket->id.' due_id:'.$nextAssignInfo['assign_id_next'].',16'."\n";
+                                                usleep(10000);
+                                            }else{
+                                                //任务已分满，将邮件分配给任务量最少的人
+                                                $task = Db::name('zendesk_tasks')
+                                                    ->alias('t')
+                                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                    ->whereTime('t.create_time', 'today')
+                                                    ->where('surplus_count','>',0)
+                                                    ->where('group',$group)
+                                                    ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                                    ->order('complete_count', 'asc')
+                                                    ->limit(1)
+                                                    ->find();
+                                                if($task['admin_id']){
+                                                    $ticketArr['due_id'] = $task['admin_id'];
+                                                    $ticketArr['assign_time'] = $date;
+                                                    Db::name('zendesk')
+                                                        ->where('id',$ticket->id)
+                                                        ->update($ticketArr);
+                                                    $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                                    $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                                    $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                                    Db::name('zendesk_tasks')
+                                                        ->where('id',$task['id'])
+                                                        ->update($taskArr);
+                                                    echo $ticket->id.' due_id:'.$task['admin_id'].',17'."\n";
+                                                    usleep(10000);
+                                                }
+                                            }
+                                        }else{
+                                            //第二承接人不上班，将邮件分配给任务量最少的人
+                                            $task = Db::name('zendesk_tasks')
+                                                ->alias('t')
+                                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                ->whereTime('t.create_time', 'today')
+                                                ->where('surplus_count','>',0)
+                                                ->where('group',$group)
+                                                ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                                ->order('complete_count', 'asc')
+                                                ->limit(1)
+                                                ->find();
+                                            if($task['admin_id']){
+                                                $ticketArr['due_id'] = $task['admin_id'];
+                                                $ticketArr['assign_time'] = $date;
+                                                Db::name('zendesk')
+                                                    ->where('id',$ticket->id)
+                                                    ->update($ticketArr);
+                                                $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                                $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                                $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                                Db::name('zendesk_tasks')
+                                                    ->where('id',$task['id'])
+                                                    ->update($taskArr);
+                                                echo $ticket->id.' due_id:'.$task['admin_id'].',18'."\n";
+                                                usleep(10000);
+                                            }
+                                        }
+                                    }else{
+                                        //第二承接人不是VIP组成员，将任务分给任务量最少的人
+                                        $task = Db::name('zendesk_tasks')
+                                            ->alias('t')
+                                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                            ->whereTime('t.create_time', 'today')
+                                            ->where('surplus_count','>',0)
+                                            ->where('group',$group)
+                                            ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                            ->order('complete_count', 'asc')
+                                            ->limit(1)
+                                            ->find();
+                                        if($task['admin_id']){
+                                            $ticketArr['assign_id_next'] = $task['admin_id'];
+                                            $ticketArr['due_id'] = $task['admin_id'];
+                                            $ticketArr['assign_time'] = $date;
+                                            Db::name('zendesk')
+                                                ->where('id',$ticket->id)
+                                                ->update($ticketArr);
+                                            $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                            $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                            $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                            Db::name('zendesk_tasks')
+                                                ->where('id',$task['id'])
+                                                ->update($taskArr);
+                                            echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',19'."\n";
+                                            usleep(10000);
+                                        }
+                                    }
+                                }
+                            }else{
+                                //没有第二承接人，分配给任务量最少的人
+                                $task = Db::name('zendesk_tasks')
+                                    ->alias('t')
+                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                    ->whereTime('t.create_time', 'today')
+                                    ->where('surplus_count','>',0)
+                                    ->where('group',$group)
+                                    ->order('complete_count', 'asc')
+                                    ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                    ->limit(1)
+                                    ->find();
+                                if($task['admin_id']){
+                                    $ticketArr['assign_id_next'] = $task['admin_id'];
+                                    $ticketArr['due_id'] = $task['admin_id'];
+                                    $ticketArr['assign_time'] = $date;
+                                    Db::name('zendesk')
+                                        ->where('id',$ticket->id)
+                                        ->update($ticketArr);
+                                    $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                    $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                    $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                    Db::name('zendesk_tasks')
+                                        ->where('id',$task['id'])
+                                        ->update($taskArr);
+                                    echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',20'."\n";
+                                    usleep(10000);
+                                }
+                            }
+                        }
+                    }else{
+                        //第一承接人不是该组成员，判断第二承接人
+                        if($nextAssignInfo['assign_id_next'] != 0){
+                            //有第二承接人，判断第二承接人是否离职
+                            if($nextAssignInfo['status'] == 'hidden'){
+                                //第二承接人离职，分配给其他人未分满组人员，并将此人标记为第一承接人
+                                $task = Db::name('zendesk_tasks')
+                                    ->alias('t')
+                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                    ->whereTime('t.create_time', 'today')
+                                    ->where('surplus_count','>',0)
+                                    ->where('group',$group)
+                                    ->order('complete_count', 'asc')
+                                    ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                    ->limit(1)
+                                    ->find();
+                                if($task['admin_id']){
+                                    $ticketArr['assign_id'] = $task['admin_id'];
+                                    $ticketArr['assign_id_next'] = 0;
+                                    $ticketArr['due_id'] = $task['admin_id'];
+                                    $ticketArr['assign_time'] = $date;
+                                    Db::name('zendesk')
+                                        ->where('id',$ticket->id)
+                                        ->update($ticketArr);
+                                    $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                    $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                    $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                    Db::name('zendesk_tasks')
+                                        ->where('id',$task['id'])
+                                        ->update($taskArr);
+                                    echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',21'."\n";
+                                    usleep(10000);
+                                }
+                            }else{
+                                //判断第二承接人是否为vip组
+                                if($nextAssignInfo['group'] == $group){
+                                    //第二承接人在职，判断第二承接人是否上班并任务是否分满
+                                    if($nextAssignInfo['count'] != 0){
+                                        //第二承接人上班，判断任务是否分满
+                                        if($nextAssignTask['surplus_count'] > 0){
+                                            //未分满，将该邮件分配给第二承接人，并将第一承接人修改为该承接人，第二承接人置空
+                                            $ticketArr['assign_id'] = $nextAssignInfo['assign_id_next'];
+                                            $ticketArr['assign_id_next'] = 0;
+                                            $ticketArr['due_id'] = $nextAssignInfo['assign_id_next'];
+                                            $ticketArr['assign_time'] = $date;
+                                            Db::name('zendesk')
+                                                ->where('id',$ticket->id)
+                                                ->update($ticketArr);
+                                            $taskArr['surplus_count'] = $nextAssignTask['surplus_count'] - 1;
+                                            $taskArr['complete_count'] = $nextAssignTask['complete_count'] + 1;
+                                            $taskArr['complete_apply_count'] = $nextAssignTask['complete_apply_count'] + 1;
+                                            Db::name('zendesk_tasks')
+                                                ->where('id',$nextAssignTask['id'])
+                                                ->update($taskArr);
+                                            echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:0 due_id:'.$nextAssignInfo['assign_id_next'].',22'."\n";
+                                            usleep(10000);
+                                        }else{
+                                            //任务已分满，将邮件分配给任务量最少的人
+                                            $task = Db::name('zendesk_tasks')
+                                                ->alias('t')
+                                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                ->whereTime('t.create_time', 'today')
+                                                ->where('surplus_count','>',0)
+                                                ->where('group',$group)
+                                                ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                                ->order('complete_count', 'asc')
+                                                ->limit(1)
+                                                ->find();
+                                            if($task['admin_id']){
+                                                $ticketArr['assign_id'] = $nextAssignInfo['assign_id_next'];
+                                                $ticketArr['assign_id_next'] = $task['admin_id'];
+                                                $ticketArr['due_id'] = $task['admin_id'];
+                                                $ticketArr['assign_time'] = $date;
+                                                Db::name('zendesk')
+                                                    ->where('id',$ticket->id)
+                                                    ->update($ticketArr);
+                                                $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                                $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                                $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                                Db::name('zendesk_tasks')
+                                                    ->where('id',$task['id'])
+                                                    ->update($taskArr);
+                                                echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',23'."\n";
+                                                usleep(10000);
+                                            }
+                                        }
+                                    }else{
+                                        //第二承接人不上班，将邮件分配给任务量最少的人
+                                        $task = Db::name('zendesk_tasks')
+                                            ->alias('t')
+                                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                            ->whereTime('t.create_time', 'today')
+                                            ->where('surplus_count','>',0)
+                                            ->where('group',$group)
+                                            ->order('complete_count', 'asc')
+                                            ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                            ->limit(1)
+                                            ->find();
+                                        if($task['admin_id']){
+                                            $ticketArr['assign_id'] = $nextAssignInfo['assign_id_next'];
+                                            $ticketArr['assign_id_next'] = $task['admin_id'];
+                                            $ticketArr['due_id'] = $task['admin_id'];
+                                            $ticketArr['assign_time'] = $date;
+                                            Db::name('zendesk')
+                                                ->where('id',$ticket->id)
+                                                ->update($ticketArr);
+                                            $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                            $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                            $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                            Db::name('zendesk_tasks')
+                                                ->where('id',$task['id'])
+                                                ->update($taskArr);
+                                            echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',24'."\n";
+                                            usleep(10000);
+                                        }
+                                    }
+                                }else{
+                                    //第二承接人不是VIP组成员，将任务分给任务量最少的人
+                                    $task = Db::name('zendesk_tasks')
+                                        ->alias('t')
+                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                        ->whereTime('t.create_time', 'today')
+                                        ->where('surplus_count','>',0)
+                                        ->where('group',$group)
+                                        ->order('complete_count', 'asc')
+                                        ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                        ->limit(1)
+                                        ->find();
+                                    if($task['admin_id']){
+                                        $ticketArr['assign_id'] = $task['admin_id'];
+                                        $ticketArr['assign_id_next'] = 0;
+                                        $ticketArr['due_id'] = $task['admin_id'];
+                                        $ticketArr['assign_time'] = $date;
+                                        Db::name('zendesk')
+                                            ->where('id',$ticket->id)
+                                            ->update($ticketArr);
+                                        $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                        $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                        $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                        Db::name('zendesk_tasks')
+                                            ->where('id',$task['id'])
+                                            ->update($taskArr);
+                                        echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',25'."\n";
+                                        usleep(10000);
+                                    }
+                                }
+                            }
+                        }else{
+                            //没有第二承接人，把任务分配给最少的人
+                            $task = Db::name('zendesk_tasks')
+                                ->alias('t')
+                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                ->whereTime('t.create_time', 'today')
+                                ->where('surplus_count','>',0)
+                                ->where('group',$group)
+                                ->order('complete_count', 'asc')
+                                ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                ->limit(1)
+                                ->find();
+                            if($task['admin_id']){
+                                $ticketArr['assign_id'] = $task['admin_id'];
+                                $ticketArr['due_id'] = $task['admin_id'];
+                                $ticketArr['assign_time'] = $date;
+                                Db::name('zendesk')
+                                    ->where('id',$ticket->id)
+                                    ->update($ticketArr);
+                                $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                Db::name('zendesk_tasks')
+                                    ->where('id',$task['id'])
+                                    ->update($taskArr);
+                                echo $ticket->id.' assign_id:'.$task['admin_id'].' due_id:'.$task['admin_id'].',26'."\n";
+                                usleep(10000);
+                            }
+                        }
+                    }
+                }
+            }else{
+                //没有第一承接人，判断是否有第二承接人
+                if($nextAssignInfo['assign_id_next'] != 0){
+                    //有第二承接人，判断第二承接人是否离职
+                    if($nextAssignInfo['status'] == 'hidden'){
+                        //第二承接人离职，分配给其他人未分满VIP组人员，并将此人标记为第一承接人
+                        $task = Db::name('zendesk_tasks')
+                            ->alias('t')
+                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                            ->whereTime('t.create_time', 'today')
+                            ->where('surplus_count','>',0)
+                            ->where('group',$group)
+                            ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                            ->order('complete_count', 'asc')
+                            ->limit(1)
+                            ->find();
+                        if($task['admin_id']){
+                            $ticketArr['assign_id'] = $task['admin_id'];
+                            $ticketArr['assign_id_next'] = 0;
+                            $ticketArr['due_id'] = $task['admin_id'];
+                            $ticketArr['assign_time'] = $date;
+                            Db::name('zendesk')
+                                ->where('id',$ticket->id)
+                                ->update($ticketArr);
+                            $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                            $taskArr['complete_count'] = $task['complete_count'] + 1;
+                            $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                            Db::name('zendesk_tasks')
+                                ->where('id',$task['id'])
+                                ->update($taskArr);
+                            echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',27'."\n";
+                            usleep(10000);
+                        }
+                    }else{
+                        //判断第二承接人是否为vip组
+                        if($nextAssignInfo['group'] == $group){
+                            //第二承接人在职，判断第二承接人是否上班并任务是否分满
+                            if($nextAssignInfo['count'] != 0){
+                                //第二承接人上班，判断任务是否分满
+                                if($nextAssignTask['surplus_count'] > 0){
+                                    //未分满，将该邮件分配给第二承接人，并将第一承接人修改为该承接人，第二承接人置空
+                                    $ticketArr['assign_id'] = $nextAssignInfo['assign_id_next'];
+                                    $ticketArr['assign_id_next'] = 0;
+                                    $ticketArr['due_id'] = $nextAssignInfo['assign_id_next'];
+                                    $ticketArr['assign_time'] = $date;
+                                    Db::name('zendesk')
+                                        ->where('id',$ticket->id)
+                                        ->update($ticketArr);
+                                    $taskArr['surplus_count'] = $nextAssignTask['surplus_count'] - 1;
+                                    $taskArr['complete_count'] = $nextAssignTask['complete_count'] + 1;
+                                    $taskArr['complete_apply_count'] = $nextAssignTask['complete_apply_count'] + 1;
+                                    Db::name('zendesk_tasks')
+                                        ->where('id',$nextAssignTask['id'])
+                                        ->update($taskArr);
+                                    echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:0 due_id:'.$nextAssignInfo['assign_id_next'].',28'."\n";
+                                    usleep(10000);
+                                }else{
+                                    //任务已分满，将邮件分配给任务量最少的人
+                                    $task = Db::name('zendesk_tasks')
+                                        ->alias('t')
+                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                        ->whereTime('t.create_time', 'today')
+                                        ->where('surplus_count','>',0)
+                                        ->where('group',$group)
+                                        ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                        ->order('complete_count', 'asc')
+                                        ->limit(1)
+                                        ->find();
+                                    if($task['admin_id']){
+                                        $ticketArr['assign_id'] = $nextAssignInfo['assign_id_next'];
+                                        $ticketArr['assign_id_next'] = $task['admin_id'];
+                                        $ticketArr['due_id'] = $task['admin_id'];
+                                        $ticketArr['assign_time'] = $date;
+                                        Db::name('zendesk')
+                                            ->where('id',$ticket->id)
+                                            ->update($ticketArr);
+                                        $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                        $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                        $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                        Db::name('zendesk_tasks')
+                                            ->where('id',$task['id'])
+                                            ->update($taskArr);
+                                        echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',29'."\n";
+                                        usleep(10000);
+                                    }
+                                }
+                            }else{
+                                //第二承接人不上班，将邮件分配给任务量最少的人
+                                $task = Db::name('zendesk_tasks')
+                                    ->alias('t')
+                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                    ->whereTime('t.create_time', 'today')
+                                    ->where('surplus_count','>',0)
+                                    ->where('group',$group)
+                                    ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                    ->order('complete_count', 'asc')
+                                    ->limit(1)
+                                    ->find();
+                                if($task['admin_id']){
+                                    $ticketArr['assign_id'] = $nextAssignInfo['assign_id_next'];
+                                    $ticketArr['assign_id_next'] = $task['admin_id'];
+                                    $ticketArr['due_id'] = $task['admin_id'];
+                                    $ticketArr['assign_time'] = $date;
+                                    Db::name('zendesk')
+                                        ->where('id',$ticket->id)
+                                        ->update($ticketArr);
+                                    $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                    $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                    $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                    Db::name('zendesk_tasks')
+                                        ->where('id',$task['id'])
+                                        ->update($taskArr);
+                                    echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',30'."\n";
+                                    usleep(10000);
+                                }
+                            }
+                        }else{
+                            //第二承接人不是VIP组成员，将任务分给任务量最少的人
+                            $task = Db::name('zendesk_tasks')
+                                ->alias('t')
+                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                ->whereTime('t.create_time', 'today')
+                                ->where('surplus_count','>',0)
+                                ->where('group',$group)
+                                ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                                ->order('complete_count', 'asc')
+                                ->limit(1)
+                                ->find();
+                            if($task['admin_id']){
+                                $ticketArr['assign_id'] = $task['admin_id'];
+                                $ticketArr['assign_id_next'] = 0;
+                                $ticketArr['due_id'] = $task['admin_id'];
+                                $ticketArr['assign_time'] = $date;
+                                Db::name('zendesk')
+                                    ->where('id',$ticket->id)
+                                    ->update($ticketArr);
+                                $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                                $taskArr['complete_count'] = $task['complete_count'] + 1;
+                                $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                                Db::name('zendesk_tasks')
+                                    ->where('id',$task['id'])
+                                    ->update($taskArr);
+                                echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',31'."\n";
+                                usleep(10000);
+                            }
+                        }
+                    }
+                }else{
+                    //没有第二承接人，分配给任务量最少的人
+                    $task = Db::name('zendesk_tasks')
+                        ->alias('t')
+                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                        ->whereTime('t.create_time', 'today')
+                        ->where('surplus_count','>',0)
+                        ->where('group',$group)
+                        ->field('t.id,t.admin_id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                        ->order('complete_count', 'asc')
+                        ->field('t.id,t.surplus_count,t.complete_count,t.complete_apply_count')
+                        ->limit(1)
+                        ->find();
+                    if($task['admin_id']){
+                        $ticketArr['assign_id'] = $task['admin_id'];
+                        $ticketArr['due_id'] = $task['admin_id'];
+                        $ticketArr['assign_time'] = $date;
+                        Db::name('zendesk')
+                            ->where('id',$ticket->id)
+                            ->update($ticketArr);
+                        $taskArr['surplus_count'] = $task['surplus_count'] - 1;
+                        $taskArr['complete_count'] = $task['complete_count'] + 1;
+                        $taskArr['complete_apply_count'] = $task['complete_apply_count'] + 1;
+                        Db::name('zendesk_tasks')
+                            ->where('id',$task['id'])
+                            ->update($taskArr);
+                        echo $ticket->id.' assign_id:'.$task['admin_id'].' due_id:'.$task['admin_id'].',32'."\n";
+                        usleep(10000);
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * 判断该用户是VIP用户
+     * @param $site
+     * @param $email
+     * @return float|mixed|string
+     * @throws Exception
+     * @author miaojingjing
+     * @date   2021/6/22 11:51:41
+     */
+    public function isVipCustomer($site,$email)
+    {
+        switch ($site) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                break;
+            default:
+                $model = false;
+                break;
+        }
+        return $model->table('customer_entity')
+            ->where('email',$email)
+            ->value('is_vip');
     }
     /*
      * 统计工作量概况
