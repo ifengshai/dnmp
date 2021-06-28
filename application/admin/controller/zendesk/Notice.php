@@ -199,7 +199,7 @@ class Notice extends Controller
                 ]);
             }
             //判断邮件中用户是否回复了三次，回复三次标记为紧急
-            $zendeskCommentsArr = Db::name('zendesk_comments')->where('ticket_id',$id)->column('is_admin');
+            $zendeskCommentsArr = Db::name('zendesk_comments')->where('ticket_id',$id)->where('platform',$type)->column('is_admin');
             if(!in_array(1,$zendeskCommentsArr) && count($zendeskCommentsArr) >= 3){
                 Db::name('zendesk')->where('id',$zid)->update(['is_urgency'=>1]);
             }
@@ -313,7 +313,7 @@ class Notice extends Controller
                 }
             }
             //判断邮件中用户是否回复了三次，回复三次标记为紧急
-            $zendeskCommentsArr = Db::name('zendesk_comments')->where('ticket_id',$id)->column('is_admin');
+            $zendeskCommentsArr = Db::name('zendesk_comments')->where('ticket_id',$id)->where('platform',$type)->column('is_admin');
             if(!in_array(1,$zendeskCommentsArr) && count($zendeskCommentsArr) >= 3){
                 Db::name('zendesk')->where('id',$zendesk->id)->update(['is_urgency'=>1]);
             }
