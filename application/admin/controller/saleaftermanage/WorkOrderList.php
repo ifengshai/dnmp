@@ -4387,10 +4387,21 @@ EOF;
         $filter = json_decode($this->request->get('filter'), true);
         $map = [];
 
+        if ($filter['create_time']) {
+            $createat = explode(' ', $filter['create_time']);
+            $map['WorkOrderList.create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            unset($filter['create_time']);
+        }
+
         if ($filter['recept_person']) {
             $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
             $map['WorkOrderList.id'] = ['in', $workIds];
             unset($filter['recept_person']);
+        }
+
+        if ($filter['id']) {
+            $map['WorkOrderList.id'] = $filter['id'];
+            unset($filter['id']);
         }
 
         //筛选措施
