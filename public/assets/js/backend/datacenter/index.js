@@ -48,6 +48,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                         {field: 'de_num', title: __('德语站销量'), operate: false},
                         {field: 'jp_sku', title: __('日语站SKU'), operate: false},
                         {field: 'jp_num', title: __('日语站销量'), operate: false},
+                        {field: 'ali_sku', title: __('ailibaba_SKU'), operate: false},
+                        {field: 'ali_num', title: __('ailibaba站销量'), operate: false},
                         {field: 'fr_sku', title: __('法语站SKU'), operate: false},
                         {field: 'fr_num', title: __('法语站销量'), operate: false},
                         { field: 'available_stock', title: __('可用库存'), operate: false },
