@@ -77,4 +77,5 @@ class WorkOrderMeasure extends Model
 		}
 		return $arrInfo;
     }
+
 }
