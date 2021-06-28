@@ -21,6 +21,8 @@ class WorkOrderMeasure extends Model
 
     // 追加属性
     protected $append = [];
+
+
     /**
      * 求出工单的措施列表
      *

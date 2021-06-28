@@ -153,7 +153,7 @@ class WorkOrderList extends Backend
             }
             $work_id = input('work_id');
             if ($work_id) {
-                $map['WorkOrderList.id'] = $work_id;
+                $map['id'] = $work_id;
             }
             //选项卡我的任务切换
             $filter = json_decode($this->request->get('filter'), true);
@@ -186,7 +186,7 @@ class WorkOrderList extends Backend
             }
             if ($filter['recept_person']) {
                 $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
-                $map['WorkOrderList.id'] = ['in', $workIds];
+                $map['id'] = ['in', $workIds];
                 unset($filter['recept_person']);
             }
             if ($filter['stock_id']) {
@@ -195,10 +195,6 @@ class WorkOrderList extends Backend
                 unset($filter['stock_id']);
             }
 
-            if ($filter['id']) {
-                $map['WorkOrderList.id'] = $filter['id'];
-                unset($filter['id']);
-            }
 
             //筛选措施
             $hasWhere = [];
@@ -210,7 +206,13 @@ class WorkOrderList extends Backend
 //                } else {
 //                    $map['id'] = ['in', $measuerWorkIds];
 //                }
-                $hasWhere['measure_choose_id'] = ['in',$filter['measure_choose_id']];
+
+                $measure_choose_id = $filter['measure_choose_id'];
+
+                $this->model->where('id', 'IN', function ($query) use ($measure_choose_id) {
+                    $query->table('fa_work_order_measure')->where('measure_choose_id', 'in', $measure_choose_id)->field('work_id');
+                });
+//                $hasWhere['measure_choose_id'] = ['in', $filter['measure_choose_id']];
                 unset($filter['measure_choose_id']);
             }
             if ($filter['payment_time']) {
@@ -219,22 +221,16 @@ class WorkOrderList extends Backend
                 unset($filter['payment_time']);
             }
 
-            if ($filter['create_time']) {
-                $createat = explode(' ', $filter['create_time']);
-                $map1['WorkOrderList.create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
-                unset($filter['create_time']);
-            }
-
             $this->request->get(['filter' => json_encode($filter)]);
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
-            $total = $this->model->hasWhere('workOrderMeasure', $hasWhere)
+            $total = $this->model
                 ->where($where)
                 ->where($map)
                 ->where($map1)
                 ->where($map2)
                 ->order($sort, $order)
                 ->count();
-            $list = $this->model->hasWhere('workOrderMeasure', $hasWhere)
+            $list = $this->model
                 ->where($where)
                 ->where($map)
                 ->where($map1)
@@ -4464,7 +4460,7 @@ EOF;
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
         $users = $admin->where('status', 'normal')->column('nickname', 'id');
-        $arr = array_column($list,'id');
+        $arr = array_column($list, 'id');
         //求出所有的措施
         $info = $this->step->fetchMeasureRecord($arr);
         if ($info) {
