@@ -17,6 +17,7 @@ use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use think\Hook;
 use app\admin\model\purchase\SupplierSku;
+use think\Model;
 
 class TrackReg extends Backend
 {
@@ -985,6 +986,25 @@ class TrackReg extends Backend
                 $number += 1;
             }
         }
+        //饰品站被过滤的部分需要重新加入补货需求单 取消过滤状态
+        $skuListVoogmechic = $this->model
+            ->where(['is_show' => 1, 'type' => 3 ,'website_type'=>12,'is_filter'=>2])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
+            ->field('id,sku,website_type,replenish_num')
+            ->select();
+        $skuListVoogmechicUpdate = $this->model
+            ->where(['is_show' => 1, 'type' => 3 ,'website_type'=>12,'is_filter'=>2])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
+            ->setField('is_filter',1);
+        foreach ($skuListVoogmechic as $ck => $cv) {
+            $arr[$number]['sku'] = $cv['sku'];
+            $arr[$number]['replenishment_num'] = $cv['replenish_num'];
+            $arr[$number]['create_person'] = 'Admin';
+            $arr[$number]['create_time'] = date('Y-m-d H:i:s');
+            $arr[$number]['type'] = 3;
+            $arr[$number]['replenish_id'] = $res;
+            $number += 1;
+        }
         if (empty($arr)){
             $this->replenish->where('id',$res)->delete();
             $this->model->where('replenish_id',$res)->delete();
@@ -995,6 +1015,78 @@ class TrackReg extends Backend
                 ->setField('is_show', 0);
             echo('所有需求都被过滤，不生成补货需求单');
             die;
+        }
+
+        //插入补货需求单表
+        $result = $this->order->allowField(true)->saveAll($arr);
+        //更新计划补货列表
+        $ids = $this->model
+            ->where(['is_show' => 1, 'type' => 3])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
+            ->setField('is_show', 0);
+
+        echo "ok";
+    }
+
+
+    public function day_replenishment1()
+    {
+        $this->model = new \app\admin\model\NewProductMapping();
+        $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
+        //统计计划补货数据
+        $list = $this->model
+            ->where(['is_show' => 1, 'type' => 3,'website_type'=>12])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
+            ->group('sku')
+            ->column("sku,sum(replenish_num) as sum");
+        if (empty($list)) {
+            echo('暂时没有紧急补货单需要处理');
+            die;
+        }
+        //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
+        $skuList1 = $this->model
+            ->where(['is_show' => 1, 'type' => 3,'website_type'=>12])
+            ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
+            ->field('id,sku,website_type,replenish_num')
+            ->select();
+        //根据sku对数组进行重新分配
+        $skuList = $this->array_group_by($skuList1, 'sku');
+        $result = false;
+        //首先插入主表 获取主表id new_product_replenish
+        $data['type'] = 3;
+        $data['create_person'] = 'Admin';
+        $data['create_time'] = date('Y-m-d H:i:s');
+        $res = Db::name('new_product_replenish')->insertGetId($data);
+        //遍历以更新平台sku映射表的 关联补货需求单id 以及各站虚拟仓占比
+        $int = 0;
+        foreach ($skuList as $k => $v) {
+            //求出此sku在此补货单中的总数量
+            $skuWholeNum = array_sum(array_map(function ($val) {
+                return $val['replenish_num'];
+            }, $v));
+            //求出比例赋予新数组
+            foreach ($v as $ko => $vo) {
+                $date[$int]['id'] = $vo['id'];
+                $date[$int]['rate'] = $vo['replenish_num'] / $skuWholeNum;
+                $date[$int]['replenish_id'] = $res;
+                $int += 1;
+            }
+        }
+        //批量更新补货需求清单 中的补货需求单id以及虚拟仓比例
+        $res1 = $this->model->allowField(true)->saveAll($date);
+        $number = 0;
+        $skuArray = array_keys($list);
+        $item = new Item();
+        $allSkuIsNew = $item->where('sku','in',$skuArray)->column('is_new','sku');
+        foreach ($list as $k => $v) {
+            //是新品 不补货
+            $arr[$number]['sku'] = $k;
+            $arr[$number]['replenishment_num'] = $v;
+            $arr[$number]['create_person'] = 'Admin';
+            $arr[$number]['create_time'] = date('Y-m-d H:i:s');
+            $arr[$number]['type'] = 3;
+            $arr[$number]['replenish_id'] = $res;
+            $number += 1;
         }
         //插入补货需求单表
         $result = $this->order->allowField(true)->saveAll($arr);

@@ -22,10 +22,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         if (0 == value) {
             $('select[name="abnormal"]').parents('.form-group').show();
             $('#check_time').parents('.form-group').show();
-            table.bootstrapTable('hideColumn', 'created_at');
+            table.bootstrapTable('hideColumn', 'oprate_created_at');
             table.bootstrapTable('showColumn', 'payment_time');
             $('input[name="b.payment_time"]').parents('.form-group').show();
-            $('input[name="a.created_at"]').parents('.form-group').hide();
+            $('input[name="oprate_created_at"]').parents('.form-group').hide();
             $('select[name="has_work_order"]').parents('.form-group').show();
             $('.btn-batch-export-xls').removeClass('hide');
             $('.btn-batch-printed').removeClass('hide');
@@ -40,29 +40,35 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         } else if (2 == value) {
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-product').removeClass('hide');
+            table.bootstrapTable('showColumn', 'oprate_created_at');
         } else if (3 == value) {
             $('#stock_house_num').parents('.form-group').show();
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-sign-abnormals').removeClass('hide');
             $('.btn-lens').removeClass('hide');
+            table.bootstrapTable('showColumn', 'oprate_created_at');
         } else if (4 == value) {
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-machining').removeClass('hide');
+            table.bootstrapTable('showColumn', 'oprate_created_at');
         } else if (5 == value) {
             $('.btn-batch-printed').removeClass('hide');
             $('.btn-logo').removeClass('hide');
+            table.bootstrapTable('showColumn', 'oprate_created_at');
 
         } else if (6 == value) {
             $('.btn-finish-adopt').removeClass('hide');
             $('.btn-finish-refuse').removeClass('hide');
+            table.bootstrapTable('showColumn', 'oprate_created_at');
         } else if (7 == value) {
             $('#stock_house_num').parents('.form-group').show();
+            table.bootstrapTable('showColumn', 'oprate_created_at');
             // $('.btn-join-complete').removeClass('hide');
         } else if (8 == value) {
             table.bootstrapTable('hideColumn', 'created_at');
             table.bootstrapTable('showColumn', 'payment_time');
             $('input[name="b.payment_time"]').parents('.form-group').show();
-            $('input[name="a.created_at"]').parents('.form-group').hide();
+            // $('input[name="a.created_at"]').parents('.form-group').hide();
             $('select[name="abnormal"]').parents('.form-group').show();
             $('select[name="work_status"]').parents('.form-group').show();
             $('select[name="work_type"]').parents('.form-group').show();
@@ -357,8 +363,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             }
                         },
 
-
-
                         {
                             field: 'stock_house_num',
                             title: __('库位号'),
@@ -401,11 +405,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             }
                         },
                         {
-                            field: 'a.created_at',
-                            title: __('创建时间'),
+                            field: 'created_at',
+                            title: __('订单创建时间'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
-                            visible: false
                         },
                         {
                             field: 'b.payment_time',
@@ -422,8 +425,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             visible: false
                         },
                         {
-                            field: 'created_at',
-                            title: __('创建时间'),
+                            field: 'oprate_created_at',
+                            title: __('操作时间'),
                             operate: false
                         },
                         {
@@ -813,7 +816,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 5: '12:00-14:59:59',
                                 6: '15:00-17:59:59',
                                 7: '18:00-20:59:59',
-                                8: '21:00-23:59:59'
+                                8: '21:00-23:59:59',
+                                9: '加诺补发加急订单'
                             },
                             formatter: Table.api.formatter.status
                         },

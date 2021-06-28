@@ -541,6 +541,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             }, operate: false, visible: false
                         },
                         {field: 'id', title: __('Id'), operate: false},
+                        {field: 'website_type', title: __('站点'), operate: false},
                         {field: 'sku', title: __(' sku'), operate: 'LIKE'},
                         {
                             field: 'is_spot', title: __('大货/现货'),

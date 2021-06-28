@@ -351,7 +351,7 @@ class UserDataDetail extends Backend
             if ($customer_type) {
                 $map['c.group_id'] = $customer_type;
             }
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
+            $map['o.order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
             $total_export_count = $web_model
                 ->table('orders')
                 ->alias('o')
@@ -385,31 +385,36 @@ class UserDataDetail extends Backend
                     $tmpRow[$created_at_index[0]] = $val['created_at'];
                     $order_where['user_id'] = $val['id'];
                     $order_status_where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
+                    $orderInfoArr=array();
+                    if (in_array('order_num', $column_name)||in_array('order_amount', $column_name)){
+                        $orderInfoArr = $web_model->table('orders')->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_actual_amount_paid) total')->select();
+                    }
+
                     if (in_array('order_num', $column_name)) {
                         //总支付订单数
                         $index = array_keys($column_name, 'order_num');
-                        $tmpRow[$index[0]] = $order_model->where($order_where)->where($order_status_where)->count();
+                        $tmpRow[$index[0]] = $orderInfoArr[0]['count'];
                     }
                     if (in_array('order_amount', $column_name)) {
                         $index = array_keys($column_name, 'order_amount');
-                        $tmpRow[$index[0]] = $order_model->where($order_where)->where($order_status_where)->sum('base_actual_amount_paid');//总订单金额
+                        $tmpRow[$index[0]] = $orderInfoArr[0]['total'];//总订单金额
                     }
                     if (in_array('point', $column_name)) {
                         $index = array_keys($column_name, 'point');
-                        if ($site != 3) {
-                            $tmpRow[$index[0]] = $web_model->table('users')->where('id', $val['id'])->value('point');  //积分
-                            $tmpRow[$index[0]] = $tmpRow[$index[0]] ? $tmpRow[$index[0]] : 0;
-                        } else {
-                            $tmpRow[$index[0]] = 0; //积分
-                        }
+                        $tmpRow[$index[0]] = 0; //积分
+                    }
+
+                    $order_coupon=array();
+                    if (in_array('coupon_order_num', $column_name)||in_array('coupon_order_amount', $column_name)){
+                        $order_coupon = $web_model->table('orders')->where($order_where)->where($order_status_where)->where("discount_coupon_id >0 ")->field('count(*) count,sum(base_coupon_discounts_price) total')->select();
                     }
                     if (in_array('coupon_order_num', $column_name)) {
                         $index = array_keys($column_name, 'coupon_order_num');
-                        $tmpRow[$index[0]] = $web_model->table('orders')->where($order_where)->where($order_status_where)->where("discount_coupon_id >0")->count();//使用优惠券订单数
+                        $tmpRow[$index[0]] =$order_coupon[0]['count'];//使用优惠券订单数
                     }
                     if (in_array('coupon_order_amount', $column_name)) {
                         $index = array_keys($column_name, 'coupon_order_amount');
-                        $tmpRow[$index[0]] = $web_model->table('orders')->where($order_where)->where($order_status_where)->where("discount_coupon_id >0")->sum('base_coupon_discounts_price');//使用优惠券订单金额
+                        $tmpRow[$index[0]] = $order_coupon[0]['total'];//使用优惠券订单金额
                     }
                     if (in_array('first_order_time', $column_name)) {
                         $index = array_keys($column_name, 'first_order_time');
@@ -424,6 +429,7 @@ class UserDataDetail extends Backend
                         $tmpRow[$index[0]] = 0;   //推荐订单数
                     }
                     if (in_array('recommend_register_num', $column_name)) {
+                        $index = array_keys($column_name, 'recommend_register_num');
                         $tmpRow[$index[0]] = 0;   //推荐注册量
                     }
                     ksort($tmpRow);

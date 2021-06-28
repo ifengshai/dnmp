@@ -9,6 +9,9 @@ use app\admin\model\lens\LensPrice;
 use app\admin\model\operatedatacenter\DatacenterDay;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\saleaftermanage\WorkOrderList;
+use app\admin\model\saleaftermanage\WorkOrderMeasure;
+use app\admin\model\saleaftermanage\WorkOrderRecept;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\warehouse\StockHouse;
 use app\common\controller\Backend;
@@ -1725,6 +1728,119 @@ class Process extends Backend
         $variance = $count / $length;
 
         return sqrt($variance);
+    }
+
+
+    public function testBatchAddWorkList()
+    {
+        $incrementId = input('id');
+        echo $incrementId;
+        $this->batchAddWorkList([$incrementId]);
+    }
+
+    /**
+     * 批量添加工单
+     * @author wangpenglei
+     * @date   2021/6/25 14:45
+     */
+    public function batchAddWorkList()
+    {
+
+        $increment_id = Db::table('fa_zzzz_es')->column('sku');
+
+        $order = new NewOrder();
+        $list = $order->where(['increment_id' => ['in', $increment_id]])->column('*', 'increment_id');
+        $work = new WorkOrderList();
+        $measure = new WorkOrderMeasure();
+        $recept = new WorkOrderRecept();
+        $wangwei = new Wangwei();
+        $work->startTrans();
+        $measure->startTrans();
+        $recept->startTrans();
+        try {
+            $i = 0;
+            foreach ($increment_id as $k => $v) {
+
+                $params = [];
+                $params['work_platform'] = $list[$v]['site'];
+                $params['work_type'] = 1;
+                $params['platform_order'] = $v;
+                $params['order_pay_currency'] = $list[$v]['order_currency_code'];
+                $params['order_pay_method'] = $list[$v]['payment_method'];
+                $params['base_grand_total'] = $list[$v]['base_grand_total'];
+                $params['grand_total'] = $list[$v]['grand_total'];
+                $params['base_to_order_rate'] = $list[$v]['base_to_order_rate'];
+                $params['work_status'] = 6;
+                $params['problem_type_id'] = 9;
+                $params['problem_type_content'] = '物流超时';
+                $params['problem_description'] = '物流超时';
+                $params['create_user_id'] = 75;
+                $params['create_user_name'] = '王伟';
+                $params['after_user_id'] = 75;
+                $params['all_after_user_id'] = 75;
+                $params['payment_time'] = date('Y-m-d H:i:s');
+                $params['create_time'] = date('Y-m-d H:i:s');
+                $params['complete_time'] = date('Y-m-d H:i:s');
+                $params['email'] = $list[$v]['customer_email'];
+                $params['recept_person_id'] = 75;
+                $params['stock_id'] = $list[$v]['stock_id'];
+                $params['order_item_numbers'] = '';
+
+
+                $id = $work->insertGetId($params);
+                if (!$id) {
+                    throw new Exception('插入失败');
+                }
+
+                $measureParams = [];
+                $measureParams['work_id'] = $id;
+                $measureParams['measure_choose_id'] = 7;
+                $measureParams['measure_content'] = '补发';
+                $measureParams['create_time'] = date('Y-m-d H:i:s');
+                $measureParams['operation_type'] = 1;
+                $measureParams['operation_time'] = date('Y-m-d H:i:s');
+                $measureParams['sku_change_type'] = 5;
+                $measureId = $measure->insertGetId($measureParams);
+                if (!$measureId) {
+                    throw new Exception('插入失败');
+                }
+
+                $receptParams = [];
+                $receptParams['work_id'] = $id;
+                $receptParams['measure_id'] = $measureId;
+                $receptParams['recept_status'] = 1;
+                $receptParams['recept_group_id'] = 0;
+                $receptParams['recept_person_id'] = 75;
+                $receptParams['recept_person'] = '王伟';
+                $receptParams['create_time'] = date('Y-m-d H:i:s');
+                $receptParams['finish_time'] = date('Y-m-d H:i:s');
+                $receptId = $recept->insertGetId($receptParams);
+                if (!$receptId) {
+                    throw new Exception('插入失败');
+                }
+
+                $wangwei->createOrder($list[$v]['site'], $id, $v, $measureId);
+
+                if ($i == 100) {
+                    $i = 0;
+                    $work->commit();
+                    $measure->commit();
+                    $recept->commit();
+                }
+                $i++;
+            }
+            $work->commit();
+            $measure->commit();
+            $recept->commit();
+        } catch (Exception $exception) {
+            // 回滚事务
+            $work->rollback();
+            $measure->rollback();
+            $recept->rollback();
+            echo $exception->getMessage();
+        }
+
+
     }
 
 }

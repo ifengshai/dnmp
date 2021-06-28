@@ -208,11 +208,12 @@ class Distribution extends Backend
             $filter = json_decode($this->request->get('filter'), true);
             //默认展示3个月内的数据
             if (!$filter) {
-                $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
+                $map['b.created_at'] = ['between', [strtotime('-3 month'), time()]];
             } else {
-                if ($filter['a.created_at']) {
-                    $time = explode(' - ', $filter['a.created_at']);
-                    $map['a.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
+                if ($filter['created_at']) {
+                    $time = explode(' - ', $filter['created_at']);
+                    $map['b.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
+                    unset($filter['created_at']);
                 }
                 if ($filter['b.payment_time']) {
                     $time = explode(' - ', $filter['b.payment_time']);
@@ -437,7 +438,7 @@ class Distribution extends Backend
             //combine_time  合单时间  delivery_time 打印时间 check_time审单时间  update_time更新时间  created_at创建时间
             $list = $this->model
                 ->alias('a')
-                ->field('a.stock_id,b.is_custom_lens,a.id,a.is_prescription_abnormal,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,a.created_at,c.check_time,b.payment_time')
+                ->field('a.stock_id,b.is_custom_lens,a.id,a.is_prescription_abnormal,a.wave_order_id,a.order_id,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.total_qty_ordered,b.site,b.order_type,b.status,a.distribution_status,a.temporary_house_id,a.abnormal_house_id,b.created_at,c.check_time,b.payment_time')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
                 ->where($where)
@@ -459,26 +460,26 @@ class Distribution extends Backend
 
                 //待配货
                 if ($label == 2) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 1)->value('create_time');
+                    $list[$key]['oprate_created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 1)->value('create_time');
                 }
                 //待配镜片
                 if ($label == 3) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 2)->value('create_time');
+                    $list[$key]['oprate_created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 2)->value('create_time');
                 }
                 //待加工
                 if ($label == 4) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 3)->value('create_time');
+                    $list[$key]['oprate_created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 3)->value('create_time');
                 }
                 //待印logo
                 if ($label == 5) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 4)->value('create_time');
+                    $list[$key]['oprate_created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', 4)->value('create_time');
                 }
                 //待成品质检
                 if ($label == 6) {
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])
+                    $list[$key]['oprate_created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])
                         ->where('distribution_node', 5)->value('create_time');
-                    if (!$list[$key]['created_at']) {
-                        $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])
+                    if (!$list[$key]['oprate_created_at']) {
+                        $list[$key]['oprate_created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])
                             ->where('distribution_node', 4)->value('create_time');
                     }
                 }
@@ -490,7 +491,7 @@ class Distribution extends Backend
                     } else {
                         $distributionNode = 6;
                     }
-                    $list[$key]['created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', $distributionNode)->value('create_time');
+                    $list[$key]['oprate_created_at'] = Db::table('fa_distribution_log')->where('item_process_id', $item['id'])->where('distribution_node', $distributionNode)->value('create_time');
                 }
             }
 
@@ -515,13 +516,13 @@ class Distribution extends Backend
                     $stock_house_num = $stock_house_data[$store_house_id]; //合单库位号
                 }
 
-                if ($list[$key]['created_at'] == '') {
-                    $list[$key]['created_at'] == '暂无';
+                if ($list[$key]['oprate_created_at'] == '') {
+                    $list[$key]['oprate_created_at'] == '暂无';
                 } else {
-                    $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+                    $list[$key]['oprate_created_at'] = date('Y-m-d H:i:s', $value['oprate_created_at']);
                 }
                 $list[$key]['stock_house_num'] = $stock_house_num;
-
+                $list[$key]['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
 
                 //跟单：异常未处理且未创建工单的显示处理异常按钮
                 $work_id = $abnormal_data[$value['id']] ?? 0;
@@ -860,33 +861,7 @@ class Distribution extends Backend
             $data[$sku['sku']]['sku'] = $sku;
             $data[$sku['sku']]['number']++;
         }
-        // $b=array();
-        // foreach($sku as $v){
-        //     $b[]=$v['sku'];
-        // }
-        // dump($b);
-        // $c=array_unique($b);
-        // foreach($c as$k => $v){
-        //     $n=0;
-        //     foreach($sku as $t){
-        //         if($v==$t['sku'])
-        //             $n++;
-        //     }
-        //     $new[$v]=$n;
-        // }
-        // dump($new);
-        // foreach ($sku as $ky=>$ite){
-        //     $new_value = array_keys($new);
-        //     $count = count($new_value)-1;
-        //     for ($i=0;$i<=$count;$i++){
-        //         if ($new_value[$i] == $ite['sku']){
-        //             $sku[$ky]['number'] = $new[$new_value[$i]];
-        //         }
-        //     }
-        // }
-        // dump($sku);
-        // $sku =array_merge(array_unique($sku, SORT_REGULAR));
-        // dump($sku);die();
+
 
         $data = array_values($data);
         $spreadsheet = new Spreadsheet();
@@ -1210,10 +1185,11 @@ class Distribution extends Backend
                 unset($filter['is_task']);
             }
 
-            if ($filter['a.created_at']) {
-                $time = explode(' - ', $filter['a.created_at']);
+            if ($filter['created_at']) {
+                $time = explode(' - ', $filter['created_at']);
 
-                $map['a.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
+                $map['b.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
+                unset($filter['created_at']);
             }
             if ($filter['site']) {
                 $map['a.site'] = ['in', $filter['site']];
@@ -1689,10 +1665,12 @@ class Distribution extends Backend
         if (!$filter) {
             $map['a.created_at'] = ['between', [strtotime('-3 month'), time()]];
         } else {
-            if ($filter['a.created_at']) {
-                $time = explode(' - ', $filter['a.created_at']);
+            if ($filter['created_at']) {
+                $time = explode(' - ', $filter['created_at']);
                 $map['a.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
+                unset($filter['created_at']);
             }
+
         }
         if ($ids) {
             $map['a.id'] = ['in', $ids];

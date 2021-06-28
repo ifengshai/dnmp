@@ -5,6 +5,8 @@ namespace app\admin\controller;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\purchase\SampleWorkorder;
+use app\admin\model\purchase\SampleWorkorderItem;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\enum\OrderType;
@@ -3507,5 +3509,64 @@ class Test4 extends Controller
         $domain = $request->domain();
         header('Location: '.$domain.$path.$fileName.'.csv');
         die;
+    }
+    public function run_purchase_sample_data()
+    {
+        $skus = Db::name('zzz_purchase_sample_sku')->column('sku');
+        $purchaseSample = Db::name('purchase_sample')->where('sku','in',$skus)->select();
+        $purchaseSampleIds = array_column($purchaseSample,'id');
+        $Sample = new \app\admin\model\purchase\Sample();
+        $purchaseSampleWorkOrder = new SampleWorkorder();
+        $purchaseSampleWorkOrderItem = new SampleWorkorderItem();
+        $data =$skus;//对应sku
+        $data = array_unique($data);
+        $Sample->startTrans();
+        $purchaseSampleWorkOrder->startTrans();
+        $purchaseSampleWorkOrderItem->startTrans();
+        foreach ($data as $key => $val) {
+            try {
+                //将样品间信息假删除
+                $map['sku'] = $val;
+                $value['is_del'] = 2;
+                $out_stock_num = $Sample->where(['sku' => $val])->value('stock');
+                $res = $Sample->where($map)->update($value);
+                if ($res) {
+                    //添加出库单
+                    $addValue['location_number'] = 'OUT'.date('YmdHis').rand(100, 999).rand(100, 999);;
+                    $addValue['createtime'] = date('Y-m-d H:i:s', time());
+                    $addValue['create_user'] = session('admin.nickname');
+                    $addValue['description'] = '样品间清理库存,商品批量出库,并将绑定关系绑定关系解除';
+                    $addValue['status'] = 3;
+                    $addValue['type'] = 2;
+                    $outStockId = $purchaseSampleWorkOrder->insertGetId($addValue);
+                    if ($outStockId) {
+                        //出库商品信息表对应信息
+                        $outStockItemValue['sku'] = $val;
+                        $outStockItemValue['stock'] = $out_stock_num;
+                        $outStockItemValue['parent_id'] = $outStockId;
+                        $purchaseSampleWorkOrderItem->insert($outStockItemValue);
+                    }
+                }
+                $a[] = $val;
+                $Sample->commit();
+                $purchaseSampleWorkOrder->commit();
+                $purchaseSampleWorkOrderItem->commit();
+            } catch (ValidateException $e) {
+                $Sample->rollback();
+                $purchaseSampleWorkOrder->rollback();
+                $purchaseSampleWorkOrderItem->rollback();
+                $this->error($e->getMessage(), [], 406);
+            } catch (PDOException $e) {
+                $Sample->rollback();
+                $purchaseSampleWorkOrder->rollback();
+                $purchaseSampleWorkOrderItem->rollback();
+                $this->error($e->getMessage(), [], 407);
+            } catch (Exception $e) {
+                $Sample->rollback();
+                $purchaseSampleWorkOrder->rollback();
+                $purchaseSampleWorkOrderItem->rollback();
+                $this->error($e->getMessage(), [], 408);
+            }
+        }
     }
 }

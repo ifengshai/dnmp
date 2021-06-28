@@ -31,6 +31,7 @@ class Inventory extends Backend
      */
     protected $model = null;
 
+
     public function _initialize()
     {
         parent::_initialize();
