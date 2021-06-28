@@ -188,9 +188,9 @@ class WorkOrderList extends Backend
             if ($filter['recept_person']) {
 
                 $recept_person = $filter['recept_person'];
-                $this->model->where('id', 'IN', function ($query) use ($recept_person) {
+                $map['id'] = ['IN', function ($query) use ($recept_person) {
                     $query->table('fa_work_order_recept')->where('recept_person_id', 'in', $recept_person)->field('work_id');
-                });
+                }];
                 unset($filter['recept_person']);
             }
 
@@ -203,12 +203,12 @@ class WorkOrderList extends Backend
             //筛选措施
             if ($filter['measure_choose_id']) {
                 $measure_choose_id = $filter['measure_choose_id'];
-
-                $this->model->where('id', 'IN', function ($query) use ($measure_choose_id) {
+                $map['id'] = [ 'IN', function ($query) use ($measure_choose_id) {
                     $query->table('fa_work_order_measure')->where('measure_choose_id', 'in', $measure_choose_id)->field('work_id');
-                });
+                }];
                 unset($filter['measure_choose_id']);
             }
+
             if ($filter['payment_time']) {
                 $createat = explode(' ', $filter['payment_time']);
                 $map1['payment_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
@@ -4380,17 +4380,24 @@ EOF;
         if ($filter['recept_person']) {
 
             $recept_person = $filter['recept_person'];
-            $this->model->where('id', 'IN', function ($query) use ($recept_person) {
+            $map['id'] = ['IN', function ($query) use ($recept_person) {
                 $query->table('fa_work_order_recept')->where('recept_person_id', 'in', $recept_person)->field('work_id');
-            });
+            }];
             unset($filter['recept_person']);
         }
 
+        if ($filter['stock_id']) {
+            $stockId = $filter['stock_id'];
+            $map['stock_id'] = $stockId;
+            unset($filter['stock_id']);
+        }
+
+        //筛选措施
         if ($filter['measure_choose_id']) {
             $measure_choose_id = $filter['measure_choose_id'];
-            $this->model->where('id', 'IN', function ($query) use ($measure_choose_id) {
+            $map['id'] = [ 'IN', function ($query) use ($measure_choose_id) {
                 $query->table('fa_work_order_measure')->where('measure_choose_id', 'in', $measure_choose_id)->field('work_id');
-            });
+            }];
             unset($filter['measure_choose_id']);
         }
 
