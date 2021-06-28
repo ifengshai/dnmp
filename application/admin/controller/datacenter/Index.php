@@ -121,6 +121,8 @@ class Index extends Backend
 
                 $v['jp_sku'] = $platform_list[11];
 
+                $v['ali_sku'] = $platform_list[14];
+
                 $v['fr_sku'] = $platform_list[15];
 
                 $skus = array_merge($skus, array_values($platform_list));
@@ -139,8 +141,9 @@ class Index extends Backend
                 $v['es_num'] = $sales_num_list[9][$v['es_sku']] ?: 0;
                 $v['de_num'] = $sales_num_list[10][$v['de_sku']] ?: 0;
                 $v['jp_num'] = $sales_num_list[11][$v['jp_sku']] ?: 0;
+                $v['ali_num'] = $sales_num_list[14][$v['ali_sku']] ?: 0;
                 $v['fr_num'] = $sales_num_list[15][$v['fr_sku']] ?: 0;
-                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'] + $v['fr_num'];
+                $v['all_num'] = $v['z_num'] + $v['v_num'] + $v['n_num'] + $v['m_num'] + $v['w_num'] + $v['es_num'] + $v['de_num'] + $v['jp_num'] + $v['ali_num'] + $v['fr_num'];
             }
             unset($v);
 
