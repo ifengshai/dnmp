@@ -383,7 +383,9 @@ class Zendesk extends Backend
                         'assignee_id' => $assignee_id,
                         'assign_id' => session('admin.id'),
                         'email_cc' => $params['email_cc'],
-                        'zendesk_update_time' => date('Y-m-d H:i:s', time())
+                        'zendesk_update_time' => date('Y-m-d H:i:s', time()),
+                        'is_urgency' => $params['is_urgency'],
+                        'is_difficult' => $params['is_difficult'],
                     ]);
                     $zid = $zendesk->id;
                     //评论表添加内容,有body时添加评论，修改状态等不添加
