@@ -2334,11 +2334,7 @@ class OrderData extends Backend
      */
     public function order_item_data_shell()
     {
-        $this->order_item_shell(1);
         $this->order_item_shell(2);
-        $this->order_item_shell(3);
-        $this->order_item_shell(10);
-        $this->order_item_shell(11);
     }
 
     protected function order_item_shell($site)
@@ -2374,15 +2370,8 @@ class OrderData extends Backend
 
         } elseif ($site == 2) {
             $entity_id = [
-                477151,
-                477152,
-                477154,
-                477156,
-                477150,
-                477153,
-                477155,
+                476397
             ];
-
 
             $list = Db::connect('database.db_voogueme')
                 ->table('sales_flat_order_item')
@@ -2468,7 +2457,8 @@ class OrderData extends Backend
             unset($options['order_prescription_type']);
             unset($options['is_prescription_abnormal']);
             if ($options) {
-                $options_id = $this->orderitemoption->insertGetId($options);
+//                $options_id = $this->orderitemoption->insertGetId($options);
+                $options_id = 3112357;
                 $data = []; //子订单表数据
                 for ($i = 0; $i < $v['qty_ordered']; $i++) {
                     $data[$i]['item_id'] = $v['item_id'];
