@@ -4399,6 +4399,11 @@ EOF;
             unset($filter['recept_person']);
         }
 
+        if ($filter['id']) {
+            $map['WorkOrderList.id'] = $filter['id'];
+            unset($filter['id']);
+        }
+
         //筛选措施
         $hasWhere = [];
         if ($filter['measure_choose_id']) {
