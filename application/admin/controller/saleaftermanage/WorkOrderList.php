@@ -184,35 +184,29 @@ class WorkOrderList extends Backend
                 unset($filter['recept_person_id']);
                 unset($filter['measure_choose_id']);
             }
+
             if ($filter['recept_person']) {
-                $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
-                $map['id'] = ['in', $workIds];
+
+                $recept_person = $filter['recept_person'];
+                $this->model->where('id', 'IN', function ($query) use ($recept_person) {
+                    $query->table('fa_work_order_recept')->where('recept_person_id', 'in', $recept_person)->field('work_id');
+                });
                 unset($filter['recept_person']);
             }
+
             if ($filter['stock_id']) {
                 $stockId = $filter['stock_id'];
                 $map['stock_id'] = $stockId;
                 unset($filter['stock_id']);
             }
 
-
             //筛选措施
-            $hasWhere = [];
             if ($filter['measure_choose_id']) {
-//                $measuerWorkIds = WorkOrderMeasure::where('measure_choose_id', 'in', $filter['measure_choose_id'])->column('work_id');
-//                if (!empty($map['id'])) {
-//                    $newWorkIds = array_intersect($workIds, $measuerWorkIds);
-//                    $map['id'] = ['in', $newWorkIds];
-//                } else {
-//                    $map['id'] = ['in', $measuerWorkIds];
-//                }
-
                 $measure_choose_id = $filter['measure_choose_id'];
 
                 $this->model->where('id', 'IN', function ($query) use ($measure_choose_id) {
                     $query->table('fa_work_order_measure')->where('measure_choose_id', 'in', $measure_choose_id)->field('work_id');
                 });
-//                $hasWhere['measure_choose_id'] = ['in', $filter['measure_choose_id']];
                 unset($filter['measure_choose_id']);
             }
             if ($filter['payment_time']) {
@@ -4383,27 +4377,20 @@ EOF;
         $filter = json_decode($this->request->get('filter'), true);
         $map = [];
 
-        if ($filter['create_time']) {
-            $createat = explode(' ', $filter['create_time']);
-            $map['WorkOrderList.create_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
-            unset($filter['create_time']);
-        }
-
         if ($filter['recept_person']) {
-            $workIds = WorkOrderRecept::where('recept_person_id', 'in', $filter['recept_person'])->column('work_id');
-            $map['WorkOrderList.id'] = ['in', $workIds];
+
+            $recept_person = $filter['recept_person'];
+            $this->model->where('id', 'IN', function ($query) use ($recept_person) {
+                $query->table('fa_work_order_recept')->where('recept_person_id', 'in', $recept_person)->field('work_id');
+            });
             unset($filter['recept_person']);
         }
 
-        if ($filter['id']) {
-            $map['WorkOrderList.id'] = $filter['id'];
-            unset($filter['id']);
-        }
-
-        //筛选措施
-        $hasWhere = [];
         if ($filter['measure_choose_id']) {
-            $hasWhere['measure_choose_id'] = ['in', $filter['measure_choose_id']];
+            $measure_choose_id = $filter['measure_choose_id'];
+            $this->model->where('id', 'IN', function ($query) use ($measure_choose_id) {
+                $query->table('fa_work_order_measure')->where('measure_choose_id', 'in', $measure_choose_id)->field('work_id');
+            });
             unset($filter['measure_choose_id']);
         }
 
@@ -4411,7 +4398,7 @@ EOF;
         $this->request->get(['filter' => json_encode($filter)]);
         [$where] = $this->buildparams();
 
-        $list = $worklist->hasWhere('workOrderMeasure', $hasWhere)
+        $list = $worklist
             ->where($where)
             ->where($map)
             ->where($addWhere)
