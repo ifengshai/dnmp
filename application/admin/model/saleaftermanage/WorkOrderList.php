@@ -54,13 +54,6 @@ class WorkOrderList extends Model
         return $this->hasMany('workOrderMeasure', 'work_id');
     }
 
-    /**
-     * 采购单明细表
-     */
-    public function workOrderRecept()
-    {
-        return $this->hasMany('workOrderRecept', 'work_id');
-    }
 
     /**
      * 平台类型
