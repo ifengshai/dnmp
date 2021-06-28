@@ -185,7 +185,7 @@
                             </div>
                             <label class="control-label col-xs-12 col-sm-2">{:__('优先级')}：</label>
                             <div class="col-xs-12 col-sm-8" style="width: 27.9%">
-                                <select class="form-control ticket-priority selectpicker" data-live-search="1" data-rule="required" name="row[priority]">-->
+                                <select class="form-control ticket-priority selectpicker" data-live-search="1" data-rule="required" name="row[priority]">
                                     {if condition="$ticket->priority == 0"}
                                     <option value="0" {$ticket->priority == 0 ? 'selected' : ''}>- </option>
                                     {/if}
@@ -196,7 +196,26 @@
                                 </select>
                             </div>
                         </div>
-
+                        <div class="form-group">
+                            <label class="control-label col-xs-12 col-sm-2">{:__('紧急')}：</label>
+                            <div class="col-xs-12 col-sm-8" style="width: 27.5%">
+                                <select class="form-control ticket-priority" data-live-search="1" data-rule="required" name="row[is_urgency]">
+                                    {if condition="$ticket->is_urgency == 0"}
+                                    <option value="0" {$ticket->is_urgency == 0 ? 'selected' : ''}>否</option>
+                                    {/if}
+                                    <option value="1" {$ticket->is_urgency == 1 ? 'selected' : ''}>是</option>
+                                </select>
+                            </div>
+                            <label class="control-label col-xs-12 col-sm-2">{:__('疑难')}：</label>
+                            <div class="col-xs-12 col-sm-8" style="width: 27.9%">
+                                <select class="form-control ticket-priority" data-live-search="1" data-rule="required" name="row[is_difficult]">
+                                    {if condition="$ticket->is_difficult == 0"}
+                                    <option value="0" {$ticket->is_difficult == 0 ? 'selected' : ''}>否</option>
+                                    {/if}
+                                    <option value="1" {$ticket->is_difficult == 1 ? 'selected' : ''}>是</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="form-group layer-footer">
                             <div class="col-xs-12 col-sm-8" style="width: 32%;">
                                 <a href="javascript:;" style="float: right;width: 150px" class="btn btn-primary btn-add create_ticket" title="{:__('创建工单')}">{:__('创建工单')} </a>
@@ -207,7 +226,6 @@
                             </div>
                             {/if}
                         </div>
-
 
                         <!-- /.box-body -->
                     </div>
