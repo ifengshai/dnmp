@@ -13,7 +13,7 @@ use think\Db;
  */
 class ZendeskAdmin extends Backend
 {
-    
+    protected $noNeedRight = ['*'];
     /**
      * ZendeskAgents模型对象
      * @var \app\admin\model\zendesk\ZendeskAgents
@@ -95,11 +95,7 @@ class ZendeskAdmin extends Backend
                         $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                         $this->model->validateFailException(true)->validate($validate);
                     }
-                    $result = $this->model->allowField(true)->save($params);
-                    if($result){
-                        //is_used变为2
-                        ZendeskAccount::where('account_id',$params['agent_id'])->setField('is_used',2);
-                    }
+                    $this->model->allowField(true)->save($params);
                     Db::commit();
                 } catch (ValidateException $e) {
                     Db::rollback();
@@ -163,45 +159,6 @@ class ZendeskAdmin extends Backend
         }
         $this->view->assign("row", $row);
         return $this->view->fetch();
-    }
-
-    /**
-     * ajax获取zendesk管理员列表
-     * @return string
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
-    public function getAgents()
-    {
-        if($this->request->isPost()) {
-            $type = input('type');
-            $agents = ZendeskAccount::where(['account_type' => $type])->field('account_id,account_user')->select();
-            $html = '<option value="">请选择</option>';
-            foreach($agents as $agent){
-                $html .= "<option value='{$agent->account_id}'>{$agent->account_user}</option>";
-            }
-            return $html;
-        }
-        $this->error('not found');
-    }
-
-    /**
-     * zendesk列表筛选获取列表
-     * @return array
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     */
-    public function getAgentsList()
-    {
-        $agents = $this->model->with('admin')->select();
-        $res = [];
-        foreach($agents as $agent){
-            $res[$agent['admin_id']] = $agent->admin->nickname;
-        }
-        $res = array_unique($res);
-        return json($res);
     }
     /**
      * 删除
