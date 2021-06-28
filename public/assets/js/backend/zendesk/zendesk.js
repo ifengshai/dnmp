@@ -75,6 +75,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                             formatter: Table.api.formatter.status
                         },
                         {
+                            field: 'is_urgency',
+                            title: __('是否紧急'),
+                            custom: {0: 'green', 1: 'blue'},
+                            searchList: {0: '否', 1: '是'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
+                            field: 'is_difficult',
+                            title: __('是否疑难'),
+                            custom: {0: 'green', 1: 'blue'},
+                            searchList: {0: '否', 1: '是'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {
                             field: 'create_time',
                             title: __('Create_time'),
                             operate: 'RANGE',
