@@ -27,7 +27,6 @@ use GuzzleHttp\Client;
 use app\admin\controller\warehouse\Inventory;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
-use app\admin\model\saleaftermanage\WorkOrderChangeSku;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\itemmanage\ItemPlatformSku;
 
@@ -46,6 +45,15 @@ class WorkOrderList extends Model
 
     // 追加属性
     protected $append = [];
+
+    /**
+     * 工单措施
+     */
+    public function workOrderMeasure()
+    {
+        return $this->hasMany('workOrderMeasure', 'work_id');
+    }
+
 
     /**
      * 平台类型
