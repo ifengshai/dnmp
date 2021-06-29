@@ -79,7 +79,8 @@ class Zendesk extends Backend
             $me_task = $filter['me_task'];
             if ($me_task == 1) { //我的所有任务
                 unset($filter['me_task']);
-                $map['zendesk.assign_id'] = session('admin.id');
+                $map[] = ['exp', Db::raw("zendesk.assign_id=".session('admin.id')." or zendesk.assign_id_next=".session('admin.id'))];
+//                $map['zendesk.assign_id'] = session('admin.id');
             } elseif ($me_task == 2) { //我的待处理任务
                 unset($filter['me_task']);
                 $now_admin_id = session('admin.id');
