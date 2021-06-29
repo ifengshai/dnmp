@@ -320,7 +320,7 @@ class Statement extends Backend
                 $kou_money = array_sum(array_column($list, 'kou_money'));
                 echo $params['product_total'].PHP_EOL;
                 echo $kou_money.PHP_EOL;
-                echo $params['product_total1'.PHP_EOL;
+                echo $params['product_total1'].PHP_EOL;
                 echo bcsub(bcadd($params['product_total'],$kou_money),$params['product_total1'],2);die;
                 if(bcsub(bcadd($params['product_total'],$kou_money),$params['product_total1'],2) != 0){
                     $this->error(__('金额计算错误，请关闭页面后重试', ''));
