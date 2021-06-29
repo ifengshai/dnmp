@@ -79,7 +79,8 @@ class Zendesk extends Backend
             $me_task = $filter['me_task'];
             if ($me_task == 1) { //我的所有任务
                 unset($filter['me_task']);
-                $map['zendesk.assign_id'] = session('admin.id');
+                $map[] = ['exp', Db::raw("zendesk.assign_id=".session('admin.id')." or zendesk.assign_id_next=".session('admin.id'))];
+//                $map['zendesk.assign_id'] = session('admin.id');
             } elseif ($me_task == 2) { //我的待处理任务
                 unset($filter['me_task']);
                 $now_admin_id = session('admin.id');
@@ -204,6 +205,7 @@ class Zendesk extends Backend
                 }
                 $list[$k]['group_name'] = $groupName;
                 $list[$k]['assign_id_nickname'] = $admin[$v['assign_id']];
+                $list[$k]['assign_id_next_nickname'] = $admin[$v['assign_id_next']];
                 $list[$k]['due_id_nickname'] = $admin[$v['due_id']];
             }
             $result = array("total" => $total, "rows" => $list);
@@ -1690,9 +1692,13 @@ DOC;
             //查询当前邮件原本的承接人数据
             $agent_id = Db::name('zendesk_agents')->where('admin_id', $params['id'])->value('agent_id');
             if ($params['type'] == 1 || $params['type'] == 3) {
-                //修改承接人
+                //修改第一承接人
                 $data['assign_id'] = $params['id'];
                 $data['assignee_id'] = $agent_id;
+            }
+            if ($params['type'] == 4 || $params['type'] == 3) {
+                //修改第二承接人
+                $data['assign_id_next'] = $params['id'];
             }
             if ($params['type'] == 2 || $params['type'] == 3) {
                 //修改处理人
@@ -1729,9 +1735,13 @@ DOC;
                 //查询当前邮件原本的承接人数据
                 $agent_id = Db::name('zendesk_agents')->where('admin_id', $params['id'])->value('agent_id');
                 if ($params['type'] == 1 || $params['type'] == 3) {
-                    //修改承接人
+                    //修改第一承接人
                     $data['assign_id'] = $params['id'];
                     $data['assignee_id'] = $agent_id;
+                }
+                if ($params['type'] == 4 || $params['type'] == 3) {
+                    //修改第二承接人
+                    $data['assign_id_next'] = $params['id'];
                 }
                 if ($params['type'] == 2 || $params['type'] == 3) {
                     //修改处理人

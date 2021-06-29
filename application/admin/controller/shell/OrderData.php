@@ -551,6 +551,12 @@ class OrderData extends Backend
                                     $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
                                     $order_prescription_type = $options['order_prescription_type'];
                                     $is_prescription_abnormal = $options['is_prescription_abnormal'];
+                                    //如果日语站存在套餐 标记为异常
+                                    if ($site == 11 && $options['combo'] == 1) {
+                                        $is_prescription_abnormal = 1;
+                                    }
+
+
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
                                     if ($options) {
@@ -619,6 +625,7 @@ class OrderData extends Backend
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
                                     if ($options) {
+
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
 
                                         $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type, 'sku' => $options['sku']]);
@@ -1381,6 +1388,7 @@ class OrderData extends Backend
         $arr['os_bd'] = $options_params['os_bd'];
         $arr['od_bd_r'] = $options_params['od_bd_r'];
         $arr['os_bd_r'] = $options_params['os_bd_r'];
+        $arr['combo'] = $options['info_buyRequest']['tmplens']['combo'] ?? 0;
 
         /**
          * 判断定制现片逻辑
