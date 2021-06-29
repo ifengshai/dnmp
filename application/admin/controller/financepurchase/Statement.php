@@ -134,12 +134,7 @@ class Statement extends Backend
                 $params = $this->preExcludeFields($params);
                 //涉及到金额计算的 要在后端进行重复校验 以免出现结算单金额错误的情况
                 $kou_money = array_sum(array_column($list, 'kou_money'));
-                echo $params['product_total'].PHP_EOL;
-                echo $kou_money.PHP_EOL;
-                echo bcadd($params['product_total'],$kou_money).PHP_EOL;
-                echo $params['product_total1'].PHP_EOL;
-                echo bcsub(bcadd($params['product_total'],$kou_money),$params['product_total1'],2);die;
-                if(bcsub(bcadd($params['product_total'],$kou_money),$params['product_total1'],2) != 0){
+                if(bcsub(bcadd($params['product_total'],$kou_money,2),$params['product_total1'],2) != 0){
                     $this->error(__('金额计算错误，请关闭页面后重试', ''));
                 }
                 foreach ($list as $k => $v) {
@@ -323,7 +318,7 @@ class Statement extends Backend
                 $params = $this->preExcludeFields($params);
                 //涉及到金额计算的 要在后端进行重复校验 以免出现结算单金额错误的情况
                 $kou_money = array_sum(array_column($list, 'kou_money'));
-                if(bcsub(bcadd($params['product_total'],$kou_money),$params['product_total1'],2) != 0){
+                if(bcsub(bcadd($params['product_total'],$kou_money,2),$params['product_total1'],2) != 0){
                     $this->error(__('金额计算错误，请关闭页面后重试', ''));
                 }
                 foreach ($list as $k => $v) {
@@ -332,7 +327,7 @@ class Statement extends Backend
                             $this->error(__('有扣款金额不能没有扣款原因', ''));
                         }
                     }
-                    if(bcsub(bcadd($v['all_money'],$v['kou_money']),$v['all_money1'],2) != 0){
+                    if(bcsub(bcadd($v['all_money'],$v['kou_money'],2),$v['all_money1'],2) != 0){
 //                    if (($v['all_money'] + $v['kou_money']) != $v['all_money1']) {
                         $this->error(__('采购单' . $v['name'] . '金额计算错误，请关闭页面后重试', ''));
                     }
