@@ -318,7 +318,7 @@ class Statement extends Backend
                 $params = $this->preExcludeFields($params);
                 //涉及到金额计算的 要在后端进行重复校验 以免出现结算单金额错误的情况
                 $kou_money = array_sum(array_column($list, 'kou_money'));
-                if (($params['product_total'] + $kou_money) != $params['product_total1']) {
+                if(bcsub(bcadd($params['product_total'],$kou_money),$params['product_total1'],2) != 0){
                     $this->error(__('金额计算错误，请关闭页面后重试', ''));
                 }
                 foreach ($list as $k => $v) {
@@ -327,7 +327,8 @@ class Statement extends Backend
                             $this->error(__('有扣款金额不能没有扣款原因', ''));
                         }
                     }
-                    if (($v['all_money'] + $v['kou_money']) != $v['all_money1']) {
+                    if(bcsub(bcadd($v['all_money'],$v['kou_money']),$v['all_money1'],2) != 0){
+//                    if (($v['all_money'] + $v['kou_money']) != $v['all_money1']) {
                         $this->error(__('采购单' . $v['name'] . '金额计算错误，请关闭页面后重试', ''));
                     }
                 }
