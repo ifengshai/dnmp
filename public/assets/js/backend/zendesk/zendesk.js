@@ -38,8 +38,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                             visible:false
                         },
                         {
+                            field: 'assign_id_next',
+                            title: __('Assign_id_next'),
+                            align: 'left',
+                            searchList: $.getJSON('zendesk/zendesk_agents/getAgentsList'),
+                            visible:false
+                        },
+                        {
                             field: 'assign_id_nickname',
                             title: __('Assign_id'),
+                            align: 'left',
+                            operate:false
+                        },
+                        {
+                            field: 'assign_id_next_nickname',
+                            title: __('Assign_id_next'),
                             align: 'left',
                             operate:false
                         },
