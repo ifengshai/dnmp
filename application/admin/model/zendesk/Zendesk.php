@@ -610,7 +610,7 @@ class Zendesk extends Model
             //普通用户有疑难标记，交给任务量最少的
             $task = Db::name('zendesk_tasks')
                 ->alias('t')
-                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                 ->whereTime('t.create_time', 'today')
                 ->where('surplus_count','>',0)
                 ->where('group',1)
@@ -645,7 +645,7 @@ class Zendesk extends Model
                             //第二承接人离职，分配给其他人未分满VIP组人员，并将此人标记为第一承接人
                             $task = Db::name('zendesk_tasks')
                                 ->alias('t')
-                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                 ->whereTime('t.create_time', 'today')
                                 ->where('surplus_count','>',0)
                                 ->where('group',$group)
@@ -667,7 +667,7 @@ class Zendesk extends Model
                                 Db::name('zendesk_tasks')
                                     ->where('id',$task['id'])
                                     ->update($taskArr);
-                                echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',2'."\n";
+                                echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].' group:'.$group.',2'."\n";
                                 usleep(10000);
                             }
                         }else{
@@ -691,13 +691,13 @@ class Zendesk extends Model
                                         Db::name('zendesk_tasks')
                                             ->where('id',$nextAssignTask['id'])
                                             ->update($taskArr);
-                                        echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:0 due_id:'.$nextAssignInfo['assign_id_next'].',3'."\n";
+                                        echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:0 due_id:'.$nextAssignInfo['assign_id_next'].' group:'.$group.',3'."\n";
                                         usleep(10000);
                                     }else{
                                         //任务已分满，将邮件分配给任务量最少的人
                                         $task = Db::name('zendesk_tasks')
                                             ->alias('t')
-                                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                            ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                             ->whereTime('t.create_time', 'today')
                                             ->where('surplus_count','>',0)
                                             ->where('group',$group)
@@ -719,7 +719,7 @@ class Zendesk extends Model
                                             Db::name('zendesk_tasks')
                                                 ->where('id',$task['id'])
                                                 ->update($taskArr);
-                                            echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',4'."\n";
+                                            echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',4'."\n";
                                             usleep(10000);
                                         }
                                     }
@@ -727,7 +727,7 @@ class Zendesk extends Model
                                     //第二承接人不上班，将邮件分配给任务量最少的人
                                     $task = Db::name('zendesk_tasks')
                                         ->alias('t')
-                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                        ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                         ->whereTime('t.create_time', 'today')
                                         ->where('surplus_count','>',0)
                                         ->where('group',$group)
@@ -749,7 +749,7 @@ class Zendesk extends Model
                                         Db::name('zendesk_tasks')
                                             ->where('id',$task['id'])
                                             ->update($taskArr);
-                                        echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',5'."\n";
+                                        echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',5'."\n";
                                         usleep(10000);
                                     }
                                 }
@@ -757,7 +757,7 @@ class Zendesk extends Model
                                 //第二承接人不是VIP组成员，将任务分给任务量最少的人
                                 $task = Db::name('zendesk_tasks')
                                     ->alias('t')
-                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                    ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                     ->whereTime('t.create_time', 'today')
                                     ->where('surplus_count','>',0)
                                     ->where('group',$group)
@@ -779,7 +779,7 @@ class Zendesk extends Model
                                     Db::name('zendesk_tasks')
                                         ->where('id',$task['id'])
                                         ->update($taskArr);
-                                    echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',6'."\n";
+                                    echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].' group:'.$group.',6'."\n";
                                     usleep(10000);
                                 }
                             }
@@ -788,7 +788,7 @@ class Zendesk extends Model
                         //没有第二承接人，把任务分配给最少的人
                         $task = Db::name('zendesk_tasks')
                             ->alias('t')
-                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                            ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                             ->whereTime('t.create_time', 'today')
                             ->where('surplus_count','>',0)
                             ->where('group',$group)
@@ -809,7 +809,7 @@ class Zendesk extends Model
                             Db::name('zendesk_tasks')
                                 ->where('id',$task['id'])
                                 ->update($taskArr);
-                            echo $ticket->id.' assign_id:'.$task['admin_id'].' due_id:'.$task['admin_id'].',7'."\n";
+                            echo $ticket->id.' assign_id:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',7'."\n";
                             usleep(10000);
                         }
                     }
@@ -832,7 +832,7 @@ class Zendesk extends Model
                                 Db::name('zendesk_tasks')
                                     ->where('id',$firstAssignTask['id'])
                                     ->update($taskArr);
-                                echo $ticket->id.' due_id:'.$firstAssignInfo['assign_id'].',8'."\n";
+                                echo $ticket->id.' due_id:'.$firstAssignInfo['assign_id'].' group:'.$group.',8'."\n";
                                 usleep(10000);
                             }else{
                                 //任务分配满，判断是否有第二承接人
@@ -842,7 +842,7 @@ class Zendesk extends Model
                                         //第二承接人离职，分配给其他人未分满VIP组人员，并将此人标记为第二承接人
                                         $task = Db::name('zendesk_tasks')
                                             ->alias('t')
-                                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                            ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                             ->whereTime('t.create_time', 'today')
                                             ->where('surplus_count','>',0)
                                             ->where('group',$group)
@@ -863,7 +863,7 @@ class Zendesk extends Model
                                             Db::name('zendesk_tasks')
                                                 ->where('id',$task['id'])
                                                 ->update($taskArr);
-                                            echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',9'."\n";
+                                            echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',9'."\n";
                                             usleep(10000);
                                         }
                                     }else{
@@ -885,13 +885,13 @@ class Zendesk extends Model
                                                     Db::name('zendesk_tasks')
                                                         ->where('id',$nextAssignTask['id'])
                                                         ->update($taskArr);
-                                                    echo $ticket->id.' due_id:'.$nextAssignInfo['assign_id_next'].',10'."\n";
+                                                    echo $ticket->id.' due_id:'.$nextAssignInfo['assign_id_next'].' group:'.$group.',10'."\n";
                                                     usleep(10000);
                                                 }else{
                                                     //任务已分满，将邮件分配给任务量最少的人
                                                     $task = Db::name('zendesk_tasks')
                                                         ->alias('t')
-                                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                        ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                                         ->whereTime('t.create_time', 'today')
                                                         ->where('surplus_count','>',0)
                                                         ->where('group',$group)
@@ -911,7 +911,7 @@ class Zendesk extends Model
                                                         Db::name('zendesk_tasks')
                                                             ->where('id',$task['id'])
                                                             ->update($taskArr);
-                                                        echo $ticket->id.' due_id:'.$task['admin_id'].',11'."\n";
+                                                        echo $ticket->id.' due_id:'.$task['admin_id'].' group:'.$group.',11'."\n";
                                                         usleep(10000);
                                                     }
                                                 }
@@ -919,7 +919,7 @@ class Zendesk extends Model
                                                 //第二承接人不上班，将邮件分配给任务量最少的人
                                                 $task = Db::name('zendesk_tasks')
                                                     ->alias('t')
-                                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                    ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                                     ->whereTime('t.create_time', 'today')
                                                     ->where('surplus_count','>',0)
                                                     ->where('group',$group)
@@ -939,7 +939,7 @@ class Zendesk extends Model
                                                     Db::name('zendesk_tasks')
                                                         ->where('id',$task['id'])
                                                         ->update($taskArr);
-                                                    echo $ticket->id.' due_id:'.$task['admin_id'].',12'."\n";
+                                                    echo $ticket->id.' due_id:'.$task['admin_id'].' group:'.$group.',12'."\n";
                                                     usleep(10000);
                                                 }
                                             }
@@ -947,7 +947,7 @@ class Zendesk extends Model
                                             //第二承接人不是VIP组成员，将任务分给任务量最少的人
                                             $task = Db::name('zendesk_tasks')
                                                 ->alias('t')
-                                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                                 ->whereTime('t.create_time', 'today')
                                                 ->where('surplus_count','>',0)
                                                 ->where('group',$group)
@@ -968,7 +968,7 @@ class Zendesk extends Model
                                                 Db::name('zendesk_tasks')
                                                     ->where('id',$task['id'])
                                                     ->update($taskArr);
-                                                echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',13'."\n";
+                                                echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',13'."\n";
                                                 usleep(10000);
                                             }
                                         }
@@ -977,7 +977,7 @@ class Zendesk extends Model
                                     //没有第二承接，将任务分配给任务量最少的人
                                     $task = Db::name('zendesk_tasks')
                                         ->alias('t')
-                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                        ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                         ->whereTime('t.create_time', 'today')
                                         ->where('surplus_count','>',0)
                                         ->where('group',$group)
@@ -998,7 +998,7 @@ class Zendesk extends Model
                                         Db::name('zendesk_tasks')
                                             ->where('id',$task['id'])
                                             ->update($taskArr);
-                                        echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',14'."\n";
+                                        echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',14'."\n";
                                         usleep(10000);
                                     }
                                 }
@@ -1011,7 +1011,7 @@ class Zendesk extends Model
                                     //第二承接人离职，分配给其他人未分满VIP组人员，并将此人标记为第二承接人
                                     $task = Db::name('zendesk_tasks')
                                         ->alias('t')
-                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                        ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                         ->whereTime('t.create_time', 'today')
                                         ->where('surplus_count','>',0)
                                         ->where('group',$group)
@@ -1032,7 +1032,7 @@ class Zendesk extends Model
                                         Db::name('zendesk_tasks')
                                             ->where('id',$task['id'])
                                             ->update($taskArr);
-                                        echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',15'."\n";
+                                        echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',15'."\n";
                                         usleep(10000);
                                     }
                                 }else{
@@ -1054,13 +1054,13 @@ class Zendesk extends Model
                                                 Db::name('zendesk_tasks')
                                                     ->where('id',$nextAssignTask['id'])
                                                     ->update($taskArr);
-                                                echo $ticket->id.' due_id:'.$nextAssignInfo['assign_id_next'].',16'."\n";
+                                                echo $ticket->id.' due_id:'.$nextAssignInfo['assign_id_next'].' group:'.$group.',16'."\n";
                                                 usleep(10000);
                                             }else{
                                                 //任务已分满，将邮件分配给任务量最少的人
                                                 $task = Db::name('zendesk_tasks')
                                                     ->alias('t')
-                                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                    ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                                     ->whereTime('t.create_time', 'today')
                                                     ->where('surplus_count','>',0)
                                                     ->where('group',$group)
@@ -1080,7 +1080,7 @@ class Zendesk extends Model
                                                     Db::name('zendesk_tasks')
                                                         ->where('id',$task['id'])
                                                         ->update($taskArr);
-                                                    echo $ticket->id.' due_id:'.$task['admin_id'].',17'."\n";
+                                                    echo $ticket->id.' due_id:'.$task['admin_id'].' group:'.$group.',17'."\n";
                                                     usleep(10000);
                                                 }
                                             }
@@ -1088,7 +1088,7 @@ class Zendesk extends Model
                                             //第二承接人不上班，将邮件分配给任务量最少的人
                                             $task = Db::name('zendesk_tasks')
                                                 ->alias('t')
-                                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                                 ->whereTime('t.create_time', 'today')
                                                 ->where('surplus_count','>',0)
                                                 ->where('group',$group)
@@ -1108,7 +1108,7 @@ class Zendesk extends Model
                                                 Db::name('zendesk_tasks')
                                                     ->where('id',$task['id'])
                                                     ->update($taskArr);
-                                                echo $ticket->id.' due_id:'.$task['admin_id'].',18'."\n";
+                                                echo $ticket->id.' due_id:'.$task['admin_id'].' group:'.$group.',18'."\n";
                                                 usleep(10000);
                                             }
                                         }
@@ -1116,7 +1116,7 @@ class Zendesk extends Model
                                         //第二承接人不是VIP组成员，将任务分给任务量最少的人
                                         $task = Db::name('zendesk_tasks')
                                             ->alias('t')
-                                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                            ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                             ->whereTime('t.create_time', 'today')
                                             ->where('surplus_count','>',0)
                                             ->where('group',$group)
@@ -1137,7 +1137,7 @@ class Zendesk extends Model
                                             Db::name('zendesk_tasks')
                                                 ->where('id',$task['id'])
                                                 ->update($taskArr);
-                                            echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',19'."\n";
+                                            echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',19'."\n";
                                             usleep(10000);
                                         }
                                     }
@@ -1146,7 +1146,7 @@ class Zendesk extends Model
                                 //没有第二承接人，分配给任务量最少的人
                                 $task = Db::name('zendesk_tasks')
                                     ->alias('t')
-                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                    ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                     ->whereTime('t.create_time', 'today')
                                     ->where('surplus_count','>',0)
                                     ->where('group',$group)
@@ -1167,7 +1167,7 @@ class Zendesk extends Model
                                     Db::name('zendesk_tasks')
                                         ->where('id',$task['id'])
                                         ->update($taskArr);
-                                    echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',20'."\n";
+                                    echo $ticket->id.' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',20'."\n";
                                     usleep(10000);
                                 }
                             }
@@ -1180,7 +1180,7 @@ class Zendesk extends Model
                                 //第二承接人离职，分配给其他人未分满组人员，并将此人标记为第一承接人
                                 $task = Db::name('zendesk_tasks')
                                     ->alias('t')
-                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                    ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                     ->whereTime('t.create_time', 'today')
                                     ->where('surplus_count','>',0)
                                     ->where('group',$group)
@@ -1202,7 +1202,7 @@ class Zendesk extends Model
                                     Db::name('zendesk_tasks')
                                         ->where('id',$task['id'])
                                         ->update($taskArr);
-                                    echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',21'."\n";
+                                    echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].' group:'.$group.',21'."\n";
                                     usleep(10000);
                                 }
                             }else{
@@ -1226,13 +1226,13 @@ class Zendesk extends Model
                                             Db::name('zendesk_tasks')
                                                 ->where('id',$nextAssignTask['id'])
                                                 ->update($taskArr);
-                                            echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:0 due_id:'.$nextAssignInfo['assign_id_next'].',22'."\n";
+                                            echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:0 due_id:'.$nextAssignInfo['assign_id_next'].' group:'.$group.',22'."\n";
                                             usleep(10000);
                                         }else{
                                             //任务已分满，将邮件分配给任务量最少的人
                                             $task = Db::name('zendesk_tasks')
                                                 ->alias('t')
-                                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                                ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                                 ->whereTime('t.create_time', 'today')
                                                 ->where('surplus_count','>',0)
                                                 ->where('group',$group)
@@ -1254,7 +1254,7 @@ class Zendesk extends Model
                                                 Db::name('zendesk_tasks')
                                                     ->where('id',$task['id'])
                                                     ->update($taskArr);
-                                                echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',23'."\n";
+                                                echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',23'."\n";
                                                 usleep(10000);
                                             }
                                         }
@@ -1262,7 +1262,7 @@ class Zendesk extends Model
                                         //第二承接人不上班，将邮件分配给任务量最少的人
                                         $task = Db::name('zendesk_tasks')
                                             ->alias('t')
-                                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                            ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                             ->whereTime('t.create_time', 'today')
                                             ->where('surplus_count','>',0)
                                             ->where('group',$group)
@@ -1284,7 +1284,7 @@ class Zendesk extends Model
                                             Db::name('zendesk_tasks')
                                                 ->where('id',$task['id'])
                                                 ->update($taskArr);
-                                            echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',24'."\n";
+                                            echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',24'."\n";
                                             usleep(10000);
                                         }
                                     }
@@ -1292,7 +1292,7 @@ class Zendesk extends Model
                                     //第二承接人不是VIP组成员，将任务分给任务量最少的人
                                     $task = Db::name('zendesk_tasks')
                                         ->alias('t')
-                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                        ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                         ->whereTime('t.create_time', 'today')
                                         ->where('surplus_count','>',0)
                                         ->where('group',$group)
@@ -1314,7 +1314,7 @@ class Zendesk extends Model
                                         Db::name('zendesk_tasks')
                                             ->where('id',$task['id'])
                                             ->update($taskArr);
-                                        echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',25'."\n";
+                                        echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].' group:'.$group.',25'."\n";
                                         usleep(10000);
                                     }
                                 }
@@ -1323,7 +1323,7 @@ class Zendesk extends Model
                             //没有第二承接人，把任务分配给最少的人
                             $task = Db::name('zendesk_tasks')
                                 ->alias('t')
-                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                 ->whereTime('t.create_time', 'today')
                                 ->where('surplus_count','>',0)
                                 ->where('group',$group)
@@ -1344,7 +1344,7 @@ class Zendesk extends Model
                                 Db::name('zendesk_tasks')
                                     ->where('id',$task['id'])
                                     ->update($taskArr);
-                                echo $ticket->id.' assign_id:'.$task['admin_id'].' due_id:'.$task['admin_id'].',26'."\n";
+                                echo $ticket->id.' assign_id:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',26'."\n";
                                 usleep(10000);
                             }
                         }
@@ -1358,7 +1358,7 @@ class Zendesk extends Model
                         //第二承接人离职，分配给其他人未分满VIP组人员，并将此人标记为第一承接人
                         $task = Db::name('zendesk_tasks')
                             ->alias('t')
-                            ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                            ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                             ->whereTime('t.create_time', 'today')
                             ->where('surplus_count','>',0)
                             ->where('group',$group)
@@ -1380,7 +1380,7 @@ class Zendesk extends Model
                             Db::name('zendesk_tasks')
                                 ->where('id',$task['id'])
                                 ->update($taskArr);
-                            echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',27'."\n";
+                            echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].' group:'.$group.',27'."\n";
                             usleep(10000);
                         }
                     }else{
@@ -1404,13 +1404,13 @@ class Zendesk extends Model
                                     Db::name('zendesk_tasks')
                                         ->where('id',$nextAssignTask['id'])
                                         ->update($taskArr);
-                                    echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:0 due_id:'.$nextAssignInfo['assign_id_next'].',28'."\n";
+                                    echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:0 due_id:'.$nextAssignInfo['assign_id_next'].' group:'.$group.',28'."\n";
                                     usleep(10000);
                                 }else{
                                     //任务已分满，将邮件分配给任务量最少的人
                                     $task = Db::name('zendesk_tasks')
                                         ->alias('t')
-                                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                        ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                         ->whereTime('t.create_time', 'today')
                                         ->where('surplus_count','>',0)
                                         ->where('group',$group)
@@ -1432,7 +1432,7 @@ class Zendesk extends Model
                                         Db::name('zendesk_tasks')
                                             ->where('id',$task['id'])
                                             ->update($taskArr);
-                                        echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',29'."\n";
+                                        echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',29'."\n";
                                         usleep(10000);
                                     }
                                 }
@@ -1440,7 +1440,7 @@ class Zendesk extends Model
                                 //第二承接人不上班，将邮件分配给任务量最少的人
                                 $task = Db::name('zendesk_tasks')
                                     ->alias('t')
-                                    ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                    ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                     ->whereTime('t.create_time', 'today')
                                     ->where('surplus_count','>',0)
                                     ->where('group',$group)
@@ -1462,7 +1462,7 @@ class Zendesk extends Model
                                     Db::name('zendesk_tasks')
                                         ->where('id',$task['id'])
                                         ->update($taskArr);
-                                    echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].',30'."\n";
+                                    echo $ticket->id.' assign_id:'.$nextAssignInfo['assign_id_next'].' assign_id_next:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',30'."\n";
                                     usleep(10000);
                                 }
                             }
@@ -1470,7 +1470,7 @@ class Zendesk extends Model
                             //第二承接人不是VIP组成员，将任务分给任务量最少的人
                             $task = Db::name('zendesk_tasks')
                                 ->alias('t')
-                                ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                                ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                                 ->whereTime('t.create_time', 'today')
                                 ->where('surplus_count','>',0)
                                 ->where('group',$group)
@@ -1492,7 +1492,7 @@ class Zendesk extends Model
                                 Db::name('zendesk_tasks')
                                     ->where('id',$task['id'])
                                     ->update($taskArr);
-                                echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].',31'."\n";
+                                echo $ticket->id.' assign_id:'.$task['admin_id'].' assign_id_next:0 due_id:'.$task['admin_id'].' group:'.$group.',31'."\n";
                                 usleep(10000);
                             }
                         }
@@ -1501,7 +1501,7 @@ class Zendesk extends Model
                     //没有第二承接人，分配给任务量最少的人
                     $task = Db::name('zendesk_tasks')
                         ->alias('t')
-                        ->join('zendesk_admin a','t.admin_id=a.admin_id')
+                        ->join('fa_zendesk_admin a','t.admin_id=a.admin_id')
                         ->whereTime('t.create_time', 'today')
                         ->where('surplus_count','>',0)
                         ->where('group',$group)
@@ -1523,7 +1523,7 @@ class Zendesk extends Model
                         Db::name('zendesk_tasks')
                             ->where('id',$task['id'])
                             ->update($taskArr);
-                        echo $ticket->id.' assign_id:'.$task['admin_id'].' due_id:'.$task['admin_id'].',32'."\n";
+                        echo $ticket->id.' assign_id:'.$task['admin_id'].' due_id:'.$task['admin_id'].' group:'.$group.',32'."\n";
                         usleep(10000);
                     }
                 }
