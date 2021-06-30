@@ -502,16 +502,16 @@ class ItWebDemand extends Backend
             }
 //
             //任务类型
-            if ($v['site_type'] == 1) {
-                $list[$k]['site_type'] = 'bug';
-            } elseif ($v['site_type'] == 2) {
-                $list[$k]['site_type'] = '维护';
-            } elseif ($v['site_type'] == 3) {
-                $list[$k]['site_type'] = '优化';
-            } elseif ($v['site_type'] == 4) {
-                $list[$k]['site_type'] = '新功能';
+            if ($v['type'] == 1) {
+                $list[$k]['type'] = 'bug';
+            } elseif ($v['type'] == 2) {
+                $list[$k]['type'] = '维护';
+            } elseif ($v['type'] == 3) {
+                $list[$k]['type'] = '优化';
+            } elseif ($v['type'] == 4) {
+                $list[$k]['type'] = '新功能';
             } else {
-                $list[$k]['site_type'] = '开发';
+                $list[$k]['type'] = '开发';
             }
             //功能模块
             if ($v['functional_module'] == 1) {
@@ -530,8 +530,10 @@ class ItWebDemand extends Backend
                 $list[$k]['functional_module'] = '支付页';
             } elseif ($v['functional_module'] == 8) {
                 $list[$k]['functional_module'] = 'magento后台';
-            } else {
+            } elseif ($v['functional_module'] == 9) {
                 $list[$k]['functional_module'] = '活动页';
+            } else {
+                $list[$k]['functional_module'] = '其他';
             }
             //难易程度
             if ($v['web_designer_complexity'] == 1) {
@@ -633,7 +635,7 @@ class ItWebDemand extends Backend
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['site']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['entry_user_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['site_type']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['type']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['functional_module']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['title']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['create_time']);
