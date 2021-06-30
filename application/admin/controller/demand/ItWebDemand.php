@@ -737,6 +737,13 @@ class ItWebDemand extends Backend
                 unset($filter['develop_finish_status1']);
             }
 
+
+            if ($filter['end_time']) {
+                $time = explode(' - ', $filter['end_time']);
+                $map['all_finish_time'] = ['between', [$time[0], $time[1]]];
+                unset($filter['end_time']);
+            }
+
             //筛选测试进度
             if ($filter['test_status1']) {
                 $map['test_status'] = $filter['test_status1'];
