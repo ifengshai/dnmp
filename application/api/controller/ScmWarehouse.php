@@ -3907,7 +3907,8 @@ class ScmWarehouse extends Scm
                         $skuItem = $this->_item->where($itemMap)->field('stock,available_stock,sample_num,wait_instock_num,occupy_stock,distribution_occupy_stock')->find();
                         if ($sv['sku']) {
                             //扣减sku总库存 可用库存
-                            $stock = $this->_item->where($itemMap)->dec('stock', $sv['real_num'])->dec('available_stock', $sv['real_num'])->update();
+                            $stock = $this->_item->where($itemMap)->setDec('stock', $sv['real_num']);
+                            $stock = $this->_item->where($itemMap)->setDec('available_stock', $sv['real_num']);
                             //插入日志表
                             (new StockLog())->setData([
                                 'type'                   => 2,
@@ -3947,7 +3948,7 @@ class ScmWarehouse extends Scm
                                     //最后一个站点 剩余数量分给最后一个站
                                     if (($allNum - $key) == 1) {
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
-                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stockNum)->update();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->setDec('stock', $stockNum);
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
@@ -3967,7 +3968,7 @@ class ScmWarehouse extends Scm
                                         $num = round($sv['real_num'] * $rateRate);
                                         $stockNum -= $num;
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
-                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->setDec('stock', $num);
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
@@ -3990,7 +3991,7 @@ class ScmWarehouse extends Scm
                                     //最后一个站点 剩余数量分给最后一个站
                                     if (($allNum - $key) == 1) {
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
-                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $stockNum)->update();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->setDec('stock', $stockNum);
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
@@ -4010,7 +4011,7 @@ class ScmWarehouse extends Scm
                                         $num = round($sv['real_num'] * abs($val['stock']) / $numNum);
                                         $stockNum -= $num;
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->find();
-                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->dec('stock', $num)->update();
+                                        $this->_item_platform_sku->where(['sku' => $sv['sku'], 'platform_type' => $val['platform_type']])->setDec('stock', $num);
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
