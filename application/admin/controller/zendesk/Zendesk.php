@@ -1696,11 +1696,11 @@ DOC;
                 $data['assign_id'] = $params['id'];
                 $data['assignee_id'] = $agent_id;
             }
-            if ($params['type'] == 4 || $params['type'] == 3) {
+            if ($params['type'] == 4 || $params['type'] == 5) {
                 //修改第二承接人
                 $data['assign_id_next'] = $params['id'];
             }
-            if ($params['type'] == 2 || $params['type'] == 3) {
+            if ($params['type'] == 2 || $params['type'] == 3 || $params['type'] == 5) {
                 //修改处理人
                 $data['due_id'] = $params['id'];
             }
@@ -1739,11 +1739,11 @@ DOC;
                     $data['assign_id'] = $params['id'];
                     $data['assignee_id'] = $agent_id;
                 }
-                if ($params['type'] == 4 || $params['type'] == 3) {
+                if ($params['type'] == 4 || $params['type'] == 5) {
                     //修改第二承接人
                     $data['assign_id_next'] = $params['id'];
                 }
-                if ($params['type'] == 2 || $params['type'] == 3) {
+                if ($params['type'] == 2 || $params['type'] == 3 || $params['type'] == 5) {
                     //修改处理人
                     $data['due_id'] = $params['id'];
                 }
