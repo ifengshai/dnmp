@@ -407,9 +407,8 @@ class ItWebDemand extends Backend
         } else {
             $starDay = date("Y-m-d H:i:s", mktime(0, 0, 0, date("m") - 1, 1));
             $endDay = date("Y-m-d H:i:s", mktime(23, 59, 59, date("m"), 0));
-            $where['app_finish_time'] = ['between', [$starDay, $endDay]];
+            $where['create_time'] = ['between', [$starDay, $endDay]];
         }
-
 
         $type = input('param.type');
 
