@@ -162,6 +162,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 visible: false
                             },
                             {
+                                field: 'phper_group',
+                                title: __('是否需要后端'),
+                                searchList: {0: '未确认', 1: '需要', 2: '不需要'},
+                                visible: false
+                            },
+
+                            {
                                 field: 'test_status1',
                                 title: __('测试进度'),
                                 searchList: {1: '未确认', 2: '已确认', 3: '待通过', 4: '待上线', 5: '已上线'},
@@ -350,8 +357,25 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 });
                 //批量导出xls
                 $('.btn-batch-export-xls').click(function () {
-                    window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=1', '_blank');
+
+
+                    var ids = Table.api.selectedids(table);
+                    if (ids.length > 0) {
+                        window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=1&ids=' + ids, '_blank');
+                    } else {
+                        var options = table.bootstrapTable('getOptions');
+                        var search = options.queryParams({});
+                        var filter = search.filter;
+                        var op = search.op;
+                        window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=1&filter=' + filter + '&op=' + op, '_blank');
+                    }
+
+
+                    // window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=1', '_blank');
                 });
+
+
+
 
             },
             second: function () {
@@ -497,7 +521,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
             });
             //批量导出xls
             $('.btn-batch-export-xls').click(function () {
-                window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=2', '_blank');
+                // window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=2', '_blank');
+
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=2&ids=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=2&filter=' + filter + '&op=' + op, '_blank');
+                }
+
+
             });
             $('.panel-heading .nav-tabs li a').on('click', function (e) {
                 var field = $(this).data("field");

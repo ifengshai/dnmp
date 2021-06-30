@@ -387,15 +387,24 @@ class ItWebDemand extends Backend
      */
     public function batch_export_xls()
     {
+
+        $filter = json_decode($this->request->get('filter'), true);
+        //筛选开发进度
+        if ($filter['phper_group']) {
+            $map['phper_group'] = $filter['phper_group'];
+            unset($filter['phper_group']);
+        }
+
         $starDay = date("Y-m-d H:i:s", mktime(0, 0, 0, date("m")-1, 1));
         $endDay = date("Y-m-d H:i:s", mktime(23, 59, 59, date("m"), 0));
         $type = input('param.type');
 
         $where['is_del'] = ['eq', 1];
         $where['demand_type'] = ['eq', $type];
-        $where['create_time'] = ['between', [$starDay, $endDay]];
+        $where['end_time'] = ['between', [$starDay, $endDay]];
         $list = $this->model
             ->where($where)
+            ->where($map)
             ->order('id desc')
             ->select();
         $list = collection($list)->toArray();
@@ -536,6 +545,16 @@ class ItWebDemand extends Backend
             } else {
                 $list[$k]['web_designer_group'] = '不需要';
             }
+
+            //是否需要前端
+            if ($v['phper_group'] == 0) {
+                $list[$k]['phper_group'] = '未确认';
+            } elseif ($v['phper_group'] == 1) {
+                $list[$k]['phper_group'] = '需要';
+            } else {
+                $list[$k]['phper_group'] = '不需要';
+            }
+
             if ($v['test_group'] == 0) {
                 $list[$k]['test_group'] = '未确认';
             } elseif ($v['test_group'] == 1) {
@@ -584,7 +603,7 @@ class ItWebDemand extends Backend
             ->setCellValue("G1", "创建时间")
             ->setCellValue("H1", "产品审核通过时间")
             ->setCellValue("I1", "开发责任人")
-            ->setCellValue("J1", "计划完成时间")
+            ->setCellValue("J1", "期望时间")
             ->setCellValue("K1", "实际开发完成时间")
             ->setCellValue("L1", "需求上线时间")
             ->setCellValue("M1", "前端预期难易度")
@@ -593,7 +612,9 @@ class ItWebDemand extends Backend
             ->setCellValue("P1", "是否需要测试")
             ->setCellValue("Q1", "前端负责人")
             ->setCellValue("R1", "后端负责人")
-            ->setCellValue("S1", "APP负责人");
+            ->setCellValue("S1", "APP负责人")
+            ->setCellValue("T1", "后端预计完成时间")
+            ->setCellValue("U1", "是否需要后端");
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['site']);
@@ -615,6 +636,8 @@ class ItWebDemand extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['web_designer_user_name']);
             $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['php_user_name']);
             $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['app_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['phper_expect_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['phper_group']);
         }
 
         //设置宽度
