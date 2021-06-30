@@ -4411,45 +4411,22 @@ EOF;
             ->where($addWhere)
             ->select();
         $list = collection($list)->toArray();
-//        foreach ($list as $key => $item) {
-//            $_new_order = new NewOrder();
-//            $result_id = $_new_order
-//                ->where('increment_id', $item['platform_order'])
-//                ->value('id');
-//            $order_item_where['order_id'] = $result_id;
-//            if (!empty($item['order_item_numbers']) && 2 == $item['work_type']) {
-//                if (empty($work)) {
-//                    $select_number = explode(',', $item['order_item_numbers']);
-//                }
-//                $order_item_where['item_order_number'] = ['in', $item['order_item_numbers']];
-//            }
-//            $_new_order_item_process = new NewOrderItemProcess();
-//            $order_item_list = $_new_order_item_process
-//                ->where($order_item_where)
-//                ->column('sku', 'item_order_number');
-//
-//            if (!empty($order_item_list)) {
-//                $son_number = array_keys($order_item_list);
-//                $son_sku = array_values($order_item_list);
-//
-//                if ($item['order_item_numbers']) {
-//                    $select_number = explode(',', $item['order_item_numbers']);
-//                    foreach ($select_number as $e => $v) {
-//                        if ($v == $son_number[$e]) {
-//                            $son_number_array[] = $v . '/' . $son_sku[$e];
-//                        }
-//                    }
-//                }
-//
-//                if (!empty($son_number_array)) {
-//                    $list[$key]['son_number'] = implode(',', $son_number_array);
-//                }
-//
-//                unset($order_item_list);
-//                unset($son_number_array);
-//            }
-//
-//        }
+
+        //根据平台sku求出商品sku
+        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        foreach ($list as $key => $item) {
+            $_new_order = new NewOrder();
+            $orders = $_new_order->alias('a')->field('b.item_order_number,b.site,b.sku')
+                ->where('increment_id', $item['platform_order'])
+                ->join(['fa_order_item_process' => 'b'],'a.id=b.order_id')
+                ->select();
+            $str = '';
+            foreach ($orders as $k => $v) {
+                $sku = $itemPlatFormSku->getTrueSku($v['sku'], $v['site']);
+                $str .= $v['item_order_number'] . '/' . $sku;
+            }
+            $list[$key]['order_skus'] = $str;
+        }
 
         //查询用户id对应姓名
         $admin = new \app\admin\model\Admin();
@@ -4470,8 +4447,7 @@ EOF;
         } else {
             $noteInfo = [];
         }
-        //根据平台sku求出商品sku
-        $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+
         //求出配置里面信息
         $workOrderConfigValue = $this->workOrderConfigValue;
         //求出配置里面的大分类信息
@@ -4653,7 +4629,7 @@ EOF;
             }
             $spreadsheet->getActiveSheet()->setCellValue("AJ" . ($key * 1 + 2), $value['payment_time']);
             $spreadsheet->getActiveSheet()->setCellValue("AK" . ($key * 1 + 2), $value['replacement_order']);
-            $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['order_item_numbers']);
+            $spreadsheet->getActiveSheet()->setCellValue("AL" . ($key * 1 + 2), $value['order_skus']);
 
         }
 
