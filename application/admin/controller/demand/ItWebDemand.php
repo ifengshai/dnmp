@@ -390,6 +390,7 @@ class ItWebDemand extends Backend
 
         $filter = json_decode($this->request->get('filter'), true);
         //筛选开发进度
+        $map = [];
         if ($filter['phper_group']) {
             $map['phper_group'] = $filter['phper_group'];
             unset($filter['phper_group']);
