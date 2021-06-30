@@ -518,6 +518,16 @@ class ItWebDemand extends Backend
             } else {
                 $list[$k]['web_designer_complexity'] = '复杂';
             }
+
+            //难易程度
+            if ($v['phper_complexity'] == 1) {
+                $list[$k]['phper_complexity'] = '简单';
+            } elseif ($v['phper_complexity'] == 2) {
+                $list[$k]['phper_complexity'] = '中等';
+            } else {
+                $list[$k]['phper_complexity'] = '复杂';
+            }
+
             //是否需要前端
             if ($v['web_designer_group'] == 0) {
                 $list[$k]['web_designer_group'] = '未确认';
@@ -578,15 +588,12 @@ class ItWebDemand extends Backend
             ->setCellValue("K1", "实际开发完成时间")
             ->setCellValue("L1", "需求上线时间")
             ->setCellValue("M1", "前端预期难易度")
-//                ->setCellValue("H1", "是否存在二次修改需求")
-            ->setCellValue("N1", "是否需要前端")
-            ->setCellValue("O1", "是否需要测试")
-//                ->setCellValue("Q1", "是否超时")
-//                ->setCellValue("R1", "是否拒绝")
-//                ->setCellValue("S1", "是否存在过pending")
-            ->setCellValue("P1", "前端负责人")
-            ->setCellValue("Q1", "后端负责人")
-            ->setCellValue("R1", "APP负责人");
+            ->setCellValue("N1", "后端预期难易度")
+            ->setCellValue("O1", "是否需要前端")
+            ->setCellValue("P1", "是否需要测试")
+            ->setCellValue("Q1", "前端负责人")
+            ->setCellValue("R1", "后端负责人")
+            ->setCellValue("S1", "APP负责人");
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['site']);
@@ -602,17 +609,12 @@ class ItWebDemand extends Backend
             //测试确认时间
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['test_confirm_time']);
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['web_designer_complexity']);
-
-//                $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), '否');
-
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['web_designer_group']);
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['test_group']);
-//                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['overtime']);
-//                $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['web_remarks']);
-//                $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['pm_audit_status']);
-            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['web_designer_user_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['php_user_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['app_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['phper_complexity']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['web_designer_group']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['test_group']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['web_designer_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['php_user_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['app_user_name']);
         }
 
         //设置宽度
