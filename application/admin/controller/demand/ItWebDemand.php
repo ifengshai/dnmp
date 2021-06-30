@@ -407,8 +407,8 @@ class ItWebDemand extends Backend
             ->where($where)
             ->where($map)
             ->order('id desc')
-            ->select(false);
-        echo $list;die;
+            ->select();
+
         $list = collection($list)->toArray();
 
         foreach ($list as $k => $v) {
