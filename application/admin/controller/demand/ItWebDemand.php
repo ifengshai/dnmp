@@ -48,7 +48,7 @@ class ItWebDemand extends Backend
     {
         $day_17 = mktime(17, 0, 0, date('m'), date('d'), date('Y')); //当天5点
         $week_17 = strtotime("+17 hour", strtotime("friday")); //本周5，下午5点
-        $data = array();
+        $data = [];
         switch ($priority) {
             case 1:
                 $data['start_time'] = date('Y-m-d H:i', time());
@@ -79,6 +79,7 @@ class ItWebDemand extends Backend
                 $data['start_time'] = '';
                 $data['end_time'] = '';
         }
+
         return $data;
     }
 
@@ -91,11 +92,12 @@ class ItWebDemand extends Backend
     public function extract_username($user_id, $config_name)
     {
         $user_id_arr = explode(',', $user_id);
-        $user_name_arr = array();
+        $user_name_arr = [];
         foreach ($user_id_arr as $v) {
             $user_name_arr[] = config('demand.' . $config_name)[$v];
         }
         $user_name = implode(',', $user_name_arr);
+
         return $user_name;
     }
 
@@ -268,7 +270,7 @@ class ItWebDemand extends Backend
             $map['demand_type'] = 1; //默认任务列表
             $this->request->get(['filter' => json_encode($filter)]);
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($meWhere)
@@ -364,7 +366,8 @@ class ItWebDemand extends Backend
                     $list[$k]['test_user_name'] = $test_users;
                 }
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
 
@@ -379,6 +382,7 @@ class ItWebDemand extends Backend
         } else {
             $this->assign('auth_label', 1);
         }
+
         return $this->view->fetch();
     }
 
@@ -396,13 +400,22 @@ class ItWebDemand extends Backend
             unset($filter['phper_group']);
         }
 
-        $starDay = date("Y-m-d H:i:s", mktime(0, 0, 0, date("m")-1, 1));
-        $endDay = date("Y-m-d H:i:s", mktime(23, 59, 59, date("m"), 0));
+        if ($filter['end_time']) {
+            $time = explode(' - ', $filter['end_time']);
+            $map['all_finish_time'] = ['between', [$time[0], $time[1]]];
+            unset($filter['end_time']);
+        } else {
+            $starDay = date("Y-m-d H:i:s", mktime(0, 0, 0, date("m") - 1, 1));
+            $endDay = date("Y-m-d H:i:s", mktime(23, 59, 59, date("m"), 0));
+            $where['app_finish_time'] = ['between', [$starDay, $endDay]];
+        }
+
+
         $type = input('param.type');
 
         $where['is_del'] = ['eq', 1];
         $where['demand_type'] = ['eq', $type];
-        $where['end_time'] = ['between', [$starDay, $endDay]];
+
         $list = $this->model
             ->where($where)
             ->where($map)
@@ -658,7 +671,7 @@ class ItWebDemand extends Backend
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
-                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
                 ],
             ],
         ];
@@ -672,9 +685,9 @@ class ItWebDemand extends Backend
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
-        if ($type ==1){
+        if ($type == 1) {
             $savename = '网站需求列表' . date("YmdHis", time());
-        }else{
+        } else {
             $savename = '网站RDC列表' . date("YmdHis", time());
         }
         if ($format == 'xls') {
@@ -844,7 +857,7 @@ class ItWebDemand extends Backend
             $map['demand_type'] = 2; //默认任务列表
 
             $this->request->get(['filter' => json_encode($filter)]);
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($meWhere)
@@ -942,9 +955,11 @@ class ItWebDemand extends Backend
                     $list[$k]['test_user_name'] = $test_users;
                 }
             }
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
+
         return $this->view->fetch();
     }
 
@@ -1043,7 +1058,7 @@ class ItWebDemand extends Backend
 
                     $pm_status = $this->auth->check('demand/it_web_demand/pm_status'); //产品确认权限
                     $user_id = $this->auth->id;
-                    $data = array();
+                    $data = [];
                     if ($pm_status) {
                         //有产品的权限，说明当前登录者是产品
                         if ($user_id == $row_arr['entry_user_id']) {
@@ -1116,6 +1131,7 @@ class ItWebDemand extends Backend
 
         $this->view->assign('userlist', $userList);
         $this->view->assign('demand_type', input('demand_type'));
+
         return $this->view->fetch();
     }
 
@@ -1214,7 +1230,7 @@ class ItWebDemand extends Backend
                 $res = $this->model->allowField(true)->save($add, ['id' => $params['id']]);
                 if ($res) {
                     //如果产品通过审核  并且该需求需要app协助
-                    if ($params['pm_audit_status'] == 3 && in_array('3',$params['site_type'])) {
+                    if ($params['pm_audit_status'] == 3 && in_array('3', $params['site_type'])) {
                         //将该需求存储到app表
                         $app_add['it_web_demand_id'] = $params['id'];//对应it_web表id
                         $app_add['site'] = $params['site'];//站点
@@ -1265,9 +1281,9 @@ class ItWebDemand extends Backend
         //确认权限
         $this->view->assign('pm_status', $this->auth->check('demand/it_web_demand/pm_status'));
         $this->view->assign('admin_id', session('admin.id'));
+
         return $this->view->fetch();
     }
-
 
 
     /**
@@ -1299,7 +1315,7 @@ class ItWebDemand extends Backend
 
             //$params['type']的值，1：响应编辑，2：完成
             if ($params['type'] == 2) {
-                $update = array();
+                $update = [];
                 if ($params['web_status'] == 1) {
                     $update['web_designer_is_finish'] = 1;
                     $update['web_designer_finish_time'] = date('Y-m-d H:i', time());
@@ -1344,7 +1360,7 @@ class ItWebDemand extends Backend
 
                     if ($flag == $num) {
                         //如果全部完成，则更新本条目状态
-                        $update = array();
+                        $update = [];
                         $update['develop_finish_status'] = 3;
                         $update['develop_finish_time'] = date('Y-m-d H:i', time());
                         $update['test_status'] = 3;
@@ -1370,7 +1386,7 @@ class ItWebDemand extends Backend
             }
 
             if ($params['type'] == 1) {
-                $update = array();
+                $update = [];
                 if ($params['web_status'] == 1) {
                     if (!$params['web_designer_group']) {
                         $this->error('需求响应必选');
@@ -1440,7 +1456,7 @@ class ItWebDemand extends Backend
                         Ding::cc_ding($info['entry_user_id'], '任务ID:' . $params['id'] . '+任务已被确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
                     }
                     //判断是否达到下一个阶段的状态
-                    $develop_finish_status = array();
+                    $develop_finish_status = [];
                     $row = $this->model->get(['id' => $params['id']]);
                     $row_arr = $row->toArray();
                     if ($row_arr['develop_finish_status'] == 1 && $row_arr['status'] == 3) {
@@ -1481,14 +1497,15 @@ class ItWebDemand extends Backend
         $row_arr['start_time'] = date('Y-m-d', strtotime($row_arr['start_time']));
         $row_arr['end_time'] = date('Y-m-d', strtotime($row_arr['end_time']));
 
-        $status = array(
+        $status = [
             1 => '确认',
             2 => '不涉及',
-        );
+        ];
 
         $this->view->assign("distribution_status", $this->auth->check('demand/it_web_demand/distribution'));
         $this->view->assign("status", $status);
         $this->view->assign("row", $row_arr);
+
         return $this->view->fetch();
     }
 
@@ -1540,7 +1557,7 @@ class ItWebDemand extends Backend
                 if ($row['web_designer_group'] == 0 && $row['phper_group'] == 0 && $row['app_group'] == 0) {
                     $this->error('开发还未确认，暂时无法操作');
                 }
-                $update = array();
+                $update = [];
                 $label = 0;
                 if ($params['type'] == 'queren') {
 
@@ -1636,10 +1653,12 @@ class ItWebDemand extends Backend
                         }
 
 //                        Ding::cc_ding($row['entry_user_id'], '任务ID:' . $params['id'] . '+任务已上线，等待确认', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
-                    } else if ($label == 1) {
-                        //测试通过 推送给对应开发者
-                        $user_all = array_merge(array_filter(array($row['app_user_id'], $row['phper_user_id'], $row['web_designer_user_id'])));
-                        Ding::cc_ding($user_all, '任务ID:' . $params['id'] . '+测试已通过，等待上线', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                    } else {
+                        if ($label == 1) {
+                            //测试通过 推送给对应开发者
+                            $user_all = array_merge(array_filter([$row['app_user_id'], $row['phper_user_id'], $row['web_designer_user_id']]));
+                            Ding::cc_ding($user_all, '任务ID:' . $params['id'] . '+测试已通过，等待上线', $row['title'], $this->request->domain() . url('index') . '?ref=addtabs');
+                        }
                     }
 
                     $this->success('成功');
@@ -1657,7 +1676,7 @@ class ItWebDemand extends Backend
         $row_arr['start_time'] = date('Y-m-d', strtotime($row_arr['start_time']));
         $row_arr['end_time'] = date('Y-m-d', strtotime($row_arr['end_time']));
 
-        $time_arr = array();
+        $time_arr = [];
         if ($row_arr['web_designer_group'] == 1) {
             $time_arr[] = strtotime($row_arr['web_designer_expect_time']);
         }
@@ -1678,10 +1697,10 @@ class ItWebDemand extends Backend
             $day = ceil($day_num / (3600 * 24));
         }
 
-        $status = array(
+        $status = [
             1 => '确认任务',
             2 => '不需测试',
-        );
+        ];
         $this->view->assign("status", $status);
         $this->view->assign("day", $day);
         $this->view->assign("row", $row_arr);
@@ -1813,6 +1832,7 @@ class ItWebDemand extends Backend
         $this->view->assign('test_review', $test_review);
         $this->view->assign('review', $review);
         $this->view->assign("row", $row);
+
         return $this->view->fetch();
     }
 
