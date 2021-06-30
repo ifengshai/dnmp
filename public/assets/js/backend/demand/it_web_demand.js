@@ -431,6 +431,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                 formatter: Table.api.formatter.status
                             },
                             {
+                                field: 'phper_group',
+                                title: __('是否需要后端'),
+                                searchList: {0: '未确认', 1: '需要', 2: '不需要'},
+                                visible: false
+                            },
+                            {
                                 field: 'site',
                                 title: __('项目'),
                                 searchList: {
