@@ -358,12 +358,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                 //批量导出xls
                 $('.btn-batch-export-xls').click(function () {
 
-
-                    var ids = Table.api.selectedids(table);
+                    var ids = Table.api.selectedids(table1);
                     if (ids.length > 0) {
                         window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=1&ids=' + ids, '_blank');
                     } else {
-                        var options = table.bootstrapTable('getOptions');
+                        var options = table1.bootstrapTable('getOptions');
                         var search = options.queryParams({});
                         var filter = search.filter;
                         var op = search.op;
@@ -523,11 +522,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
             $('.btn-batch-export-xls').click(function () {
                 // window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=2', '_blank');
 
-                var ids = Table.api.selectedids(table);
+                var ids = Table.api.selectedids($('#table1'));
                 if (ids.length > 0) {
                     window.open(Config.moduleurl + '/demand/it_web_demand/batch_export_xls?type=2&ids=' + ids, '_blank');
                 } else {
-                    var options = table.bootstrapTable('getOptions');
+                    var options = $('#table1').bootstrapTable('getOptions');
                     var search = options.queryParams({});
                     var filter = search.filter;
                     var op = search.op;
