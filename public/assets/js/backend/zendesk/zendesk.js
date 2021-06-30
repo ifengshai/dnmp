@@ -346,6 +346,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             $(document).on('click', '.merge', function () {
                 var nid = $(this).data('nid');
                 var pid = $(this).data('pid');
+                var zid = $(this).data('zid');
                 var subject = $(this).data('subject');
                 var ticket_id = $('.merge-input').val();
                 if (ticket_id) {
@@ -360,7 +361,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         async: false,
                         data: {
                             nid: nid,
-                            pid: pid
+                            pid: pid,
+                            zid: zid,
                         },
                         success: function (json) {
                             var data = json.data;

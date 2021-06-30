@@ -1101,8 +1101,9 @@ class Zendesk extends Backend
     {
         $ticket_id = input('nid');
         $pid = input('pid');
+        $zid = input('zid');
         //查询原订单的站点
-        $type = $this->model->where('ticket_id', $pid)->value('type');
+        $type = $this->model->where('id', $zid)->value('type');
         if ($ticket_id == $pid) {
             $this->error("You selected the same ticket as source and target: #{$ticket_id}. You cannot merge a ticket into itself.
 Please close this window and try again.");
@@ -1117,7 +1118,7 @@ Please close this window and try again.");
         //合并的最后一条评论
         $comment = $this->model->where('ticket_id', $pid)->where('type', $type)->with('lastComment')->find();
         if (in_array($comment->status, [4, 5])) {
-            $this->error("You are unable to merge into #{$ticket_id}.{$comment->status}{$pid} Tickets that are Closed, tickets that are shared with other accounts, and tickets you don\'t have access to cannot be merged into.
+            $this->error("You are unable to merge into #{$ticket_id}. Tickets that are Closed, tickets that are shared with other accounts, and tickets you don\'t have access to cannot be merged into.
 Please close this window and try again.");
         }
         $ticket['lastComment'] = $comment->lastComment[0]->html_body;
