@@ -5,8 +5,8 @@
 </style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('第一承接人')}:</label>
-        <div class="col-xs-12 col-sm-8">
+        <label class="control-label col-xs-12 col-sm-3">{:__('第一承接人')}:</label>
+        <div class="col-xs-12 col-sm-7">
             {:Form::select('row[id]', $issueList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_dept_id'])}
         </div>
         <input type="hidden" name="row[type]" value="1">
@@ -18,8 +18,8 @@
 </form>
 <form id="add-form3" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('第二承接人')}:</label>
-        <div class="col-xs-12 col-sm-8">
+        <label class="control-label col-xs-12 col-sm-3">{:__('第二承接人')}:</label>
+        <div class="col-xs-12 col-sm-7">
             {:Form::select('row[id]', $issueList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_dept_id'])}
         </div>
         <input type="hidden" name="row[type]" value="4">
@@ -31,8 +31,8 @@
 </form>
 <form id="add-form1" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('处理人')}:</label>
-        <div class="col-xs-12 col-sm-8">
+        <label class="control-label col-xs-12 col-sm-3">{:__('处理人')}:</label>
+        <div class="col-xs-12 col-sm-7">
             {:Form::select('row[id]', $issueList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_dept_id'])}
         </div>
         <input type="hidden" name="row[type]" value="2">
@@ -44,11 +44,24 @@
 </form>
 <form id="add-form2" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('承接人+处理人')}:</label>
-        <div class="col-xs-12 col-sm-8">
+        <label class="control-label col-xs-12 col-sm-3">{:__('第一承接人+处理人')}:</label>
+        <div class="col-xs-12 col-sm-7">
             {:Form::select('row[id]', $issueList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_dept_id'])}
         </div>
         <input type="hidden" name="row[type]" value="3">
+        <div style="left: 50%;">
+            <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+<form id="add-form4" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-3">{:__('第二承接人+处理人')}:</label>
+        <div class="col-xs-12 col-sm-7">
+            {:Form::select('row[id]', $issueList, null, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'id'=>'choose_dept_id'])}
+        </div>
+        <input type="hidden" name="row[type]" value="5">
         <div style="left: 50%;">
             <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
