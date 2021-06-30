@@ -188,9 +188,12 @@ class WorkOrderList extends Backend
             if ($filter['recept_person']) {
 
                 $recept_person = $filter['recept_person'];
-                $map['id'] = ['IN', function ($query) use ($recept_person) {
-                    $query->table('fa_work_order_recept')->where('recept_person_id', 'in', $recept_person)->field('work_id');
-                }];
+                $map['id'] = [
+                    'IN',
+                    function ($query) use ($recept_person) {
+                        $query->table('fa_work_order_recept')->where('recept_person_id', 'in', $recept_person)->field('work_id');
+                    },
+                ];
                 unset($filter['recept_person']);
             }
 
@@ -203,9 +206,12 @@ class WorkOrderList extends Backend
             //筛选措施
             if ($filter['measure_choose_id']) {
                 $measure_choose_id = $filter['measure_choose_id'];
-                $map['id'] = [ 'IN', function ($query) use ($measure_choose_id) {
-                    $query->table('fa_work_order_measure')->where('measure_choose_id', 'in', $measure_choose_id)->field('work_id');
-                }];
+                $map['id'] = [
+                    'IN',
+                    function ($query) use ($measure_choose_id) {
+                        $query->table('fa_work_order_measure')->where('measure_choose_id', 'in', $measure_choose_id)->field('work_id');
+                    },
+                ];
                 unset($filter['measure_choose_id']);
             }
 
@@ -4380,9 +4386,12 @@ EOF;
         if ($filter['recept_person']) {
 
             $recept_person = $filter['recept_person'];
-            $map['id'] = ['IN', function ($query) use ($recept_person) {
-                $query->table('fa_work_order_recept')->where('recept_person_id', 'in', $recept_person)->field('work_id');
-            }];
+            $map['id'] = [
+                'IN',
+                function ($query) use ($recept_person) {
+                    $query->table('fa_work_order_recept')->where('recept_person_id', 'in', $recept_person)->field('work_id');
+                },
+            ];
             unset($filter['recept_person']);
         }
 
@@ -4395,9 +4404,12 @@ EOF;
         //筛选措施
         if ($filter['measure_choose_id']) {
             $measure_choose_id = $filter['measure_choose_id'];
-            $map['id'] = [ 'IN', function ($query) use ($measure_choose_id) {
-                $query->table('fa_work_order_measure')->where('measure_choose_id', 'in', $measure_choose_id)->field('work_id');
-            }];
+            $map['id'] = [
+                'IN',
+                function ($query) use ($measure_choose_id) {
+                    $query->table('fa_work_order_measure')->where('measure_choose_id', 'in', $measure_choose_id)->field('work_id');
+                },
+            ];
             unset($filter['measure_choose_id']);
         }
 
@@ -4418,12 +4430,12 @@ EOF;
             $_new_order = new NewOrder();
             $orders = $_new_order->alias('a')->field('b.item_order_number,b.site,b.sku')
                 ->where('increment_id', $item['platform_order'])
-                ->join(['fa_order_item_process' => 'b'],'a.id=b.order_id')
+                ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
                 ->select();
             $str = '';
             foreach ($orders as $k => $v) {
                 $sku = $itemPlatFormSku->getTrueSku($v['sku'], $v['site']);
-                $str .= $v['item_order_number'] . '/' . $sku;
+                $str .= $v['item_order_number'] . '/' . $sku . "\n";
             }
             $list[$key]['order_skus'] = $str;
         }
