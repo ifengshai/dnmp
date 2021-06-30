@@ -3929,6 +3929,7 @@ class ScmWarehouse extends Scm
                             //实体仓调拨出库的同时要对虚拟库存进行一定的操作
                             //查出映射表中此sku对应的所有平台sku 并根据库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
                             $itemPlatformSku = $this->_item_platform_sku->where('sku', $sv['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                            dump($itemPlatformSku);
                             $allNum = count($itemPlatformSku);
                             $wholeNum = $this->_item_platform_sku
                                 ->where('sku', $sv['sku'])
