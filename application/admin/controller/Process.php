@@ -1844,8 +1844,8 @@ class Process extends Backend
     }
     public function test11111111()
     {
-        $dayBefore = date('Y-m-d', strtotime('-2 day'));
-        $dayNow = date('Y-m-d', strtotime('-1 day'));
+        $dayBefore = date('Y-m-d', strtotime('-2 day','1624899600'));
+        $dayNow = date('Y-m-d', strtotime('-1 day','1624899600'));
         echo $dayBefore . '---- ' . $dayNow;
     }
 
