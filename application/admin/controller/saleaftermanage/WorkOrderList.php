@@ -4435,7 +4435,7 @@ EOF;
             $str = '';
             foreach ($orders as $k => $v) {
                 $sku = $itemPlatFormSku->getTrueSku($v['sku'], $v['site']);
-                $str .= $v['item_order_number'] . '/' . $sku . "\n";
+                $str .= $v['item_order_number'] . '/' . $sku . ",";
             }
             $list[$key]['order_skus'] = $str;
         }
