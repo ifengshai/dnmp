@@ -737,7 +737,6 @@ class ItWebDemand extends Backend
                 unset($filter['develop_finish_status1']);
             }
 
-
             if ($filter['end_time']) {
                 $time = explode(' - ', $filter['end_time']);
                 $map['all_finish_time'] = ['between', [$time[0], $time[1]]];
