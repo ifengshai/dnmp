@@ -4437,7 +4437,7 @@ EOF;
                 $sku = $itemPlatFormSku->getTrueSku($v['sku'], $v['site']);
                 $str .= $v['item_order_number'] . '/' . $sku . ",";
             }
-            $list[$key]['order_skus'] = $str;
+            $list[$key]['order_skus'] = trim($str,',');
         }
 
         //查询用户id对应姓名
