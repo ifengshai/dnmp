@@ -159,7 +159,7 @@ class Zendesk extends Backend
                 ->where($where)
                 ->where($map)
                 ->where($andWhere)
-                ->where('channel', 'in', ['email', 'web', 'chat'])
+                ->where('channel', 'in', ['email', 'web', 'chat','sms','mobile_sdk'])
                 ->count();
 
             $list = $this->model
@@ -167,7 +167,7 @@ class Zendesk extends Backend
                 ->where($where)
                 ->where($map)
                 ->where($andWhere)
-                ->where('channel', 'in', ['email', 'web', 'chat'])
+                ->where('channel', 'in', ['email', 'web', 'chat','sms','mobile_sdk'])
                 ->order($orderSet)
                 ->limit($offset, $limit)
                 ->select();
