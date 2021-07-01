@@ -156,6 +156,12 @@ class Distribution extends Backend
     protected $_product_bar_code_item = null;
 
     protected $_wave_order;
+    /**
+     * @var
+     * @author wangpenglei
+     * @date   2021/7/1 14:10
+     */
+    protected $_new_order_item_process;
 
     public function _initialize()
     {
@@ -3758,7 +3764,7 @@ class Distribution extends Backend
     protected function setOrderStockId($orderId = null, $site = null)
     {
         $this->_new_order->where(['id' => $orderId, 'site' => $site])->update(['stock_id' => 2, 'updated_at' => time() + 28800]);
-        $this->_new_order_process->where(['order_id' => $orderId, 'site' => $site])->update(['stock_id' => 2, 'wave_order_id' => 0]);
+        $this->_new_order_item_process->where(['order_id' => $orderId, 'site' => $site])->update(['stock_id' => 2, 'wave_order_id' => 0]);
     }
 
 
