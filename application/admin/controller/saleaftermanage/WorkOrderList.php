@@ -4504,7 +4504,7 @@ EOF;
             ->setCellValue("AI1", "工单回复备注")
             ->setCellValue("AJ1", "订单支付时间")
             ->setCellValue("AK1", "补发订单号")
-            ->setCellValue("AL1", "子单号");;
+            ->setCellValue("AL1", "商品子单号SKU");;
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
