@@ -832,9 +832,25 @@ class DataMarket extends Backend
                 $end = date('Y-m');
             }
             $where['day_date'] = ['between', [$start, $end]];
-            $data = $this->supplymonth->where($where)->field('id,purchase_num,purchase_sales_rate,day_date')->order('day_date',
-                'asc')->select();
+            $data = $this->supplymonth
+                ->where($where)
+                ->field('id,sales_num,day_date')
+                ->order('day_date', 'asc')->select();
             $data = collection($data)->toArray();
+            foreach ($data as $key=>$value){
+                $start = $value['day_date']. '-01 00:00:00';
+                $end = date('Y-m-t 23:59:59',strtotime($value['day_date']));
+                $mapWhere['createtime'] = ['between', [$start, $end]];
+                $mapWhere['is_del'] = 1;
+                $mapWhere['purchase_status'] = ['in', [2, 5, 6, 7, 8, 9, 10]];
+                $purchaseNum = $this->purchase
+                    ->alias('a')
+                    ->where($mapWhere)
+                    ->join(['fa_purchase_order_item' => 'b'],'a.id=b.purchase_id')
+                    ->sum('b.purchase_num');
+                $data[$key]['purchase_num'] = $purchaseNum;
+                $data[$key]['purchase_sales_rate'] = $value['sales_num'] != 0 ? round($purchaseNum / $value['sales_num'] * 100, 2) : 0;
+            }
             $arr['day_date'] = date('Y-m');
             $map['createtime'] = ['between', [date('Y-m-01') . ' 00:00:00', date('Y-m-t') . ' 23:59:59']];
             $map['is_del'] = 1;
