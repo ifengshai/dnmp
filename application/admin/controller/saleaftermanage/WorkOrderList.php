@@ -4426,11 +4426,11 @@ EOF;
 
         //根据平台sku求出商品sku
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $_new_order_item_process = new NewOrderItemProcess();
         foreach ($list as $key => $item) {
-            $_new_order = new NewOrder();
-            $orders = $_new_order->alias('a')->field('b.item_order_number,b.site,b.sku')
-                ->where('increment_id', $item['platform_order'])
-                ->join(['fa_order_item_process' => 'b'], 'a.id=b.order_id')
+
+            $orders = $_new_order_item_process->field('item_order_number,site,sku')
+                ->where(['item_order_number' => ['in', $item['order_item_numbers']]])
                 ->select();
             $str = '';
             foreach ($orders as $k => $v) {
