@@ -18,6 +18,7 @@ use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use think\Env;
 use think\exception\DbException;
+use think\Log;
 
 class OrderData extends Backend
 {
@@ -554,9 +555,8 @@ class OrderData extends Backend
                                     //如果日语站存在套餐 标记为异常
                                     if ($site == 11 && $options['combo'] == 1) {
                                         $is_prescription_abnormal = 1;
+                                        Log::write("日语站套餐:" . $v['order_id'] . '_' . $site . '_' . $is_prescription_abnormal);
                                     }
-
-
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
                                     if ($options) {
@@ -573,6 +573,11 @@ class OrderData extends Backend
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
+
+                                        if ($site == 11) {
+                                            Log::write("日语站002:" . serialize($data));
+                                        }
+
                                         $this->orderitemprocess->insertAll($data);
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
@@ -2699,7 +2704,7 @@ class OrderData extends Backend
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
-            $res = Db::connect('database.db_zeelool')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
+            $res = Db::connect('database.db_zeelool')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('telephone,postcode,country_id,region,region_id,city,street,lastname,firstname', 'parent_id');
         } elseif ($site == 2) {
             $res = Db::connect('database.db_voogueme')->table('sales_flat_order_address')->where(['parent_id' => ['in', $entity_id]])->column('lastname,firstname', 'parent_id');
         } elseif ($site == 3) {
