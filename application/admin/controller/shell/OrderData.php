@@ -555,7 +555,7 @@ class OrderData extends Backend
                                     //如果日语站存在套餐 标记为异常
                                     if ($site == 11 && $options['combo'] == 1) {
                                         $is_prescription_abnormal = 1;
-                                        Log::write("日语站套餐:" . $v['order_id'] . '_' . $site . '_' . $is_prescription_abnormal);
+                                        file_put_contents('./order_data.log', "日语站套餐:" . $v['order_id'] . '_' . $site . '_' . $is_prescription_abnormal . "\n");
                                     }
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
@@ -575,7 +575,7 @@ class OrderData extends Backend
                                         }
 
                                         if ($site == 11) {
-                                            Log::write("日语站002:" . serialize($data));
+                                            file_put_contents('./order_data.log', "日语站0002:" . serialize($data) . "\n");
                                         }
 
                                         $this->orderitemprocess->insertAll($data);
