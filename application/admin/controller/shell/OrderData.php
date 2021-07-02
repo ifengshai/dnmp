@@ -624,11 +624,21 @@ class OrderData extends Backend
                                     $order_prescription_type = $options['order_prescription_type'] ?: '';
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
-                                    if ($options) {
 
+                                    $is_prescription_abnormal = $options['is_prescription_abnormal'];
+                                    //如果日语站存在套餐 标记为异常
+                                    if ($site == 11 && $options['combo'] == 1) {
+                                        $is_prescription_abnormal = 1;
+                                    }
+
+                                    if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
 
-                                        $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type, 'sku' => $options['sku']]);
+                                        $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update([
+                                            'order_prescription_type'  => $order_prescription_type,
+                                            'sku'                      => $options['sku'],
+                                            'is_prescription_abnormal' => $is_prescription_abnormal,
+                                        ]);
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                         if ($order_prescription_type == 3 && in_array($site, [1, 3])) {
@@ -2331,7 +2341,6 @@ class OrderData extends Backend
     }
 
 
-
     /**
      * 临时处理订单子表数据 - 04
      *
@@ -2378,7 +2387,7 @@ class OrderData extends Backend
 
         } elseif ($site == 2) {
             $entity_id = [
-                476397
+                476397,
             ];
 
             $list = Db::connect('database.db_voogueme')
@@ -2443,7 +2452,7 @@ class OrderData extends Backend
                 $options = $this->voogueme_prescription_analysis($v['product_options']);
             } elseif ($site == 3) {
                 $options = $this->nihao_prescription_analysis($v['product_options']);
-            }elseif ($site == 10) {
+            } elseif ($site == 10) {
                 $options = $this->zeelool_de_prescription_analysis($v['product_options']);
             } elseif ($site == 11) {
                 $options = $this->zeelool_jp_prescription_analysis($v['product_options']);
@@ -2492,7 +2501,6 @@ class OrderData extends Backend
         }
         echo "ok";
     }
-
 
 
     public function order_data_shell_de()
@@ -2544,11 +2552,6 @@ class OrderData extends Backend
         usleep(100000);
         echo $site . 'ok';
     }
-
-
-
-
-
 
 
     /**
