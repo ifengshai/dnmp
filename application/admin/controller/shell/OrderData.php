@@ -555,8 +555,7 @@ class OrderData extends Backend
                                     //如果日语站存在套餐 标记为异常
                                     if ($site == 11 && $options['combo'] == 1) {
                                         $is_prescription_abnormal = 1;
-
-                                        echo "日语站套餐-新增:" . $v['order_id'] . '_' . $site . '_' . $is_prescription_abnormal . "\n";
+                                        file_put_contents('./order_data.log', "日语站套餐-更新:" . $v['order_id'] . '_' . $site . '_' . $is_prescription_abnormal . "\n", FILE_APPEND);
                                     }
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
@@ -576,7 +575,7 @@ class OrderData extends Backend
                                         }
 
                                         if ($site == 11) {
-                                            echo "日语站套餐-序列化:" . serialize($data) . "\n";
+                                            file_put_contents('./order_data.log', serialize($data). "\n", FILE_APPEND);
                                         }
 
                                         $this->orderitemprocess->insertAll($data);
@@ -635,15 +634,14 @@ class OrderData extends Backend
                                     //如果日语站存在套餐 标记为异常
                                     if ($site == 11 && $options['combo'] == 1) {
                                         $is_prescription_abnormal = 1;
-
-                                        echo "日语站套餐-更新:" . $v['order_id'] . '_' . $site . '_' . $is_prescription_abnormal . "\n";
+                                        file_put_contents('./order_data.log', "日语站套餐-更新:" . $v['order_id'] . '_' . $site . '_' . $is_prescription_abnormal . "\n", FILE_APPEND);
                                     }
 
                                     if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
 
                                         if ($site == 11) {
-                                            echo "日语站套餐-更新002:" . $v['order_id'] . '_' . $site . '_' . $is_prescription_abnormal . "\n";
+                                            file_put_contents('./order_data.log', "日语站套餐-更新002:" . $v['order_id'] . '_' . $site . '_' . $is_prescription_abnormal . "\n", FILE_APPEND);
                                         }
                                         $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update([
                                             'order_prescription_type'  => $order_prescription_type,
