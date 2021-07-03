@@ -1262,6 +1262,12 @@ class ItWebDemand extends Backend
                             $app_add['copy_to_user_id'] = implode(',', $params['copy_to_user_id']);//抄送人
                         }
                         Db::name('it_app_demand')->insert($app_add);
+                        $update['app_group'] = 1;
+                        $update['app_expect_time'] = date('Y-m-d H:i:s');
+                        $update['app_complexity'] = 1;
+                        $update['status'] = 3;
+
+                        $this->model->allowField(true)->save($update, ['id' => $params['id']]);
                         //Ding::dingHook(__FUNCTION__, $this ->model ->get($params['id']));
                     }
                     $this->success('成功');
