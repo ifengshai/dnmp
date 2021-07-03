@@ -67,6 +67,10 @@ class UserDataViewVip extends Backend
             }
 
             $map['order_status'] = 'success';
+            if($filter['time_str']){
+                $createat = explode(' ', $filter['time_str']);
+                $map['start_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+            }
 
             unset($filter['one_time-operate']);
             unset($filter['time_str']);
