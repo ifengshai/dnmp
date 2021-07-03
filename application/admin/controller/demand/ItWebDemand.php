@@ -1215,7 +1215,7 @@ class ItWebDemand extends Backend
                         }
                         Db::name('it_app_demand')->insert($app_add);
                         $update['app_group'] = 1;
-                        $update['app_expect_time'] = time();
+                        $update['app_expect_time'] = date('Y-m-d H:i:s');
                         $update['app_complexity'] = 1;
                         $update['status'] = 3;
 
