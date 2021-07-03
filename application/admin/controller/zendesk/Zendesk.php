@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\zendesk;
 
+use app\admin\model\Admin;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\zendesk\ZendeskPosts;
@@ -143,7 +144,7 @@ class Zendesk extends Backend
                 unset($filter['content']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             //默认使用
             //$orderSet = 'priority desc,zendesk_update_time asc,id asc';
             $orderSet = 'zendesk_update_time asc';
@@ -1866,6 +1867,10 @@ DOC;
             $orderSet = "{$sort} {$order}";
         }
 
+        //查询用户
+        $admin = new Admin();
+        $adminList = $admin->where('status','normal')->column('nickname','id');
+
         $list = Db::table("fa_zendesk")->alias("zendesk")
             ->join(['fa_admin' => 'admin'], 'zendesk.assign_id=admin.id', 'LEFT')
             ->join(['fa_admin' => 'admin_due'], 'zendesk.due_id=admin_due.id', 'LEFT')
@@ -1873,7 +1878,7 @@ DOC;
             ->where($map)
             ->where($andWhere)
             ->where('channel', 'in', ['email', 'web', 'chat'])
-            ->field("zendesk.id,zendesk.ticket_id,zendesk.type,zendesk.channel,zendesk.email,zendesk.username,zendesk.user_id,zendesk.to_email,zendesk.priority,zendesk.status,zendesk.tags,zendesk.subject,zendesk.raw_subject,zendesk.assignee_id,zendesk.assign_id,zendesk.due_id,zendesk.email_cc,zendesk.rating,zendesk.rating_type,zendesk.comment,zendesk.reason,zendesk.create_time,zendesk.update_time,zendesk.assign_time,zendesk.shell,zendesk.is_hide,zendesk.zendesk_update_time,zendesk.recipient
+            ->field("zendesk.assign_id_next,zendesk.id,zendesk.ticket_id,zendesk.type,zendesk.channel,zendesk.email,zendesk.username,zendesk.user_id,zendesk.to_email,zendesk.priority,zendesk.status,zendesk.tags,zendesk.subject,zendesk.raw_subject,zendesk.assignee_id,zendesk.assign_id,zendesk.due_id,zendesk.email_cc,zendesk.rating,zendesk.rating_type,zendesk.comment,zendesk.reason,zendesk.create_time,zendesk.update_time,zendesk.assign_time,zendesk.shell,zendesk.is_hide,zendesk.zendesk_update_time,zendesk.recipient
             ,admin.nickname as 'assign_nickname' ,admin_due.nickname as 'due_nickname'")
             ->order($orderSet)
             ->select();
@@ -1888,20 +1893,21 @@ DOC;
             ->setCellValue("B1", "Ticket ID")
             ->setCellValue("C1", "发送人");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "承接人")
-            ->setCellValue("E1", "处理人");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "Subject")
-            ->setCellValue("G1", "Tags");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "Status")
-            ->setCellValue("I1", "Priority")
-            ->setCellValue("J1", "渠道");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建时间");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "更新时间");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "回复次数");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "首次响应时长");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "是否客服发出");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "kf首次回复时间");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "回复模板");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "组别");
+            ->setCellValue("E1", "第二承接人")
+            ->setCellValue("F1", "处理人");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("G1", "Subject")
+            ->setCellValue("H1", "Tags");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("I1", "Status")
+            ->setCellValue("J1", "Priority")
+            ->setCellValue("K1", "渠道");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "创建时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("M1", "更新时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("N1", "回复次数");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("O1", "首次响应时长");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("P1", "是否客服发出");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "kf首次回复时间");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "回复模板");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("S1", "组别");
         foreach ($list as $key => $value) {
 
             $arr = explode(",", $value['tags']);
@@ -2067,20 +2073,21 @@ DOC;
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['ticket_id']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['email']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['assign_nickname']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['due_nickname']);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['subject']);
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['tags_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['status_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['priority_name']);
-            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['channel']);
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['create_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['update_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['replies']);
-            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['reply_minutes']);
-            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['is_admin']);
-            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['fist_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['template_info']);
-            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['group_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $adminList['assign_id_next']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['due_nickname']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['subject']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['tags_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['status_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['priority_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['channel']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['update_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['replies']);
+            $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['reply_minutes']);
+            $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['is_admin']);
+            $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['fist_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['template_info']);
+            $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['group_name']);
         }
 
         //设置宽度
