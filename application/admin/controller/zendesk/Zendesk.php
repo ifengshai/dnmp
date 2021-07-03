@@ -2073,7 +2073,7 @@ DOC;
             $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['ticket_id']);
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['email']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['assign_nickname']);
-            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $adminList['assign_id_next']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $adminList[$value['assign_id_next']]);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['due_nickname']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['subject']);
             $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['tags_name']);
