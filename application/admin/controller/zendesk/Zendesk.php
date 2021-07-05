@@ -542,9 +542,9 @@ class Zendesk extends Backend
                         'admin_id' => session('admin.id'),
                         'type' => $ticket->type
                     ])->value('agent_id');
-                    if (!$author_id) {
-                        throw new Exception('请将用户先绑定zendesk的账号', 10001);
-                    }
+//                    if (!$author_id) {
+//                        throw new Exception('请将用户先绑定zendesk的账号', 10001);
+//                    }
                     //发送邮件的参数
                     $updateData = [
                         'comment' => [
@@ -563,8 +563,8 @@ class Zendesk extends Backend
                     if ($params['subject'] != $ticket->subject) {
                         $updateData['subject'] = $params['subject'];
                     }
-                    //获取签名
-                    $sign = Db::name('zendesk_signvalue')->where('site', $ticket->type)->value('signvalue');
+
+
                     //获取zendesk用户的昵称
                     $zendeskAgentInfo = Db::name('zendesk_agents')
                         ->where('type', $ticket->type)
@@ -572,16 +572,25 @@ class Zendesk extends Backend
                         ->field('nickname,account_level')
                         ->find();
                     $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
-                    //替换签名中的昵称
-                    if (strpos($sign, '{{agent.name}}') !== false) {
-                        $sign = str_replace('{{agent.name}}', $zendeskNickname, $sign);
+                    if($ticket->channel != 'sms'){
+                        //获取签名
+                        $sign = Db::name('zendesk_signvalue')->where('site', $ticket->type)->value('signvalue');
+                        //替换签名中的昵称
+                        if (strpos($sign, '{{agent.name}}') !== false) {
+                            $sign = str_replace('{{agent.name}}', $zendeskNickname, $sign);
+                            //替换签名中的账号级别
+                            $zendeskAccountLevel = $zendeskAgentInfo['account_level'] ? $zendeskAgentInfo['account_level'] : '';
+                        }
+                        if (strpos($sign, '{{agent.account_level}}') !== false) {
+                            $sign = str_replace('{{agent.account_level}}', $zendeskAccountLevel, $sign);
+                        }
+                        $sign = $sign ? $sign : '';
+                    }else{
+                        $params['content'] = strip_tags($params['content']);
+                        if(strlen($params['content']) > 160){
+                            throw new Exception('邮件内容过长', 10001);
+                        }
                     }
-                    //替换签名中的账号级别
-                    $zendeskAccountLevel = $zendeskAgentInfo['account_level'] ? $zendeskAgentInfo['account_level'] : '';
-                    if (strpos($sign, '{{agent.account_level}}') !== false) {
-                        $sign = str_replace('{{agent.account_level}}', $zendeskAccountLevel, $sign);
-                    }
-                    $sign = $sign ? $sign : '';
                     //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
                     if (strpos($params['content'], '<p>') !== false) {
                         $params['content'] = str_replace('<p>', '<span style="display:block">', $params['content']);
@@ -698,27 +707,29 @@ class Zendesk extends Backend
                 $query->where('type', $ticket->type);
             }
         ])->where('zid', $ids)->order('id', 'desc')->select();
-        foreach ($comments as $comment) {
-            if ($comment->is_admin == 1) {
-                //获取签名
-                $sign = Db::name('zendesk_signvalue')->where('site', $ticket->type)->value('signvalue');
-                //获取当前评论的用户的昵称
-                $zendeskAgentInfo = Db::name('zendesk_agents')
-                    ->where('type', $ticket->type)
-                    ->where('admin_id', $comment->due_id)
-                    ->field('nickname,account_level')
-                    ->find();
-                $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
-                //替换签名中的昵称
-                if (strpos($sign, '{{agent.name}}') !== false) {
-                    $sign = str_replace('{{agent.name}}', $zendeskNickname, $sign);
+        if($ticket->channel != 'sms'){
+            foreach ($comments as $comment) {
+                if ($comment->is_admin == 1) {
+                    //获取签名
+                    $sign = Db::name('zendesk_signvalue')->where('site', $ticket->type)->value('signvalue');
+                    //获取当前评论的用户的昵称
+                    $zendeskAgentInfo = Db::name('zendesk_agents')
+                        ->where('type', $ticket->type)
+                        ->where('admin_id', $comment->due_id)
+                        ->field('nickname,account_level')
+                        ->find();
+                    $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
+                    //替换签名中的昵称
+                    if (strpos($sign, '{{agent.name}}') !== false) {
+                        $sign = str_replace('{{agent.name}}', $zendeskNickname, $sign);
+                    }
+                    //替换签名中的账号级别
+                    $zendeskAccountLevel = $zendeskAgentInfo['account_level'] ? $zendeskAgentInfo['account_level'] : '';
+                    if (strpos($sign, '{{agent.account_level}}') !== false) {
+                        $sign = str_replace('{{agent.account_level}}', $zendeskAccountLevel, $sign);
+                    }
+                    $comment->sign = $sign ? $sign : '';
                 }
-                //替换签名中的账号级别
-                $zendeskAccountLevel = $zendeskAgentInfo['account_level'] ? $zendeskAgentInfo['account_level'] : '';
-                if (strpos($sign, '{{agent.account_level}}') !== false) {
-                    $sign = str_replace('{{agent.account_level}}', $zendeskAccountLevel, $sign);
-                }
-                $comment->sign = $sign ? $sign : '';
             }
         }
         //获取该用户的所有状态不为close，sloved的ticket
