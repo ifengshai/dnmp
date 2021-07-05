@@ -768,21 +768,35 @@ class ScmDistribution extends Scm
                 'b.work_status'    => ['in', [1, 2, 3, 5]],
             ])
             ->select();
-        if ($check_work_order) {
-            $codings = $this->_stock_house
-                ->where(['id' => $item_process_info['abnormal_house_id']])
-                ->value('coding');
-            foreach ($check_work_order as $val) {
-                (3 == $val['measure_choose_id'] //主单取消措施未处理
-                    ||
-                    $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
-                )
+        //配货节点不限制工单 - 只提示
+        if ($check_status > 2) {
 
-                // && $this->error(__('有工单未处理，无法操作'), [], 405);
-                && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
+            if ($check_work_order) {
+                $codings = $this->_stock_house
+                    ->where(['id' => $item_process_info['abnormal_house_id']])
+                    ->value('coding');
+                foreach ($check_work_order as $val) {
+                    (3 == $val['measure_choose_id'] //主单取消措施未处理
+                        ||
+                        $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
+                    )
+                    && $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
 
-                if ($val['measure_choose_id'] == 21) {
-                    $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
+                    if ($val['measure_choose_id'] == 21) {
+                        $this->error(__("子订单存在工单" . "<br><b>$codings</b>"), [], 405);
+                    }
+                }
+            }
+        } else {
+            $isWorkList = 0;
+            if ($check_work_order) {
+
+                foreach ($check_work_order as $val) {
+                    if (21 == $val['measure_choose_id'] || 3 == $val['measure_choose_id'] || //主单取消措施未处理
+                        $val['item_order_number'] == $item_order_number //子单措施未处理:更改镜框18、更改镜片19、取消20
+                    ) {
+                        $isWorkList = 1;
+                    }
                 }
             }
         }
@@ -920,10 +934,17 @@ class ScmDistribution extends Scm
                 ->isUpdate(true, ['item_order_number' => $item_order_number])
                 ->save(['distribution_status' => $save_status]);
 
+
+            $back_msg = '';
+            if ($check_status == 2 && $isWorkList == 1) {
+                $back_msg = '订单存在工单,';
+            }
+
             //下一步提示信息
             if (3 == $save_status) {
                 //待配镜片
-                $back_msg = 2 == $item_process_info['order_prescription_type'] ? '去配现片' : '去配定制片';
+                $str = 2 == $item_process_info['order_prescription_type'] ? '去配现片' : '去配定制片';
+                $back_msg .= $str;
             } else {
                 $next_step = [
                     4 => '去加工',
@@ -932,7 +953,7 @@ class ScmDistribution extends Scm
                     7 => '去合单',
                     9 => '去合单',
                 ];
-                $back_msg = $next_step[$save_status];
+                $back_msg .= $next_step[$save_status];
             }
             //将订单号截取处理
             $order_log_order_number = substr($item_process_info['item_order_number'], 0, strpos($item_process_info['item_order_number'], '-'));
