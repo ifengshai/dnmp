@@ -707,9 +707,9 @@ class Zendesk extends Backend
                 $query->where('type', $ticket->type);
             }
         ])->where('zid', $ids)->order('id', 'desc')->select();
-        if($ticket->channel != 'sms'){
-            foreach ($comments as $comment) {
-                if ($comment->is_admin == 1) {
+        foreach ($comments as $comment) {
+            if ($comment->is_admin == 1) {
+                if($ticket->channel != 'sms') {
                     //获取签名
                     $sign = Db::name('zendesk_signvalue')->where('site', $ticket->type)->value('signvalue');
                     //获取当前评论的用户的昵称
@@ -728,8 +728,8 @@ class Zendesk extends Backend
                     if (strpos($sign, '{{agent.account_level}}') !== false) {
                         $sign = str_replace('{{agent.account_level}}', $zendeskAccountLevel, $sign);
                     }
-                    $comment->sign = $sign ? $sign : '';
                 }
+                $comment->sign = $sign ? $sign : '';
             }
         }
         //获取该用户的所有状态不为close，sloved的ticket
