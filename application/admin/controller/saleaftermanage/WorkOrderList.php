@@ -1381,8 +1381,8 @@ class WorkOrderList extends Backend
 
                         //子单取消
                         if (in_array(18, $item['item_choose'])) {
-                            //检测之前是否处理过子单措施
-                            array_intersect([3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
+                            //检测之前是否处理过子单措施 2021-07-05 bug2213 改为不校验此项
+                            //array_intersect([3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
