@@ -2182,11 +2182,7 @@ class OrderData extends Backend
      */
     public function process_order_data_address_temp()
     {
-        $this->order_address_data_shell(1);
         $this->order_address_data_shell(2);
-        $this->order_address_data_shell(3);
-        $this->order_address_data_shell(10);
-        $this->order_address_data_shell(11);
     }
 
     public function order_address_data_shell($site)
