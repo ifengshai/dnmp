@@ -1094,7 +1094,7 @@ class ScmWarehouse extends Scm
                     }
 
                     //样品入库不限制
-                    if ($type_id == 6) {
+                    if ($type_id != 6) {
                         continue;
                     }
 
@@ -1219,6 +1219,11 @@ class ScmWarehouse extends Scm
                     $sku_code = array_column($value['sku_agg'], 'code');
                     if (count($value['sku_agg']) != count(array_unique($sku_code))) {
                         throw new Exception('条形码有重复，请检查');
+                    }
+
+                    //样品入库不限制
+                    if ($type_id != 6) {
+                        continue;
                     }
 
                     $where['code'] = ['in', $sku_code];
