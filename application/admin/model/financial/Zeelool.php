@@ -43,7 +43,6 @@ class Zeelool extends Model
      */
     public function facebook_cost($start_time, $end_time)
     {
-        echo $this->access_token;
         Api::init($this->app_id, $this->app_secret, $this->access_token);
         $all_facebook_spend = 0;
         $accounts = explode(",", $this->accounts);
