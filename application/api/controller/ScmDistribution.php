@@ -739,7 +739,7 @@ class ScmDistribution extends Scm
             ->value('id');
 
         //操作失败记录
-        if ($abnormal_id) {
+        if ($abnormal_id && $check_status > 2) {
             DistributionLog::record($this->auth, $item_process_info['id'], 0, $status_arr[$check_status] . '：有异常[' . $abnormal_id . ']待处理不可操作');
             // $this->error(__('有异常待处理无法操作'), [], 405);
             $coding1 = $this->_stock_house
