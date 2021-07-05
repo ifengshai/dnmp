@@ -77,7 +77,7 @@
                                 </span>
                                 <span class="description" style="margin-left: 93px">{$ticket->zendesk_update_time} · {$ticket->username} {$ticket->email} · {$ticket->channel}</span>
                             </div>
-                            <div class="user-block pull-right" style="margin-top: 45px">
+                            <div class="user-block pull-right" style="margin-top: 45px">{if $ticket->channel == 'sms'}<span style="color: red">短信发送的字数限制：160</span>{/if}
                                 <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-default">
                                     合并工单
                                 </button>
