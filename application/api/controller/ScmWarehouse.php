@@ -1093,6 +1093,11 @@ class ScmWarehouse extends Scm
                         throw new Exception(' 条形码有重复，请检查');
                     }
 
+                    //样品入库不限制
+                    if ($type_id == 6) {
+                        continue;
+                    }
+
                     $where['code'] = ['in', $sku_code];
                     $check_quantity = $this->_product_bar_code_item
                         ->where($where)
@@ -1200,6 +1205,7 @@ class ScmWarehouse extends Scm
                             $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
                             $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                             $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
+                            $save_code_data['library_status'] = 1; //在库状态
                             $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
                         }
                     }
@@ -1214,6 +1220,11 @@ class ScmWarehouse extends Scm
                     $sku_code = array_column($value['sku_agg'], 'code');
                     if (count($value['sku_agg']) != count(array_unique($sku_code))) {
                         throw new Exception('条形码有重复，请检查');
+                    }
+
+                    //样品入库不限制
+                    if ($type_id == 6) {
+                        continue;
                     }
 
                     $where['code'] = ['in', $sku_code];
@@ -1289,6 +1300,7 @@ class ScmWarehouse extends Scm
                                 $save_code_data['location_code'] = $warehouse_area['coding']; //绑定条形码与库位号
                                 $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                                 $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
+                                $save_code_data['library_status'] = 1; //在库状态
                                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
                             }
                         }
