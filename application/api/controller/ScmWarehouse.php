@@ -1093,6 +1093,11 @@ class ScmWarehouse extends Scm
                         throw new Exception(' 条形码有重复，请检查');
                     }
 
+                    //样品入库不限制
+                    if ($type_id == 6) {
+                        continue;
+                    }
+
                     $where['code'] = ['in', $sku_code];
                     $check_quantity = $this->_product_bar_code_item
                         ->where($where)
