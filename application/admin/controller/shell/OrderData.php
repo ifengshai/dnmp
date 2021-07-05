@@ -2182,11 +2182,7 @@ class OrderData extends Backend
      */
     public function process_order_data_address_temp()
     {
-        $this->order_address_data_shell(1);
         $this->order_address_data_shell(2);
-        $this->order_address_data_shell(3);
-        $this->order_address_data_shell(10);
-        $this->order_address_data_shell(11);
     }
 
     public function order_address_data_shell($site)
@@ -2195,24 +2191,6 @@ class OrderData extends Backend
         if ($site == 1) {
             $entity_id = [
                 956143,
-                956144,
-                956148,
-                956139,
-                956141,
-                956142,
-                956145,
-                956146,
-                956149,
-                956151,
-                956152,
-                956153,
-                956154,
-                956155,
-                956157,
-                956147,
-                956140,
-                956150,
-                956156,
             ];
             $list = Db::connect('database.db_zeelool')
                 ->table('sales_flat_order_address')
@@ -2221,13 +2199,16 @@ class OrderData extends Backend
 
         } elseif ($site == 2) {
             $entity_id = [
-                477151,
-                477152,
-                477154,
-                477156,
-                477150,
-                477153,
-                477155,
+                476398,
+                476396,
+                476395,
+                476394,
+                476393,
+                476392,
+                476391,
+                476390,
+                476389,
+                476388,
             ];
             $list = Db::connect('database.db_voogueme')
                 ->table('sales_flat_order_address')
