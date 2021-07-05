@@ -937,7 +937,7 @@ class ScmDistribution extends Scm
 
             $back_msg = '';
             if ($check_status == 2 && $isWorkList == 1) {
-                $back_msg = '订单存在工单,';
+                $back_msg = '订单存在工单,需要跟单处理,';
             }
 
             //下一步提示信息
