@@ -542,9 +542,9 @@ class Zendesk extends Backend
                         'admin_id' => session('admin.id'),
                         'type' => $ticket->type
                     ])->value('agent_id');
-//                    if (!$author_id) {
-//                        throw new Exception('请将用户先绑定zendesk的账号', 10001);
-//                    }
+                    if (!$author_id) {
+                        throw new Exception('请将用户先绑定zendesk的账号', 10001);
+                    }
                     //发送邮件的参数
                     $updateData = [
                         'comment' => [
