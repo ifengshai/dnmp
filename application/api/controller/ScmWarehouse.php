@@ -1094,7 +1094,7 @@ class ScmWarehouse extends Scm
                     }
 
                     //样品入库不限制
-                    if ($type_id != 6) {
+                    if ($type_id == 6) {
                         continue;
                     }
 
@@ -1222,7 +1222,7 @@ class ScmWarehouse extends Scm
                     }
 
                     //样品入库不限制
-                    if ($type_id != 6) {
+                    if ($type_id == 6) {
                         continue;
                     }
 
