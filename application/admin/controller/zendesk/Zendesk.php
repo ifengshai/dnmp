@@ -584,13 +584,13 @@ class Zendesk extends Backend
                         if (strpos($sign, '{{agent.account_level}}') !== false) {
                             $sign = str_replace('{{agent.account_level}}', $zendeskAccountLevel, $sign);
                         }
-                        $sign = $sign ? $sign : '';
                     }else{
                         $params['content'] = strip_tags($params['content']);
                         if(strlen($params['content']) > 160){
                             throw new Exception('邮件内容过长', 10001);
                         }
                     }
+                    $sign = $sign ? $sign : '';
                     //替换回复内容中的<p>为<span style="display:block">,替换</p>为</span>
                     if (strpos($params['content'], '<p>') !== false) {
                         $params['content'] = str_replace('<p>', '<span style="display:block">', $params['content']);
