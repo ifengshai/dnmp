@@ -409,6 +409,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             title: __('订单创建时间'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
+                            sortable: true,
                         },
                         {
                             field: 'b.payment_time',
