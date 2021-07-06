@@ -415,8 +415,13 @@ class NewProduct extends Backend
                                 $data['sku'] = $params['origin_sku'] . '-' . sprintf("%02d", $count + 1);
                                 ++$count;
                             } else {
-                                $data['origin_sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'];
-                                $data['sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
+                                //如果是镜盒
+                                if ($params['category_id'] == 32) {
+                                    $data['sku'] = 'ACC' . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
+                                } else {
+                                    $data['origin_sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'];
+                                    $data['sku'] = $params['procurement_origin'] . $textureEncode . $params['origin_sku'] . '-' . sprintf("%02d", $k + 1);
+                                }
                             }
                             $lastInsertId = Db::name('new_product')->insertGetId($data);
                             if ($lastInsertId !== false) {
