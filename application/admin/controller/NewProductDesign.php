@@ -93,8 +93,8 @@ class NewProductDesign extends Backend
                     $adminId = session('admin.id');
                     //品牌设计部主管都可以看到所有待修图和修图中的数据
                     $ids = Db::name('auth_group_access')->where('group_id',159)->column('uid');
-                    if (!in_array($adminId,$ids)){
-                        $map['a.responsible_id'] = ['in', $ids];
+                    if (in_array($adminId,$ids)){
+
                     }else{
                         $map['a.responsible_id'] = ['eq', $adminId];
                     }
