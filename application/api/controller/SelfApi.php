@@ -14,6 +14,7 @@ use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use app\admin\model\StockLog;
 use app\admin\model\finance\FinanceCost;
 use app\admin\controller\elasticsearch\AsyncEs;
+use think\Exception;
 use think\Model;
 
 /**
@@ -64,17 +65,44 @@ class SelfApi extends Api
             'site'         => $site,
             'node_type'    => ['>=', 0],
         ])->count();
-        if ($order_count <= 0) {
-            $res_node = $this->node->allowField(true)->save([
-                'order_number' => $order_number,
-                'order_id'     => $order_id,
-                'site'         => $site,
-                'create_time'  => date('Y-m-d H:i:s'),
-                'order_node'   => 0,
-                'node_type'    => 0,
-                'update_time'  => date('Y-m-d H:i:s'),
-            ]);
-            $insertId = $this->node->getLastInsID();
+
+        if ($order_count > 0) {
+            $this->error('记录已存在', [], 400);
+        }
+
+        $count = (new OrderNodeDetail())->where([
+            'order_number' => $order_number,
+            'order_id'     => $order_id,
+            'site'         => $site,
+            'order_node'   => 0,
+            'node_type'    => 0,
+        ])->count();
+        if ($count > 0) {
+            $this->error('记录已存在', [], 400);
+        }
+
+        $res_node = $this->node->allowField(true)->save([
+            'order_number' => $order_number,
+            'order_id'     => $order_id,
+            'site'         => $site,
+            'create_time'  => date('Y-m-d H:i:s'),
+            'order_node'   => 0,
+            'node_type'    => 0,
+            'update_time'  => date('Y-m-d H:i:s'),
+        ]);
+        $insertId = $this->node->getLastInsID();
+
+        $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
+            'order_number' => $order_number,
+            'order_id'     => $order_id,
+            'content'      => 'Your order has been created.',
+            'site'         => $site,
+            'create_time'  => date('Y-m-d H:i:s'),
+            'order_node'   => 0,
+            'node_type'    => 0,
+        ]);
+
+        try {
             $arr = [
                 'id'                  => $insertId,
                 'order_node'          => 0,
@@ -94,28 +122,11 @@ class SelfApi extends Api
             ];
             $data[] = $this->asyncEs->formatDate($arr, time());
             $this->asyncEs->esService->addMutilToEs('mojing_track', $data);
+
+        } catch (Exception $exception) {
+
         }
 
-        $count = (new OrderNodeDetail())->where([
-            'order_number' => $order_number,
-            'order_id'     => $order_id,
-            'site'         => $site,
-            'order_node'   => 0,
-            'node_type'    => 0,
-        ])->count();
-        if ($count > 0) {
-            $this->error('已存在', [], 400);
-        }
-
-        $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
-            'order_number' => $order_number,
-            'order_id'     => $order_id,
-            'content'      => 'Your order has been created.',
-            'site'         => $site,
-            'create_time'  => date('Y-m-d H:i:s'),
-            'order_node'   => 0,
-            'node_type'    => 0,
-        ]);
         if (false !== $res_node && false !== $res_node_detail) {
             $this->success('创建成功', [], 200);
         } else {
