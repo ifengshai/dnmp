@@ -95,6 +95,8 @@ class NewProductDesign extends Backend
                     $ids = Db::name('auth_group_access')->where('group_id',159)->column('uid');
                     if (!in_array($adminId,$ids)){
                         $map['a.responsible_id'] = ['in', $ids];
+                    }else{
+                        $map['a.responsible_id'] = ['eq', $adminId];
                     }
                 }
                 $map['a.status'] = $filter['label'];
