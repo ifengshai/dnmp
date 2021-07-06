@@ -64,37 +64,41 @@ class SelfApi extends Api
             'site'         => $site,
             'node_type'    => ['>=', 0],
         ])->count();
-        if ($order_count <= 0) {
-            $res_node = $this->node->allowField(true)->save([
-                'order_number' => $order_number,
-                'order_id'     => $order_id,
-                'site'         => $site,
-                'create_time'  => date('Y-m-d H:i:s'),
-                'order_node'   => 0,
-                'node_type'    => 0,
-                'update_time'  => date('Y-m-d H:i:s'),
-            ]);
-            $insertId = $this->node->getLastInsID();
-            $arr = [
-                'id'                  => $insertId,
-                'order_node'          => 0,
-                'node_type'           => 0,
-                'site'                => $site,
-                'order_id'            => $order_id,
-                'order_number'        => $order_number,
-                'shipment_type'       => '',
-                'shipment_data_type'  => '',
-                'track_number'        => '',
-                'signing_time'        => 0,
-                'delivery_time'       => 0,
-                'delivery_error_flag' => 0,
-                'shipment_last_msg'   => "",
-                'delievered_days'     => 0,
-                'wait_time'           => 0,
-            ];
-            $data[] = $this->asyncEs->formatDate($arr, time());
-            $this->asyncEs->esService->addMutilToEs('mojing_track', $data);
+
+        if ($order_count > 0) {
+            $this->error('已存在', [], 400);
         }
+
+        $res_node = $this->node->allowField(true)->save([
+            'order_number' => $order_number,
+            'order_id'     => $order_id,
+            'site'         => $site,
+            'create_time'  => date('Y-m-d H:i:s'),
+            'order_node'   => 0,
+            'node_type'    => 0,
+            'update_time'  => date('Y-m-d H:i:s'),
+        ]);
+        $insertId = $this->node->getLastInsID();
+
+        $arr = [
+            'id'                  => $insertId,
+            'order_node'          => 0,
+            'node_type'           => 0,
+            'site'                => $site,
+            'order_id'            => $order_id,
+            'order_number'        => $order_number,
+            'shipment_type'       => '',
+            'shipment_data_type'  => '',
+            'track_number'        => '',
+            'signing_time'        => 0,
+            'delivery_time'       => 0,
+            'delivery_error_flag' => 0,
+            'shipment_last_msg'   => "",
+            'delievered_days'     => 0,
+            'wait_time'           => 0,
+        ];
+        $data[] = $this->asyncEs->formatDate($arr, time());
+        $this->asyncEs->esService->addMutilToEs('mojing_track', $data);
 
         $count = (new OrderNodeDetail())->where([
             'order_number' => $order_number,
