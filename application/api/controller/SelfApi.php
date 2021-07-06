@@ -14,6 +14,7 @@ use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use app\admin\model\StockLog;
 use app\admin\model\finance\FinanceCost;
 use app\admin\controller\elasticsearch\AsyncEs;
+use think\Exception;
 use think\Model;
 
 /**
@@ -91,28 +92,6 @@ class SelfApi extends Api
         ]);
         $insertId = $this->node->getLastInsID();
 
-        $arr = [
-            'id'                  => $insertId,
-            'order_node'          => 0,
-            'node_type'           => 0,
-            'site'                => $site,
-            'order_id'            => $order_id,
-            'order_number'        => $order_number,
-            'shipment_type'       => '',
-            'shipment_data_type'  => '',
-            'track_number'        => '',
-            'signing_time'        => 0,
-            'delivery_time'       => 0,
-            'delivery_error_flag' => 0,
-            'shipment_last_msg'   => "",
-            'delievered_days'     => 0,
-            'wait_time'           => 0,
-        ];
-        $data[] = $this->asyncEs->formatDate($arr, time());
-        $this->asyncEs->esService->addMutilToEs('mojing_track', $data);
-
-
-
         $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
             'order_id'     => $order_id,
@@ -122,6 +101,32 @@ class SelfApi extends Api
             'order_node'   => 0,
             'node_type'    => 0,
         ]);
+
+        try {
+            $arr = [
+                'id'                  => $insertId,
+                'order_node'          => 0,
+                'node_type'           => 0,
+                'site'                => $site,
+                'order_id'            => $order_id,
+                'order_number'        => $order_number,
+                'shipment_type'       => '',
+                'shipment_data_type'  => '',
+                'track_number'        => '',
+                'signing_time'        => 0,
+                'delivery_time'       => 0,
+                'delivery_error_flag' => 0,
+                'shipment_last_msg'   => "",
+                'delievered_days'     => 0,
+                'wait_time'           => 0,
+            ];
+            $data[] = $this->asyncEs->formatDate($arr, time());
+            $this->asyncEs->esService->addMutilToEs('mojing_track', $data);
+
+        } catch (Exception $exception) {
+
+        }
+
         if (false !== $res_node && false !== $res_node_detail) {
             $this->success('创建成功', [], 200);
         } else {
