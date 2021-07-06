@@ -92,7 +92,7 @@ class NewProductDesign extends Backend
                 if ($filter['label'] == 5 || $filter['label'] == 6){
                     $adminId = session('admin.id');
                     //品牌设计部主管都可以看到所有待修图和修图中的数据
-                    $ids = Db::name('auth_group_access')->where('group_id',159)->column('id');
+                    $ids = Db::name('auth_group_access')->where('group_id',159)->column('uid');
                     if (!in_array($adminId,$ids)){
                         $map['a.responsible_id'] = ['in', $ids];
                     }
