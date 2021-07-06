@@ -2,11 +2,13 @@
 
 namespace app\admin\model\financial;
 
+use fast\Http;
 use think\Model;
 use think\Db;
 use FacebookAds\Api;
 use FacebookAds\Object\Campaign;
 use app\admin\model\financial\Fackbook;
+
 //use app\admin\model\itemmanage\ItemPlatformSku;
 class Zeelool extends Model
 {
@@ -24,6 +26,7 @@ class Zeelool extends Model
     protected $access_token = '';
     protected $accounts = '';
     protected $facebook = '';
+
     public function __construct()
     {
         parent::__construct();
@@ -31,26 +34,33 @@ class Zeelool extends Model
         $this->app_id = $this->facebook->app_id;
         $this->app_secret = $this->facebook->app_secret;
         $this->access_token = $this->facebook->access_token;
-        $this->accounts   = $this->facebook->accounts;
+        $this->accounts = $this->facebook->accounts;
     }
 
     /**
      * 计算facebook费用
      *
-     * @Author lsw 1461069578@qq.com
+     * @Author   lsw 1461069578@qq.com
      * @DateTime 2020-08-14 15:25:33
      * @return void
      */
     public function facebook_cost($start_time, $end_time)
     {
+//        $url = 'https://graph.facebook.com/v11.0/oauth/access_token?grant_type=fb_exchange_token';
+//        $params['client_id'] = $this->app_id;
+//        $params['client_secret'] = $this->app_secret;
+//        $params['fb_exchange_token'] = $this->access_token;
+//        Http::get($url, $params);
+
+
         Api::init($this->app_id, $this->app_secret, $this->access_token);
         $all_facebook_spend = 0;
         $accounts = explode(",", $this->accounts);
         foreach ($accounts as $key => $value) {
             $campaign = new Campaign($value);
-            $params = array(
-                'time_range' => array('since' => $start_time, 'until' => $end_time),
-            );
+            $params = [
+                'time_range' => ['since' => $start_time, 'until' => $end_time],
+            ];
             $cursor = $campaign->getInsights([], $params);
             foreach ($cursor->getObjects() as $key => $value) {
                 if ($value) {
@@ -58,12 +68,14 @@ class Zeelool extends Model
                 }
             }
         }
+
         return $all_facebook_spend ? round($all_facebook_spend, 2) : 0;
     }
+
     /**
      * 计算谷歌费用
      *
-     * @Author lsw 1461069578@qq.com
+     * @Author   lsw 1461069578@qq.com
      * @DateTime 2020-08-14 15:27:40
      * @return void
      */
@@ -81,6 +93,7 @@ class Zeelool extends Model
 
         return $result[0]['ga:adCost'] ? round($result[0]['ga:adCost'], 2) : 0;
     }
+
     protected function getReport($analytics, $startDate, $endDate)
     {
 
@@ -105,13 +118,15 @@ class Zeelool extends Model
         $request = new \Google_Service_AnalyticsReporting_ReportRequest();
         $request->setViewId($VIEW_ID);
         $request->setDateRanges($dateRange);
-        $request->setMetrics(array($adCostMetric));
+        $request->setMetrics([$adCostMetric]);
         // $request->setDimensions(array($sessionDayDimension));
 
         $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
-        $body->setReportRequests(array($request));
+        $body->setReportRequests([$request]);
+
         return $analytics->reports->batchGet($body);
     }
+
     /**
      * Parses and prints the Analytics Reporting API V4 response.
      *
@@ -143,13 +158,15 @@ class Zeelool extends Model
                     }
                 }
             }
+
             return $finalResult;
         }
     }
+
     /**
      * 计算镜架成本、镜片成本、运输成本、销售额
      *
-     * @Author lsw 1461069578@qq.com
+     * @Author   lsw 1461069578@qq.com
      * @DateTime 2020-08-14 17:13:20
      * @return void
      */
@@ -159,7 +176,7 @@ class Zeelool extends Model
 
         $this->itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku;
         $start_time = $start_time . ' 00:00:00';
-        $end_time   = $end_time . ' 23:59:59';
+        $end_time = $end_time . ' 23:59:59';
 
         $this->item = new \app\admin\model\itemmanage\Item();
         //查询产品库镜框采购单价
@@ -194,18 +211,20 @@ class Zeelool extends Model
         //销售额
         $all_base_grand_total = round($base_grand_total_result[0]['base_grand_total'], 2);
         //运费
-        $all_shipping_amount  = round($base_grand_total_result[0]['shipping_amount'], 2);
+        $all_shipping_amount = round($base_grand_total_result[0]['shipping_amount'], 2);
+
         return [
-            'all_frame_price'       => $all_frame_price ? round($all_frame_price, 2) : 0,
-            'all_lens_price'        => $all_lens_price ? round($all_lens_price, 2) : 0,
-            'all_base_grand_total'  => $all_base_grand_total ? round($all_base_grand_total, 2) : 0,
-            'all_shipping_amount'   => $all_shipping_amount ? round($all_shipping_amount, 2) : 0
+            'all_frame_price'      => $all_frame_price ? round($all_frame_price, 2) : 0,
+            'all_lens_price'       => $all_lens_price ? round($all_lens_price, 2) : 0,
+            'all_base_grand_total' => $all_base_grand_total ? round($all_base_grand_total, 2) : 0,
+            'all_shipping_amount'  => $all_shipping_amount ? round($all_shipping_amount, 2) : 0,
         ];
     }
+
     /**
      * 计算成本控制器
      *
-     * @Author lsw 1461069578@qq.com
+     * @Author   lsw 1461069578@qq.com
      * @DateTime 2020-08-15 09:58:16
      * @return void
      */
@@ -214,35 +233,35 @@ class Zeelool extends Model
         //facebook金额
         $facebook_money = $this->facebook_cost($start_time, $end_time);
         //google金额
-        $google_money   = $this->goole_cost($start_time, $end_time);
+        $google_money = $this->goole_cost($start_time, $end_time);
         //镜框等价格
-        $all_money      = $this->all_cost($start_time, $end_time);
+        $all_money = $this->all_cost($start_time, $end_time);
         //销售额
-        $all_base_grand_total       = $all_money['all_base_grand_total'];
+        $all_base_grand_total = $all_money['all_base_grand_total'];
         //运费
-        $all_shipping_amount        = $all_money['all_shipping_amount'];
+        $all_shipping_amount = $all_money['all_shipping_amount'];
         //镜架成本
-        $all_frame_price            = round($all_money['all_frame_price'] / $rate, 2);
+        $all_frame_price = round($all_money['all_frame_price'] / $rate, 2);
         //镜片成本
-        $all_lens_price             = $all_money['all_lens_price'];
+        $all_lens_price = $all_money['all_lens_price'];
         //利润
-        $all_profit     = round(($all_base_grand_total - $all_shipping_amount - $all_frame_price - $all_lens_price - $google_money - $facebook_money), 2);
+        $all_profit = round(($all_base_grand_total - $all_shipping_amount - $all_frame_price - $all_lens_price - $google_money - $facebook_money), 2);
 
         //求出人民币成本和比率
         $all_base_grand_total_rate = round($all_base_grand_total * $rate, 2);
-        $all_shipping_amount_rate  = round($all_shipping_amount * $rate, 2);
-        $all_frame_price_rate      = round($all_frame_price * $rate, 2);
-        $all_lens_price_rate       = round($all_lens_price * $rate, 2);
-        $all_profit_rate           = round($all_profit * $rate, 2);
-        $facebook_money_rate       = round($facebook_money * $rate, 2);
-        $google_money_rate         = round($google_money * $rate, 2);
+        $all_shipping_amount_rate = round($all_shipping_amount * $rate, 2);
+        $all_frame_price_rate = round($all_frame_price * $rate, 2);
+        $all_lens_price_rate = round($all_lens_price * $rate, 2);
+        $all_profit_rate = round($all_profit * $rate, 2);
+        $facebook_money_rate = round($facebook_money * $rate, 2);
+        $google_money_rate = round($google_money * $rate, 2);
         if (0 < $all_base_grand_total) {
-            $shipping_percent      = round($all_shipping_amount / $all_base_grand_total * 100, 2);
-            $frame_percent         = round($all_frame_price / $all_base_grand_total * 100, 2);
-            $lens_percent          = round($all_lens_price / $all_base_grand_total * 100, 2);
-            $google_percent        = round($google_money / $all_base_grand_total * 100, 2);
-            $facebook_percent      = round($facebook_money / $all_base_grand_total * 100, 2);
-            $profit_percent        = round($all_profit / $all_base_grand_total * 100, 2);
+            $shipping_percent = round($all_shipping_amount / $all_base_grand_total * 100, 2);
+            $frame_percent = round($all_frame_price / $all_base_grand_total * 100, 2);
+            $lens_percent = round($all_lens_price / $all_base_grand_total * 100, 2);
+            $google_percent = round($google_money / $all_base_grand_total * 100, 2);
+            $facebook_percent = round($facebook_money / $all_base_grand_total * 100, 2);
+            $profit_percent = round($all_profit / $all_base_grand_total * 100, 2);
         } else {
             $shipping_percent = $frame_percent = $lens_percent = $google_percent = $facebook_percent = $profit_percent = 0;
         }
@@ -266,6 +285,7 @@ class Zeelool extends Model
             ['type' => '毛利润', 'money_us' => $all_profit, 'money_cn' => $all_profit_rate, 'percent' => $profit_percent],
             ['type' => '销售额', 'money_us' => $all_base_grand_total, 'money_cn' => $all_base_grand_total_rate, 'percent' => ''],
         ];
+
         return $arr;
     }
 }
