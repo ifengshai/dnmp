@@ -426,6 +426,10 @@ class Distribution extends Backend
                 $sort = 'a.sku';
                 $order = 'asc';
             }
+
+            if ($sort == 'created_at') {
+                $sort = 'a.created_at';
+            }
             //非拆分订单
             $map['c.is_split'] = 0;
             //非重新下单
