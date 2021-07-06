@@ -66,7 +66,18 @@ class SelfApi extends Api
         ])->count();
 
         if ($order_count > 0) {
-            $this->error('已存在', [], 400);
+            $this->error('记录已存在', [], 400);
+        }
+
+        $count = (new OrderNodeDetail())->where([
+            'order_number' => $order_number,
+            'order_id'     => $order_id,
+            'site'         => $site,
+            'order_node'   => 0,
+            'node_type'    => 0,
+        ])->count();
+        if ($count > 0) {
+            $this->error('记录已存在', [], 400);
         }
 
         $res_node = $this->node->allowField(true)->save([
@@ -100,16 +111,7 @@ class SelfApi extends Api
         $data[] = $this->asyncEs->formatDate($arr, time());
         $this->asyncEs->esService->addMutilToEs('mojing_track', $data);
 
-        $count = (new OrderNodeDetail())->where([
-            'order_number' => $order_number,
-            'order_id'     => $order_id,
-            'site'         => $site,
-            'order_node'   => 0,
-            'node_type'    => 0,
-        ])->count();
-        if ($count > 0) {
-            $this->error('已存在', [], 400);
-        }
+
 
         $res_node_detail = (new OrderNodeDetail())->allowField(true)->save([
             'order_number' => $order_number,
