@@ -587,10 +587,10 @@ class NewProductReplenishOrder extends Backend
                             $websiteType[$sk] = 'Amazon';
                             break;
                         case PlatformType::ZEELOOL_ES_PLAT:
-                            $websiteType[$sk] = 'Zeelool_de';
+                            $websiteType[$sk] = 'Zeelool_es';
                             break;
                         case PlatformType::ZEELOOL_DE_PLAT:
-                            $websiteType[$sk] = 'Zeelool_es';
+                            $websiteType[$sk] = 'Zeelool_de';
                             break;
                         case PlatformType::ZEELOOL_JP_PLAT:
                             $websiteType[$sk] = 'Zeelool_jp';
