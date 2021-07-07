@@ -3394,7 +3394,6 @@ class Crontab extends Backend
 
         $today = date('Y-m-d 23:59:59');
         $model->table('orders')->query("set time_zone='+8:00'");
-        $order_where['order_type'] = 1;
         $order_success_where['status'] = ['in', [2,3,4,9,10]];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $date_time_start = date('Y-m-d 00:00:00', strtotime("-1 day"));
@@ -3404,63 +3403,63 @@ class Crontab extends Backend
         $yestime_where['created_at'] = ['between', [$date_time_start,$date_time_end]];
         $yestime_where1['updated_at'] = ['between', [$date_time_start,$date_time_end]];
 
-        $yesterday_sales_money = $model->table('orders')->where($yestime_where)->where($order_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $yesterday_sales_money = $model->table('orders')->where($yestime_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
         $yesterday_sales_money_data           = round($yesterday_sales_money['base_grand_total'], 2);
         //过去7天销售额
         $seven_start = date("Y-m-d", strtotime("-7 day"));
         $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $sev_where['created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
-        $pastsevenday_sales_money = $model->table('orders')->where($sev_where)->where($order_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $pastsevenday_sales_money = $model->table('orders')->where($sev_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
         $pastsevenday_sales_money_data        = round($pastsevenday_sales_money['base_grand_total'], 2);
         //过去30天销售额
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
         $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $thirty_where['created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
-        $pastthirtyday_sales_money = $model->table('orders')->where($thirty_where)->where($order_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $pastthirtyday_sales_money = $model->table('orders')->where($thirty_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
         $pastthirtyday_sales_money_data = round($pastthirtyday_sales_money['base_grand_total'], 2);
         //当月销售额
         $thismonth_start = date('Y-m-01', strtotime($today));
         $thismonth_end = $today;
         $thismonth_where['created_at'] = $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
-        $thismonth_sales_money = $model->table('orders')->where($thismonth_where)->where($order_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $thismonth_sales_money = $model->table('orders')->where($thismonth_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
         $thismonth_sales_money_data = round($thismonth_sales_money['base_grand_total'], 2);
         //上月销售额
         $lastmonth_start = date('Y-m-d', strtotime("first day of -1 month"));
         $lastmonth_end = date('Y-m-d 23:59:59', strtotime("last day of -1 month"));
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
-        $lastmonth_sales_money = $model->table('orders')->where($lastmonth_where)->where($order_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $lastmonth_sales_money = $model->table('orders')->where($lastmonth_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
         $lastmonth_sales_money_data = round($lastmonth_sales_money['base_grand_total'], 2);
         //今年销售额
         $thisyear_start = date("Y", time())."-1"."-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
-        $thisyear_sales_money = $model->table('orders')->where($thisyear_where)->where($order_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $thisyear_sales_money = $model->table('orders')->where($thisyear_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
         $thisyear_sales_money_data = round($thisyear_sales_money['base_grand_total'], 2);
         //上年销售额
         $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
         $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
         $lastyear_where['created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
-        $lastyear_sales_money = $model->table('orders')->where($lastyear_where)->where($order_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $lastyear_sales_money = $model->table('orders')->where($lastyear_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
         $lastyear_sales_money_data = round($lastyear_sales_money['base_grand_total'], 2);
         //总共销售额
-        $total_sales_money = $model->table('orders')->where($order_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $total_sales_money = $model->table('orders')->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
         $total_sales_money_data               = round($total_sales_money['base_grand_total'], 2);
         //昨天订单数
-        $yesterday_order_num_data             = $model->table('orders')->where($yestime_where)->where($order_where)->count();
+        $yesterday_order_num_data             = $model->table('orders')->where($yestime_where)->count();
         //过去7天订单数
-        $pastsevenday_order_num_data          = $model->table('orders')->where($sev_where)->where($order_where)->count();
+        $pastsevenday_order_num_data          = $model->table('orders')->where($sev_where)->count();
         //过去30天订单数
-        $pastthirtyday_order_num_data         = $model->table('orders')->where($thirty_where)->where($order_where)->count();
+        $pastthirtyday_order_num_data         = $model->table('orders')->where($thirty_where)->count();
         //当月订单数
-        $thismonth_order_num_data             = $model->table('orders')->where($thismonth_where)->where($order_where)->count();
+        $thismonth_order_num_data             = $model->table('orders')->where($thismonth_where)->count();
         //上月订单数
-        $lastmonth_order_num_data             = $model->table('orders')->where($lastmonth_where)->where($order_where)->count();
+        $lastmonth_order_num_data             = $model->table('orders')->where($lastmonth_where)->count();
         //今年订单数
-        $thisyear_order_num_data              = $model->table('orders')->where($thisyear_where)->where($order_where)->count();
+        $thisyear_order_num_data              = $model->table('orders')->where($thisyear_where)->count();
         //去年订单数
-        $lastyear_order_num_data              = $model->table('orders')->where($lastyear_where)->where($order_where)->count();
+        $lastyear_order_num_data              = $model->table('orders')->where($lastyear_where)->count();
         //总共订单数
-        $total_order_num_data                 = $model->table('orders')->where($order_where)->count();
+        $total_order_num_data                 = $model->table('orders')->count();
         //昨天支付成功数
         $yesterday_order_success_data         = $yesterday_sales_money['order_num'];
         //过去7天支付成功数
@@ -3986,7 +3985,6 @@ class Crontab extends Backend
 
         $today = date('Y-m-d 23:59:59');
         $model->table('orders')->query("set time_zone='+8:00'");
-        $order_where['order_type'] = 1;
         $order_success_where['status'] = ['in', [2,3,4,9,10]];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $date_time_start = date('Y-m-d 00:00:00', strtotime("-1 day"));
@@ -3995,40 +3993,40 @@ class Crontab extends Backend
         $yestime_where1 = [];
         $yestime_where['created_at'] = ['between', [$date_time_start,$date_time_end]];
         $yestime_where1['updated_at'] = ['between', [$date_time_start,$date_time_end]];
-        $yesterday_order_success_data = $model->table('orders')->where($yestime_where)->where($order_where)->where($order_success_where)->count();
+        $yesterday_order_success_data = $model->table('orders')->where($yestime_where)->where($order_success_where)->count();
         //过去7天支付成功数
         $seven_start = date("Y-m-d", strtotime("-7 day"));
         $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $sev_where['created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
-        $pastsevenday_order_success_data = $model->table('orders')->where($sev_where)->where($order_where)->where($order_success_where)->count();
+        $pastsevenday_order_success_data = $model->table('orders')->where($sev_where)->where($order_success_where)->count();
         //过去30天支付成功数
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
         $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $thirty_where['created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
-        $pastthirtyday_order_success_data = $model->table('orders')->where($thirty_where)->where($order_where)->where($order_success_where)->count();
+        $pastthirtyday_order_success_data = $model->table('orders')->where($thirty_where)->where($order_success_where)->count();
         //当月支付成功数
         $thismonth_start = date('Y-m-01', strtotime($today));
         $thismonth_end = $today;
         $thismonth_where['created_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
-        $thismonth_order_success_data = $model->table('orders')->where($thismonth_where)->where($order_where)->where($order_success_where)->count();
+        $thismonth_order_success_data = $model->table('orders')->where($thismonth_where)->where($order_success_where)->count();
         //上月支付成功数
         $lastmonth_start = date('Y-m-d', strtotime("first day of -1 month"));
         $lastmonth_end = date('Y-m-d 23:59:59', strtotime("last day of -1 month"));
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
-        $lastmonth_order_success_data = $model->table('orders')->where($lastmonth_where)->where($order_where)->where($order_success_where)->count();
+        $lastmonth_order_success_data = $model->table('orders')->where($lastmonth_where)->where($order_success_where)->count();
         //今年支付成功数
         $thisyear_start = date("Y", time())."-1"."-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
-        $thisyear_order_success_data = $model->table('orders')->where($thisyear_where)->where($order_where)->where($order_success_where)->count();
+        $thisyear_order_success_data = $model->table('orders')->where($thisyear_where)->where($order_success_where)->count();
         //上年支付成功数
         $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
         $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
         $lastyear_where['created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
-        $lastyear_order_success_data = $model->table('orders')->where($lastyear_where)->where($order_where)->where($order_success_where)->count();
+        $lastyear_order_success_data = $model->table('orders')->where($lastyear_where)->where($order_success_where)->count();
         //总共支付成功数
-        $total_order_success_data = $model->table('orders')->where($order_where)->where($order_success_where)->count();
+        $total_order_success_data = $model->table('orders')->where($order_success_where)->count();
 
         //昨天购物车总数
         //$quote_where['base_grand_total'] = ['>', 0];

@@ -92,7 +92,6 @@ class OperationAnalysis extends Model
         $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
         if ($id == 5) {
             $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
-            $order_success_where['order_type'] = 1;
             $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('orders')->query("set time_zone='+8:00'");
             $today_sales_money_data = $model->table('orders')->where($yestime_where)->where($order_success_where)->sum('base_actual_amount_paid');
@@ -170,7 +169,6 @@ class OperationAnalysis extends Model
         $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
         if ($id == 5) {
             $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
-            $order_success_where['order_type'] = 1;
             $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('orders')->query("set time_zone='+8:00'");
             $today_order_success_rs = $model->table('orders')->where($yestime_where)->where($order_success_where)->field('count(id) as count')->find();
