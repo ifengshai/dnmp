@@ -22,7 +22,7 @@ class OperationAnalysis extends Model
 
     // 追加属性
     protected $append = [];
-    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed') and order_type = 1";
+    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed')";
     /**
      * 通过id判断需要传递的model
      *
@@ -97,7 +97,12 @@ class OperationAnalysis extends Model
             $today_sales_money_data = $model->table('orders')->where($yestime_where)->where($order_success_where)->sum('base_actual_amount_paid');
         } else {
             //今日销售额sql
-            $today_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status";
+            if($id == 11){
+                $today_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status  and (order_type = 1 or order_type = 10)";
+            }else{
+                $today_sales_money_sql = "SELECT round(sum(base_grand_total),2)  base_grand_total FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status  and order_type = 1";
+            }
+
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             //今日销售额
             $today_sales_money_rs = $model->query($today_sales_money_sql);
@@ -169,8 +174,14 @@ class OperationAnalysis extends Model
             $today_order_success_rs = $model->table('orders')->where($yestime_where)->where($order_success_where)->field('count(id) as count')->find();
             $today_order_success_data = $today_order_success_rs['count'];
         } else {
-            //今日订单支付成功数sql
-            $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE  created_at between '$date_time_start' and '$date_time_end' $order_status";
+            if($id == 11){
+                //今日订单支付成功数sql
+                $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE  created_at between '$date_time_start' and '$date_time_end' $order_status  and (order_type = 1 or order_type = 10)";
+            }else{
+                //今日订单支付成功数sql
+                $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE  created_at between '$date_time_start' and '$date_time_end' $order_status  and order_type = 1";
+            }
+
             $model->query("set time_zone='+8:00'");
             //今日订单支付成功数
             $today_order_success_rs = $model->query($today_order_success_sql);
@@ -348,7 +359,12 @@ class OperationAnalysis extends Model
 
             //今天新增购物车产生的订单
             $order_status = $this->order_status;
-            $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and quote_id in ({$today_shoppingcart_total_ids})";
+            if($id == 11){
+                $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and order_type=1 and quote_id in ({$today_shoppingcart_total_ids})";
+            }else{
+                $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and (order_type=1 or order_type=10) and quote_id in ({$today_shoppingcart_total_ids})";
+            }
+
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             $today_order_success_rs = $model->query($today_order_success_sql);
             $today_order_success_data_cart = $today_order_success_rs[0]['counter'];
