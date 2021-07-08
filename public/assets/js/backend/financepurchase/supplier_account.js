@@ -119,11 +119,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             $(document).on('click', '#submit_cancel', function () {
                 Fast.api.close(); // 关闭弹窗
                 parent.location.reload(); //刷新父级
-            })
+            });
 
         },
         table: {
             first: function () {
+
                 // 表格1
                 var table1 = $("#table1");
                 table1.bootstrapTable({
@@ -142,7 +143,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             {field: 'state', checkbox: true},
                             {field: 'id', title: 'ID', operate: false},
                             {field: 'purchase_number', title: __('采购单号'), operate: false},
-                            {field: 'purchase_name', title: __('采购单名称'), operate: false},
+                            {field: 'sku', title: __('SKU'), operate: false},
                             {
                                 field: 'pay_type',
                                 title: __('付款类型'),
@@ -160,16 +161,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             {field: 'in_stock_money', title: __('入库金额'), operate: false},
                             {field: 'unqualified_num', title: __('退货数量'), operate: false},
                             {field: 'unqualified_num_money', title: __('退货金额'), operate: false},
-                            {field: 'period', title: __('结算周期'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange'},
+                            {field: 'period', title: __('账期'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange',visible:false},
+                            {field: 'period1', title: __('账期'), operate: false},
                         ]
                     ]
                 });
-
+                $('#wait_pay').attr("style","display:block;");
                 // 为表格1绑定事件
                 Table.api.bindevent(table1);
 
             },
             second: function () {
+                $('#wait_pay').attr("style","display:none;");
                 // 表格2
                 var table2 = $("#table2");
                 table2.bootstrapTable({

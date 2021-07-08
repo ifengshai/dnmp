@@ -168,6 +168,8 @@
                         <select id="c-kou_reason" name="list[{$k}][kou_reason]" class="form-control">
                             <option value="0">选择</option>
                             <option value="1" {:$v['deduction_reason']==1 ? 'selected' : '' }>逾期扣款</option>
+                            <option value="2" {:$v['deduction_reason']==2 ? 'selected' : '' }>单价变动</option>
+                            <option value="3" {:$v['deduction_reason']==3 ? 'selected' : '' }>已付预付款</option>
                         </select>
                     </td>
                     <td>
