@@ -12,6 +12,7 @@ use app\admin\model\warehouse\ProductBarCodeItem;
 use app\enum\OrderType;
 use fast\Excel;
 use fast\Http;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Controller;
 use app\Common\model\Auth;
 use GuzzleHttp\Client;
@@ -3568,5 +3569,192 @@ class Test4 extends Controller
                 $this->error($e->getMessage(), [], 408);
             }
         }
+    }
+    public function export_data()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $skus = Db::name('zzzzzzzz_temps')->column('sku');
+        $map['a.sku'] = ['in',$skus];
+        $items = Db::name('check_order_item')
+            ->alias('a')
+            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id')
+            ->join(['fa_purchase_order' => 'c'], 'b.purchase_id=c.id')
+            ->join(['fa_purchase_order_item' => 'd'], 'c.id=d.purchase_id')
+            ->join(['fa_supplier' => 'e'], 'c.supplier_id=e.id')
+            ->where($map)
+            ->where('c.createtime','between',['2020.06.01','2021.07.08'])
+            ->field('a.sku,a.quantity_rate,b.check_order_number,e.supplier_name,d.purchase_num,d.purchase_price,c.purchase_number,c.purchase_status,c.check_status,c.stock_status,c.factory_type,c.createtime,c.type')
+            ->select();
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "SKU")
+            ->setCellValue("B1", "供应商")
+            ->setCellValue("C1", "采购数量");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "采购单价")
+            ->setCellValue("E1", "采购单号");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "质检合格率")
+            ->setCellValue("G1", "采购状态");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("H1", "质检状态")
+            ->setCellValue("I1", "入库状态")
+            ->setCellValue("J1", "工厂类型")
+            ->setCellValue("K1", "大货/现货")
+            ->setCellValue("L1", "采购单创建时间")
+            ->setCellValue("M1", "质检单号");
+
+        foreach ($items as $key => $value) {
+            switch ($value['purchase_status']) {
+                case 0:
+                    $purchaseStatus = '新建';
+                    break;
+                case 1:
+                    $purchaseStatus = '审核中';
+                    break;
+                case 2:
+                    $purchaseStatus = '已审核';
+                    break;
+                case 3:
+                    $purchaseStatus = '已拒绝';
+                    break;
+                case 4:
+                    $purchaseStatus = '已取消';
+                    break;
+                case 5:
+                    $purchaseStatus = '待发货';
+                    break;
+                case 6:
+                    $purchaseStatus = '待收货';
+                    break;
+                case 7:
+                    $purchaseStatus = '已签收';
+                    break;
+                case 8:
+                    $purchaseStatus = '已退款';
+                    break;
+                case 9:
+                    $purchaseStatus = '部分签收';
+                    break;
+                case 10:
+                    $purchaseStatus = '已完成';
+                    break;
+                default:
+                    $purchaseStatus = '异常';
+                    break;
+            }
+            switch ($value['check_status']) {
+                case 0:
+                    $checkStatus = '未质检';
+                    break;
+                case 1:
+                    $checkStatus = '部分质检';
+                    break;
+                case 2:
+                    $checkStatus = '已质检';
+                    break;
+                default:
+                    $checkStatus = '异常';
+                    break;
+            }
+            switch ($value['stock_status']) {
+                case 0:
+                    $stockStatus = '未入库';
+                    break;
+                case 1:
+                    $stockStatus = '部分入库';
+                    break;
+                case 2:
+                    $stockStatus = '已入库';
+                    break;
+                default:
+                    $stockStatus = '异常';
+                    break;
+            }
+            switch ($value['factory_type']) {
+                case 0:
+                    $factoryType = '工厂';
+                    break;
+                case 1:
+                    $factoryType = '贸易';
+                    break;
+            }
+            switch ($value['type']) {
+                case 1:
+                    $type = '现货';
+                    break;
+                case 2:
+                    $type = '大货';
+                    break;
+            }
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['supplier_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['purchase_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['purchase_price']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['purchase_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['quantity_rate']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $purchaseStatus);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $checkStatus);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $stockStatus);
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $factoryType);
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $type);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['createtime']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['check_order_number']);
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(40);
+
+
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:N' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '采购单数据2020.6.1-2021.7.8';
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
 }
