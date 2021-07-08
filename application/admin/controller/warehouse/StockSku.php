@@ -35,7 +35,7 @@ class StockSku extends Backend
     {
         parent::_initialize();
         $this->model = new \app\admin\model\warehouse\StockSku;
-        $this->assignconfig('warehourseStock',getStockHouse());
+        $this->assignconfig('warehourseStock', getStockHouse());
     }
 
     /**
@@ -62,27 +62,27 @@ class StockSku extends Backend
             //自定义sku搜索
             $filter = json_decode($this->request->get('filter'), true);
             if ($filter['area_coding']) {
-                $area_id = Db::name('warehouse_area')->where('coding',$filter['area_coding'])->value('id');
-                $all_store_id = Db::name('store_house')->where('area_id',$area_id)->column('id');
-                $map['storehouse.id'] = ['in',$all_store_id];
+                $area_id = Db::name('warehouse_area')->where('coding', $filter['area_coding'])->value('id');
+                $all_store_id = Db::name('store_house')->where('area_id', $area_id)->column('id');
+                $map['storehouse.id'] = ['in', $all_store_id];
                 unset($filter['area_coding']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
             if ($filter['storehouse.status']) {
-                $map['storehouse.status'] = ['=',$filter['storehouse.status']];
+                $map['storehouse.status'] = ['=', $filter['storehouse.status']];
                 unset($filter['storehouse.status']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
-                ->with(['storehouse','warehouseStock'])
+                ->with(['storehouse', 'warehouseStock'])
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
 
             $list = $this->model
-                ->with(['storehouse','warehouseStock'])
+                ->with(['storehouse', 'warehouseStock'])
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -93,20 +93,20 @@ class StockSku extends Backend
             $item = new \app\admin\model\itemmanage\Item;
             $arr = $item->where('is_del', 1)->column('name,is_open', 'sku');
             //所有库区编码id
-            $area_coding = Db::name('warehouse_area')->column('coding','id');
+            $area_coding = Db::name('warehouse_area')->column('coding', 'id');
             foreach ($list as $k => $row) {
                 $row->getRelation('storehouse')->visible(['coding', 'library_name', 'status']);
                 $list[$k]['name'] = $arr[$row['sku']]['name'];
                 $list[$k]['is_open'] = $arr[$row['sku']]['is_open'];
-                $store_house = Db::name('store_house')->where('id',$row['store_id'])->find();
+                $store_house = Db::name('store_house')->where('id', $row['store_id'])->find();
                 //获得库位所属库区编码
                 $list[$k]['area_coding'] = $area_coding[$store_house['area_id']];
-                $list[$k]['area_status'] = Db::name('warehouse_area')->where('id',$store_house['area_id'])->value('status');
+                $list[$k]['area_status'] = Db::name('warehouse_area')->where('id', $store_house['area_id'])->value('status');
             }
 
             $list = collection($list)->toArray();
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
@@ -129,24 +129,30 @@ class StockSku extends Backend
                 }
                 empty($params['sku']) && $this->error('sku不能为空！');
 
-                $store_house = Db::name('store_house')->where('id',$params['store_id'])->where('stock_id',$params['stock_id'])->find();
-                $warehouse_area = Db::name('warehouse_area')->where('id',$store_house['area_id'])->where('stock_id',$params['stock_id'])->find();
+                $store_house = Db::name('store_house')->where('id', $params['store_id'])->where('stock_id', $params['stock_id'])->find();
+                //查询拣货区ID
+                $warehouse_area = Db::name('warehouse_area')->where('id', $params['area_id'])->find();
                 //拣货货区一个库位号只能有一个sku
-                if ($warehouse_area['type'] !== 2){
-                    $map['sku'] = $params['sku'];
+                //拣货区一个sku 只能有一个库位
+                if ($warehouse_area['type'] != 2) {
+                    //判断选择的库位是否已存在
+                    $map['a.store_id'] = $params['store_id'];//库位id
+                } else {
+                    $map['b.area_id'] = $params['area_id'];
                 }
-                if (!$params['area_id']){
+
+                if (!$params['area_id']) {
                     $this->error('库区不能为空！！');
                 }
-                //判断选择的库位是否已存在
-                $map['store_id'] = $params['store_id'];//库位id
-                $map['is_del'] = 1;
-                $map['stock_id'] = $params['stock_id'];
-                $count = $this->model->where($map)->count();
+                $map['a.sku'] = $params['sku'];
+                $map['a.is_del'] = 1;
+                $map['a.stock_id'] = $params['stock_id'];
+                $count = $this->model->alias('a')->where($map)->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->count();
+
                 if ($count > 0) {
                     $this->error('库位已绑定！！');
                 }
-                if ($store_house['area_id'] != $params['area_id']){
+                if ($store_house['area_id'] != $params['area_id']) {
                     $this->error('库位不在当前选择库区！！');
                 }
                 $result = false;
@@ -181,7 +187,7 @@ class StockSku extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         //查询库区数据
-        $data1 = Db::name('warehouse_area')->column('coding','id');
+        $data1 = Db::name('warehouse_area')->column('coding', 'id');
         $this->assign('data1', $data1);
         //查询库位数据
         $data = (new StockHouse())->getStockHouseData();
@@ -190,6 +196,7 @@ class StockSku extends Backend
         //查询商品SKU数据
         $info = (new Item())->getItemSkuInfo();
         $this->assign('info', $info);
+
         return $this->view->fetch();
     }
 
@@ -199,7 +206,7 @@ class StockSku extends Backend
     public function edit($ids = null)
     {
         $row = $this->model->get($ids);
-        $row['area_id'] = Db::name('store_house')->where('id',$row['store_id'])->value('area_id');
+        $row['area_id'] = Db::name('store_house')->where('id', $row['store_id'])->value('area_id');
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -215,20 +222,32 @@ class StockSku extends Backend
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 empty($params['sku']) && $this->error('sku不能为空！');
-                if (!$params['area_id']){
+                if (!$params['area_id']) {
                     $this->error('库区不能为空！！');
                 }
-                //判断选择的库位是否已存在
-                $map['store_id'] = $params['store_id'];
-                $map['id'] = ['<>', $row->id];
-                $map['is_del'] = 1;
-                $map['stock_id'] = $params['stock_id'];
-                $count = $this->model->where($map)->count();
+
+                //查询库区
+                $warehouse_area = Db::name('warehouse_area')->where('id', $params['area_id'])->find();
+                //拣货货区一个库位号只能有一个sku
+                //拣货区一个sku 只能有一个库位
+                if ($warehouse_area['type'] != 2) {
+                    //判断选择的库位是否已存在
+                    $map['a.store_id'] = $params['store_id'];//库位id
+                } else {
+                    $map['b.area_id'] = $params['area_id'];
+                }
+
+                $map['a.sku'] = $params['sku'];
+                $map['a.is_del'] = 1;
+                $map['a.stock_id'] = $params['stock_id'];
+                $map['a.id'] = ['<>', $row->id];
+                $count = $this->model->alias('a')->where($map)->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->count();
                 if ($count > 0) {
                     $this->error('库位已绑定！！');
                 }
-                $store_house = Db::name('store_house')->where('id',$params['store_id'])->where('stock_id',$params['stock_id'])->find();
-                if ($store_house['area_id'] != $params['area_id']){
+
+                $store_house = Db::name('store_house')->where('id', $params['store_id'])->where('stock_id', $params['stock_id'])->find();
+                if ($store_house['area_id'] != $params['area_id']) {
                     $this->error('库位不在当前选择库区！！');
                 }
                 $result = false;
@@ -263,7 +282,7 @@ class StockSku extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         //查询库区数据
-        $data1 = Db::name('warehouse_area')->column('coding','id');
+        $data1 = Db::name('warehouse_area')->column('coding', 'id');
         $this->assign('data1', $data1);
         //查询库位数据
         $data = (new StockHouse())->getStockHouseData();
@@ -290,7 +309,7 @@ class StockSku extends Backend
         if (!$file) {
             $this->error(__('Parameter %s can not be empty', 'file'));
         }
-        $filePath = ROOT_PATH.DS.'public'.DS.$file;
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
         if (!is_file($filePath)) {
             $this->error(__('No results were found'));
         }
@@ -311,9 +330,9 @@ class StockSku extends Backend
                     $line = mb_convert_encoding($line, 'utf-8', $encoding);
                 }
                 if ($n == 0 || preg_match('/^".*"$/', $line)) {
-                    fwrite($fp, $line."\n");
+                    fwrite($fp, $line . "\n");
                 } else {
-                    fwrite($fp, '"'.str_replace(['"', ','], ['""', '","'], $line)."\"\n");
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
                 }
                 $n++;
             }
@@ -329,7 +348,7 @@ class StockSku extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['库区编码', '库位编码', 'SKU','实体仓id'];
+        $listName = ['库区编码', '库位编码', 'SKU', '实体仓id'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -370,11 +389,11 @@ class StockSku extends Backend
             }
             $warehouse_area = Db::name('warehouse_area')->where('coding', $v[0])->where('stock_id', $v[3])->find();
             if (empty($warehouse_area)) {
-                $this->error('sku:'.$v[2].'库区编码错误，请检查！！');
+                $this->error('sku:' . $v[2] . '库区编码错误，请检查！！');
             }
             $store_house = Db::name('store_house')->where('coding', $v[1])->where('area_id', $warehouse_area['id'])->where('stock_id', $v[3])->find();
             if (empty($store_house)) {
-                $this->error('sku:'.$v[2].'库位编码错误，请检查！！');
+                $this->error('sku:' . $v[2] . '库位编码错误，请检查！！');
             }
             //拣货货区一个库位号只能有一个sku
             if ($warehouse_area['type'] !== 2) {
@@ -386,13 +405,13 @@ class StockSku extends Backend
             $map['stock_id'] = $store_house['stock_id'];
             $count = Db::name('store_sku')->where($map)->count();
             if ($count > 0) {
-                $this->error('sku:'.$v[2].'库位已绑定！！');
+                $this->error('sku:' . $v[2] . '库位已绑定！！');
             }
         }
         foreach ($data as $k => $v) {
             $area_id = Db::name('warehouse_area')->where('stock_id', $v[3])->where('coding', $v[0])->value('id');
             $store_house = Db::name('store_house')->where('stock_id', $v[3])->where('coding', $v[1])->where('area_id', $area_id)->find();
-            $result = Db::name('store_sku')->insert(['sku' => $v[2], 'store_id' => $store_house['id'],'stock_id' =>$store_house['stock_id'],  'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
+            $result = Db::name('store_sku')->insert(['sku' => $v[2], 'store_id' => $store_house['id'], 'stock_id' => $store_house['stock_id'], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username]);
         }
         if ($result) {
             $this->success('导入成功！！');
