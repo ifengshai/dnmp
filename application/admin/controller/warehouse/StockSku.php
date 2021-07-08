@@ -148,10 +148,18 @@ class StockSku extends Backend
                 $map['a.is_del'] = 1;
                 $map['a.stock_id'] = $params['stock_id'];
                 $count = $this->model->alias('a')->where($map)->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->count();
+                if ($count > 0) {
+                    $this->error('sku已绑定！！');
+                }
 
+                unset($map['a.sku']);
+                $map['a.store_id'] = $params['store_id'];//库位id
+                $count = $this->model->alias('a')->where($map)->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->count();
                 if ($count > 0) {
                     $this->error('库位已绑定！！');
                 }
+
+
                 if ($store_house['area_id'] != $params['area_id']) {
                     $this->error('库位不在当前选择库区！！');
                 }
@@ -241,6 +249,13 @@ class StockSku extends Backend
                 $map['a.is_del'] = 1;
                 $map['a.stock_id'] = $params['stock_id'];
                 $map['a.id'] = ['<>', $row->id];
+                $count = $this->model->alias('a')->where($map)->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->count();
+                if ($count > 0) {
+                    $this->error('SKU已绑定！！');
+                }
+
+                unset($map['a.sku']);
+                $map['a.store_id'] = $params['store_id'];//库位id
                 $count = $this->model->alias('a')->where($map)->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->count();
                 if ($count > 0) {
                     $this->error('库位已绑定！！');
