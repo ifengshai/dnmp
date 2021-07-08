@@ -70,7 +70,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form','upload'], function ($
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
-            })
+            });
+            //批量导出xls
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/finance/settle_order/export?ids=' + ids, '_blank');
+                } else {
+                    Layer.alert('请勾选要导出的结算单');
+                }
+
+            });
             // 为表格绑定事件
             Table.api.bindevent(table);
         },

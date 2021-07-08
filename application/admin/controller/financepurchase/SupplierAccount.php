@@ -10,6 +10,7 @@ use think\Controller;
 use think\Db;
 use think\Hook;
 use think\Request;
+use think\response\Json;
 
 class SupplierAccount extends Backend
 {
@@ -259,7 +260,7 @@ class SupplierAccount extends Backend
             ->where('a.check_id', 'in', $check_order_ids)
             ->where('a.id', 'not in', $instock_ids)
             ->where('c.is_statement', 0)
-            ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
+            ->field('d.sku,c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
             ->select();
         $wait_pay_money = 0;
         $now = date('Y-m-t', time());
@@ -337,7 +338,19 @@ class SupplierAccount extends Backend
         $this->assign('supplier', $supplier);
         $this->assign('wait_pay_money', round($wait_pay_money, 2));
         $this->assign('all_wait_pay_money', round($all_wait_pay_money, 2));
-
+        $arr = array();
+        $year = date('Y');
+        for ($i = 0; $i<=5; $i++){
+            $arr[$i] = $year - $i;
+        }
+        $month = date('m');
+        $arr1 = array();
+        for ($i = 0; $i<12; $i++){
+            $arr1[$i] = $i + 1;
+        }
+        $this->assign('year',$arr);
+        $this->assign('month',$arr1);
+        $this->assign('now_month',$month);
         return $this->view->fetch();
     }
 
@@ -408,7 +421,7 @@ class SupplierAccount extends Backend
                 ->where('a.check_id', 'in', $check_order_ids)//已审核通过的入库单
                 ->where('a.id', 'not in', $instock_ids)
                 ->where('c.is_statement', 0)
-                ->field('c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
+                ->field('d.sku,c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
@@ -438,10 +451,11 @@ class SupplierAccount extends Backend
                 //采购单物流单详情
                 $row = Db::name('logistics_info')->where($map)->field('logistics_number,logistics_company_no,collect_time,createtime')->find();
                 if (!empty($row['collect_time'])) {
-                    $list[$k]['period'] = date("Y-m-t", strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
+                    $list[$k]['period'] = date("Y-m", strtotime(($row['collect_time'] . '+' . $supplier['period'] . 'month')));
                 } else {
-                    $list[$k]['period'] = date("Y-m-t", strtotime(($row['createtime'] . '+' . $supplier['period'] . 'month')));
+                    $list[$k]['period'] = date("Y-m", strtotime(($row['createtime'] . '+' . $supplier['period'] . 'month')));
                 }
+                $list[$k]['period1'] = $list[$k]['period'];
                 if ($timeBegin && $timeEnd) {
                     if (strtotime($list[$k]['period']) < $timeBegin || strtotime($list[$k]['period']) > $timeEnd) {
                         unset($list[$k]);
