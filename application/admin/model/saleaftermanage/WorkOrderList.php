@@ -483,58 +483,6 @@ class WorkOrderList extends Model
     }
 
     /**
-     * 获取修改处方-弃用
-     *
-     * @param $siteType
-     * @param $showPrescriptions
-     *
-     * @return array|bool
-     * @throws \think\Exception
-     */
-    public function getReissueLensOld($siteType, $showPrescriptions, $type = 1, $isNewVersion = 0)
-    {
-        $url = '';
-        $key = $siteType . '_getlens_' . $isNewVersion;
-        $data = Cache::get($key);
-        if (!$data) {
-            if ($isNewVersion == 1) {
-                $url = 'magic/product/newLensData';
-            } else {
-                $url = 'magic/product/lensData';
-            }
-            if ($siteType == 13 || $siteType == 14) {//第三方平台接口
-                $data = [];
-                $data['lens_list'] = ['Plastic lenses', 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers', 'Photochromic Lenses', 'Color Tint', 'Mid-Index Mirrored lenses', 'Polarized','PhotochromicBlueLightBlocking','Night vision'];
-                $data['color_list'] = [];
-                $data['coating_list'] = [];
-            } else {
-                $data = $this->httpRequest($siteType, $url);
-            }
-            Cache::set($key, $data, 3600 * 24);
-        }
-
-        $prescription = $prescriptions = $coating_type = '';
-
-        $prescription = $data['lens_list'];
-        $colorList = $data['color_list'] ?? [];
-        $lensColorList = $data['lens_color_list'];
-        $coating_type = $data['coating_list'];
-        if ($type == 1) {
-            foreach ($showPrescriptions as $key => $val) {
-                $prescriptions .= "<option value='{$key}'>{$val}</option>";
-            }
-            //拼接html页面
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'lensColorList', 'isNewVersion'));
-        } elseif ($type == 2) {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'lensColorList', 'type', 'isNewVersion'));
-        } else {
-            $html = (new \think\View())->fetch('saleaftermanage/work_order_list/ajax_reissue_add', compact('showPrescriptions', 'prescription', 'coating_type', 'prescriptions', 'colorList', 'type', 'lensColorList', 'isNewVersion'));
-        }
-
-        return ['data' => $data, 'html' => $html];
-    }
-
-    /**
      * 获取镜片、镀膜、颜色列表-新
      *
      * @param int    $siteType          网站类型
@@ -638,6 +586,9 @@ class WorkOrderList extends Model
             case 14:
                 $url = config('url.zeeloolcn_url');//阿里
                 break;
+            case 15:
+                $url = config('url.zeelool_fr');//法语
+                break;
             default:
                 return false;
                 break;
@@ -654,11 +605,9 @@ class WorkOrderList extends Model
             }
             $body = $response->getBody();
 
-            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$body,FILE_APPEND);
             $stringBody = (string)$body;
             $res = json_decode($stringBody, true);
 
-            //file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',$stringBody,FILE_APPEND);
             if ($res === null) {
                 exception('网络异常');
             }
@@ -1173,53 +1122,6 @@ class WorkOrderList extends Model
         }
     }
 
-    /**
-     * 插入更换镜框数据 - 弃用
-     *
-     * @Description
-     * @return void
-     * @since  2020/04/23 17:02:32
-     * @author lsw
-     */
-    public function changeFrameOld($params, $work_id, $measure_choose_id, $measure_id)
-    {
-        //循环插入更换镜框数据
-        $orderChangeList = [];
-        //判断是否选中更改镜框问题类型
-        if ($params['change_frame']) {
-            if (($params['work_type'] == 1 && $measure_choose_id == 1) || ($params['work_type'] == 2 && $measure_choose_id == 1)) {
-                $original_sku = $params['change_frame']['original_sku'];
-                $original_number = $params['change_frame']['original_number'];
-                $change_sku = $params['change_frame']['change_sku'];
-                $change_number = $params['change_frame']['change_number'];
-                foreach ($change_sku as $k => $v) {
-                    if (!$v) {
-                        continue;
-                    }
-                    $orderChangeList[$k]['work_id'] = $work_id;
-                    $orderChangeList[$k]['increment_id'] = $params['platform_order'];
-                    $orderChangeList[$k]['platform_type'] = $params['work_platform'];
-                    $orderChangeList[$k]['original_sku'] = $original_sku[$k];
-                    $orderChangeList[$k]['original_number'] = $original_number[$k];
-                    $orderChangeList[$k]['change_sku'] = $v;
-                    $orderChangeList[$k]['change_number'] = $change_number[$k];
-                    $orderChangeList[$k]['change_type'] = 1;
-                    $orderChangeList[$k]['measure_id'] = $measure_id;
-                    $orderChangeList[$k]['create_person'] = session('admin.nickname');
-                    $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
-                    $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
-                }
-                $orderChangeRes = (new WorkOrderChangeSku())->saveAll($orderChangeList);
-                if (false === $orderChangeRes) {
-                    throw new Exception("添加失败！！");
-                } else {
-                    WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 1]);
-                }
-            } else {
-                return false;
-            }
-        }
-    }
 
     /**
      * 更换镜框 - 新
@@ -1263,44 +1165,6 @@ class WorkOrderList extends Model
 
             //标记措施表更改类型
             WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 1]);
-        }
-    }
-
-    /**
-     * 取消操作 - 弃用
-     *
-     * @Description
-     * @return mixed
-     * @author lsw
-     */
-    public function cancelOrderOld($params, $work_id, $measure_choose_id, $measure_id)
-    {
-        //循环插入取消订单数据
-        $orderChangeList = [];
-        //判断是否选中取消措施
-        if ($params['cancel_order'] && (3 == $measure_choose_id)) {
-
-            foreach ($params['cancel_order']['original_sku'] as $k => $v) {
-
-                $orderChangeList[$k]['work_id'] = $work_id;
-                $orderChangeList[$k]['increment_id'] = $params['platform_order'];
-                $orderChangeList[$k]['platform_type'] = $params['work_platform'];
-                $orderChangeList[$k]['original_sku'] = $v;
-                $orderChangeList[$k]['original_number'] = $params['cancel_order']['original_number'][$k];
-                $orderChangeList[$k]['change_type'] = 3;
-                $orderChangeList[$k]['measure_id'] = $measure_id;
-                $orderChangeList[$k]['create_person'] = session('admin.nickname');
-                $orderChangeList[$k]['create_time'] = date('Y-m-d H:i:s');
-                $orderChangeList[$k]['update_time'] = date('Y-m-d H:i:s');
-            }
-            $cancelOrderRes = (new WorkOrderChangeSku())->saveAll($orderChangeList);
-            if (false === $cancelOrderRes) {
-                throw new Exception("添加失败！！");
-            } else {
-                WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => 3]);
-            }
-        } else {
-            return false;
         }
     }
 
