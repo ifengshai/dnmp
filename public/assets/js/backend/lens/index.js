@@ -30,14 +30,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'refractive_index', title: __('Refractive_index'), searchList: { '1.57': '1.57', '1.61': '1.61', '1.67': '1.67', '1.71': '1.71', '1.74': '1.74' } },
-                        {
-                            field: 'lens_type', title: __('Lens_type'),
-                            searchList: { 'Mid-Index': 'Mid-Index', 'High-Index Beyond UV Blue Blockers': 'High-Index Beyond UV Blue Blockers', 'Photochromic - Gray': 'Photochromic - Gray', 'Photochromic - Amber': 'Photochromic - Amber' },
-                            operate: 'like'
-                        },
 
                         {
-                            field: 'lens_type', title: __('Lens_type'), operate: 'like',visible: false
+                            field: 'lens_type', title: __('Lens_type'), operate: 'like'
                         },
 
                         { field: 'sph', title: __('Sph') },
