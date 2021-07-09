@@ -1689,6 +1689,10 @@ class ScmWarehouse extends Scm
             if (!in_array($v['sku'], $skus)) {
                 $this->error('此sku:' . $v['sku'] . '不存在！！', [], 516);
             }
+
+            if ($v['status'] == 2) {
+                $this->error('此入库单已审核', [], 516);
+            }
         }
 
         $res = false;
