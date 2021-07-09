@@ -35,6 +35,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             searchList: { 'Mid-Index': 'Mid-Index', 'High-Index Beyond UV Blue Blockers': 'High-Index Beyond UV Blue Blockers', 'Photochromic - Gray': 'Photochromic - Gray', 'Photochromic - Amber': 'Photochromic - Amber' },
                             operate: 'like'
                         },
+
+                        {
+                            field: 'lens_type', title: __('Lens_type'), operate: 'like',visible: false
+                        },
+
                         { field: 'sph', title: __('Sph') },
                         { field: 'cyl', title: __('Cyl') },
                         { field: 'stock_num', title: __('Stock_num') },
