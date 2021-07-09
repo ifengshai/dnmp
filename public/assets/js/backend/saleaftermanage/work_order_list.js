@@ -3406,6 +3406,8 @@ function platform_order(){
             $('#work_platform').val(13);
         }else if (str == '900'){
             $('#work_platform').val(14);
+        } else if (str == '260' || str == '560'){
+            $('#work_platform').val(15);
         }
 
         if (str == '180' || str == '900') {
