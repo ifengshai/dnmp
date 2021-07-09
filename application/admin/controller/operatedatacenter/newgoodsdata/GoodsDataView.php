@@ -318,9 +318,9 @@ class GoodsDataView extends Backend
                     ->field('sum(glass_num) sales_num,sum(sku_grand_total) sales_total')
                     ->find();
                 $dataCenterDay[$key]['sales_num'] = $order['sales_num'];
-                $dataCenterDay[$key]['sales_num_rate'] = $salesSum['sales_num'] ? round($order['sales_num']/$salesSum['sales_num']*100,2) : 0;
+                $dataCenterDay[$key]['sales_num_rate'] = $salesSum['sales_num']!=0  ? round($order['sales_num']/$salesSum['sales_num']*100,2) : 0;
                 $dataCenterDay[$key]['sales_total'] = $order['sales_total'];
-                $dataCenterDay[$key]['sales_total_rate'] = $salesSum['sales_total'] ? round($order['sales_total']/$salesSum['sales_total']*100,2) : 0;
+                $dataCenterDay[$key]['sales_total_rate'] = $salesSum['sales_total']!=0 ? round($order['sales_total']/$salesSum['sales_total']*100,2) : 0;
                 $stockInfo = $this->model
                     ->where(['is_open'=>1,'is_del'=>1])
                     ->where('category_id','neq',43)
@@ -332,7 +332,7 @@ class GoodsDataView extends Backend
                     ->where('sku','in',$skus)
                     ->value('sum(stock) stock');
                 $dataCenterDay[$key]['real_time_stock'] = $skuStock;
-                $dataCenterDay[$key]['real_time_stock_rate'] = $skuStockSum ? round($skuStock/$skuStockSum*100,2) : 0;
+                $dataCenterDay[$key]['real_time_stock_rate'] = $skuStockSum!=0 ? round($skuStock/$skuStockSum*100,2) : 0;
                 $dataCenterDay[$key]['stock'] = $stockInfo;
             }
             $dataCenterDay = array_column($dataCenterDay,null,'sort');
