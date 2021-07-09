@@ -1919,6 +1919,7 @@ DOC;
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("Q1", "kf首次回复时间");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "回复模板");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("S1", "组别");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("T1", "处理人数");
         foreach ($list as $key => $value) {
 
             $arr = explode(",", $value['tags']);
@@ -2038,23 +2039,25 @@ DOC;
                 ->order("zendesk_comments.id  ")
                 ->select();
 
+            $value['reply_num'] = 0;
             $due_name = array();
-            //邮件工单处理人+回复处理人
-            array_push($due_name, $value['due_nickname']);
             //有回复数据时,计算回复数据
             if (!empty($comments_list)) {
                 //回复次数
                 $replies = 0;
                 $admin_data = array();
+                $replyNumArr = [];
                 $template_info = "";
                 foreach ($comments_list as $commentsK => $commentsV) {
                     if ($commentsV['is_admin'] == '1') {
                         $replies += 1;//客服人员回复次数
                         array_push($admin_data, $commentsV['create_time']);
                         array_push($due_name, $commentsV['due_nickname']);
+                        $replyNumArr[] = $commentsV['due_id'];
                     }
                     $template_info .= $template_list[$commentsV['mail_template_id']] . ",";
                 }
+                $value['reply_num'] = count(array_unique($replyNumArr));
                 $is_admin = $comments_list[0]['is_admin'] == '1' ? '是' : '否';
                 //预防没有客服人员回复,首次回复时间处理
                 if (!empty($admin_data)) {
@@ -2099,6 +2102,7 @@ DOC;
             $spreadsheet->getActiveSheet()->setCellValue("Q" . ($key * 1 + 2), $value['fist_time']);
             $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['template_info']);
             $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['group_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['reply_num']);
         }
 
         //设置宽度
