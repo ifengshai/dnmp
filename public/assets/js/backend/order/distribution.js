@@ -580,6 +580,26 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 window.open(Config.moduleurl + '/order/distribution/batch_export_xls_account?' + params, '_blank');
             });
 
+            //批量导出xls
+            $('.btn-batch-export-log').click(function () {
+                var ids = Table.api.selectedids(table);
+                var params = '';
+                if (ids.length > 0) {
+                    params = 'ids=' + ids;
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    params = 'filter=' + filter + '&op=' + op + '&label=' + Config.label;
+                }
+                window.open(Config.moduleurl + '/order/distribution/export_distribution_log?' + params, '_blank');
+            });
+
+
+
+
+
             //批量打印
             $('.btn-batch-printed').click(function () {
                 var ids = Table.api.selectedids(table);
