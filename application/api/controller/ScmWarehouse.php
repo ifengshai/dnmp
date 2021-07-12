@@ -640,7 +640,7 @@ class ScmWarehouse extends Scm
         $out_stock_id = $this->request->request('out_stock_id');
         empty($out_stock_id) && $this->error(__('出库单ID不能为空'), [], 403);
 
-        $result = LockService::addLock($out_stock_id,30,'out_stock_lock_%s');
+        $result = LockService::addLock($out_stock_id, 30, 'out_stock_lock_%s');
         if (!$result) {
             $this->error(__('服务异常,重复提交或加锁失败,请联系管理员！！'), '', 524);
         }
@@ -1649,7 +1649,7 @@ class ScmWarehouse extends Scm
         $in_stock_id = $this->request->request('in_stock_id');
         empty($in_stock_id) && $this->error(__('入库单ID不能为空'), [], 516);
 
-        $result = LockService::addLock($in_stock_id,30,'in_stock_lock_%s');
+        $result = LockService::addLock($in_stock_id, 30, 'in_stock_lock_%s');
         if (!$result) {
             $this->error(__('服务异常,重复提交或加锁失败,请联系管理员！！'), '', 524);
         }
@@ -2498,6 +2498,12 @@ class ScmWarehouse extends Scm
 
         $inventory_id = $this->request->request("inventory_id");
         empty($inventory_id) && $this->error(__('盘点单号不能为空'), [], 545);
+
+        $result = LockService::addLock($inventory_id, 30, 'inventory_lock_%s');
+        if (!$result) {
+            $this->error(__('服务异常,重复提交或加锁失败,请联系管理员！！'), '', 524);
+        }
+
         //获取盘点单数据
         $row = $this->_inventory->get($inventory_id);
         empty($row) && $this->error(__('盘点单不存在'), [], 546);
@@ -2850,6 +2856,8 @@ class ScmWarehouse extends Scm
         if ($res) {
             $msg = '审核成功';
         }
+        //解锁
+        LockService::releaseLock($inventory_id, $result);
 
         $this->success($msg, ['info' => ''], 200);
     }
