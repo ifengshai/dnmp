@@ -2024,7 +2024,7 @@ class Distribution extends Backend
             '站点',
             '订单类型',
             '操作时间',
-            '审单实际',
+            '审单时间',
             '操作人',
         ];
 
@@ -2069,7 +2069,7 @@ class Distribution extends Backend
                 ->select();
             $list = collection($list)->toArray();
             $ids = array_column($list, 'id');
-            $log = $distributionLog->where(['distribution_node' => 3, 'item_process_id' => ['in', $ids]])->column('*', 'id');
+            $log = $distributionLog->where(['distribution_node' => 3, 'item_process_id' => ['in', $ids]])->column('*', 'item_process_id');
             $data = [];
             foreach ($list as $k => $v) {
                 $data[$k]['increment_id'] = $v['increment_id'];
