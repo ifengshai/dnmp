@@ -666,7 +666,7 @@ class ZendeskOne extends Controller
             'usps'      => '21051',
             'yanwen'    => '190012',
             'sua'       => '190111',
-            'cod'       => '100040',
+            'cod'       => '10021',
             'tnt'       => '100004',
             'ups'       => '100002',
         ];
