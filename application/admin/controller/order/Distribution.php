@@ -55,6 +55,7 @@ class Distribution extends Backend
         'operation_log',
         'batch_export_xls_copy',
         'batch_export_xls_account',
+        'export_distribution_log'
     ];
     protected $noNeedLogin = ['batch_export_xls_copy'];
     /**
