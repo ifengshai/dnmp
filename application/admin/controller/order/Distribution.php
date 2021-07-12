@@ -55,6 +55,7 @@ class Distribution extends Backend
         'operation_log',
         'batch_export_xls_copy',
         'batch_export_xls_account',
+        'export_distribution_log'
     ];
     protected $noNeedLogin = ['batch_export_xls_copy'];
     /**
@@ -1996,6 +1997,140 @@ class Distribution extends Backend
     }
 
     /**
+     * 导出配镜片操作数据
+     * @author wangpenglei
+     * @date   2021/7/12 16:32
+     */
+    public function export_distribution_log()
+    {
+        //根据传的标签切换状态
+        $filter = json_decode($this->request->get('filter'), true);
+
+        $map['b.status'] = ['in', ['processing', 'complete', 'delivered']];
+
+        //审单时间
+        if ($filter['check_time']) {
+            $check_time = explode(' - ', $filter['check_time']);
+            $map['c.check_time'] = ['between', [strtotime($check_time[0]), strtotime($check_time[1])]];
+            //审单通过时间
+            $map['c.check_status'] = 1;
+            unset($filter['check_time']);
+        }
+        unset($filter);
+
+        $headList = [
+            '订单号',
+            '子单号',
+            '站点',
+            '订单类型',
+            '操作时间',
+            '审单实际',
+            '操作人',
+        ];
+
+        //站点列表
+        $siteList = [
+            1  => 'Zeelool',
+            2  => 'Voogueme',
+            3  => 'Nihao',
+            4  => 'Meeloog',
+            5  => 'Wesee',
+            8  => 'Amazon',
+            9  => 'Zeelool_es',
+            10 => 'Zeelool_de',
+            11 => 'Zeelool_jp',
+            12 => 'voogueme_acc',
+            13 => 'zeelool_cn',
+            14 => 'alibaba',
+            15 => 'zeelool_fr'
+        ];
+
+        $path = '/uploads/order/';
+        $fileName = '财务导出配镜片数据' . time();
+        //非拆分订单
+        $map['c.is_split'] = 0;
+        //非重新下单
+        $map['c.is_repeat'] = 0;
+        $distributionLog = new DistributionLog();
+        $count = $this->_new_order_item_process->alias('a')
+            ->where($map)
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
+            ->count();
+        for ($i = 0; $i < ceil($count / 10000); $i++) {
+
+            $list = $this->_new_order_item_process
+                ->alias('a')
+                ->field('a.id,b.increment_id,a.item_order_number,a.site,b.order_type,c.check_time')
+                ->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
+                ->page($i + 1, 10000)
+                ->select();
+            $list = collection($list)->toArray();
+            $ids = array_column($list, 'id');
+            $log = $distributionLog->where(['distribution_node' => 3, 'item_process_id' => ['in', $ids]])->column('*', 'id');
+            $data = [];
+            foreach ($list as $k => $v) {
+                $data[$k]['increment_id'] = $v['increment_id'];
+                $data[$k]['item_order_number'] = $v['item_order_number'];
+                $data[$k]['site'] = $siteList[$v['site']];
+
+                switch ($v['order_type']) {
+                    case OrderType::REGULAR_ORDER:
+                        $v['order_type'] = '普通订单';
+                        break;
+                    case OrderType::WHOLESALE_ORDER:
+                        $v['order_type'] = '批发单';
+                        break;
+                    case OrderType::SOCIAL_ORDER:
+                        $v['order_type'] = '网红单';
+                        break;
+                    case OrderType::REPLACEMENT_ORDER:
+                        $v['order_type'] = '补发单';
+                        break;
+                    case OrderType::DIFFERENCE_ORDER:
+                        $v['order_type'] = '补差价';
+                        break;
+                    case OrderType::PAYROLL_ORDER:
+                        $v['order_type'] = '一件代发';
+                        break;
+                    case OrderType::VIP_ORDER:
+                        $v['order_type'] = 'vip订单';
+                        break;
+                    case OrderType::CASH_DELIVERY_ORDER:
+                        $v['order_type'] = '货到付款';
+                        break;
+                    case OrderType::CONVENIENCE_ORDER:
+                        $v['order_type'] = '便利店支付';
+                        break;
+                    default:
+                        break;
+                }
+
+                $data[$k]['order_type'] = $v['order_type'];
+                $data[$k]['node_time'] = $log[$v['id']]['create_time'] ? date('Y-m-d H:i:s', $log[$v['id']]['create_time']) : '';
+                $data[$k]['check_time'] = $v['check_time'] ? date('Y-m-d H:i:s', $v['check_time']) : '';
+                $data[$k]['create_person'] = $log[$v['id']]['create_person'];
+            }
+
+            if ($i > 0) {
+                $headList = [];
+            }
+            Excel::writeCsv($data, $headList, $path . $fileName);
+
+        }
+
+        //获取当前域名
+        $request = Request::instance();
+        $domain = $request->domain();
+        header('Location: ' . $domain . $path . $fileName . '.csv');
+        die;
+
+
+    }
+
+    /**
      * 标记已打印
      * @Description
      * @return void
@@ -2034,7 +2169,7 @@ class Distribution extends Backend
                 $count = $this->model->alias('a')
                     ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                     ->where(['wave_order_id' => $v, 'is_print' => 0, 'distribution_status' => ['<>', 0]])
-                    ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']]])
+                    ->where(['b.status' => ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered', 'delivery']]])
                     ->count();
                 if ($count > 0) {
                     $status = 1;
@@ -2169,14 +2304,14 @@ class Distribution extends Backend
             $v['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
             $v['img_url'] = $img_url;
 
-            $skuDir = ROOT_PATH."public".DS."uploads".DS."printOrder".DS."distribution".DS."new".DS."sku".DS;
+            $skuDir = ROOT_PATH . "public" . DS . "uploads" . DS . "printOrder" . DS . "distribution" . DS . "new" . DS . "sku" . DS;
             $sku = str_replace(strrchr($v['sku'], "-"), "", $v['sku']);
-            $skuFileName = $sku.".png";
+            $skuFileName = $sku . ".png";
             if (!file_exists($skuDir)) {
                 mkdir($skuDir, 0777, true);
             }
             $sku_url = "/uploads/printOrder/distribution/new/sku/$skuFileName";
-            $this->generate_barcode_new($sku, $skuDir.$skuFileName);
+            $this->generate_barcode_new($sku, $skuDir . $skuFileName);
             //生成SKU条形码
             $v['sku_url'] = $sku_url;
 
