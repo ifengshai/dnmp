@@ -24,12 +24,13 @@ class LockService
      * 加单据锁
      * 安卓前端做了相关限制，还是有可能因为网络或异常操作产生并发重复调用的情况 2021-06-16 实体仓调拨单重复提交5次 导致入库数量错误
      *
-     * @param int $intOrderId    单据ID
-     * @param int $intExpireTime 锁过期时间（秒）
+     * @param int    $intOrderId           单据ID
+     * @param int    $intExpireTime        锁过期时间（秒）
+     * @param string $redisLockKeyTemplate 单据锁模板
      *
      * @return bool|int 加锁成功返回唯一锁ID，加锁失败返回false
      */
-    public static function addLock(int $intOrderId, int $intExpireTime = self::REDIS_LOCK_DEFAULT_EXPIRE_TIME)
+    public static function addLock(int $intOrderId, int $intExpireTime = self::REDIS_LOCK_DEFAULT_EXPIRE_TIME, string $redisLockKeyTemplate = self::REDIS_LOCK_KEY_TEMPLATE)
     {
         //参数校验
         if (empty($intOrderId) || $intExpireTime <= 0) {
@@ -43,7 +44,7 @@ class LockService
         $intUniqueLockId = self::generateUniqueLockId();
 
         //根据模板，结合单据ID，生成唯一Redis key（一般来说，单据ID在业务中系统中唯一的）
-        $strKey = sprintf(self::REDIS_LOCK_KEY_TEMPLATE, $intOrderId);
+        $strKey = sprintf($redisLockKeyTemplate, $intOrderId);
 
         //加锁（通过Redis setnx指令实现，从Redis 2.6.12开始，通过set指令可选参数也可以实现setnx，同时可原子化地设置超时时间）
         $bolRes = $objRedisConn->set($strKey, $intUniqueLockId, ['nx', 'ex' => $intExpireTime]);
