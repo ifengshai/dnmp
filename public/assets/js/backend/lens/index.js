@@ -12,7 +12,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                     index_url: 'lens/index/index' + location.search,
                     add_url: 'lens/index/add',
                     edit_url: 'lens/index/edit',
-                    // del_url: 'lens/index/del',
+                    del_url: 'lens/index/del',
                     import_url: 'lens/index/import',
                     table: 'lens',
                 }
