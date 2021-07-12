@@ -2024,7 +2024,7 @@ class Distribution extends Backend
             '站点',
             '订单类型',
             '操作时间',
-            '审单实际',
+            '审单时间',
             '操作人',
         ];
 
