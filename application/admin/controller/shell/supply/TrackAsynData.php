@@ -266,6 +266,7 @@ class TrackAsynData extends Command
             'sua'       => '190111',
             'cod'       => '100040',
             'tnt'       => '100004',
+            'ups'       => '100002'
         ];
 
         return $carrier[$title];

@@ -383,6 +383,9 @@ class SelfApi extends Api
         } elseif (stripos($title, 'tnt') !== false) {
             $carrierId = 'tnt';
             $title = 'TNT';
+        } elseif (stripos($title, 'ups') !== false) {
+            $carrierId = 'ups';
+            $title = 'UPS';
         }
 
         $carrier = [
@@ -396,6 +399,7 @@ class SelfApi extends Api
             'sua'       => '190111',
             'cod'       => '100040',
             'tnt'       => '100004',
+            'ups'       => '100002',
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];

@@ -614,47 +614,67 @@ class ZendeskOne extends Controller
     }
     /**
      * 获取快递号
+     *
      * @param $title
+     *
      * @return mixed|string
      */
-    public function getCarrier($title)
+    protected function getCarrier($title)
     {
         $carrierId = '';
-        if(stripos($title,'post') !== false){
+        if (stripos($title, 'post') !== false) {
             $carrierId = 'chinapost';
             $title = 'China Post';
-        }elseif(stripos($title,'ems') !== false){
+        } elseif (stripos($title, 'ems') !== false) {
             $carrierId = 'chinaems';
             $title = 'China Ems';
-        }elseif(stripos($title,'dhl') !== false){
+        } elseif (stripos($title, 'dhl') !== false) {
             $carrierId = 'dhl';
             $title = 'DHL';
-        }elseif(stripos($title,'fede') !== false){
+        } elseif (stripos($title, 'fede') !== false) {
             $carrierId = 'fedex';
             $title = 'Fedex';
-        }elseif(stripos($title,'usps') !== false){
+        } elseif (stripos($title, 'usps') !== false) {
             $carrierId = 'usps';
             $title = 'Usps';
-        }elseif(stripos($title,'yanwen') !== false){
+        } elseif (stripos($title, 'yanwen') !== false) {
             $carrierId = 'yanwen';
             $title = 'YANWEN';
-        }elseif(stripos($title,'cpc') !== false){
+        } elseif (stripos($title, 'cpc') !== false) {
             $carrierId = 'cpc';
             $title = 'Canada Post';
+        } elseif (stripos($title, 'sua') !== false) {
+            $carrierId = 'sua';
+            $title = 'SUA';
+        } elseif (stripos($title, 'cod') !== false) {
+            $carrierId = 'cod';
+            $title = 'COD';
+        } elseif (stripos($title, 'tnt') !== false) {
+            $carrierId = 'tnt';
+            $title = 'TNT';
+        } elseif (stripos($title, 'ups') !== false) {
+            $carrierId = 'ups';
+            $title = 'UPS';
         }
+
         $carrier = [
-            'dhl' => '100001',
+            'dhl'       => '100001',
             'chinapost' => '03011',
-            'chinaems' => '03013',
-            'cpc' =>  '03041',
-            'fedex' => '100003',
-            'usps' => '21051',
-            'yanwen' => '190012'
+            'chinaems'  => '03013',
+            'cpc'       => '03041',
+            'fedex'     => '100003',
+            'usps'      => '21051',
+            'yanwen'    => '190012',
+            'sua'       => '190111',
+            'cod'       => '100040',
+            'tnt'       => '100004',
+            'ups'       => '100002',
         ];
-        if($carrierId){
-            return ['title' => $title,'carrierId' => $carrier[$carrierId]];
+        if ($carrierId) {
+            return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
         }
-        return ['title' => $title,'carrierId' => $carrierId];
+
+        return ['title' => $title, 'carrierId' => $carrierId];
     }
 
     /**

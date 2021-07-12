@@ -66,27 +66,6 @@ class TrackReg extends Backend
             $shipment_reg[$k]['number'] = $v['track_number'];
             $shipment_reg[$k]['carrier'] = $carrier['carrierId'];
             $shipment_reg[$k]['order_id'] = $v['order_id'];
-
-
-            // $list[$k]['order_node'] = 2;
-            // $list[$k]['node_type'] = 7; //出库
-            // $list[$k]['create_time'] = $v['created_at'];
-            // $list[$k]['site'] = $site_type;
-            // $list[$k]['order_id'] = $v['order_id'];
-            // $list[$k]['order_number'] = $v['increment_id'];
-            // $list[$k]['shipment_type'] = $v['title'];
-            // $list[$k]['shipment_data_type'] = $shipment_data_type;
-            // $list[$k]['track_number'] = $v['track_number'];
-            // $list[$k]['content'] = 'Leave warehouse, Waiting for being picked up.';
-
-            // $data['order_node'] = 2;
-            // $data['node_type'] = 7;
-            // $data['update_time'] = $v['created_at'];
-            // $data['shipment_type'] = $v['title'];
-            // $data['shipment_data_type'] = $shipment_data_type;
-            // $data['track_number'] = $v['track_number'];
-            // $data['delivery_time'] = $v['created_at'];
-            // Db::name('order_node')->where(['order_id' => $v['order_id'], 'site' => $site_type])->update($data);
         }
         // if ($list) {
         //     $this->ordernodedetail->saveAll($list);
@@ -114,6 +93,40 @@ class TrackReg extends Backend
 
         echo $site_str . ' is ok' . "\n";
     }
+
+    //批量注册
+    /**
+     * 批量 注册物流
+     * 每天跑一次，查找遗漏注册的物流单号，进行注册操作
+     */
+    public function reg()
+    {
+        $list = $this->ordernode->where('shipment_data_type','丹阳UPS')->select();
+        foreach ($list as $k => $v) {
+            $title = $v['shipment_type'];
+            $carrier = $this->getCarrier($title);
+            $shipment_reg[$k]['number'] = $v['track_number'];
+            $shipment_reg[$k]['carrier'] = $carrier['carrierId'];
+            $shipment_reg[$k]['order_id'] = $v['order_id'];
+        }
+
+        if ($shipment_reg) {
+            $order_group = array_chunk($shipment_reg, 40);
+            $trackingConnector = new TrackingConnector($this->apiKey);
+            foreach ($order_group as $key => $val) {
+                $trackingConnector->registerMulti($val);
+                usleep(500000);
+            }
+        }
+
+        echo "ok";
+    }
+
+
+
+
+
+
 
     /**
      * 处理物流商类型为空的数据
@@ -187,6 +200,9 @@ class TrackReg extends Backend
         } elseif (stripos($title, 'tnt') !== false) {
             $carrierId = 'tnt';
             $title = 'TNT';
+        } elseif (stripos($title, 'ups') !== false) {
+            $carrierId = 'ups';
+            $title = 'UPS';
         }
 
         $carrier = [
@@ -200,6 +216,7 @@ class TrackReg extends Backend
             'sua'       => '190111',
             'cod'       => '100040',
             'tnt'       => '100004',
+            'ups'       => '100002',
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
