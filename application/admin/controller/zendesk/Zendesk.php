@@ -2049,7 +2049,7 @@ DOC;
                 $replyNumArr = [];
                 $template_info = "";
                 foreach ($comments_list as $commentsK => $commentsV) {
-                    if ($commentsV['is_admin'] == '1') {
+                    if ($commentsV['is_admin'] == '1' && $commentsV['due_id'] != 0) {
                         $replies += 1;//客服人员回复次数
                         array_push($admin_data, $commentsV['create_time']);
                         array_push($due_name, $commentsV['due_nickname']);
