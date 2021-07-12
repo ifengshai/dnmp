@@ -2069,7 +2069,7 @@ class Distribution extends Backend
                 ->select();
             $list = collection($list)->toArray();
             $ids = array_column($list, 'id');
-            $log = $distributionLog->where(['distribution_node' => 3, 'item_process_id' => ['in', $ids]])->column('*', 'id');
+            $log = $distributionLog->where(['distribution_node' => 3, 'item_process_id' => ['in', $ids]])->column('*', 'item_process_id');
             $data = [];
             foreach ($list as $k => $v) {
                 $data[$k]['increment_id'] = $v['increment_id'];
