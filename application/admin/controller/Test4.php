@@ -3757,4 +3757,107 @@ class Test4 extends Controller
 
         $writer->save('php://output');
     }
+    public function export_work_order_data()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $skus = Db::name('zzzzzzzz_temps')->column('sku');
+        $map['a.platform_order'] = ['in',$skus];
+        $items = Db::name('work_order_list')
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.id=b.work_id')
+            ->join(['fa_work_order_problem_type' => 'c'], 'c.id=a.problem_type_id')
+            ->where($map)
+            ->field('c.type,c.problem_name,b.measure_content,a.replacement_order,a.refund_money,a.platform_order,b.operation_type')
+            ->select();
+//        dump($items);die;
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "订单号")
+            ->setCellValue("B1", "工单问题类型")
+            ->setCellValue("C1", "退款金额");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "措施")
+            ->setCellValue("E1", "措施状态");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "补发订单号")
+            ->setCellValue("G1", "补发订单状态");
+
+        foreach ($items as $key => $value) {
+            switch ($value['type']) {
+                case 1:
+                    $type = '客服';
+                    break;
+                case 2:
+                    $type = '仓库';
+                    break;
+            }
+            switch ($value['operation_type']) {
+                case 0:
+                    $operationType = '未处理';
+                    break;
+                case 1:
+                    $operationType = '处理完成';
+                    break;
+                case 2:
+                    $operationType= '处理失败';
+                    break;
+            }
+            $orderStatus = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id', $value['replacement_order'])->value('status');
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['platform_order'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $type);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['refund_money']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['measure_content']);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $operationType);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['platform_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $orderStatus);
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:N' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '导出数据-排查加诺拦截订单的补发情况';
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
 }
