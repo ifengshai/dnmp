@@ -82,7 +82,6 @@ class ThirdApi extends Api
             $this->total_track_data($track_arr['data']['track'], $add);
 
         }
-        // }
     }
 
     /**
