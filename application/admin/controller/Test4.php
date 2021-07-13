@@ -3808,7 +3808,7 @@ class Test4 extends Controller
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['refund_money']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['measure_content']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $operationType);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['platform_order']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['replacement_order']);
             $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $orderStatus);
         }
         //设置宽度
