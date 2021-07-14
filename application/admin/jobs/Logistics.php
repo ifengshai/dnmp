@@ -7,10 +7,10 @@
 
 namespace app\admin\jobs;
 
+use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\order\order\NewOrderProcess;
 use fast\Http;
 use think\Db;
-use think\Log;
 use think\queue\Job;
 use app\admin\controller\elasticsearch\AsyncEs;
 
@@ -46,20 +46,21 @@ class Logistics
      */
     public function fire(Job $job, $data)
     {
-        try {
-            $isJobDone = $this->doTrackReturn($data);
-            if ($isJobDone) {
-                //如果任务执行成功， 记得删除任务
-                $job->delete();
-            } else {
-                if ($job->attempts() > 3) {
-                    //通过这个方法可以检查这个任务已经重试了几次了
-                    $job->delete();
-                }
-            }
-        } catch (\Throwable $throwable) {
-            Log::error(__CLASS__ . $throwable->getMessage());
+        $isJobDone = $this->doTrackReturn($data);
+
+        if ($isJobDone) {
+            //如果任务执行成功， 记得删除任务
             $job->delete();
+            print("<info>Hello Job has been done and deleted" . "</info>\n");
+        } else {
+            if ($job->attempts() > 3) {
+                //通过这个方法可以检查这个任务已经重试了几次了
+                print("<warn>Hello Job has been retried more than 3 times!" . "</warn>\n");
+                $job->delete();
+                // 也可以重新发布这个任务
+                //print("<info>Hello Job will be availabe again after 2s."."</info>\n");
+                //$job->release(2); //$delay为延迟时间，表示该任务延迟2秒后再执行
+            }
         }
     }
 
@@ -72,10 +73,6 @@ class Logistics
         //妥投给magento接口
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
-            if (empty($order_node)) {
-                return true;
-            }
-
             if ($track_arr['data']['track']['e'] == 40 && in_array($order_node['site'], [1, 2])) {
                 //更新加工表中订单妥投状态
                 $process = new NewOrderProcess;
