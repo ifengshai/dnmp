@@ -94,7 +94,7 @@ class Logistics
             $add['shipment_data_type'] = $order_node['shipment_data_type'];
             $add['track_number'] = $track_arr['data']['number'];
 
-            $this->total_track_data($track_arr['data']['track'], $add);
+            return $this->total_track_data($track_arr['data']['track'], $add);
 
         } else {
 
