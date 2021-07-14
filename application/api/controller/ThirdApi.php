@@ -48,7 +48,7 @@ class ThirdApi extends Api
         $jobData = json_decode($track_info, true);
 
         // 4.将该任务推送到消息队列，等待对应的消费者去执行
-        $isPushed = Queue::push( $jobHandlerClassName , $jobData , $jobQueueName );
+        $isPushed = Queue::push($jobHandlerClassName, $jobData, $jobQueueName);
         // database 驱动时，返回值为 1|false  ;   redis 驱动时，返回值为 随机字符串|false
         if( $isPushed !== false ){
             $this->success('推送成功');
