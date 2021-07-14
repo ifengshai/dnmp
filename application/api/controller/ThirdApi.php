@@ -3,12 +3,11 @@
 namespace app\api\controller;
 
 use app\admin\model\OrderNode;
-use app\admin\model\OrderNodeCourier;
 use app\admin\model\OrderNodeCourierThird;
-use app\admin\model\OrderNodeDetail;
 use app\common\controller\Api;
 use think\Db;
 use app\admin\controller\elasticsearch\AsyncEs;
+use think\Queue;
 
 
 /**
@@ -39,50 +38,24 @@ class ThirdApi extends Api
     public function track_return()
     {
         $track_info = file_get_contents("php://input");
-        $track_arr = json_decode($track_info, true);
-        $verify_sign = $track_arr['event'] . '/' . json_encode($track_arr['data']) . '/' . $this->apiKey;
-        $verify_sign = hash("sha256", $verify_sign);
-        // if($verify_sign == $track_arr['sign']){
-        //妥投给maagento接口
-        $paths = ROOT_PATH . "/public/uploads/17track.json";
-        $path_txt = date('Y-m-d H:i:s', time()) . '单号：' . $track_arr['data']['number'] . ',内容:' . json_encode($track_arr);
-        file_put_contents($paths, $path_txt, FILE_APPEND);
-        if ($track_arr['event'] != 'TRACKING_STOPPED') {
-            $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
-            if ($track_arr['data']['track']['e'] == 40) {
-                //更新加工表中订单妥投状态
-                $process = new \app\admin\model\order\order\NewOrderProcess;
-                $process->where('increment_id', $order_node['order_number'])->update(['is_tracking' => 5]);
-                if ($order_node['site'] == 1) {
-                    $url = config('url.zeelool_url') . 'magic/order/updateOrderStatus';
-                } elseif ($order_node['site'] == 2) {
-                    $url = config('url.voogueme_url') . 'magic/order/updateOrderStatus';
-                }
+        // 1.当前任务将由哪个类来负责处理。
+        //   当轮到该任务时，系统将生成一个该类的实例，并调用其 fire 方法
+        $jobHandlerClassName  = 'app\admin\jobs\Logistics';
+        // 2.当前任务归属的队列名称，如果为新队列，会自动创建
+        $jobQueueName  	  = "logisticsJobQueue";
+        // 3.当前任务所需的业务数据 . 不能为 resource 类型，其他类型最终将转化为json形式的字符串
+        //   ( jobData 为对象时，需要在先在此处手动序列化，否则只存储其public属性的键值对)
+        $jobData = json_decode($track_info, true);
 
-                $value['increment_id'] = $order_node['order_number'];
-                $curl = curl_init();
-                curl_setopt($curl, CURLOPT_URL, $url);
-                curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']); //在HTTP请求中包含一个"User-Agent: "头的字符串。
-                curl_setopt($curl, CURLOPT_HEADER, 0); //启用时会将头文件的信息作为数据流输出。
-                curl_setopt($curl, CURLOPT_POST, true); //发送一个常规的Post请求
-                curl_setopt($curl, CURLOPT_POSTFIELDS, $value);//Post提交的数据包
-                curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1); //启用时会将服务器服务器返回的"Location: "放在header中递归的返回给服务器，使用CURLOPT_MAXREDIRS可以限定递归返回的数量。
-                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); //文件流形式
-                curl_setopt($curl, CURLOPT_TIMEOUT, 20); //设置cURL允许执行的最长秒数。
-                $content = json_decode(curl_exec($curl), true);
-                curl_close($curl);
-            }
-            $add['site'] = $order_node['site'];
-            $add['order_id'] = $order_node['order_id'];
-            $add['order_number'] = $order_node['order_number'];
-            $add['shipment_type'] = $order_node['shipment_type'];
-            $add['shipment_data_type'] = $order_node['shipment_data_type'];
-            $add['track_number'] = $track_arr['data']['number'];
-
-            $this->total_track_data($track_arr['data']['track'], $add);
-
+        // 4.将该任务推送到消息队列，等待对应的消费者去执行
+        $isPushed = Queue::push( $jobHandlerClassName , $jobData , $jobQueueName );
+        // database 驱动时，返回值为 1|false  ;   redis 驱动时，返回值为 随机字符串|false
+        if( $isPushed !== false ){
+            $this->success('推送成功');
+        } else {
+            $this->error('推送失败');
         }
-        // }
+
     }
 
     /**

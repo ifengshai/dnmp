@@ -8,14 +8,11 @@
 
 namespace app\admin\controller\elasticsearch;
 
-
-use app\admin\model\operatedatacenter\Datacenter;
 use app\admin\model\operatedatacenter\DatacenterDay;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\OrderNode;
 use app\admin\model\web\WebShoppingCart;
 use app\admin\model\web\WebUsers;
-use think\Collection;
 use think\Db;
 use think\Debug;
 
