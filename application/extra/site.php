@@ -2,7 +2,6 @@
 
 return array (
   'beian' => '',
-  'name' => '',
   'cdnurl' => '',
   'version' => '1.0.39',
   'timezone' => 'Asia/Shanghai',
