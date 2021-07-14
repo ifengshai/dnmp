@@ -163,12 +163,12 @@ class Logistics
                         'node_type'  => 8,
                     ];
 
-                    $this->asyncEs->updateEsById('mojing_track', $arr);
-
                     $order_node_detail['node_type'] = 8;
                     $order_node_detail['content'] = $this->str1;
                     $order_node_detail['create_time'] = $v['a'];
                     Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+
+                    $this->asyncEs->updateEsById('mojing_track', $arr);
                 }
             }
             if ($k == 2) {
@@ -185,12 +185,14 @@ class Logistics
                         'order_node' => 3,
                         'node_type'  => 10,
                     ];
-                    $this->asyncEs->updateEsById('mojing_track', $arr);
+
 
                     $order_node_detail['node_type'] = 10;
                     $order_node_detail['content'] = $this->str3;
                     $order_node_detail['create_time'] = $v['a'];
                     Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+
+                    $this->asyncEs->updateEsById('mojing_track', $arr);
                 }
             }
 

@@ -454,7 +454,7 @@ class BaseElasticsearch extends Backend
      * @date   2021/4/22 16:16:09
      */
     public function updateEsById($index,$data){
-        $this->esService->updateEs($index,$data);
+        return $this->esService->updateEs($index,$data);
     }
     /**
      * 格式化时间字段，方便后续查询聚合
