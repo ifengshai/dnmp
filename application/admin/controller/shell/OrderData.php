@@ -1564,6 +1564,12 @@ class OrderData extends Backend
         $arr = array_merge($arr, $list);
 
         $arr['order_prescription_type'] = 0;
+
+        //斜视值大于1 默认为定制片
+        if ($params['od_pv'] >= 1 ||  $params['os_pv'] >= 1 || $params['od_pv_r'] >= 1 || $params['os_pv_r'] >= 1) {
+            $arr['order_prescription_type'] = 3;
+        }
+
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
