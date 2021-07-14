@@ -236,6 +236,8 @@ class SelfApi extends Api
         $title = $this->request->request('title'); //运营商
         $shipment_data_type = $this->request->request('shipment_data_type'); //渠道名称
         $track_number = $this->request->request('track_number'); //快递单号
+        $complete_time = $this->request->request('complete_time'); //发货时间
+        $complete_time = $complete_time ?? time();
         if (!$order_id) {
             $this->error(__('缺少订单id参数'), [], 400);
         }
@@ -275,7 +277,7 @@ class SelfApi extends Api
             'shipment_type'      => $title,
             'shipment_data_type' => $shipment_data_type,
             'track_number'       => $track_number,
-            'delivery_time'      => date('Y-m-d H:i:s'),
+            'delivery_time'      => date('Y-m-d H:i:s', $complete_time),
         ]);
 
         //更新order_node表中es数据
@@ -286,7 +288,7 @@ class SelfApi extends Api
             'shipment_type'      => $title,
             'shipment_data_type' => $shipment_data_type,
             'track_number'       => $track_number,
-            'delivery_time'      => time(),
+            'delivery_time'      => date('Y-m-d H:i:s', $complete_time),
         ];
         $this->asyncEs->updateEsById('mojing_track', $arr);
 
@@ -298,7 +300,7 @@ class SelfApi extends Api
                 'order_id'           => $order_id,
                 'content'            => '订单离开仓库, 等待揽收',
                 'site'               => $site,
-                'create_time'        => date('Y-m-d H:i:s'),
+                'create_time'        => date('Y-m-d H:i:s', $complete_time),
                 'order_node'         => 2,
                 'node_type'          => 7,
                 'shipment_type'      => $title,
@@ -312,7 +314,7 @@ class SelfApi extends Api
                 'order_id'           => $order_id,
                 'content'            => 'Order leave warehouse, waiting for being picked up.',
                 'site'               => $site,
-                'create_time'        => date('Y-m-d H:i:s'),
+                'create_time'        => date('Y-m-d H:i:s', $complete_time),
                 'order_node'         => 2,
                 'node_type'          => 7,
                 'shipment_type'      => $title,
@@ -1200,16 +1202,16 @@ class SelfApi extends Api
 
         ini_set('memory_limit', '1512M');
         set_time_limit(0);
-        $model=new OrderProcess();
-        $arr =$model->where("agent_code='jianuo' and complete_time >1619798400 ")
+        $model = new OrderProcess();
+        $arr = $model->where("agent_code='jianuo' and complete_time >1619798400 ")
             ->select();
-        foreach ($arr as $value){
+        foreach ($arr as $value) {
             $order_id = $value['entity_id']; //订单id
             $order_number = $value['increment_id']; //订单号
-            $site =$value['site']; //站点
+            $site = $value['site']; //站点
             $title = "USPS"; //运营商
             $shipment_data_type = "加诺"; //渠道名称
-            $track_number =$value['track_number']; //快递单号
+            $track_number = $value['track_number']; //快递单号
 
 
             //查询节点主表记录
@@ -1217,7 +1219,7 @@ class SelfApi extends Api
             if (!$row) {
                 continue;
             }
-            if ($row['track_number']==$track_number){
+            if ($row['track_number'] == $track_number) {
                 continue;
             }
 
@@ -1230,7 +1232,7 @@ class SelfApi extends Api
                 'shipment_type'      => $title,
                 'shipment_data_type' => $shipment_data_type,
                 'track_number'       => $track_number,
-                'delivery_time'      => date('Y-m-d H:i:s',$value['complete_time']),
+                'delivery_time'      => date('Y-m-d H:i:s', $value['complete_time']),
             ]);
 
 
@@ -1248,13 +1250,12 @@ class SelfApi extends Api
                 'track_number'       => $track_number,
             ]);
 
-            dump("order_number:".$order_number."/track_number:".$track_number);
+            dump("order_number:" . $order_number . "/track_number:" . $track_number);
 
         }
         //校验参数
 
     }
-
 
 
 }
