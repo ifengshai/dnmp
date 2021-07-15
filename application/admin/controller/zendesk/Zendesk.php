@@ -1920,6 +1920,9 @@ DOC;
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("R1", "回复模板");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("S1", "组别");
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("T1", "处理人数");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("U1", "满意度");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("V1", "原因反馈");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("W1", "详细情况");
         foreach ($list as $key => $value) {
 
             $arr = explode(",", $value['tags']);
@@ -2027,6 +2030,17 @@ DOC;
                     $value['status_name'] = '';
                     break;
             }
+            switch ($value['rating_type']) {
+                case 1:
+                    $value['rating_type_name'] = '好评';
+                    break;
+                case 2:
+                    $value['rating_type_name'] = '差评';
+                    break;
+                default:
+                    $value['rating_type_name'] = '';
+                    break;
+            }
 
 
             //处理回复数据
@@ -2103,6 +2117,9 @@ DOC;
             $spreadsheet->getActiveSheet()->setCellValue("R" . ($key * 1 + 2), $value['template_info']);
             $spreadsheet->getActiveSheet()->setCellValue("S" . ($key * 1 + 2), $value['group_name']);
             $spreadsheet->getActiveSheet()->setCellValue("T" . ($key * 1 + 2), $value['reply_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("U" . ($key * 1 + 2), $value['rating_type_name']);
+            $spreadsheet->getActiveSheet()->setCellValue("V" . ($key * 1 + 2), $value['reason']);
+            $spreadsheet->getActiveSheet()->setCellValue("W" . ($key * 1 + 2), $value['comment']);
         }
 
         //设置宽度
@@ -2126,7 +2143,8 @@ DOC;
         $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(50);
         $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
-
+        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(50);
+        $spreadsheet->getActiveSheet()->getColumnDimension('W')->setWidth(50);
 
         //设置边框
         $border = [
