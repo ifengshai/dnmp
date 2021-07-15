@@ -204,7 +204,7 @@ class NewProductDesign extends Backend
             $platStock = collection($platStock)->toArray();
             $itemCategory= new ItemCategory();
             $itemCategoryAll = $itemCategory->column('name','id');
-            $platformType = ['0','Z','V','N','M','W','0','0','A','Es','De','Jp','Chic','Z_cn','Ali','Z_fr'];
+            $platformType = ['0','Z','V','M','Vm','W','0','0','A','Es','De','Jp','Chic','Z_cn','Ali','Z_fr'];
             foreach ($list as $key=>$item){
                 $list[$key]['label'] = $map['a.status'] ? $map['a.status'] : 0;
                 if ($item['responsible_id'] !==null){
