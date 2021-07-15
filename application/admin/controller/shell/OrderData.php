@@ -223,6 +223,10 @@ class OrderData extends Backend
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
 
+                                    if ($site == Site::ZEELOOL_DE || $site == Site::ZEELOOL_FR) {
+                                        $params['pay_method'] = $v['pay_method'];
+                                    }
+
                                     //插入订单主表
                                     $order_id = $this->order->insertGetId($params);
                                     //es同步订单数据，插入
@@ -370,6 +374,11 @@ class OrderData extends Backend
                                     $params['customer_id'] = $v['customer_id'] ?: 0;
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+                                    }
+
+
+                                    if ($site == Site::ZEELOOL_DE || $site == Site::ZEELOOL_FR) {
+                                        $params['pay_method'] = $v['pay_method'];
                                     }
 
                                     $this->order->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
@@ -1643,6 +1652,14 @@ class OrderData extends Backend
          * 4、有PD无SPH及CYL
          */
         if (($od_sph < 0 && $os_sph > 0) || ($od_sph > 0 && $os_sph < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        if ($od_sph == 0 && ($os_sph > 0 || $os_sph < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        if ($os_sph == 0 && ($od_sph > 0 || $od_sph < 0)) {
             $list['is_prescription_abnormal'] = 1;
         }
 
