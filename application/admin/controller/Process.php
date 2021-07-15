@@ -1207,6 +1207,14 @@ class Process extends Backend
             $list['is_prescription_abnormal'] = 1;
         }
 
+        if ($od_sph == 0 && ($os_sph > 0 || $os_sph < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        if ($os_sph == 0 && ($od_sph > 0 || $od_sph < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
         if (($os_cyl < 0 && $od_cyl > 0) || ($os_cyl > 0 && $od_cyl < 0)) {
             $list['is_prescription_abnormal'] = 1;
         }
@@ -1235,8 +1243,8 @@ class Process extends Backend
 
     public function test001()
     {
-        $params['od_sph'] = '3.00';
-        $params['os_sph'] = '2.00';
+        $params['od_sph'] = '0.00';
+        $params['os_sph'] = '0';
         $params['od_cyl'] = '-0.75';
         $params['os_cyl'] = '-0.50';
         $params['pd'] = 60;
