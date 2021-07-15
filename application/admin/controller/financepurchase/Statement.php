@@ -245,15 +245,15 @@ class Statement extends Backend
                 switch ($v['pay_type']) {
                     case 1:
                         //无批次预付款 待结算金额公式=入库金额 +运费-已支付预付金额
-                        $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
+                        $list[$k]['all_money'] = round($list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'], 2);
                         break;
                     case 2:
                         //无批次全款预付 待结算金额 = 入库金额 +运费 - 已支付预付金额
-                        $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
+                        $list[$k]['all_money'] = round($list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'], 2);
                         break;
                     default:
                         //货到付款的 待结算金额 = 入库金额 + 运费
-                        $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'];
+                        $list[$k]['all_money'] = round($list[$k]['in_stock_money'] + $v['purchase_freight'], 2);
                 }
             } else {
                 $map['purchase_id'] = ['=', $v['purchase_id']];
@@ -262,7 +262,7 @@ class Statement extends Backend
                 $list[$k]['arrival_num'] = Db::name('purchase_batch_item')->where('purchase_batch_id', $v['batch_id'])->value('arrival_num');
                 //采购批次是第一批 待结算金额 = 采购批次入库数量*采购单价-预付款金额 + 运费
                 if ($list[$k]['purchase_batch'] == 1) {
-                    $list[$k]['all_money'] = $list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'];
+                    $list[$k]['all_money'] = round($list[$k]['in_stock_money'] + $v['purchase_freight'] - $list[$k]['now_wait_pay'], 2);
                 } else {
                     //不是第一批 批次待结算金额 = 采购批次入库数量*采购单价
                     $list[$k]['all_money'] = $list[$k]['in_stock_money'];
