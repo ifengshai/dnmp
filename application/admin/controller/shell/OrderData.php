@@ -376,7 +376,6 @@ class OrderData extends Backend
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
 
-
                                     if ($site == Site::ZEELOOL_DE || $site == Site::ZEELOOL_FR) {
                                         $params['pay_method'] = $v['pay_method'];
                                     }
