@@ -33,7 +33,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                             searchList: {1: '好评', 2: '差评'},
                             formatter: Table.api.formatter.status
                         },
-                        {field: 'reason', title: __('原因反馈')},
+                        {field: 'reason', title: __('原因反馈'), operate: false},
                         {
                             field: 'subject',
                             title: __('Subject'),
