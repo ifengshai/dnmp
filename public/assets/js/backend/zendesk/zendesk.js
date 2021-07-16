@@ -26,7 +26,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {checkbox: true},
                         {field: 'id', title: __('Id'),sortable: true},
                         {field: 'ticket_id', title: __('Ticket_id'),sortable: true},
-                        {field: 'subject', title: __('Subject'),operate:false,formatter: function(value){return value.toString().substr(0, 100)}},
+                        {
+                            field: 'rating_type',
+                            title: __('满意度'),
+                            custom: {1: 'success', 2: 'danger'},
+                            searchList: {1: '好评', 2: '差评'},
+                            formatter: Table.api.formatter.status
+                        },
+                        {field: 'reason', title: __('原因反馈')},
+                        {
+                            field: 'subject',
+                            title: __('Subject'),
+                            operate: false,
+                            events: Controller.api.events.showDetail,
+                            formatter: function (value) {
+                                return `<span class="showDetail">${value.toString().substr(0, 100)}</span>`;
+                            }
+                        },
                         {field: 'email', title: __('Email'),operate:'LIKE %...%'},
                         {field: 'content', title: __('关键字'),visible:false},
                         //{field: 'assign_id', title: __('Assgin_id'),operate: false,visible:false},
@@ -147,21 +163,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         }
                                     }
                                 },
-
                                 {
-                                    name: 'edit',
-                                    text: ('查看'),
-                                    title: function (row) {
-                                        return __('Answer') + '【' + row.ticket_id + '】' + row.subject;
+                                    name: 'show',
+                                    text: __('详细情况'),
+                                    classname: 'btn btn-xs btn-success btn-click',
+                                    click: function (data, row) {
+                                        Layer.alert(row.comment, {title: "详细情况"});
                                     },
-                                    classname: 'btn btn-xs btn-success',
-                                    icon: '',
-                                    url: 'zendesk/zendesk/check_email/status/{row.status}',
-                                    extend: 'data-area = \'["100%","100%"]\' target=\'_blank\'',
-                                    callback: function (data) {
-                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
+                                    visible: function (row) {
+                                        return row.comment
                                     },
-                                    visible: true,
                                 },
                                 {
                                     name: 'edit_recipient',
@@ -684,8 +695,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                     // console.log(num);
                     $('.show-posts').find('.post-row').eq(num).show().siblings().hide();
                 })
-
             },
+            events: {
+                showDetail: {
+                    //格式为：方法名+空格+DOM元素
+                    'click .showDetail': function (e, value, row, index) {
+                        window.open(`zendesk/check_email/status/${row.status}/ids/${row.id}`)
+                    }
+                }
+            }
         }
     };
     return Controller;
