@@ -165,10 +165,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                 },
                                 {
                                     name: 'show',
-                                    text: __('详细情况'),
+                                    text: 'rating',
                                     classname: 'btn btn-xs btn-success btn-click',
                                     click: function (data, row) {
-                                        Layer.alert(row.comment, {title: "详细情况"});
+                                        Layer.alert(`<b>Rating：</b>${{
+                                            1: '好评',
+                                            2: '差评'
+                                        }[row.rating_type]}<br /><b>Reason：</b>${row.reason}<br />${row.comment}`, {
+                                            title: "Rating",
+                                            area: ["50%"]
+                                        });
                                     },
                                     visible: function (row) {
                                         return row.comment
