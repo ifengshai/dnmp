@@ -2031,6 +2031,9 @@ DOC;
                     break;
             }
             switch ($value['rating_type']) {
+                case 0:
+                    $value['rating_type_name'] = '-';
+                    break;
                 case 1:
                     $value['rating_type_name'] = '好评';
                     break;
