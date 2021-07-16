@@ -29,8 +29,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                         {
                             field: 'rating_type',
                             title: __('满意度'),
-                            custom: {1: 'success', 2: 'danger'},
-                            searchList: {1: '好评', 2: '差评'},
+                            custom: {0: 'primary', 1: 'success', 2: 'danger'},
+                            searchList: {0: '无评论', 1: '好评', 2: '差评'},
                             formatter: Table.api.formatter.status
                         },
                         {field: 'reason', title: __('原因反馈'), operate: false},
@@ -169,6 +169,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                     classname: 'btn btn-xs btn-success btn-click',
                                     click: function (data, row) {
                                         Layer.alert(`<b>Rating：</b>${{
+                                            0: '无评论',
                                             1: '好评',
                                             2: '差评'
                                         }[row.rating_type]}<br /><b>Reason：</b>${row.reason}<br />${row.comment}`, {
