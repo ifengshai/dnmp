@@ -142,8 +142,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         [
                             {field: 'state', checkbox: true},
                             {field: 'id', title: 'ID', operate: false},
-                            {field: 'purchase_number', title: __('采购单号'), operate: false},
-                            {field: 'sku', title: __('SKU'), operate: false},
+                            {field: 'purchase_number', title: __('采购单号')},
+                            {field: 'sku', title: __('SKU')},
                             {
                                 field: 'pay_type',
                                 title: __('付款类型'),
