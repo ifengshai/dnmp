@@ -7,9 +7,9 @@ if (!function_exists('__')) {
     /**
      * 获取语言变量值
      *
-     * @param  string  $name  语言变量名
-     * @param  array  $vars  动态变量值
-     * @param  string  $lang  语言
+     * @param string $name 语言变量名
+     * @param array  $vars 动态变量值
+     * @param string $lang 语言
      *
      * @return mixed
      */
@@ -33,8 +33,8 @@ if (!function_exists('format_bytes')) {
     /**
      * 将字节转换为可读文本
      *
-     * @param  int  $size  大小
-     * @param  string  $delimiter  分隔符
+     * @param int    $size      大小
+     * @param string $delimiter 分隔符
      *
      * @return string
      */
@@ -45,7 +45,7 @@ if (!function_exists('format_bytes')) {
             $size /= 1024;
         }
 
-        return round($size, 2).$delimiter.$units[$i];
+        return round($size, 2) . $delimiter . $units[$i];
     }
 }
 
@@ -54,8 +54,8 @@ if (!function_exists('datetime')) {
     /**
      * 将时间戳转换为日期时间
      *
-     * @param  int  $time  时间戳
-     * @param  string  $format  日期时间格式
+     * @param int    $time   时间戳
+     * @param string $format 日期时间格式
      *
      * @return string
      */
@@ -72,8 +72,8 @@ if (!function_exists('human_date')) {
     /**
      * 获取语义化时间
      *
-     * @param  int  $time  时间
-     * @param  int  $local  本地时间
+     * @param int $time  时间
+     * @param int $local 本地时间
      *
      * @return string
      */
@@ -88,18 +88,18 @@ if (!function_exists('cdnurl')) {
     /**
      * 获取上传资源的CDN的地址
      *
-     * @param  string  $url  资源相对地址
-     * @param  boolean  $domain  是否显示域名 或者直接传入域名
+     * @param string  $url    资源相对地址
+     * @param boolean $domain 是否显示域名 或者直接传入域名
      *
      * @return string
      */
     function cdnurl($url, $domain = false)
     {
         $regex = "/^((?:[a-z]+:)?\/\/|data:image\/)(.*)/i";
-        $url = preg_match($regex, $url) ? $url : \think\Config::get('upload.cdnurl').$url;
+        $url = preg_match($regex, $url) ? $url : \think\Config::get('upload.cdnurl') . $url;
         if ($domain && !preg_match($regex, $url)) {
             $domain = is_bool($domain) ? request()->domain() : $domain;
-            $url = $domain.$url;
+            $url = $domain . $url;
         }
 
         return $url;
@@ -112,7 +112,7 @@ if (!function_exists('is_really_writable')) {
     /**
      * 判断文件或文件夹是否可写
      *
-     * @param  string  $file  文件或目录
+     * @param string $file 文件或目录
      *
      * @return    bool
      */
@@ -122,7 +122,7 @@ if (!function_exists('is_really_writable')) {
             return is_writable($file);
         }
         if (is_dir($file)) {
-            $file = rtrim($file, '/').'/'.md5(mt_rand());
+            $file = rtrim($file, '/') . '/' . md5(mt_rand());
             if (($fp = @fopen($file, 'ab')) === false) {
                 return false;
             }
@@ -145,8 +145,8 @@ if (!function_exists('rmdirs')) {
     /**
      * 删除文件夹
      *
-     * @param  string  $dirname  目录
-     * @param  bool  $withself  是否删除自身
+     * @param string $dirname  目录
+     * @param bool   $withself 是否删除自身
      *
      * @return boolean
      */
@@ -177,8 +177,8 @@ if (!function_exists('copydirs')) {
     /**
      * 复制文件夹
      *
-     * @param  string  $source  源文件夹
-     * @param  string  $dest  目标文件夹
+     * @param string $source 源文件夹
+     * @param string $dest   目标文件夹
      */
     function copydirs($source, $dest)
     {
@@ -192,12 +192,12 @@ if (!function_exists('copydirs')) {
             ) as $item
         ) {
             if ($item->isDir()) {
-                $sontDir = $dest.DS.$iterator->getSubPathName();
+                $sontDir = $dest . DS . $iterator->getSubPathName();
                 if (!is_dir($sontDir)) {
                     mkdir($sontDir, 0755, true);
                 }
             } else {
-                copy($item, $dest.DS.$iterator->getSubPathName());
+                copy($item, $dest . DS . $iterator->getSubPathName());
             }
         }
     }
@@ -206,7 +206,7 @@ if (!function_exists('copydirs')) {
 if (!function_exists('mb_ucfirst')) {
     function mb_ucfirst($string)
     {
-        return mb_strtoupper(mb_substr($string, 0, 1)).mb_strtolower(mb_substr($string, 1));
+        return mb_strtoupper(mb_substr($string, 0, 1)) . mb_strtolower(mb_substr($string, 1));
     }
 }
 
@@ -215,8 +215,8 @@ if (!function_exists('addtion')) {
     /**
      * 附加关联字段数据
      *
-     * @param  array  $items  数据列表
-     * @param  mixed  $fields  渲染的来源字段
+     * @param array $items  数据列表
+     * @param mixed $fields 渲染的来源字段
      *
      * @return array
      */
@@ -290,8 +290,8 @@ if (!function_exists('var_export_short')) {
     /**
      * 返回打印数组结构
      *
-     * @param  string  $var  数组
-     * @param  string  $indent  缩进字符
+     * @param string $var    数组
+     * @param string $indent 缩进字符
      *
      * @return string
      */
@@ -299,17 +299,17 @@ if (!function_exists('var_export_short')) {
     {
         switch (gettype($var)) {
             case "string":
-                return '"'.addcslashes($var, "\\\$\"\r\n\t\v\f").'"';
+                return '"' . addcslashes($var, "\\\$\"\r\n\t\v\f") . '"';
             case "array":
                 $indexed = array_keys($var) === range(0, count($var) - 1);
                 $r = [];
                 foreach ($var as $key => $value) {
                     $r[] = "$indent    "
-                        .($indexed ? "" : var_export_short($key)." => ")
-                        .var_export_short($value, "$indent    ");
+                        . ($indexed ? "" : var_export_short($key) . " => ")
+                        . var_export_short($value, "$indent    ");
                 }
 
-                return "[\n".implode(",\n", $r)."\n".$indent."]";
+                return "[\n" . implode(",\n", $r) . "\n" . $indent . "]";
             case "boolean":
                 return $var ? "TRUE" : "FALSE";
             default:
@@ -330,13 +330,13 @@ if (!function_exists('letter_avatar')) {
     {
         $total = unpack('L', hash('adler32', $text, true))[1];
         $hue = $total % 360;
-        list($r, $g, $b) = hsv2rgb($hue / 360, 0.3, 0.9);
+        [$r, $g, $b] = hsv2rgb($hue / 360, 0.3, 0.9);
 
         $bg = "rgb({$r},{$g},{$b})";
         $color = "#ffffff";
         $first = mb_strtoupper(mb_substr($text, 0, 1));
-        $src = base64_encode('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="100" width="100"><rect fill="'.$bg.'" x="0" y="0" width="100" height="100"></rect><text x="50" y="50" font-size="50" text-copy="fast" fill="'.$color.'" text-anchor="middle" text-rights="admin" alignment-baseline="central">'.$first.'</text></svg>');
-        $value = 'data:image/svg+xml;base64,'.$src;
+        $src = base64_encode('<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="100" width="100"><rect fill="' . $bg . '" x="0" y="0" width="100" height="100"></rect><text x="50" y="50" font-size="50" text-copy="fast" fill="' . $color . '" text-anchor="middle" text-rights="admin" alignment-baseline="central">' . $first . '</text></svg>');
+        $value = 'data:image/svg+xml;base64,' . $src;
 
         return $value;
     }
@@ -418,11 +418,11 @@ if (!function_exists('getTree')) {
                         $j .= $icon[1];
                         $k = $itemprefix ? $icon[0] : '';
                     }
-                    $spacer = $itemprefix ? $itemprefix.$j : '';
-                    $row['name'] = $spacer.$row['name'];
+                    $spacer = $itemprefix ? $itemprefix . $j : '';
+                    $row['name'] = $spacer . $row['name'];
                     $arr[] = $row;
                     $number++;
-                    getTree($list, $row['id'], $itemprefix.$k.$nbsp);
+                    getTree($list, $row['id'], $itemprefix . $k . $nbsp);
                 }
             }
         }
@@ -433,10 +433,10 @@ if (!function_exists('getTree')) {
 /**
  * 中文转拼音 (utf8版,gbk转utf8也可用)
  *
- * @param  string  $str  utf8字符串
- * @param  string  $ret_format  返回格式 [all:全拼音|first:首字母|one:仅第一字符首字母]
- * @param  string  $placeholder  无法识别的字符占位符
- * @param  string  $allow_chars  允许的非中文字符
+ * @param string $str         utf8字符串
+ * @param string $ret_format  返回格式 [all:全拼音|first:首字母|one:仅第一字符首字母]
+ * @param string $placeholder 无法识别的字符占位符
+ * @param string $allow_chars 允许的非中文字符
  *
  * @return string             拼音字符串
  */
@@ -451,7 +451,7 @@ function pinyin($str, $ret_format = 'all', $placeholder = '_', $allow_chars = '/
 
         $pinyins = [];
         foreach ($rows as $v) {
-            list($py, $vals) = explode(':', $v);
+            [$py, $vals] = explode(':', $v);
             $chars = explode(',', $vals);
 
             foreach ($chars as $char) {
@@ -474,7 +474,7 @@ function pinyin($str, $ret_format = 'all', $placeholder = '_', $allow_chars = '/
             }
         } else { // 128-255
             if (isset($pinyins[$chr])) {
-                $rs .= 'first' === $ret_format ? $pinyins[$chr][0] : ($pinyins[$chr].' ');
+                $rs .= 'first' === $ret_format ? $pinyins[$chr][0] : ($pinyins[$chr] . ' ');
             } else {
                 $rs .= $placeholder;
             }
@@ -491,7 +491,7 @@ function pinyin($str, $ret_format = 'all', $placeholder = '_', $allow_chars = '/
 /**
  * [发送钉钉通知]
  *
- * @param  array  $userIds  [用户的userid]
+ * @param array $userIds [用户的userid]
  * @param  [type] $title   [标题]
  * @param  [type] $text    [内容]
  *
@@ -564,11 +564,11 @@ if (!function_exists('downloadFile')) {
 
         //告诉浏览器返回的文件大小
 
-        header('Accept-Length:'.$filesize);
+        header('Accept-Length:' . $filesize);
 
         //告诉浏览器文件作为附件处理并且设定最终下载完成的文件名称
 
-        header('content-disposition:attachment;filename='.basename($filename));
+        header('content-disposition:attachment;filename=' . basename($filename));
 
         //针对大文件，规定每次读取文件的字节数为4096字节，直接输出数据
         $read_buffer = 4096;
@@ -586,5 +586,22 @@ if (!function_exists('downloadFile')) {
         //关闭句柄
         fclose($handle);
         exit;
+    }
+}
+
+
+if (!function_exists('tp_log')) {
+    /**
+     * [ tp自带写入日志 -详细]
+     *
+     * @param $logContent
+     * @param $filePath
+     *
+     * @return void [type]         　　　　　　[description]
+     */
+    function tp_log($logContent, $filePath)
+    {
+        \think\Log::init(['type' => 'File', 'path' => ROOT_PATH . 'public' . DS . 'logs' . DS . $filePath . DS]);
+        \think\Log::write($logContent);
     }
 }
