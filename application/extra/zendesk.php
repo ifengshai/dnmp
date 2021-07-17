@@ -12,7 +12,7 @@ return [
     ],
     'zeelool'              => [
         'subdomain' => "zeelooloptical",
-        'username'  => "complaint@zeelool.com",
+        'username'  => "ww591795345@yahoo.com",
         'token'     => "wAhNtX3oeeYOJ3RI1i2oUuq0f77B2MiV5upmh11B",
     ],
     'voogueme'             => [
