@@ -38,7 +38,7 @@ class ThirdApi extends Api
     public function track_return()
     {
         $track_info = file_get_contents("php://input");
-        tp_log('推送时间:' . date('Y-m-d H:i:s') . ' - 物流信息:' . $track_info . PHP_EOL, '17track');
+        tp_log('物流信息:' . $track_info, '17track');
 
         // 1.当前任务将由哪个类来负责处理。
         //   当轮到该任务时，系统将生成一个该类的实例，并调用其 fire 方法
