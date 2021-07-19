@@ -40,9 +40,6 @@ class ThirdApi extends Api
     {
         $track_info = file_get_contents("php://input");
         tp_log('物流信息:' . $track_info, '17track');
-
-        $track_info = '{"event":"TRACKING_UPDATED","sign":"d5dc66bedc1973e9accb94b527386364a808c82253a5738db098c3d31270cb90","data":{"number":"9214490221582737950192","track":{"b":2105,"c":0,"e":10,"f":-1,"w1":21051,"w2":0,"is1":1,"is2":0,"hs":-2128872419,"z0":{"a":"2021-07-17 14:35","b":null,"c":"","d":"ANN ARBOR, MI 48104","z":"Shipping Label Created, USPS Awaiting Item -> A shipping label has been prepared for your item at 2:35 pm on July 17, 2021 in ANN ARBOR, MI 48104. This does not indicate receipt by the USPS or the actual mailing date."},"ln9":null,"ln1":"en","ln2":null,"ygt9":0,"ygt1":0,"ygt2":0,"ylt9":"2079-01-01 00:00:00","ylt1":"2021-07-17 15:07:13","ylt2":"2079-01-01 00:00:00","z9":[],"z1":[{"a":"2021-07-17 14:35","b":null,"c":"","d":"ANN ARBOR, MI 48104","z":"Shipping Label Created, USPS Awaiting Item -> A shipping label has been prepared for your item at 2:35 pm on July 17, 2021 in ANN ARBOR, MI 48104. This does not indicate receipt by the USPS or the actual mailing date."}],"z2":[],"yt":"","zex":{"trN":"","trC":0,"psex":0,"dt":1626532500000,"dtS":1626532500000,"dtP":0,"dtD":0,"dtL":1626532500000}}}}';
-
         // 1.当前任务将由哪个类来负责处理。
         //   当轮到该任务时，系统将生成一个该类的实例，并调用其 fire 方法
         $jobHandlerClassName = 'app\admin\jobs\Logistics';
