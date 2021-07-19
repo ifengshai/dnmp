@@ -392,7 +392,7 @@ class GoodsSalesNum extends Backend
             $map['p.sku'] = ['not like', '%Price%'];
         }
         $map['o.site'] = $site;
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery','delived']];
         if($pages['limit']){
             if(isset($pages['offset'])){
                 $res['data'] = $this->order
