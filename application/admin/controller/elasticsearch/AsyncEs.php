@@ -339,7 +339,7 @@ class AsyncEs extends BaseElasticsearch
                     return $v === null ? 0 : $v;
                 }, $value);
                 $mergeData = strtotime($value['delivery_time']);
-                $delivery_error_flag = strtotime($value['signing_time']) < $mergeData + 172800 ? 1 : 0;
+//                $delivery_error_flag = strtotime($value['signing_time']) < $mergeData + 172800 ? 1 : 0;
                 $insertData = [
                     'id'                  => $value['id'],
                     'order_node'          => $value['order_node'],
@@ -352,7 +352,7 @@ class AsyncEs extends BaseElasticsearch
                     'track_number'        => $value['track_number'],
                     'signing_time'        => $value['signing_time'] ? strtotime($value['signing_time']) : 0,
                     'delivery_time'       => $mergeData,
-                    'delivery_error_flag' => $delivery_error_flag,
+                    'delivery_error_flag' => 0,
                     'shipment_last_msg'   => $value['shipment_last_msg'],
                     'delievered_days'     => (strtotime($value['signing_time']) - $mergeData) / 86400,
                     'wait_time'           => abs(strtotime($value['signing_time']) - $mergeData),
