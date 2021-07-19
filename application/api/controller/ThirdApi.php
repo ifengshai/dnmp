@@ -5,6 +5,7 @@ namespace app\api\controller;
 use app\admin\model\OrderNode;
 use app\admin\model\OrderNodeCourierThird;
 use app\common\controller\Api;
+use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use think\Db;
 use app\admin\controller\elasticsearch\AsyncEs;
 use think\Queue;
@@ -60,6 +61,54 @@ class ThirdApi extends Api
 
     }
 
+
+    /**
+     * 临时批量注册--lixiang
+     */
+    public function get_track()
+    {
+        $order_shipment = Db::name('order_node')->where(['delivery_time' => ['>', '2021-07-13'], 'order_node' => ['>', 2]])->where(['shipment_data_type' => 'USPS'])->select();
+        $order_shipment = collection($order_shipment)->toArray();
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        $shipment_reg = [];
+        foreach ($order_shipment as $k => $v) {
+            $title = $v['shipment_type'];
+            $carrier = $this->getCarrier($title);
+            $shipment_reg[$k]['number'] = $v['track_number'];
+            $shipment_reg[$k]['carrier'] = $carrier['carrierId'];
+            $shipment_reg[$k]['order_id'] = $v['order_id'];
+            $shipment_reg[$k]['site'] = $v['site'];
+            $shipment_reg[$k]['order_number'] = $v['order_number'];
+            $shipment_reg[$k]['shipment_data_type'] = $v['shipment_data_type'];
+            $shipment_reg[$k]['shipment_type'] = $v['shipment_type'];
+        }
+
+        $order_group = array_chunk($shipment_reg, 40);
+
+
+        foreach ($order_group as $k => $v) {
+
+            $trackInfo = $trackingConnector->getTrackInfoMulti($v);
+            if (!$trackInfo['data']) {
+                return false;
+            }
+            foreach ($trackInfo['data']['accepted'] as $val) {
+                $add = [];
+                $add['site'] = $v['site'];
+                $add['order_id'] = $v['order_id'];
+                $add['order_number'] = $v['order_number'];
+                $add['shipment_type'] = $v['shipment_type'];
+                $add['shipment_data_type'] = $v['shipment_data_type'];
+                $add['track_number'] = $val['number'];
+                $this->total_track_data($val['track'], $add);
+            }
+            echo $k . "ok \n";
+        }
+        echo "all ok \n";
+    }
+
+
     /**
      * @param $data
      * @param $add
@@ -96,12 +145,15 @@ class ThirdApi extends Api
                     $add['content'] = $v['z'];
                     $add['courier_status'] = $data['e'];
                     Db::name('order_node_courier')->insert($add); //插入物流日志表
-
                 }
                 if ($k == 1) {
                     //更新上网
                     $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
                     if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
+                        $order_node_detail_count = Db::name('order_node_detail')
+                            ->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type'], 'order_node' => 3, 'node_type' => 8])
+                            ->count();
+
                         $update_order_node['order_node'] = 3;
                         $update_order_node['node_type'] = 8;
                         $update_order_node['update_time'] = $v['a'];
@@ -116,13 +168,19 @@ class ThirdApi extends Api
                         $order_node_detail['node_type'] = 8;
                         $order_node_detail['content'] = $this->str1;
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        if ($order_node_detail_count < 1) {
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        }
+
                     }
                 }
                 if ($k == 2) {
                     //更新运输
                     $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
                     if ($order_node_date['order_node'] == 3 && $order_node_date['node_type'] == 8) {
+                        $order_node_detail_count = Db::name('order_node_detail')
+                            ->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type'], 'order_node' => 3, 'node_type' => 10])
+                            ->count();
                         $update_order_node['order_node'] = 3;
                         $update_order_node['node_type'] = 10;
                         $update_order_node['update_time'] = $v['a'];
@@ -137,7 +195,9 @@ class ThirdApi extends Api
                         $order_node_detail['node_type'] = 10;
                         $order_node_detail['content'] = $this->str3;
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        if ($order_node_detail_count < 1) {
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        }
                     }
                 }
 
@@ -171,6 +231,10 @@ class ThirdApi extends Api
                             $arr['node_type'] = $data['e'];
                             $this->asyncEs->updateEsById('mojing_track', $arr);
 
+                            $order_node_detail_count = Db::name('order_node_detail')
+                                ->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type'], 'order_node' => 4, 'node_type' =>  $data['e']])
+                                ->count();
+
                             $order_node_detail['order_node'] = 4;
                             $order_node_detail['node_type'] = $data['e'];
                             switch ($data['e']) {
@@ -189,7 +253,9 @@ class ThirdApi extends Api
                             }
 
                             $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                            if ($order_node_detail_count < 1) {
+                                Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                            }
                         }
                         if ($order_node_date['order_node'] == 4 && $order_node_date['node_type'] != 40) {
                             $update_order_node['order_node'] = 4;
@@ -211,6 +277,10 @@ class ThirdApi extends Api
                             $arr['node_type'] = $data['e'];
                             $this->asyncEs->updateEsById('mojing_track', $arr);
 
+                            $order_node_detail_count = Db::name('order_node_detail')
+                                ->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type'], 'order_node' => 4, 'node_type' =>  $data['e']])
+                                ->count();
+
                             $order_node_detail['order_node'] = 4;
                             $order_node_detail['node_type'] = $data['e'];
                             switch ($data['e']) {
@@ -229,7 +299,9 @@ class ThirdApi extends Api
                             }
 
                             $order_node_detail['create_time'] = $v['a'];
-                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                            if ($order_node_detail_count < 1) {
+                                Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                            }
                         }
                     }
                     $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
