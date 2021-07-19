@@ -47,7 +47,6 @@ class BaseElasticsearch extends Backend
     public function __construct(Request $request = null)
     {
         parent::__construct($request);
-
         try{
             //es配置
             $params = [
@@ -60,7 +59,6 @@ class BaseElasticsearch extends Backend
         }catch (\Exception $e){
             Log::error('es:' . $e->getMessage());
         }
-
     }
 
     /**
@@ -454,7 +452,7 @@ class BaseElasticsearch extends Backend
      * @date   2021/4/22 16:16:09
      */
     public function updateEsById($index,$data){
-        return $this->esService->updateEs($index,$data);
+       return $this->esService->updateEs($index,$data);
     }
     /**
      * 格式化时间字段，方便后续查询聚合
