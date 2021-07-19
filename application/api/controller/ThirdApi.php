@@ -67,7 +67,7 @@ class ThirdApi extends Api
      */
     public function get_track()
     {
-        $order_shipment = Db::name('order_node')->where(['delivery_time' => ['>', '2021-07-13'], 'order_node' => ['>', 2]])->where(['shipment_data_type' => 'USPS'])->select();
+        $order_shipment = Db::name('order_node')->where(['delivery_time' => ['>', '2021-07-13'], 'order_node' => ['>', 2]])->where(['shipment_data_type' => '加诺'])->select();
         $order_shipment = collection($order_shipment)->toArray();
         $trackingConnector = new TrackingConnector($this->apiKey);
 
@@ -85,8 +85,6 @@ class ThirdApi extends Api
         }
 
         $order_group = array_chunk($shipment_reg, 40);
-
-
         foreach ($order_group as $k => $v) {
             $trackInfo = $trackingConnector->getTrackInfoMulti($v);
             if (!$trackInfo['data']) {
