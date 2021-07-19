@@ -1392,8 +1392,16 @@ class Process extends Backend
     {
         $type = 1;
         $site = 'zeelool';
-        for ($i = 0; $i < 7; $i++) {
+        for ($i = 4; $i < 7; $i++) {
             $start = '2021-07-19T' . $i . ':00:00Z';
+            $end = '2021-07-19T' . $i . ':29:59Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+            $start = '2021-07-19T' . $i . ':30:00Z';
             $end = '2021-07-19T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
