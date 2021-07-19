@@ -47,7 +47,7 @@ class Logistics
                 }
             }
         } catch (\Throwable $throwable) {
-            Log::error(__CLASS__ . $throwable->getMessage(),$throwable->getFile(),$throwable->getLine());
+            Log::error(__CLASS__ . $throwable->getMessage().'-' . $throwable->getFile().'-' . $throwable->getLine());
             $job->delete();
         }
     }
