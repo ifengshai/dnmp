@@ -155,9 +155,6 @@ class Logistics
                     $order_node_detail['create_time'] = $v['a'];
                     Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
 
-                    dump($arr);die;
-
-
                     (new AsyncEs())->updateEsById('mojing_track', $arr);
                 }
             }
