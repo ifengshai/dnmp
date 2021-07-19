@@ -89,6 +89,7 @@ class ThirdApi extends Api
 
         foreach ($order_group as $k => $v) {
 
+            usleep(100000);
             $trackInfo = $trackingConnector->getTrackInfoMulti($v);
             if (!$trackInfo['data']) {
                 return false;
