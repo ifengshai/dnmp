@@ -7,6 +7,7 @@
 
 namespace app\admin\jobs;
 
+use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\order\order\NewOrderProcess;
 use fast\Http;
 use think\Db;
@@ -25,18 +26,6 @@ class Logistics
     protected $str35 = 'Attempted for delivery but failed, this may due to several reasons. Please contact the carrier for clarification.'; //投递失败
     protected $str40 = 'Delivered successfully.'; //投递成功
     protected $str50 = 'Item might undergo unusual shipping condition, this may due to several reasons, most likely item was returned to sender, customs issue etc.'; //可能异常
-    /**
-     * @var AsyncEs
-     * @author wangpenglei
-     * @date   2021/7/14 10:34
-     */
-    private $asyncEs;
-
-
-    public function _initialize()
-    {
-        $this->asyncEs = new AsyncEs();
-    }
 
     /**
      * fire方法是消息队列默认调用的方法
@@ -96,7 +85,6 @@ class Logistics
             $add['shipment_type'] = $order_node['shipment_type'];
             $add['shipment_data_type'] = $order_node['shipment_data_type'];
             $add['track_number'] = $track_arr['data']['number'];
-
             return $this->total_track_data($track_arr['data']['track'], $add);
 
         } else {
@@ -139,7 +127,6 @@ class Logistics
 
         //获取物流明细表中的描述
         $contents = Db::name('order_node_courier')->where('track_number', $add['track_number'])->column('content');
-
         foreach ($trackdetail as $k => $v) {
 
             if (!in_array($v['z'], $contents)) {
@@ -149,6 +136,7 @@ class Logistics
                 Db::name('order_node_courier')->insert($add); //插入物流日志表
 
             }
+
             if ($k == 1) {
                 //更新上网
                 $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
@@ -168,7 +156,10 @@ class Logistics
                     $order_node_detail['create_time'] = $v['a'];
                     Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
 
-                    $this->asyncEs->updateEsById('mojing_track', $arr);
+                    dump($arr);die;
+
+
+                    (new AsyncEs())->updateEsById('mojing_track', $arr);
                 }
             }
             if ($k == 2) {
@@ -192,7 +183,7 @@ class Logistics
                     $order_node_detail['create_time'] = $v['a'];
                     Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
 
-                    $this->asyncEs->updateEsById('mojing_track', $arr);
+                    (new AsyncEs())->updateEsById('mojing_track', $arr);
                 }
             }
 
@@ -224,7 +215,7 @@ class Logistics
                         $arr['id'] = $order_node_date['id'];
                         $arr['order_node'] = 4;
                         $arr['node_type'] = $data['e'];
-                        $this->asyncEs->updateEsById('mojing_track', $arr);
+                        (new AsyncEs())->updateEsById('mojing_track', $arr);
 
                         $order_node_detail['order_node'] = 4;
                         $order_node_detail['node_type'] = $data['e'];
@@ -264,7 +255,7 @@ class Logistics
                         $arr['id'] = $order_node_date['id'];
                         $arr['order_node'] = 4;
                         $arr['node_type'] = $data['e'];
-                        $this->asyncEs->updateEsById('mojing_track', $arr);
+                        (new AsyncEs())->updateEsById('mojing_track', $arr);
 
                         $order_node_detail['order_node'] = 4;
                         $order_node_detail['node_type'] = $data['e'];
@@ -295,7 +286,7 @@ class Logistics
                 //更新es
                 $arr['id'] = $order_node_date['id'];
                 $arr['shipment_last_msg'] = $v['z'];
-                $this->asyncEs->updateEsById('mojing_track', $arr);
+                (new AsyncEs())->updateEsById('mojing_track', $arr);
 
             }
         }
