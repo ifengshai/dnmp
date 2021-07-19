@@ -378,7 +378,11 @@ class SupplierAccount extends Backend
                 unset($filter['period']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
-
+            if ($filter['sku']) {
+                $skuSearch['d.sku'] = ['like','%'.$filter['sku'].'%'];
+                unset($filter['sku']);
+                $this->request->get(['filter' => json_encode($filter)]);
+            }
             $instock = new Instock();
             $supplier_id = input('supplier_id');
             //入库单已经创建过结算单并且结算单不是已取消状态的不可再重新结算
@@ -407,6 +411,7 @@ class SupplierAccount extends Backend
                 ->where('a.id', 'not in', $instock_ids)
                 ->where('c.is_statement', 0)
                 ->where($where)
+                ->where($skuSearch)
                 ->order($sort, $order)
                 ->count();
             $list = $instock
@@ -423,6 +428,7 @@ class SupplierAccount extends Backend
                 ->where('c.is_statement', 0)
                 ->field('d.sku,c.purchase_number,a.id,d.purchase_price,c.purchase_freight,f.quantity_num,a.in_stock_number,b.check_order_number,b.purchase_id,b.batch_id,c.purchase_name,c.pay_type,e.in_stock_num,f.arrivals_num,f.quantity_num,f.unqualified_num')
                 ->where($where)
+                ->where($skuSearch)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
