@@ -1394,7 +1394,7 @@ class Process extends Backend
         $site = 'zeelool';
         for ($i = 4; $i < 7; $i++) {
             $start = '2021-07-19T' . $i . ':00:00Z';
-            $end = '2021-07-19T' . $i . ':29:59Z';
+            $end = '2021-07-19T' . $i . ':19:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(10000);
