@@ -92,11 +92,14 @@ class ThirdApi extends Api
             }
             foreach ($trackInfo['data']['accepted'] as $val) {
                 $add = [];
-                $add['site'] = $v['site'];
-                $add['order_id'] = $v['order_id'];
-                $add['order_number'] = $v['order_number'];
-                $add['shipment_type'] = $v['shipment_type'];
-                $add['shipment_data_type'] = $v['shipment_data_type'];
+                $order_node_date = Db::name('order_node')
+                    ->where(['track_number' => $val['number']])
+                    ->find();
+                $add['site'] = $order_node_date['site'];
+                $add['order_id'] = $order_node_date['order_id'];
+                $add['order_number'] = $order_node_date['order_number'];
+                $add['shipment_type'] = $order_node_date['shipment_type'];
+                $add['shipment_data_type'] = $order_node_date['shipment_data_type'];
                 $add['track_number'] = $val['number'];
                 $this->total_track_data($val['track'], $add);
             }
