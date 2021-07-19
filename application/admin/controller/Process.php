@@ -1352,8 +1352,8 @@ class Process extends Backend
     {
         $type = 2;
         $site = 'voogueme';
-        $start = '2021-05-19T01:00:00Z';
-        $end = '2021-05-19T23:59:59Z';
+        $start = '2021-07-19T01:00:00Z';
+        $end = '2021-07-19T07:59:59Z';
 
         $this->asyncTicketHttps($type, $site, $start, $end);
     }
@@ -1362,9 +1362,39 @@ class Process extends Backend
     {
         $type = 2;
         $site = 'voogueme';
-        for ($i = 0; $i < 24; $i++) {
-            $start = '2021-07-13T' . $i . ':00:00Z';
-            $end = '2021-07-13T' . $i . ':59:59Z';
+        for ($i = 0; $i < 7; $i++) {
+            $start = '2021-07-19T' . $i . ':00:00Z';
+            $end = '2021-07-19T' . $i . ':59:59Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+        }
+    }
+    public function test012()
+    {
+        $type = 3;
+        $site = 'nihao';
+        for ($i = 0; $i < 7; $i++) {
+            $start = '2021-07-19T' . $i . ':00:00Z';
+            $end = '2021-07-19T' . $i . ':59:59Z';
+            try {
+                $this->asyncTicketHttps($type, $site, $start, $end);
+                usleep(10000);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+            }
+        }
+    }
+    public function test013()
+    {
+        $type = 1;
+        $site = 'zeelool';
+        for ($i = 0; $i < 7; $i++) {
+            $start = '2021-07-19T' . $i . ':00:00Z';
+            $end = '2021-07-19T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(10000);
