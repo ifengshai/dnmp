@@ -7,6 +7,7 @@
 
 namespace app\admin\jobs;
 
+use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\order\order\NewOrderProcess;
 use fast\Http;
 use think\Db;
@@ -211,7 +212,6 @@ class Logistics
                         $arr['id'] = $order_node_date['id'];
                         $arr['order_node'] = 4;
                         $arr['node_type'] = $data['e'];
-                        (new AsyncEs())->updateEsById('mojing_track', $arr);
 
                         $order_node_detail['order_node'] = 4;
                         $order_node_detail['node_type'] = $data['e'];
@@ -232,6 +232,9 @@ class Logistics
 
                         $order_node_detail['create_time'] = $v['a'];
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+
+                        (new AsyncEs())->updateEsById('mojing_track', $arr);
+
                     }
                     if ($order_node_date['order_node'] == 4 && $order_node_date['node_type'] != 40) {
                         $update_order_node['order_node'] = 4;
@@ -251,7 +254,6 @@ class Logistics
                         $arr['id'] = $order_node_date['id'];
                         $arr['order_node'] = 4;
                         $arr['node_type'] = $data['e'];
-                        (new AsyncEs())->updateEsById('mojing_track', $arr);
 
                         $order_node_detail['order_node'] = 4;
                         $order_node_detail['node_type'] = $data['e'];
@@ -272,6 +274,8 @@ class Logistics
 
                         $order_node_detail['create_time'] = $v['a'];
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+
+                        (new AsyncEs())->updateEsById('mojing_track', $arr);
                     }
                 }
                 $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
