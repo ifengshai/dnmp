@@ -158,12 +158,6 @@ class ThirdApi extends Api
                         $update_order_node['node_type'] = 8;
                         $update_order_node['update_time'] = $v['a'];
                         Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-                        $arr = [
-                            'id'         => $order_node_date['id'],
-                            'order_node' => 3,
-                            'node_type'  => 8,
-                        ];
-                        $this->asyncEs->updateEsById('mojing_track', $arr);
 
                         $order_node_detail['node_type'] = 8;
                         $order_node_detail['content'] = $this->str1;
@@ -185,12 +179,6 @@ class ThirdApi extends Api
                         $update_order_node['node_type'] = 10;
                         $update_order_node['update_time'] = $v['a'];
                         Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-                        $arr = [
-                            'id'         => $order_node_date['id'],
-                            'order_node' => 3,
-                            'node_type'  => 10,
-                        ];
-                        $this->asyncEs->updateEsById('mojing_track', $arr);
 
                         $order_node_detail['node_type'] = 10;
                         $order_node_detail['content'] = $this->str3;
@@ -225,11 +213,6 @@ class ThirdApi extends Api
                                 $arr['wait_time'] = abs(strtotime($v['a']) - strtotime($order_node_date['delivery_time']));
                             }
                             Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-                            //更新es
-                            $arr['id'] = $order_node_date['id'];
-                            $arr['order_node'] = 4;
-                            $arr['node_type'] = $data['e'];
-                            $this->asyncEs->updateEsById('mojing_track', $arr);
 
                             $order_node_detail_count = Db::name('order_node_detail')
                                 ->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type'], 'order_node' => 4, 'node_type' =>  $data['e']])
@@ -271,11 +254,6 @@ class ThirdApi extends Api
                                 $arr['wait_time'] = abs(strtotime($v['a']) - strtotime($order_node_date['delivery_time']));
                             }
                             Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-                            //更新es
-                            $arr['id'] = $order_node_date['id'];
-                            $arr['order_node'] = 4;
-                            $arr['node_type'] = $data['e'];
-                            $this->asyncEs->updateEsById('mojing_track', $arr);
 
                             $order_node_detail_count = Db::name('order_node_detail')
                                 ->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type'], 'order_node' => 4, 'node_type' =>  $data['e']])
@@ -309,10 +287,7 @@ class ThirdApi extends Api
                     $update_order_node['update_time'] = $v['a'];
                     $update_order_node['shipment_last_msg'] = $v['z'];
                     Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
-                    //更新es
-                    $arr['id'] = $order_node_date['id'];
-                    $arr['shipment_last_msg'] = $v['z'];
-                    $this->asyncEs->updateEsById('mojing_track', $arr);
+
 
                 }
             }
