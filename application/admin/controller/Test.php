@@ -39,6 +39,13 @@ class Test extends Backend
         $this->ordernode = new \app\admin\model\OrderNode();
     }
 
+
+
+
+
+
+
+
     public function test001()
     {
         //查询镜片编码对应价格
@@ -193,34 +200,7 @@ class Test extends Backend
     }
 
 
-    /**
-     * 临时批量注册--lixiang
-     */
-    public function linshi_reg_track()
-    {
-        $order_shipment = Db::name('z_linshi')->select();
-        $order_shipment = collection($order_shipment)->toArray();
 
-        $trackingConnector = new TrackingConnector($this->apiKey);
-
-        foreach ($order_shipment as $k => $v) {
-
-            $trackInfo = $trackingConnector->getTrackInfoMulti([
-                [
-                    'number'  => $v['yundanhao'],
-                    'carrier' => '21051',
-                ],
-            ]);
-
-            $update['17status'] = $trackInfo['data']['accepted'][0]['track']['e'];
-            Db::name('z_linshi')->where('id', $v['id'])->update($update);
-
-            sleep(1);
-
-            echo $k . "ok \n";
-        }
-        echo "all ok \n";
-    }
 
     protected function regitster17Track($params = [])
     {
