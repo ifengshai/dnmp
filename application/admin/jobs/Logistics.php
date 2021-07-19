@@ -7,13 +7,15 @@
 
 namespace app\admin\jobs;
 
-use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\order\order\NewOrderProcess;
+use app\service\elasticsearch\EsFormatData;
+use app\service\elasticsearch\EsService;
+use Elasticsearch\ClientBuilder;
 use fast\Http;
 use think\Db;
+use think\Env;
 use think\Log;
 use think\queue\Job;
-use app\admin\controller\elasticsearch\AsyncEs;
 
 class Logistics
 {
@@ -27,6 +29,21 @@ class Logistics
     protected $str40 = 'Delivered successfully.'; //投递成功
     protected $str50 = 'Item might undergo unusual shipping condition, this may due to several reasons, most likely item was returned to sender, customs issue etc.'; //可能异常
 
+    public function __construct()
+    {
+        try{
+            //es配置
+            $params = [
+                Env::get('es.es_host','127.0.0.1:9200')
+            ];
+            //获取es的实例
+            $this->esClient = ClientBuilder::create()->setHosts($params)->build();
+            $this->esService = new EsService($this->esClient);
+            $this->esFormatData = new EsFormatData();
+        } catch (\Exception $e){
+            Log::error('es:' . $e->getMessage());
+        }
+    }
     /**
      * fire方法是消息队列默认调用的方法
      *
@@ -127,6 +144,7 @@ class Logistics
 
         //获取物流明细表中的描述
         $contents = Db::name('order_node_courier')->where('track_number', $add['track_number'])->column('content');
+
         foreach ($trackdetail as $k => $v) {
 
             if (!in_array($v['z'], $contents)) {
@@ -156,7 +174,7 @@ class Logistics
                     $order_node_detail['create_time'] = $v['a'];
                     Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
 
-                    (new AsyncEs())->updateEsById('mojing_track', $arr);
+                    $this->esService->updateEs('mojing_track', $arr);
                 }
             }
             if ($k == 2) {
@@ -179,13 +197,13 @@ class Logistics
                     $order_node_detail['content'] = $this->str3;
                     $order_node_detail['create_time'] = $v['a'];
                     Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
-
-                    (new AsyncEs())->updateEsById('mojing_track', $arr);
+                    $this->esService->updateEs('mojing_track', $arr);
                 }
             }
 
             //结果
             if ($all_num - 1 == $k) {
+
                 if ($data['e'] == 30 || $data['e'] == 35 || $data['e'] == 40 || $data['e'] == 50) {
                     $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
 
@@ -233,8 +251,7 @@ class Logistics
                         $order_node_detail['create_time'] = $v['a'];
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
 
-                        (new AsyncEs())->updateEsById('mojing_track', $arr);
-
+                        $this->esService->updateEs('mojing_track', $arr);
                     }
                     if ($order_node_date['order_node'] == 4 && $order_node_date['node_type'] != 40) {
                         $update_order_node['order_node'] = 4;
@@ -275,7 +292,7 @@ class Logistics
                         $order_node_detail['create_time'] = $v['a'];
                         Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
 
-                        (new AsyncEs())->updateEsById('mojing_track', $arr);
+                        $this->esService->updateEs('mojing_track', $arr);
                     }
                 }
                 $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
@@ -286,7 +303,7 @@ class Logistics
                 //更新es
                 $arr['id'] = $order_node_date['id'];
                 $arr['shipment_last_msg'] = $v['z'];
-                (new AsyncEs())->updateEsById('mojing_track', $arr);
+                $this->esService->updateEs('mojing_track', $arr);
 
             }
         }
