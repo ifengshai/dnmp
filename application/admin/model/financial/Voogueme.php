@@ -69,50 +69,19 @@ class Voogueme extends Model
         // Create an authorized analytics service object.
         $analytics = new \Google_Service_AnalyticsReporting($client);
         // Call the Analytics Reporting API V4.
-        $viewId = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
-        $response = $this->getReport($analytics, $start_time, $end_time,$viewId);
+        $response = $this->getReport($analytics, $start_time, $end_time);
         // Print the response.
         $result = $this->printResults($response);
 
        return $result[0]['ga:adCost'] ? round($result[0]['ga:adCost'],2): 0; 
     }
-    public function goole_cost_android($start_time,$end_time)
-    {
-        $client = new \Google_Client();
-        $client->setAuthConfig('./oauth/oauth-credentials.json');
-        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
-        // Create an authorized analytics service object.
-        $analytics = new \Google_Service_AnalyticsReporting($client);
-        // Call the Analytics Reporting API V4.
-        $viewId = '270127498';
-        $response = $this->getReport($analytics, $start_time, $end_time,$viewId);
-        // Print the response.
-        $result = $this->printResults($response);
-
-        return $result[0]['ga:adCost'] ? round($result[0]['ga:adCost'],2): 0;
-    }
-    public function goole_cost_ios($start_time,$end_time)
-    {
-        $client = new \Google_Client();
-        $client->setAuthConfig('./oauth/oauth-credentials.json');
-        $client->addScope(\Google_Service_Analytics::ANALYTICS_READONLY);
-        // Create an authorized analytics service object.
-        $analytics = new \Google_Service_AnalyticsReporting($client);
-        // Call the Analytics Reporting API V4.
-        $viewId = '270135168';
-        $response = $this->getReport($analytics, $start_time, $end_time,$viewId);
-        // Print the response.
-        $result = $this->printResults($response);
-
-        return $result[0]['ga:adCost'] ? round($result[0]['ga:adCost'],2): 0;
-    }
-    protected function getReport($analytics, $startDate, $endDate,$viewId)
+    protected function getReport($analytics, $startDate, $endDate)
     {
 
         // Replace with your view ID, for example XXXX.
         // $VIEW_ID = "168154683";
         // $VIEW_ID = "172731925";
-        $VIEW_ID = $viewId;
+        $VIEW_ID = config('VOOGUEME_GOOGLE_ANALYTICS_VIEW_ID');
 
 
         // Replace with your view ID, for example XXXX.
@@ -238,7 +207,7 @@ class Voogueme extends Model
         //facebook金额
         $facebook_money = $this->facebook_cost($start_time,$end_time);
         //google金额
-        $google_money   = $this->goole_cost($start_time,$end_time) + $this->goole_cost_android($start_time,$end_time) + $this->goole_cost_ios($start_time,$end_time);
+        $google_money   = $this->goole_cost($start_time,$end_time);
         //镜框等价格
         $all_money      = $this->all_cost($start_time,$end_time);
         //销售额
