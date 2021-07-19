@@ -7,7 +7,6 @@
 
 namespace app\admin\jobs;
 
-use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\order\order\NewOrderProcess;
 use fast\Http;
 use think\Db;
