@@ -17,6 +17,19 @@ module.exports = {
             "script": "sudo docker exec --workdir=/var/www/mojing/ php7.3  php think queue:work --queue logisticsJobQueue --daemon --tries 3",
             "exec_mode": "fork",
             "max_memory_restart": "100M",
+        },
+        {
+            "name": "mojing_zendesk_sync_queue",
+            "script": "think",
+            "interpreter": "php",
+            "args": [
+                "queue:work",
+                "--queue",
+                "zendeskJobQueue",
+                "--daemon"
+            ],
+            "exec_mode": "fork",
+            "max_memory_restart": "100M",
         }
     ]
 };
