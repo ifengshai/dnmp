@@ -1329,7 +1329,7 @@ class Process extends Backend
     {
         $startTime = '2021-04-01 00:00:00';
         $endTime = date('Y-m-d H:i:s');
-        $zendeskTickets = (new Zendesk())->field(['ticket_id', 'type', 'id', 'status', 'username', 'tags', 'email'])
+        $zendeskTickets = (new Zendesk())->field(['ticket_id', 'type'])
             ->whereTime('update_time', [$startTime, $endTime])
             ->select();
         /** @var Zendesk $ticket */
