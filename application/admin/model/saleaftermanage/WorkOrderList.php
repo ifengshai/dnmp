@@ -502,7 +502,7 @@ class WorkOrderList extends Model
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
-                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized','PhotochromicBlueLightBlocking'=>'PhotochromicBlueLightBlocking','Night vision'=>'Night vision'];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized', 'PhotochromicBlueLightBlocking' => 'PhotochromicBlueLightBlocking', 'Night vision' => 'Night vision'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
             } else {
@@ -1255,7 +1255,7 @@ class WorkOrderList extends Model
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
-                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized','PhotochromicBlueLightBlocking'=>'PhotochromicBlueLightBlocking','Night vision'=>'Night vision'];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized', 'PhotochromicBlueLightBlocking' => 'PhotochromicBlueLightBlocking', 'Night vision' => 'Night vision'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
             } else {
@@ -1557,7 +1557,7 @@ class WorkOrderList extends Model
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
-                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized','PhotochromicBlueLightBlocking'=>'PhotochromicBlueLightBlocking','Night vision'=>'Night vision'];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized', 'PhotochromicBlueLightBlocking' => 'PhotochromicBlueLightBlocking', 'Night vision' => 'Night vision'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
             } else {
@@ -2494,8 +2494,8 @@ class WorkOrderList extends Model
         $map['work_status'] = ['not in', '0,4,7'];
         if ($platform != 0) {
             $map['work_platform'] = $platform;
-        }else{
-            $map['work_platform'] = ['in','1,2,3'];
+        } else {
+            $map['work_platform'] = ['in', '1,2,3'];
         }
 
         $count = $this->where($map)->count();
@@ -2514,8 +2514,8 @@ class WorkOrderList extends Model
         $map['work_status'] = 6;
         if ($platform != 0) {
             $map['work_platform'] = $platform;
-        }else{
-            $map['work_platform'] = ['in','1,2,3'];
+        } else {
+            $map['work_platform'] = ['in', '1,2,3'];
         }
         $count = $this->where($map)->count();
 
@@ -2534,8 +2534,8 @@ class WorkOrderList extends Model
         $map['z.work_status'] = 6;
         if ($platform != 0) {
             $map['z.work_platform'] = $platform;
-        }else{
-            $map['work_platform'] = ['in','1,2,3'];
+        } else {
+            $map['work_platform'] = ['in', '1,2,3'];
         }
         $map['m.measure_choose_id'] = 7;
         $count = $this->alias('z')->join('fa_work_order_measure m', 'z.id=m.work_id')->where($map)->count();
@@ -2557,8 +2557,8 @@ class WorkOrderList extends Model
         $map['work_status'] = 6;
         if ($platform != 0) {
             $map['work_platform'] = $platform;
-        }else{
-            $map['work_platform'] = ['in','1,2,3'];
+        } else {
+            $map['work_platform'] = ['in', '1,2,3'];
         }
         $count = $this->where($map)->count();
         $sum = $complete_count == 0 ? 0 : round($count / $complete_count * 100, 2);
@@ -2577,8 +2577,8 @@ class WorkOrderList extends Model
         $map['work_status'] = 6;
         if ($platform != 0) {
             $map['work_platform'] = $platform;
-        }else{
-            $map['work_platform'] = ['in','1,2,3'];
+        } else {
+            $map['work_platform'] = ['in', '1,2,3'];
         }
         $complete_money = $this->where($map)->sum('base_grand_total');
         $money = $this->where($map)->where('is_refund', 1)->sum('refund_money');
@@ -2742,16 +2742,22 @@ class WorkOrderList extends Model
     }
 
     /*
+     * 更换镜片处理子单
      * 订单的其余子单的状态，如果状态是合单完成时需要将状态变为合单中，如果没有合单库位号需要分配一个
-     * */
+     *
+     */
     public function other_item_order_process($increment_id, $item_order_number)
     {
         $_new_order_process = new NewOrderProcess();
         $_new_order_item_process = new NewOrderItemProcess();
-        $all_item_order_number = $_new_order_process->alias('a')//所有子单
+        $item_order_number_arr = $_new_order_process->alias('a')//所有子单
         ->where('a.increment_id', $increment_id)
+            ->field('b.item_order_number,b.stock_id')
             ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
-            ->column('b.item_order_number');
+            ->select();
+        $item_order_number_arr = collection($item_order_number_arr)->toArray();
+
+        $all_item_order_number = array_column($item_order_number_arr, 'item_order_number');
         $flag = 0;
         $item_order_number_diff = array_diff($all_item_order_number, $item_order_number);//其余子单
         if (!empty($item_order_number_diff)) {
@@ -2768,7 +2774,7 @@ class WorkOrderList extends Model
             if (!$store_house_id && $flag) {//没有库位号分配库位号
                 $_stock_house = new StockHouse();
                 $fictitious_time = time();
-                $store_house_info = $_stock_house->field('id,coding,subarea')->where(['status' => 1, 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]])->find();
+                $store_house_info = $_stock_house->field('id,coding,subarea')->where(['status' => 1, 'stock_id' => $item_order_number_arr[0]['stock_id'], 'type' => 2, 'occupy' => 0, 'fictitious_occupy_time' => ['<', $fictitious_time]])->find();
                 //绑定预占用库存和有效时间
                 $_stock_house->where(['id' => $store_house_info['id']])->update(['fictitious_occupy_time' => $fictitious_time + 600, 'order_id' => $order_id, 'occupy' => 1]);
                 //绑定合单库位
@@ -2778,6 +2784,14 @@ class WorkOrderList extends Model
     }
 
 
+    /**
+     * 子单取消
+     * @param $increment_id
+     * @param $item_order_number
+     * @param $work_id
+     *
+     * @throws Exception
+     */
     public function other_item_order_auto($increment_id, $item_order_number, $work_id)
     {
         $_new_order_process = new NewOrderProcess();
@@ -2786,41 +2800,25 @@ class WorkOrderList extends Model
         //措施表
         $_work_order_measure = new WorkOrderMeasure();
         //除当前子单外的子单取消是否完成
-        $map = [];
-        $measure_item_order_number = $_work_order_measure->where(['work_id' => $work_id, 'measure_choose_id' => 18])->column('item_order_number');
-        $count = $_work_order_measure->where(['work_id' => $work_id, 'measure_choose_id' => 18])->count('item_order_number');
-        $count_s = $_work_order_measure->where(['work_id' => $work_id, 'operation_type' => 1, 'measure_choose_id' => 18])->count('item_order_number');
-        if ($count == $count_s + 1) {//最后一个子单取消完成
-            $map['b.item_order_number'] = ['not in', $measure_item_order_number];
-        }
-        $all_item_order_number = $_new_order_process->alias('a')//所有子单
-        ->where('a.increment_id', $increment_id)
-            ->where(['b.distribution_status' => ['neq', 0]])
-            ->where($map)
-            ->join(['fa_order_item_process' => 'b'], 'a.order_id=b.order_id')
-            ->column('b.item_order_number');
-        $item_order_number_diff = array_diff($all_item_order_number, [$item_order_number]);//其余子单
-        //查询是否其他子单为合单中
-        $flag = 1;
-        foreach ($item_order_number_diff as $key => $value) {
-            $distribution_status = $_new_order_item_process->where(['item_order_number' => $value])->value('distribution_status');
-            $order_prescription_type = $_new_order_item_process->where(['item_order_number' => $value])->value('order_prescription_type');
-            if ($distribution_status != 8) {
-                $flag = 0;
-            }
-        }
-        if ($flag) {
-            $order_id = $_new_order_process->where(['increment_id' => $increment_id])->value('order_id');//order_id
-            $store_house_id = $_new_order_process->where(['increment_id' => $increment_id])->value('store_house_id');//store_house_id
-            $_new_order_item_process
-                ->where(['order_id' => $order_id, 'item_order_number' => ['neq', $item_order_number]])
-                ->where(['distribution_status' => ['neq', 0]])
-                ->update(['distribution_status' => 9]);
+        $work_count = $_work_order_measure->where(['work_id' => $work_id, 'measure_choose_id' => 18])->count('item_order_number');
+        $work_count_s = $_work_order_measure->where(['work_id' => $work_id, 'operation_type' => 1, 'measure_choose_id' => 18])->count('item_order_number');
+
+        //查询订单ID
+        $order_id = $_new_order_process
+            ->where('increment_id', $increment_id)
+            ->value('order_id');
+        //判断是否所有子单都为合单中
+        $count = $_new_order_item_process->where(['order_id' => $order_id])->where('distribution_status > 0 and distribution_status < 8')->count();
+        if ($count == 0 && $work_count == ($work_count_s + 1)) {
+            //更新所有合单中的子单为合单完成
+            $_new_order_item_process->where(['order_id' => $order_id, 'distribution_status' => 8])->update(['distribution_status' => 9]);
+            $store_house_id = $_new_order_process->where(['increment_id' => $increment_id])->value('store_house_id');
+            //清除库位 合单完成
             $_new_order_process
                 ->where(['order_id' => $order_id])
-                ->update(['combine_status' => 1, 'check_status' => 0, 'combine_time' => time(), 'store_house_id' => 0]);
+                ->update(['combine_status' => 1, 'combine_time' => time(), 'store_house_id' => 0]);
             if ($store_house_id) {
-                //释放合单库位占用数量    
+                //释放合单库位占用数量
                 $_stock_house->where(['id' => $store_house_id])->update(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => null]);
             }
         }
