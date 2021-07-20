@@ -3470,6 +3470,8 @@ class Distribution extends Backend
                 $this->model->where(['id' => $value])->update(['is_prescription_abnormal' => 0]);
                 //更新主单更新时间-波次单
                 $this->_new_order->where(['id' => $item_info['order_id']])->update(['updated_at' => time()]);
+
+                DistributionLog::record($this->auth, $ids[$key], 10, "子单号{$item_info['item_order_number']}，处方异常取消");
                 continue;
             }
 
