@@ -523,7 +523,6 @@ class OrderData extends Backend
                             //新增子表
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_order_item') {
 
-
                                 foreach ($payload['data'] as $k => $v) {
                                     $options = [];
                                     //处方解析 不同站不同字段
@@ -560,10 +559,6 @@ class OrderData extends Backend
                                     $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
                                     $order_prescription_type = $options['order_prescription_type'];
                                     $is_prescription_abnormal = $options['is_prescription_abnormal'];
-                                    //如果日语站存在套餐 标记为异常
-                                    if ($site == 11 && $options['combo'] == 1) {
-                                        $is_prescription_abnormal = 1;
-                                    }
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
                                     if ($options) {
@@ -630,17 +625,17 @@ class OrderData extends Backend
                                     $options['single_base_original_price'] = $v['base_original_price'];
                                     $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
                                     $order_prescription_type = $options['order_prescription_type'] ?: '';
+                                    $is_prescription_abnormal = $options['is_prescription_abnormal'];
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
-
-                                    $is_prescription_abnormal = $options['is_prescription_abnormal'];
 
                                     if ($options) {
                                         $this->orderitemoption->where(['item_id' => $v['item_id'], 'site' => $site])->update($options);
 
                                         $this->orderitemprocess->where(['item_id' => $v['item_id'], 'site' => $site])->update([
                                             'order_prescription_type'  => $order_prescription_type,
-                                            'sku'                      => $options['sku']
+                                            'sku'                      => $options['sku'],
+                                            'is_prescription_abnormal' => $is_prescription_abnormal
                                         ]);
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
@@ -1414,7 +1409,7 @@ class OrderData extends Backend
         //判断加工类型
         $result = $this->set_processing_type($arr);
         $arr = array_merge($arr, $result);
-
+        $arr['is_prescription_abnormal'] = $arr['combo'] == 1 ? 1 : $arr['is_prescription_abnormal'];
         return $arr;
     }
 
@@ -1683,7 +1678,7 @@ class OrderData extends Backend
             $list['is_prescription_abnormal'] = 1;
         }
 
-        $list['is_prescription_abnormal'] = $list['is_prescription_abnormal'] ?: 0;
+        $list['is_prescription_abnormal'] = $list['is_prescription_abnormal'] == 1 ?: 0;
 
         return $list;
     }
