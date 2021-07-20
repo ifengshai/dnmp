@@ -220,10 +220,10 @@ class Logistics
                             $update_order_node['signing_time'] = $v['a']; //更新签收时间
                             //更新es
                             $arr['signing_time'] = strtotime($v['a']);
-                            $delivery_error_flag = strtotime($v['a']) < strtotime($order_node_date['delivery_time']) + 172800 ? 1 : 0;
-                            $arr['delivery_error_flag'] = $delivery_error_flag;
-                            $arr['delievered_days'] = (strtotime($v['a']) - strtotime($order_node_date['delivery_time'])) / 86400;
-                            $arr['wait_time'] = abs(strtotime($v['a']) - strtotime($order_node_date['delivery_time']));
+                            // $delivery_error_flag = strtotime($v['a']) < strtotime($order_node_date['delivery_time']) + 172800 ? 1 : 0;
+                            $arr['delivery_error_flag'] = 0;
+                            $arr['delievered_days'] = $order_node_date['delivery_time'] ? (strtotime($v['a']) - strtotime($order_node_date['delivery_time'])) / 86400 : 0;
+                            $arr['wait_time'] = $order_node_date['delivery_time'] ? abs(strtotime($v['a']) - strtotime($order_node_date['delivery_time'])) : 0;
                         }
                         Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                         //更新es
@@ -261,10 +261,10 @@ class Logistics
                             $update_order_node['signing_time'] = $v['a']; //更新签收时间
                             //更新es
                             $arr['signing_time'] = strtotime($v['a']);
-                            $delivery_error_flag = strtotime($v['a']) < strtotime($order_node_date['delivery_time']) + 172800 ? 1 : 0;
-                            $arr['delivery_error_flag'] = $delivery_error_flag;
-                            $arr['delievered_days'] = (strtotime($v['a']) - strtotime($order_node_date['delivery_time'])) / 86400;
-                            $arr['wait_time'] = abs(strtotime($v['a']) - strtotime($order_node_date['delivery_time']));
+                            // $delivery_error_flag = strtotime($v['a']) < strtotime($order_node_date['delivery_time']) + 172800 ? 1 : 0;
+                            $arr['delivery_error_flag'] = 0;
+                            $arr['delievered_days'] = $order_node_date['delivery_time'] ? (strtotime($v['a']) - strtotime($order_node_date['delivery_time'])) / 86400 : 0;
+                            $arr['wait_time'] = $order_node_date['delivery_time'] ? abs(strtotime($v['a']) - strtotime($order_node_date['delivery_time'])) : 0;
                         }
                         Db::name('order_node')->where('id', $order_node_date['id'])->update($update_order_node); //更新主表状态
                         //更新es
