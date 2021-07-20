@@ -15,6 +15,7 @@ use app\admin\model\zendesk\ZendeskTasks;
 use think\Controller;
 use think\Db;
 use think\Exception;
+use think\Log;
 use Zendesk\API\HttpClient as ZendeskAPI;
 use app\admin\model\zendesk\Zendesk;
 use app\admin\model\zendesk\ZendeskComments;
@@ -27,6 +28,8 @@ use app\admin\model\zendesk\ZendeskTags;
  */
 class Notice extends Controller
 {
+    /** @var ZendeskAPI|null */
+    public $client = null;
     public $postData = [];
 
     /**time();
@@ -269,7 +272,7 @@ class Notice extends Controller
                 'zendesk_update_time' => $zendesk_update_time
             ];
             //更新rating,如果存在的话
-            if (!$zendesk->rating && $ticket->satisfaction_rating) {
+            if ($ticket->satisfaction_rating) {
                 $score = $ticket->satisfaction_rating->score;
                 $ratingComment = $ticket->satisfaction_rating->comment;
                 $ratingReason = $ticket->satisfaction_rating->reason;
@@ -530,7 +533,7 @@ class Notice extends Controller
                 $updateData['assign_id'] = '';
             }*/
             //更新rating,如果存在的话
-            if (!$zendesk->rating && $ticket->satisfaction_rating) {
+            if ($ticket->satisfaction_rating) {
                 $score = $ticket->satisfaction_rating->score;
                 $ratingComment = $ticket->satisfaction_rating->comment;
                 $ratingReason = $ticket->satisfaction_rating->reason;
@@ -652,8 +655,9 @@ class Notice extends Controller
         try {
             return $this->client->tickets()->find($id)->ticket;
         } catch (\Exception $e) {
-            file_put_contents('/var/www/mojing/runtime/log/a.txt', $id . "\r\n", FILE_APPEND);
-            file_put_contents('/var/www/mojing/runtime/log/a.txt', $e->getMessage() . "\r\n", FILE_APPEND);
+            Log::error($id);
+            Log::error($e->getMessage());
+
             return 'success';
             //echo $e->getMessage();
         }
@@ -1187,7 +1191,7 @@ class Notice extends Controller
                     $updateData['assign_id'] = $updateData['due_id'] = ZendeskAgents::where('agent_id', $ticket->assignee_id)->value('admin_id');
                 }
                 //更新rating,如果存在的话
-                if (!$zendesk->rating && $ticket->satisfaction_rating) {
+                if ($ticket->satisfaction_rating) {
                     $score = $ticket->satisfaction_rating->score;
                     $ratingComment = $ticket->satisfaction_rating->comment;
                     $ratingReason = $ticket->satisfaction_rating->reason;

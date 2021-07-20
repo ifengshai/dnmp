@@ -14,6 +14,7 @@ use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\warehouse\StockHouse;
+use app\admin\model\zendesk\Zendesk;
 use app\common\controller\Backend;
 use think\Db;
 use FacebookAds\Api;
@@ -22,6 +23,8 @@ use app\admin\model\financial\Fackbook;
 use fast\Excel;
 use think\Exception;
 use think\Model;
+use think\Queue;
+use Zendesk\API\HttpClient;
 
 class Process extends Backend
 {
@@ -1314,6 +1317,30 @@ class Process extends Backend
             echo $k . "\n";
         }
         echo "ok";
+    }
+
+    /**
+     * 同步系统中工单数据
+     *
+     * @author fangke
+     * @date   2021/7/20 9:45 上午
+     */
+    public function syncAllZendeskTicker()
+    {
+        $startTime = '2021-04-01 00:00:00';
+        $endTime = date('Y-m-d H:i:s');
+        $zendeskTickets = (new Zendesk())->field(['ticket_id', 'type', 'id', 'status', 'username', 'tags', 'email'])
+            ->whereTime('update_time', [$startTime, $endTime])
+            ->select();
+        /** @var Zendesk $ticket */
+        foreach ($zendeskTickets as $ticket) {
+            $isPushed = Queue::push("app\admin\jobs\Zendesk", $ticket, "zendeskJobQueue");
+            if ($isPushed !== false) {
+                echo $ticket->ticket_id."->推送成功".PHP_EOL;
+            } else {
+                echo $ticket->ticket_id."->推送失败".PHP_EOL;
+            }
+        }
     }
 
 
