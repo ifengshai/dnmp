@@ -333,7 +333,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncTrackTest()
     {
-        (new OrderNode)->where("delivery_time>'2021-07-13 00:00:00' and  delivery_time<'2021-07-20 23:59:59'")->chunk(10000, function ($track) {
+        (new OrderNode)->where("shipment_data_type='郭伟峰-2781郑州超级专线-电'")->where("shipment_data_type='郑州超级专线-含电'")->chunk(10000, function ($track) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
