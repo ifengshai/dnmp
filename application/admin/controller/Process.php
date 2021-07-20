@@ -1327,18 +1327,21 @@ class Process extends Backend
      */
     public function syncAllZendeskTicker()
     {
-        $startTime = '2021-04-01 00:00:00';
-        $endTime = date('Y-m-d H:i:s');
-        $zendeskTickets = (new Zendesk())->field(['ticket_id', 'type'])
-            ->whereTime('update_time', [$startTime, $endTime])
-            ->select();
-        /** @var Zendesk $ticket */
-        foreach ($zendeskTickets as $ticket) {
-            $isPushed = Queue::push("app\admin\jobs\Zendesk", $ticket, "zendeskJobQueue");
-            if ($isPushed !== false) {
-                echo $ticket->ticket_id."->推送成功".PHP_EOL;
-            } else {
-                echo $ticket->ticket_id."->推送失败".PHP_EOL;
+        for ($i = 4; $i < 8; $i++) {
+            $startTime = "2021-0{$i}-01 00:00:00";
+            $endTime = "2021-0{$i}-31 23:59:59";
+            $zendeskTickets = (new Zendesk())->field(['ticket_id', 'type', 'id'])
+                ->whereTime('update_time', [$startTime, $endTime])
+                ->select();
+            /** @var Zendesk $ticket */
+            foreach ($zendeskTickets as $ticket) {
+                echo $i.'->'.$ticket->type.'->';
+                $isPushed = Queue::push("app\admin\jobs\Zendesk", $ticket, "zendeskJobQueue");
+                if ($isPushed !== false) {
+                    echo $ticket->ticket_id."->推送成功".PHP_EOL;
+                } else {
+                    echo $ticket->ticket_id."->推送失败".PHP_EOL;
+                }
             }
         }
     }
