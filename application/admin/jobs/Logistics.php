@@ -90,6 +90,8 @@ class Logistics
                     $url = config('url.zeelool_url') . 'magic/order/updateOrderStatus';
                 } elseif ($order_node['site'] == 2) {
                     $url = config('url.voogueme_url') . 'magic/order/updateOrderStatus';
+                } elseif ($order_node['site'] == 5) {
+                    $url = config('url.wesee_url') . 'api/delivered';
                 }
 
                 $value['increment_id'] = $order_node['order_number'];
