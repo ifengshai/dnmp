@@ -110,6 +110,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.status,
                         },
                         {
+                            field: 'is_spot', title: __('大货/现货'),
+                            searchList: { 1: '大货', 2: '现货'},
+                            custom: { 1: 'black', 2: 'red'},
+                            formatter: Table.api.formatter.status,
+                        },
+                        {
                             field: 'status',
                             addclass: 'design_status',
                             title: __('状态'),

@@ -105,6 +105,14 @@ class NewProductDesign extends Backend
             if ($filter['sku']) {
                 $map['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
             }
+            if ($filter['is_spot']) {
+                $sku = $Item
+                    ->where('is_spot',$filter['is_spot'])
+                    ->column('sku');
+                $sku = array_unique($sku);
+                unset($filter['is_spot']);
+                $map['a.sku'] = ['in', $sku];
+            }
 
             if ($filter['site'] || $filter['item_status'] || $filter['is_new']){
                 if ($filter['site']){
@@ -199,7 +207,7 @@ class NewProductDesign extends Backend
             $skuList = array_column($list,'sku');
             $itemPlatform = new ItemPlatformSku();
             $platStock = $itemPlatform->where('sku','in',$skuList)->field('stock,platform_type,sku')->select();
-            $itemStatusIsNew = $Item->where('sku','in',$skuList)->field('sku,item_status,is_new,available_stock,category_id')->select();
+            $itemStatusIsNew = $Item->where('sku','in',$skuList)->field('sku,item_status,is_new,available_stock,category_id,is_spot')->select();
             $itemStatusIsNew = collection($itemStatusIsNew)->toArray();
             $itemStatusIsNew = array_column($itemStatusIsNew,null,'sku');
             $platStock = collection($platStock)->toArray();
@@ -215,6 +223,7 @@ class NewProductDesign extends Backend
                 }
 
                 $list[$key]['item_status'] =$itemStatusIsNew[$item['sku']]['item_status'];
+                $list[$key]['is_spot'] =$itemStatusIsNew[$item['sku']]['is_spot'];
 
                 $list[$key]['zeelool'] = array_reduce($platStock,function($carry,$val)use($item){
                     if ($val['sku'] == $item['sku'] && $val['platform_type'] == 1){
