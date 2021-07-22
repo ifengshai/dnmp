@@ -1966,7 +1966,7 @@ class Process extends Backend
                 echo $orderNode['id'] .PHP_EOL;
                 echo $orderNode['order_number'] .PHP_EOL;
                 //修改节点信息
-                OrderNode::where('id',$orderNode)->setField('shipment_data_type',$shipment_data_type);
+                OrderNode::where('id',$orderNode['id'])->setField('shipment_data_type',$shipment_data_type);
                 die;
             }
         }
