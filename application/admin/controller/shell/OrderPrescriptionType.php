@@ -34,7 +34,7 @@ class OrderPrescriptionType extends Command
         //查询Z站所有订单
         $list = $order->where('order_prescription_type', 0)
             ->where('site', 1)
-            ->where('create_at', '>', strtotime('2021-07-22 16:30:00'))
+            ->where('created_at', '>', strtotime('2021-07-22 16:30:00'))
             ->column('id');
         foreach ($list as $key => $value) {
             $order_type = $orderitemprocess->where('order_id', $value)->column('order_prescription_type');
