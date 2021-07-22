@@ -1940,26 +1940,25 @@ class Process extends Backend
         ini_set('memory_limit','-1');
         $orderNodes = OrderNode::where('shipment_data_type','加诺')->whereTime('update_time','>','2021-07-01 00:00:00')->select();
         $orderNumbers = array_column($orderNodes,'order_number');
-        dump($orderNumbers);die;
         $orders = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id','in',$orderNumbers)->field('increment_id,country_id,region')->select();
         foreach($orderNodes as $orderNode) {
             foreach($orders as $order) {
                 if($order['increment_id'] != $orderNode['order_number']) continue;
                 $shipment_data_type='加诺-其他';
-                if (!empty($orderNode['country_id']) && $orderNode['country_id']=='US'){
+                if (!empty($order['country_id']) && $order['country_id']=='US'){
                     //美国
                     $shipment_data_type='加诺-美国';
-                    if ($orderNode['region']=='PR'||$orderNode['region']=='Puerto Rico'){
+                    if ($order['region']=='PR'||$order['region']=='Puerto Rico'){
                         //波多黎各
                         $shipment_data_type ='加诺-波多黎各';
                     }
                 }
-                if (!empty($orderNode['country_id']) && $orderNode['country_id']=='CA'){
+                if (!empty($order['country_id']) && $order['country_id']=='CA'){
                     //加拿大
                     $shipment_data_type ='加诺-加拿大';
                 }
 
-                if (!empty($orderNode['country_id']) && $orderNode['country_id']=='PR'){
+                if (!empty($order['country_id']) && $order['country_id']=='PR'){
                     //波多黎各
                     $shipment_data_type ='加诺-波多黎各';
                 }
