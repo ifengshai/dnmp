@@ -1937,7 +1937,7 @@ class Process extends Backend
      */
     public function deliveryTest()
     {
-        $orderNodes = OrderNode::where('shipment_data_type','加诺')->whereTime('update_time','2021-06-01 00:00:00')->select();
+        $orderNodes = OrderNode::where('shipment_data_type','加诺')->whereTime('update_time','>','2021-06-01 00:00:00')->select();
         $orderNumbers = array_column($orderNodes,'order_number');
         $orders = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id','in',$orderNumbers)->field('increment_id,country_id,region')->select();
         foreach($orderNodes as $orderNode) {
