@@ -82,7 +82,7 @@ class Logistics
                 return true;
             }
 
-            if ($track_arr['data']['track']['e'] == 40 && in_array($order_node['site'], [1, 2])) {
+            if ($track_arr['data']['track']['e'] == 40 && in_array($order_node['site'], [1, 2, 5])) {
                 //更新加工表中订单妥投状态
                 $process = new NewOrderProcess;
                 $process->where('increment_id', $order_node['order_number'])->update(['is_tracking' => 5]);
