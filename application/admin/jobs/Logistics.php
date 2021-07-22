@@ -82,7 +82,7 @@ class Logistics
                 return true;
             }
 
-            if ($track_arr['data']['track']['e'] == 40 && in_array($order_node['site'], [1, 2])) {
+            if ($track_arr['data']['track']['e'] == 40 && in_array($order_node['site'], [1, 2, 5])) {
                 //更新加工表中订单妥投状态
                 $process = new NewOrderProcess;
                 $process->where('increment_id', $order_node['order_number'])->update(['is_tracking' => 5]);
@@ -90,6 +90,8 @@ class Logistics
                     $url = config('url.zeelool_url') . 'magic/order/updateOrderStatus';
                 } elseif ($order_node['site'] == 2) {
                     $url = config('url.voogueme_url') . 'magic/order/updateOrderStatus';
+                } elseif ($order_node['site'] == 5) {
+                    $url = config('url.new_wesee_url') . 'api/delivered';
                 }
 
                 $value['increment_id'] = $order_node['order_number'];
@@ -105,7 +107,6 @@ class Logistics
             return $this->total_track_data($track_arr['data']['track'], $add);
 
         } else {
-
             return true;
         }
 
