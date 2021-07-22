@@ -1938,7 +1938,7 @@ class Process extends Backend
     public function deliveryTest()
     {
         ini_set('memory_limit','-1');
-        $orderNodes = OrderNode::where('shipment_data_type','加诺')->whereTime('create_time','>','2021-06-21 00:00:00')->select();
+        $orderNodes = OrderNode::where('shipment_data_type','加诺')->whereTime('delivery_time','>','2021-06-20 00:00:00')->select();
         $orderNumbers = array_column($orderNodes,'order_number');
         $orders = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id','in',$orderNumbers)->field('increment_id,country_id,region')->select();
         foreach($orderNodes as $orderNode) {
