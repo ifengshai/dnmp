@@ -1963,10 +1963,11 @@ class Process extends Backend
                     $shipment_data_type ='加诺-波多黎各';
                 }
                 echo $shipment_data_type .PHP_EOL;
-                echo $order['id'] .PHP_EOL;
+                echo $orderNode['id'] .PHP_EOL;
                 echo $orderNode['order_number'] .PHP_EOL;
                 //修改节点信息
-                //OrderNode::where('id',$orderNode)->setField('shipment_data_type',$shipment_data_type);
+                OrderNode::where('id',$orderNode)->setField('shipment_data_type',$shipment_data_type);
+                die;
             }
         }
     }
