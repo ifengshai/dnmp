@@ -227,6 +227,9 @@ class NewProduct extends Backend
                 $frame_size = $params['frame_size'] ?: [];
                 //区分是镜架还是配饰
                 $item_type = $params['item_type'];
+                if ($params['goods_supply'] < 1){
+                    $this->error('请选择货源');
+                }
                 $data = $itemAttribute = [];
                 if (3 == $item_type) { //配饰
 
@@ -292,6 +295,7 @@ class NewProduct extends Backend
                             $data['create_person'] = session('admin.nickname');
                             $data['create_time'] = date("Y-m-d H:i:s", time());
                             $data['link'] = $params['link'];
+                            $data['goods_supply'] = $params['goods_supply'];
                             //后来添加的商品数据
                             if (!empty($params['origin_skus']) && $params['category_id'] != 53) {
                                 $data['sku'] = $params['origin_sku'] . '-' . sprintf("%02d", $count + 1);
@@ -405,6 +409,7 @@ class NewProduct extends Backend
                             $data['supplier_id'] = $params['supplier_id'];
                             $data['supplier_sku'] = $supplierSku[$k];
                             $data['link'] = $params['link'];
+                            $data['goods_supply'] = $params['goods_supply'];
                             $data['frame_is_rimless'] = $params['shape'] == 1 ? 2 : 1;
                             $data['price'] = $price[$k];
                             $data['create_person'] = session('admin.nickname');
@@ -916,6 +921,11 @@ class NewProduct extends Backend
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
             if ($res !== false) {
                 $params = $row;
+                if ($params['goods_supply'] == 1 || $params['goods_supply'] == 2){
+                    $params['is_spot'] = 1;
+                }else{
+                    $params['is_spot'] = 2;
+                }
                 $params['create_person'] = session('admin.nickname');
                 $params['create_time'] = date('Y-m-d H:i:s', time());
                 $params['item_status'] = 1;
@@ -995,6 +1005,11 @@ class NewProduct extends Backend
                 $res = $this->model->where($map)->update($data);
                 if ($res !== false) {
                     $params = $item;
+                    if ($params['goods_supply'] == 1 || $params['goods_supply'] == 2){
+                        $params['is_spot'] = 1;
+                    }else{
+                        $params['is_spot'] = 2;
+                    }
                     $params['create_person'] = session('admin.nickname');
                     $params['create_time'] = date('Y-m-d H:i:s', time());
                     $params['item_status'] = 1;

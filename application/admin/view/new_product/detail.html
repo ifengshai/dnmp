@@ -57,13 +57,26 @@
 
 <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group" id="item-stock">
+
+        <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-id" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$row.origin_sku}" disabled='disabled'>
+        </div>
+    </div>
+    <div class="form-group" >
         <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
         <div class="col-xs-12 col-sm-3">
             {:Form::select('row[category_id]', $categoryList, $row.category_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required','data-live-search' => true,'disabled'=>'disabled'])}
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('货源')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-id" data-rule="required" class="form-control"  name="row[origin_sku]" type="text" value="{$row.origin_sku}" disabled='disabled'>
+            <select id="goods_supply" data-rule="required" class="form-control selectpicker" data-live-search='true' name="row[goods_supply]">
+                <option value="0">请选择</option>
+                <option value="1" {eq name="$row['goods_supply']" value="1"}selected{/eq}>自主设计</option>
+                <option value="2" {eq name="$row['goods_supply']" value="2"}selected{/eq}>采样定做</option>
+                <option value="3" {eq name="$row['goods_supply']" value="3"}selected{/eq}>线上现货</option>
+                <option value="4" {eq name="$row['goods_supply']" value="4"}selected{/eq}>线下现货</option>
+            </select>
         </div>
     </div>
     <div class="form-group ajax-add">

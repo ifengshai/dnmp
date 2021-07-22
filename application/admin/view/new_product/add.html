@@ -58,6 +58,14 @@
 </style>
 <form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="c-origin_sku" data-rule="required" class="form-control" name="row[origin_sku]" type="text"
+                   value="{$IdStr}" readonly>
+        </div>
+
+    </div>
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
         <div class="col-xs-12 col-sm-3">
             <select id="choose_category_id" data-rule="required" class="form-control selectpicker"
@@ -68,10 +76,15 @@
             </select>
 
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('ID')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('货源')}:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-origin_sku" data-rule="required" class="form-control" name="row[origin_sku]" type="text"
-                value="{$IdStr}" readonly>
+            <select id="goods_supply" data-rule="required" class="form-control selectpicker" data-live-search='true' name="row[goods_supply]">
+                <option value="0">请选择</option>
+                <option value="1">自主设计</option>
+                <option value="2">采样定做</option>
+                <option value="3">线上现货</option>
+                <option value="4">线下现货</option>
+            </select>
         </div>
     </div>
     <div class="form-group" id="item-stock">
@@ -92,6 +105,7 @@
         </div>
 
     </div>
+
     <input type='hidden' name="row[item_status]" id="status" value="1">
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
