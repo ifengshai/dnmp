@@ -2809,7 +2809,7 @@ class WorkOrderList extends Model
             ->value('order_id');
         //判断是否所有子单都为合单中
         $count = $_new_order_item_process->where(['order_id' => $order_id])->where('distribution_status > 0 and distribution_status < 8')->count();
-        if ($count == 0 && $work_count == ($work_count_s + 1)) {
+        if ($count == 0 && $work_count == $work_count_s) {
             //更新所有合单中的子单为合单完成
             $_new_order_item_process->where(['order_id' => $order_id, 'distribution_status' => 8])->update(['distribution_status' => 9]);
             $store_house_id = $_new_order_process->where(['increment_id' => $increment_id])->value('store_house_id');
