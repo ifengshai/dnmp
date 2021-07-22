@@ -9,6 +9,7 @@ use app\admin\model\lens\LensPrice;
 use app\admin\model\operatedatacenter\DatacenterDay;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\OrderNode;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
@@ -1922,6 +1923,48 @@ class Process extends Backend
         $dayBefore = date('Y-m-d', strtotime('-2 day','1624899600'));
         $dayNow = date('Y-m-d', strtotime('-1 day','1624899600'));
         echo $dayBefore . '---- ' . $dayNow;
+    }
+
+    /**
+     * 加诺订单修改物流内容
+     *
+     * @throws Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @author huangbinbin
+     * @date   2021/7/22 14:45
+     */
+    public function deliveryTest()
+    {
+        $orderNodes = OrderNode::where('shipment_data_type','加诺')->whereTime('update_time','2021-06-01 00:00:00')->select();
+        $orderNumbers = array_column($orderNodes,'order_number');
+        $orders = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id','in',$orderNumbers)->field('increment_id,country_id,region')->select();
+        foreach($orderNodes as $orderNode) {
+            foreach($orders as $order) {
+                if($order['increment_id'] != $orderNode['order_number']) continue;
+                $shipment_data_type='加诺-其他';
+                if (!empty($orderNode['country_id']) && $orderNode['country_id']=='US'){
+                    //美国
+                    $shipment_data_type='加诺-美国';
+                    if ($orderNode['region']=='PR'||$orderNode['region']=='Puerto Rico'){
+                        //波多黎各
+                        $shipment_data_type ='加诺-波多黎各';
+                    }
+                }
+                if (!empty($orderNode['country_id']) && $orderNode['country_id']=='CA'){
+                    //加拿大
+                    $shipment_data_type ='加诺-加拿大';
+                }
+
+                if (!empty($orderNode['country_id']) && $orderNode['country_id']=='PR'){
+                    //波多黎各
+                    $shipment_data_type ='加诺-波多黎各';
+                }
+                //修改节点信息
+                OrderNode::where('id',$orderNode)->setField('shipment_data_type',$shipment_data_type);
+            }
+        }
     }
 
 }
