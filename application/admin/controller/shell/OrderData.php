@@ -420,7 +420,6 @@ class OrderData extends Backend
                                 }
                             }
 
-
                             //批发站处方表更新
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'orders_prescriptions') {
                                 foreach ($payload['data'] as $k => $v) {
@@ -456,7 +455,6 @@ class OrderData extends Backend
                                     $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
                                     unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     $order_prescription_type = $options['order_prescription_type'];
-                                    $is_prescription_abnormal = $options['is_prescription_abnormal'];
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
                                     if ($options) {
@@ -469,7 +467,6 @@ class OrderData extends Backend
                                             $data[$i]['option_id'] = $options_id;
                                             $data[$i]['sku'] = $options['sku'];
                                             $data[$i]['order_prescription_type'] = $order_prescription_type;
-                                            $data[$i]['is_prescription_abnormal'] = $is_prescription_abnormal;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
                                         }
@@ -558,7 +555,7 @@ class OrderData extends Backend
                                     $options['single_base_original_price'] = $v['base_original_price'];
                                     $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
                                     $order_prescription_type = $options['order_prescription_type'];
-                                    $is_prescription_abnormal = $options['is_prescription_abnormal'];
+                                    $is_prescription_abnormal = $options['is_prescription_abnormal'] ?: 0;
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
                                     if ($options) {
@@ -625,7 +622,7 @@ class OrderData extends Backend
                                     $options['single_base_original_price'] = $v['base_original_price'];
                                     $options['single_base_discount_amount'] = round($v['base_discount_amount'] / $v['qty_ordered'], 4);
                                     $order_prescription_type = $options['order_prescription_type'] ?: '';
-                                    $is_prescription_abnormal = $options['is_prescription_abnormal'];
+                                    $is_prescription_abnormal = $options['is_prescription_abnormal'] ?: 0;
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
 
@@ -1562,9 +1559,9 @@ class OrderData extends Backend
     public function set_processing_type($params = [])
     {
         $arr = [];
-        //判断处方是否异常
-        $list = $this->is_prescription_abnormal($params);
-        $arr = array_merge($arr, $list);
+//        //判断处方是否异常
+//        $list = $this->is_prescription_abnormal($params);
+//        $arr = array_merge($arr, $list);
 
         $arr['order_prescription_type'] = 0;
 
