@@ -1562,7 +1562,7 @@ class OrderData extends Backend
 //        //判断处方是否异常
 //        $list = $this->is_prescription_abnormal($params);
 //        $arr = array_merge($arr, $list);
-
+        $arr['is_prescription_abnormal'] = 0;
         $arr['order_prescription_type'] = 0;
 
         //斜视值大于1 默认为定制片
