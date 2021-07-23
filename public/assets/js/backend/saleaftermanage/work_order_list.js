@@ -154,6 +154,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                                     recept_user_str += '...';
                                                     break;
                                                 }
+                                                recept_user_str += ',';
                                             }
                                             all_user_name += '<div class="step_recept"><b class="step">' + rows.step_num[i].measure_content + '：</b><b class="recept">' + recept_user_str + '</b></div>';
                                         }
