@@ -311,10 +311,43 @@ class CustomerService extends Backend
         $platform = $params['platform'];
         $timeStr = $params['time_str'];
         $groupId = $params['group_id'];
-        //$admin_id = $params['admin_id'];
+        if ($timeStr) {
+            $createat1 = explode(' ', $timeStr);
+            $map['create_time'] = $rateWhere['create_time'] = ['between', [$createat1[0] . ' ' . $createat1[1], $createat1[3]  . ' ' . $createat1[4]]];
+        }else{
+            $sevenStartdate = date("Y-m-d", strtotime("-6 day"));
+            $sevenEnddate = date("Y-m-d");
+            $map['create_time'] = $rateWhere['create_time'] = ['between', [$sevenStartdate, $sevenEnddate]];
+        }
+        //总评论查询
+        $rateWhere['type'] = $platform;
+        $rateMap = [];
+        $rateMap[] = ['exp', Db::raw("rating = 'good' or rating = 'bad'")];
+        $sumRate = Db::name('zendesk')
+            ->where($rateWhere)
+            ->where($rateMap)
+            ->group('rating_due_id')
+            ->column('count(*) count','rating_due_id');
+        //好评查询
+        $rateMap1 = [];
+        $rateMap1[] = ['exp', Db::raw("rating = 'good'")];
+        $goodRate = Db::name('zendesk')
+            ->where($rateWhere)
+            ->where($rateMap1)
+            ->group('rating_due_id')
+            ->column('count(*) count','rating_due_id');
+        //差评查询
+        $rateMap2 = [];
+        $rateMap2[] = ['exp', Db::raw("rating = 'bad'")];
+        $badRate = Db::name('zendesk')
+            ->where($rateWhere)
+            ->where($rateMap2)
+            ->group('rating_due_id')
+            ->column('count(*) count','rating_due_id');
         $where['c.due_id'] = ['neq',0];
         if($platform){
             $where['c.platform'] = $platform;
+            $map['platform'] = $platform;
         }
         if($groupId){
             //查询客服类型
@@ -323,18 +356,7 @@ class CustomerService extends Backend
                 ->column('id');
             $where['c.due_id'] = array('in', $groupAdminId);
         }
-        if ($timeStr) {
-            $createat1 = explode(' ', $timeStr);
-            $oneTime = $createat1[0].' - '.$createat1[3];
-            $map['create_time'] = ['between', [$createat1[0] . ' ' . $createat1[1], $createat1[3]  . ' ' . $createat1[4]]];
-            $timeTime = $timeStr;
-        }else{
-            $sevenStartdate = date("Y-m-d", strtotime("-6 day"));
-            $sevenEnddate = date("Y-m-d");
-            $oneTime = $sevenStartdate.' - '.$sevenEnddate;
-            $map['create_time'] = ['between', [$sevenStartdate, $sevenEnddate]];
-            $timeTime = '';
-        }
+
         //查询所有客服人员
         $map['due_id'] = ['neq',0];
         $map['is_admin'] = 1;
@@ -345,7 +367,7 @@ class CustomerService extends Backend
         if ($allService) {
             foreach ($allService as $key => $value) {
                 $admin = Db::name('admin')
-                    ->where('id',$value)
+                    ->where('id', $value)
                     ->field('nickname,group_id')
                     ->find();
                 //用户姓名
@@ -359,19 +381,23 @@ class CustomerService extends Backend
                 } else {
                     $user[] = '';
                 }
-                if($allService){
+                $user[] = $sumRate[$value] ? $sumRate[$value] : 0;   //总评论
+                $user[] = $goodRate[$value] ? $goodRate[$value] : 0;   //好评论
+                $user[] = $badRate[$value] ? $badRate[$value] : 0;   //差评论
+                $user[] = $sumRate[$value] ? round($goodRate[$value] / $sumRate[$value] * 100, 2) . '%' : 0;
+                if ($allService) {
                     $where['c.due_id'] = $value;
                 }
                 $where['c.is_admin'] = 1;
-                $where['c.is_public'] = ['<>',2];
-                $where['z.channel'] = ['neq','voice'];
-                if($timeStr){
+                $where['c.is_public'] = ['<>', 2];
+                $where['z.channel'] = ['neq', 'voice'];
+                if ($timeStr) {
                     $createat = explode(' ', $timeStr);
-                    $where['c.create_time'] = ['between', [$createat[0], $createat[0]  . ' 23:59:59']];
+                    $where['c.create_time'] = ['between', [$createat[0], $createat[0] . ' 23:59:59']];
                     $dateArr = array(
                         $createat[0] => $this->zendeskComments
                             ->alias('c')
-                            ->join('fa_zendesk z','c.zid=z.id')
+                            ->join('fa_zendesk z', 'c.zid=z.id')
                             ->where($where)
                             ->count()
                     );
@@ -381,10 +407,10 @@ class CustomerService extends Backend
                             $dealDate = date_create($createat[0]);
                             date_add($dealDate, date_interval_create_from_date_string("$m days"));
                             $nextDay = date_format($dealDate, "Y-m-d");
-                            $where['c.create_time'] = ['between', [$nextDay, $nextDay  . ' 23:59:59']];
+                            $where['c.create_time'] = ['between', [$nextDay, $nextDay . ' 23:59:59']];
                             $dateArr[$nextDay] = $this->zendeskComments
                                 ->alias('c')
-                                ->join('fa_zendesk z','c.zid=z.id')
+                                ->join('fa_zendesk z', 'c.zid=z.id')
                                 ->where($where)
                                 ->count();
                             if ($nextDay == $createat[3]) {
@@ -392,28 +418,26 @@ class CustomerService extends Backend
                             }
                         }
                     }
-                }else {
+                } else {
                     for ($i = 6; $i >= 0; $i--) {
-                        $j = $i-1;
+                        $j = $i - 1;
                         $nextDay = date("Y-m-d", strtotime("-$i day"));
                         $nextNextDay = date("Y-m-d", strtotime("-$j day"));
                         $where['c.create_time'] = ['between', [$nextDay, $nextNextDay]];
                         $dateArr[$nextDay] = $this->zendeskComments
                             ->alias('c')
-                            ->join('fa_zendesk z','c.zid=z.id')
+                            ->join('fa_zendesk z', 'c.zid=z.id')
                             ->where($where)
                             ->count();
                     }
-            }
-
+                }
                 $json['xcolumnData'] = array_keys($dateArr);
                 $json['columnData'][] = array_values(array_merge($user,$dateArr));
             }
-            
         }
         if (!empty($json)) {
             $path = '/uploads/customerService/';
-            $headList = ['姓名', '组别'];
+            $headList = ['姓名', '组别','总评价数','好评数','差评数','客户满意度'];
             foreach ($json['xcolumnData'] as $key => $value) {
                 array_push($headList, $value);
             }
