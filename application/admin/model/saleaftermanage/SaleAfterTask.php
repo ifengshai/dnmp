@@ -850,9 +850,9 @@ class SaleAfterTask extends Model
             ->where('a.site', $order_platform)
             ->where('a.customer_email', $customer_email)
             ->join(['fa_order_process' => 'b'], 'a.id=b.order_id')
-            ->field('a.id,a.entity_id,a.mw_rewardpoint,a.mw_rewardpoint_discount,a.status,a.coupon_code,a.coupon_rule_name,a.store_id,
+            ->field('a.id,a.shipping_title,a.entity_id,a.mw_rewardpoint,a.mw_rewardpoint_discount,a.status,a.coupon_code,a.coupon_rule_name,a.store_id,
                 a.increment_id,a.customer_email,a.customer_firstname,a.customer_lastname,a.order_currency_code,a.total_item_count,a.grand_total,
-                a.base_grand_total,a.base_shipping_amount,a.created_at,a.total_qty_ordered,a.order_type,a.payment_method,a.last_trans_id,b.track_number,b.agent_name as title')
+                a.base_grand_total,a.base_shipping_amount,a.created_at,a.total_qty_ordered,a.order_type,a.payment_method,a.last_trans_id,b.track_number,b.agent_way_title,b.shipment_num')
             ->order('a.entity_id desc')
             ->select();
 

@@ -134,7 +134,7 @@
             <li style="width: 7%;"  class="option"  >
                 <button type="button" class="logistics"  data-id="{$orderInfoList.entity_id}" style="white-space: normal !important;" >{$orderInfoList.track_number}</button>
             </li>
-            <li style="width: 5%">{$orderInfoList.title}</li>
+            <li style="width: 5%">{$orderInfoList.shipment_type}</li>
             <li style="width: 8%">{$orderInfoList.status}</li>
             <li style="width: 3%">{$orderInfoList.total_qty_ordered}</li>
             <li style="width: 3%">{$orderInfoList.order_currency_code}</li>
@@ -145,7 +145,7 @@
             <li style="width:3%">{:round($orderInfoList.mw_rewardpoint,2)}</li>
             <li style="width: 3%">{:round($orderInfoList.mw_rewardpoint_discount,2)}</li>
             <li style="width: 3%">{:round($orderInfoList.base_shipping_amount,2)}</li>
-            <li style="width: 5%">{$orderInfoList.agent_way_title}</li>
+            <li style="width: 5%">{$orderInfoList.shipping_title}</li>
             <li style="width:5%">{$orderInfoList.created_at}</li>
             <li style="width: 5%">{$orderInfoList.signing_time}</li>
             <li style="width: 5%" class="option">

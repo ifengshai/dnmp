@@ -371,178 +371,25 @@ class OrderReturn extends Backend
             if ($customer) {
                 foreach ($customer as $key => $item) {
                     //客户签收时间
-                    $customer[$key]['signing_time'] = Db::table('fa_order_node')->where('order_number', $item['increment_id'])->value('signing_time');
-                    //查询物流渠道，头程单号，订单商品数量
-                    $mojing_order = Db::connect('database.db_mojing_order');
-                    $morder_other_value = $mojing_order->table('fa_order_process')->alias('pro')
-                        ->join("fa_order fao", 'pro.order_id = fao.id', 'left')
-                        ->where('pro.increment_id', $item['increment_id'])
-                        ->field('pro.agent_way_title,pro.shipment_num,fao.total_qty_ordered')
-                        ->find();
-                    if ($morder_other_value) {
-                        $morder_other_value = collection($morder_other_value)->toArray();
-                    }
-                    $customer[$key]['agent_way_title'] = $morder_other_value['agent_way_title'];
-                    $customer[$key]['shipment_num'] = $morder_other_value['shipment_num'];
-                    $customer[$key]['total_qty_ordered'] = $morder_other_value['total_qty_ordered'];
+                     $orderNodeData = Db::table('fa_order_node')->where('order_number', $item['increment_id'])->find();
+                    $customer[$key]['signing_time'] = $orderNodeData->signing_time;
+                    $customer[$key]['shipment_type'] = $orderNodeData->shipment_type;
                 }
             }
-
 
             if (!$customer) {
                 return json(['code' => 0, 'msg' => '找不到订单信息，请重新尝试']);
             }
-            //求出所有的订单号
-            $allIncrementOrder = $customer['increment_id'];
+
             //求出会员的个人信息
             $customerInfo = $customer['info'];
             unset($customer['info']);
             unset($customer['increment_id']);
-            Db::name('info_synergy_task')->query("set time_zone='+8:00'");
-            Db::name('sale_after_task')->query("set time_zone='+8:00'");
-            Db::name('order_return')->query("set time_zone='+8:00'");
-            //如果存在vip订单的话查询这个订单是否在协同任务当中
-            if ($customerInfo['arr_order_vip']) {
-                $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->whereOr('synergy_order_number', 'in', $customerInfo['arr_order_vip'])->order('id desc')->select();
-            } else {
-                $infoSynergyTaskResult = Db::name('info_synergy_task')->where('order_platform', $order_platform)->where('synergy_order_number', 'in', $allIncrementOrder)->order('id desc')->select();
-            }
 
-            $saleAfterTaskResult = Db::name('sale_after_task')->where('order_platform', $order_platform)->where('order_number', 'in', $allIncrementOrder)->order('id desc')->select();
-
-            $orderReturnResult = Db::name('order_return')->where('order_platform', $order_platform)->where('increment_id', 'in', $allIncrementOrder)->order('id desc')->select();
-
-            //求出承接部门和承接人
-            $deptArr = (new AuthGroup())->getAllGroup();
-            $repArr = (new Admin())->getAllStaff();
             //求出订单平台
             $orderPlatformList = (new MagentoPlatform())->getOrderPlatformList();
-            //求出任务优先级
-            $prtyIdList = (new SaleAfterTask())->getPrtyIdList();
-            //求出售后问题分类列表
-            $issueList = (new SaleAfterIssue())->getAjaxIssueList();
-            //求出信息协同任务分类列表
-            $synergyTaskList = (new InfoSynergyTaskCategory())->getSynergyTaskCategoryList();
-            //求出关联单据类型
-            $relateOrderType = (new InfoSynergyTask())->orderType();
-            if (!empty($infoSynergyTaskResult)) {
-                foreach ($infoSynergyTaskResult as $k => $v) {
-                    if ($v['dept_id']) {
-                        $deptNumArr = explode('+', $v['dept_id']);
-                        $infoSynergyTaskResult[$k]['dept_id'] = '';
-                        foreach ($deptNumArr as $values) {
-                            $infoSynergyTaskResult[$k]['dept_id'] .= $deptArr[$values] . ' ';
-                        }
-                    }
-                    if ($v['rep_id']) {
-                        $repNumArr = explode('+', $v['rep_id']);
-                        $infoSynergyTaskResult[$k]['rep_id'] = '';
-                        foreach ($repNumArr as $vals) {
-                            $infoSynergyTaskResult[$k]['rep_id'] .= $repArr[$vals] . ' ';
-                        }
-                    }
-                    if ($v['order_platform']) {
-                        $infoSynergyTaskResult[$k]['order_platform'] = $orderPlatformList[$v['order_platform']];
-                    }
-                    if ($v['prty_id']) {
-                        $infoSynergyTaskResult[$k]['prty_id'] = $prtyIdList[$v['prty_id']];
-                    }
-                    if ($v['synergy_task_id']) {
-                        $infoSynergyTaskResult[$k]['synergy_task_id'] = $synergyTaskList[$v['synergy_task_id']];
-                    }
-                    if ($v['synergy_order_id']) {
-                        $infoSynergyTaskResult[$k]['synergy_order_id'] = $relateOrderType[$v['synergy_order_id']];
-                    }
-                    switch ($v['synergy_status']) {
-                        case 1:
-                            $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#f39c12">处理中</span>';
-                            break;
-                        case 2:
-                            $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#18bc9c">处理完成</span>';
-                            break;
-                        case 3:
-                            $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#e74c3c">取消</span>';
-                            break;
-                        default:
-                            $infoSynergyTaskResult[$k]['synergy_status'] = '<span style="color:#0073b7">新建</span>';
-                            break;
-                    }
-                }
-            }
-            if (!empty($saleAfterTaskResult)) {
-                foreach ($saleAfterTaskResult as $k => $v) {
-                    if ($v['dept_id']) {
-                        $saleAfterTaskResult[$k]['dept_id'] = $deptArr[$v['dept_id']];
-                    }
-                    if ($v['rep_id']) {
-                        $saleAfterTaskResult[$k]['rep_id'] = $repArr[$v['rep_id']];
-                    }
-                    if ($v['order_platform']) {
-                        $saleAfterTaskResult[$k]['order_platform'] = $orderPlatformList[$v['order_platform']];
-                    }
-                    if ($v['task_status'] == 1) {
-                        $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#f39c12">处理中</span>';
-                    } elseif ($v['task_status'] == 2) {
-                        $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#18bc9c">处理完成</span>';
-                    } elseif ($v['task_status'] == 3) {
-                        $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#e74c3c">取消</span>';
-                    } else {
-                        $saleAfterTaskResult[$k]['task_status'] = '<span style="color:#0073b7">新建</span>';
-                    }
-                    if ($v['prty_id']) {
-                        $saleAfterTaskResult[$k]['prty_id'] = $prtyIdList[$v['prty_id']];
-                    }
-                    if ($v['problem_id']) {
-                        $saleAfterTaskResult[$k]['problem_id'] = $issueList[$v['problem_id']];
-                    }
-                    switch ($v['handle_scheme']) {
-                        case 1:
-                            $saleAfterTaskResult[$k]['handle_scheme'] = '部分退款';
-                            break;
-                        case 2:
-                            $saleAfterTaskResult[$k]['handle_scheme'] = '退全款';
-                            break;
-                        case 3:
-                            $saleAfterTaskResult[$k]['handle_scheme'] = '补发';
-                            break;
-                        case 4:
-                            $saleAfterTaskResult[$k]['handle_scheme'] = '加钱补发';
-                            break;
-                        case 5:
-                            $saleAfterTaskResult[$k]['handle_scheme'] = '退款+补发';
-                            break;
-                        case 6:
-                            $saleAfterTaskResult[$k]['handle_scheme'] = '折扣买新';
-                            break;
-                        case 7:
-                            $saleAfterTaskResult[$k]['handle_scheme'] = '发放积分';
-                            break;
-                        case 8:
-                            $saleAfterTaskResult[$k]['handle_scheme'] = '安抚';
-                            break;
-                        case 9:
-                            $saleAfterTaskResult[$k]['handle_scheme'] = '长时间未回复';
-                            break;
-                        default:
-                            $saleAfterTaskResult[$k]['handle_scheme'] = '请选择';
-                            break;
-                    }
-                }
-            }
-            if (!empty($orderReturnResult)) {
-                foreach ($orderReturnResult as $k1 => $v1) {
-                    if ($v1['order_platform']) {
-                        $orderReturnResult[$k1]['order_platform'] = $orderPlatformList[$v1['order_platform']];
-                    }
-                }
-            }
 
-            $this->view->assign('infoSynergyTaskResult', $infoSynergyTaskResult);
-            // $this->view->assign('workOrderListResult', $workOrderListResult);
-            $this->view->assign('saleAfterTaskResult', $saleAfterTaskResult);
-            $this->view->assign('orderReturnResult', $orderReturnResult);
             $this->view->assign('orderInfoResult', $customer);
-
 
             $this->view->assign('orderPlatformId', $order_platform);
             $this->view->assign('orderPlatform', $orderPlatformList[$order_platform]);
