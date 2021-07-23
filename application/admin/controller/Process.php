@@ -1985,7 +1985,7 @@ class Process extends Backend
         foreach ($list as $k => $v) {
             $grand_total = $order->where('site', 13)->where('increment_id', $v['order_number'])->value('grand_total');
             $finanace->where('id', $v['id'])->update(['order_money' => $grand_total, 'income_amount' => $grand_total]);
-            echo $v['increment_id'] . "\n";
+            echo $v['order_number'] . "\n";
         }
         echo "ok";
     }
