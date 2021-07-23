@@ -104,7 +104,6 @@
             <li  style="width: 7%">快递单号</li>
             <li style="width: 5%">快递名称</li>
             <li style="width: 8%">订单状态</li>
-            <li style="width: 5%;">更换<br>地址</li>
             <li style="width: 3%">数量</li>
             <li style="width: 3%"> 币种</li>
             <li style="width: 5%">原币种<br>支付金额</li>
@@ -137,7 +136,6 @@
             </li>
             <li style="width: 5%">{$orderInfoList.title}</li>
             <li style="width: 8%">{$orderInfoList.status}</li>
-            <li style="width: 5%">{:$orderInfoList['is_modify_address'] == 1 ? '是' : '否'}</li>
             <li style="width: 3%">{$orderInfoList.total_qty_ordered}</li>
             <li style="width: 3%">{$orderInfoList.order_currency_code}</li>
             <li style="width: 5%">{:round($orderInfoList.grand_total,2)}</li>
@@ -145,9 +143,9 @@
             <li style="width: 5%">{$orderInfoList.coupon_code}</li>
             <li style="width: 4%">{$orderInfoList.coupon_rule_name}</li>
             <li style="width:3%">{:round($orderInfoList.mw_rewardpoint,2)}</li>
-            <li style="width: 3%">{:round($orderInfoList.mw_rewardpoint_discount_show,2)}</li>
+            <li style="width: 3%">{:round($orderInfoList.mw_rewardpoint_discount,2)}</li>
             <li style="width: 3%">{:round($orderInfoList.base_shipping_amount,2)}</li>
-            <li style="width: 5%">{$orderInfoList.shipping_description}</li>
+            <li style="width: 5%">{$orderInfoList.agent_way_title}</li>
             <li style="width:5%">{$orderInfoList.created_at}</li>
             <li style="width: 5%">{$orderInfoList.signing_time}</li>
             <li style="width: 5%" class="option">
@@ -180,25 +178,22 @@
                             <td>{:$itemInfoList.item_order_number}</td>
                             <td>
                                 <ul class="product-info">
-                                    <li>{$itemInfoList.name}</li>
                                     <li>SKU：{$itemInfoList.sku} </li>
-                                    <li>Color：{$itemInfoList.options[0]['value']}</li>
-                                    <li>Qty：{:round($itemInfoList.qty_ordered)}</li>
+                                    <li>Color：{$itemInfoList.frame_color}</li>
+                                    <li>Qty：{$itemInfoList.qty}</li>
                                 </ul>
                             </td>
                             <td class="lens-wrap-td">
-                                {if $itemInfoList.index_type || $itemInfoList.coatiing_name}
+                                {if $itemInfoList.index_type || $itemInfoList.coating_name}
                                 <ul class="lens-wrap">
                                     <li style="display:block;">
-                                        <span class="name">{$itemInfoList.lenstype_data_name}</span>
-                                        <span class="price">{$itemInfoList.lenstype_base_price}</span>
                                         <span class="name">{$itemInfoList.index_type}</span>
+                                        <span class="name">{$itemInfoList.web_lens_name}</span>
                                         <span class="price">{$itemInfoList.index_price}</span>
-
                                     </li>
                                     <li>
-                                        <span class="name">{$itemInfoList.coatiing_name}</span>
-                                        <span>{$itemInfoList.coatiing_price}</span>
+                                        <span class="name">{$itemInfoList.coating_name}</span>
+                                        <span>{$itemInfoList.coating_price}</span>
                                     </li>
                                 </ul>
                                 {/if}
@@ -221,20 +216,14 @@
                                         <td>{$itemInfoList.od_sph}</td>
                                         <td>{:urldecode($itemInfoList.od_cyl)}</td>
                                         <td>{$itemInfoList.od_axis}</td>
-                                        {if $itemInfoList.total_add}
-                                        <td rowspan="2">{$itemInfoList.total_add}</td>
-                                        {else/}
                                         <td>{$itemInfoList.od_add}</td>
-                                        {/if}
                                     </tr>
                                     <tr>
                                         <th>OS</th>
                                         <td>{$itemInfoList.os_sph}</td>
                                         <td>{:urldecode($itemInfoList.os_cyl)}</td>
                                         <td>{$itemInfoList.os_axis}</td>
-                                        {if !$itemInfoList.total_add}
                                         <td>{$itemInfoList.os_add}</td>
-                                        {/if}
                                     </tr>
                                     <tr>
                                         <th>PD</th>
@@ -277,9 +266,9 @@
                             <td>{:round($itemInfoList.frame_price,2)}</td>
                             <td>{:round($itemInfoList.lenstype_base_price,2)}</td>
                             <td>{:round($itemInfoList.index_price,2)}</td>
-                            <td>{:round($itemInfoList.original_price,2)}</td>
-                            <td>{:round($itemInfoList.discount_amount,2)}</td>
-                            <td>{:round($itemInfoList['base_row_total']-$itemInfoList['discount_amount'],2)}</td>
+                            <td>{:round($itemInfoList.frame_regural_price,2)}</td>
+                            <td>{:round($itemInfoList.base_discount_amount,2)}</td>
+                            <td>{:round($itemInfoList['base_row_total']-$itemInfoList['base_discount_amount'],2)}</td>
                             <td>{$itemInfoList.stock}</td>
                         </tr>
                         {/foreach}
@@ -293,7 +282,7 @@
                         <ul>
                             <li>
                                 <span>支付方式:</span>
-                                <em> {$orderInfoList.method}</em>
+                                <em> {$orderInfoList.payment_method}</em>
                             </li>
                             <li>
                                 <span>last trans id:</span>
@@ -311,7 +300,6 @@
                     </div>
                     <div>
                         <h3>地址信息</h3>
-                        <!-- <img class="edit" src="../../web/edit.png" alt=""> -->
                         <dl>
                             {foreach $orderInfoList.address as $value}
                             {php}

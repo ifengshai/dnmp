@@ -219,6 +219,8 @@ class OrderData extends Backend
                                     $params['quote_id'] = $v['quote_id'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
                                     $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    $params['coupon_code'] = $v['coupon_code'];
+                                    $params['coupon_rule_name'] = $v['coupon_rule_name'];
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
@@ -372,6 +374,8 @@ class OrderData extends Backend
                                     $params['quote_id'] = $v['quote_id'];
                                     $params['base_discount_amount'] = $v['base_discount_amount'];
                                     $params['customer_id'] = $v['customer_id'] ?: 0;
+                                    $params['coupon_code'] = $v['coupon_code'];
+                                    $params['coupon_rule_name'] = $v['coupon_rule_name'];
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
                                     }
@@ -783,6 +787,8 @@ class OrderData extends Backend
         $options = unserialize($data);
         //镜片类型
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['lenstype_data_name'] ?: '';
+
+        $arr['index_type_price'] = $options['info_buyRequest']['tmplens']['lenstype_price'] ?: '';
         //镜片名称
         $index_name = $options['info_buyRequest']['tmplens']['lens_data_name'] ?: $options['info_buyRequest']['tmplens']['index_type'];
         $arr['index_name'] = $index_name ?: '';
@@ -880,6 +886,7 @@ class OrderData extends Backend
         $options = unserialize($data);
         //镜片类型
         $arr['index_type'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
+
         //镜片名称
         $arr['index_name'] = $options['info_buyRequest']['tmplens']['index_type'] ?: '';
         //光度等参数
