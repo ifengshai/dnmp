@@ -3899,6 +3899,7 @@ class ScmWarehouse extends Scm
                                         Log::error('shitisql3'.$this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->select(false));
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
                                         $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->setDec('stock', $stockNum);
+                                        Log::error('shitisql3'.' setDec');
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
