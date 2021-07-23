@@ -3965,7 +3965,7 @@ class ScmWarehouse extends Scm
                 $this->_item_platform_sku->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error('shiticang:'.$e->getMessage().$e->getError().$e->getLine());
+                Log::error('shiticang:'.$e->getMessage() .'-'. $e->getLine());
                 $this->error($e->getMessage(), [], 444);
             } catch (PDOException $e) {
                 $this->_product_bar_code_item->rollback();
@@ -3974,7 +3974,7 @@ class ScmWarehouse extends Scm
                 $this->_item_platform_sku->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error('shiticang:'.$e->getMessage().$e->getError().$e->getLine());
+                Log::error('shiticang:'.$e->getMessage() .'-'. $e->getLine());
                 $this->error($e->getMessage(), [], 444);
             } catch (Exception $e) {
                 $this->_product_bar_code_item->rollback();
@@ -3983,7 +3983,7 @@ class ScmWarehouse extends Scm
                 $this->_item_platform_sku->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error('shiticang:'.$e->getMessage().$e->getError().$e->getLine());
+                Log::error('shiticang:'.$e->getMessage() .'-'. $e->getLine());
                 $this->error($e->getMessage(), [], 444);
             }
             if ($res !== false) {
