@@ -10,6 +10,7 @@ use app\admin\model\lens\LensPrice;
 use app\admin\model\operatedatacenter\DatacenterDay;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\OrderNode;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
@@ -1988,6 +1989,43 @@ class Process extends Backend
             echo $v['order_number'] . "\n";
         }
         echo "ok";
+    }
+
+    public function editOrder()
+    {
+        $order_number = [
+            '430360882',
+            '400698872',
+            '430389123',
+            '430389146',
+            '400692021',
+            '430390599',
+            '130128550',
+            '430392133',
+            '400691738',
+            '430390848',
+            '130128086',
+            '400694633',
+            '130127986',
+            '400695134',
+            '430388991',
+            '400694718',
+            '100285033',
+            '130128541',
+            '100285305',
+        ];
+        $orderprocess = new NewOrderProcess();
+        $orderitemprocess = new NewOrderItemProcess();
+        $list = $orderprocess->where(['increment_id' => ['in', $order_number]])->select();
+        foreach ($list as $k => $v) {
+            $orderprocess->where('id', $v['id'])->update(['combine_status' => 1, 'combine_time' => time(), 'store_house_id' => 0]);
+            $orderitemprocess->where('order_id', $v['order_id'])
+                ->where('site', $v['site'])
+                ->where('distribution_status', 8)
+                ->update(['distribution_status' => 9]);
+        }
+
+
     }
 
 }
