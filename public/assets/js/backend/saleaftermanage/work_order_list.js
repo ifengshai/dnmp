@@ -77,7 +77,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         },
                         { field: 'coupon_str', title: __('优惠券') },
                         { field: 'replacement_order', title: __('补发订单号') },
-                        { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
+                        // { field: 'work_level', title: __('Work_level'), custom: { 1: 'success', 2: 'orange', 3: 'danger' }, searchList: { 1: '低', 2: '中', 3: '高' }, formatter: Table.api.formatter.status },
                         {
                             field: 'problem_type_content',
                             title: __('Problem_type_content'),
@@ -91,23 +91,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             searchList: $.getJSON('saleaftermanage/work_order_list/getMeasureContent'),
                             visible:false
                         },
-                        { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
+                        // { field: 'is_check', title: __('Is_check'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         { field: 'is_refund', title: __('是否有退款'), custom: { 0: 'black', 1: 'success' }, searchList: { 0: '否', 1: '是' }, formatter: Table.api.formatter.status },
                         /*{ field: 'create_user_name', title: __('create_user_name') },*/
                         {
                             field: 'create_user_name',
-                            title: __('about_user'),
+                            title: __('工单创建人'),
                             operate: false,
                             formatter: function (value, rows) {
                                 var all_user_name = '';
                                 all_user_name += '<div class="step_recept"><b class="step">工单创建人：</b><b class="recept">' + rows.create_user_name + '</b></div>';
-                                if (rows.is_check == 1) {
-                                    all_user_name += '<div class="step_recept"><b class="step">直接审核人：</b><b class="recept">' + rows.assign_user_name + '</b></div>';
-                                    if (rows.operation_user_id != 0) {
-                                        all_user_name += '<div class="step_recept"><b class="step">实际审核人：</b><b class="recept">' + rows.operation_user_name + '</b></div>';
-                                    }
-
-                                }
+                                // if (rows.is_check == 1) {
+                                //     all_user_name += '<div class="step_recept"><b class="step">直接审核人：</b><b class="recept">' + rows.assign_user_name + '</b></div>';
+                                //     if (rows.operation_user_id != 0) {
+                                //         all_user_name += '<div class="step_recept"><b class="step">实际审核人：</b><b class="recept">' + rows.operation_user_name + '</b></div>';
+                                //     }
+                                //
+                                // }
 
                                 return all_user_name;
                             },
@@ -145,7 +145,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                             if (rows.step_num[i].recept_user == '') {
                                                 rows.step_num[i].recept_user = 'system';
                                             }
-                                            all_user_name += '<div class="step_recept"><b class="step">' + rows.step_num[i].measure_content + '：</b><b class="recept">' + rows.step_num[i].recept_user + '</b></div>';
+                                            let recept_user = rows.step_num[i].recept_user;
+                                            let recept_user_arr = recept_user.split(",");
+                                            let recept_user_str = '';
+                                            for(var j=0;j<recept_user_arr.length;j++){
+                                                recept_user_str += recept_user_arr[j];
+                                                if(j >= 2) {
+                                                    recept_user_str += '...';
+                                                    break;
+                                                }
+                                                recept_user_str += ',';
+                                            }
+                                            all_user_name += '<div class="step_recept"><b class="step">' + rows.step_num[i].measure_content + '：</b><b class="recept">' + recept_user_str + '</b></div>';
                                         }
                                     }
                                 }
