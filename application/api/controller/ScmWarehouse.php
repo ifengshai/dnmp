@@ -3900,7 +3900,6 @@ class ScmWarehouse extends Scm
                                         /** @var ItemPlatformSku $itemPlatformSkuDetail */
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
                                         Log::error('shitisql3'."{$stockNum}-{$sv['sku']}-{$val['platform_type']}");
-                                        $itemPlatformSkuDetail->setDec('stock', $stockNum);
                                         Log::error('shitisql3'.$this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->select(false));
                                         $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->setDec('stock', $stockNum);
                                         Log::error('shitisql3'.' setDec');
