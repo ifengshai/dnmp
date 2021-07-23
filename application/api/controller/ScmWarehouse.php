@@ -4169,7 +4169,7 @@ class ScmWarehouse extends Scm
                 $this->_stock_transfer_order->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error($e->getMessage());
+                Log::error('实体仓:'. $e->getMessage());
                 $this->error($e->getMessage(), [], 444);
             } catch (PDOException $e) {
                 $this->_item->rollback();
@@ -4177,7 +4177,7 @@ class ScmWarehouse extends Scm
                 $this->_stock_transfer_order->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error($e->getMessage());
+                Log::error('实体仓:'.$e->getMessage());
                 $this->error($e->getMessage(), [], 444);
             } catch (Exception $e) {
                 $this->_item->rollback();
@@ -4185,7 +4185,7 @@ class ScmWarehouse extends Scm
                 $this->_stock_transfer_order->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error($e->getMessage());
+                Log::error('实体仓:'.$e->getMessage());
                 $this->error($e->getMessage(), [], 444);
             }
             if ($res !== false) {
