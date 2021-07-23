@@ -852,7 +852,7 @@ class SaleAfterTask extends Model
             ->join(['fa_order_process' => 'b'], 'a.id=b.order_id')
             ->field('a.id,a.entity_id,a.mw_rewardpoint,a.mw_rewardpoint_discount,a.status,a.coupon_code,a.coupon_rule_name,a.store_id,
                 a.increment_id,a.customer_email,a.customer_firstname,a.customer_lastname,a.order_currency_code,a.total_item_count,a.grand_total,
-                a.base_grand_total,a.base_shipping_amount,a.created_at,a.total_qty_ordered,a.order_type,a.payment_method,a.last_trans_id,b.track_number,b.agent_way_title as title')
+                a.base_grand_total,a.base_shipping_amount,a.created_at,a.total_qty_ordered,a.order_type,a.payment_method,a.last_trans_id,b.track_number,b.agent_name as title')
             ->order('a.entity_id desc')
             ->select();
 
@@ -863,10 +863,11 @@ class SaleAfterTask extends Model
         foreach ($result as $k => $v) {
             $item = $orderItem->alias('a')
                 ->where(['a.order_id' => $v['id']])
-                ->join(['fa_order_item_option' => 'b'],'a.option_id=b.id')
+                ->join(['fa_order_item_option' => 'b'], 'a.option_id=b.id')
                 ->select();
             $item = collection($item)->toArray();
             $result[$k]['item'] = $item;
+            $result[$k]['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
             foreach ($result[$k]['item'] as $key => $value) {
                 //虚拟库存
                 $result[$k]['item'][$key]['stock'] = Db::connect('database.db_stock')->table('fa_item_platform_sku')
