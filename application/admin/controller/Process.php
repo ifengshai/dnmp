@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\admin\controller\zendesk\Notice;
+use app\admin\model\finance\FinanceCost;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\lens\LensPrice;
@@ -832,7 +833,7 @@ class Process extends Backend
         $list = db('zz_temp2')->select();
         $storehouse = new \app\admin\model\warehouse\StockHouse();
         foreach ($list as $k => $v) {
-            $storehouse->where(['type' => 1,'stock_id' => 1, 'area_id' => 3, 'coding' => $v['store_house']])->update(['picking_sort' => $v['sort']]);
+            $storehouse->where(['type' => 1, 'stock_id' => 1, 'area_id' => 3, 'coding' => $v['store_house']])->update(['picking_sort' => $v['sort']]);
         }
     }
 
@@ -1336,12 +1337,12 @@ class Process extends Backend
                 ->select();
             /** @var Zendesk $ticket */
             foreach ($zendeskTickets as $ticket) {
-                echo $i.'->'.$ticket->type.'->';
+                echo $i . '->' . $ticket->type . '->';
                 $isPushed = Queue::push("app\admin\jobs\Zendesk", $ticket, "zendeskJobQueue");
                 if ($isPushed !== false) {
-                    echo $ticket->ticket_id."->推送成功".PHP_EOL;
+                    echo $ticket->ticket_id . "->推送成功" . PHP_EOL;
                 } else {
-                    echo $ticket->ticket_id."->推送失败".PHP_EOL;
+                    echo $ticket->ticket_id . "->推送失败" . PHP_EOL;
                 }
             }
         }
@@ -1404,6 +1405,7 @@ class Process extends Backend
             }
         }
     }
+
     public function test012()
     {
         $type = 3;
@@ -1419,6 +1421,7 @@ class Process extends Backend
             }
         }
     }
+
     public function test013()
     {
         $type = 1;
@@ -1652,7 +1655,7 @@ class Process extends Backend
         $productbarcode = new ProductBarCodeItem();
         $headList = ['SKU', '仓库', '总库存', '仓库实时库存', '大货区库存', '货架区库存', '拣货区库存', '最近1个月的销量'];
         $z = 0;
-        $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->chunk(1000, function ($row) use ($productbarcode,$itemplatformsku,$order,$headList,&$z) {
+        $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->chunk(1000, function ($row) use ($productbarcode, $itemplatformsku, $order, $headList, &$z) {
             $data = [];
             $stock_id = [1, 2];
             $i = 0;
@@ -1682,25 +1685,25 @@ class Process extends Backend
                     $data[$i]['stock_id'] = $v == 1 ? '郑州' : '丹阳';
                     $data[$i]['stock'] = $val['stock'];
                     $data[$i]['real_stock'] = $productbarcode
-                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1])
+                        ->where(['sku' => $val['sku'], 'stock_id' => $v, 'library_status' => 1])
                         ->where("item_order_number=''")
                         ->count();
 
                     $dahuo_location_id = $v == 1 ? 1 : 4;
                     $data[$i]['dahuo_stock'] = $productbarcode
-                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1, 'location_id' => $dahuo_location_id])
+                        ->where(['sku' => $val['sku'], 'stock_id' => $v, 'library_status' => 1, 'location_id' => $dahuo_location_id])
                         ->where("item_order_number=''")
                         ->count();
 
                     $huojia_location_id = $v == 1 ? 2 : 5;
                     $data[$i]['huojia_stock'] = $productbarcode
-                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1, 'location_id' => $huojia_location_id])
+                        ->where(['sku' => $val['sku'], 'stock_id' => $v, 'library_status' => 1, 'location_id' => $huojia_location_id])
                         ->where("item_order_number=''")
                         ->count();
 
                     $jianhuojia_location_id = $v == 1 ? 3 : 6;
                     $data[$i]['jianhuojia_stock'] = $productbarcode
-                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1, 'location_id' => $jianhuojia_location_id])
+                        ->where(['sku' => $val['sku'], 'stock_id' => $v, 'library_status' => 1, 'location_id' => $jianhuojia_location_id])
                         ->where("item_order_number=''")
                         ->count();
                     $data[$i]['xiaoliang'] = $order_num;
@@ -1918,10 +1921,11 @@ class Process extends Backend
 
 
     }
+
     public function test11111111()
     {
-        $dayBefore = date('Y-m-d', strtotime('-2 day','1624899600'));
-        $dayNow = date('Y-m-d', strtotime('-1 day','1624899600'));
+        $dayBefore = date('Y-m-d', strtotime('-2 day', '1624899600'));
+        $dayNow = date('Y-m-d', strtotime('-1 day', '1624899600'));
         echo $dayBefore . '---- ' . $dayNow;
     }
 
@@ -1937,38 +1941,53 @@ class Process extends Backend
      */
     public function deliveryTest()
     {
-        ini_set('memory_limit','-1');
-        $orderNodes = OrderNode::where('shipment_data_type','加诺')->whereTime('delivery_time','>','2021-06-20 00:00:00')->select();
-        $orderNumbers = array_column($orderNodes,'order_number');
-        $orders = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id','in',$orderNumbers)->field('increment_id,country_id,region')->select();
-        foreach($orderNodes as $orderNode) {
-            foreach($orders as $order) {
-                if($order['increment_id'] != $orderNode['order_number']) continue;
-                $shipment_data_type='加诺-其他';
-                if (!empty($order['country_id']) && $order['country_id']=='US'){
+        ini_set('memory_limit', '-1');
+        $orderNodes = OrderNode::where('shipment_data_type', '加诺')->whereTime('delivery_time', '>', '2021-06-20 00:00:00')->select();
+        $orderNumbers = array_column($orderNodes, 'order_number');
+        $orders = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id', 'in', $orderNumbers)->field('increment_id,country_id,region')->select();
+        foreach ($orderNodes as $orderNode) {
+            foreach ($orders as $order) {
+                if ($order['increment_id'] != $orderNode['order_number']) {
+                    continue;
+                }
+                $shipment_data_type = '加诺-其他';
+                if (!empty($order['country_id']) && $order['country_id'] == 'US') {
                     //美国
-                    $shipment_data_type='加诺-美国';
-                    if ($order['region']=='PR'||$order['region']=='Puerto Rico'){
+                    $shipment_data_type = '加诺-美国';
+                    if ($order['region'] == 'PR' || $order['region'] == 'Puerto Rico') {
                         //波多黎各
-                        $shipment_data_type ='加诺-波多黎各';
+                        $shipment_data_type = '加诺-波多黎各';
                     }
                 }
-                if (!empty($order['country_id']) && $order['country_id']=='CA'){
+                if (!empty($order['country_id']) && $order['country_id'] == 'CA') {
                     //加拿大
-                    $shipment_data_type ='加诺-加拿大';
+                    $shipment_data_type = '加诺-加拿大';
                 }
 
-                if (!empty($order['country_id']) && $order['country_id']=='PR'){
+                if (!empty($order['country_id']) && $order['country_id'] == 'PR') {
                     //波多黎各
-                    $shipment_data_type ='加诺-波多黎各';
+                    $shipment_data_type = '加诺-波多黎各';
                 }
-                echo $shipment_data_type .PHP_EOL;
-                echo $orderNode['id'] .PHP_EOL;
-                echo $orderNode['order_number'] .PHP_EOL;
+                echo $shipment_data_type . PHP_EOL;
+                echo $orderNode['id'] . PHP_EOL;
+                echo $orderNode['order_number'] . PHP_EOL;
                 //修改节点信息
-                OrderNode::where('id',$orderNode['id'])->setField('shipment_data_type',$shipment_data_type);
+                OrderNode::where('id', $orderNode['id'])->setField('shipment_data_type', $shipment_data_type);
             }
         }
+    }
+
+    public function editCost()
+    {
+        $finanace = new FinanceCost();
+        $order = new NewOrder();
+        $list = $finanace->where('type', 1)->where('bill_type', 1)->where('site', 13)->select();
+        foreach ($list as $k => $v) {
+            $grand_total = $order->where('site', 13)->where('increment_id', $v['order_number'])->value('grand_total');
+            $finanace->where('id', $v['id'])->update(['order_money' => $grand_total, 'income_amount' => $grand_total]);
+            echo $v['increment_id'] . "\n";
+        }
+        echo "ok";
     }
 
 }
