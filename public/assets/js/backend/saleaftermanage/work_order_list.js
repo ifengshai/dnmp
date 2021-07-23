@@ -148,9 +148,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                             let recept_user = rows.step_num[i].recept_user;
                                             let recept_user_arr = recept_user.split(",");
                                             let recept_user_str = '';
-                                            for(var i=0;i<recept_user_arr.length;i++){
-                                                recept_user_str += recept_user_arr[i];
-                                                if(i >= 2) {
+                                            for(var j=0;j<recept_user_arr.length;j++){
+                                                recept_user_str += recept_user_arr[j];
+                                                if(j >= 2) {
                                                     recept_user_str += '...';
                                                     break;
                                                 }
