@@ -3897,9 +3897,12 @@ class ScmWarehouse extends Scm
                                     if (($allNum - $key) == 1) {
                                         Log::error('shitisql3'.json_encode($sv) . '-' . json_encode($val));
                                         Log::error('shitisql3'.$this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->select(false));
+                                        /** @var ItemPlatformSku $itemPlatformSkuDetail */
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
                                         Log::error('shitisql3'."{$stockNum}-{$sv['sku']}-{$val['platform_type']}");
-                                        $this->_item_platform_sku->where(['sku' => $sv['sku'],'platform_type' => $val['platform_type']])->setDec('stock', $stockNum);
+                                        $itemPlatformSkuDetail->setDec('stock', $stockNum);
+                                        Log::error('shitisql3'.$this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->select(false));
+                                        $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->setDec('stock', $stockNum);
                                         Log::error('shitisql3'.' setDec');
                                         //插入日志表
                                         (new StockLog())->setData([
