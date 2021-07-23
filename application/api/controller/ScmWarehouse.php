@@ -3846,9 +3846,7 @@ class ScmWarehouse extends Scm
                                     //最后一个站点 剩余数量分给最后一个站
                                     if (($allNum - $key) == 1) {
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
-                                        echo $this->_item_platform_sku->getLastSql();
                                         $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->setDec('stock', $stockNum);
-                                        echo $this->_item_platform_sku->getLastSql();
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
@@ -3868,9 +3866,7 @@ class ScmWarehouse extends Scm
                                         $num = round($sv['real_num'] * $rateRate);
                                         $stockNum -= $num;
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
-                                        echo $this->_item_platform_sku->getLastSql();
                                         $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->setDec('stock', $num);
-                                        echo $this->_item_platform_sku->getLastSql();
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
@@ -3896,9 +3892,7 @@ class ScmWarehouse extends Scm
                                     //最后一个站点 剩余数量分给最后一个站
                                     if (($allNum - $key) == 1) {
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
-                                        echo $this->_item_platform_sku->getLastSql();
                                         $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->setDec('stock', $stockNum);
-                                        echo $this->_item_platform_sku->getLastSql();
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
@@ -3918,9 +3912,7 @@ class ScmWarehouse extends Scm
                                         $num = round($sv['real_num'] * abs($val['stock']) / $numNum);
                                         $stockNum -= $num;
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
-                                        echo $this->_item_platform_sku->getLastSql();
                                         $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->setDec('stock', $num);
-                                        echo $this->_item_platform_sku->getLastSql();
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
