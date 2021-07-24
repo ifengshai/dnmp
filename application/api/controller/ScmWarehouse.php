@@ -4307,6 +4307,12 @@ class ScmWarehouse extends Scm
         if (count($codeAggUnique) != count($codeAgg)) {
             $this->error(__('条形码数据有重复的，请检查！！'), '', 524);
         }
+        //重复条码校验
+        $stockTransferOrderItemCodes = $this->_stock_transfer_order_item_code->where('transfer_order_item_id' , $transferOrderItemId)->column('code');
+        $hasCode = array_intersect($stockTransferOrderItemCodes,$codeAggUnique);
+        if ($hasCode) {
+            $this->error(__(join(',',$hasCode) . '重复，请删除此条码！'), '', 524);
+        }
         $arr = [];
         foreach ($codeAgg as $k => $v) {
             //判断当前条码的在库状态
@@ -4323,11 +4329,7 @@ class ScmWarehouse extends Scm
             if ($codeStatus['stock_id'] !== $transferOrderDetail['out_stock_id']) {
                 $this->error(__($v['code'] . '当前不在调出仓库：' . $allStock[$transferOrderDetail['out_stock_id']] . '！！'), '', 524);
             }
-            //重复条码校验
-            $hasCode = $this->_stock_transfer_order_item_code->where(['code' => $v['code'], 'transfer_order_item_id' => $transferOrderItemId])->find();
-            if ($hasCode) {
-                $this->error(__($v['code'] . '重复，请删除此条码！'), '', 524);
-            }
+
             //实体仓调拨单子表的子表（条形码明细表）插入数据
             $arr[$k]['code'] = $v['code'];
             $arr[$k]['transfer_order_item_id'] = $transferOrderItemId;
