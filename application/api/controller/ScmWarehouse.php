@@ -3845,8 +3845,6 @@ class ScmWarehouse extends Scm
                                 foreach ($itemPlatformSku as $key => $val) {
                                     //最后一个站点 剩余数量分给最后一个站
                                     if (($allNum - $key) == 1) {
-                                        Log::error('shitisql1'.json_encode($sv) . '-' . json_encode($val));
-                                        Log::error('shitisql1'.$this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->select(false));
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
                                         $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->setDec('stock', $stockNum);
                                         //插入日志表
@@ -3867,8 +3865,6 @@ class ScmWarehouse extends Scm
                                     } else {
                                         $num = round($sv['real_num'] * $rateRate);
                                         $stockNum -= $num;
-                                        Log::error('shitisql2'.json_encode($sv) . '-' . json_encode($val));
-                                        Log::error('shitisql2'.$this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->select(false));
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
                                         $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->setDec('stock', $num);
                                         //插入日志表
@@ -3895,15 +3891,10 @@ class ScmWarehouse extends Scm
                                 foreach ($itemPlatformSku as $key => $val) {
                                     //最后一个站点 剩余数量分给最后一个站
                                     if (($allNum - $key) == 1) {
-                                        Log::error('shitisql3'.json_encode($sv) . '-' . json_encode($val));
-                                        Log::error('shitisql3'.$this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->select(false));
                                         /** @var ItemPlatformSku $itemPlatformSkuDetail */
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
-                                        Log::error('shitisql3'."{$stockNum}-{$sv['sku']}-{$val['platform_type']}");
 
                                         $this->_item_platform_sku->where("sku = '" . $sv['sku'] . "' and platform_type={$val['platform_type']}")->setDec('stock', $stockNum);
-                                        Log::error('shitisql3'.$this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->select(false));
-                                        Log::error('shitisql3'.' setDec');
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'              => 2,
@@ -3922,8 +3913,6 @@ class ScmWarehouse extends Scm
                                     } else {
                                         $num = round($sv['real_num'] * abs($val['stock']) / $numNum);
                                         $stockNum -= $num;
-                                        Log::error('shitisql4'.json_encode($sv) . '-' . json_encode($val));
-                                        Log::error('shitisql4'.$this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->select(false));
                                         $itemPlatformSkuDetail = $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->find();
                                         $this->_item_platform_sku->where('sku', $sv['sku'])->where('platform_type', $val['platform_type'])->setDec('stock', $num);
 
