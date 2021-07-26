@@ -2421,9 +2421,16 @@ class OrderData extends Backend
                 11772,
                 11773,
                 11774,
-                11775
+                11775,
             ];
             $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
+        }
+
+        if ($entity_id) {
+            $this->order->where(['entity_id' => ['in', $entity_id], 'site' => $site])->delete();
+            $this->orderitemprocess->where(['magento_order_id' => ['in', $entity_id], 'site' => $site])->delete();
+            $this->orderitemoption->where(['magento_order_id' => ['in', $entity_id], 'site' => $site])->delete();
+            $this->orderprocess->where(['entity_id' => ['in', $entity_id], 'site' => $site])->delete();
         }
 
         $list = collection($list)->toArray();
@@ -2891,7 +2898,7 @@ class OrderData extends Backend
                 11772,
                 11773,
                 11774,
-                11775
+                11775,
             ];
 
             $list = Db::connect('database.db_zeelool_jp')
@@ -3388,7 +3395,7 @@ class OrderData extends Backend
                 11772,
                 11773,
                 11774,
-                11775
+                11775,
             ];
 
             $list = Db::connect('database.db_zeelool_jp')
