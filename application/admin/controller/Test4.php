@@ -3860,4 +3860,29 @@ class Test4 extends Controller
 
         $writer->save('php://output');
     }
+
+    public function run_goods_supply_data()
+    {
+        $item = new Item();
+        $newProduct = new \app\admin\model\NewProduct();
+        $goodsSupply = Db::name('zzzzzzz_temp_goods_supply')->select();
+        foreach ($goodsSupply as $k=>$v){
+            if ($v['goods_supply'] == 1 || $v['goods_supply'] == 2){
+                $isSpot = 1;
+            }else{
+                $isSpot = 2;
+            }
+            $res = $newProduct->where('sku',$v['sku'])->update(['goods_supply'=>$v['goods_supply']]);
+            if ($res){
+                $res1 = $item->where('sku',$v['sku'])->update(['goods_supply'=>$v['goods_supply'],'is_spot'=>$isSpot]);
+                if ($res1){
+                    echo $v['sku'].'更新成功'."\n";
+                }else{
+                    echo $v['sku'].'更新选品成功，更新商品失败'."\n";
+                }
+            }else{
+                echo $v['sku'].'更新失败'."\n";
+            }
+        }
+    }
 }
