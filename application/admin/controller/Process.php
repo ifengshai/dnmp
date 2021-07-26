@@ -8,6 +8,7 @@ use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\lens\LensPrice;
 use app\admin\model\operatedatacenter\DatacenterDay;
+use app\admin\model\order\Order;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
@@ -2026,6 +2027,31 @@ class Process extends Backend
         }
 
 
+    }
+
+    /**
+     * @author wangpenglei
+     * @date   2021/7/26 11:04
+     */
+    public function add_order_process()
+    {
+        $order = new NewOrder();
+        $orderProcess = new NewOrderProcess();
+        $list = $order->where('id','>',1780000)->select();
+        foreach ($list as $k => $v) {
+            $count = $orderProcess->where('order_id',$v['id'])->count();
+            if ($count < 1) {
+                $order_params = [];
+                $order_params['site'] = $v['site'];
+                $order_params['order_id'] = $v['id'];
+                $order_params['entity_id'] = $v['entity_id'];
+                $order_params['increment_id'] = $v['increment_id'];
+                //插入订单处理表
+                $orderProcess->insert($order_params);
+            }
+            echo $k . "\n";
+        }
+        echo "ok";
     }
 
 }
