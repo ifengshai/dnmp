@@ -2800,15 +2800,19 @@ class WorkOrderList extends Model
         //措施表
         $_work_order_measure = new WorkOrderMeasure();
         //除当前子单外的子单取消是否完成
-        $work_count = $_work_order_measure->where(['work_id' => $work_id, 'measure_choose_id' => 18])->count('item_order_number');
+        $work_item_order_number = $_work_order_measure->where(['work_id' => $work_id, 'measure_choose_id' => 18])->column('item_order_number');
         $work_count_s = $_work_order_measure->where(['work_id' => $work_id, 'operation_type' => 1, 'measure_choose_id' => 18])->count('item_order_number');
-
+        $work_count = count($work_item_order_number);
         //查询订单ID
         $order_id = $_new_order_process
             ->where('increment_id', $increment_id)
             ->value('order_id');
         //判断是否所有子单都为合单中
-        $count = $_new_order_item_process->where(['order_id' => $order_id])->where('distribution_status > 0 and distribution_status < 8')->count();
+        $count = $_new_order_item_process
+            ->where(['order_id' => $order_id])
+            ->where(['item_order_number' => ['not in', $work_item_order_number]])
+            ->where('distribution_status > 0 and distribution_status < 8')
+            ->count();
         if ($count == 0 && $work_count == ($work_count_s + 1)) {
             //更新所有合单中的子单为合单完成
             $_new_order_item_process->where(['order_id' => $order_id, 'distribution_status' => 8])->update(['distribution_status' => 9]);
