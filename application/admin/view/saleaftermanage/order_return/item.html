@@ -526,8 +526,8 @@
 
                 <td style="text-align: center; vertical-align: middle;">{$order_vip.order_number}</td>
                 <td style="text-align: center; vertical-align: middle;">{$order_vip.order_status}</td>
-                <td style="text-align: center; vertical-align: middle;">{$order_vip.start_time}</td>
-                <td style="text-align: center; vertical-align: middle;">{$order_vip.end_time}</td>
+                <td style="text-align: center; vertical-align: middle;">{$order_vip.start_time|date='Y-m-d H:i:s',###}</td>
+                <td style="text-align: center; vertical-align: middle;">{$order_vip.end_time|date='Y-m-d H:i:s',###}</td>
                 <td style="text-align: center; vertical-align: middle;">{:$order_vip.is_active_status ==
                     1 ? '正常' : '禁用'}
                 </td>
