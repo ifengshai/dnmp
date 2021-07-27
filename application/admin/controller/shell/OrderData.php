@@ -806,7 +806,7 @@ class OrderData extends Backend
         //镀膜价格
         $arr['coating_price'] = $options['info_buyRequest']['tmplens']['coating_base_price'];
         //镜框价格
-        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_base_price'];
+        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_price'];
         //镜片价格
         $arr['index_price'] = $options['info_buyRequest']['tmplens']['lens_base_price'];
         $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
