@@ -800,7 +800,7 @@ class SaleAfterTask extends Model
         $vip = new WebVipOrder();
         $user = new WebUsers();
         $orderItem = new NewOrderItemProcess();
-        $item = new ItemPlatformSku();
+        $itemPlatFormSku = new ItemPlatformSku();
 
         //根据订单号搜索
         if ($increment_id) {
@@ -871,7 +871,7 @@ class SaleAfterTask extends Model
 
             foreach ($item as $key => $value) {
                 //虚拟库存
-                $item[$key]['stock'] = $item->where('platform_sku', $value['sku'])->where('platform_type', $order_platform)->value('stock');
+                $item[$key]['stock'] = $itemPlatFormSku->where('platform_sku', $value['sku'])->where('platform_type', $order_platform)->value('stock');
             }
             $result[$k]['item'] = $item;
             $result[$k]['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
