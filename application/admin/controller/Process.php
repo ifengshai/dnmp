@@ -2376,7 +2376,7 @@ class Process extends Backend
      */
     public function add_order_coupon()
     {
-        $nihao = new Nihao();
+        $nihao = new ZeeloolDe();
         $order = new NewOrder();
         $nihao->where('coupon_code is not null')->field('entity_id,coupon_code,coupon_rule_name')->chunk(10000, function ($row) use ($order) {
             $row = collection($row)->toArray();
