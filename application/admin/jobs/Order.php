@@ -18,7 +18,7 @@ class Order
     {
         $order = new NewOrder();
         try {
-            $order->where(['entity_id' => $data['entity_id'], 'site' => 3])
+            $order->where(['entity_id' => $data['entity_id'], 'site' => 10])
                 ->update(['coupon_code' => $data['coupon_code'], 'coupon_rule_name' => $data['coupon_rule_name']]);
             echo $data['entity_id'] . '->success->' . PHP_EOL;
             $job->delete();
