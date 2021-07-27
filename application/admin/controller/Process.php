@@ -17,6 +17,7 @@ use app\admin\model\order\order\Nihao;
 use app\admin\model\order\order\Voogueme;
 use app\admin\model\order\order\Zeelool;
 use app\admin\model\order\order\ZeeloolDe;
+use app\admin\model\order\order\ZeeloolJp;
 use app\admin\model\OrderNode;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
@@ -2376,7 +2377,7 @@ class Process extends Backend
      */
     public function add_order_coupon()
     {
-        $nihao = new ZeeloolDe();
+        $nihao = new ZeeloolJp();
         $order = new NewOrder();
         $nihao->where('coupon_code is not null')->field('entity_id,coupon_code,coupon_rule_name')->chunk(10000, function ($row) use ($order) {
             $row = collection($row)->toArray();
