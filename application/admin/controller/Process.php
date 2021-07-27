@@ -13,6 +13,7 @@ use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemOption;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
+use app\admin\model\order\order\Voogueme;
 use app\admin\model\order\order\Zeelool;
 use app\admin\model\order\order\ZeeloolDe;
 use app\admin\model\OrderNode;
@@ -2374,9 +2375,9 @@ class Process extends Backend
      */
     public function add_order_coupon()
     {
-        $zeelool = new Zeelool();
+        $voogueme = new Voogueme();
         $order = new NewOrder();
-        $zeelool->where('coupon_code is not null')->field('entity_id,coupon_code,coupon_rule_name')->chunk(10000, function ($row) use ($order) {
+        $voogueme->where('coupon_code is not null')->field('entity_id,coupon_code,coupon_rule_name')->chunk(10000, function ($row) use ($order) {
             $row = collection($row)->toArray();
             foreach ($row as $k => $v) {
                 $res = Queue::push("app\admin\jobs\Order", $v, "orderJobQueue");
