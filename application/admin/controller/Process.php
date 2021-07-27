@@ -2400,7 +2400,7 @@ class Process extends Backend
     public function edit_order_prescription()
     {
         $options = new NewOrderItemOption();
-        $options->where('index_type_price is null')
+        $options->where('index_type_price=0')
             ->where('site=1')
             ->where('order_id>1627188')
             ->field('id,item_id')
@@ -2410,13 +2410,13 @@ class Process extends Backend
                 $list = Db::connect('database.db_zeelool')
                     ->table('sales_flat_order_item')
                     ->where(['item_id'=> ['in',$item_id]])
-                    ->column('name,description','item_id');
+                    ->column('name,product_options','item_id');
                 $data = [];
                 foreach ($row as $k => $v) {
-                    $description = unserialize($list[$v['item_id']]['description']);
+                    $description = unserialize($list[$v['item_id']]['product_options']);
                     $name = $list[$v['item_id']]['name'];
                     $data[$k]['name'] = $name;
-                    $data[$k]['index_type_price'] = $description['info_buyRequest']['tmplens']['lenstype_price'] ?: 0;
+                    $data[$k]['index_type_price'] = $description['info_buyRequest']['tmplens']['lenstype_price'] > 0 ? $description['info_buyRequest']['tmplens']['lenstype_price'] : 0.1111;
                     $data[$k]['id'] = $v['id'];
                     echo $v['id'] . PHP_EOL;
                 }
