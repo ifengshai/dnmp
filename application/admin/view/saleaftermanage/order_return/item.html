@@ -190,13 +190,15 @@
                             <td class="lens-wrap-td">
                                 <ul class="lens-wrap">
                                     <li style="display:block;">
-                                        <span class="name">{$itemInfoList.index_type}</span>
+                                        {if $orderInfoList.site == 1}
+                                            <span class="name">{$itemInfoList.index_type}</span>
+                                        {/if}
                                         <span class="name">{$itemInfoList.web_lens_name}</span>
-                                        <span class="price">{$itemInfoList.index_price}</span>
+                                        <span class="price">{:round($itemInfoList.index_price,2)}</span>
                                     </li>
                                     <li>
                                         <span class="name">{$itemInfoList.coating_name}</span>
-                                        <span>{$itemInfoList.coating_price}</span>
+                                        <span>{:round($itemInfoList.coating_price,2)}</span>
                                     </li>
                                 </ul>
                             </td>
