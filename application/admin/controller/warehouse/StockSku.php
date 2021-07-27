@@ -134,9 +134,11 @@ class StockSku extends Backend
                 $warehouse_area = Db::name('warehouse_area')->where('id', $params['area_id'])->find();
                 //拣货货区一个库位号只能有一个sku
                 //拣货区一个sku 只能有一个库位
+                $where = [];
                 if ($warehouse_area['type'] != 2) {
                     //判断选择的库位是否已存在
                     $map['a.store_id'] = $params['store_id'];//库位id
+                    $where['a.sku'] = $params['sku'];
                 } else {
                     $map['b.area_id'] = $params['area_id'];
                 }
@@ -154,11 +156,13 @@ class StockSku extends Backend
 
                 unset($map['a.sku']);
                 $map['a.store_id'] = $params['store_id'];//库位id
-                $count = $this->model->alias('a')->where($map)->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->count();
+                $count = $this->model->alias('a')
+                    ->where($map)
+                    ->where($where)
+                    ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')->count();
                 if ($count > 0) {
                     $this->error('库位已绑定！！');
                 }
-
 
                 if ($store_house['area_id'] != $params['area_id']) {
                     $this->error('库位不在当前选择库区！！');
