@@ -1577,6 +1577,7 @@ class OrderData extends Backend
         //斜视值大于1 默认为定制片
         if ($params['od_pv'] >= 1 || $params['os_pv'] >= 1 || $params['od_pv_r'] >= 1 || $params['os_pv_r'] >= 1) {
             $arr['order_prescription_type'] = 3;
+            return $arr;
         }
 
         //仅镜框
