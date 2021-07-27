@@ -2424,7 +2424,7 @@ class Inventory extends Backend
                     ->setDec('stock', $original_number);
 
                 //记录库存日志
-                $_stock_log->setData([
+                $_stock_log->create([
                     'type'                      => 2,
                     'site'                      => $order_platform,
                     'modular'                   => 1 == $type ? 9 : 8,
