@@ -840,7 +840,7 @@ class SaleAfterTask extends Model
         }
 
         //求出用户的等级
-        $customer_group_code = $user->alias('a')->join(['fa_web_group' => 'b'], 'a.group_id=b.id')->where(['a.email' => $customer_email])->value('b.customer_group_code');
+        $customer_group_code = $user->alias('a')->join(['fa_web_group' => 'b'], 'a.group_id=b.id')->where(['a.email' => $customer_email])->where('a.site',$order_platform)->where('b.site',0)->value('b.customer_group_code');
         //如果是z站或者v站的话求出是否存在VIP订单
         if ($order_platform < 3) {
             $order_vip = $vip->where(['customer_email' => $customer_email])->field('web_id as id,customer_email,order_number,order_amount,order_status,order_type,start_time,end_time,is_active_status')->select();
