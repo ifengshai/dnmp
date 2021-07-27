@@ -2390,4 +2390,41 @@ class Process extends Backend
         });
         echo "ok";
     }
+
+    /**
+     * @author wangpenglei
+     * @date   2021/7/27 13:48
+     */
+    public function edit_order_prescription()
+    {
+        $options = new NewOrderItemOption();
+        $options->where('index_type_price is null')
+            ->where('site=1')
+            ->where('order_id>1627188')
+            ->field('id,item_id')
+            ->chunk(10000, function ($row) use ($options) {
+                $row = collection($row)->toArray();
+                $item_id = array_column($row,'item_id');
+                $list = Db::connect('database.db_zeelool')
+                    ->table('sales_flat_order_item')
+                    ->where(['item_id'=> ['in',$item_id]])
+                    ->column('name,description','item_id');
+                $data = [];
+                foreach ($row as $k => $v) {
+                    $description = unserialize($list[$v['item_id']]['description']);
+                    $name = $list[$v['item_id']]['name'];
+                    $data[$k]['name'] = $name;
+                    $data[$k]['index_type_price'] = $description['info_buyRequest']['tmplens']['lenstype_price'] ?: 0;
+                    $data[$k]['id'] = $v['id'];
+                    echo $v['id'] . PHP_EOL;
+                }
+
+                if ($options) {
+                    $options->saveAll($data);
+                }
+            });
+
+    }
+
+
 }
