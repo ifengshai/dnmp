@@ -2016,6 +2016,12 @@ class Distribution extends Backend
             $map['c.check_status'] = 1;
             unset($filter['check_time']);
         }
+        if ($filter['created_at']) {
+            $createdAt = explode(' - ', $filter['created_at']);
+            $map['b.created_at'] = ['between', [strtotime($createdAt[0]), strtotime($createdAt[1])]];
+            //订单创建时间
+            unset($filter['created_at']);
+        }
         unset($filter);
 
         $headList = [
@@ -2023,9 +2029,11 @@ class Distribution extends Backend
             '子单号',
             '站点',
             '订单类型',
+            '订单状态',
             '操作时间',
             '审单时间',
-            '操作人',
+            '配镜片完成操作人',
+            '加工完成操作人',
         ];
 
         //站点列表
@@ -2051,7 +2059,6 @@ class Distribution extends Backend
         $map['c.is_split'] = 0;
         //非重新下单
         $map['c.is_repeat'] = 0;
-        $distributionLog = new DistributionLog();
         $count = $this->_new_order_item_process->alias('a')
             ->where($map)
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
@@ -2061,7 +2068,7 @@ class Distribution extends Backend
 
             $list = $this->_new_order_item_process
                 ->alias('a')
-                ->field('a.id,b.increment_id,a.item_order_number,a.site,b.order_type,c.check_time')
+                ->field('a.id,b.increment_id,a.item_order_number,a.site,b.order_type,c.check_time,b.status')
                 ->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->join(['fa_order_process' => 'c'], 'a.order_id=c.order_id')
@@ -2069,7 +2076,8 @@ class Distribution extends Backend
                 ->select();
             $list = collection($list)->toArray();
             $ids = array_column($list, 'id');
-            $log = $distributionLog->where(['distribution_node' => 3, 'item_process_id' => ['in', $ids]])->column('*', 'item_process_id');
+            $log = (new DistributionLog())->where(['distribution_node' => 3, 'item_process_id' => ['in', $ids]])->column('*', 'item_process_id');
+            $processingLog = (new DistributionLog())->where(['distribution_node' => 4, 'item_process_id' => ['in', $ids]])->column('*', 'item_process_id');
             $data = [];
             foreach ($list as $k => $v) {
                 $data[$k]['increment_id'] = $v['increment_id'];
@@ -2109,9 +2117,11 @@ class Distribution extends Backend
                 }
 
                 $data[$k]['order_type'] = $v['order_type'];
+                $data[$k]['order_status'] = $v['status'];
                 $data[$k]['node_time'] = $log[$v['id']]['create_time'] ? date('Y-m-d H:i:s', $log[$v['id']]['create_time']) : '';
                 $data[$k]['check_time'] = $v['check_time'] ? date('Y-m-d H:i:s', $v['check_time']) : '';
                 $data[$k]['create_person'] = $log[$v['id']]['create_person'];
+                $data[$k]['processing_end_person'] = $processingLog[$v['id']]['create_person'];
             }
 
             if ($i > 0) {

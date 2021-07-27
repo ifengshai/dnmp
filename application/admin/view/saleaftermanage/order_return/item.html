@@ -95,16 +95,16 @@
 <div class="order-list-wrap">
     <h2>订单信息列表</h2>
     <div class="table-responsive">
-        <ul class="order-list" >
+        <ul class="order-list">
             <li style="width: 3%">类型</li>
             <li style="width: 7%">订单号</li>
+            <li>所属仓库</li>
             <li style="width: 5%">物流渠道</li>
             <li style="width: 5%">头程单号</li>
             <!--            <li class="num" style="width: 150px">快递单号</li>-->
-            <li  style="width: 7%">快递单号</li>
+            <li style="width: 7%">快递单号</li>
             <li style="width: 5%">快递名称</li>
             <li style="width: 8%">订单状态</li>
-            <li style="width: 5%;">更换<br>地址</li>
             <li style="width: 3%">数量</li>
             <li style="width: 3%"> 币种</li>
             <li style="width: 5%">原币种<br>支付金额</li>
@@ -123,21 +123,23 @@
 
         {foreach name="orderInfoResult" item="orderInfoList"}
 
-        <ul class="order-list"  >
-            <li  style="width: 3%"class="normal">{$orderInfoList.order_type}</li>
+        <ul class="order-list">
+            <li style="width: 3%" class="normal">{$orderInfoList.order_type}</li>
             <li style="width: 7%">{$orderInfoList.increment_id}</li>
+            <li>{:$orderInfoList['stock_id'] == 2 ? '丹阳':'郑州'}</li>
             <li style="width: 5%">{$orderInfoList.agent_way_title}</li>
             <!--            <li class="num">-->
             <li style="width: 5%">
                 <a href="javascript:void(0)" class="track-number"
                    data-id='{$orderInfoList.entity_id}'>{$orderInfoList.shipment_num}</a></li>
 
-            <li style="width: 7%;"  class="option"  >
-                <button type="button" class="logistics"  data-id="{$orderInfoList.entity_id}" style="white-space: normal !important;" >{$orderInfoList.track_number}</button>
+            <li style="width: 7%;" class="option">
+                <button type="button" class="logistics" data-id="{$orderInfoList.entity_id}"
+                        style="white-space: normal !important;">{$orderInfoList.track_number}
+                </button>
             </li>
-            <li style="width: 5%">{$orderInfoList.title}</li>
+            <li style="width: 5%">{$orderInfoList.shipment_type}</li>
             <li style="width: 8%">{$orderInfoList.status}</li>
-            <li style="width: 5%">{:$orderInfoList['is_modify_address'] == 1 ? '是' : '否'}</li>
             <li style="width: 3%">{$orderInfoList.total_qty_ordered}</li>
             <li style="width: 3%">{$orderInfoList.order_currency_code}</li>
             <li style="width: 5%">{:round($orderInfoList.grand_total,2)}</li>
@@ -145,9 +147,9 @@
             <li style="width: 5%">{$orderInfoList.coupon_code}</li>
             <li style="width: 4%">{$orderInfoList.coupon_rule_name}</li>
             <li style="width:3%">{:round($orderInfoList.mw_rewardpoint,2)}</li>
-            <li style="width: 3%">{:round($orderInfoList.mw_rewardpoint_discount_show,2)}</li>
+            <li style="width: 3%">{:round($orderInfoList.mw_rewardpoint_discount,2)}</li>
             <li style="width: 3%">{:round($orderInfoList.base_shipping_amount,2)}</li>
-            <li style="width: 5%">{$orderInfoList.shipping_description}</li>
+            <li style="width: 5%">{$orderInfoList.shipping_title}</li>
             <li style="width:5%">{$orderInfoList.created_at}</li>
             <li style="width: 5%">{$orderInfoList.signing_time}</li>
             <li style="width: 5%" class="option">
@@ -180,25 +182,22 @@
                             <td>{:$itemInfoList.item_order_number}</td>
                             <td>
                                 <ul class="product-info">
-                                    <li>{$itemInfoList.name}</li>
-                                    <li>SKU：{$itemInfoList.sku} </li>
-                                    <li>Color：{$itemInfoList.options[0]['value']}</li>
-                                    <li>Qty：{:round($itemInfoList.qty_ordered)}</li>
+                                    <li>SKU：{$itemInfoList.sku}</li>
+                                    <li>Color：{$itemInfoList.frame_color}</li>
+                                    <li>Qty：{$itemInfoList.qty}</li>
                                 </ul>
                             </td>
                             <td class="lens-wrap-td">
-                                {if $itemInfoList.index_type || $itemInfoList.coatiing_name}
+                                {if $itemInfoList.index_type || $itemInfoList.coating_name}
                                 <ul class="lens-wrap">
                                     <li style="display:block;">
-                                        <span class="name">{$itemInfoList.lenstype_data_name}</span>
-                                        <span class="price">{$itemInfoList.lenstype_base_price}</span>
                                         <span class="name">{$itemInfoList.index_type}</span>
+                                        <span class="name">{$itemInfoList.web_lens_name}</span>
                                         <span class="price">{$itemInfoList.index_price}</span>
-
                                     </li>
                                     <li>
-                                        <span class="name">{$itemInfoList.coatiing_name}</span>
-                                        <span>{$itemInfoList.coatiing_price}</span>
+                                        <span class="name">{$itemInfoList.coating_name}</span>
+                                        <span>{$itemInfoList.coating_price}</span>
                                     </li>
                                 </ul>
                                 {/if}
@@ -207,7 +206,8 @@
                                 <table>
                                     <tr>
                                         <th class="type" colspan="5">
-                                            {$itemInfoList.prescription_type}</th>
+                                            {$itemInfoList.prescription_type}
+                                        </th>
                                     </tr>
                                     <tr>
                                         <th></th>
@@ -221,20 +221,14 @@
                                         <td>{$itemInfoList.od_sph}</td>
                                         <td>{:urldecode($itemInfoList.od_cyl)}</td>
                                         <td>{$itemInfoList.od_axis}</td>
-                                        {if $itemInfoList.total_add}
-                                        <td rowspan="2">{$itemInfoList.total_add}</td>
-                                        {else/}
                                         <td>{$itemInfoList.od_add}</td>
-                                        {/if}
                                     </tr>
                                     <tr>
                                         <th>OS</th>
                                         <td>{$itemInfoList.os_sph}</td>
                                         <td>{:urldecode($itemInfoList.os_cyl)}</td>
                                         <td>{$itemInfoList.os_axis}</td>
-                                        {if !$itemInfoList.total_add}
                                         <td>{$itemInfoList.os_add}</td>
-                                        {/if}
                                     </tr>
                                     <tr>
                                         <th>PD</th>
@@ -277,9 +271,9 @@
                             <td>{:round($itemInfoList.frame_price,2)}</td>
                             <td>{:round($itemInfoList.lenstype_base_price,2)}</td>
                             <td>{:round($itemInfoList.index_price,2)}</td>
-                            <td>{:round($itemInfoList.original_price,2)}</td>
-                            <td>{:round($itemInfoList.discount_amount,2)}</td>
-                            <td>{:round($itemInfoList['base_row_total']-$itemInfoList['discount_amount'],2)}</td>
+                            <td>{:round($itemInfoList.frame_regural_price,2)}</td>
+                            <td>{:round($itemInfoList.base_discount_amount,2)}</td>
+                            <td>{:round($itemInfoList['base_row_total']-$itemInfoList['base_discount_amount'],2)}</td>
                             <td>{$itemInfoList.stock}</td>
                         </tr>
                         {/foreach}
@@ -293,7 +287,7 @@
                         <ul>
                             <li>
                                 <span>支付方式:</span>
-                                <em> {$orderInfoList.method}</em>
+                                <em> {$orderInfoList.payment_method}</em>
                             </li>
                             <li>
                                 <span>last trans id:</span>
@@ -311,7 +305,6 @@
                     </div>
                     <div>
                         <h3>地址信息</h3>
-                        <!-- <img class="edit" src="../../web/edit.png" alt=""> -->
                         <dl>
                             {foreach $orderInfoList.address as $value}
                             {php}
@@ -485,7 +478,8 @@
                             {volist name="$email_select" id="vo"}
                             <tr>
                                 <td>{$vo.ze_id}</td>
-                                <td><a href="{:url('zendesk/zendesk/edit?ids='.$vo['ze_id'])}" target="_blank" >{$vo.ticket_id}</a></td>
+                                <td><a href="{:url('zendesk/zendesk/edit?ids='.$vo['ze_id'])}" target="_blank">{$vo.ticket_id}</a>
+                                </td>
                                 <td>{$vo.subject}</td>
                                 <td>{$vo.ze_status}</td>
                                 <td>{$vo.to_email}</td>
@@ -513,7 +507,6 @@
 {/notempty}
 
 
-
 {notempty name="customerInfo.order_vip"}
 <div class="order-list-wrap vip-wrap ">
     <h2>VIP会员订单列表</h2>
@@ -536,7 +529,8 @@
                 <td style="text-align: center; vertical-align: middle;">{$order_vip.start_time}</td>
                 <td style="text-align: center; vertical-align: middle;">{$order_vip.end_time}</td>
                 <td style="text-align: center; vertical-align: middle;">{:$order_vip.is_active_status ==
-                    1 ? '正常' : '禁用'}</td>
+                    1 ? '正常' : '禁用'}
+                </td>
 
             </tr>
             {/foreach}
@@ -556,7 +550,8 @@
         <tr>
             <th colspan="16"
                 style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">
-                协同任务列表</th>
+                协同任务列表
+            </th>
         </tr>
         <tr>
             <!-- <th style="text-align: center; vertical-align: middle;">序号</th> -->
@@ -585,7 +580,8 @@
             <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.synergy_order_id}
             </td>
             <td style="text-align: center; vertical-align: middle;">
-                {$synergyTaskList.synergy_order_number}</td>
+                {$synergyTaskList.synergy_order_number}
+            </td>
             <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.order_status}</td>
             <td style="text-align: center; vertical-align: middle;">{$synergyTaskList.order_platform}
             </td>
@@ -614,7 +610,8 @@
         <tr>
             <th colspan="16"
                 style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">
-                售后任务列表</th>
+                售后任务列表
+            </th>
         </tr>
         <tr>
             <!-- <th style="text-align: center; vertical-align: middle;">序号</th> -->
@@ -672,7 +669,8 @@
         <tr>
             <th colspan="16"
                 style="font-size:16px;text-align: center; vertical-align: middle;background-color: #cccccc;">
-                退货任务列表</th>
+                退货任务列表
+            </th>
         </tr>
         <tr>
             <th style="text-align: center; vertical-align: middle;">序号</th>
@@ -690,7 +688,8 @@
         <tr>
             <td style="text-align: center; vertical-align: middle;">{$orderReturnList.id}</td>
             <td style="text-align: center; vertical-align: middle;">
-                {$orderReturnList.return_order_number}</td>
+                {$orderReturnList.return_order_number}
+            </td>
             <td style="text-align: center; vertical-align: middle;">{$orderReturnList.increment_id}</td>
             <td style="text-align: center; vertical-align: middle;">{$orderReturnList.order_platform}
             </td>

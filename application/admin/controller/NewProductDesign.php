@@ -21,6 +21,7 @@ use think\exception\PDOException;
 use think\exception\ValidateException;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\NewProductDesignLog;
+use think\Model;
 
 /**
  * 选品设计管理
@@ -103,6 +104,14 @@ class NewProductDesign extends Backend
             }
             if ($filter['sku']) {
                 $map['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
+            }
+            if ($filter['is_spot']) {
+                $sku = $Item
+                    ->where('is_spot',$filter['is_spot'])
+                    ->column('sku');
+                $sku = array_unique($sku);
+                unset($filter['is_spot']);
+                $map['a.sku'] = ['in', $sku];
             }
 
             if ($filter['site'] || $filter['item_status'] || $filter['is_new']){
@@ -198,7 +207,7 @@ class NewProductDesign extends Backend
             $skuList = array_column($list,'sku');
             $itemPlatform = new ItemPlatformSku();
             $platStock = $itemPlatform->where('sku','in',$skuList)->field('stock,platform_type,sku')->select();
-            $itemStatusIsNew = $Item->where('sku','in',$skuList)->field('sku,item_status,is_new,available_stock,category_id')->select();
+            $itemStatusIsNew = $Item->where('sku','in',$skuList)->field('sku,item_status,is_new,available_stock,category_id,is_spot')->select();
             $itemStatusIsNew = collection($itemStatusIsNew)->toArray();
             $itemStatusIsNew = array_column($itemStatusIsNew,null,'sku');
             $platStock = collection($platStock)->toArray();
@@ -214,6 +223,7 @@ class NewProductDesign extends Backend
                 }
 
                 $list[$key]['item_status'] =$itemStatusIsNew[$item['sku']]['item_status'];
+                $list[$key]['is_spot'] =$itemStatusIsNew[$item['sku']]['is_spot'];
 
                 $list[$key]['zeelool'] = array_reduce($platStock,function($carry,$val)use($item){
                     if ($val['sku'] == $item['sku'] && $val['platform_type'] == 1){
@@ -363,30 +373,34 @@ class NewProductDesign extends Backend
     //录尺寸
     public function record_size($ids =null)
     {
+        $item = new Item();
         $itemAttribute = new ItemAttribute();
         if ($this->request->post()){
             $data = $this->request->post();
-            if ($data['attributeType'] ==1){
-                if ($data['row']['frame_height'] < 0.1){
-                    $this->error('请输入正确的镜框高数值');
-                }
-                if($data['row']['frame_bridge']<0.1){
-                    $this->error('请输入正确的桥数值');
-                }
-                if($data['row']['frame_temple_length']<0.1){
-                    $this->error('请输入正确的镜腿长数值');
-                }
-                if($data['row']['frame_length']<0.1){
-                    $this->error('请输入正确的镜架总长数值');
-                }
-                if($data['row']['frame_weight']<0.1){
-                    $this->error('请输入正确的重量数值');
-                }
-                if($data['row']['mirror_width']<0.1){
-                    $this->error('请输入正确的镜面宽数值');
-                }
-
-            }
+            $attributeType = $item->where('id',$data['goodsId'])
+                ->field('id,category_id')
+                ->find();
+//            if ($data['attributeType'] ==1){
+//                if ($data['row']['frame_height'] < 0.1){
+//                    $this->error('请输入正确的镜框高数值');
+//                }
+//                if($data['row']['frame_bridge']<0.1){
+//                    $this->error('请输入正确的桥数值');
+//                }
+//                if($data['row']['frame_temple_length']<0.1){
+//                    $this->error('请输入正确的镜腿长数值');
+//                }
+//                if($data['row']['frame_length']<0.1){
+//                    $this->error('请输入正确的镜架总长数值');
+//                }
+//                if($data['row']['frame_weight']<0.1){
+//                    $this->error('请输入正确的重量数值');
+//                }
+//                if($data['row']['mirror_width']<0.1){
+//                    $this->error('请输入正确的镜面宽数值');
+//                }
+//
+//            }
 //            if ($data['attributeType'] ==32){
 //                if($data['row']['box_height']<0.1){
 //                    $this->error('请输入正确的高度数值');
@@ -449,7 +463,7 @@ class NewProductDesign extends Backend
             }
             $this->success('操作成功');
         }
-        $item = new Item();
+
         $value = $this->model->get($ids);
         $where['sku'] = $value->sku;
         $data = $item->where($where)

@@ -3,12 +3,16 @@
 namespace app\admin\controller;
 
 use app\admin\controller\zendesk\Notice;
+use app\admin\model\finance\FinanceCost;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\lens\LensPrice;
 use app\admin\model\operatedatacenter\DatacenterDay;
+use app\admin\model\order\Order;
 use app\admin\model\order\order\NewOrder;
+use app\admin\model\order\order\NewOrderItemOption;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\OrderNode;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
@@ -832,7 +836,7 @@ class Process extends Backend
         $list = db('zz_temp2')->select();
         $storehouse = new \app\admin\model\warehouse\StockHouse();
         foreach ($list as $k => $v) {
-            $storehouse->where(['type' => 1,'stock_id' => 1, 'area_id' => 3, 'coding' => $v['store_house']])->update(['picking_sort' => $v['sort']]);
+            $storehouse->where(['type' => 1, 'stock_id' => 1, 'area_id' => 3, 'coding' => $v['store_house']])->update(['picking_sort' => $v['sort']]);
         }
     }
 
@@ -1336,12 +1340,12 @@ class Process extends Backend
                 ->select();
             /** @var Zendesk $ticket */
             foreach ($zendeskTickets as $ticket) {
-                echo $i.'->'.$ticket->type.'->';
+                echo $i . '->' . $ticket->type . '->';
                 $isPushed = Queue::push("app\admin\jobs\Zendesk", $ticket, "zendeskJobQueue");
                 if ($isPushed !== false) {
-                    echo $ticket->ticket_id."->推送成功".PHP_EOL;
+                    echo $ticket->ticket_id . "->推送成功" . PHP_EOL;
                 } else {
-                    echo $ticket->ticket_id."->推送失败".PHP_EOL;
+                    echo $ticket->ticket_id . "->推送失败" . PHP_EOL;
                 }
             }
         }
@@ -1404,6 +1408,7 @@ class Process extends Backend
             }
         }
     }
+
     public function test012()
     {
         $type = 3;
@@ -1419,6 +1424,7 @@ class Process extends Backend
             }
         }
     }
+
     public function test013()
     {
         $type = 1;
@@ -1652,7 +1658,7 @@ class Process extends Backend
         $productbarcode = new ProductBarCodeItem();
         $headList = ['SKU', '仓库', '总库存', '仓库实时库存', '大货区库存', '货架区库存', '拣货区库存', '最近1个月的销量'];
         $z = 0;
-        $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->chunk(1000, function ($row) use ($productbarcode,$itemplatformsku,$order,$headList,&$z) {
+        $this->item->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])->chunk(1000, function ($row) use ($productbarcode, $itemplatformsku, $order, $headList, &$z) {
             $data = [];
             $stock_id = [1, 2];
             $i = 0;
@@ -1682,25 +1688,25 @@ class Process extends Backend
                     $data[$i]['stock_id'] = $v == 1 ? '郑州' : '丹阳';
                     $data[$i]['stock'] = $val['stock'];
                     $data[$i]['real_stock'] = $productbarcode
-                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1])
+                        ->where(['sku' => $val['sku'], 'stock_id' => $v, 'library_status' => 1])
                         ->where("item_order_number=''")
                         ->count();
 
                     $dahuo_location_id = $v == 1 ? 1 : 4;
                     $data[$i]['dahuo_stock'] = $productbarcode
-                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1, 'location_id' => $dahuo_location_id])
+                        ->where(['sku' => $val['sku'], 'stock_id' => $v, 'library_status' => 1, 'location_id' => $dahuo_location_id])
                         ->where("item_order_number=''")
                         ->count();
 
                     $huojia_location_id = $v == 1 ? 2 : 5;
                     $data[$i]['huojia_stock'] = $productbarcode
-                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1, 'location_id' => $huojia_location_id])
+                        ->where(['sku' => $val['sku'], 'stock_id' => $v, 'library_status' => 1, 'location_id' => $huojia_location_id])
                         ->where("item_order_number=''")
                         ->count();
 
                     $jianhuojia_location_id = $v == 1 ? 3 : 6;
                     $data[$i]['jianhuojia_stock'] = $productbarcode
-                        ->where(['sku' => $val['sku'],'stock_id' => $v,'library_status' => 1, 'location_id' => $jianhuojia_location_id])
+                        ->where(['sku' => $val['sku'], 'stock_id' => $v, 'library_status' => 1, 'location_id' => $jianhuojia_location_id])
                         ->where("item_order_number=''")
                         ->count();
                     $data[$i]['xiaoliang'] = $order_num;
@@ -1918,10 +1924,11 @@ class Process extends Backend
 
 
     }
+
     public function test11111111()
     {
-        $dayBefore = date('Y-m-d', strtotime('-2 day','1624899600'));
-        $dayNow = date('Y-m-d', strtotime('-1 day','1624899600'));
+        $dayBefore = date('Y-m-d', strtotime('-2 day', '1624899600'));
+        $dayNow = date('Y-m-d', strtotime('-1 day', '1624899600'));
         echo $dayBefore . '---- ' . $dayNow;
     }
 
@@ -1937,40 +1944,43 @@ class Process extends Backend
      */
     public function deliveryTest()
     {
-        ini_set('memory_limit','-1');
-        $orderNodes = OrderNode::where('shipment_data_type','加诺')->whereTime('delivery_time','>','2021-06-20 00:00:00')->select();
-        $orderNumbers = array_column($orderNodes,'order_number');
-        $orders = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id','in',$orderNumbers)->field('increment_id,country_id,region')->select();
-        foreach($orderNodes as $orderNode) {
-            foreach($orders as $order) {
-                if($order['increment_id'] != $orderNode['order_number']) continue;
-                $shipment_data_type='加诺-其他';
-                if (!empty($order['country_id']) && $order['country_id']=='US'){
+        ini_set('memory_limit', '-1');
+        $orderNodes = OrderNode::where('shipment_data_type', '加诺')->whereTime('delivery_time', '>', '2021-06-20 00:00:00')->select();
+        $orderNumbers = array_column($orderNodes, 'order_number');
+        $orders = Db::connect('database.db_mojing_order')->table('fa_order')->where('increment_id', 'in', $orderNumbers)->field('increment_id,country_id,region')->select();
+        foreach ($orderNodes as $orderNode) {
+            foreach ($orders as $order) {
+                if ($order['increment_id'] != $orderNode['order_number']) {
+                    continue;
+                }
+                $shipment_data_type = '加诺-其他';
+                if (!empty($order['country_id']) && $order['country_id'] == 'US') {
                     //美国
-                    $shipment_data_type='加诺-美国';
-                    if ($order['region']=='PR'||$order['region']=='Puerto Rico'){
+                    $shipment_data_type = '加诺-美国';
+                    if ($order['region'] == 'PR' || $order['region'] == 'Puerto Rico') {
                         //波多黎各
-                        $shipment_data_type ='加诺-波多黎各';
+                        $shipment_data_type = '加诺-波多黎各';
                     }
                 }
-                if (!empty($order['country_id']) && $order['country_id']=='CA'){
+                if (!empty($order['country_id']) && $order['country_id'] == 'CA') {
                     //加拿大
-                    $shipment_data_type ='加诺-加拿大';
+                    $shipment_data_type = '加诺-加拿大';
                 }
 
-                if (!empty($order['country_id']) && $order['country_id']=='PR'){
+                if (!empty($order['country_id']) && $order['country_id'] == 'PR') {
                     //波多黎各
-                    $shipment_data_type ='加诺-波多黎各';
+                    $shipment_data_type = '加诺-波多黎各';
                 }
-                echo $shipment_data_type .PHP_EOL;
-                echo $orderNode['id'] .PHP_EOL;
-                echo $orderNode['order_number'] .PHP_EOL;
+                echo $shipment_data_type . PHP_EOL;
+                echo $orderNode['id'] . PHP_EOL;
+                echo $orderNode['order_number'] . PHP_EOL;
                 //修改节点信息
-                OrderNode::where('id',$orderNode['id'])->setField('shipment_data_type',$shipment_data_type);
+                OrderNode::where('id', $orderNode['id'])->setField('shipment_data_type', $shipment_data_type);
             }
         }
     }
 
+<<<<<<< HEAD
     /**
      * 王伟加诺补发的订单
      * @throws \think\db\exception\DataNotFoundException
@@ -2055,6 +2065,328 @@ class Process extends Backend
         }
 
         return $step_arr ?: [];
+=======
+    public function editCost()
+    {
+        $finanace = new FinanceCost();
+        $order = new NewOrder();
+        $list = $finanace->where('type', 1)->where('bill_type', 1)->where('site', 13)->select();
+        foreach ($list as $k => $v) {
+            $grand_total = $order->where('site', 13)->where('increment_id', $v['order_number'])->value('grand_total');
+            $finanace->where('id', $v['id'])->update(['order_money' => $grand_total, 'income_amount' => $grand_total]);
+            echo $v['order_number'] . "\n";
+        }
+        echo "ok";
+    }
+
+    public function editOrder()
+    {
+        $order_number = [
+            '430360882',
+            '400698872',
+            '430389123',
+            '430389146',
+            '400692021',
+            '430390599',
+            '130128550',
+            '430392133',
+            '400691738',
+            '430390848',
+            '130128086',
+            '400694633',
+            '130127986',
+            '400695134',
+            '430388991',
+            '400694718',
+            '100285033',
+            '130128541',
+            '100285305',
+        ];
+        $orderprocess = new NewOrderProcess();
+        $orderitemprocess = new NewOrderItemProcess();
+        $list = $orderprocess->where(['increment_id' => ['in', $order_number]])->select();
+        foreach ($list as $k => $v) {
+            $orderprocess->where('id', $v['id'])->update(['combine_status' => 1, 'combine_time' => time(), 'store_house_id' => 0]);
+            $orderitemprocess->where('order_id', $v['order_id'])
+                ->where('site', $v['site'])
+                ->where('distribution_status', 8)
+                ->update(['distribution_status' => 9]);
+        }
+
+
+    }
+
+    /**
+     * @author wangpenglei
+     * @date   2021/7/26 11:04
+     */
+    public function add_order_process()
+    {
+        $order = new NewOrder();
+        $orderProcess = new NewOrderProcess();
+        $list = $order->where('id', '>', 1780000)->select();
+        foreach ($list as $k => $v) {
+            $count = $orderProcess->where('order_id', $v['id'])->count();
+            if ($count < 1) {
+                $order_params = [];
+                $order_params['site'] = $v['site'];
+                $order_params['order_id'] = $v['id'];
+                $order_params['entity_id'] = $v['entity_id'];
+                $order_params['increment_id'] = $v['increment_id'];
+                //插入订单处理表
+                $orderProcess->insert($order_params);
+            }
+            echo $k . "\n";
+        }
+        echo "ok";
+    }
+
+    public function order_process()
+    {
+        $entity_id = [
+            1021739,
+            1021740,
+            1021741,
+            1021742,
+            1021743,
+            1021744,
+            1021745,
+            1021746,
+            1021747,
+            1021748,
+            1021749,
+            1021750,
+            1021751,
+            1021752,
+            1021753,
+            1021754,
+            1021755,
+            1021756,
+            1021757,
+            1021758,
+            1021759,
+            1021760,
+            1021761,
+            1021762,
+            1021763,
+            1021764,
+            1021765,
+            1021766,
+            1021767,
+            1021768,
+            1021769,
+            1021770,
+            1021771,
+            1021772,
+            1021773,
+            1021774,
+            1021775,
+            1021776,
+            1021777,
+            1021778,
+            1021779,
+            1021780,
+            1021781,
+            1021782,
+            1021783,
+            1021784,
+            1021785,
+            1021786,
+            1021787,
+            1021788,
+            1021789,
+            1021790,
+            1021791,
+            1021792,
+            1021793,
+            1021794,
+            1021795,
+            1021796,
+            1021797,
+            1021798,
+            1021799,
+            1021800,
+            1021801,
+            1021802,
+            1021803,
+            1021804,
+            1021805,
+            1021806,
+            1021807,
+            1021808,
+            1021809,
+            1021810,
+            1021811,
+            1021812,
+            1021813,
+            1021814,
+            1021815,
+            1021816,
+            1021817,
+            1021818,
+            1021819,
+            1021820,
+            1021821,
+            1021822,
+            1021823,
+            1021824,
+            1021825,
+            1021826,
+            1021827,
+            1021828,
+            1021829,
+            1021830,
+            1021831,
+            1021832,
+            1021833,
+            1021834,
+            1021835,
+            1021836,
+            1021837,
+            1021838,
+            1021839,
+            1021840,
+            1021841,
+            1021842,
+            1021843,
+            1021844,
+            1021845,
+            1021846,
+            1021847,
+            1021848,
+            1021849,
+            1021850,
+            1021851,
+            1021852,
+            1021853,
+            1021854,
+            1021855,
+            1021856,
+            1021857,
+            1021858,
+            1021859,
+            1021860,
+            1021861,
+            1021862,
+            1021863,
+            1021864,
+            1021865,
+            1021866,
+            1021867,
+            1021868,
+            1021869,
+            1021870,
+            1021871,
+            1021872,
+            1021873,
+            1021874,
+            1021875,
+            1021876,
+            1021877,
+            1021878,
+            1021879,
+            1021880,
+            1021881,
+            1021882,
+            1021883,
+            1021884,
+            1021885,
+            1021886,
+            1021887,
+            1021888,
+            1021889,
+            1021890,
+            1021891,
+            1021892,
+            1021893,
+            1021894,
+            1021895,
+            1021896,
+            1021897,
+            1021898,
+            1021899,
+            1021900,
+            1021901,
+            1021902,
+            1021903,
+            1021904,
+            1021905,
+            1021906,
+            1021907,
+            1021908,
+            1021909,
+            1021910,
+            1021911,
+            1021912,
+            1021913,
+            1021914,
+            1021915,
+            1021916,
+            1021917,
+            1021918,
+            1021919,
+            1021920,
+            1021921,
+            1021922,
+            1021923,
+            1021924,
+            1021925,
+            1021926,
+            1021927,
+            1021928,
+            1021929,
+            1021930,
+            1021931,
+            1021932,
+            1021933,
+            1021934,
+            1021935,
+            1021936,
+            1021937,
+            1021938,
+            1021939,
+            1021940,
+            1021941,
+            1021942,
+            1021943,
+            1021944,
+            1021945,
+            1021946,
+            1021947,
+            1021948,
+            1021949,
+            1021950,
+            1021951,
+            1021952,
+            1021953,
+            1021954,
+            1021955,
+            1021956,
+            1021957,
+            1021958,
+            1021959,
+            1021960,
+            1021961,
+            1021962,
+            1021963,
+            1021964,
+            1021965,
+            1021966,
+            1021967,
+            1021968,
+        ];
+        $order = new NewOrder();
+        $orderProcess = new NewOrderProcess();
+        $orderItemProcess = new NewOrderItemProcess();
+        $orderItemOption = new NewOrderItemOption();
+        $list = $order->where(['entity_id' => ['in', $entity_id], 'site' => 1])->select();
+        foreach ($list as $k => $v) {
+            $orderItemProcess->where(['magento_order_id' => $v['entity_id'], 'site' => 1])->update(['order_id' => $v['id']]);
+            $orderItemOption->where(['magento_order_id' => $v['entity_id'], 'site' => 1])->update(['order_id' => $v['id']]);
+            $orderProcess->where(['entity_id' => $v['entity_id'], 'site' => 1, 'order_id' => ['<>', $v['id']]])->delete();
+        }
+
+>>>>>>> master
     }
 
 }
