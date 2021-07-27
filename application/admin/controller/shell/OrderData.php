@@ -551,6 +551,7 @@ class OrderData extends Backend
                                     $options['site'] = $site;
                                     $options['magento_order_id'] = $v['order_id'];
                                     $options['sku'] = $v['sku'];
+                                    $options['name'] = $v['name'] ?? '';
                                     $options['qty'] = $v['qty_ordered'];
                                     $options['base_row_total'] = $v['base_row_total'];
                                     $options['product_id'] = $v['product_id'];
