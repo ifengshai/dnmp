@@ -345,7 +345,11 @@ class SelfApi extends Api
         $this->success('提交成功', [], 200);
     }
 
-
+    /**
+     * 注册头程单号
+     * @author wangpenglei
+     * @date   2021/7/28 11:55
+     */
     public function headingLogistics()
     {
         if ($this->request->isPost()) {
@@ -358,7 +362,7 @@ class SelfApi extends Api
                 $this->error('缺少快递单号');
             }
             $carrier = $this->getCarrier($shipment_title);
-            $shipment_reg[0]['number'] = $track_number;
+            $shipment_reg[0]['number'] = trim($track_number);
             $shipment_reg[0]['carrier'] = $carrier['carrierId'];
             $track = $this->regitster17Track($shipment_reg);
 
