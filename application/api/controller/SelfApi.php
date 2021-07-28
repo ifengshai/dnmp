@@ -346,6 +346,34 @@ class SelfApi extends Api
     }
 
     /**
+     * 注册头程单号
+     * @author wangpenglei
+     * @date   2021/7/28 11:55
+     */
+    public function headingLogistics()
+    {
+        if ($this->request->isPost()) {
+            $shipment_title = $this->request->request('shipment_title'); //渠道名称
+            if (!$shipment_title) {
+                $this->error('缺少渠道参数');
+            }
+            $track_number = $this->request->request('track_number'); //快递单号
+            if (!$track_number) {
+                $this->error('缺少快递单号');
+            }
+            $carrier = $this->getCarrier($shipment_title);
+            $shipment_reg[0]['number'] = trim($track_number);
+            $shipment_reg[0]['carrier'] = $carrier['carrierId'];
+            $track = $this->regitster17Track($shipment_reg);
+
+            if (count($track['data']['rejected']) > 0) {
+                $this->error('物流接口注册失败！！', [], $track['data']['rejected']['error']['code']);
+            }
+            $this->success('提交成功', [], 200);
+        }
+    }
+
+    /**
      * 获取快递号
      *
      * @param $title

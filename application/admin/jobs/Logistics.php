@@ -31,19 +31,20 @@ class Logistics
 
     public function __construct()
     {
-        try{
+        try {
             //es配置
             $params = [
-                Env::get('es.es_host','127.0.0.1:9200')
+                Env::get('es.es_host', '127.0.0.1:9200'),
             ];
             //获取es的实例
             $this->esClient = ClientBuilder::create()->setHosts($params)->build();
             $this->esService = new EsService($this->esClient);
             $this->esFormatData = new EsFormatData();
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             Log::error('es:' . $e->getMessage());
         }
     }
+
     /**
      * fire方法是消息队列默认调用的方法
      *
@@ -64,7 +65,7 @@ class Logistics
                 }
             }
         } catch (\Throwable $throwable) {
-            Log::error(__CLASS__ . $throwable->getMessage().'-' . $throwable->getFile().'-' . $throwable->getLine());
+            Log::error(__CLASS__ . $throwable->getMessage() . '-' . $throwable->getFile() . '-' . $throwable->getLine());
             $job->delete();
         }
     }
@@ -79,6 +80,23 @@ class Logistics
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
             if (empty($order_node)) {
+                $count = Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $track_arr['data']['number'])->where('is_del', 1)->count();
+                if ($count > 0) {
+                    $courier_status = $track_arr['data']['track']['e'];
+                    $shipment_last_msg = $track_arr['data']['track']['z0']['z'];
+
+                    $params = [];
+                    $params['courier_status'] = $courier_status;
+                    $params['shipment_last_msg'] = $shipment_last_msg;
+                    $params['update_at'] = time();
+                    if ($courier_status == 40) {
+                        $signing_time = strtotime($track_arr['data']['track']['z0']['a']);
+                        $params['shipment_signing_time'] = $signing_time;
+                    }
+                    Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $track_arr['data']['number'])
+                        ->update(['courier_status' => $courier_status, 'shipment_last_msg' => $shipment_last_msg, 'update_at' => time()]);
+                }
+
                 return true;
             }
 
@@ -104,6 +122,7 @@ class Logistics
             $add['shipment_type'] = $order_node['shipment_type'];
             $add['shipment_data_type'] = $order_node['shipment_data_type'];
             $add['track_number'] = $track_arr['data']['number'];
+
             return $this->total_track_data($track_arr['data']['track'], $add);
 
         } else {
