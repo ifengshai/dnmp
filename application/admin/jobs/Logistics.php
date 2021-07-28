@@ -94,7 +94,7 @@ class Logistics
                         $params['shipment_signing_time'] = $signing_time;
                     }
                     Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $track_arr['data']['number'])
-                        ->update(['courier_status' => $courier_status, 'shipment_last_msg' => $shipment_last_msg, 'update_at' => time()]);
+                        ->update($params);
                 }
 
                 return true;
