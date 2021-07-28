@@ -76,7 +76,7 @@ class FinanceCost extends Model
         $params['createtime'] = time();
         //订单收入增加
         $res = $this->insert($params);
-        $this->process_complete_workorder($order_detail); //处理存在补价，退件，退款工单的核算
+//        $this->process_complete_workorder($order_detail); //处理存在补价，退件，退款工单的核算
     }
 
     /**
@@ -227,7 +227,7 @@ class FinanceCost extends Model
             $income_amount = $work_order_info['replenish_money'];
             $action_type = 1;
         }
-        if ($bill_type == 4) {//退件
+        if ($bill_type == 4 || $bill_type == 6) {//退件
             $income_amount = $work_order_info['refund_money'];
             $action_type = 2;
         }
