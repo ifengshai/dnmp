@@ -320,7 +320,9 @@ class CustomerService extends Backend
             $map['create_time'] = $rateWhere['create_time'] = ['between', [$sevenStartdate, $sevenEnddate]];
         }
         //总评论查询
-        $rateWhere['type'] = $platform;
+        if ($platform) {
+            $rateWhere['type'] = $platform;
+        }
         $rateMap = [];
         $rateMap[] = ['exp', Db::raw("rating = 'good' or rating = 'bad'")];
         $sumRate = Db::name('zendesk')
