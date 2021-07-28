@@ -2956,7 +2956,7 @@ class WorkOrderList extends Backend
                         $FinanceCost->return_order_subtract($receptInfo['work_id'], 3);
                     }
                     //退件或退款
-                    if (11 == $measure_choose_id || 2 == $measure_choose_id) {
+                    if (11 == $measure_choose_id) {
                         //退件退款收入核算冲减
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->return_order_subtract($receptInfo['work_id'], 4);
