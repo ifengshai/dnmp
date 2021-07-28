@@ -52,10 +52,11 @@ class OrderPrescriptionType extends Command
                 $type = 1;
                 //如果Z站全为仅镜框 则分到丹阳仓
                 $data['stock_id'] = 2;
-                $orderitemprocess->where('order_id', $value)->update(['stock_id' => 2]);
+                $orderitemprocess->where('order_id', $value)->update(['stock_id' => 2, 'wave_order_id' => 0]);
             }
 
             $data['order_prescription_type'] = $type;
+            $data['updated_at'] = time();
             $order->where('id', $value)->update($data);
             echo $value . ' is ok' . "\n";
             usleep(100000);
