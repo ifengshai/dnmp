@@ -2905,9 +2905,13 @@ class WorkOrderList extends Backend
                     $result = $this->model->handleRecept($receptInfo['id'], $receptInfo['work_id'], $receptInfo['measure_id'], $receptInfo['recept_group_id'], $params['success'], $params['note'], $receptInfo['is_auto_complete'], $params['barcode']);
                 }
                 if ($result !== false) {
-
+                    //查询选择的所有措施
+                    $measure_choose_ids = $_work_order_measure->where('work_id', $params['id'])
+                        ->where('operation_type', '<>', 2)
+                        ->column('measure_choose_id');
                     //措施表
                     $_work_order_measure = new WorkOrderMeasure();
+                    //查询当前措施
                     $measure_choose_id = $_work_order_measure->where('id', $receptInfo['measure_id'])->value('measure_choose_id');
                     if (3 == $measure_choose_id) {
                         //主单取消收入核算冲减
@@ -2961,6 +2965,14 @@ class WorkOrderList extends Backend
                         $FinanceCost = new FinanceCost();
                         $FinanceCost->return_order_subtract($receptInfo['work_id'], 4);
                     }
+
+                    //其他退款措施
+                    if (2 == $measure_choose_id && !array_intersect([3,15,19,18,8,11], $measure_choose_ids)) {
+                        $FinanceCost = new FinanceCost();
+                        $FinanceCost->return_order_subtract($receptInfo['work_id'], 6);
+                    }
+
+
                     $this->success();
                 } else {
                     $this->error(__('No rows were updated'));
@@ -3735,9 +3747,9 @@ EOF;
             $str = '';
             foreach ($orders as $k => $v) {
                 $sku = $itemPlatFormSku->getTrueSku($v['sku'], $v['site']);
-                $str .=  $sku . ",";
+                $str .= $sku . ",";
             }
-            $list[$key]['order_skus'] = trim($str,',');
+            $list[$key]['order_skus'] = trim($str, ',');
         }
 
         //查询用户id对应姓名
