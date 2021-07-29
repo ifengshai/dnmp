@@ -389,7 +389,7 @@ class SelfApi extends Api
                 $signing_time = strtotime($trackInfo['data']['track']['z0']['a']);
                 $params['shipment_signing_time'] = $signing_time;
             }
-            Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $trackInfo['data']['number'])
+            Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $track_number)
                 ->update($params);
 
             $this->success('提交成功', [], 200);
