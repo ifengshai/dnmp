@@ -371,9 +371,9 @@ class OrderReturn extends Backend
             if ($customer) {
                 foreach ($customer as $key => $item) {
                     //客户签收时间
-                     $orderNodeData = Db::table('fa_order_node')->where('order_number', $item['increment_id'])->find();
-                    $customer[$key]['signing_time'] = $orderNodeData->signing_time;
-                    $customer[$key]['shipment_type'] = $orderNodeData->shipment_type;
+                    $orderNodeData = Db::table('fa_order_node')->where('order_number', $item['increment_id'])->find();
+                    $customer[$key]['signing_time'] = $orderNodeData['signing_time'];
+                    $customer[$key]['shipment_type'] = $orderNodeData['shipment_type'];
                 }
             }
 
