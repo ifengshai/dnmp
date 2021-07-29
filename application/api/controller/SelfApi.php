@@ -346,6 +346,59 @@ class SelfApi extends Api
     }
 
     /**
+     *  查询快递单号
+     * @author wangpenglei
+     * @date   2021/7/29 13:38
+     */
+    public function getLogsitics()
+    {
+        if ($this->request->isPost()) {
+            $shipment_title = $this->request->request('shipment_title'); //渠道名称
+            if (!$shipment_title) {
+                $this->error('缺少渠道参数');
+            }
+            $track_number = $this->request->request('track_number'); //快递单号
+            if (!$track_number) {
+                $this->error('缺少快递单号');
+            }
+
+            $count = Db::connect('database.db_mojing_order')
+                ->table('fa_shipment')
+                ->where('shipment_num', $track_number)
+                ->where('is_del', 1)->count();
+            if ($count < 1) {
+                $this->error('未查询到头程数据');
+            }
+
+            $carrier = $this->getCarrier($shipment_title);
+            $trackingConnector = new TrackingConnector($this->apiKey);
+            $trackInfo = $trackingConnector->getTrackInfoMulti([
+                [
+                    'number'  => $track_number,
+                    'carrier' => $carrier['carrierId'],
+                ],
+            ]);
+
+            $courier_status = $trackInfo['data']['accepted']['track']['e'];
+            $shipment_last_msg = $trackInfo['data']['accepted']['track']['z0']['z'];
+            $params = [];
+            $params['courier_status'] = $courier_status;
+            $params['shipment_last_msg'] = $shipment_last_msg;
+            $params['update_at'] = time();
+            if ($courier_status == 40) {
+                $signing_time = strtotime($trackInfo['data']['track']['z0']['a']);
+                $params['shipment_signing_time'] = $signing_time;
+            }
+            Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $trackInfo['data']['number'])
+                ->update($params);
+
+            $this->success('提交成功', [], 200);
+        }
+
+
+    }
+
+    /**
      * 注册头程单号
      * @author wangpenglei
      * @date   2021/7/28 11:55
