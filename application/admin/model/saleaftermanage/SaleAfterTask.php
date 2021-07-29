@@ -842,7 +842,7 @@ class SaleAfterTask extends Model
         }
 
         //求出用户的等级
-        $customer_group_code = $user->alias('a')->join(['fa_web_group' => 'b'], 'a.group_id=b.id')->where(['a.email' => $customer_email])->where('a.site',$order_platform)->where('b.site',0)->value('b.customer_group_code');
+        $customer_group_code = $user->alias('a')->join(['fa_web_group' => 'b'], 'a.group_id=b.id')->where(['a.email' => $customer_email])->where('a.site', $order_platform)->where('b.site', 0)->value('b.customer_group_code');
         //如果是z站或者v站的话求出是否存在VIP订单
         if ($order_platform < 3) {
             $order_vip = $vip->where(['customer_email' => $customer_email])->field('web_id as id,customer_email,order_number,order_amount,order_status,order_type,start_time,end_time,is_active_status')->select();
@@ -893,6 +893,7 @@ class SaleAfterTask extends Model
 
             $result[$k]['workOrderList'] = $workOrderListResult['list'];
             $result[$k]['differencePriceList'] = $differencePriceList;
+            $result[$k]['order_type_id'] = $v['order_type'];
             switch ($v['order_type']) {
                 case 2:
                     $result[$k]['order_type'] = '<span style="color:#f39c12">批发</span>';
@@ -933,16 +934,17 @@ class SaleAfterTask extends Model
         $customer['customer_email'] = $customer_email;
         $customer['customer_name'] = $result[0]['customer_firstname'] . ' ' . $result[0]['customer_lastname'];
         $customer['success_counter'] = $customer['success_total'] = $customer['failed_counter'] = $customer['failed_total'] = 0;
-        $orderStatus = ['complete', 'processing', 'free_processing', 'delivered'];
+        $orderStatus = ['complete', 'processing', 'delivered'];
         foreach ($result as $key => $val) {
             //计算支付成功和失败次数
-            if (in_array($val['status'], $orderStatus)) {
+            if (in_array($val['status'], $orderStatus) && $val['order_type_id'] != 4) {
                 $customer['success_counter']++;
                 $customer['success_total'] += $val['base_grand_total'];
-            } else {
+            } elseif ($val['order_type_id'] != 4) {
                 $customer['failed_counter']++;
                 $customer['failed_total'] += $val['base_grand_total'];
             }
+
             //求出所有的订单号
             $result['increment_id'][] = $val['increment_id'];
             $result[$key]['additional_information'] = unserialize($val['additional_information']);
@@ -954,7 +956,6 @@ class SaleAfterTask extends Model
             $result[$key]['arr'] = [];
         }
         $result['info'] = $customer;
-
 
         return $result;
     }
