@@ -2185,7 +2185,7 @@ class Process extends Backend
                     $description = unserialize($list[$v['item_id']]['product_options']);
                     $name = $list[$v['item_id']]['name'];
                     $data[$k]['name'] = $name;
-                    $data[$k]['index_type_price'] = $description['info_buyRequest']['tmplens']['lenstype_price'] > 0 ? $description['info_buyRequest']['tmplens']['lenstype_price'] : 0.1111;
+                    $data[$k]['index_type_price'] = $description['info_buyRequest']['tmplens']['lenstype_price'] > 0 ? $description['info_buyRequest']['tmplens']['lenstype_price'] : 0;
                     $data[$k]['id'] = $v['id'];
                     echo $v['id'] . PHP_EOL;
                 }
