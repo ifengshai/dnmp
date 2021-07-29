@@ -362,13 +362,13 @@ class SelfApi extends Api
                 $this->error('缺少快递单号');
             }
 
-            $count = Db::connect('database.db_mojing_order')
-                ->table('fa_shipment')
-                ->where('shipment_num', $track_number)
-                ->where('is_del', 1)->count();
-            if ($count < 1) {
-                $this->error('未查询到头程数据');
-            }
+//            $count = Db::connect('database.db_mojing_order')
+//                ->table('fa_shipment')
+//                ->where('shipment_num', $track_number)
+//                ->where('is_del', 1)->count();
+//            if ($count < 1) {
+//                $this->error('未查询到头程数据');
+//            }
 
             $carrier = $this->getCarrier($shipment_title);
             $trackingConnector = new TrackingConnector($this->apiKey);
@@ -379,14 +379,15 @@ class SelfApi extends Api
                 ],
             ]);
 
-            $courier_status = $trackInfo['data']['accepted']['track']['e'];
-            $shipment_last_msg = $trackInfo['data']['accepted']['track']['z0']['z'];
+
+            $courier_status = $trackInfo['data']['accepted'][0]['track']['e'];
+            $shipment_last_msg = $trackInfo['data']['accepted'][0]['track']['z0']['z'];
             $params = [];
             $params['courier_status'] = $courier_status;
             $params['shipment_last_msg'] = $shipment_last_msg;
             $params['update_at'] = time();
             if ($courier_status == 40) {
-                $signing_time = strtotime($trackInfo['data']['track']['z0']['a']);
+                $signing_time = strtotime($trackInfo['data']['accepted'][0]['track']['z0']['a']);
                 $params['shipment_signing_time'] = $signing_time;
             }
             Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $track_number)
