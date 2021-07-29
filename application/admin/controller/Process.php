@@ -2171,7 +2171,7 @@ class Process extends Backend
         $options = new NewOrderItemOption();
         $options->where('index_type_price is null')
             ->where('site=1')
-            ->where('order_id>1500000')
+            ->where('order_id>1000000')
             ->field('id,item_id')
             ->chunk(10000, function ($row) use ($options) {
                 $row = collection($row)->toArray();
