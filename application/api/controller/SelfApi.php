@@ -350,7 +350,7 @@ class SelfApi extends Api
      * @author wangpenglei
      * @date   2021/7/29 13:38
      */
-    public function getLogsitics()
+    public function getLogistics()
     {
         if ($this->request->isPost()) {
             $shipment_title = $this->request->request('shipment_title'); //渠道名称
