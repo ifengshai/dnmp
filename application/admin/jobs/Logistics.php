@@ -212,7 +212,6 @@ class Logistics
                         'node_type'  => 10,
                     ];
 
-
                     $order_node_detail['node_type'] = 10;
                     $order_node_detail['content'] = $this->str3;
                     $order_node_detail['create_time'] = $v['a'];

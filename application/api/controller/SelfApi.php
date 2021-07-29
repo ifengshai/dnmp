@@ -16,6 +16,7 @@ use app\admin\model\finance\FinanceCost;
 use app\admin\controller\elasticsearch\AsyncEs;
 use think\Exception;
 use think\Model;
+use think\Queue;
 
 /**
  * 系统接口
@@ -362,16 +363,16 @@ class SelfApi extends Api
                 $this->error('缺少快递单号');
             }
 
-            $count = Db::connect('database.db_mojing_order')
-                ->table('fa_shipment')
-                ->where('shipment_num', $track_number)
-                ->where('is_del', 1)->count();
+            $count = Db::table('fa_order_node')
+                ->where('track_number', $track_number)
+                ->count();
             if ($count < 1) {
-                $this->error('未查询到头程数据');
+                $this->error('未查询到订单数据');
             }
 
             $carrier = $this->getCarrier($shipment_title);
             $trackingConnector = new TrackingConnector($this->apiKey);
+
             $trackInfo = $trackingConnector->getTrackInfoMulti([
                 [
                     'number'  => $track_number,
@@ -379,21 +380,23 @@ class SelfApi extends Api
                 ],
             ]);
 
-
-            $courier_status = $trackInfo['data']['accepted'][0]['track']['e'];
-            $shipment_last_msg = $trackInfo['data']['accepted'][0]['track']['z0']['z'];
-            $params = [];
-            $params['courier_status'] = $courier_status;
-            $params['shipment_last_msg'] = $shipment_last_msg;
-            $params['update_at'] = time();
-            if ($courier_status == 40) {
-                $signing_time = strtotime($trackInfo['data']['accepted'][0]['track']['z0']['a']);
-                $params['shipment_signing_time'] = $signing_time;
+            $trackData = [];
+            $trackData['event'] = 'success';
+            $trackData['data']['number'] = $track_number;
+            $trackData['data']['track'] = $trackInfo['data']['accepted'][0]['track'];
+            // 1.当前任务将由哪个类来负责处理。
+            //   当轮到该任务时，系统将生成一个该类的实例，并调用其 fire 方法
+            $jobHandlerClassName = 'app\admin\jobs\Logistics';
+            // 2.当前任务归属的队列名称，如果为新队列，会自动创建
+            $jobQueueName = "logisticsJobQueue";
+            // 3.将该任务推送到消息队列，等待对应的消费者去执行
+            $isPushed = Queue::push($jobHandlerClassName, $trackData, $jobQueueName);
+            // database 驱动时，返回值为 1|false  ;   redis 驱动时，返回值为 随机字符串|false
+            if ($isPushed !== false) {
+                $this->success('推送成功');
+            } else {
+                $this->error('推送失败');
             }
-            Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $track_number)
-                ->update($params);
-
-            $this->success('提交成功', [], 200);
         }
 
 
