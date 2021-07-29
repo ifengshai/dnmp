@@ -362,13 +362,13 @@ class SelfApi extends Api
                 $this->error('缺少快递单号');
             }
 
-//            $count = Db::connect('database.db_mojing_order')
-//                ->table('fa_shipment')
-//                ->where('shipment_num', $track_number)
-//                ->where('is_del', 1)->count();
-//            if ($count < 1) {
-//                $this->error('未查询到头程数据');
-//            }
+            $count = Db::connect('database.db_mojing_order')
+                ->table('fa_shipment')
+                ->where('shipment_num', $track_number)
+                ->where('is_del', 1)->count();
+            if ($count < 1) {
+                $this->error('未查询到头程数据');
+            }
 
             $carrier = $this->getCarrier($shipment_title);
             $trackingConnector = new TrackingConnector($this->apiKey);
