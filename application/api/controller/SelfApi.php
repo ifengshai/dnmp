@@ -172,7 +172,7 @@ class SelfApi extends Api
                 'site'         => $site,
                 'node_type'    => ['>=', 1],
             ])->count();
-            if ($order_count < 0) {
+            if ($order_count <= 0) {
                 $res_node = $this->node->save([
                     'order_node'  => 0,
                     'node_type'   => 1,
