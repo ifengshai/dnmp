@@ -826,7 +826,7 @@ class SaleAfterTask extends Model
         //根据物流单号搜索
         if ($track_number) {
             $customer_email = $order->alias('a')
-                ->where('site', $order_platform)
+                ->where('a.site', $order_platform)
                 ->where('b.track_number', $track_number)
                 ->join(['fa_order_process' => 'b'], 'a.id=b.order_id')
                 ->value('a.customer_email');
