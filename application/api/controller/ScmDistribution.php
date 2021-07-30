@@ -399,7 +399,7 @@ class ScmDistribution extends Scm
             9 => '审单',
         ];
         // $check_status != $item_process_info['distribution_status'] && $this->error(__('只有' . $status_arr[$check_status] . '状态才能操作'), [], 405);
-        $check_status != $item_process_info['distribution_status'] && $this->error(__('去' . $status_arr1[$item_process_info['distribution_status']]), [], 405);
+        $check_status != $item_process_info['distribution_status'] && $this->error(__('去' . $status_arr1[$item_process_info['distribution_status']]), '', 405);
 
         //获取子订单处方数据
         $option_info = $this->_new_order_item_option
