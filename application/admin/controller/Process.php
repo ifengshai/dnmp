@@ -2427,12 +2427,5 @@ class Process extends Backend
             });
 
     }
-    public function testTime()
-    {
-        date_default_timezone_set('UTC');
-        echo strtotime('2021-07-31 05:51:00').PHP_EOL;
-        echo time().PHP_EOL;
-        echo date('Y-m-d H:i:s',time()).PHP_EOL;
-    }
 
 }
