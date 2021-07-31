@@ -2428,16 +2428,23 @@ class Process extends Backend
             });
 
     }
+
+    /**
+     * meeloog最近三个月妥投状态传值
+     * @author huangbinbin
+     * @date   2021/7/31 15:00
+     */
     public function nihaoOrderStatus()
     {
         $url = 'https://meeloogapi.xmslol.cn/api/mj/updateDeliveredTime';
         $orderNodeModel = new OrderNode();
         Order::where('site',3)->where('status','in',['processing', 'complete', 'delivered', 'delivery'])->where('created_at','>=','1616515200')->chunk(10,function ($orders) use ($url, $orderNodeModel){
             $incrementId = array_column(collection($orders)->toArray(),'increment_id');
-            $orderValues = $orderNodeModel->where('site',3)->where('order_number','in',$incrementId)->field('order_number as order_no,signing_time as delivered_at')->select();
+            $orderValues = $orderNodeModel->where('site',3)->where('order_number','in',$incrementId)->where('node_type','40')->field('order_number as order_no,signing_time as delivered_at')->select();
             if($orderValues) {
-                dump(collection($orderValues)->toArray());die;
-                Http::post($url, collection($orderValues)->toArray());
+                $values = collection($orderValues)->toArray();
+                Http::post($url, ['data' => $values]);
+                dump($values);
             }
         },'id','asc');
     }
