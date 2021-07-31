@@ -2432,7 +2432,7 @@ class Process extends Backend
     {
         $url = 'https://meeloogapi.xmslol.cn/api/mj/updateDeliveredTime';
         $orderNodeModel = new OrderNode();
-        Order::where('site',3)->where('status','in',['processing', 'complete', 'delivered', 'delivery'])->whereTime('created_at','>=','1616515200')->chunk(10,function ($orders) use ($url, $orderNodeModel){
+        Order::where('site',3)->where('status','in',['processing', 'complete', 'delivered', 'delivery'])->where('created_at','>=','1616515200')->chunk(10,function ($orders) use ($url, $orderNodeModel){
             dump(collection($orders)->toArray());
             $incrementId = array_column(collection($orders)->toArray(),'increment_id');
             dump($incrementId);
