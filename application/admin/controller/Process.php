@@ -26,6 +26,7 @@ use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\warehouse\StockHouse;
 use app\admin\model\zendesk\Zendesk;
 use app\common\controller\Backend;
+use fast\Http;
 use think\Db;
 use FacebookAds\Api;
 use FacebookAds\Object\Campaign;
@@ -2427,5 +2428,15 @@ class Process extends Backend
             });
 
     }
-
+    public function nihaoOrderStatus()
+    {
+        $url = 'https://meeloogapi.xmslol.cn/api/mj/updateDeliveredTime';
+        $orderNodeModel = new OrderNode();
+        Order::where('site',2)->where('status','in',['processing', 'complete', 'delivered', 'delivery'])->whereTime('create_time','>=','2021-03-01 00:00:00')->chunk(10,function ($orders) use ($url, $orderNodeModel){
+            $incrementId = array_column(collection($orders)->toArray(),'increment_id');
+            $orderValues = $orderNodeModel->where('site',2)->where('order_number','in',$incrementId)->field('order_number as order_no,signing_time as delivered_at')->select();
+            dump($orderValues);die;
+            //Http::post($url, $orderValues);
+        },'id','asc');
+    }
 }
