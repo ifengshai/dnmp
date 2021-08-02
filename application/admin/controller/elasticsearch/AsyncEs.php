@@ -340,7 +340,6 @@ class AsyncEs extends BaseElasticsearch
                     return $v === null ? 0 : $v;
                 }, $value);
                 $mergeData = strtotime($value['delivery_time']);
-//                $delivery_error_flag = strtotime($value['signing_time']) < $mergeData + 172800 ? 1 : 0;
                 $insertData = [
                     'id'                  => $value['id'],
                     'order_node'          => $value['order_node'],
@@ -361,8 +360,7 @@ class AsyncEs extends BaseElasticsearch
 
                 $this->updateEsById('mojing_track', $insertData);
 
-
-                return $this->formatDate($insertData, $mergeData);
+                echo $value['id'] . "\n";
             }, collection($track)->toArray());
 
         }, 'id', 'desc');
