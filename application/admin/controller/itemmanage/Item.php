@@ -928,7 +928,7 @@ class Item extends Backend
                 unset($map['platform_type']);
             }
 
-            $itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $itemPlatform = new ItemPlatformSku();
             //如果选择的是全部
             if ($platform_type == 100) {
                 //如果选择sku查询
@@ -1058,41 +1058,45 @@ class Item extends Backend
      */
     public function export_csv()
     {
-        $itemPlatform = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $list = $this->model
+        $itemPlatform = new ItemPlatformSku();
+        $z = 0;
+        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Meeloog', '虚拟库存Vicmoo', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic', '虚拟库存ZeeloolCn', '虚拟库存Alibaba', '虚拟库存ZeeloolFr'];
+        $this->model
             ->field('sku,stock,available_stock')
             ->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])
-            ->select();
-        $list = collection($list)->toArray();
+            ->chunk(1000, function ($row) use ($itemPlatform, $headlist, &$z) {
+                $row = collection($row)->toArray();
+                //查询各站SKU虚拟库存
+                $skus = array_column($row, 'sku');
+                $itemList = $itemPlatform->where(['sku' => ['in', $skus]])->select();
+                $itemStock = [];
+                foreach ($itemList as $v) {
+                    $itemStock[$v['sku']][$v['platform_type']] = $v['stock'];
+                }
 
-        //查询各站SKU虚拟库存
-        $skus = array_column($list, 'sku');
-        $itemList = $itemPlatform->where(['sku' => ['in', $skus]])->select();
-        $itemStock = [];
-        foreach ($itemList as $v) {
-            $itemStock[$v['sku']][$v['platform_type']] = $v['stock'];
-        }
+                foreach ($row as &$v) {
+                    $v['zeelool_stock'] = $itemStock[$v['sku']][1];
+                    $v['voogueme_stock'] = $itemStock[$v['sku']][2];
+                    $v['nihao_stock'] = $itemStock[$v['sku']][3];
+                    $v['meeloog_stock'] = $itemStock[$v['sku']][4];
+                    $v['wesee_stock'] = $itemStock[$v['sku']][5];
+                    $v['amazon_stock'] = $itemStock[$v['sku']][8];
+                    $v['zeelool_es_stock'] = $itemStock[$v['sku']][9];
+                    $v['zeelool_de_stock'] = $itemStock[$v['sku']][10];
+                    $v['zeelool_jp_stock'] = $itemStock[$v['sku']][11];
+                    $v['voogmechic_stock'] = $itemStock[$v['sku']][12];
+                    $v['douyin_stock'] = $itemStock[$v['sku']][13];
+                    $v['alibaba_stock'] = $itemStock[$v['sku']][14];
+                    $v['zeelool_fr_stock'] = $itemStock[$v['sku']][15];
+                }
+                if ($z > 0) {
+                    $headlist = [];
+                }
 
-        foreach ($list as &$v) {
-            $v['zeelool_stock'] = $itemStock[$v['sku']][1];
-            $v['voogueme_stock'] = $itemStock[$v['sku']][2];
-            $v['nihao_stock'] = $itemStock[$v['sku']][3];
-            $v['meeloog_stock'] = $itemStock[$v['sku']][4];
-            $v['wesee_stock'] = $itemStock[$v['sku']][5];
-            $v['amazon_stock'] = $itemStock[$v['sku']][8];
-            $v['zeelool_es_stock'] = $itemStock[$v['sku']][9];
-            $v['zeelool_de_stock'] = $itemStock[$v['sku']][10];
-            $v['zeelool_jp_stock'] = $itemStock[$v['sku']][11];
-            $v['voogmechic_stock'] = $itemStock[$v['sku']][12];
-            $v['douyin_stock'] = $itemStock[$v['sku']][13];
-            $v['alibaba_stock'] = $itemStock[$v['sku']][14];
-            $v['zeelool_fr_stock'] = $itemStock[$v['sku']][15];
-        }
+                $z++;
+                Excel::writeCsv($row, $headlist, '/uploads/financeCost/' . time(), false);
+            });
 
-        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Meeloog', '虚拟库存Vicmoo', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic', '虚拟库存ZeeloolCn', '虚拟库存Alibaba', '虚拟库存ZeeloolFr'];
-        $filename = '商品虚拟库存';
-        Excel::writeCsv($list, $headlist, $filename, true);
-        die;
     }
 
 
@@ -1210,7 +1214,7 @@ class Item extends Backend
     public function detail($ids = null)
     {
         $row = $this->model->get($ids, 'itemAttribute');
-        $newProductDesign = Db::name('new_product_design')->where(['sku'=>$row['sku'],'status'=>8])->find();
+        $newProductDesign = Db::name('new_product_design')->where(['sku' => $row['sku'], 'status' => 8])->find();
         if (!$row) {
             $this->error(__('No Results were found'));
         }
@@ -1250,7 +1254,7 @@ class Item extends Backend
             $this->assign('AllShape', $allShape);
             $this->assign('AllTexture', $allTexture);
         }
-        if (empty($newProductDesign)){
+        if (empty($newProductDesign)) {
             $row['itemAttribute']['frame_images'] = '';
             $row['itemAttribute']['frame_images'] = '';
         }
@@ -1579,11 +1583,11 @@ class Item extends Backend
             //查询同步的平台
 //            $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
 
-                Db::startTrans();
-                $this->model->startTrans();
+            Db::startTrans();
+            $this->model->startTrans();
 //                $platform->startTrans();
-                try {
-                    $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            try {
+                $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
 //                    foreach ($row as $val) {
 //                        $platformArr = $platform->where(['sku' => $val['sku']])->where('platform_type', '<>', 4)->select();
 //                        $uploadItemArr = [];
@@ -1652,26 +1656,26 @@ class Item extends Backend
 //                            }
 //                        }
 //                    }
-                    Db::commit();
-                    $this->model->commit();
+                Db::commit();
+                $this->model->commit();
 //                    $platform->commit();
-                } catch (ValidateException $e) {
-                    Db::rollback();
-                    $this->model->rollback();
+            } catch (ValidateException $e) {
+                Db::rollback();
+                $this->model->rollback();
 //                    $platform->rollback();
-                    $this->error($e->getMessage());
-                } catch (PDOException $e) {
-                    Db::rollback();
-                    $this->model->rollback();
+                $this->error($e->getMessage());
+            } catch (PDOException $e) {
+                Db::rollback();
+                $this->model->rollback();
 //                    $platform->rollback();
-                    $this->error($e->getMessage());
-                } catch (Exception $e) {
-                    Db::rollback();
-                    $this->model->rollback();
+                $this->error($e->getMessage());
+            } catch (Exception $e) {
+                Db::rollback();
+                $this->model->rollback();
 //                    $platform->rollback();
-                    $this->error($e->getMessage());
-                }
-                $this->success('审核成功');
+                $this->error($e->getMessage());
+            }
+            $this->success('审核成功');
         } else {
             $this->error('404 Not found');
         }
@@ -1814,7 +1818,7 @@ class Item extends Backend
             if ($site == 0) {
                 $this->error('请先选择平台！！');
             }
-            $itemplatform = new \app\admin\model\itemmanage\ItemPlatformSku();
+            $itemplatform = new ItemPlatformSku();
             $info = $itemplatform->where(['sku' => $sku, 'platform_type' => $site])->field('stock')->find();
             $res = $this->model->getGoodsInfo($sku);
             $res['platform_stock'] = $info['stock'];
@@ -2545,7 +2549,7 @@ class Item extends Backend
                 $value['is_spot'] = '大货';
             } elseif (2 == $value['is_spot']) {
                 $value['is_spot'] = '现货';
-            }else{
+            } else {
                 $value['is_spot'] = '-';
             }
             $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['is_spot']);
@@ -2599,29 +2603,31 @@ class Item extends Backend
      * @author zjw
      * @date   2021/4/19 18:18
      */
-    public function changeValue(){
+    public function changeValue()
+    {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
         $itemAttribute = new ItemAttribute();
-        $goodsValue = $this->model->where(['is_open'=>1])->column('id');
+        $goodsValue = $this->model->where(['is_open' => 1])->column('id');
         $itemAttributeValue = $itemAttribute->column('item_id');
-        $result=array_diff($goodsValue,$itemAttributeValue);
-        foreach ($result as $k=>$v){
+        $result = array_diff($goodsValue, $itemAttributeValue);
+        foreach ($result as $k => $v) {
             $data[$k]['item_id'] = $v;
         }
         $itemAttribute->insertAll($data);
     }
 
-    public function categoryValue(){
+    public function categoryValue()
+    {
         $cateGory = new  \app\admin\model\itemmanage\ItemCategory();
-        $subordinateValue = $cateGory->where(['pid'=>['in','21,24,45']])->column('id');
-        $value = $this->model->where(['category_id'=>['in',$subordinateValue]])->column('sku','id');
-        foreach ($value as $key=>$val){
+        $subordinateValue = $cateGory->where(['pid' => ['in', '21,24,45']])->column('id');
+        $value = $this->model->where(['category_id' => ['in', $subordinateValue]])->column('sku', 'id');
+        foreach ($value as $key => $val) {
             $data[$key]['sku'] = $val;
         }
         $data = array_values($data);
         $headlist = [
-            'SKU'
+            'SKU',
         ];
         $path = "/uploads/";
         $fileName = '镜框-配饰-生活用品下的sku';
