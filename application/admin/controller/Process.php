@@ -2443,8 +2443,8 @@ class Process extends Backend
             $orderValues = $orderNodeModel->where('site',3)->where('order_number','in',$incrementId)->where('node_type','40')->field('order_number as order_no,signing_time as delivered_at')->select();
             if($orderValues) {
                 $values = collection($orderValues)->toArray();
-                Http::post($url, ['data' => $values]);
-                dump($values);
+                $res = Http::post($url, ['data' => $values]);
+                dump($res);
             }
         },'id','asc');
     }
