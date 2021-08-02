@@ -1060,11 +1060,13 @@ class Item extends Backend
     {
         $itemPlatform = new ItemPlatformSku();
         $z = 0;
-        $headlist = ['商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Meeloog', '虚拟库存Vicmoo', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic', '虚拟库存ZeeloolCn', '虚拟库存Alibaba', '虚拟库存ZeeloolFr'];
+        $path = '/uploads/itemmanage/';
+        $saveName = '各种库存数据-' . date("YmdHis", time());
+        $headlist = ['ID', '商品sku', '总库存', '可用库存', '虚拟库存Zeelool', '虚拟库存Voogueme', '虚拟库存Meeloog', '虚拟库存Vicmoo', '虚拟库存Wesee', '虚拟库存Amazon', '虚拟库存ZeeloolEs', '虚拟库存ZeeloolDe', '虚拟库存ZeeloolJp', '虚拟库存Voogmechic', '虚拟库存ZeeloolCn', '虚拟库存Alibaba', '虚拟库存ZeeloolFr'];
         $this->model
-            ->field('sku,stock,available_stock')
+            ->field('id,sku,stock,available_stock')
             ->where(['is_open' => 1, 'is_del' => 1, 'category_id' => ['<>', 43]])
-            ->chunk(1000, function ($row) use ($itemPlatform, $headlist, &$z) {
+            ->chunk(1000, function ($row) use ($itemPlatform, $headlist,$path,$saveName, &$z) {
                 $row = collection($row)->toArray();
                 //查询各站SKU虚拟库存
                 $skus = array_column($row, 'sku');
@@ -1073,7 +1075,6 @@ class Item extends Backend
                 foreach ($itemList as $v) {
                     $itemStock[$v['sku']][$v['platform_type']] = $v['stock'];
                 }
-
                 foreach ($row as &$v) {
                     $v['zeelool_stock'] = $itemStock[$v['sku']][1];
                     $v['voogueme_stock'] = $itemStock[$v['sku']][2];
@@ -1089,14 +1090,20 @@ class Item extends Backend
                     $v['alibaba_stock'] = $itemStock[$v['sku']][14];
                     $v['zeelool_fr_stock'] = $itemStock[$v['sku']][15];
                 }
+                unset($v);
                 if ($z > 0) {
                     $headlist = [];
                 }
-
                 $z++;
-                Excel::writeCsv($row, $headlist, '/uploads/financeCost/' . time(), false);
+                Excel::writeCsv($row, $headlist, $path.$saveName . time(), false);
             });
 
+        //获取当前域名
+        $request = Request::instance();
+        $domain = $request->domain();
+        unset($i);
+        header('Location: '.$domain.$path.$saveName.'.csv');
+        die;
     }
 
 
