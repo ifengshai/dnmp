@@ -1095,7 +1095,7 @@ class Item extends Backend
                     $headlist = [];
                 }
                 $z++;
-                Excel::writeCsv($row, $headlist, $path.$saveName . time(), false);
+                Excel::writeCsv($row, $headlist, $path.$saveName , false);
             });
 
         //获取当前域名
