@@ -3317,9 +3317,10 @@ class OrderData extends Backend
 
                 //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                 if ($order_prescription_type == 3 && in_array($site, [1, 3])) {
-                    $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                    $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2,'updated_at' => time() + 28800]);
                     $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                 }
+                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['updated_at' => time() + 28800]);
             }
             echo $v['item_id'] . "\n";
             usleep(10000);
