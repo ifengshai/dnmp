@@ -3320,6 +3320,7 @@ class OrderData extends Backend
                     $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2,'updated_at' => time() + 28800]);
                     $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                 }
+                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['updated_at' => time() + 28800]);
             }
             echo $v['item_id'] . "\n";
             usleep(10000);
