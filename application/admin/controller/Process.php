@@ -2448,4 +2448,11 @@ class Process extends Backend
             }
         },'id','asc');
     }
+    public function updateTrackEs()
+    {
+        $orderNodes = Db::name('order_node')->where("delivery_time>='2021-06-16' and delivery_time<='2021-07-01'")->where('shipment_data_type','丹阳UPS')->where('node_type','<>',40)->field('track_number,shipment_type as shipment_title')->select();
+        foreach($orderNodes as $orderNode) {
+            dump(Http::post('https://mojing.nextmar.com/api/self_api/getLogistics',$orderNode));
+        }
+    }
 }
