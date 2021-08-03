@@ -69,7 +69,7 @@ class TrackReg extends Backend
      * @author wangpenglei
      * @date   2021/7/29 13:38
      */
-    protected function getLogistics($orderGroup): bool
+    protected function getLogistics($orderGroup)
     {
         if (!$orderGroup) {
             return false;
