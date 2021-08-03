@@ -44,7 +44,7 @@ class TrackReg extends Backend
     {
         $delivery_time = date('Y-m-d', strtotime('-2 day'));
         $orderNodes = Db::name('order_node')
-            ->where("delivery_time", $delivery_time)
+            ->where("delivery_time", '>=', $delivery_time)
             ->where('node_type', '<>', 40)
             ->field('track_number,shipment_type as shipment_title')
             ->select();
