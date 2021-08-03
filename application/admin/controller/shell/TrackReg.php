@@ -12,12 +12,14 @@ use app\admin\model\order\order\NewOrder;
 use app\common\controller\Backend;
 use app\enum\Site;
 use fast\Excel;
+use fast\Http;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use think\Hook;
 use app\admin\model\purchase\SupplierSku;
 use think\Model;
+use think\Queue;
 
 class TrackReg extends Backend
 {
@@ -31,6 +33,76 @@ class TrackReg extends Backend
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
         $this->ordernode = new \app\admin\model\OrderNode();
     }
+
+
+    /**
+     * 定时更新物流数据
+     * @author wangpenglei
+     * @date   2021/8/3 14:59
+     */
+    public function updateTrack()
+    {
+        $delivery_time = date('Y-m-d', strtotime('-2 day'));
+        $orderNodes = Db::name('order_node')
+            ->where("delivery_time", $delivery_time)
+            ->where('node_type', '<>', 40)
+            ->field('track_number,shipment_type as shipment_title')
+            ->select();
+        foreach ($orderNodes as $v) {
+            $this->getLogistics($v['shipment_title'], $v['track_number']);
+            echo $v['track_number'] . "\n";
+        }
+        echo "ok";
+    }
+
+    /**
+     *  查询快递单号
+     *
+     * @params string $shipment_title
+     * @params string $track_number
+     *
+     * @author wangpenglei
+     * @date   2021/7/29 13:38
+     */
+    protected function getLogistics($shipment_title, $track_number): bool
+    {
+        if (!$shipment_title) {
+            return false;
+        }
+        if (!$track_number) {
+            return false;
+        }
+
+        $carrier = $this->getCarrier($shipment_title);
+        $trackingConnector = new TrackingConnector($this->apiKey);
+
+        $trackInfo = $trackingConnector->getTrackInfoMulti([
+            [
+                'number'  => $track_number,
+                'carrier' => $carrier['carrierId'],
+            ],
+        ]);
+
+        $trackData = [];
+        $trackData['event'] = 'success';
+        $trackData['data']['number'] = $track_number;
+        $trackData['data']['track'] = $trackInfo['data']['accepted'][0]['track'];
+        // 1.当前任务将由哪个类来负责处理。
+        //   当轮到该任务时，系统将生成一个该类的实例，并调用其 fire 方法
+        $jobHandlerClassName = 'app\admin\jobs\Logistics';
+        // 2.当前任务归属的队列名称，如果为新队列，会自动创建
+        $jobQueueName = "logisticsJobQueue";
+        // 3.将该任务推送到消息队列，等待对应的消费者去执行
+        $isPushed = Queue::push($jobHandlerClassName, $trackData, $jobQueueName);
+        // database 驱动时，返回值为 1|false  ;   redis 驱动时，返回值为 随机字符串|false
+        if ($isPushed !== false) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
 
     public function site_reg()
     {
@@ -95,13 +167,14 @@ class TrackReg extends Backend
     }
 
     //批量注册
+
     /**
      * 批量 注册物流
      * 每天跑一次，查找遗漏注册的物流单号，进行注册操作
      */
     public function reg()
     {
-        $list = $this->ordernode->where('shipment_data_type','丹阳UPS')->select();
+        $list = $this->ordernode->where('shipment_data_type', '丹阳UPS')->select();
         foreach ($list as $k => $v) {
             $title = $v['shipment_type'];
             $carrier = $this->getCarrier($title);
@@ -753,16 +826,16 @@ class TrackReg extends Backend
         $number = 0;
         $skuArray = array_keys($list);
         $item = new Item();
-        $allSkuIsNew = $item->where('sku','in',$skuArray)->column('is_new','sku');
+        $allSkuIsNew = $item->where('sku', 'in', $skuArray)->column('is_new', 'sku');
         foreach ($list as $k => $v) {
             //是新品 不补货
-            if ($allSkuIsNew[$k] == 1 && $v < 20){
-                foreach ($sku_list1 as $ks=>$vs){
-                    if ($vs['sku'] == $k){
-                        $this->model->where('id',$vs['id'])->setField('is_filter',2);
+            if ($allSkuIsNew[$k] == 1 && $v < 20) {
+                foreach ($sku_list1 as $ks => $vs) {
+                    if ($vs['sku'] == $k) {
+                        $this->model->where('id', $vs['id'])->setField('is_filter', 2);
                     }
                 }
-            }else{
+            } else {
                 $arr[$number]['sku'] = $k;
                 $arr[$number]['replenishment_num'] = $v;
                 $arr[$number]['create_person'] = 'Admin';
@@ -772,9 +845,9 @@ class TrackReg extends Backend
                 $number += 1;
             }
         }
-        if (empty($arr)){
-            $this->replenish->where('id',$res)->delete();
-            $this->model->where('replenish_id',$res)->delete();
+        if (empty($arr)) {
+            $this->replenish->where('id', $res)->delete();
+            $this->model->where('replenish_id', $res)->delete();
             $ids = $this->model
                 ->where(['is_show' => 1, 'type' => 1])
                 ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
@@ -883,16 +956,16 @@ class TrackReg extends Backend
         $number = 0;
         $skuArray = array_keys($list);
         $item = new Item();
-        $allSkuIsNew = $item->where('sku','in',$skuArray)->column('is_new','sku');
+        $allSkuIsNew = $item->where('sku', 'in', $skuArray)->column('is_new', 'sku');
         foreach ($list as $k => $v) {
             //是新品 不补货
-            if ($allSkuIsNew[$k] == 1 && $v < 20){
-                foreach ($sku_list1 as $ks=>$vs){
-                    if ($vs['sku'] == $k){
-                        $this->model->where('id',$vs['id'])->setField('is_filter',2);
+            if ($allSkuIsNew[$k] == 1 && $v < 20) {
+                foreach ($sku_list1 as $ks => $vs) {
+                    if ($vs['sku'] == $k) {
+                        $this->model->where('id', $vs['id'])->setField('is_filter', 2);
                     }
                 }
-            }else {
+            } else {
                 $arr[$number]['sku'] = $k;
                 $arr[$number]['replenishment_num'] = $v;
                 $arr[$number]['create_person'] = 'Admin';
@@ -903,9 +976,9 @@ class TrackReg extends Backend
                 $number += 1;
             }
         }
-        if (empty($arr)){
-            $this->replenish->where('id',$res)->delete();
-            $this->model->where('replenish_id',$res)->delete();
+        if (empty($arr)) {
+            $this->replenish->where('id', $res)->delete();
+            $this->model->where('replenish_id', $res)->delete();
             //更新计划补货列表
             $ids = $this->model
                 ->where(['is_show' => 1, 'type' => 2])
@@ -978,16 +1051,16 @@ class TrackReg extends Backend
         $number = 0;
         $skuArray = array_keys($list);
         $item = new Item();
-        $allSkuIsNew = $item->where('sku','in',$skuArray)->column('is_new','sku');
+        $allSkuIsNew = $item->where('sku', 'in', $skuArray)->column('is_new', 'sku');
         foreach ($list as $k => $v) {
             //是新品 不补货
-            if ($allSkuIsNew[$k] == 1 && $v < 20){
-                foreach ($skuList1 as $ks=>$vs){
-                    if ($vs['sku'] == $k){
-                        $this->model->where('id',$vs['id'])->setField('is_filter',2);
+            if ($allSkuIsNew[$k] == 1 && $v < 20) {
+                foreach ($skuList1 as $ks => $vs) {
+                    if ($vs['sku'] == $k) {
+                        $this->model->where('id', $vs['id'])->setField('is_filter', 2);
                     }
                 }
-            }else {
+            } else {
                 $arr[$number]['sku'] = $k;
                 $arr[$number]['replenishment_num'] = $v;
                 $arr[$number]['create_person'] = 'Admin';
@@ -999,14 +1072,14 @@ class TrackReg extends Backend
         }
         //饰品站被过滤的部分需要重新加入补货需求单 取消过滤状态
         $skuListVoogmechic = $this->model
-            ->where(['is_show' => 1, 'type' => 3 ,'website_type'=>12,'is_filter'=>2])
+            ->where(['is_show' => 1, 'type' => 3, 'website_type' => 12, 'is_filter' => 2])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
             ->field('id,sku,website_type,replenish_num')
             ->select();
         $skuListVoogmechicUpdate = $this->model
-            ->where(['is_show' => 1, 'type' => 3 ,'website_type'=>12,'is_filter'=>2])
+            ->where(['is_show' => 1, 'type' => 3, 'website_type' => 12, 'is_filter' => 2])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
-            ->setField('is_filter',1);
+            ->setField('is_filter', 1);
         foreach ($skuListVoogmechic as $ck => $cv) {
             $arr[$number]['sku'] = $cv['sku'];
             $arr[$number]['replenishment_num'] = $cv['replenish_num'];
@@ -1016,9 +1089,9 @@ class TrackReg extends Backend
             $arr[$number]['replenish_id'] = $res;
             $number += 1;
         }
-        if (empty($arr)){
-            $this->replenish->where('id',$res)->delete();
-            $this->model->where('replenish_id',$res)->delete();
+        if (empty($arr)) {
+            $this->replenish->where('id', $res)->delete();
+            $this->model->where('replenish_id', $res)->delete();
             //更新计划补货列表
             $ids = $this->model
                 ->where(['is_show' => 1, 'type' => 3])
@@ -1046,7 +1119,7 @@ class TrackReg extends Backend
         $this->order = new \app\admin\model\purchase\NewProductReplenishOrder();
         //统计计划补货数据
         $list = $this->model
-            ->where(['is_show' => 1, 'type' => 3,'website_type'=>12])
+            ->where(['is_show' => 1, 'type' => 3, 'website_type' => 12])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
             ->group('sku')
             ->column("sku,sum(replenish_num) as sum");
@@ -1056,7 +1129,7 @@ class TrackReg extends Backend
         }
         //统计各个站计划某个sku计划补货的总数 以及比例 用于回写平台sku映射表中
         $skuList1 = $this->model
-            ->where(['is_show' => 1, 'type' => 3,'website_type'=>12])
+            ->where(['is_show' => 1, 'type' => 3, 'website_type' => 12])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
             ->field('id,sku,website_type,replenish_num')
             ->select();
@@ -1088,7 +1161,7 @@ class TrackReg extends Backend
         $number = 0;
         $skuArray = array_keys($list);
         $item = new Item();
-        $allSkuIsNew = $item->where('sku','in',$skuArray)->column('is_new','sku');
+        $allSkuIsNew = $item->where('sku', 'in', $skuArray)->column('is_new', 'sku');
         foreach ($list as $k => $v) {
             //是新品 不补货
             $arr[$number]['sku'] = $k;
@@ -3763,7 +3836,7 @@ class TrackReg extends Backend
             if ($value['lens_price'] > 0 || $value['coating_price'] > 0) {
                 $skuArr[$value['sku']]['pay_lens_num'] += $value['qty'];
             }
-            $skuArr[$value['sku']]['sku_grand_total'] += $value['base_row_total']-$value['mw_rewardpoint_discount']/$value['total_qty_ordered']-$value['base_discount_amount'];
+            $skuArr[$value['sku']]['sku_grand_total'] += $value['base_row_total'] - $value['mw_rewardpoint_discount'] / $value['total_qty_ordered'] - $value['base_discount_amount'];
             $skuArr[$value['sku']]['sku_row_total'] += $value['base_row_total'];
         }
         foreach ($list as $k => $v) {
