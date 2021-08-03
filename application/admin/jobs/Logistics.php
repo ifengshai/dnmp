@@ -192,7 +192,16 @@ class Logistics
                     $order_node_detail['node_type'] = 8;
                     $order_node_detail['content'] = $this->str1;
                     $order_node_detail['create_time'] = $v['a'];
-                    Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+
+                    //查询子表是否已存在此节点数据
+                    $count = Db::name('order_node_detail')->where(['order_node' => 3, 'node_type' => 8, 'track_number' => $add['track_number']])->count();
+                    if ($count > 0) {
+                        Db::name('order_node_detail')
+                            ->where(['order_node' => 3, 'node_type' => 8, 'track_number' => $add['track_number']])
+                            ->update($order_node_detail); //插入节点字表
+                    } else {
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
 
                     $this->esService->updateEs('mojing_track', $arr);
                 }
@@ -215,7 +224,17 @@ class Logistics
                     $order_node_detail['node_type'] = 10;
                     $order_node_detail['content'] = $this->str3;
                     $order_node_detail['create_time'] = $v['a'];
-                    Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+
+                    //查询子表是否已存在此节点数据
+                    $count = Db::name('order_node_detail')->where(['order_node' => 3, 'node_type' => 10, 'track_number' => $add['track_number']])->count();
+                    if ($count > 0) {
+                        Db::name('order_node_detail')
+                            ->where(['order_node' => 3, 'node_type' => 10, 'track_number' => $add['track_number']])
+                            ->update($order_node_detail); //插入节点字表
+                    } else {
+                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                    }
+
                     $this->esService->updateEs('mojing_track', $arr);
                 }
             }
@@ -266,9 +285,17 @@ class Logistics
                                 $order_node_detail['content'] = $this->str50;
                                 break;
                         }
-
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+
+                        //查询子表是否已存在此节点数据
+                        $count = Db::name('order_node_detail')->where(['order_node' => 4, 'node_type' => $data['e'], 'track_number' => $add['track_number']])->count();
+                        if ($count > 0) {
+                            Db::name('order_node_detail')
+                                ->where(['order_node' => 4, 'node_type' => $data['e'], 'track_number' => $add['track_number']])
+                                ->update($order_node_detail); //插入节点字表
+                        } else {
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        }
 
                         $this->esService->updateEs('mojing_track', $arr);
                     }
@@ -309,7 +336,16 @@ class Logistics
                         }
 
                         $order_node_detail['create_time'] = $v['a'];
-                        Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+
+                        //查询子表是否已存在此节点数据
+                        $count = Db::name('order_node_detail')->where(['order_node' => 4, 'node_type' => $data['e'], 'track_number' => $add['track_number']])->count();
+                        if ($count > 0) {
+                            Db::name('order_node_detail')
+                                ->where(['order_node' => 4, 'node_type' => $data['e'], 'track_number' => $add['track_number']])
+                                ->update($order_node_detail); //插入节点字表
+                        } else {
+                            Db::name('order_node_detail')->insert($order_node_detail); //插入节点字表
+                        }
 
                         $this->esService->updateEs('mojing_track', $arr);
                     }
