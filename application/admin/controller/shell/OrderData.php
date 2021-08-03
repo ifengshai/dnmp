@@ -8,6 +8,8 @@ namespace app\admin\controller\shell;
 
 use app\admin\controller\elasticsearch\async\AsyncOrder;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\order\order\NewOrder;
+use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\WaveOrder;
 use app\admin\model\warehouse\StockSku;
 use app\common\controller\Backend;
@@ -19,6 +21,7 @@ use think\db\exception\ModelNotFoundException;
 use think\Env;
 use think\exception\DbException;
 use think\Log;
+use think\Model;
 
 class OrderData extends Backend
 {
@@ -1777,6 +1780,7 @@ class OrderData extends Backend
      */
     public function create_wave_order()
     {
+        $this->setOrderPrescriptionType();
         /**
          *
          * 生成规则
@@ -1880,6 +1884,47 @@ class OrderData extends Backend
         echo "ok";
     }
 
+
+    /**
+     * Z站仅镜架 分丹阳仓
+     * @author wangpenglei
+     * @date   2021/8/3 10:53
+     */
+    protected function setOrderPrescriptionType()
+    {
+        $order = new NewOrder();
+        $orderitemprocess = new NewOrderItemProcess();
+        //查询Z站所有订单
+        $list = $order->where('order_prescription_type', 0)
+            ->where('site', 1)
+            ->where('created_at', '>', strtotime('2021-07-22 16:30:00'))
+            ->column('id');
+        foreach ($list as $key => $value) {
+            $order_type = $orderitemprocess->where('order_id', $value)->column('order_prescription_type');
+            //查不到结果跳过 防止子单表延迟两分钟查不到数据
+            if (!$order_type) {
+                continue;
+            }
+
+            $data = [];
+            if (in_array(3, $order_type)) {
+                $type = 3;
+            } elseif (in_array(2, $order_type)) {
+                $type = 2;
+            } else {
+                $type = 1;
+                //如果Z站全为仅镜框 则分到丹阳仓
+                $data['stock_id'] = 2;
+                $orderitemprocess->where('order_id', $value)->update(['stock_id' => 2, 'wave_order_id' => 0]);
+            }
+
+            $data['order_prescription_type'] = $type;
+            $data['updated_at'] = time();
+            $order->where('id', $value)->update($data);
+            echo $value . ' is ok' . "\n";
+            usleep(100000);
+        }
+    }
     ########################################end##############################################
 
 
