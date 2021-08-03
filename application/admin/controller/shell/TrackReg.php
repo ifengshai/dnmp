@@ -48,10 +48,15 @@ class TrackReg extends Backend
             ->where('node_type', '<>', 40)
             ->field('track_number,shipment_type as shipment_title')
             ->select();
-        foreach ($orderNodes as $v) {
-            $this->getLogistics($v['shipment_title'], $v['track_number']);
-            echo $v['track_number'] . "\n";
+        $orderNodes = collection($orderNodes)->toArray();
+        $shipment_reg = [];
+        foreach ($orderNodes as $k => $v) {
+            $carrier = $this->getCarrier($v['shipment_title']);
+            $shipment_reg[$k]['number'] = $v['track_number'];
+            $shipment_reg[$k]['carrier'] = $carrier['carrierId'];
         }
+        $orderGroup = array_chunk($shipment_reg, 40);
+        $this->getLogistics($orderGroup);
         echo "ok";
     }
 
@@ -64,43 +69,31 @@ class TrackReg extends Backend
      * @author wangpenglei
      * @date   2021/7/29 13:38
      */
-    protected function getLogistics($shipment_title, $track_number): bool
+    protected function getLogistics($orderGroup): bool
     {
-        if (!$shipment_title) {
-            return false;
-        }
-        if (!$track_number) {
+        if (!$orderGroup) {
             return false;
         }
 
-        $carrier = $this->getCarrier($shipment_title);
         $trackingConnector = new TrackingConnector($this->apiKey);
-
-        $trackInfo = $trackingConnector->getTrackInfoMulti([
-            [
-                'number'  => $track_number,
-                'carrier' => $carrier['carrierId'],
-            ],
-        ]);
-
-        $trackData = [];
-        $trackData['event'] = 'success';
-        $trackData['data']['number'] = $track_number;
-        $trackData['data']['track'] = $trackInfo['data']['accepted'][0]['track'];
-        // 1.当前任务将由哪个类来负责处理。
-        //   当轮到该任务时，系统将生成一个该类的实例，并调用其 fire 方法
-        $jobHandlerClassName = 'app\admin\jobs\Logistics';
-        // 2.当前任务归属的队列名称，如果为新队列，会自动创建
-        $jobQueueName = "logisticsJobQueue";
-        // 3.将该任务推送到消息队列，等待对应的消费者去执行
-        $isPushed = Queue::push($jobHandlerClassName, $trackData, $jobQueueName);
-        // database 驱动时，返回值为 1|false  ;   redis 驱动时，返回值为 随机字符串|false
-        if ($isPushed !== false) {
-            return true;
-        } else {
-            return false;
+        foreach ($orderGroup as $v) {
+            $trackInfo = $trackingConnector->getTrackInfoMulti($v);
+            foreach ($trackInfo['data']['accepted'] as $val) {
+                echo $val['number'] . "\n";
+                $trackData = [];
+                $trackData['event'] = 'success';
+                $trackData['data']['number'] = $val['number'];
+                $trackData['data']['track'] = $val['track'];
+                // 1.当前任务将由哪个类来负责处理。
+                //   当轮到该任务时，系统将生成一个该类的实例，并调用其 fire 方法
+                $jobHandlerClassName = 'app\admin\jobs\Logistics';
+                // 2.当前任务归属的队列名称，如果为新队列，会自动创建
+                $jobQueueName = "logisticsJobQueue";
+                // 3.将该任务推送到消息队列，等待对应的消费者去执行
+                Queue::push($jobHandlerClassName, $trackData, $jobQueueName);
+            }
         }
-
+        echo "ok";
     }
 
 
