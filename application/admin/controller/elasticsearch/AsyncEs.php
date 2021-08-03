@@ -400,9 +400,10 @@ class AsyncEs extends BaseElasticsearch
                     'wait_time'           => abs(strtotime($value['signing_time']) - $mergeData),
                 ];
 
-                $this->updateEsById('mojing_track', $insertData);
+                $res = $this->updateEsById('mojing_track', $insertData);
 
                 echo $value['id'] . "\n";
+                dump($res);
             }, collection($track)->toArray());
 
         }, 'id', 'desc');
