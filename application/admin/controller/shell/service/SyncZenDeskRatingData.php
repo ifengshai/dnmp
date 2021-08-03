@@ -33,7 +33,7 @@ class SyncZenDeskRatingData extends Command
 
         $output->writeln("Start");
         $zendeskTickets = (new Zendesk())->field(['ticket_id', 'type', 'id'])
-            ->whereTime('update_time', [$startTime, $endTime])
+            ->whereTime('zendesk_update_time', [$startTime, $endTime])
             ->select();
         /** @var Zendesk $ticket */
         foreach ($zendeskTickets as $ticket) {
