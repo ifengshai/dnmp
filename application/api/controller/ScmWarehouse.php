@@ -4313,6 +4313,7 @@ class ScmWarehouse extends Scm
         if ($hasCode) {
             $this->error(__(join(',',$hasCode) . '重复，请删除此条码！'), '', 524);
         }
+
         $arr = [];
         foreach ($codeAgg as $k => $v) {
             //判断当前条码的在库状态
