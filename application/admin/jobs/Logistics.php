@@ -166,7 +166,6 @@ class Logistics
         $contents = Db::name('order_node_courier')->where('track_number', $add['track_number'])->column('content');
 
         foreach ($trackdetail as $k => $v) {
-
             if (!in_array($v['z'], $contents)) {
                 $add['create_time'] = $v['a'];
                 $add['content'] = $v['z'];
@@ -178,6 +177,10 @@ class Logistics
             if ($k == 1) {
                 //更新上网
                 $order_node_date = Db::name('order_node')->where(['track_number' => $add['track_number'], 'shipment_type' => $add['shipment_type']])->find();
+                //推送的时间小于发货时间跳过
+                if ($v['a'] < $order_node_date['delivery_time']){
+                    continue;
+                }
                 if ($order_node_date['order_node'] == 2 && $order_node_date['node_type'] == 7) {
                     $update_order_node['order_node'] = 3;
                     $update_order_node['node_type'] = 8;
