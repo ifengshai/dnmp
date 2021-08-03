@@ -1,5 +1,6 @@
 <?php
 
+use app\admin\model\NewProductProcess;
 use app\admin\model\warehouse\WarehouseStock;
 use app\common\model\Category;
 use fast\Form;
@@ -281,3 +282,4 @@ function getStockHouse()
 {
     return WarehouseStock::column('name','id');
 }
+

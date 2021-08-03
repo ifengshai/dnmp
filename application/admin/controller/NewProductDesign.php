@@ -570,6 +570,7 @@ class NewProductDesign extends Backend
             $data['item_status']=1;
             $change['sku'] = $value->sku;
             $item->allowField(true)->isUpdate(true, $change)->save($data);
+            createNewProductProcessLog([$value->sku],6,session('admin.id'));
         }
         $data['status'] = $status;
         $data['update_time']  = date("Y-m-d H:i:s", time());

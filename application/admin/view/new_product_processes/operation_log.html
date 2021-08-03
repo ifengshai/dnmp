@@ -1,0 +1,26 @@
+<table id="product_list" class="table table-bordered table-striped dataTable" role="grid" aria-describedby="example1_info">
+    <thead>
+    <tr role="row">
+        <th style="width: 150px;">操作内容</th>
+        <th style="width: 150px;">操作人</th>
+        <th style="width: 150px;">操作时间</th>
+    </thead>
+    <tbody id="product_data">
+    {foreach name="list" item="value"}
+    <tr role="row" class="odd">
+        <td>{switch name="$value['type']" }
+            {case value="1" }选品审核通过{/case}
+            {case value="2"}采购需求提报通过{/case}
+            {case value="3"}新品待入库{/case}
+            {case value="4"}新品待带回{/case}
+            {case value="5"}新品待设计{/case}
+            {case value="6"}新品待上架{/case}
+            {case value="7"}新品已上架{/case}
+            {/switch}
+        </td>
+        <td>{$value.admin.nickname}</td>
+        <td>{$value.create_time|date='Y-m-d H:i:s',###}</td>
+    </tr>
+    {/foreach}
+    </tbody>
+</table>

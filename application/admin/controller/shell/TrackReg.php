@@ -689,6 +689,33 @@ class TrackReg extends Backend
         echo "ok";
     }
 
+    /**
+     * *@param  [type] $arr [二维数组]
+     * @param  [type] $key [键名]
+     *
+     * @return [type]      [新的二维数组]
+     * Created by Phpstorm.
+     * User: jhh
+     * Date: 2020/7/22
+     * Time: 11:37
+     */
+    function array_group_by($arr, $key)
+    {
+        $grouped = [];
+        foreach ($arr as $value) {
+            $grouped[$value[$key]][] = $value;
+        }
+        if (func_num_args() > 2) {
+            $args = func_get_args();
+            foreach ($grouped as $key => $value) {
+                $parms = array_merge($value, array_slice($args, 2, func_num_args()));
+                $grouped[$key] = call_user_func_array('array_group_by', $parms);
+            }
+        }
+
+        return $grouped;
+    }
+
 
     /**
      * 计划任务 计划补货 每月7号执行一次 汇总各个平台原始sku相同的品的补货需求数量 加入补货需求单以供采购分配处理 汇总过后更新字段 is_show 的值 列表不显示
@@ -789,33 +816,11 @@ class TrackReg extends Backend
             ->where(['is_show' => 1, 'type' => 1])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->setField('is_show', 0);
-    }
-
-    /**
-     * *@param  [type] $arr [二维数组]
-     * @param  [type] $key [键名]
-     *
-     * @return [type]      [新的二维数组]
-     * Created by Phpstorm.
-     * User: jhh
-     * Date: 2020/7/22
-     * Time: 11:37
-     */
-    function array_group_by($arr, $key)
-    {
-        $grouped = [];
-        foreach ($arr as $value) {
-            $grouped[$value[$key]][] = $value;
-        }
-        if (func_num_args() > 2) {
-            $args = func_get_args();
-            foreach ($grouped as $key => $value) {
-                $parms = array_merge($value, array_slice($args, 2, func_num_args()));
-                $grouped[$key] = call_user_func_array('array_group_by', $parms);
-            }
-        }
-
-        return $grouped;
+        #########################  新品流程  ###################################
+        //获取唯一的sku
+        $skuArrayUnique = array_unique($skuArray);
+        //插入新品记录表
+        createNewProductProcessLog($skuArrayUnique,2,1);
     }
 
     /**
@@ -921,6 +926,11 @@ class TrackReg extends Backend
             ->where(['is_show' => 1, 'type' => 2])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 month")), date('Y-m-d H:i:s')])
             ->setField('is_show', 0);
+        #########################  新品流程  ###################################
+        //获取唯一的sku
+        $skuArrayUnique = array_unique($skuArray);
+        //插入新品记录表
+        createNewProductProcessLog($skuArrayUnique,2,1);
     }
 
     /**
@@ -1035,7 +1045,11 @@ class TrackReg extends Backend
             ->where(['is_show' => 1, 'type' => 3])
             ->whereTime('create_time', 'between', [date('Y-m-d H:i:s', strtotime("-1 day")), date('Y-m-d H:i:s')])
             ->setField('is_show', 0);
-
+        #########################  新品流程  ###################################
+        //获取唯一的sku
+        $skuArrayUnique = array_unique($skuArray);
+        //插入新品记录表
+        createNewProductProcessLog($skuArrayUnique,2,1);
         echo "ok";
     }
 
