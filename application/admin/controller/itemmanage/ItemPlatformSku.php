@@ -717,6 +717,7 @@ class ItemPlatformSku extends Backend
             }
             if ($soapRes || $thirdRes['code'] == 1) {
                 $this->model->where(['id' => $ids])->update(['is_upload' => 1]);
+                createNewProductProcessLog([$itemPlatformRow['sku']], 7, session('admin.id'));
                 $this->success('同步成功！！');
             } else {
                 $this->success('同步失败！！');

@@ -520,7 +520,6 @@ class Instock extends Backend
 
         $new_product_mapp = new \app\admin\model\NewProductMapping();
         $platform = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $item_platform_sku_model = new ItemPlatformSku();
         $purchase = new \app\admin\model\purchase\PurchaseOrderItem;
         $allocated = new \app\admin\model\itemmanage\GoodsStockAllocated;
         $item = new \app\admin\model\itemmanage\Item;
@@ -539,9 +538,6 @@ class Instock extends Backend
             $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
 
             if ($data['status'] == 2) {
-                /**
-                 * @todo 审核通过增加库存 并添加入库单入库数量
-                 */
                 $error_num = [];
                 foreach ($list as $k => $v) {
                     $item_map['sku'] = $v['sku'];
@@ -870,6 +866,8 @@ class Instock extends Backend
                             'create_time' => time(),
                             'number_type' => 3,
                         ]);
+
+
                     }
 
                     if ($stock_res === false) {
@@ -911,6 +909,10 @@ class Instock extends Backend
                         $orderReturn->where(['id' => $check_res['order_return_id']])->update(['in_stock_status' => 1]);
                     }
                 }
+
+                //新品流程日志
+                $logSku = array_column($list, 'sku');
+                createNewProductProcessLog($logSku, 4, $this->auth->id);
 
                 //条形码入库时间
                 $this->_product_bar_code_item

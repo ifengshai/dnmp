@@ -1150,7 +1150,6 @@ class PurchaseOrder extends Backend
                 //查询供应商
                 $supplier = new \app\admin\model\purchase\Supplier();
                 $supplier_list = $supplier->column('supplier_name', 'id');
-                // dump($list);die;
                 foreach ($list as $v) {
                     //插入日志表
                     (new StockLog())->setData([
@@ -1247,9 +1246,13 @@ class PurchaseOrder extends Backend
                             $res = $this->replenish->where('id', $replenish_id['replenish_id'])->setField('status', 4);
                         }
                     }
+
+
                 }
                 //采购单审核通过 sku 改为老品
                 $item->where(['sku' => ['in', $skus]])->update(['is_new' => 2]);
+
+                createNewProductProcessLog($skus, 3, session('admin.id'));
             }
             $item->commit();
             $item_platform->commit();

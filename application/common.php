@@ -2,6 +2,8 @@
 
 // 公共助手函数
 
+use app\admin\model\NewProductProcess;
+
 if (!function_exists('__')) {
 
     /**
@@ -603,5 +605,44 @@ if (!function_exists('tp_log')) {
     {
         \think\Log::init(['type' => 'File', 'path' => ROOT_PATH . 'public' . DS . 'logs' . DS . $filePath . DS]);
         \think\Log::write($logContent);
+    }
+}
+
+
+/**
+ * 创建新品流程日志记录
+ *
+ * @param  array  $sku
+ * @param  int  $type
+ * @param  int|null  $adminId
+ * @throws \think\db\exception\DataNotFoundException
+ * @throws \think\db\exception\ModelNotFoundException
+ * @throws \think\exception\DbException
+ * @author fangke
+ * @date   2021/7/28 11:32 上午
+ */
+function createNewProductProcessLog(array $sku, int $type, int $adminId = null)
+{
+    $adminId = $adminId ?? session('admin.id');
+    // 判断主表该SKU状态是否可以更新
+    $newProductProcesses = NewProductProcess::whereIn('sku', $sku)
+        ->where('status', '<', $type)
+        ->select();
+
+    if (empty($newProductProcesses)) {
+        return;
+    }
+
+    // 更新主表状态及操作人
+    foreach ($newProductProcesses as $newProductProcess) {
+        $newProductProcess->status = $type;
+        $newProductProcess->admin_id = $adminId;
+        $newProductProcess->save();
+
+        // 插入日志记录
+        $newProductProcess->logs()->save([
+            'type' => $type,
+            'admin_id' => $adminId
+        ]);
     }
 }

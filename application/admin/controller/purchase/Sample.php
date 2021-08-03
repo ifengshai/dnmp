@@ -1012,6 +1012,7 @@ class Sample extends Backend
                                 $this->samplelendlog->insert($lendlog);
                                 //入库选择换图入库时 将SKU增加到【产品开发管理】页面
                                 if ($sampleWorkOrder['instock_type'] == 2){
+                                    createNewProductProcessLog([$item['sku']],5,session('admin.id'));
                                     $newProductDesign->insert(['sku'=>$item['sku'],'status'=>1,'create_time'=>date('Y-m-d H:i:s', time()),'update_time'=>date('Y-m-d H:i:s', time())]);
                                 }
                             } else {
@@ -1030,6 +1031,7 @@ class Sample extends Backend
                                 $this->samplelendlog->insert($lendlog);
                                 //入库选择换图入库时 将SKU增加到【产品开发管理】页面
                                 if ($sampleWorkOrder['instock_type'] == 2){
+                                    createNewProductProcessLog([$item['sku']],4,session('admin.id'));
                                 $newProductDesign->insert(['sku'=>$item['sku'],'status'=>1,'create_time'=>date('Y-m-d H:i:s', time()),'update_time'=>date('Y-m-d H:i:s', time())]);
                                 }
                             }

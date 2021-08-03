@@ -1929,6 +1929,7 @@ class ScmWarehouse extends Scm
                             'create_time'             => time(),
                             'number_type'             => 3,
                         ]);
+
                     }
 
                     if ($stock_res === false) {
@@ -1966,6 +1967,8 @@ class ScmWarehouse extends Scm
                     if ($check_res['order_return_id']) {
                         $this->_order_return->where(['id' => $check_res['order_return_id']])->update(['in_stock_status' => 1]);
                     }
+
+
                 }
 
                 //有错误 则回滚数据
@@ -1978,6 +1981,10 @@ class ScmWarehouse extends Scm
                     ->allowField(true)
                     ->isUpdate(true, ['in_stock_id' => $in_stock_id])
                     ->save(['in_stock_time' => date('Y-m-d H:i:s')]);
+
+                //新品流程日志
+                $logSku = array_column($list, 'sku');
+                createNewProductProcessLog($logSku, 4, $this->auth->id);
             } else {
                 //审核拒绝解除条形码绑定关系
                 $this->_product_bar_code_item
@@ -3968,7 +3975,7 @@ class ScmWarehouse extends Scm
                 $this->_item_platform_sku->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error('shiticang:'.$e->getMessage() .'-'. $e->getLine());
+                Log::error('shiticang:' . $e->getMessage() . '-' . $e->getLine());
                 $this->error($e->getMessage(), [], 444);
             } catch (PDOException $e) {
                 $this->_product_bar_code_item->rollback();
@@ -3977,7 +3984,7 @@ class ScmWarehouse extends Scm
                 $this->_item_platform_sku->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error('shiticang:'.$e->getMessage() .'-'. $e->getLine());
+                Log::error('shiticang:' . $e->getMessage() . '-' . $e->getLine());
                 $this->error($e->getMessage(), [], 444);
             } catch (Exception $e) {
                 $this->_product_bar_code_item->rollback();
@@ -3986,7 +3993,7 @@ class ScmWarehouse extends Scm
                 $this->_item_platform_sku->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error('shiticang:'.$e->getMessage() .'-'. $e->getLine());
+                Log::error('shiticang:' . $e->getMessage() . '-' . $e->getLine());
                 $this->error($e->getMessage(), [], 444);
             }
             if ($res !== false) {
@@ -4175,7 +4182,7 @@ class ScmWarehouse extends Scm
                 $this->_stock_transfer_order->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error('shiticang:'. $e->getMessage());
+                Log::error('shiticang:' . $e->getMessage());
                 $this->error($e->getMessage(), [], 444);
 
             } catch (PDOException $e) {
@@ -4184,7 +4191,7 @@ class ScmWarehouse extends Scm
                 $this->_stock_transfer_order->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error('shiticang:'.$e->getMessage());
+                Log::error('shiticang:' . $e->getMessage());
                 $this->error($e->getMessage(), [], 444);
             } catch (Exception $e) {
                 $this->_item->rollback();
@@ -4192,7 +4199,7 @@ class ScmWarehouse extends Scm
                 $this->_stock_transfer_order->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
-                Log::error('shiticang:'.$e->getMessage());
+                Log::error('shiticang:' . $e->getMessage());
                 $this->error($e->getMessage(), [], 444);
             }
             if ($res !== false) {
@@ -4308,10 +4315,10 @@ class ScmWarehouse extends Scm
             $this->error(__('条形码数据有重复的，请检查！！'), '', 524);
         }
         //重复条码校验
-        $stockTransferOrderItemCodes = $this->_stock_transfer_order_item_code->where('transfer_order_item_id' , $transferOrderItemId)->column('code');
-        $hasCode = array_intersect($stockTransferOrderItemCodes,$codeAggUnique);
+        $stockTransferOrderItemCodes = $this->_stock_transfer_order_item_code->where('transfer_order_item_id', $transferOrderItemId)->column('code');
+        $hasCode = array_intersect($stockTransferOrderItemCodes, $codeAggUnique);
         if ($hasCode) {
-            $this->error(__(join(',',$hasCode) . '重复，请删除此条码！'), '', 524);
+            $this->error(__(join(',', $hasCode) . '重复，请删除此条码！'), '', 524);
         }
 
         $arr = [];

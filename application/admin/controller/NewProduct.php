@@ -4,6 +4,7 @@ namespace app\admin\controller;
 
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\NewProductProcess;
 use app\common\controller\Backend;
 use think\Log;
 use think\Request;
@@ -951,12 +952,28 @@ class NewProduct extends Backend
 
                 //添加对应平台映射关系
                 $skuParams['site'] = $site;
+
                 $skuParams['sku'] = $params['sku'];
                 $skuParams['frame_is_rimless'] = $row['frame_is_rimless'];
                 $skuParams['name'] = $row['name'];
                 $skuParams['category_id'] = $row['category_id'];
 
                 $result = $itemPlatformSku->addPlatformSku($skuParams);
+                #########################  新品流程  ###################################
+                //审核通过新品流程插入数据以及日志
+                $glassCategories = $this->category->where('attribute_group_id',1)->column('id');
+                $newProductProcesses = NewProductProcess::whereIn('sku', $row['sku'])
+                    ->select();
+                //只记录眼镜的，其余不记录
+                if(in_array($row['category_id'],$glassCategories) && !$newProductProcesses) {
+                    NewProductProcess::create([
+                        'sku' => $row['sku'],
+                        'admin_id' => session('admin.id'),
+                        'status' => 1,
+                        'goods_supply' => $row['goods_supply']
+                    ]);
+                    createNewProductProcessLog([$row['sku']],1,session('admin.id'));
+                }
                 $this->success('审核成功');
             } else {
                 $this->error('审核失败');
@@ -993,6 +1010,10 @@ class NewProduct extends Backend
             $row = collection($row)->toArray();
 
             $test = [];
+            //审核通过新品流程插入数据以及日志
+            $glassCategories = $this->category->where('attribute_group_id',1)->column('id');
+
+            $newProductProcessSkus = [];
             foreach ($row as $key => $item) {
                 if ($item['item_status'] != 1 && $item['item_status'] != 2) {
                     $this->error($item['sku'] . '数据状态不能同步');
@@ -1039,9 +1060,29 @@ class NewProduct extends Backend
                     $skuParams['name'] = $item['name'];
                     $skuParams['category_id'] = $item['category_id'];
                     $result = (new \app\admin\model\itemmanage\ItemPlatformSku())->addPlatformSku($skuParams);
+                    #########################  新品流程  ###################################
+                    //只记录眼镜的，其余不记录
+                    if(in_array($item['category_id'],$glassCategories)) {
+                        //大货（1自主设计；2采样定做）\r\n\r\n现货（3线上现货；4线下现货）,
+                        $newProductProcesses = NewProductProcess::whereIn('sku', $item['sku'])
+                            ->select();
+                        if(!$newProductProcesses) {
+                            NewProductProcess::create([
+                                'sku' => $item['sku'],
+                                'admin_id' => session('admin.id'),
+                                'status' => 1,
+                                'goods_supply' => $item['goods_supply']
+                            ]);
+                            array_push($newProductProcessSkus,$item['sku']);
+                        }
+                    }
                 } else {
                     $this->error('审核失败');
                 }
+            }
+            //新品日志
+            if($newProductProcessSkus) {
+                createNewProductProcessLog(array_unique(array_column($row,'sku')),1,session('admin.id'));
             }
             $this->success('审核成功');
         } else {
