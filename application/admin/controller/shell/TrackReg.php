@@ -9,16 +9,16 @@ namespace app\admin\controller\shell;
 use app\admin\controller\elasticsearch\async\AsyncDatacenterDay;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\order\order\NewOrder;
+use app\admin\model\OrderNode;
+use app\admin\model\OrderNodeDetail;
 use app\common\controller\Backend;
 use app\enum\Site;
 use fast\Excel;
-use fast\Http;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use think\Hook;
 use app\admin\model\purchase\SupplierSku;
-use think\Model;
 use think\Queue;
 
 class TrackReg extends Backend
@@ -30,8 +30,8 @@ class TrackReg extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
-        $this->ordernode = new \app\admin\model\OrderNode();
+        $this->ordernodedetail = new OrderNodeDetail();
+        $this->ordernode = new OrderNode();
     }
 
 
