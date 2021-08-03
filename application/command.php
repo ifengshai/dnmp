@@ -34,4 +34,5 @@ return [
     'app\admin\controller\shell\operate\RepurchaseTemp',
     'app\admin\controller\shell\Shell',
     'app\admin\controller\shell\OrderPrescriptionType',
+    'app\admin\controller\shell\service\SyncZenDeskRatingData',
 ];
