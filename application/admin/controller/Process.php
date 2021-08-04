@@ -1403,9 +1403,9 @@ class Process extends Backend
     {
         $type = 2;
         $site = 'voogueme';
-        for ($i = 0; $i < 7; $i++) {
-            $start = '2021-07-19T' . $i . ':00:00Z';
-            $end = '2021-07-19T' . $i . ':59:59Z';
+        for ($i = 0; $i < 24; $i++) {
+            $start = '2021-08-03T' . $i . ':00:00Z';
+            $end = '2021-08-03T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(10000);
