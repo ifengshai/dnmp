@@ -1803,6 +1803,12 @@ class NewProduct extends Backend
             unset($filter['platform_type']);
             $this->request->get(['filter' => json_encode($filter)]);
         }
+        //名字搜索
+        if ($filter['supplier.supplier_name']) {
+            $map['supplier_name'] = ['like','%'.$filter['supplier.supplier_name'].'%'];
+            unset($filter['supplier.supplier_name']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
 
 
         [$where] = $this->buildparams();
