@@ -44,6 +44,7 @@ class NewProductDesign extends Backend
         $this->itemAttribute = new \app\admin\model\itemmanage\attribute\ItemAttribute;
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $this->category = new \app\admin\model\itemmanage\ItemCategory;
+        $this->newProduct = new \app\admin\model\NewProduct;
         $this->view->assign('getTabList', $this->model->getTabList());
         $this->view->assign('categoryList', $this->category->categoryList());
         $this->view->assign('brandList', (new ItemBrand())->getBrandList());
@@ -208,8 +209,10 @@ class NewProductDesign extends Backend
             $itemPlatform = new ItemPlatformSku();
             $platStock = $itemPlatform->where('sku','in',$skuList)->field('stock,platform_type,sku')->select();
             $itemStatusIsNew = $Item->where('sku','in',$skuList)->field('sku,item_status,is_new,available_stock,category_id,is_spot')->select();
+            $newProducts = $Item->where('sku','in',$skuList)->field('sku,goods_supply')->select();
             $itemStatusIsNew = collection($itemStatusIsNew)->toArray();
             $itemStatusIsNew = array_column($itemStatusIsNew,null,'sku');
+            $newProducts = array_column($newProducts,null,'sku');
             $platStock = collection($platStock)->toArray();
             $itemCategory= new ItemCategory();
             $itemCategoryAll = $itemCategory->column('name','id');
@@ -224,7 +227,25 @@ class NewProductDesign extends Backend
 
                 $list[$key]['item_status'] =$itemStatusIsNew[$item['sku']]['item_status'];
                 $list[$key]['is_spot'] =$itemStatusIsNew[$item['sku']]['is_spot'];
-
+                $goodsSupply =$newProducts[$item['sku']]['goods_supply'];
+                //自主设计,采样定做,线上现货,线下现货
+                switch($goodsSupply) {
+                    case 1:
+                        $goodsSupplyName = '自主设计';
+                        break;
+                    case 2:
+                        $goodsSupplyName = '采样定做';
+                        break;
+                    case 3:
+                        $goodsSupplyName = '线上现货';
+                        break;
+                    case 4:
+                        $goodsSupplyName = '线下现货';
+                        break;
+                        default:
+                        $goodsSupplyName = '';
+                }
+                $list[$key]['goods_supply'] = $goodsSupplyName;
                 $list[$key]['zeelool'] = array_reduce($platStock,function($carry,$val)use($item){
                     if ($val['sku'] == $item['sku'] && $val['platform_type'] == 1){
                         return $val['stock'];
