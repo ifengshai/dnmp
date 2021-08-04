@@ -2112,7 +2112,7 @@ DOC;
             $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), $value['priority_name']);
             $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['channel']);
             $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['create_time']);
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['update_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['zendesk_update_time']);
             $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['replies']);
             $spreadsheet->getActiveSheet()->setCellValue("O" . ($key * 1 + 2), $value['reply_minutes']);
             $spreadsheet->getActiveSheet()->setCellValue("P" . ($key * 1 + 2), $value['is_admin']);
