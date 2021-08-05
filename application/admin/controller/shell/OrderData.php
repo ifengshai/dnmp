@@ -1898,9 +1898,10 @@ class OrderData extends Backend
         $list = $order->where('order_prescription_type', 0)
             ->where('site', 1)
             ->where('created_at', '>', strtotime('2021-07-22 16:30:00'))
-            ->column('id');
+            ->field('id,entity_id')
+            ->select();
         foreach ($list as $key => $value) {
-            $order_type = $orderitemprocess->where('order_id', $value)->column('order_prescription_type');
+            $order_type = $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->column('order_prescription_type');
             //查不到结果跳过 防止子单表延迟两分钟查不到数据
             if (!$order_type) {
                 continue;
@@ -1915,13 +1916,13 @@ class OrderData extends Backend
                 $type = 1;
                 //如果Z站全为仅镜框 则分到丹阳仓
                 $data['stock_id'] = 2;
-                $orderitemprocess->where('order_id', $value)->update(['stock_id' => 2, 'wave_order_id' => 0]);
+                $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
             }
 
             $data['order_prescription_type'] = $type;
             $data['updated_at'] = time();
-            $order->where('id', $value)->update($data);
-            echo $value . ' is ok' . "\n";
+            $order->where('id', $value['id'])->update($data);
+            echo $value['id'] . ' is ok' . "\n";
             usleep(100000);
         }
     }
@@ -3362,7 +3363,7 @@ class OrderData extends Backend
 
                 //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                 if ($order_prescription_type == 3 && in_array($site, [1, 3])) {
-                    $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2,'updated_at' => time() + 28800]);
+                    $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2, 'updated_at' => time() + 28800]);
                     $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                 }
                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['updated_at' => time() + 28800]);
