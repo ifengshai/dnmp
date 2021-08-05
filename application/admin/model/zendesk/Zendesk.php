@@ -541,11 +541,7 @@ class Zendesk extends Model
                 if ($ticket['channel'] == 'voice') {
                     continue;
                 }
-                if($ticket['type'] != 3){
-                    $isVip = Zendesk::isVipCustomer($ticket['type'], $ticket->email);
-                }else{
-                    $isVip = 0;
-                }
+                $isVip = Zendesk::isVipCustomer($ticket['type'], $ticket->email);
                 Zendesk::emailDistribution($ticket, $isVip);
             }
         }
@@ -1555,9 +1551,18 @@ class Zendesk extends Model
                 $model = false;
                 break;
         }
-        return $model->table('customer_entity')
-            ->where('email',$email)
-            ->value('is_vip');
+        if($site == 3){
+            $group = $model->table('users')
+                ->where('email',$email)
+                ->value('group');
+            $isVip = $group == 2 ? 1 : 0;
+            return $isVip;
+        }else{
+            return $model->table('customer_entity')
+                ->where('email',$email)
+                ->value('is_vip');
+        }
+
     }
     /*
      * 统计工作量概况

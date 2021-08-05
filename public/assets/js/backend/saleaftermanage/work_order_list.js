@@ -442,7 +442,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }else if(site =='V'){
                         $("#work_platform").val(2);
                     }else if(site =='M'){
-                        $("#work_platform").val(4);
+                        $("#work_platform").val(3);
                     }else if(site =='E'){
                         $("#work_platform").val(9);
                     }else if(site =='D'){
@@ -3381,7 +3381,7 @@ function platform_order(){
         }else if(site == 'V'){
             $("#work_platform").val(2);
         }else if(site == 'M'){
-            $("#work_platform").val(4);
+            $("#work_platform").val(3);
         }else if(site == 'E'){
             $("#work_platform").val(9);
         }else if(site == 'D'){

@@ -4,8 +4,6 @@ namespace app\admin\controller\operatedatacenter\NewGoodsData;
 
 use app\common\controller\Backend;
 use think\Db;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use fast\Excel;
 
 /**
  * 数据中心
@@ -392,7 +390,7 @@ class GoodsSalesNum extends Backend
             $map['p.sku'] = ['not like', '%Price%'];
         }
         $map['o.site'] = $site;
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery','delived']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery','shipped']];
         if($pages['limit']){
             if(isset($pages['offset'])){
                 $res['data'] = $this->order

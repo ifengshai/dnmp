@@ -64,7 +64,7 @@ class NewOrder extends Model
         } else {
             $map['b.sku'] = ['not like', '%Price%'];
         }
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
+        $map['a.status'] = ['in', [ 'processing', 'complete', 'delivered','delivery']];
         // $map['a.created_at'] = ['between', [strtotime(date('Y-m-d', strtotime("-1 day"))), strtotime(date('Y-m-d'))]];
         $map['a.created_at'] = $createTime;
         $map['a.site'] = $site;
@@ -96,7 +96,7 @@ class NewOrder extends Model
         } else {
             $map['b.sku'] = ['not like', '%Price%'];
         }
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
+        $map['a.status'] = ['in', [ 'processing','complete', 'delivered', 'delivery']];
         $map['a.created_at'] = ['between', [strtotime(date('Y-m-d', strtotime("-1 day"))), strtotime(date('Y-m-d'))]];
         $map['a.site'] = $site;
         $count = $this->where($map)
@@ -125,7 +125,7 @@ class NewOrder extends Model
         } else {
             $map['b.sku'] = ['not like', '%Price%'];
         }
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
+        $map['a.status'] = ['in', ['processing', 'complete', 'delivered','delivery']];
         $map['a.created_at'] = ['between', [strtotime(date('Y-m-d', strtotime("-30 day"))), strtotime(date('Y-m-d'))]];
         $count = $this->where($map)
             ->alias('a')
@@ -154,7 +154,7 @@ class NewOrder extends Model
         }
         $map['a.status'] = [
             'in',
-            ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']
+            ['processing', 'complete', 'delivered','delivery']
         ];
         $map['a.payment_time'] = ['>', strtotime('-120 day')];
         $map['a.site'] = $site;
@@ -183,7 +183,7 @@ class NewOrder extends Model
         } else {
             $map['sku'] = ['not like', '%Price%'];
         }
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']];
+        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
         $list = $this
             ->alias('a')
             ->field('sku,count(1) as num,a.site')

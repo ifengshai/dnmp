@@ -90,11 +90,16 @@ class OperationAnalysis extends Model
         $where['order_platform'] = $id;
         $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
         $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
-        if ($id == 5) {
-            $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
-            $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
+        if ($id == 3 || $id == 5) {
+            $yestime_where['payment_time'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('orders')->query("set time_zone='+8:00'");
-            $today_sales_money_data = $model->table('orders')->where($yestime_where)->where($order_success_where)->sum('base_actual_amount_paid');
+            if($id == 3){
+                $order_success_where['status'] = ['in', ['processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed','delivered','delivery','shipped']];
+                $today_sales_money_data = $model->table('orders')->where($yestime_where)->where($order_success_where)->sum('base_actual_payment');
+            }else{
+                $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
+                $today_sales_money_data = $model->table('orders')->where($yestime_where)->where($order_success_where)->sum('base_actual_amount_paid');
+            }
         } else {
             //今日销售额sql
             if($id == 11){
@@ -131,7 +136,7 @@ class OperationAnalysis extends Model
         $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
         $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
 
-        if ($id == 5) {
+        if ($id == 3 || $id == 5) {
             $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('orders')->query("set time_zone='+8:00'");
             $today_order_num_rs = $model->table('orders')->where($yestime_where)->field('count(id) as count')->find();
@@ -167,9 +172,13 @@ class OperationAnalysis extends Model
         $model = $this->get_model_by_id($id);
         $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
         $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
-        if ($id == 5) {
-            $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
-            $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
+        if ($id == 3 || $id == 5) {
+            if($id == 3){
+                $order_success_where['status'] = ['in', ['processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed','delivered','delivery','shipped']];
+            }else{
+                $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
+            }
+            $yestime_where['payment_time'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('orders')->query("set time_zone='+8:00'");
             $today_order_success_rs = $model->table('orders')->where($yestime_where)->where($order_success_where)->field('count(id) as count')->find();
             $today_order_success_data = $today_order_success_rs['count'];
@@ -201,7 +210,7 @@ class OperationAnalysis extends Model
     public function get_today_shoppingcart_total($id)
     {
         //批发站无购物车
-        if ($id == 5) {
+        if ($id == 3 || $id == 5) {
             return 0;
         }
         $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_total_' . $id);
@@ -232,7 +241,7 @@ class OperationAnalysis extends Model
      */
     public function get_today_shoppingcart_new($id)
     {
-        if ($id == 5) {
+        if ($id == 3 || $id == 5) {
             return 0;
         }
         $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_new_' . $id);
@@ -269,7 +278,7 @@ class OperationAnalysis extends Model
         $model = $this->get_model_by_id($id);
         $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
         $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
-        if ($id == 5) {
+        if ($id == 3 || $id == 5) {
             $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('users')->query("set time_zone='+8:00'");
             $today_register_customer_rs = $model->table('users')->where($yestime_where)->field('count(id) as count')->find();
@@ -304,7 +313,7 @@ class OperationAnalysis extends Model
         $model = $this->get_model_by_id($id);
         $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
         $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
-        if ($id == 5) {
+        if ($id == 3 || $id == 5) {
             $yestime_where['updated_at'] = ['between', [$date_time_start, $date_time_end]];
             $model->table('users')->query("set time_zone='+8:00'");
             $today_sign_customer_rs = $model->table('users')->where($yestime_where)->field('count(id) as count')->find();
@@ -360,9 +369,9 @@ class OperationAnalysis extends Model
             //今天新增购物车产生的订单
             $order_status = $this->order_status;
             if($id == 11){
-                $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and order_type=1 and quote_id in ({$today_shoppingcart_total_ids})";
-            }else{
                 $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and (order_type=1 or order_type=10) and quote_id in ({$today_shoppingcart_total_ids})";
+            }else{
+                $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and order_type=1 and quote_id in ({$today_shoppingcart_total_ids})";
             }
 
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");

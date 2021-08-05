@@ -32,11 +32,11 @@ class UserData extends BaseElasticsearch
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getNewAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val, ['zeelool', 'voogueme', 'nihao', 'zeelool_de', 'zeelool_jp','wesee'])) {
+            if (!in_array($val, ['zeelool', 'voogueme', 'meeloog', 'zeelool_de', 'zeelool_jp','wesee'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
-        $data = compact(  'active_user_num', 'register_user_num', 'again_user_num',  'magentoplatformarr');
+        $data = compact('magentoplatformarr');
         $this->view->assign($data);
         return $this->view->fetch();
     }
@@ -187,11 +187,6 @@ class UserData extends BaseElasticsearch
             $timeStr = date('Y-m-d', strtotime('-6 days')) . ' ' . '00:00:00' . ' - ' . date('Y-m-d');
         }
         $createat = explode(' ', $timeStr);
-        $map_where['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-
-
-        // 用户概述表格数据
-        $map_where['o.order_type'] = 1;
 
         if ($site == 2) {
             $model = Db::connect('database.db_voogueme');
@@ -207,29 +202,88 @@ class UserData extends BaseElasticsearch
             $model =  Db::connect('database.db_zeelool');
         }
 
-        if ($site==5){
-            $customerWhere['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-            $orderWhere['status'] = ['in', [2,3,4,9,10]];
-            $orderWhere['order_type'] = 1;
-            //用户统计
-            $customerCount = Db::connect('database.db_weseeoptical')
+        if ($site==3 || $site==5){
+            $model->table('users')->query("set time_zone='+8:00'");
+            $customerWhere['created_at'] = $orderWhere['o.payment_time'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
+            //总用户数
+            $customerCount = $model
                 ->table('users')
-                ->where('name','<>','visitor')
                 ->where($customerWhere)
                 ->count();
-            $orderCount = Db::connect('database.db_weseeoptical')
-                ->table('orders')
-                ->where($customerWhere)
-                ->where($orderWhere)
-                ->sum('base_actual_amount_paid');
+            if($site == 3){
+                $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+                $orderWhere['o.order_type'] = 1;
+                $order = $model
+                    ->table('orders')
+                    ->alias('o')
+                    ->join('users u','o.user_id=u.id')
+                    ->where($orderWhere)
+                    ->group('u.group')
+                    ->column('sum(base_actual_payment) price','u.group');
+                $customer = $model
+                    ->table('users')
+                    ->where($customerWhere)
+                    ->group('group')
+                    ->column('count(*) as count,group');
+                $orderCount = $model
+                    ->table('orders')
+                    ->alias('o')
+                    ->join('users u','o.user_id=u.id')
+                    ->where($orderWhere)
+                    ->count();
+            }else{
+                $orderWhere['o.status'] = ['in', [2,3,4,9,10]];
+                $order = $model
+                    ->table('orders')
+                    ->alias('o')
+                    ->join('users u','o.user_id=u.id')
+                    ->where($orderWhere)
+                    ->group('u.group_id')
+                    ->column('sum(base_actual_amount_paid) price','u.group_id');
+                $customer = $model
+                    ->table('users')
+                    ->where($customerWhere)
+                    ->group('group_id')
+                    ->column('count(*) as count,group_id');
+                $orderCount = $model
+                    ->table('orders')
+                    ->alias('o')
+                    ->join('users u','o.user_id=u.id')
+                    ->where($orderWhere)
+                    ->count();
+            }
             $resultData=array();
-            //拼装数据
-            $resultData[0]['userType']="普通用户";//用户类型
-            $resultData[0]['userNumber']=$customerCount;//用户数
-            $resultData[0]['userNumberRatio']="100%";//用户数占比
-            $resultData[0]['userSale']=$orderCount?number_format($orderCount, 2):0;//销售额
-            $resultData[0]['userSaleRatio']="100%";//销售额占比
-
+            $i = 0;
+            foreach ($order as $key=>$value){
+                if($site == 3){
+                    switch ($key){
+                        case 1:
+                            $userType = '普通用户';
+                            break;
+                        case 2:
+                            $userType = 'VIP';
+                            break;
+                    }
+                }else{
+                    switch ($key){
+                        case 1:
+                            $userType = '普通用户';
+                            break;
+                        case 2:
+                            $userType = '批发用户';
+                            break;
+                        case 4:
+                            $userType = 'VIP';
+                            break;
+                    }
+                }
+                $resultData[$i]['userType'] = $userType;
+                $resultData[$i]['userNumber'] = $customer[$key];
+                $resultData[$i]['userNumberRatio'] = $customerCount > 0 ? round($customer[$key]/$customerCount*100,2).'%' : 0;
+                $resultData[$i]['userSale'] = $value ? $value : 0;
+                $resultData[$i]['userSaleRatio'] = $orderCount > 0 ? round($value/$orderCount*100,2).'%' : 0;
+                $i++;
+            }
             return $resultData;
         }
 

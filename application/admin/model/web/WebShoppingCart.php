@@ -3,6 +3,7 @@
 namespace app\admin\model\web;
 
 use app\admin\controller\elasticsearch\async\AsyncCart;
+use app\enum\Site;
 use think\Model;
 use think\Log;
 
@@ -29,7 +30,7 @@ class WebShoppingCart extends Model
      * @author wpl
      * @date   2021/4/15 9:30
      */
-    public static function setInsertData(array $data = [], int $site = null)
+    public static function setInsertData(array $data = [], int $site = null): bool
     {
         if (!$data) {
             return false;
@@ -38,18 +39,26 @@ class WebShoppingCart extends Model
         try {
             $params = [];
             foreach ($data as $k => $v) {
-                $params['entity_id'] = $v['entity_id'];
-                $params['store_id'] = $v['store_id'] ?: 0;
-                $params['is_active'] = $v['is_active'] ?: 0;
+                if ($site == Site::NIHAO) {
+                    $params['entity_id'] = $v['id'];
+                    $params['items_qty'] = $v['qty'] ?: 0;
+                    $params['items_count'] = $v['qty'] ?: 0;
+                    $params['customer_id'] = $v['user_id'] ?: 0;
+                    $params['goods_id'] = $v['goods_id'] ?: 0;
+                } else {
+                    $params['entity_id'] = $v['entity_id'];
+                    $params['store_id'] = $v['store_id'] ?: 0;
+                    $params['is_active'] = $v['is_active'] ?: 0;
+                    $params['items_count'] = $v['items_count'] ?: 0;
+                    $params['items_qty'] = $v['items_qty'] ?: 0;
+                    $params['base_currency_code'] = $v['base_currency_code'] ?: 0;
+                    $params['quote_currency_code'] = $v['quote_currency_code'] ?: 0;
+                    $params['grand_total'] = $v['grand_total'] ?: 0;
+                    $params['base_grand_total'] = $v['base_grand_total'] ?: 0;
+                    $params['customer_id'] = $v['customer_id'] ?: 0;
+                    $params['customer_email'] = $v['customer_email'] ?: '';
+                }
                 $params['site'] = $site;
-                $params['items_count'] = $v['items_count'] ?: 0;
-                $params['items_qty'] = $v['items_qty'] ?: 0;
-                $params['base_currency_code'] = $v['base_currency_code'] ?: 0;
-                $params['quote_currency_code'] = $v['quote_currency_code'] ?: 0;
-                $params['grand_total'] = $v['grand_total'] ?: 0;
-                $params['base_grand_total'] = $v['base_grand_total'] ?: 0;
-                $params['customer_id'] = $v['customer_id'] ?: 0;
-                $params['customer_email'] = $v['customer_email'] ?: '';
                 $params['created_at'] = strtotime($v['created_at']) ?: 0;
                 $params['updated_at'] = strtotime($v['updated_at']) ?: 0;
                 $cartId = (new WebShoppingCart())->insertGetId($params);
@@ -66,14 +75,14 @@ class WebShoppingCart extends Model
     /**
      * 网站用户表同步 更新
      *
-     * @param array $data 数据
-     * @param int   $site 站点
+     * @param array    $data 数据
+     * @param int|null $site 站点
      *
      * @return bool
      * @author wpl
      * @date   2021/4/15 9:30
      */
-    public static function setUpdateData($data = [], $site = null)
+    public static function setUpdateData(array $data = [], int $site = null): bool
     {
         if (!$data) {
             return false;
@@ -82,19 +91,28 @@ class WebShoppingCart extends Model
         try {
             foreach ($data as $k => $v) {
                 $params = [];
-                $params['store_id'] = $v['store_id'] ?: 0;
-                $params['is_active'] = $v['is_active'] ?: 0;
-                $params['items_count'] = $v['items_count'] ?: 0;
-                $params['items_qty'] = $v['items_qty'] ?: 0;
-                $params['base_currency_code'] = $v['base_currency_code'] ?: 0;
-                $params['quote_currency_code'] = $v['quote_currency_code'] ?: 0;
-                $params['grand_total'] = $v['grand_total'] ?: 0;
-                $params['base_grand_total'] = $v['base_grand_total'] ?: 0;
-                $params['customer_id'] = $v['customer_id'] ?: 0;
-                $params['customer_email'] = $v['customer_email'] ?: '';
+                if ($site == Site::NIHAO) {
+                    $params['items_qty'] = $v['qty'] ?: 0;
+                    $params['items_count'] = $v['qty'] ?: 0;
+                    $params['customer_id'] = $v['user_id'] ?: 0;
+                    $params['goods_id'] = $v['goods_id'] ?: 0;
+                    $id = $v['id'];
+                } else {
+                    $params['store_id'] = $v['store_id'] ?: 0;
+                    $params['is_active'] = $v['is_active'] ?: 0;
+                    $params['items_count'] = $v['items_count'] ?: 0;
+                    $params['items_qty'] = $v['items_qty'] ?: 0;
+                    $params['base_currency_code'] = $v['base_currency_code'] ?: 0;
+                    $params['quote_currency_code'] = $v['quote_currency_code'] ?: 0;
+                    $params['grand_total'] = $v['grand_total'] ?: 0;
+                    $params['base_grand_total'] = $v['base_grand_total'] ?: 0;
+                    $params['customer_id'] = $v['customer_id'] ?: 0;
+                    $params['customer_email'] = $v['customer_email'] ?: '';
+                    $id = $v['entity_id'];
+                }
                 $params['updated_at'] = strtotime($v['updated_at']) ?: 0;
-                (new WebShoppingCart())->where(['entity_id' => $v['entity_id'], 'site' => $site])->update($params);
-                $cart = (new WebShoppingCart())->where(['entity_id' => $v['entity_id'], 'site' => $site])->find();
+                (new WebShoppingCart())->where(['entity_id' => $id, 'site' => $site])->update($params);
+                $cart = (new WebShoppingCart())->where(['entity_id' => $id, 'site' => $site])->find();
                 if ($cart) {
                     (new AsyncCart())->runUpdate($cart->toArray());
                 }

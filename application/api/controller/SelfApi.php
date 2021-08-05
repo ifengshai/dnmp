@@ -563,11 +563,10 @@ class SelfApi extends Api
         $order_number = $this->request->request('order_number'); //订单号
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
-
+        Db::query("set time_zone='+0:00';");
         $order_node1 = Db::name('order_node_detail')
             ->where('order_number', $order_number)
             ->where('site', $site)
-            ->where('node_type', 'in', '1,2,3,4,5,6,7,13')
             ->order('create_time desc')
             ->select();
         $order_node2 = Db::name('order_node_courier')
@@ -583,7 +582,6 @@ class SelfApi extends Api
                 $other_order_node1 = Db::name('order_node_detail')
                     ->where('order_number', $val)
                     ->where('site', $site)
-                    ->where('node_type', 'in', '1,2,3,4,5,6,7,13')
                     ->order('create_time desc')
                     ->select();
                 $other_order_node2 = Db::name('order_node_courier')
@@ -610,7 +608,7 @@ class SelfApi extends Api
         $order_number = $this->request->request('order_number'); //订单号
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
-
+        Db::query("set time_zone='+0:00';");
         $order_data['order_data'] = Db::name('order_node_courier')
             ->where('order_number', $order_number)
             ->where('site', $site)
@@ -642,11 +640,10 @@ class SelfApi extends Api
         $order_number = $this->request->request('order_number'); //订单号
         $other_order_number = $this->request->request('other_order_number/a'); //其他订单号
         $site = $this->request->request('site'); //站点
-
+        Db::query("set time_zone='+0:00';");
         $order_data['order_data'] = Db::name('order_node_detail')
             ->where('order_number', $order_number)
             ->where('site', $site)
-            ->where('node_type', 'in', '1,2,3,4,5,6,7,13')
             ->order('create_time desc')
             ->select();
         if ($other_order_number) {
@@ -656,7 +653,6 @@ class SelfApi extends Api
                 $order_data['other_order_data'][$val] = Db::name('order_node_detail')
                     ->where('order_number', $val)
                     ->where('site', $site)
-                    ->where('node_type', 'in', '1,2,3,4,5,6,7,13')
                     ->order('create_time desc')
                     ->select();
             }
@@ -1256,9 +1252,23 @@ class SelfApi extends Api
      * @author gyh
      * @param $income_amount 收入金额
      */
-    public function vip_order_income($work_id = null)
+    public function vip_order_income()
     {
         $order_detail = $this->request->request();
+
+        if (!$order_detail['order_number']) {
+            $this->error(__('缺少订单号'), [], 400);
+        }
+
+        if (!$order_detail['site']) {
+            $this->error(__('缺少站点参数'), [], 400);
+        }
+
+        if (!$order_detail['base_grand_total']) {
+            $this->error(__('缺少支付金额'), [], 400);
+        }
+
+
         $params['type'] = 1;
         $params['bill_type'] = 2;//单据类型
         $params['order_number'] = $order_detail['order_number'];//订单号

@@ -152,7 +152,7 @@ class Repurchase extends Command
         //订单查询条件
         $where['site'] = $site;
         $where['order_type'] = 1;
-        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
+        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery','shipped']];
         $where['payment_time'] = ['between',[$startTime,$endTime]];
         //获取当前时间段内的用户人数
         $sql1 = $this->order
@@ -196,7 +196,8 @@ class Repurchase extends Command
                 'payment_review',
                 'paypal_canceled_reversal',
                 'delivered',
-                'delivery'
+                'delivery',
+                'shipped'
             ]
         ];
         $where1['payment_time'] = ['between', [$startTime1, $endTime1]];
@@ -251,7 +252,7 @@ class Repurchase extends Command
         $lastOneMonthTimeEnd = strtotime($lastOneMonthEnd);
         $where['site'] = $site;
         $where['order_type'] = 1;
-        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
+        $where['status'] = ['in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery','shipped']];
         $where1['payment_time'] = ['between',[$lastOneMonthTimeStart,$lastOneMonthTimeEnd]];
         $sql1 = $this->order
             ->where($where)

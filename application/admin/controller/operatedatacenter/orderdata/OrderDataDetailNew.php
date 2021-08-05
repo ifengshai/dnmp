@@ -49,9 +49,6 @@ class OrderDataDetailNew extends Backend
             if($filter['order_platform'] == 2){
                 $order_model = $this->voogueme;
                 $web_model = Db::connect('database.db_voogueme');
-            }elseif($filter['order_platform'] == 3){
-                $order_model = $this->nihao;
-                $web_model = Db::connect('database.db_nihao');
             }elseif($filter['order_platform'] == 10){
                 $order_model = $this->zeeloolde;
                 $web_model = Db::connect('database.db_zeelool_de');
@@ -73,7 +70,7 @@ class OrderDataDetailNew extends Backend
             $whereWesee = [];
             if($filter['time_str']){
                 $createat = explode(' ', $filter['time_str']);
-                $mapWesee['o.created_at'] = $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+                $mapWesee['o.payment_time'] = $map['o.payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
             }else{
                 if(isset($filter['time_str'])){
                     unset($filter['time_str']);
@@ -81,7 +78,7 @@ class OrderDataDetailNew extends Backend
                 }
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
-                $mapWesee['o.created_at'] = $map['o.created_at'] = ['between', [$start,$end]];
+                $mapWesee['o.payment_time'] = $map['o.payment_time'] = ['between', [$start,$end]];
             }
             if($filter['order_status']){
                 if($filter['order_status'] == 1){
@@ -107,13 +104,30 @@ class OrderDataDetailNew extends Backend
             }
             if($filter['store_id']){
                 $map['o.store_id'] = $filter['store_id'];
-                $weseeStoreId = '';
-                if($filter['store_id'] == 4) {
-                    $weseeStoreId = 2;
-                }elseif($filter['store_id'] == 1) {
-                    $weseeStoreId = 1;
+                if($filter['order_platform'] == 3){
+                    switch ($filter['store_id']){
+                        case 1:
+                            $mapWesee['o.source'] = 'pc';
+                            break;
+                        case 4:
+                            $mapWesee['o.source'] = 'wap';
+                            break;
+                        case 5:
+                            $mapWesee['o.source'] = 'iOS';
+                            break;
+                        case 6:
+                            $mapWesee['o.source'] = 'Android';
+                            break;
+                    }
+                }elseif($filter['order_platform'] == 5){
+                    $weseeStoreId = '';
+                    if($filter['store_id'] == 4) {
+                        $weseeStoreId = 2;
+                    }elseif($filter['store_id'] == 1) {
+                        $weseeStoreId = 1;
+                    }
+                    $mapWesee['o.source'] = $weseeStoreId;
                 }
-                $mapWesee['o.source'] = $weseeStoreId;
             }
             if($filter['increment_id']){
                 $map['o.increment_id'] = $filter['increment_id'];
@@ -135,20 +149,37 @@ class OrderDataDetailNew extends Backend
             unset($filter['is_refund']);
             $this->request->get(['filter' => json_encode($filter)]);
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
-            if($site == 5) {
-                $order_model = Db::connect('database.db_wesee_temp');
-                $order_model->table('order')->query("set time_zone='+8:00'");
+            if($site == 3 || $site == 5) {
+                 if($site == 3){
+                     $order_model = Db::connect('database.db_nihao');
+                 }else{
+                     $order_model = Db::connect('database.db_wesee_temp');
+                 }
+                $order_model->table('orders')->query("set time_zone='+8:00'");
                 $sort = 'o.id';
-                $list = $order_model->table('orders')->alias('o')
-                    ->join('users c','o.user_id=c.id','left')
-                    ->join('orders_addresses d','d.order_id = o.id')
-                    ->where($where)
-                    ->where($mapWesee)
-                    ->where('d.type',1)
-                    ->order($sort, $order)
-                    ->limit($offset, $limit)
-                    ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.discount_code_id as coupon_code,o.discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group_id')
-                    ->select();
+                if($site == 3){
+                    $list = $order_model->table('orders')->alias('o')
+                        ->join('users c','o.user_id=c.id','left')
+                        ->join('order_addresses d','d.order_id = o.id')
+                        ->where($where)
+                        ->where($mapWesee)
+                        ->where('d.type',1)
+                        ->order($sort, $order)
+                        ->limit($offset, $limit)
+                        ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.discount_code_id as coupon_code,o.discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group as group_id')
+                        ->select();
+                }else{
+                    $list = $order_model->table('orders')->alias('o')
+                        ->join('users c','o.user_id=c.id','left')
+                        ->join('orders_addresses d','d.order_id = o.id')
+                        ->where($where)
+                        ->where($mapWesee)
+                        ->where('d.type',1)
+                        ->order($sort, $order)
+                        ->limit($offset, $limit)
+                        ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.discount_code_id as coupon_code,o.discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group_id')
+                        ->select();
+                }
                 $arr = array();
                 $i = 0;
                 foreach ($list as $key=>$value){
@@ -186,18 +217,27 @@ class OrderDataDetailNew extends Backend
                         $order_shipping_status = $value['status'];
                     }
                     $arr[$i]['status'] = $order_shipping_status;
-                    switch ($value['store_id']){
-                        case 1:
-                            $store_id = 'PC';
-                            break;
-                        case 2:
-                            $store_id = 'M';
-                            break;
+                    if($site == 3){
+                        $arr[$i]['store_id'] = $value['store_id'];
+                    }else{
+                        switch ($value['store_id']){
+                            case 1:
+                                $store_id = 'PC';
+                                break;
+                            case 2:
+                                $store_id = 'M';
+                                break;
+                        }
+                        $arr[$i]['store_id'] = $store_id;
                     }
-                    $arr[$i]['store_id'] = $store_id;
                     $arr[$i]['coupon_code'] = $value['coupon_code'];
-                    $arr[$i]['coupon_rule_name'] = $order_model->table('user_coupons')->alias('a')
-                        ->join('discount_coupons b','b.id=a.discount_coupon_id')->field('b.*')->value('b.name');
+                    if($site == 3){
+                        $arr[$i]['coupon_rule_name'] = $order_model->table('discount_coupon_tickets')->alias('a')
+                        ->join('discount_coupons b','b.id=a.discount_coupon_id')->value('b.name');
+                    }else{
+                        $arr[$i]['coupon_rule_name'] = $order_model->table('user_coupons')->alias('a')
+                        ->join('discount_coupons b','b.id=a.discount_coupon_id')->value('b.name');
+                    }
                     $arr[$i]['shipping_method'] = $value['shipping_method'];  //快递类别
                     $value['firstname'] = mb_convert_encoding( $value['firstname'], 'UTF-8', 'UTF-8,GBK,GB2312,BIG5' );
                     $value['lastname'] = mb_convert_encoding( $value['lastname'], 'UTF-8', 'UTF-8,GBK,GB2312,BIG5' );
@@ -205,20 +245,30 @@ class OrderDataDetailNew extends Backend
                     $arr[$i]['shipping_name'] = $value['firstname'].''.$value['lastname'];  //收货姓名
                     $arr[$i]['customer_email'] = $value['customer_email'];   //支付邮箱
                     //客户信息
-
-                    switch ($value['group_id']){
-                        case 1:
-                            $group = '普通';
-                            break;
-                        case 2:
-                            $group = '批发';
-                            break;
-                        case 4:
-                            $group = 'VIP';
-                            break;
+                    if($site == 3){
+                        switch ($value['group_id']){
+                            case 1:
+                                $group = '普通';
+                                break;
+                            case 2:
+                                $group = 'VIP';
+                                break;
+                        }
+                    }else{
+                        switch ($value['group_id']){
+                            case 1:
+                                $group = '普通';
+                                break;
+                            case 2:
+                                $group = '批发';
+                                break;
+                            case 4:
+                                $group = 'VIP';
+                                break;
+                        }
                     }
                     $arr[$i]['customer_type'] = $group;   //客户类型
-                    $arr[$i]['discount_rate'] = $value['base_grand_total'] ? round(($value['base_discount_amount'] / $value['base_grand_total'] * (-1)), 2).'%' : 0;  //折扣百分比
+                    $arr[$i]['discount_rate'] = $value['base_grand_total'] ? round(($value['base_discount_amount'] / $value['base_grand_total'] * (-1)*100), 2).'%' : 0;  //折扣百分比
                     $arr[$i]['discount_money'] = round($value['base_discount_amount'], 2);  //折扣金额
 
                     $work_list_where['platform_order'] = $value['increment_id'];
@@ -248,18 +298,24 @@ class OrderDataDetailNew extends Backend
                     $arr[$i]['country_id'] = $value['country'];   //收货国家
 
                     $arr[$i]['payment_method'] = $value['payment_method'];  //支付方式
-                    //处方信息
-                    $frame_price = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->sum('base_goods_total_price');
-                    $arr[$i]['frame_price'] = round($frame_price,2);
-                    $arr[$i]['frame_num'] = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->sum('goods_count');
-                    $arr[$i]['lens_num'] = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->where('lens_name','neq','')->count();
+
                     $arr[$i]['is_box_num'] = 0;
-
-                    $lens_price = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->sum('base_lens_total_price');
+                    if($site == 3){
+                        $frame_price = $order_model->table('order_items')->where('order_id',$value['entity_id'])->sum('base_goods_price');
+                        $arr[$i]['frame_num'] = $order_model->table('order_items')->where('order_id',$value['entity_id'])->sum('goods_count');
+                        $arr[$i]['lens_num'] = $order_model->table('order_items')->where('order_id',$value['entity_id'])->where('base_lens_price','neq',0)->count();
+                        $lens_price = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->sum('base_lens_price');
+                        $skus = $order_model->table('order_items')->where('order_id',$value['entity_id'])->column('goods_sku');
+                    }else{
+                        $frame_price = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->sum('base_goods_total_price');
+                        $arr[$i]['frame_num'] = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->sum('goods_count');
+                        $arr[$i]['lens_num'] = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->where('lens_name','neq','')->count();
+                        $lens_price = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->sum('base_lens_total_price');
+                        $skus = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->column('goods_sku');
+                    }
+                    $arr[$i]['frame_price'] = round($frame_price,2);
                     $arr[$i]['lens_price'] = round($lens_price,2);
-
                     $arr[$i]['telephone'] = $value['telephone'];
-                    $skus = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->column('goods_sku');
                     $skus = collection($skus)->toArray();
                     $arr[$i]['sku'] = implode(',',$skus);
                     $arr[$i]['register_time'] = $value['register_time'];
@@ -598,9 +654,6 @@ class OrderDataDetailNew extends Backend
         if($order_platform == 2){
             $order_model = $this->voogueme;
             $web_model = Db::connect('database.db_voogueme');
-        }elseif($order_platform == 3){
-            $order_model = $this->nihao;
-            $web_model = Db::connect('database.db_nihao');
         }elseif($order_platform == 10){
             $order_model = $this->zeeloolde;
             $web_model = Db::connect('database.db_zeelool_de');
@@ -614,20 +667,16 @@ class OrderDataDetailNew extends Backend
             $order_model = $this->zeelool;
             $web_model = Db::connect('database.db_zeelool');
         }
-        $web_model->table('customer_entity')->query("set time_zone='+8:00'");
-        $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
-        $web_model->table('sales_flat_order_address')->query("set time_zone='+8:00'");
-        $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
         if($time_str){
             $createat = explode(' ', $time_str);
-            $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+            $map['o.payment_time'] = $mapWesee['o.payment_time'] =  ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
-            $map['o.created_at'] = ['between', [$start,$end]];
+            $map['o.payment_time'] = $mapWesee['o.payment_time'] = ['between', [$start,$end]];
         }
         if($increment_id){
-            $map['o.increment_id'] = $increment_id;
+            $map['o.increment_id'] = $mapWesee['o.order_no'] = $increment_id;
         }
         if($order_status){
             if($order_status == 1){
@@ -644,28 +693,93 @@ class OrderDataDetailNew extends Backend
             }
             $node_where['site'] = $site;
             $order_ids = Db::name('order_node')->where($node_where)->column('order_id');
-            $map['o.entity_id'] = ['in',$order_ids];
+            $map['o.entity_id'] = $mapWesee['o.id'] = ['in',$order_ids];
         }
         if($customer_type){
-            $map['c.group_id'] = $customer_type;
+            $map['c.group_id'] = $mapWesee['c.group_id'] = $customer_type;
         }
         if($store_id){
             $map['o.store_id'] = $store_id;
+            if($site == 3){
+                switch ($store_id){
+                    case 1:
+                        $mapWesee['o.source'] = 'pc';
+                        break;
+                    case 4:
+                        $mapWesee['o.source'] = 'wap';
+                        break;
+                    case 5:
+                        $mapWesee['o.source'] = 'iOS';
+                        break;
+                    case 6:
+                        $mapWesee['o.source'] = 'Android';
+                        break;
+                }
+            }elseif($site == 5){
+                $weseeStoreId = '';
+                if($store_id == 4) {
+                    $weseeStoreId = 2;
+                }elseif($store_id == 1) {
+                    $weseeStoreId = 1;
+                }
+                $mapWesee['o.source'] = $weseeStoreId;
+            }
         }
-        $total_export_count = $order_model->alias('o')
-            ->join('customer_entity c','o.customer_id=c.entity_id','left')
-            ->where($map)
-            ->count();
+        if($site == 3 || $site == 5){
+            if($site == 3){
+                $order_model = Db::connect('database.db_nihao');
+            }else{
+                $order_model = Db::connect('database.db_wesee_temp');
+            }
+            $order_model->table('orders')->query("set time_zone='+8:00'");
+            $total_export_count = $order_model->table('orders')
+                ->alias('o')
+                ->join('users c','o.user_id=c.id','left')
+                ->where($map)
+                ->count();
+        }else{
+            $web_model->table('customer_entity')->query("set time_zone='+8:00'");
+            $web_model->table('sales_flat_order_payment')->query("set time_zone='+8:00'");
+            $web_model->table('sales_flat_order_address')->query("set time_zone='+8:00'");
+            $web_model->table('sales_flat_order_item_prescription')->query("set time_zone='+8:00'");
+            $total_export_count = $order_model->alias('o')
+                ->join('customer_entity c','o.customer_id=c.entity_id','left')
+                ->where($map)
+                ->count();
+        }
         $pre_count = 5000;
         for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
             $start = $i*$pre_count;
             //切割每份数据
-            $list = $order_model->alias('o')
-                ->join('customer_entity c', 'o.customer_id=c.entity_id', 'left')
-                ->where($map)
-                ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.coupon_rule_name,o.order_type,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount,o.payment_time')
-                ->limit($start,$pre_count)
-                ->select();
+            if($site == 3 || $site == 5){
+                if($site == 3){
+                    $list = $order_model->table('orders')->alias('o')
+                        ->join('users c','o.user_id=c.id','left')
+                        ->join('order_addresses d','d.order_id = o.id')
+                        ->where($mapWesee)
+                        ->where('d.type',1)
+                        ->limit($start,$pre_count)
+                        ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.discount_code_id as coupon_code,o.discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group_id')
+                        ->select();
+                }else{
+                    $list = $order_model->table('orders')->alias('o')
+                        ->join('users c','o.user_id=c.id','left')
+                        ->join('orders_addresses d','d.order_id = o.id')
+                        ->where($mapWesee)
+                        ->where('d.type',1)
+                        ->limit($start,$pre_count)
+                        ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.discount_code_id as coupon_code,o.discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group_id')
+                        ->select();
+                }
+            }else{
+                $list = $order_model->alias('o')
+                    ->join('customer_entity c', 'o.customer_id=c.entity_id', 'left')
+                    ->where($map)
+                    ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.coupon_rule_name,o.order_type,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount,o.payment_time')
+                    ->limit($start,$pre_count)
+                    ->select();
+            }
+
             $list = collection($list)->toArray();
             //整理数据
             foreach ( $list as &$val ) {
@@ -708,45 +822,37 @@ class OrderDataDetailNew extends Backend
                     $index = array_keys($column_name,'status');
                     $tmpRow[$index[0]] =$order_shipping_status;
                 }
-                if(in_array('order_type',$column_name)) {
-                    switch ($val['order_type']) {
-                        case 1:
-                            $order_type = '普通订单';
-                            break;
-                        case 2:
-                            $order_type = '批发';
-                            break;
-                        case 3:
-                            $order_type = '网红';
-                            break;
-                        case 4:
-                            $order_type = '补发';
-                            break;
-                    }
-                    $index = array_keys($column_name,'order_type');
-                    $tmpRow[$index[0]] =$order_type;
-                }
-                if(in_array('coupon_rule_name',$column_name)){
-                    $index = array_keys($column_name,'coupon_rule_name');
-                    $tmpRow[$index[0]] =$val['coupon_rule_name'];
-                }
                 if(in_array('store_id',$column_name)){
-                    switch ($val['store_id']){
-                        case 1:
-                            $store_id = 'PC';
-                            break;
-                        case 4:
-                            $store_id = 'M';
-                            break;
-                        case 5:
-                            $store_id = 'Ios';
-                            break;
-                        case 6:
-                            $store_id = 'Android';
-                            break;
-                    }
                     $index = array_keys($column_name,'store_id');
-                    $tmpRow[$index[0]] =$store_id;
+                    if($site == 3){
+                        $tmpRow[$index[0]] =$val['store_id'];
+                    }elseif($site == 5){
+                        switch ($val['store_id']){
+                            case 1:
+                                $store_id = 'PC';
+                                break;
+                            case 2:
+                                $store_id = 'M';
+                                break;
+                        }
+                        $tmpRow[$index[0]] =$store_id;
+                    }else{
+                        switch ($val['store_id']){
+                            case 1:
+                                $store_id = 'PC';
+                                break;
+                            case 4:
+                                $store_id = 'M';
+                                break;
+                            case 5:
+                                $store_id = 'Ios';
+                                break;
+                            case 6:
+                                $store_id = 'Android';
+                                break;
+                        }
+                        $tmpRow[$index[0]] =$store_id;
+                    }
                 }
                 if(in_array('coupon_code',$column_name)){
                     $index = array_keys($column_name,'coupon_code');
@@ -756,22 +862,30 @@ class OrderDataDetailNew extends Backend
                     $index = array_keys($column_name,'shipping_method');
                     $tmpRow[$index[0]] =$val['shipping_method'];
                 }
-                if(in_array('address_type',$column_name)){
-                    $index = array_keys($column_name,'address_type');
-                    $tmpRow[$index[0]] ='shipping';
-                }
-                if(in_array('parent_id',$column_name)){
-                    $index = array_keys($column_name,'parent_id');
-                    $tmpRow[$index[0]] =$val['entity_id'];
-                }
                 if(in_array('shipping_name',$column_name) || in_array('country_id',$column_name) || in_array('telephone',$column_name)){
-                    //收货信息
-                    $shipping_where['address_type'] = 'shipping';
-                    $shipping_where['parent_id'] = $val['entity_id'];
-                    $shipping = $web_model->table('sales_flat_order_address')->where($shipping_where)->field('firstname,lastname,telephone,country_id')->find();
+                    if($site == 3){
+                        $shipping = $web_model->table('order_addresses')
+                            ->where('order_id',$val['entity_id'])
+                            ->where('type',1)
+                            ->field('firstname,lastname,telephone,country_id')
+                            ->find();
+                    }elseif($site == 5){
+                        $shipping = $web_model->table('orders_addresses')
+                            ->where('order_id',$val['entity_id'])
+                            ->where('type',1)
+                            ->field('firstname,lastname,telephone,country_id')
+                            ->find();
+                    }else{
+                        //收货信息
+                        $shipping_where['address_type'] = 'shipping';
+                        $shipping_where['parent_id'] = $val['entity_id'];
+                        $shipping = $web_model->table('sales_flat_order_address')->where($shipping_where)->field('firstname,lastname,telephone,country_id')->find();
+                    }
                     $index1 = array_keys($column_name,'shipping_name');
                     if($index1){
-                        $tmpRow[$index1[0]] =$shipping['firstname'].''.$shipping['lastname'];
+                        $firstname = mb_convert_encoding($shipping['firstname'], 'UTF-8', 'UTF-8,GBK,GB2312,BIG5' );
+                        $lastname = mb_convert_encoding($shipping['lastname'], 'UTF-8', 'UTF-8,GBK,GB2312,BIG5' );
+                        $tmpRow[$index1[0]] =$firstname.''.$lastname;
                     }
                     $index2 = array_keys($column_name,'country_id');
                     if($index2){
@@ -789,8 +903,31 @@ class OrderDataDetailNew extends Backend
                 if(in_array('customer_type',$column_name) || in_array('register_time',$column_name) || in_array('register_email',$column_name)){
                     //客户信息
                     if($val['customer_id']){
-                        $customer_where['entity_id'] = $val['customer_id'];
-                        $customer = $web_model->table('customer_entity')->where($customer_where)->field('email,group_id,created_at')->find();
+                        if($site == 3){
+                            $customer = $web_model->table('users')->where('id',$val['customer_id'])->field('email,group,created_at')->find();
+                            switch ($customer['group']){
+                                case 1:
+                                    $group = '普通';
+                                    break;
+                                case 2:
+                                    $group = 'VIP';
+                                    break;
+                            }
+                        }elseif($site == 5){
+                            $customer = $web_model->table('users')->where('id',$val['customer_id'])->field('email,group_id,created_at')->find();
+                            switch ($customer['group_id']){
+                                case 1:
+                                    $group = '普通';
+                                    break;
+                                case 2:
+                                    $group = '批发';
+                                    break;
+                                case 4:
+                                    $group = 'VIP';
+                                    break;
+                            }
+                        }
+                        $customer = $web_model->table('customer_entity')->where('entity_id',$val['customer_id'])->field('email,group_id,created_at')->find();
                         switch ($customer['group_id']){
                             case 1:
                                 $group = '普通';
@@ -809,6 +946,7 @@ class OrderDataDetailNew extends Backend
                         $register_time = '';
                         $register_email = '';
                     }
+
                     $index1 = array_keys($column_name,'customer_type');
                     if($index1){
                         $tmpRow[$index1[0]] =$group;//客户类型
@@ -824,7 +962,7 @@ class OrderDataDetailNew extends Backend
                 }
                 if(in_array('discount_rate',$column_name)) {
                     $index = array_keys($column_name, 'discount_rate');
-                    $tmpRow[$index[0]] = $val['base_grand_total'] ? round(($val['base_discount_amount'] / $val['base_grand_total'] * (-1)), 2).'%' : 0;//折扣百分比
+                    $tmpRow[$index[0]] = $val['base_grand_total'] ? round(($val['base_discount_amount'] / $val['base_grand_total'] * (-1)*100), 2).'%' : 0;//折扣百分比
                 }
                 if(in_array('discount_money',$column_name)){
                     $index = array_keys($column_name,'discount_money');
@@ -851,10 +989,14 @@ class OrderDataDetailNew extends Backend
                     }
                 }
                 if(in_array('payment_method',$column_name)){
-                    //支付信息
-                    $payment_where['parent_id'] = $val['entity_id'];
-                    $payment = $web_model->table('sales_flat_order_payment')->where($payment_where)->value('method');
                     $index = array_keys($column_name,'payment_method');
+                    if($site == 3 || $site == 5){
+                        $payment = $web_model->table('orders')->where('order_id',$val['entity_id'])->value('payment_type');
+                    }else{
+                        //支付信息
+                        $payment_where['parent_id'] = $val['entity_id'];
+                        $payment = $web_model->table('sales_flat_order_payment')->where($payment_where)->value('method');
+                    }
                     $tmpRow[$index[0]] = $payment == 'oceanpayment_creditcard' ? '钱海' : 'Paypal';  //支付方式
                 }
                 if(in_array('frame_price',$column_name) || in_array('frame_num',$column_name) || in_array('lens_price',$column_name)){
@@ -876,14 +1018,6 @@ class OrderDataDetailNew extends Backend
                         $tmpRow[$index3[0]] =round($frame_info[0]['lens_amount'],2);
                     }
                 }
-                if(in_array('sku',$column_name)){
-                    $prescription_where['magento_order_id'] = $val['entity_id'];
-                    $prescription_where['site'] = $order_platform;
-                    $skus = $this->orderitemoption->where($prescription_where)->column('sku');
-                    $index = array_keys($column_name,'sku');
-                    $tmpRow[$index[0]] =implode('|',$skus);
-
-                }
                 if(in_array('lens_num',$column_name)){
                     $prescription_where['magento_order_id'] = $val['entity_id'];
                     $prescription_where['site'] = $order_platform;
@@ -896,6 +1030,44 @@ class OrderDataDetailNew extends Backend
                     $prescription_where['site'] = $order_platform;
                     $index = array_keys($column_name,'is_box_num');
                     $tmpRow[$index[0]] =$this->orderitemoption->where($prescription_where)->where('goods_type',6)->sum('qty');
+                }
+                if(in_array('sku',$column_name)){
+                    $prescription_where['magento_order_id'] = $val['entity_id'];
+                    $prescription_where['site'] = $order_platform;
+                    $skus = $this->orderitemoption->where($prescription_where)->column('sku');
+                    $index = array_keys($column_name,'sku');
+                    $tmpRow[$index[0]] =implode('|',$skus);
+
+                }
+                if(in_array('order_type',$column_name)) {
+                    switch ($val['order_type']) {
+                        case 1:
+                            $order_type = '普通订单';
+                            break;
+                        case 2:
+                            $order_type = '批发';
+                            break;
+                        case 3:
+                            $order_type = '网红';
+                            break;
+                        case 4:
+                            $order_type = '补发';
+                            break;
+                    }
+                    $index = array_keys($column_name,'order_type');
+                    $tmpRow[$index[0]] =$order_type;
+                }
+                if(in_array('coupon_rule_name',$column_name)){
+                    $index = array_keys($column_name,'coupon_rule_name');
+                    if($site == 3){
+                        $tmpRow[$index[0]] = $order_model->table('discount_coupon_tickets')->alias('a')
+                            ->join('discount_coupons b','b.id=a.discount_coupon_id')->value('b.name');
+                    }elseif($site == 5){
+                        $tmpRow[$index[0]] = $order_model->table('user_coupons')->alias('a')
+                            ->join('discount_coupons b','b.id=a.discount_coupon_id')->value('b.name');
+                    }else{
+                        $tmpRow[$index[0]] =$val['coupon_rule_name'];
+                    }
                 }
                 ksort($tmpRow);
                 $rows = array();

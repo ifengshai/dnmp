@@ -184,6 +184,15 @@ class WebData extends Backend
                                 WebVipOrder::setUpdateData($payload['data'], $site);
                             }
 
+                            //VIP订单表添加
+                            if ($payload['type'] == 'INSERT' && $payload['table'] == 'vip_orders') {
+                                WebVipOrder::setInsertData($payload['data'], $site);
+                            }
+                            //VIP订单表更新
+                            if ($payload['type'] == 'UPDATE' && $payload['table'] == 'vip_orders') {
+                                WebVipOrder::setUpdateData($payload['data'], $site);
+                            }
+
                             //购物车表添加
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'sales_flat_quote') {
                                 WebShoppingCart::setInsertData($payload['data'], $site);
@@ -193,14 +202,23 @@ class WebData extends Backend
                                 WebShoppingCart::setUpdateData($payload['data'], $site);
                             }
 
+                            //购物车表添加
+                            if ($payload['type'] == 'INSERT' && $payload['table'] == 'carts') {
+                                WebShoppingCart::setInsertData($payload['data'], $site);
+                            }
+                            //购物车表更新
+                            if ($payload['type'] == 'UPDATE' && $payload['table'] == 'carts') {
+                                WebShoppingCart::setUpdateData($payload['data'], $site);
+                            }
+
                             //批发站用户表添加
                             if ($payload['type'] == 'INSERT' && $payload['table'] == 'users') {
-                                WebUsers::setInsertWeseeData($payload['data'], $site);
+                                WebUsers::setInsertData($payload['data'], $site);
                             }
 
                             //批发站用户表更新
                             if ($payload['type'] == 'UPDATE' && $payload['table'] == 'users') {
-                                WebUsers::setUpdateWeseeData($payload['data'], $site);
+                                WebUsers::setUpdateData($payload['data'], $site);
                             }
                         }
                         break;
@@ -309,169 +327,5 @@ class WebData extends Backend
                 Db::name('web_shopping_cart')->insertAll(array_values($params));
             });
     }
-
-
-    public function process_list_user()
-    {
-        $this->process_users_data(1);
-    }
-
-    public function process_list_user_v()
-    {
-        $this->process_users_data(2);
-    }
-
-    public function process_list_user_n()
-    {
-        $this->process_users_data(3);
-    }
-
-    public function process_list_user_de()
-    {
-        $this->process_users_data(10);
-        $this->process_users_data(11);
-    }
-
-    /**
-     * 处理用户表旧数据
-     * @author wpl
-     * @date   2021/4/26 15:59
-     */
-    protected function process_users_data($site)
-    {
-        $webUsers = new WebUsers();
-        if ($site == 1) {
-            $entity_id = $webUsers->where(['site' => 1, 'entity_id' => ['<', 1213214]])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
-        } elseif ($site == 2) {
-            $entity_id = $webUsers->where(['site' => 2, 'entity_id' => ['<', 444608]])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_voogueme')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
-        } elseif ($site == 3) {
-            $entity_id = $webUsers->where(['site' => 3, 'entity_id' => ['<', 77186]])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_nihao')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
-        } elseif ($site == 9) {
-            $entity_id = $webUsers->where(['site' => 9, 'entity_id' => ['<', 1134]])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool_es')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
-        } elseif ($site == 10) {
-            $entity_id = $webUsers->where(['site' => 10, 'entity_id' => ['<', 13199]])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool_de')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
-        } elseif ($site == 11) {
-            $entity_id = $webUsers->where(['site' => 11, 'entity_id' => ['<', 10166]])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_zeelool_jp')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
-        } elseif ($site == 12) {
-            $entity_id = $webUsers->where(['site' => 12, 'entity_id' => ['<', 505]])->order('entity_id desc')->value('entity_id');
-            $entity_id = $entity_id ?: 0;
-            $res = Db::connect('database.db_voogueme_acc')->table('customer_entity')->where(['entity_id' => ['>', $entity_id]])->limit(4000)->select();
-        }
-        $res = collection($res)->toArray();
-        foreach ($res as $k => $v) {
-            $count = $webUsers->where(['site' => $site, 'entity_id' => $v['entity_id']])->count();
-            if ($count > 0) {
-                continue;
-            }
-            $params = [];
-            $params['entity_id'] = $v['entity_id'];
-            $params['email'] = $v['email'] ?: '';
-            $params['site'] = $site;
-            $params['group_id'] = $v['group_id'] ?: 0;
-            $params['store_id'] = $v['store_id'] ?: 0;
-            $params['created_at'] = strtotime($v['created_at']);
-            $params['updated_at'] = strtotime($v['updated_at']);
-            $params['resouce'] = $v['resouce'] ?: 0;
-            $params['is_vip'] = $v['is_vip'] ?: 0;
-            $userId = $webUsers->insertGetId($params);
-
-            echo $v['entity_id'] . "\n";
-            usleep(10000);
-        }
-        echo $site . '--ok' . "\n";
-    }
-
-
-    public function process_users_data_wesee()
-    {
-        $webUsers = new WebUsers();
-        $entity_id = $webUsers->where(['site' => 5, 'entity_id' => ['<', 96486]])->order('entity_id desc')->value('entity_id');
-        $entity_id = $entity_id ?: 0;
-        $res = Db::connect('database.db_weseeoptical')->table('users')->where(['id' => ['>', $entity_id]])->limit(4000)->select();
-        $res = collection($res)->toArray();
-        foreach ($res as $k => $v) {
-            $count = $webUsers->where(['site' => 5, 'entity_id' => $v['entity_id']])->count();
-            if ($count > 0) {
-                continue;
-            }
-            $params = [];
-            $params['entity_id'] = $v['entity_id'];
-            $params['email'] = $v['email'] ?: '';
-            $params['site'] = 5;
-            $params['group_id'] = $v['group_id'] ?: 0;
-            $params['store_id'] = $v['store_id'] ?: 0;
-            $params['created_at'] = strtotime($v['created_at']);
-            $params['updated_at'] = strtotime($v['updated_at']);
-            $params['resouce'] = $v['resouce'] ?: 0;
-            $params['is_vip'] = $v['is_vip'] ?: 0;
-            $webUsers->insertGetId($params);
-
-            echo $v['entity_id'] . "\n";
-        }
-        echo 5 . '--ok' . "\n";
-    }
-
-
-    public function process_list_viporder()
-    {
-        $this->process_viporder_data(1);
-        $this->process_viporder_data(2);
-    }
-
-    /**
-     * 处理用户表旧数据
-     * @author wpl
-     * @date   2021/4/26 15:59
-     */
-    protected function process_viporder_data($site)
-    {
-        if ($site == 1) {
-            $entity_id = WebVipOrder::where(['web_id' => ['<', 10557], 'site' => 1])->max('web_id');
-            $res = Db::connect('database.db_zeelool')->table('oc_vip_order')->where(['id' => ['>', $entity_id]])->limit(1000)->select();
-        } elseif ($site == 2) {
-            $entity_id = WebVipOrder::where(['web_id' => ['<', 3136], 'site' => 2])->max('web_id');
-            $res = Db::connect('database.db_voogueme')->table('oc_vip_order')->where(['id' => ['>', $entity_id]])->limit(1000)->select();
-        }
-        $res = collection($res)->toArray();
-        foreach ($res as $k => $v) {
-            $count = (new WebVipOrder)->where(['site' => $site, 'web_id' => $v['id']])->count();
-            if ($count > 0) {
-                continue;
-            }
-            $params = [];
-            $params['web_id'] = $v['id'];
-            $params['customer_id'] = $v['customer_id'] ?: 0;
-            $params['customer_email'] = $v['customer_email'] ?: '';
-            $params['site'] = $site;
-            $params['order_number'] = $v['order_number'] ?: '';
-            $params['order_amount'] = $v['order_amount'] ?: 0;
-            $params['order_status'] = $v['order_status'] ?: 0;
-            $params['order_type'] = $v['order_type'] ?: 0;
-            $params['paypal_token'] = $v['paypal_token'] ?: '';
-            $params['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) : 0;
-            $params['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) : 0;
-            $params['is_active_status'] = $v['is_active_status'] ?: 0;
-            $params['created_at'] = time();
-            $params['updated_at'] = time();
-            $params['pay_status'] = $v['pay_status'] ?: 0;
-            $params['country_id'] = $v['country_id'] ?: 0;
-            (new WebVipOrder)->insertGetId($params);
-        }
-
-        echo $site . '--ok' . "\n";
-    }
-
 
 }

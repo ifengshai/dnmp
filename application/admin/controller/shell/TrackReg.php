@@ -1898,237 +1898,6 @@ class TrackReg extends Backend
         usleep(100000);
     }
 
-    //运营数据中心 nihao
-    public function nihao_day_data()
-    {
-        $model = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $this->zeelool = new \app\admin\model\order\order\Nihao();
-        $zeelool_model = Db::connect('database.db_nihao_online');
-        $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
-        $zeelool_model->table('oc_vip_order')->query("set time_zone='+8:00'");
-        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-
-        $date_time = date('Y-m-d', strtotime("-1 day"));
-
-        //查询时间
-        $arr = [];
-        $arr['site'] = 3;
-        $arr['day_date'] = $date_time;
-        //活跃用户数
-        // $arr['active_user_num'] = $this->google_active_user(3, $date_time);
-        //注册用户数
-        $register_where = [];
-        $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['register_num'] = $zeelool_model->table('customer_entity')->where($register_where)->count();
-
-        //总的订单数
-        $order_where = [];
-        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['sum_order_num'] = $zeelool_model->table('sales_flat_order')->where($order_where)->where('order_type',
-            1)->count();
-        //登录用户数
-        $customer_where = [];
-        $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['login_user_num'] = $zeelool_model->table('customer_entity')->where($customer_where)->count();
-
-        //支付成功的订单数
-        $order_where = [];
-        $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '" . $date_time . "'")];
-        $order_where['status'] = [
-            'in',
-            [
-                'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-                'delivered',
-                'delivery',
-            ],
-        ];
-
-        $arr['order_num'] = $this->zeelool->where($order_where)->where('order_type', 1)->count();
-        //销售额
-        $arr['sales_total_money'] = $this->zeelool->where($order_where)->where('order_type',
-            1)->sum('base_grand_total');
-        //邮费
-        $arr['shipping_total_money'] = $this->zeelool->where($order_where)->where('order_type',
-            1)->sum('base_shipping_amount');
-        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
-        //中位数
-        $sales_total_money = $this->zeelool->where($order_where)->where('order_type', 1)->column('base_grand_total');
-        $arr['order_total_midnum'] = $this->median($sales_total_money);
-        //标准差
-        $arr['order_total_standard'] = $this->getVariance($sales_total_money);
-        //补发订单数
-        $arr['replacement_order_num'] = $this->zeelool->where($order_where)->where('order_type', 4)->count();
-        //补发销售额
-        $arr['replacement_order_total'] = $this->zeelool->where($order_where)->where('order_type',
-            4)->sum('base_grand_total');
-        //网红订单数
-        $arr['online_celebrity_order_num'] = $this->zeelool->where($order_where)->where('order_type', 3)->count();
-        //补发销售额
-        $arr['online_celebrity_order_total'] = $this->zeelool->where($order_where)->where('order_type',
-            3)->sum('base_grand_total');
-
-        //会话
-        // $arr['sessions'] = $this->google_session(3, $date_time);
-        //会话转化率
-        // $arr['session_rate'] = $arr['sessions'] != 0 ? round($arr['order_num'] / $arr['sessions'] * 100, 2) : 0;
-        //新建购物车数量
-        $cart_where1 = [];
-        $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['new_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total',
-            'gt', 0)->count();
-        //更新购物车数量
-        $cart_where2 = [];
-        $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
-        $arr['update_cart_num'] = $zeelool_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total',
-            'gt', 0)->count();
-        //新增加购率
-        // $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
-        //更新加购率
-        // $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
-        //新增购物车转化率
-        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
-        //更新购物车转化率
-        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100,
-            2) : 0;
-        //当天创建的用户当天产生订单的转化率
-        $status_where['status'] = [
-            'in',
-            [
-                'free_processing',
-                'processing',
-                'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
-            ],
-        ];
-        $status_where['order_type'] = 1;
-        //当天注册用户数
-        $register_userids = $zeelool_model->table('customer_entity')->where($cart_where1)->column('entity_id');
-        $register_num = count($register_userids);
-        //当天注册用户在当天下单的用户数
-        $order_user_count1 = 0;
-        foreach ($register_userids as $register_userid) {
-            //判断当前用户在当天是否下单
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',
-                $register_userid)->value('entity_id');
-            if ($order) {
-                $order_user_count1++;
-            }
-        }
-        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
-        //当天更新用户当天产生订单的转化率
-        $update_userids = $zeelool_model->table('customer_entity')->where($cart_where2)->column('entity_id');
-        $update_num = count($update_userids);
-        //当天活跃更新用户数在当天是否下单
-        $order_user_count2 = 0;
-        foreach ($update_userids as $update_userid) {
-            //判断活跃用户在当天下单的用户数
-            $order = $zeelool_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',
-                $update_userid)->value('entity_id');
-            if ($order) {
-                $order_user_count2++;
-            }
-        }
-        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
-        //虚拟库存
-        $virtual_where['platform_type'] = 3;
-        $virtual_where['i.category_id'] = ['<>', 43];
-        $virtual_where['i.is_del'] = 1;
-        $virtual_where['i.is_open'] = 1;
-        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
-            'p.sku=i.sku')->where($virtual_where)->sum('p.stock');
-        //在售，预售，下架
-        $item = new \app\admin\model\itemmanage\Item();
-        $site_where['platform_type'] = $arr['site'];
-        $skus = $item->getFrameSku();
-        $map_where['sku'] = ['in', $skus];
-        $webSkus = $model
-            ->where($map_where)
-            ->where($site_where)
-            ->select();
-        $onSalesNum = 0;  //在售
-        $SalesOutNum = 0;  //售罄
-        $downShelvesNum = 0;  //下架
-        $nowDate = date('Y-m-d H:i:s');
-        foreach ($webSkus as $value) {
-            if ($value['outer_sku_status'] == 1) {
-                //上架
-                if ($value['stock'] > 0) {
-                    //在售
-                    $onSalesNum++;
-                } else {
-                    if ($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']) {
-                        //开预售
-                        if ($value['presell_num'] > 0) {
-                            $onSalesNum++;
-                        } else {
-                            $SalesOutNum++;
-                        }
-                    } else {
-                        //未开预售
-                        $SalesOutNum++;
-                    }
-                }
-            } else {
-                //下架
-                $downShelvesNum++;
-            }
-        }
-        $arr['glass_in_sale_num'] = $onSalesNum;  //在售
-        $arr['glass_shelves_num'] = $downShelvesNum;  //下架
-        $arr['glass_presell_num'] = $SalesOutNum;  //售罄
-        $skus1 = $item->getOrnamentsSku();
-        $map_where1['sku'] = ['in', $skus1];
-        $webSkus1 = $model
-            ->where($map_where1)
-            ->where($site_where)
-            ->select();
-        $onSalesNum1 = 0;  //在售
-        $SalesOutNum1 = 0;  //售罄
-        $downShelvesNum1 = 0;  //下架
-        foreach ($webSkus1 as $value) {
-            if ($value['outer_sku_status'] == 1) {
-                //上架
-                if ($value['stock'] > 0) {
-                    //在售
-                    $onSalesNum1++;
-                } else {
-                    if ($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']) {
-                        //开预售
-                        if ($value['presell_num'] > 0) {
-                            $onSalesNum1++;
-                        } else {
-                            $SalesOutNum1++;
-                        }
-                    } else {
-                        //未开预售
-                        $SalesOutNum1++;
-                    }
-                }
-            } else {
-                //下架
-                $downShelvesNum1++;
-            }
-        }
-        $arr['box_in_sale_num'] = $onSalesNum1;
-        $arr['box_shelves_num'] = $downShelvesNum1;
-        $arr['box_presell_num'] = $SalesOutNum1;
-        //插入数据
-        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
-        //同步es数据
-        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
-        echo $date_time . "\n";
-        echo date("Y-m-d H:i:s") . "\n";
-        usleep(100000);
-    }
-
     //运营数据中心 zeeloolde
     public function zeeloolde_day_data()
     {
@@ -2917,129 +2686,133 @@ class TrackReg extends Backend
 
         return $arr;
     }
-
-    //运营数据中心 wesee
-    public function wesee_day_data()
+    //运营数据中心 -- 重构后的网站使用
+    public function refact_day_data()
     {
-        $model = new \app\admin\model\itemmanage\ItemPlatformSku();
-        $wesee = new \app\admin\model\order\order\NewWeseeoptical();
-        $wesee_data = new \app\admin\model\operatedatacenter\Weseeoptical();
-        $wesee_model = Db::connect('database.db_weseeoptical');
-        $wesee_model->table('users')->query("set time_zone='+8:00'");
-        $wesee_model->table('orders')->query("set time_zone='+8:00'");
-
-        $date_time = date('Y-m-d', strtotime("-1 day"));
-        $date_time_start = date('Y-m-d 00:00:00', strtotime("-1 day"));
-        $date_time_end = date('Y-m-d 23:59:59', strtotime("-1 day"));
+        //求出平台
+        $platform = $this->request->get('platform');
+        $this->getRefactDayData($platform);
+    }
+    public function getRefactDayData($site)
+    {
+        $itemSkuModel = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $item = new \app\admin\model\itemmanage\Item();
+        $orderModel = new \app\admin\model\order\order\NewOrder();
+        switch ($site){
+            case 3:
+                $model = Db::connect('database.db_nihao_online');
+                break;
+            case 5:
+                $model = Db::connect('database.db_weseeoptical');
+                break;
+        }
+        $model->table('users')->query("set time_zone='+8:00'");
+        $dateTime = date('Y-m-d', strtotime("-1 day"));
+        $dateTimeStart = date('Y-m-d 00:00:00', strtotime("-1 day"));
+        $dateTimeEnd = date('Y-m-d 23:59:59', strtotime("-1 day"));
         //查询时间
         $arr = [];
-        $arr['site'] = 5;
-        $arr['day_date'] = $date_time;
-        //活跃用户数
-        // $arr['active_user_num'] = $this->google_active_user(1, $date_time);
-        //注册用户数
-        $register_where = [];
-        $arr['register_num'] = $wesee_model->table('users')->where('created_at', 'between', [$date_time_start, $date_time_end])->count();
+        $arr['site'] = $site;
+        $arr['day_date'] = $dateTime;
+        $createWhere['created_at'] = $updateWhere['updated_at'] = ['between',[$dateTimeStart, $dateTimeEnd]];
+        $arr['register_num'] = $model->table('users')->where($createWhere)->count();//注册用户数
+        $orderSuccessWhere['payment_time'] = ['between',[strtotime($dateTimeStart), strtotime($dateTimeEnd)]];
+        if($site == 3){
+            $orderSuccessWhere['status'] = ['in',['processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed','delivered','delivery','shipped']];
+            $orderTypeWhere['order_type'] = 1;
+            $arr['sum_order_num'] = $orderModel->where($createWhere)->where($orderTypeWhere)->count();//总的订单数
+            $arr['order_num'] = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->count(); //支付成功的订单数
+            $arr['sales_total_money'] = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->sum('base_actual_payment');//销售额
+            $arr['shipping_total_money'] = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->sum('base_freight_price');//邮费
+            $salesTotalMoney = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->column('base_actual_payment');//销售额数组（求中位数和标准差需用到）
+            $arr['replacement_order_num'] = $orderModel->where($orderSuccessWhere)->where('order_type', 4)->count();//补发订单数
+            $arr['replacement_order_total'] = $orderModel->where($orderSuccessWhere)->where('order_type',4)->sum('base_actual_payment');//补发销售额
+            //当天创建的用户当天产生订单的转化率
+            $registerUserids = $model->table('users')->where($createWhere)->column('id');//当天注册用户数
+            $registerNum = count($registerUserids);
+            //当天注册用户在当天下单的用户数
+            $orderUserCount1 = 0;
+            foreach ($registerUserids as $registerUserid) {
+                //判断当前用户在当天是否下单
+                $order = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->where('user_id',$registerUserid)->value('id');
+                if ($order) {
+                    $orderUserCount1++;
+                }
+            }
+            $arr['create_user_change_rate'] = $registerNum ? round($orderUserCount1 / $registerNum * 100, 2) : 0;
+            //当天更新用户当天产生订单的转化率
+            $updateUserids = $model->table('users')->where($updateWhere)->column('id');
+            $updateNum = count($updateUserids);
+            //当天活跃更新用户数在当天是否下单
+            $orderUserCount2 = 0;
+            foreach ($updateUserids as $updateUserid) {
+                //判断活跃用户在当天下单的用户数
+                $order = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->where('user_id', $updateUserid)->value('id');
+                if ($order) {
+                    $orderUserCount2++;
+                }
+            }
+            $arr['update_user_change_rate'] = $updateNum ? round($orderUserCount2 / $updateNum * 100, 0) : 0;
+        }else{
+            $orderSuccessWhere['status'] = ['in',[2, 3, 4, 9, 10]];
+            $arr['sum_order_num'] = $orderModel->where($createWhere)->count();//总的订单数
+            $arr['order_num'] = $orderModel->where($orderSuccessWhere)->count(); //支付成功的订单数
+            $arr['sales_total_money'] = $orderModel->where($orderSuccessWhere)->sum('base_actual_amount_paid');  //销售额
+            $arr['shipping_total_money'] = $orderModel->where($orderSuccessWhere)->sum('base_freight_price'); //邮费
+            $salesTotalMoney = $orderModel->where($orderSuccessWhere)->column('base_actual_amount_paid');//销售额数组（求中位数和标准差需用到）
+            $arr['replacement_order_num'] = 0;  //补发订单数
+            $arr['replacement_order_total'] = 0; //补发销售额
+            //当天创建的用户当天产生订单的转化率
+            $registerUserids = $model->table('users')->where($createWhere)->column('id');//当天注册用户数
+            $registerNum = count($registerUserids);
+            //当天注册用户在当天下单的用户数
+            $orderUserCount1 = 0;
+            foreach ($registerUserids as $registerUserid) {
+                //判断当前用户在当天是否下单
+                $order = $orderModel->where($orderSuccessWhere)->where('user_id',$registerUserid)->value('id');
+                if ($order) {
+                    $orderUserCount1++;
+                }
+            }
+            $arr['create_user_change_rate'] = $registerNum ? round($orderUserCount1 / $registerNum * 100, 2) : 0;
+            //当天更新用户当天产生订单的转化率
+            $updateUserids = $model->table('users')->where($updateWhere)->column('id');
+            $updateNum = count($updateUserids);
+            //当天活跃更新用户数在当天是否下单
+            $orderUserCount2 = 0;
+            foreach ($updateUserids as $updateUserid) {
+                //判断活跃用户在当天下单的用户数
+                $order = $orderModel->where($orderSuccessWhere)->where('user_id', $updateUserid)->value('id');
+                if ($order) {
+                    $orderUserCount2++;
+                }
+            }
+            $arr['update_user_change_rate'] = $updateNum ? round($orderUserCount2 / $updateNum * 100, 0) : 0;
 
-        //总的订单数
-        $order_where = [];
-        $arr['sum_order_num'] = $wesee_model->table('orders')->where('created_at', 'between', [$date_time_start, $date_time_end])->where('order_type',
-            1)->count();
-        //登录用户数
-        $customer_where = [];
-        $arr['login_user_num'] = $wesee_model->table('users')->where('updated_at', 'between', [$date_time_start, $date_time_end])->count();
-
-        //新增vip用户数
-        $arr['vip_user_num'] = 0;
-        //支付成功的订单数
-
-        $arr['order_num'] = $wesee->where('status', 'in', [2, 3, 4, 9, 10])->where('updated_at', 'between', [$date_time_start, $date_time_end])->where('order_type', 1)->count();
-        //销售额
-        $arr['sales_total_money'] = $wesee->where('status', 'in', [2, 3, 4, 9, 10])->where('updated_at', 'between', [$date_time_start, $date_time_end])->where('order_type',
-            1)->sum('base_actual_amount_paid');
-        //邮费
-        $arr['shipping_total_money'] = $wesee->where('status', 'in', [2, 3, 4, 9, 10])->where('updated_at', 'between', [$date_time_start, $date_time_end])->where('order_type',
-            1)->sum('base_freight_price');
+        }
+        $arr['login_user_num'] = $model->table('users')->where($updateWhere)->count();  //登录用户数
+        $arr['vip_user_num'] = 0;//新增vip用户数
         //客单价
         $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
-        //中位数
-        $sales_total_money = $wesee->where('status', 'in', [2, 3, 4, 9, 10])->where('updated_at', 'between', [$date_time_start, $date_time_end])->where('order_type', 1)->column('base_actual_amount_paid');
-        $arr['order_total_midnum'] = $this->median($sales_total_money);
-        //标准差
-        $arr['order_total_standard'] = $this->getVariance($sales_total_money);
-        //补发订单数
-        $arr['replacement_order_num'] = $wesee->where('status', 'in', [2, 3, 4, 9, 10])->where('updated_at', 'between', [$date_time_start, $date_time_end])->where('order_type', 4)->count();
-        //补发销售额
-        $arr['replacement_order_total'] = $wesee->where('status', 'in', [2, 3, 4, 9, 10])->where('updated_at', 'between', [$date_time_start, $date_time_end])->where('order_type',
-            4)->sum('base_actual_amount_paid');
-        //网红订单数
-        $arr['online_celebrity_order_num'] = 0;
-        //补发销售额
-        $arr['online_celebrity_order_total'] = 0;
-        //新建购物车数量
-        $arr['new_cart_num'] = 0;
-        //更新购物车数量
-        $arr['update_cart_num'] = 0;
-        //新增购物车转化率
-        $arr['cart_rate'] = 0;
-        //更新购物车转化率
-        $arr['update_cart_cart'] = 0;
-        //当天创建的用户当天产生订单的转化率
-        $status_where['status'] = [
-            'in',
-            [
-                2,
-                3,
-                4,
-                9,
-                10,
-            ],
-        ];
-        $status_where['order_type'] = 1;
-        //当天注册用户数
-        $register_userids = $wesee_model->table('users')->where('created_at', 'between', [$date_time_start, $date_time_end])->column('id');
-        $register_num = count($register_userids);
-        //当天注册用户在当天下单的用户数
-        $order_user_count1 = 0;
-        foreach ($register_userids as $register_userid) {
-            //判断当前用户在当天是否下单
-            $order = $wesee->where('created_at', 'between', [$date_time_start, $date_time_end])->where($status_where)->where('user_id',
-                $register_userid)->value('id');
-            if ($order) {
-                $order_user_count1++;
-            }
-        }
-        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
-        //当天更新用户当天产生订单的转化率
-        $update_userids = $wesee_model->table('users')->where('updated_at', 'between', [$date_time_start, $date_time_end])->column('id');
-        $update_num = count($update_userids);
-        //当天活跃更新用户数在当天是否下单
-        $order_user_count2 = 0;
-        foreach ($update_userids as $update_userid) {
-            //判断活跃用户在当天下单的用户数
-            $order = $wesee->where('created_at', 'between', [$date_time_start, $date_time_end])->where($status_where)->where('user_id',
-                $update_userid)->value('id');
-            if ($order) {
-                $order_user_count2++;
-            }
-        }
-        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
+        $arr['order_total_midnum'] = $this->median($salesTotalMoney);//中位数
+        $arr['order_total_standard'] = $this->getVariance($salesTotalMoney);//标准差
+        $arr['online_celebrity_order_num'] = 0; //网红订单数
+        $arr['online_celebrity_order_total'] = 0; //补发销售额
+        $arr['new_cart_num'] = 0;//新建购物车数量
+        $arr['update_cart_num'] = 0; //更新购物车数量
+        $arr['cart_rate'] = 0;//新增购物车转化率
+        $arr['update_cart_cart'] = 0;//更新购物车转化率
         //虚拟库存
-        $virtual_where['platform_type'] = 5;
-        $virtual_where['i.category_id'] = ['<>', 43];
-        $virtual_where['i.is_del'] = 1;
-        $virtual_where['i.is_open'] = 1;
-        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
-            'p.sku=i.sku')->where($virtual_where)->sum('p.stock');
+        $virtualWhere['platform_type'] = $site;
+        $virtualWhere['i.category_id'] = ['<>', 43];
+        $virtualWhere['i.is_del'] = 1;
+        $virtualWhere['i.is_open'] = 1;
+        $arr['virtual_stock'] = $itemSkuModel->alias('p')->join('fa_item i','p.sku=i.sku')->where($virtualWhere)->sum('p.stock');
         //在售，预售，下架
-        $item = new \app\admin\model\itemmanage\Item();
-        $site_where['platform_type'] = $arr['site'];
+        $siteWhere['platform_type'] = $site;
         $skus = $item->getFrameSku();
-        $map_where['sku'] = ['in', $skus];
-        $webSkus = $model
-            ->where($map_where)
-            ->where($site_where)
-            ->select();
+        $mapWhere['sku'] = ['in', $skus];
+        $webSkus = $model->where($mapWhere)->where($siteWhere)->select();
         $onSalesNum = 0;  //在售
         $SalesOutNum = 0;  //售罄
         $downShelvesNum = 0;  //下架
@@ -3072,11 +2845,8 @@ class TrackReg extends Backend
         $arr['glass_shelves_num'] = $downShelvesNum;  //下架
         $arr['glass_presell_num'] = $SalesOutNum;  //售罄
         $skus1 = $item->getOrnamentsSku();
-        $map_where1['sku'] = ['in', $skus1];
-        $webSkus1 = $model
-            ->where($map_where1)
-            ->where($site_where)
-            ->select();
+        $mapWhere1['sku'] = ['in', $skus1];
+        $webSkus1 = $model->where($mapWhere1)->where($siteWhere)->select();
         $onSalesNum1 = 0;  //在售
         $SalesOutNum1 = 0;  //售罄
         $downShelvesNum1 = 0;  //下架
@@ -3110,7 +2880,7 @@ class TrackReg extends Backend
         $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
-        echo $date_time . "\n";
+        echo $dateTime . "\n";
         echo date("Y-m-d H:i:s") . "\n";
         usleep(100000);
     }
@@ -3184,6 +2954,7 @@ class TrackReg extends Backend
                 'paypal_canceled_reversal',
                 'delivered',
                 'delivery',
+                'shipped'
             ],
         ];
         $where['o.site'] = $site;
@@ -3489,7 +3260,7 @@ class TrackReg extends Backend
         $seven_days = $start . ' 00:00:00 - ' . $start . ' 23:59:59';
         $createat = explode(' ', $seven_days);
         $where['o.payment_time'] = ['between', [strtotime($createat[0] . ' ' . $createat[1]), strtotime($createat[3] . ' ' . $createat[4])]];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery','shipped']];
         $where['order_type'] = 1;
         $where['o.site'] = $plat;
         $where['goods_type'] = $goods_type;
@@ -3822,7 +3593,7 @@ class TrackReg extends Backend
         $orderWhere['o.payment_time'] = ['between', [$start, $end]];
         $orderWhere['o.site'] = $site;
         $orderWhere['o.order_type'] = 1;
-        $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered']];
+        $orderWhere['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','shipped']];
         //统计昨天的数据
         $list = Db::name('datacenter_sku_day')
             ->where(['day_date' => $data, 'site' => $site])
@@ -3877,19 +3648,31 @@ class TrackReg extends Backend
         set_time_limit(0);
         $this->getSkuDayDataOther(1);  //z站
         $this->getSkuDayDataOther(2);  //v站
-        $this->getSkuDayDataOther(3);  //nihao站
         $this->getSkuDayDataOther(10); //de站
         $this->getSkuDayDataOther(11); //jp站
         $this->getSkuDayDataOther(15); //fr站
+        $this->getSkuDayDataRefact(3);   //nihao站
+        $this->getSkuDayDataRefact(5);   //批发站
 
-        //wesee站
+    }
+
+    public function getSkuDayDataRefact($site)
+    {
+        switch ($site){
+            case 3:
+                $model = Db::connect('database.db_nihao_online');
+                break;
+            case 5:
+                $model = Db::connect('database.db_weseeoptical');
+                break;
+        }
         //统计昨天的数据
         $data = date('Y-m-d', strtotime('-1 day'));
         $skuList = Db::name('datacenter_sku_day')
-            ->where(['day_date' => $data, 'site' => 5])
+            ->where(['day_date' => $data, 'site' => $site])
             ->field('id,platform_sku')
             ->select();
-        $nowPrice = Db::connect('database.db_weseeoptical')
+        $nowPrice = $model
             ->table('goods') //为了获取现价找的表
             ->whereIn('sku', array_column($skuList, 'platform_sku'))
             ->column('IF(special_price,special_price,price) price', 'sku');
@@ -3919,9 +3702,6 @@ class TrackReg extends Backend
                 break;
             case 2:
                 $model = Db::connect('database.db_voogueme_online');
-                break;
-            case 3:
-                $model = Db::connect('database.db_nihao_online');
                 break;
             case 10:
                 $model = Db::connect('database.db_zeelool_de_online');

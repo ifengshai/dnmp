@@ -9,8 +9,18 @@ namespace app\admin\controller\shell;
 use app\admin\controller\elasticsearch\async\AsyncOrder;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrder;
+use app\admin\model\order\order\Meeloog;
+use app\admin\model\order\order\NewOrderItemOption;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\order\order\NewOrderProcess;
+use app\admin\model\order\order\Nihao;
+use app\admin\model\order\order\Voogueme;
 use app\admin\model\order\order\WaveOrder;
+use app\admin\model\order\order\Weseeoptical;
+use app\admin\model\order\order\Zeelool;
+use app\admin\model\order\order\ZeeloolDe;
+use app\admin\model\order\order\ZeeloolEs;
+use app\admin\model\order\order\ZeeloolJp;
 use app\admin\model\warehouse\StockSku;
 use app\common\controller\Backend;
 use app\enum\Site;
@@ -48,18 +58,18 @@ class OrderData extends Backend
     public function _initialize()
     {
         parent::_initialize();
-        $this->order = new \app\admin\model\order\order\NewOrder();
-        $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
-        $this->orderprocess = new \app\admin\model\order\order\NewOrderProcess();
-        $this->orderitemprocess = new \app\admin\model\order\order\NewOrderItemProcess();
-        $this->zeelool = new \app\admin\model\order\order\Zeelool();
-        $this->voogueme = new \app\admin\model\order\order\Voogueme();
-        $this->nihao = new \app\admin\model\order\order\Nihao();
-        $this->meeloog = new \app\admin\model\order\order\Meeloog();
-        $this->wesee = new \app\admin\model\order\order\Weseeoptical();
-        $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs();
-        $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe();
-        $this->zeelool_jp = new \app\admin\model\order\order\ZeeloolJp();
+        $this->order = new NewOrder();
+        $this->orderitemoption = new NewOrderItemOption();
+        $this->orderprocess = new NewOrderProcess();
+        $this->orderitemprocess = new NewOrderItemProcess();
+        $this->zeelool = new Zeelool();
+        $this->voogueme = new Voogueme();
+        $this->nihao = new Nihao();
+        $this->meeloog = new Meeloog();
+        $this->wesee = new Weseeoptical();
+        $this->zeelool_es = new ZeeloolEs();
+        $this->zeelool_de = new ZeeloolDe();
+        $this->zeelool_jp = new ZeeloolJp();
         $this->asyncOrder = new AsyncOrder();
         $this->topicName = Env::get('topic.orderTopicName');
         $this->topicIp = Env::get('topic.topicIp');
@@ -134,7 +144,6 @@ class OrderData extends Backend
 
         // 更新订阅集（自动分配partitions ）
         $consumer->subscribe([$topic]);
-
 
         $orders_prescriptions_params = [];
         $order_lens_type = [];
@@ -255,16 +264,44 @@ class OrderData extends Backend
                                     $params['entity_id'] = $v['id'];
                                     $params['site'] = $site;
                                     $params['increment_id'] = $v['order_no'];
-                                    $params['status'] = $v['order_status'] ?: '';
-                                    $params['store_id'] = $v['source'];
-                                    $params['base_grand_total'] = $v['base_actual_amount_paid'];
-                                    $params['grand_total'] = $v['actual_amount_paid'];
+
+                                    if ($site == Site::NIHAO) {
+                                        $params['status'] = $v['status'] == 'shipped' ? 'complete' : $v['status'];
+                                        $params['base_grand_total'] = $v['base_actual_payment'] ?: 0;
+                                        $params['grand_total'] = $v['actual_payment'] ?: 0;
+                                        $store_id = 0;
+                                        if ($v['source'] == 'pc') {
+                                            $store_id = 1;
+                                        } elseif ($v['source'] == 'wap') {
+                                            $store_id = 2;
+                                        } elseif ($v['source'] == 'android') {
+                                            $store_id = 3;
+                                        } elseif ($v['source'] == 'ios') {
+                                            $store_id = 4;
+                                        }
+                                        $params['store_id'] = $store_id;
+                                        $params['coupon_code'] = $v['code'];
+                                        $params['coupon_rule_name'] = $v['coupon_id'];
+                                        if ($v['order_type'] == 2) {
+                                            $order_type = 3;
+                                        } elseif ($v['order_type'] == 3) {
+                                            $order_type = 4;
+                                        } else {
+                                            $order_type = $v['order_type'];
+                                        }
+                                        $params['order_type'] = $order_type;
+                                    } else {
+                                        $params['status'] = $v['order_status'] ?: '';
+                                        $params['base_grand_total'] = $v['base_actual_amount_paid'] ?: 0;
+                                        $params['grand_total'] = $v['actual_amount_paid'] ?: 0;
+                                        $params['store_id'] = $v['source'];
+                                        $params['customer_email'] = $v['email'] ?? '';
+                                    }
                                     $params['total_qty_ordered'] = $v['goods_quantity'];
                                     $params['base_currency_code'] = $v['base_currency'];
                                     $params['order_currency_code'] = $v['now_currency'];
                                     $params['shipping_method'] = $v['freight_type'];
                                     $params['shipping_title'] = $v['freight_description'];
-                                    $params['customer_email'] = $v['email'];
                                     $params['base_to_order_rate'] = $v['rate'];
                                     $params['base_shipping_amount'] = $v['freight_price'];
                                     $params['base_discount_amount'] = $v['base_discounts_price'];
@@ -297,16 +334,44 @@ class OrderData extends Backend
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     $params['increment_id'] = $v['order_no'];
-                                    $params['status'] = $v['order_status'] ?: '';
-                                    $params['store_id'] = $v['source'];
-                                    $params['base_grand_total'] = $v['base_actual_amount_paid'];
-                                    $params['grand_total'] = $v['actual_amount_paid'];
+
+                                    if ($site == Site::NIHAO) {
+                                        $params['status'] = $v['status'] == 'shipped' ? 'complete' : $v['status'];
+                                        $params['base_grand_total'] = $v['base_actual_payment'] ?: 0;
+                                        $params['grand_total'] = $v['actual_payment'] ?: 0;
+                                        $store_id = 0;
+                                        if ($v['source'] == 'pc') {
+                                            $store_id = 1;
+                                        } elseif ($v['source'] == 'wap') {
+                                            $store_id = 2;
+                                        } elseif ($v['source'] == 'android') {
+                                            $store_id = 3;
+                                        } elseif ($v['source'] == 'ios') {
+                                            $store_id = 4;
+                                        }
+                                        $params['store_id'] = $store_id;
+                                        if ($v['order_type'] == 2) {
+                                            $order_type = 3;
+                                        } elseif ($v['order_type'] == 3) {
+                                            $order_type = 4;
+                                        } else {
+                                            $order_type = $v['order_type'];
+                                        }
+                                        $params['order_type'] = $order_type;
+                                    } else {
+                                        $params['status'] = $v['order_status'] ?: '';
+                                        $params['base_grand_total'] = $v['base_actual_amount_paid'] ?: 0;
+                                        $params['grand_total'] = $v['actual_amount_paid'] ?: 0;
+                                        $params['store_id'] = $v['source'];
+                                        $params['customer_email'] = $v['email'] ?? '';
+                                    }
+
+
                                     $params['total_qty_ordered'] = $v['goods_quantity'];
                                     $params['base_currency_code'] = $v['base_currency'];
                                     $params['order_currency_code'] = $v['now_currency'];
                                     $params['shipping_method'] = $v['freight_type'];
                                     $params['shipping_title'] = $v['freight_description'];
-                                    $params['customer_email'] = $v['email'];
                                     $params['base_to_order_rate'] = $v['rate'];
                                     $params['payment_method'] = $v['payment_type'];
                                     $params['base_shipping_amount'] = $v['freight_price'];
@@ -323,12 +388,21 @@ class OrderData extends Backend
                             }
 
                             //批发站地址表插入时或更新时更新主表地址
-                            if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && $payload['table'] == 'orders_addresses') {
+                            if (($payload['type'] == 'UPDATE' || $payload['type'] == 'INSERT') && ($payload['table'] == 'orders_addresses' || $payload['table'] == 'order_addresses')) {
                                 foreach ($payload['data'] as $k => $v) {
                                     $params = [];
                                     if ($v['type'] == 1) {
-                                        $params['country_id'] = $v['country'];
+
+                                        if ($site == Site::NIHAO) {
+                                            $params['country_id'] = $v['country_id'];
+                                            $params['customer_email'] = $v['email'];
+                                            $params['address'] = $v['address'];
+                                        } else {
+                                            $params['country_id'] = $v['country'];
+                                        }
+
                                         $params['region'] = $v['region'];
+                                        $params['region_id'] = $v['region_id'] ?? 0;
                                         $params['city'] = $v['city'];
                                         $params['street'] = $v['street'];
                                         $params['postcode'] = $v['postcode'];
@@ -436,31 +510,47 @@ class OrderData extends Backend
                             }
 
                             //批发站新增子表
-                            if ($payload['type'] == 'INSERT' && $payload['table'] == 'orders_items') {
+                            if ($payload['type'] == 'INSERT' && ($payload['table'] == 'orders_items' || $payload['table'] == 'order_items')) {
                                 foreach ($payload['data'] as $k => $v) {
                                     $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 5) {
                                         $options = $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
+                                        $options['base_row_total'] = $v['original_total_price'];
+                                        $options['index_price'] = $v['lens_total_price'];
+                                        $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
+                                        $options['base_discount_amount'] = $v['base_goods_discounts_price'];
+                                        $options['single_base_original_price'] = $v['base_goods_price'];
+                                        $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
+                                        $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
+                                        unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
+                                    } elseif ($site == Site::NIHAO) {
+                                        $options = $this->nihao_prescription_analysis($v['prescription']);
+                                        $options['base_row_total'] = $v['goods_payable'];
+                                        $options['index_price'] = $v['lens_price'];
+                                        $options['coating_price'] = $v['coating_price'];
+                                        $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
+                                        $options['base_discount_amount'] = $v['base_goods_discounts_price'];
+                                        $options['single_base_original_price'] = $v['base_goods_price'];
+                                        $options['lens_height'] = $v['lens_height'];
+                                        $options['lens_width'] = $v['lens_width'];
+                                        $options['bridge'] = $v['bridge'];
+                                        //镜片价格
+                                        $options['lens_price'] = $v['lens_price'] ?? 0;
+                                        //商品总价
+                                        $options['total'] = $v['goods_total_price'] ?? 0;
                                     }
+
                                     $options['item_id'] = $v['id'];
                                     $options['site'] = $site;
                                     $options['magento_order_id'] = $v['order_id'];
                                     $options['sku'] = $this->getTrueSku($v['goods_sku']);
                                     $options['qty'] = $v['goods_count'];
-                                    $options['base_row_total'] = $v['original_total_price'];
                                     $options['product_id'] = $v['goods_id'];
                                     $options['frame_regural_price'] = $v['goods_original_price'];
-                                    $options['frame_price'] = $v['goods_total_price'];
-                                    $options['index_price'] = $v['lens_total_price'];
+                                    $options['frame_price'] = $v['goods_price'];
                                     $options['frame_color'] = $v['goods_color'];
-                                    $options['goods_type'] = $v['goods_type'];
-                                    $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
-                                    $options['base_discount_amount'] = $v['base_goods_discounts_price'];
-                                    $options['single_base_original_price'] = $v['base_goods_price'];
-                                    $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
-                                    $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
-                                    unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
+                                    $options['goods_type'] = $v['goods_type'] ?? '';
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
@@ -493,29 +583,28 @@ class OrderData extends Backend
                             }
 
                             //批发站更新子表
-                            if ($payload['type'] == 'UPDATE' && $payload['table'] == 'orders_items') {
+                            if ($payload['type'] == 'UPDATE' && ($payload['table'] == 'orders_items' || $payload['table'] == 'order_items')) {
                                 foreach ($payload['data'] as $k => $v) {
                                     $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 5) {
                                         $options = $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
+                                        $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
+                                        unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
+                                    } elseif ($site == Site::NIHAO) {
+                                        $options = $this->nihao_prescription_analysis($v['prescription']);
+                                        $options['lens_height'] = $v['lens_height'];
+                                        $options['lens_width'] = $v['lens_width'];
+                                        $options['bridge'] = $v['bridge'];
                                     }
 
                                     $options['sku'] = $this->getTrueSku($v['goods_sku']);
                                     $options['qty'] = $v['goods_count'];
-                                    $options['base_row_total'] = $v['original_total_price'];
-
-                                    $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
-                                    $options['base_discount_amount'] = $v['base_goods_discounts_price'];
-                                    $options['single_base_original_price'] = $v['base_goods_price'];
-                                    $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
-
-                                    $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
-                                    unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     $order_prescription_type = $options['order_prescription_type'];
                                     unset($options['order_prescription_type']);
                                     unset($options['is_prescription_abnormal']);
                                     if ($options) {
+
                                         $this->orderitemoption->where(['item_id' => $v['id'], 'site' => $site])->update($options);
 
                                         $this->orderitemprocess->where(['item_id' => $v['id'], 'site' => $site])->update(['order_prescription_type' => $order_prescription_type, 'sku' => $options['sku']]);
@@ -575,7 +664,7 @@ class OrderData extends Backend
                                             $data[$i]['site'] = $site;
                                             $data[$i]['option_id'] = $options_id;
                                             $data[$i]['sku'] = $v['sku'];
-                                            $data[$i]['order_prescription_type'] = $order_prescription_type ?: '';
+                                            $data[$i]['order_prescription_type'] = $order_prescription_type ?: 0;
                                             $data[$i]['is_prescription_abnormal'] = $is_prescription_abnormal;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
                                             $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
@@ -974,71 +1063,55 @@ class OrderData extends Backend
      * @Description
      * @author wpl
      * @since 2020/10/28 10:16:53 
+     *
+     * @param $data
+     *
      * @return array
      */
-    protected function nihao_prescription_analysis($data)
+    protected function nihao_prescription_analysis($data): array
     {
-        $options = unserialize($data);
+        $options_params = json_decode($data, true);
+
         //镜片类型
-        $arr['index_type'] = $options['info_buyRequest']['tmplens']['lens_type'] ?: '';
+        $options['index_type'] = $options_params['lens_type'] ?: '';
         //镜片名称
-        $arr['index_name'] = $options['info_buyRequest']['tmplens']['third_name'] ?: '';
-        //光度等参数
-        $options_params = json_decode($options['info_buyRequest']['tmplens']['prescription'], true);
+        $options['index_name'] = $options_params['lens_data_name'] ?: '';
+
+        //镜片颜色
+        $options['index_color'] = $options_params['lens_color'];
+        $options['index_id'] = $options_params['lens_id'];
+        $options['web_lens_name'] = $options_params['lens_data_name'] . ' ' . $options_params['lens_type'];
+        $options['web_lens_name'] = isset($options_params['tint_color']) ? $options['web_lens_name'] . '-' . $options_params['tint_color'] : $options['web_lens_name'];
 
         //处方类型
-        $arr['prescription_type'] = $options_params['prescription_type'] ?: '';
+        $options['prescription_type'] = $options_params['prescription_type'] ?: '';
         //镀膜名称
-        $arr['coating_name'] = $options['info_buyRequest']['tmplens']['four_name'] ?: '';
-        //镀膜价格
-        $arr['coating_price'] = $options['info_buyRequest']['tmplens']['four_price'];
-        //镜框价格
-        $arr['frame_price'] = $options['info_buyRequest']['tmplens']['frame_price'];
-        //镜片价格
-        $arr['index_price'] = $options['info_buyRequest']['tmplens']['third_price'];
-        //镜框原始价格
-        $arr['frame_regural_price'] = $options['info_buyRequest']['tmplens']['frame_regural_price'];
-        //镜片颜色
-        $arr['index_color'] = $options['info_buyRequest']['tmplens']['color_name'];
-        //镜框颜色
-        $arr['frame_color'] = $options['options'][0]['value'];
-        //镜片+镀膜价格
-        $arr['lens_price'] = $options['info_buyRequest']['tmplens']['lens_price'] ?? 0;
-        //镜框+镜片+镀膜价格
-        $arr['total'] = $options['info_buyRequest']['tmplens']['total'] ?? 0;
-        //镜片分类
-        $arr['goods_type'] = $options['info_buyRequest']['tmplens']['goods_type'] ?? 0;
-
-        $arr['color_id'] = $options['info_buyRequest']['tmplens']['color_id'];
-        $arr['coating_id'] = $options['info_buyRequest']['tmplens']['four_id'];
-        $arr['index_id'] = $options['info_buyRequest']['tmplens']['third_id'];
-
+        $options['coating_name'] = $options_params['coating_name'] ?: '';
+        $options['coating_id'] = $options_params['coating_id'] ?: '';
         //镜片编码
-        $arr['lens_number'] = $options['info_buyRequest']['tmplens']['lens_number'] ?? 0;
-        $arr['web_lens_name'] = $options['info_buyRequest']['tmplens']['web_lens_name'];
-
+        $options['lens_number'] = $options_params['lens_number'] ?: '';
         //光度参数
-        $arr['od_sph'] = $options_params['od_sph'] ?: '';;
-        $arr['os_sph'] = $options_params['os_sph'] ?: '';;
-        $arr['od_cyl'] = $options_params['od_cyl'] ?: '';;
-        $arr['os_cyl'] = $options_params['os_cyl'] ?: '';;
-        $arr['od_axis'] = $options_params['od_axis'];
-        $arr['os_axis'] = $options_params['os_axis'];
-        $arr['pd_l'] = $options_params['pd_l'];
-        $arr['pd_r'] = $options_params['pd_r'];
-        $arr['pd'] = $options_params['pd'];
-        $arr['pdcheck'] = $options_params['pdcheck'];
-        $arr['prismcheck'] = $options_params['prismcheck'];
-        $arr['os_add'] = $options_params['os_add'];
-        $arr['od_add'] = $options_params['od_add'];
-        $arr['od_pv'] = $options_params['od_pv'];
-        $arr['os_pv'] = $options_params['os_pv'];
-        $arr['od_pv_r'] = $options_params['od_pv_r'];
-        $arr['os_pv_r'] = $options_params['os_pv_r'];
-        $arr['od_bd'] = $options_params['od_bd'];
-        $arr['os_bd'] = $options_params['os_bd'];
-        $arr['od_bd_r'] = $options_params['od_bd_r'];
-        $arr['os_bd_r'] = $options_params['os_bd_r'];
+        $options['od_sph'] = $options_params['od_sph'] ?: '';;
+        $options['os_sph'] = $options_params['os_sph'] ?: '';;
+        $options['od_cyl'] = $options_params['od_cyl'] ?: '';;
+        $options['os_cyl'] = $options_params['os_cyl'] ?: '';;
+        $options['od_axis'] = $options_params['od_axis'];
+        $options['os_axis'] = $options_params['os_axis'];
+        $options['pd_l'] = $options_params['pd_l'];
+        $options['pd_r'] = $options_params['pd_r'];
+        $options['pd'] = $options_params['pd'];
+        $options['pdcheck'] = $options_params['pd_check'] == 2 ? 'on' : '';
+        $options['prismcheck'] = $options_params['prism_check'] == 2 ? 'on' : '';
+        $options['os_add'] = $options_params['os_add'];
+        $options['od_add'] = $options_params['od_add'];
+        $options['od_pv'] = $options_params['od_pv'];
+        $options['os_pv'] = $options_params['os_pv'];
+        $options['od_pv_r'] = $options_params['od_pv_r'];
+        $options['os_pv_r'] = $options_params['os_pv_r'];
+        $options['od_bd'] = $options_params['od_bd'];
+        $options['os_bd'] = $options_params['os_bd'];
+        $options['od_bd_r'] = $options_params['od_bd_r'];
+        $options['os_bd_r'] = $options_params['os_bd_r'];
 
         /**
          * 判断定制现片逻辑
@@ -1049,10 +1122,9 @@ class OrderData extends Backend
          */
 
         //判断加工类型
-        $result = $this->set_processing_type($arr);
-        $arr = array_merge($arr, $result);
+        $result = $this->set_processing_type($options);
 
-        return $arr;
+        return array_merge($options, $result);
     }
 
     /**
@@ -1552,9 +1624,8 @@ class OrderData extends Backend
 
         //判断加工类型
         $result = $this->set_processing_type($arr);
-        $arr = array_merge($arr, $result);
 
-        return $arr;
+        return array_merge($arr, $result);
     }
 
     /**
@@ -1562,13 +1633,13 @@ class OrderData extends Backend
      * @param array $params
      *
      * @return array
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
+     * @throws DataNotFoundException
+     * @throws ModelNotFoundException
+     * @throws DbException
      * @author wpl
      * @date   2021/5/19 10:18
      */
-    public function set_processing_type($params = [])
+    public function set_processing_type(array $params = []): array
     {
         $arr = [];
 //        //判断处方是否异常

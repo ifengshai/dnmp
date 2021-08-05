@@ -2,8 +2,11 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\order\order\NewOrder;
 use app\admin\model\purchase\PurchaseOrder;
 use app\admin\model\warehouse\LogisticsInfo;
+use app\admin\model\web\WebShoppingCart;
+use app\admin\model\web\WebUsers;
 use app\common\controller\Backend;
 use think\Db;
 use fast\Alibaba;
@@ -29,7 +32,7 @@ class Crontab extends Backend
     }
 
 
-    protected $order_status =  "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed','delivered') and order_type =1";
+    protected $order_status = "and status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed','delivered') and order_type =1";
 
 
     /**
@@ -147,7 +150,6 @@ class Crontab extends Backend
     }
 
 
-
     protected function filter($origin_str)
     {
         return str_replace("'", "\'", $origin_str);
@@ -203,7 +205,7 @@ class Crontab extends Backend
             $items[$order_item_key]['is_prescribe'] = $final_params['is_prescribe'] = $product_options['info_buyRequest']['tmplens']['is_prescribe'];
             $items[$order_item_key]['is_special_price'] = $final_params['is_special_price'] = $product_options['info_buyRequest']['tmplens']['is_special_price'];
             $items[$order_item_key]['index_price_old'] = $final_params['index_price_old'] = $product_options['info_buyRequest']['tmplens']['index_price_old'];
-            $items[$order_item_key]['index_name'] = $final_params['index_name'] =  $final_params['index_type'];
+            $items[$order_item_key]['index_name'] = $final_params['index_name'] = $final_params['index_type'];
             $items[$order_item_key]['index_id'] = $final_params['index_id'] = $product_options['info_buyRequest']['tmplens']['lens_id'] ?: $product_options['info_buyRequest']['tmplens']['index_id'];
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['lens_old'] = $final_params['lens_old'] = $product_options['info_buyRequest']['tmplens']['lens_old'];
@@ -213,7 +215,7 @@ class Crontab extends Backend
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             // dump($final_params);
             $prescription_params = explode("&", $prescription_params);
-            $lens_params = array();
+            $lens_params = [];
             foreach ($prescription_params as $key => $value) {
                 // dump($value);
                 $arr_value = explode("=", $value);
@@ -260,12 +262,12 @@ class Crontab extends Backend
             $final_params['od_add'] = urldecode($final_params['od_add']);
 
             //判断双ADD还是单ADD
-            if ((float) $final_params['os_add'] && (float) $final_params['od_add'] && $final_params['os_add'] != '0.00' && $final_params['od_add'] * 1 != '0.00') {
+            if ((float)$final_params['os_add'] && (float)$final_params['od_add'] && $final_params['os_add'] != '0.00' && $final_params['od_add'] * 1 != '0.00') {
                 //如果新处方add 对调 因为旧处方add左右眼颠倒
                 $items[$order_item_key]['os_add'] = $final_params['os_add'];
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
             } else {
-                if ($items[$order_item_key]['od_add'] && (float) $final_params['od_add'] * 1 != 0) {
+                if ($items[$order_item_key]['od_add'] && (float)$final_params['od_add'] * 1 != 0) {
                     $items[$order_item_key]['total_add'] = $final_params['od_add'];
                 } else {
                     $items[$order_item_key]['total_add'] = $final_params['os_add'];
@@ -321,25 +323,25 @@ class Crontab extends Backend
             }
 
             if ($final_params['od_cyl']) {
-                if ((float) urldecode($final_params['od_cyl']) * 1 <= -4 || (float) urldecode($final_params['od_cyl']) * 1 >= 4) {
+                if ((float)urldecode($final_params['od_cyl']) * 1 <= -4 || (float)urldecode($final_params['od_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_cyl']) {
-                if ((float) urldecode($final_params['os_cyl']) * 1 <= -4 || (float) urldecode($final_params['os_cyl']) * 1 >= 4) {
+                if ((float)urldecode($final_params['os_cyl']) * 1 <= -4 || (float)urldecode($final_params['os_cyl']) * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['od_sph']) {
-                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
+                if ((float)urldecode($final_params['od_sph']) * 1 < -8 || (float)urldecode($final_params['od_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_sph']) {
-                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
+                if ((float)urldecode($final_params['os_sph']) * 1 < -8 || (float)urldecode($final_params['os_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
@@ -602,7 +604,7 @@ class Crontab extends Backend
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             // dump($final_params);
             $prescription_params = explode("&", $prescription_params);
-            $lens_params = array();
+            $lens_params = [];
             foreach ($prescription_params as $key => $value) {
                 // dump($value);
                 $arr_value = explode("=", $value);
@@ -690,26 +692,26 @@ class Crontab extends Backend
 
             if ($final_params['od_cyl']) {
                 $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
-                if ((float) $final_params['od_cyl'] * 1 <= -4 || (float) $final_params['od_cyl'] * 1 >= 4) {
+                if ((float)$final_params['od_cyl'] * 1 <= -4 || (float)$final_params['od_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_cyl']) {
                 $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
-                if ((float) $final_params['os_cyl'] * 1 <= -4 || (float) $final_params['os_cyl'] * 1 >= 4) {
+                if ((float)$final_params['os_cyl'] * 1 <= -4 || (float)$final_params['os_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['od_sph']) {
-                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
+                if ((float)urldecode($final_params['od_sph']) * 1 < -8 || (float)urldecode($final_params['od_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_sph']) {
-                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
+                if ((float)urldecode($final_params['os_sph']) * 1 < -8 || (float)urldecode($final_params['os_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
@@ -951,7 +953,7 @@ class Crontab extends Backend
         $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_nihao')->query($order_item_prescription_querySql);
 
-        $finalResult = array();
+        $finalResult = [];
         foreach ($order_item_list as $key => $value) {
             $finalResult[$key]['item_id'] = $value['item_id'];
             $finalResult[$key]['quote_item_id'] = $value['quote_item_id'];
@@ -989,7 +991,7 @@ class Crontab extends Backend
             $finalResult[$key]['lens_price'] = $tmp_product_options['info_buyRequest']['tmplens']['lens_price'];
             $finalResult[$key]['total'] = $tmp_product_options['info_buyRequest']['tmplens']['total'];
 
-            $tmp_lens_params = array();
+            $tmp_lens_params = [];
             $tmp_lens_params = json_decode($tmp_product_options['info_buyRequest']['tmplens']['prescription'], true);
 
             $finalResult[$key]['prescription_type'] = $tmp_product_options['info_buyRequest']['tmplens']['prescription_type'];
@@ -1006,7 +1008,7 @@ class Crontab extends Backend
             $finalResult[$key]['os_axis'] = $tmp_lens_params['os_axis'];
 
             //处理ADD  当ReadingGlasses时 是 双ADD值
-            if ($tmp_lens_params['prescription_type'] == 'Reading Glasses' &&  strlen($tmp_lens_params['os_add']) > 0 && strlen($tmp_lens_params['od_add']) > 0) {
+            if ($tmp_lens_params['prescription_type'] == 'Reading Glasses' && strlen($tmp_lens_params['os_add']) > 0 && strlen($tmp_lens_params['od_add']) > 0) {
                 // echo '双ADD值';
                 $finalResult[$key]['od_add'] = $tmp_lens_params['od_add'];
                 $finalResult[$key]['os_add'] = $tmp_lens_params['os_add'];
@@ -1064,24 +1066,24 @@ class Crontab extends Backend
             }
 
             if ($tmp_lens_params['od_cyl']) {
-                if ((float) $tmp_lens_params['od_cyl'] * 1 <= -4 || (float) $tmp_lens_params['od_cyl'] * 1 >= 4) {
+                if ((float)$tmp_lens_params['od_cyl'] * 1 <= -4 || (float)$tmp_lens_params['od_cyl'] * 1 >= 4) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
             if ($tmp_lens_params['os_cyl']) {
-                if ((float) $tmp_lens_params['os_cyl'] * 1 <= -4 || (float) $tmp_lens_params['os_cyl'] * 1 >= 4) {
+                if ((float)$tmp_lens_params['os_cyl'] * 1 <= -4 || (float)$tmp_lens_params['os_cyl'] * 1 >= 4) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($tmp_lens_params['od_sph']) {
-                if ((float) urldecode($tmp_lens_params['od_sph']) * 1 < -8 || (float) urldecode($tmp_lens_params['od_sph']) * 1 > 8) {
+                if ((float)urldecode($tmp_lens_params['od_sph']) * 1 < -8 || (float)urldecode($tmp_lens_params['od_sph']) * 1 > 8) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($tmp_lens_params['os_sph']) {
-                if ((float) urldecode($tmp_lens_params['os_sph']) * 1 < -8 || (float) urldecode($tmp_lens_params['os_sph']) * 1 > 8) {
+                if ((float)urldecode($tmp_lens_params['os_sph']) * 1 < -8 || (float)urldecode($tmp_lens_params['os_sph']) * 1 > 8) {
                     $finalResult[$key]['is_custom_lens'] = 1;
                 }
             }
@@ -1344,7 +1346,7 @@ class Crontab extends Backend
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             // dump($final_params);
             $prescription_params = explode("&", $prescription_params);
-            $lens_params = array();
+            $lens_params = [];
             foreach ($prescription_params as $key => $value) {
                 // dump($value);
                 $arr_value = explode("=", $value);
@@ -1557,6 +1559,7 @@ class Crontab extends Backend
             echo '执行完毕！';
         }
     }
+
     /**
      * 西语站
      * 定时处理 订单列表分类
@@ -1704,7 +1707,7 @@ class Crontab extends Backend
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
-            $lens_params = array();
+            $lens_params = [];
             foreach ($prescription_params as $key => $value) {
                 $arr_value = explode("=", $value);
                 $lens_params[$arr_value[0]] = $arr_value[1];
@@ -1752,7 +1755,6 @@ class Crontab extends Backend
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
-
 
 
             if ($final_params['pdcheck'] == 'on') {
@@ -1808,26 +1810,26 @@ class Crontab extends Backend
 
             if ($final_params['od_cyl']) {
                 $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
-                if ((float) $final_params['od_cyl'] * 1 <= -4 || (float) $final_params['od_cyl'] * 1 >= 4) {
+                if ((float)$final_params['od_cyl'] * 1 <= -4 || (float)$final_params['od_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_cyl']) {
                 $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
-                if ((float) $final_params['os_cyl'] * 1 <= -4 || (float) $final_params['os_cyl'] * 1 >= 4) {
+                if ((float)$final_params['os_cyl'] * 1 <= -4 || (float)$final_params['os_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['od_sph']) {
-                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
+                if ((float)urldecode($final_params['od_sph']) * 1 < -8 || (float)urldecode($final_params['od_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_sph']) {
-                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
+                if ((float)urldecode($final_params['os_sph']) * 1 < -8 || (float)urldecode($final_params['os_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
@@ -1998,12 +2000,12 @@ class Crontab extends Backend
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
             $items[$order_item_key]['goods_type'] = $final_params['goods_type'] = $product_options['info_buyRequest']['tmplens']['goods_type'];
-            $items[$order_item_key]['coating_id'] =  $product_options['info_buyRequest']['tmplens']['coating_id'];
+            $items[$order_item_key]['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
 
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
-            $lens_params = array();
+            $lens_params = [];
             foreach ($prescription_params as $key => $value) {
                 $arr_value = explode("=", $value);
                 $lens_params[$arr_value[0]] = $arr_value[1];
@@ -2051,7 +2053,6 @@ class Crontab extends Backend
                 $items[$order_item_key]['od_add'] = $final_params['od_add'];
                 $items[$order_item_key]['total_add'] = $final_params['os_add'];
             }
-
 
 
             if ($final_params['pdcheck'] == 'on') {
@@ -2107,26 +2108,26 @@ class Crontab extends Backend
 
             if ($final_params['od_cyl']) {
                 $final_params['od_cyl'] = urldecode($final_params['od_cyl']);
-                if ((float) $final_params['od_cyl'] * 1 <= -4 || (float) $final_params['od_cyl'] * 1 >= 4) {
+                if ((float)$final_params['od_cyl'] * 1 <= -4 || (float)$final_params['od_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_cyl']) {
                 $final_params['os_cyl'] = urldecode($final_params['os_cyl']);
-                if ((float) $final_params['os_cyl'] * 1 <= -4 || (float) $final_params['os_cyl'] * 1 >= 4) {
+                if ((float)$final_params['os_cyl'] * 1 <= -4 || (float)$final_params['os_cyl'] * 1 >= 4) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['od_sph']) {
-                if ((float) urldecode($final_params['od_sph']) * 1 < -8 || (float) urldecode($final_params['od_sph']) * 1 > 8) {
+                if ((float)urldecode($final_params['od_sph']) * 1 < -8 || (float)urldecode($final_params['od_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
 
             if ($final_params['os_sph']) {
-                if ((float) urldecode($final_params['os_sph']) * 1 < -8 || (float) urldecode($final_params['os_sph']) * 1 > 8) {
+                if ((float)urldecode($final_params['os_sph']) * 1 < -8 || (float)urldecode($final_params['os_sph']) * 1 > 8) {
                     $items[$order_item_key]['is_custom_lens'] = 1;
                 }
             }
@@ -2165,7 +2166,7 @@ class Crontab extends Backend
         $max_item_id = $max_item_id > 0 ? $max_item_id : 0;
         $order_item_prescription_querySql = "select sfoi.item_id,sfoi.order_id,sfoi.product_id,sfoi.`name`,sfoi.sku,sfoi.product_options,sfoi.created_at,sfoi.qty_ordered,sfoi.quote_item_id from sales_flat_order_item sfoi where sfoi.item_id > $max_item_id order by sfoi.item_id asc limit 1000";
         $order_item_list = Db::connect('database.db_zeelool_jp')->query($order_item_prescription_querySql);
-      
+
         foreach ($order_item_list as $order_item_key => $order_item_value) {
             $product_options = unserialize($order_item_value['product_options']);
 
@@ -2183,11 +2184,11 @@ class Crontab extends Backend
             $items[$order_item_key]['lens'] = $final_params['lens'] = $product_options['info_buyRequest']['tmplens']['lens'];
             $items[$order_item_key]['total'] = $final_params['total'] = $product_options['info_buyRequest']['tmplens']['total'];
             $items[$order_item_key]['goods_type'] = $final_params['goods_type'] = $product_options['info_buyRequest']['tmplens']['goods_type'];
-            $items[$order_item_key]['coating_id'] =  $product_options['info_buyRequest']['tmplens']['coating_id'];
+            $items[$order_item_key]['coating_id'] = $product_options['info_buyRequest']['tmplens']['coating_id'];
 
             $prescription_params = $product_options['info_buyRequest']['tmplens']['prescription'];
             $prescription_params = explode("&", $prescription_params);
-            $lens_params = array();
+            $lens_params = [];
             foreach ($prescription_params as $key => $value) {
                 $arr_value = explode("=", $value);
                 $lens_params[$arr_value[0]] = $arr_value[1];
@@ -2272,7 +2273,7 @@ class Crontab extends Backend
             unset($prescription_params);
             unset($product_options);
         }
-       
+
         if ($items) {
             $result = Db::connect('database.db_zeelool_jp')->table('sales_flat_order_item_prescription')->insertAll($items);
             if ($result) {
@@ -2289,64 +2290,29 @@ class Crontab extends Backend
      * 定时统计每天的销量等数据
      *之后修改添加
      * @Description created by lsw
-     * @author lsw
-     * @since 2020/03/09 09:32:05
      * @return void
+     * @since       2020/03/09 09:32:05
+     * @author      lsw
      */
     public function get_sales_order_data()
     {
-        $zeelool_model = Db::connect('database.db_zeelool');
-        $voogueme_model = Db::connect('database.db_voogueme');
-        $nihao_model    = Db::connect('database.db_nihao');
-        $meeloog_model  = Db::connect('database.db_meeloog');
-        $zeelool_es_model = Db::connect('database.db_zeelool_es');
-        $zeelool_de_model = Db::connect('database.db_zeelool_de');
-        $zeelool_jp_model = Db::connect('database.db_zeelool_jp');
-        $voogmechicModel = Db::connect('database.db_voogueme_acc');
-        $zeelool_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
-        $voogueme_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $voogueme_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $voogueme_model->table('customer_entity')->query("set time_zone='+8:00'");
-        $nihao_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $nihao_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $nihao_model->table('customer_entity')->query("set time_zone='+8:00'");
-        $meeloog_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $meeloog_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $meeloog_model->table('customer_entity')->query("set time_zone='+8:00'");
-
-        $zeelool_es_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $zeelool_es_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $zeelool_es_model->table('customer_entity')->query("set time_zone='+8:00'");
-
-        $zeelool_de_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $zeelool_de_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $zeelool_de_model->table('customer_entity')->query("set time_zone='+8:00'");
-        $zeelool_jp_model->table('sales_flat_order')->query("set time_zone='+8:00'");
-        $zeelool_jp_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-        $zeelool_jp_model->table('customer_entity')->query("set time_zone='+8:00'");
-        $voogmechicModel
-            ->table('sales_flat_order')
-            ->query("set time_zone='+8:00'");
-        $voogmechicModel
-            ->table('sales_flat_quote')
-            ->query("set time_zone='+8:00'");
-        $voogmechicModel
-            ->table('customer_entity')
-            ->query("set time_zone='+8:00'");
+        $order = new NewOrder();
+        $shopping_cart = new WebShoppingCart();
+        $users = new WebUsers();
 
         //计算前一天的销量
-        $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
-        $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
+        $stime = strtotime(date("Y-m-d 00:00:00", strtotime("-1 day")));
+        $etime = strtotime(date("Y-m-d 23:59:59", strtotime("-1 day")));
         $map['created_at'] = $date['created_at'] = $update['updated_at'] = ['between', [$stime, $etime]];
         $map['status'] = [
             'in',
-            ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery']
+            ['processing', 'complete', 'delivered', 'delivery'],
         ];
         $map['order_type'] = 1;
-        $zeelool_count = $zeelool_model->table('sales_flat_order')->where($map)->count(1);
-        $zeelool_total = $zeelool_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+
+        //zeelool
+        $zeelool_count = $order->where('site',1)->where($map)->count(1);
+        $zeelool_total = $order->where('site',1)->where($map)->sum('base_grand_total');
         //zeelool客单价
         if ($zeelool_count > 0) {
             $zeelool_unit_price = round(($zeelool_total / $zeelool_count), 2);
@@ -2354,10 +2320,11 @@ class Crontab extends Backend
             $zeelool_unit_price = 0;
         }
 
-        //zeelool购物车数 SELECT count(*) counter from sales_flat_quote where base_grand_total>0
-        $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        //zeelool购物车数
+        $zeelool_shoppingcart_total = $shopping_cart->where('site',1)->where($date)->where('base_grand_total', 'GT', 0)->count(1);
+
         //zeelool购物车更新数
-        $zeelool_shoppingcart_update_total = $zeelool_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        $zeelool_shoppingcart_update_total = $shopping_cart->where('site',1)->where($update)->where('base_grand_total', 'GT', 0)->count(1);
         //zeelool购物车转化率
         if ($zeelool_shoppingcart_total > 0) {
             $zeelool_shoppingcart_conversion = round(($zeelool_count / $zeelool_shoppingcart_total) * 100, 2);
@@ -2371,20 +2338,27 @@ class Crontab extends Backend
             $zeelool_shoppingcart_update_conversion = 0;
         }
 
-        //zeelool注册用户数SELECT count(*) counter from customer_entity
-        $zeelool_register_customer = $zeelool_model->table('customer_entity')->where($date)->count('*');
-        $voogueme_count = $voogueme_model->table('sales_flat_order')->where($map)->count(1);
-        $voogueme_total = $voogueme_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        //zeelool注册用户数
+        $zeelool_register_customer = $users->where('site',1)->where($date)->count(1);
+
+
+        //voogueme
+        $voogueme_count = $order->where('site',2)->where($map)->count(1);
+        $voogueme_total = $order->where('site',2)->where($map)->sum('base_grand_total');
+
         //voogueme客单价
         if ($voogueme_count > 0) {
             $voogueme_unit_price = round(($voogueme_total / $voogueme_count), 2);
         } else {
             $voogueme_unit_price = 0;
         }
+
         //voogueme购物车数
-        $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        $voogueme_shoppingcart_total = $shopping_cart->where('site',2)->where($date)->where('base_grand_total', 'GT', 0)->count(1);
+
         //voogueme购物车更新数
-        $voogueme_shoppingcart_update_total = $voogueme_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        $voogueme_shoppingcart_update_total = $shopping_cart->where('site',2)->where($update)->where('base_grand_total', 'GT', 0)->count(1);
+
         //voogueme购物车转化率
         if ($voogueme_shoppingcart_total > 0) {
             $voogueme_shoppingcart_conversion = round(($voogueme_count / $voogueme_shoppingcart_total) * 100, 2);
@@ -2397,11 +2371,12 @@ class Crontab extends Backend
         } else {
             $voogueme_shoppingcart_update_conversion = 0;
         }
-
         //voogueme注册用户数
-        $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
-        $nihao_count = $nihao_model->table('sales_flat_order')->where($map)->count(1);
-        $nihao_total = $nihao_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        $voogueme_register_customer =  $users->where('site',2)->where($date)->count(1);
+
+        //nihao
+        $nihao_count = $order->where('site',3)->where($map)->count(1);
+        $nihao_total = $order->where('site',3)->where($map)->sum('base_grand_total');
         //nihao客单价
         if ($nihao_count > 0) {
             $nihao_unit_price = round(($nihao_total / $nihao_count), 2);
@@ -2410,28 +2385,29 @@ class Crontab extends Backend
         }
 
         //nihao购物车数
-        $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        $nihao_shoppingcart_total = $shopping_cart->where('site',3)->where($date)->count(1);
+
         //nihao站购物车更新数
-        $nihao_shoppingcart_update_total = $nihao_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        $nihao_shoppingcart_update_total = $shopping_cart->where('site',3)->where($update)->count(1);
+
         //nihao购物车转化率
         if ($nihao_shoppingcart_total > 0) {
             $nihao_shoppingcart_conversion = round(($nihao_count / $nihao_shoppingcart_total) * 100, 2);
         } else {
             $nihao_shoppingcart_conversion = 0;
         }
-
         //nihao站购物车更新转化率
         if ($nihao_shoppingcart_update_total > 0) {
             $nihao_shoppingcart_update_conversion = round(($nihao_count / $nihao_shoppingcart_update_total) * 100, 2);
         } else {
             $nihao_shoppingcart_update_conversion = 0;
         }
+        //voogueme注册用户数
+        $nihao_register_customer =  $users->where('site',3)->where($date)->count(1);
 
-        //nihao注册用户数
-        $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
-
-        $meeloog_count = $meeloog_model->table('sales_flat_order')->where($map)->count(1);
-        $meeloog_total = $meeloog_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        //meeloog
+        $meeloog_count = $order->where('site',4)->where($map)->count(1);
+        $meeloog_total = $order->where('site',4)->where($map)->sum('base_grand_total');
         //meeloog客单价
         if ($meeloog_count > 0) {
             $meeloog_unit_price = round(($meeloog_total / $meeloog_count), 2);
@@ -2440,9 +2416,11 @@ class Crontab extends Backend
         }
 
         //meeloog购物车数
-        $meeloog_shoppingcart_total = $meeloog_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        $meeloog_shoppingcart_total = $shopping_cart->where('site',4)->where($date)->where('base_grand_total', 'GT', 0)->count(1);
+
         //meeloog购物车更新数
-        $meeloog_shoppingcart_update_total = $meeloog_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        $meeloog_shoppingcart_update_total = $shopping_cart->where('site',4)->where($update)->where('base_grand_total', 'GT', 0)->count(1);
+
         //meeloog购物车转化率
         if ($meeloog_shoppingcart_total > 0) {
             $meeloog_shoppingcart_conversion = round(($meeloog_count / $meeloog_shoppingcart_total) * 100, 2);
@@ -2456,12 +2434,12 @@ class Crontab extends Backend
         } else {
             $meeloog_shoppingcart_update_conversion = 0;
         }
-        //nihao注册用户数
-        $meeloog_register_customer = $meeloog_model->table('customer_entity')->where($date)->count('*');
+        //meeloog注册用户数
+        $meeloog_register_customer = $users->where('site',4)->where($date)->count(1);
 
         //zeelool es
-        $zeelool_es_count = $zeelool_es_model->table('sales_flat_order')->where($map)->count(1);
-        $zeelool_es_total = $zeelool_es_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        $zeelool_es_count = $order->where('site',9)->where($map)->count(1);
+        $zeelool_es_total = $order->where('site',9)->where($map)->sum('base_grand_total');
         //zeelool_es客单价
         if ($zeelool_es_count > 0) {
             $zeelool_es_unit_price = round(($zeelool_es_total / $zeelool_es_count), 2);
@@ -2470,9 +2448,9 @@ class Crontab extends Backend
         }
 
         //zeelool_es购物车数
-        $zeelool_es_shoppingcart_total = $zeelool_es_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        $zeelool_es_shoppingcart_total = $shopping_cart->where('site',9)->where($date)->where('base_grand_total', 'GT', 0)->count(1);
         //zeelool_es购物车更新数
-        $zeelool_es_shoppingcart_update_total = $zeelool_es_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        $zeelool_es_shoppingcart_update_total = $shopping_cart->where('site',9)->where($update)->where('base_grand_total', 'GT', 0)->count(1);
         //zeelool_es购物车转化率
         if ($zeelool_es_shoppingcart_total > 0) {
             $zeelool_es_shoppingcart_conversion = round(($zeelool_es_count / $zeelool_es_shoppingcart_total) * 100, 2);
@@ -2488,11 +2466,12 @@ class Crontab extends Backend
         }
 
         //zeelool_es注册用户数
-        $zeelool_es_register_customer = $zeelool_es_model->table('customer_entity')->where($date)->count('*');
+        $zeelool_es_register_customer = $users->where('site',9)->where($date)->count(1);
+
 
         //zeelool de
-        $zeelool_de_count = $zeelool_de_model->table('sales_flat_order')->where($map)->count(1);
-        $zeelool_de_total = $zeelool_de_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        $zeelool_de_count = $order->where('site',10)->where($map)->count(1);
+        $zeelool_de_total = $order->where('site',10)->where($map)->sum('base_grand_total');
         //zeelool_de客单价
         if ($zeelool_de_count > 0) {
             $zeelool_de_unit_price = round(($zeelool_de_total / $zeelool_de_count), 2);
@@ -2501,9 +2480,9 @@ class Crontab extends Backend
         }
 
         //zeelool_de购物车数
-        $zeelool_de_shoppingcart_total = $zeelool_de_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        $zeelool_de_shoppingcart_total = $shopping_cart->where('site',10)->where($date)->where('base_grand_total', 'GT', 0)->count(1);
         //zeelool_de购物车更新数
-        $zeelool_de_shoppingcart_update_total = $zeelool_de_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        $zeelool_de_shoppingcart_update_total = $shopping_cart->where('site',10)->where($update)->where('base_grand_total', 'GT', 0)->count(1);
         //zeelool_de购物车转化率
         if ($zeelool_de_shoppingcart_total > 0) {
             $zeelool_de_shoppingcart_conversion = round(($zeelool_de_count / $zeelool_de_shoppingcart_total) * 100, 2);
@@ -2519,12 +2498,12 @@ class Crontab extends Backend
         }
 
         //zeelool_de注册用户数
-        $zeelool_de_register_customer = $zeelool_de_model->table('customer_entity')->where($date)->count('*');
+        $zeelool_de_register_customer = $users->where('site',10)->where($date)->count(1);
 
 
         //zeelool jp
-        $zeelool_jp_count = $zeelool_jp_model->table('sales_flat_order')->where($map)->count(1);
-        $zeelool_jp_total = $zeelool_jp_model->table('sales_flat_order')->where($map)->sum('base_grand_total');
+        $zeelool_jp_count = $order->where('site',11)->where($map)->count(1);
+        $zeelool_jp_total = $order->where('site',11)->where($map)->sum('base_grand_total');
         //zeelool_jp客单价
         if ($zeelool_jp_count > 0) {
             $zeelool_jp_unit_price = round(($zeelool_jp_total / $zeelool_jp_count), 2);
@@ -2533,9 +2512,9 @@ class Crontab extends Backend
         }
 
         //zeelool_jp购物车数
-        $zeelool_jp_shoppingcart_total = $zeelool_jp_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+        $zeelool_jp_shoppingcart_total = $shopping_cart->where('site',11)->where($date)->where('base_grand_total', 'GT', 0)->count(1);
         //zeelool_jp购物车更新数
-        $zeelool_jp_shoppingcart_update_total = $zeelool_jp_model->table('sales_flat_quote')->where($update)->where('base_grand_total', 'GT', 0)->count('*');
+        $zeelool_jp_shoppingcart_update_total = $shopping_cart->where('site',11)->where($update)->where('base_grand_total', 'GT', 0)->count(1);
         //zeelool_jp购物车转化率
         if ($zeelool_jp_shoppingcart_total > 0) {
             $zeelool_jp_shoppingcart_conversion = round(($zeelool_jp_count / $zeelool_jp_shoppingcart_total) * 100, 2);
@@ -2551,17 +2530,12 @@ class Crontab extends Backend
             $zeelool_jp_shoppingcart_update_conversion = 0;
         }
         //zeelool_jp注册用户数
-        $zeelool_jp_register_customer = $zeelool_jp_model->table('customer_entity')->where($date)->count('*');
+        $zeelool_jp_register_customer = $users->where('site',11)->where($date)->count(1);
 
         //voogmechic
-        $voogmechicCount = $voogmechicModel
-            ->table('sales_flat_order')
-            ->where($map)
-            ->count(1);
-        $voogmechicTotal = $voogmechicModel
-            ->table('sales_flat_order')
-            ->where($map)
-            ->sum('base_grand_total');
+        $voogmechicCount = $order->where('site',12)->where($map)->count(1);
+        $voogmechicTotal = $order->where('site',12)->where($map)->sum('base_grand_total');
+
         //voogmechic客单价
         if ($voogmechicCount > 0) {
             $voogmechicUnitPrice = round(($voogmechicTotal / $voogmechicCount), 2);
@@ -2569,16 +2543,9 @@ class Crontab extends Backend
             $voogmechicUnitPrice = 0;
         }
         //voogmechic购物车数
-        $voogmechicShoppingcartTotal = $voogmechicModel
-            ->table('sales_flat_quote')
-            ->where($date)->where('base_grand_total', 'GT', 0)
-            ->count('*');
+        $voogmechicShoppingcartTotal = $shopping_cart->where('site',12)->where($date)->where('base_grand_total', 'GT', 0)->count(1);
         //voogmechic购物车更新数
-        $voogmechicShoppingcartUpdateTotal = $voogmechicModel
-            ->table('sales_flat_quote')
-            ->where($update)
-            ->where('base_grand_total', 'GT', 0)
-            ->count('*');
+        $voogmechicShoppingcartUpdateTotal = $shopping_cart->where('site',12)->where($update)->where('base_grand_total', 'GT', 0)->count(1);
         //voogmechic购物车转化率
         if ($voogmechicShoppingcartTotal > 0) {
             $voogmechicShoppingcartConversion = round(($voogmechicCount / $voogmechicShoppingcartTotal) * 100, 2);
@@ -2593,10 +2560,7 @@ class Crontab extends Backend
             $voogmechicShoppingcartUpdateConversion = 0;
         }
         //voogmechic注册用户数
-        $voogmechicRegisterCustomer = $voogmechicModel
-            ->table('customer_entity')
-            ->where($date)
-            ->count('*');
+        $voogmechicRegisterCustomer =  $users->where('site',12)->where($date)->count(1);
 
         $data['zeelool_sales_num'] = $zeelool_count;
         $data['voogueme_sales_num'] = $voogueme_count;
@@ -2879,8 +2843,8 @@ class Crontab extends Backend
             $days = $val['days'] == 0 ? 1 : $val['days'];
             $num = round($val['counter'] * 1 / $days * 1 * 30);
             $list[$k]['num'] = $num;
-            $list[$k]['supplier_name'] =  $supplier_list[$val['true_sku']]['supplier_name'];
-            $list[$k]['purchase_person'] =  $supplier_list[$val['true_sku']]['purchase_person'];
+            $list[$k]['supplier_name'] = $supplier_list[$val['true_sku']]['supplier_name'];
+            $list[$k]['purchase_person'] = $supplier_list[$val['true_sku']]['purchase_person'];
 
 
             if ($num >= 300) {
@@ -3034,9 +2998,9 @@ class Crontab extends Backend
      * 记录每天商品库存变化日志
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/19 16:23:27
      * @return void
+     * @since  2020/02/19 16:23:27
+     * @author wpl
      */
     public function get_sku_stock()
     {
@@ -3053,9 +3017,9 @@ class Crontab extends Backend
      * 定时获取SKU最新的采购单价
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/19 16:23:27
      * @return void
+     * @since  2020/02/19 16:23:27
+     * @author wpl
      */
     public function get_sku_price()
     {
@@ -3103,9 +3067,9 @@ class Crontab extends Backend
      * 记录每天总库存数
      *
      * @Description
-     * @author wpl
-     * @since 2020/02/29 16:13:16
      * @return void
+     * @since  2020/02/29 16:13:16
+     * @author wpl
      */
     public function get_sku_allstock()
     {
@@ -3119,14 +3083,15 @@ class Crontab extends Backend
         $res = Db::table('fa_product_allstock_log')->insert($data);
         echo "ok";
     }
+
     /**
      * 更新zeelool站仪表盘数据
      *
-     * z站今天的销售额($) 订单数	订单支付成功数	客单价($)	购物车总数	购物车总转化率(%)	新增购物车数	新增购物车转化率	新增注册用户数
+     * z站今天的销售额($) 订单数    订单支付成功数    客单价($)    购物车总数    购物车总转化率(%)    新增购物车数    新增购物车转化率    新增注册用户数
      * @Description created by lsw
-     * @author lsw
-     * @since 2020/03/02 17:39:31
      * @return void
+     * @since       2020/03/02 17:39:31
+     * @author      lsw
      */
     public function update_ashboard_data_one()
     {
@@ -3174,25 +3139,25 @@ class Crontab extends Backend
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('customer_entity')->query("set time_zone='+8:00'");
         //昨天销售额
-        if($platform == 11){
-            $order_where['order_type'] = ['in',[1,10]];
-        }else{
+        if ($platform == 11) {
+            $order_where['order_type'] = ['in', [1, 10]];
+        } else {
             $order_where['order_type'] = 1;
         }
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
         $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
         $yestime_where1[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $yes_date . "'")];
         $yesterday_sales_money = $model->table('sales_flat_order')->where($yestime_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $yesterday_sales_money_data           = round($yesterday_sales_money['base_grand_total'], 2);
+        $yesterday_sales_money_data = round($yesterday_sales_money['base_grand_total'], 2);
         //过去7天销售额
         $seven_start = date("Y-m-d", strtotime("-7 day"));
         $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $sev_where['created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
         $pastsevenday_sales_money = $model->table('sales_flat_order')->where($sev_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $pastsevenday_sales_money_data        = round($pastsevenday_sales_money['base_grand_total'], 2);
+        $pastsevenday_sales_money_data = round($pastsevenday_sales_money['base_grand_total'], 2);
         //过去30天销售额
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
         $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
@@ -3212,7 +3177,7 @@ class Crontab extends Backend
         $lastmonth_sales_money = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
         $lastmonth_sales_money_data = round($lastmonth_sales_money['base_grand_total'], 2);
         //今年销售额
-        $thisyear_start = date("Y", time())."-1"."-1"; //本年开始
+        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
         $thisyear_sales_money = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
@@ -3225,152 +3190,152 @@ class Crontab extends Backend
         $lastyear_sales_money_data = round($lastyear_sales_money['base_grand_total'], 2);
         //总共销售额
         $total_sales_money = $model->table('sales_flat_order')->where($order_where)->where($order_success_where)->field('sum(base_grand_total) base_grand_total,count(entity_id) order_num')->find();
-        $total_sales_money_data               = round($total_sales_money['base_grand_total'], 2);
+        $total_sales_money_data = round($total_sales_money['base_grand_total'], 2);
         //昨天订单数
-        $yesterday_order_num_data             = $model->table('sales_flat_order')->where($yestime_where)->where($order_where)->count();
+        $yesterday_order_num_data = $model->table('sales_flat_order')->where($yestime_where)->where($order_where)->count();
         //过去7天订单数
-        $pastsevenday_order_num_data          = $model->table('sales_flat_order')->where($sev_where)->where($order_where)->count();
+        $pastsevenday_order_num_data = $model->table('sales_flat_order')->where($sev_where)->where($order_where)->count();
         //过去30天订单数
-        $pastthirtyday_order_num_data         = $model->table('sales_flat_order')->where($thirty_where)->where($order_where)->count();
+        $pastthirtyday_order_num_data = $model->table('sales_flat_order')->where($thirty_where)->where($order_where)->count();
         //当月订单数
-        $thismonth_order_num_data             = $model->table('sales_flat_order')->where($thismonth_where)->where($order_where)->count();
+        $thismonth_order_num_data = $model->table('sales_flat_order')->where($thismonth_where)->where($order_where)->count();
         //上月订单数
-        $lastmonth_order_num_data             = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->count();
+        $lastmonth_order_num_data = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->count();
         //今年订单数
-        $thisyear_order_num_data              = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->count();
+        $thisyear_order_num_data = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->count();
         //去年订单数
-        $lastyear_order_num_data              = $model->table('sales_flat_order')->where($lastyear_where)->where($order_where)->count();
+        $lastyear_order_num_data = $model->table('sales_flat_order')->where($lastyear_where)->where($order_where)->count();
         //总共订单数
-        $total_order_num_data                 = $model->table('sales_flat_order')->where($order_where)->count();
+        $total_order_num_data = $model->table('sales_flat_order')->where($order_where)->count();
         //昨天支付成功数
-        $yesterday_order_success_data         = $yesterday_sales_money['order_num'];
+        $yesterday_order_success_data = $yesterday_sales_money['order_num'];
         //过去7天支付成功数
-        $pastsevenday_order_success_data      = $pastsevenday_sales_money['order_num'];
+        $pastsevenday_order_success_data = $pastsevenday_sales_money['order_num'];
         //过去30天支付成功数
-        $pastthirtyday_order_success_data     = $pastthirtyday_sales_money['order_num'];
+        $pastthirtyday_order_success_data = $pastthirtyday_sales_money['order_num'];
         //当月支付成功数
-        $thismonth_order_success_data         = $thismonth_sales_money['order_num'];
+        $thismonth_order_success_data = $thismonth_sales_money['order_num'];
         //上月支付成功数
-        $lastmonth_order_success_data         = $lastmonth_sales_money['order_num'];
+        $lastmonth_order_success_data = $lastmonth_sales_money['order_num'];
         //今年支付成功数
-        $thisyear_order_success_data          = $thisyear_sales_money['order_num'];
+        $thisyear_order_success_data = $thisyear_sales_money['order_num'];
         //上年支付成功数
-        $lastyear_order_success_data          = $lastyear_sales_money['order_num'];
+        $lastyear_order_success_data = $lastyear_sales_money['order_num'];
         //总共支付成功数
-        $total_order_success_data             = $total_sales_money['order_num'];
+        $total_order_success_data = $total_sales_money['order_num'];
         //昨天新增注册人数
         //昨天新增注册用户数sql
-        $yesterday_register_customer_data     = $model->table('customer_entity')->where($yestime_where)->count();
+        $yesterday_register_customer_data = $model->table('customer_entity')->where($yestime_where)->count();
         //过去7天新增注册人数
-        $pastsevenday_register_customer_data  = $model->table('customer_entity')->where($sev_where)->count();
+        $pastsevenday_register_customer_data = $model->table('customer_entity')->where($sev_where)->count();
         //过去30天新增注册人数
         $pastthirtyday_register_customer_data = $model->table('customer_entity')->where($thirty_where)->count();
         //当月新增注册人数
-        $thismonth_register_customer_data     = $model->table('customer_entity')->where($thismonth_where)->count();
+        $thismonth_register_customer_data = $model->table('customer_entity')->where($thismonth_where)->count();
         //上月新增注册人数
-        $lastmonth_register_customer_data     = $model->table('customer_entity')->where($lastmonth_where)->count();
+        $lastmonth_register_customer_data = $model->table('customer_entity')->where($lastmonth_where)->count();
         //今年新增注册人数
-        $thisyear_register_customer_data      = $model->table('customer_entity')->where($thisyear_where)->count();
+        $thisyear_register_customer_data = $model->table('customer_entity')->where($thisyear_where)->count();
         //去年新增注册人数
-        $lastyear_register_customer_data      = $model->table('customer_entity')->where($lastyear_where)->count();
+        $lastyear_register_customer_data = $model->table('customer_entity')->where($lastyear_where)->count();
         //总共新增注册人数
-        $total_register_customer_data         = $model->table('customer_entity')->count();
+        $total_register_customer_data = $model->table('customer_entity')->count();
         //昨天新增登录人数
         //昨天新增登录用户数sql
-        $yesterday_sign_customer_data         = $model->table('customer_entity')->where($yestime_where1)->count();
+        $yesterday_sign_customer_data = $model->table('customer_entity')->where($yestime_where1)->count();
         //过去7天新增登录人数
-        $pastsevenday_sign_customer_data      = $model->table('customer_entity')->where($sev_where1)->count();
+        $pastsevenday_sign_customer_data = $model->table('customer_entity')->where($sev_where1)->count();
         //过去30天新增登录人数
-        $pastthirtyday_sign_customer_data     = $model->table('customer_entity')->where($thirty_where1)->count();
+        $pastthirtyday_sign_customer_data = $model->table('customer_entity')->where($thirty_where1)->count();
         //当月新增登录人数
-        $thismonth_sign_customer_data         = $model->table('customer_entity')->where($thismonth_where1)->count();
+        $thismonth_sign_customer_data = $model->table('customer_entity')->where($thismonth_where1)->count();
         //上月新增登录人数
-        $lastmonth_sign_customer_data         = $model->table('customer_entity')->where($lastmonth_where1)->count();
+        $lastmonth_sign_customer_data = $model->table('customer_entity')->where($lastmonth_where1)->count();
         //今年新增登录人数
-        $thisyear_sign_customer_data          = $model->table('customer_entity')->where($thisyear_where1)->count();
+        $thisyear_sign_customer_data = $model->table('customer_entity')->where($thisyear_where1)->count();
         //去年新增登录人数
-        $lastyear_sign_customer_data          = $model->table('customer_entity')->where($lastyear_where1)->count();
+        $lastyear_sign_customer_data = $model->table('customer_entity')->where($lastyear_where1)->count();
         //总共新增登录人数
-        $total_sign_customer_data             = $total_register_customer_data;
+        $total_sign_customer_data = $total_register_customer_data;
 
         //昨日客单价data
-        $yesterday_unit_price_data                  = @round(($yesterday_sales_money_data / $yesterday_order_success_data), 2);
+        $yesterday_unit_price_data = @round(($yesterday_sales_money_data / $yesterday_order_success_data), 2);
         //过去7天客单价data
-        $pastsevenday_unit_price_data               = @round(($pastsevenday_sales_money_data / $pastsevenday_order_success_data), 2);
+        $pastsevenday_unit_price_data = @round(($pastsevenday_sales_money_data / $pastsevenday_order_success_data), 2);
         //过去30天客单价data
-        $pastthirtyday_unit_price_data              = @round(($pastthirtyday_sales_money_data / $pastthirtyday_order_success_data), 2);
+        $pastthirtyday_unit_price_data = @round(($pastthirtyday_sales_money_data / $pastthirtyday_order_success_data), 2);
         //当月客单价data
-        $thismonth_unit_price_data                  = @round(($thismonth_sales_money_data / $thismonth_order_success_data), 2);
+        $thismonth_unit_price_data = @round(($thismonth_sales_money_data / $thismonth_order_success_data), 2);
         //上月客单价data
-        $lastmonth_unit_price_data                  = @round(($lastmonth_sales_money_data / $lastmonth_order_success_data), 2);
+        $lastmonth_unit_price_data = @round(($lastmonth_sales_money_data / $lastmonth_order_success_data), 2);
         //今年客单价data
-        $thisyear_unit_price_data                   = @round(($thisyear_sales_money_data / $thisyear_order_success_data), 2);
+        $thisyear_unit_price_data = @round(($thisyear_sales_money_data / $thisyear_order_success_data), 2);
         //上一年客单价data
-        $lastyear_unit_price_data                   = @round(($lastyear_sales_money_data / $lastyear_order_success_data), 2);
+        $lastyear_unit_price_data = @round(($lastyear_sales_money_data / $lastyear_order_success_data), 2);
         //总共客单价data
-        $total_unit_price_data                      = @round(($total_sales_money_data / $total_order_success_data), 2);
+        $total_unit_price_data = @round(($total_sales_money_data / $total_order_success_data), 2);
 
-        $updateData['yesterday_sales_money']        = $yesterday_sales_money_data ?? 0;
-        $updateData['pastsevenday_sales_money']     = $pastsevenday_sales_money_data ?? 0;
-        $updateData['pastthirtyday_sales_money']    = $pastthirtyday_sales_money_data ?? 0;
-        $updateData['thismonth_sales_money']        = $thismonth_sales_money_data ?? 0;
-        $updateData['lastmonth_sales_money']        = $lastmonth_sales_money_data ?? 0;
-        $updateData['thisyear_sales_money']         = $thisyear_sales_money_data ?? 0;
-        $updateData['lastyear_sales_money']         = $lastyear_sales_money_data ?? 0;
-        $updateData['total_sales_money']            = $total_sales_money_data ?? 0;
+        $updateData['yesterday_sales_money'] = $yesterday_sales_money_data ?? 0;
+        $updateData['pastsevenday_sales_money'] = $pastsevenday_sales_money_data ?? 0;
+        $updateData['pastthirtyday_sales_money'] = $pastthirtyday_sales_money_data ?? 0;
+        $updateData['thismonth_sales_money'] = $thismonth_sales_money_data ?? 0;
+        $updateData['lastmonth_sales_money'] = $lastmonth_sales_money_data ?? 0;
+        $updateData['thisyear_sales_money'] = $thisyear_sales_money_data ?? 0;
+        $updateData['lastyear_sales_money'] = $lastyear_sales_money_data ?? 0;
+        $updateData['total_sales_money'] = $total_sales_money_data ?? 0;
 
-        $updateData['yesterday_order_num']         = $yesterday_order_num_data ?? 0;
-        $updateData['pastsevenday_order_num']      = $pastsevenday_order_num_data ?? 0;
-        $updateData['pastthirtyday_order_num']     = $pastthirtyday_order_num_data ?? 0;
-        $updateData['thismonth_order_num']         = $thismonth_order_num_data ?? 0;
-        $updateData['lastmonth_order_num']         = $lastmonth_order_num_data ?? 0;
-        $updateData['thisyear_order_num']          = $thisyear_order_num_data ?? 0;
-        $updateData['lastyear_order_num']          = $lastyear_order_num_data ?? 0;
-        $updateData['total_order_num']             = $total_order_num_data ?? 0;
+        $updateData['yesterday_order_num'] = $yesterday_order_num_data ?? 0;
+        $updateData['pastsevenday_order_num'] = $pastsevenday_order_num_data ?? 0;
+        $updateData['pastthirtyday_order_num'] = $pastthirtyday_order_num_data ?? 0;
+        $updateData['thismonth_order_num'] = $thismonth_order_num_data ?? 0;
+        $updateData['lastmonth_order_num'] = $lastmonth_order_num_data ?? 0;
+        $updateData['thisyear_order_num'] = $thisyear_order_num_data ?? 0;
+        $updateData['lastyear_order_num'] = $lastyear_order_num_data ?? 0;
+        $updateData['total_order_num'] = $total_order_num_data ?? 0;
 
-        $updateData['yesterday_order_success']      = $yesterday_order_success_data ?? 0;
-        $updateData['pastsevenday_order_success']   = $pastsevenday_order_success_data ?? 0;
-        $updateData['pastthirtyday_order_success']  = $pastthirtyday_order_success_data ?? 0;
-        $updateData['thismonth_order_success']      = $thismonth_order_success_data ?? 0;
-        $updateData['lastmonth_order_success']      = $lastmonth_order_success_data ?? 0;
-        $updateData['thisyear_order_success']       = $thisyear_order_success_data ?? 0;
-        $updateData['lastyear_order_success']       = $lastyear_order_success_data ?? 0;
-        $updateData['total_order_success']          = $total_order_success_data ?? 0;
+        $updateData['yesterday_order_success'] = $yesterday_order_success_data ?? 0;
+        $updateData['pastsevenday_order_success'] = $pastsevenday_order_success_data ?? 0;
+        $updateData['pastthirtyday_order_success'] = $pastthirtyday_order_success_data ?? 0;
+        $updateData['thismonth_order_success'] = $thismonth_order_success_data ?? 0;
+        $updateData['lastmonth_order_success'] = $lastmonth_order_success_data ?? 0;
+        $updateData['thisyear_order_success'] = $thisyear_order_success_data ?? 0;
+        $updateData['lastyear_order_success'] = $lastyear_order_success_data ?? 0;
+        $updateData['total_order_success'] = $total_order_success_data ?? 0;
 
-        $updateData['yesterday_unit_price']         = $yesterday_unit_price_data ?? 0;
-        $updateData['pastsevenday_unit_price']      = $pastsevenday_unit_price_data ?? 0;
-        $updateData['pastthirtyday_unit_price']     = $pastthirtyday_unit_price_data ?? 0;
-        $updateData['thismonth_unit_price']         = $thismonth_unit_price_data ?? 0;
-        $updateData['lastmonth_unit_price']         = $lastmonth_unit_price_data ?? 0;
-        $updateData['thisyear_unit_price']          = $thisyear_unit_price_data ?? 0;
-        $updateData['lastyear_unit_price']          = $lastyear_unit_price_data ?? 0;
-        $updateData['total_unit_price']             = $total_unit_price_data ?? 0;
+        $updateData['yesterday_unit_price'] = $yesterday_unit_price_data ?? 0;
+        $updateData['pastsevenday_unit_price'] = $pastsevenday_unit_price_data ?? 0;
+        $updateData['pastthirtyday_unit_price'] = $pastthirtyday_unit_price_data ?? 0;
+        $updateData['thismonth_unit_price'] = $thismonth_unit_price_data ?? 0;
+        $updateData['lastmonth_unit_price'] = $lastmonth_unit_price_data ?? 0;
+        $updateData['thisyear_unit_price'] = $thisyear_unit_price_data ?? 0;
+        $updateData['lastyear_unit_price'] = $lastyear_unit_price_data ?? 0;
+        $updateData['total_unit_price'] = $total_unit_price_data ?? 0;
 
-        $updateData['yesterday_register_customer']      = $yesterday_register_customer_data ?? 0;
-        $updateData['pastsevenday_register_customer']   = $pastsevenday_register_customer_data ?? 0;
-        $updateData['pastthirtyday_register_customer']  = $pastthirtyday_register_customer_data ?? 0;
-        $updateData['thismonth_register_customer']      = $thismonth_register_customer_data ?? 0;
-        $updateData['lastmonth_register_customer']      = $lastmonth_register_customer_data ?? 0;
-        $updateData['thisyear_register_customer']       = $thisyear_register_customer_data ?? 0;
-        $updateData['lastyear_register_customer']       = $lastyear_register_customer_data ?? 0;
-        $updateData['total_register_customer']          = $total_register_customer_data ?? 0;
+        $updateData['yesterday_register_customer'] = $yesterday_register_customer_data ?? 0;
+        $updateData['pastsevenday_register_customer'] = $pastsevenday_register_customer_data ?? 0;
+        $updateData['pastthirtyday_register_customer'] = $pastthirtyday_register_customer_data ?? 0;
+        $updateData['thismonth_register_customer'] = $thismonth_register_customer_data ?? 0;
+        $updateData['lastmonth_register_customer'] = $lastmonth_register_customer_data ?? 0;
+        $updateData['thisyear_register_customer'] = $thisyear_register_customer_data ?? 0;
+        $updateData['lastyear_register_customer'] = $lastyear_register_customer_data ?? 0;
+        $updateData['total_register_customer'] = $total_register_customer_data ?? 0;
 
-        $updateData['yesterday_sign_customer']      = $yesterday_sign_customer_data ?? 0;
-        $updateData['pastsevenday_sign_customer']   = $pastsevenday_sign_customer_data ?? 0;
-        $updateData['pastthirtyday_sign_customer']  = $pastthirtyday_sign_customer_data ?? 0;
-        $updateData['thismonth_sign_customer']      = $thismonth_sign_customer_data ?? 0;
-        $updateData['lastmonth_sign_customer']      = $lastmonth_sign_customer_data ?? 0;
-        $updateData['thisyear_sign_customer']       = $thisyear_sign_customer_data ?? 0;
-        $updateData['lastyear_sign_customer']       = $lastyear_sign_customer_data ?? 0;
-        $updateData['total_sign_customer']          = $total_sign_customer_data ?? 0;
+        $updateData['yesterday_sign_customer'] = $yesterday_sign_customer_data ?? 0;
+        $updateData['pastsevenday_sign_customer'] = $pastsevenday_sign_customer_data ?? 0;
+        $updateData['pastthirtyday_sign_customer'] = $pastthirtyday_sign_customer_data ?? 0;
+        $updateData['thismonth_sign_customer'] = $thismonth_sign_customer_data ?? 0;
+        $updateData['lastmonth_sign_customer'] = $lastmonth_sign_customer_data ?? 0;
+        $updateData['thisyear_sign_customer'] = $thisyear_sign_customer_data ?? 0;
+        $updateData['lastyear_sign_customer'] = $lastyear_sign_customer_data ?? 0;
+        $updateData['total_sign_customer'] = $total_sign_customer_data ?? 0;
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
         if (!$result) {
             $updateData['order_platform'] = $platform;
-            $updateData['create_time']    = date('Y-m-d h:i:s', time());
+            $updateData['create_time'] = date('Y-m-d h:i:s', time());
             $info = Db::name('operation_analysis')->insert($updateData);
         } else {
-            $updateData['update_time']    = date('Y-m-d h:i:s', time());
+            $updateData['update_time'] = date('Y-m-d h:i:s', time());
             $info = Db::name('operation_analysis')->where(['order_platform' => $platform])->update($updateData);
         }
         if ($info) {
@@ -3383,9 +3348,20 @@ class Crontab extends Backend
     public function update_ashboard_data_one_wesee()
     {
         //求出平台
-        $platform = 5;
+        $platform = $this->request->get('platform');
 
-        $model = Db::connect('database.db_weseeoptical');
+        switch ($platform){
+            case 3:
+                $model = Db::connect('database.db_nihao_online');
+                $order_success_where['status'] = ['in',['processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed','delivered','delivery','shipped']];
+                $orderField = 'sum(base_actual_payment) base_grand_total,count(id) order_num';
+                break;
+            case 5:
+                $model = Db::connect('database.db_weseeoptical');
+                $order_success_where['status'] = ['in', [2, 3, 4, 9, 10]];
+                $orderField = 'sum(base_actual_amount_paid) base_grand_total,count(id) order_num';
+                break;
+        }
 
 
         if (false === $model) {
@@ -3394,201 +3370,201 @@ class Crontab extends Backend
 
         $today = date('Y-m-d 23:59:59');
         $model->table('orders')->query("set time_zone='+8:00'");
-        $order_success_where['status'] = ['in', [2,3,4,9,10]];
+
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $date_time_start = date('Y-m-d 00:00:00', strtotime("-1 day"));
         $date_time_end = date('Y-m-d 23:59:59', strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
-        $yestime_where['created_at'] = ['between', [$date_time_start,$date_time_end]];
-        $yestime_where1['updated_at'] = ['between', [$date_time_start,$date_time_end]];
+        $yestime_where['created_at'] = ['between', [$date_time_start, $date_time_end]];
+        $yestime_where1['updated_at'] = ['between', [$date_time_start, $date_time_end]];
 
-        $yesterday_sales_money = $model->table('orders')->where($yestime_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
-        $yesterday_sales_money_data           = round($yesterday_sales_money['base_grand_total'], 2);
+        $yesterday_sales_money = $model->table('orders')->where($yestime_where)->where($order_success_where)->field($orderField)->find();
+        $yesterday_sales_money_data = round($yesterday_sales_money['base_grand_total'], 2);
         //过去7天销售额
         $seven_start = date("Y-m-d", strtotime("-7 day"));
         $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $sev_where['created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
-        $pastsevenday_sales_money = $model->table('orders')->where($sev_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
-        $pastsevenday_sales_money_data        = round($pastsevenday_sales_money['base_grand_total'], 2);
+        $pastsevenday_sales_money = $model->table('orders')->where($sev_where)->where($order_success_where)->field($orderField)->find();
+        $pastsevenday_sales_money_data = round($pastsevenday_sales_money['base_grand_total'], 2);
         //过去30天销售额
         $thirty_start = date("Y-m-d", strtotime("-30 day"));
         $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
         $thirty_where['created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
-        $pastthirtyday_sales_money = $model->table('orders')->where($thirty_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $pastthirtyday_sales_money = $model->table('orders')->where($thirty_where)->where($order_success_where)->field($orderField)->find();
         $pastthirtyday_sales_money_data = round($pastthirtyday_sales_money['base_grand_total'], 2);
         //当月销售额
         $thismonth_start = date('Y-m-01', strtotime($today));
         $thismonth_end = $today;
         $thismonth_where['created_at'] = $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
-        $thismonth_sales_money = $model->table('orders')->where($thismonth_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $thismonth_sales_money = $model->table('orders')->where($thismonth_where)->where($order_success_where)->field($orderField)->find();
         $thismonth_sales_money_data = round($thismonth_sales_money['base_grand_total'], 2);
         //上月销售额
         $lastmonth_start = date('Y-m-d', strtotime("first day of -1 month"));
         $lastmonth_end = date('Y-m-d 23:59:59', strtotime("last day of -1 month"));
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
-        $lastmonth_sales_money = $model->table('orders')->where($lastmonth_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $lastmonth_sales_money = $model->table('orders')->where($lastmonth_where)->where($order_success_where)->field($orderField)->find();
         $lastmonth_sales_money_data = round($lastmonth_sales_money['base_grand_total'], 2);
         //今年销售额
-        $thisyear_start = date("Y", time())."-1"."-1"; //本年开始
+        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
-        $thisyear_sales_money = $model->table('orders')->where($thisyear_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $thisyear_sales_money = $model->table('orders')->where($thisyear_where)->where($order_success_where)->field($orderField)->find();
         $thisyear_sales_money_data = round($thisyear_sales_money['base_grand_total'], 2);
         //上年销售额
         $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
         $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
         $lastyear_where['created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
-        $lastyear_sales_money = $model->table('orders')->where($lastyear_where)->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
+        $lastyear_sales_money = $model->table('orders')->where($lastyear_where)->where($order_success_where)->field($orderField)->find();
         $lastyear_sales_money_data = round($lastyear_sales_money['base_grand_total'], 2);
         //总共销售额
-        $total_sales_money = $model->table('orders')->where($order_success_where)->field('sum(base_actual_amount_paid) base_grand_total,count(id) order_num')->find();
-        $total_sales_money_data               = round($total_sales_money['base_grand_total'], 2);
+        $total_sales_money = $model->table('orders')->where($order_success_where)->field($orderField)->find();
+        $total_sales_money_data = round($total_sales_money['base_grand_total'], 2);
         //昨天订单数
-        $yesterday_order_num_data             = $model->table('orders')->where($yestime_where)->count();
+        $yesterday_order_num_data = $model->table('orders')->where($yestime_where)->count();
         //过去7天订单数
-        $pastsevenday_order_num_data          = $model->table('orders')->where($sev_where)->count();
+        $pastsevenday_order_num_data = $model->table('orders')->where($sev_where)->count();
         //过去30天订单数
-        $pastthirtyday_order_num_data         = $model->table('orders')->where($thirty_where)->count();
+        $pastthirtyday_order_num_data = $model->table('orders')->where($thirty_where)->count();
         //当月订单数
-        $thismonth_order_num_data             = $model->table('orders')->where($thismonth_where)->count();
+        $thismonth_order_num_data = $model->table('orders')->where($thismonth_where)->count();
         //上月订单数
-        $lastmonth_order_num_data             = $model->table('orders')->where($lastmonth_where)->count();
+        $lastmonth_order_num_data = $model->table('orders')->where($lastmonth_where)->count();
         //今年订单数
-        $thisyear_order_num_data              = $model->table('orders')->where($thisyear_where)->count();
+        $thisyear_order_num_data = $model->table('orders')->where($thisyear_where)->count();
         //去年订单数
-        $lastyear_order_num_data              = $model->table('orders')->where($lastyear_where)->count();
+        $lastyear_order_num_data = $model->table('orders')->where($lastyear_where)->count();
         //总共订单数
-        $total_order_num_data                 = $model->table('orders')->count();
+        $total_order_num_data = $model->table('orders')->count();
         //昨天支付成功数
-        $yesterday_order_success_data         = $yesterday_sales_money['order_num'];
+        $yesterday_order_success_data = $yesterday_sales_money['order_num'];
         //过去7天支付成功数
-        $pastsevenday_order_success_data      = $pastsevenday_sales_money['order_num'];
+        $pastsevenday_order_success_data = $pastsevenday_sales_money['order_num'];
         //过去30天支付成功数
-        $pastthirtyday_order_success_data     = $pastthirtyday_sales_money['order_num'];
+        $pastthirtyday_order_success_data = $pastthirtyday_sales_money['order_num'];
         //当月支付成功数
-        $thismonth_order_success_data         = $thismonth_sales_money['order_num'];
+        $thismonth_order_success_data = $thismonth_sales_money['order_num'];
         //上月支付成功数
-        $lastmonth_order_success_data         = $lastmonth_sales_money['order_num'];
+        $lastmonth_order_success_data = $lastmonth_sales_money['order_num'];
         //今年支付成功数
-        $thisyear_order_success_data          = $thisyear_sales_money['order_num'];
+        $thisyear_order_success_data = $thisyear_sales_money['order_num'];
         //上年支付成功数
-        $lastyear_order_success_data          = $lastyear_sales_money['order_num'];
+        $lastyear_order_success_data = $lastyear_sales_money['order_num'];
         //总共支付成功数
-        $total_order_success_data             = $total_sales_money['order_num'];
+        $total_order_success_data = $total_sales_money['order_num'];
         //昨天新增注册人数
         //昨天新增注册用户数sql
-        $yesterday_register_customer_data     = $model->table('users')->where($yestime_where)->count();
+        $yesterday_register_customer_data = $model->table('users')->where($yestime_where)->count();
         //过去7天新增注册人数
-        $pastsevenday_register_customer_data  = $model->table('users')->where($sev_where)->count();
+        $pastsevenday_register_customer_data = $model->table('users')->where($sev_where)->count();
         //过去30天新增注册人数
         $pastthirtyday_register_customer_data = $model->table('users')->where($thirty_where)->count();
         //当月新增注册人数
-        $thismonth_register_customer_data     = $model->table('users')->where($thismonth_where)->count();
+        $thismonth_register_customer_data = $model->table('users')->where($thismonth_where)->count();
         //上月新增注册人数
-        $lastmonth_register_customer_data     = $model->table('users')->where($lastmonth_where)->count();
+        $lastmonth_register_customer_data = $model->table('users')->where($lastmonth_where)->count();
         //今年新增注册人数
-        $thisyear_register_customer_data      = $model->table('users')->where($thisyear_where)->count();
+        $thisyear_register_customer_data = $model->table('users')->where($thisyear_where)->count();
         //去年新增注册人数
-        $lastyear_register_customer_data      = $model->table('users')->where($lastyear_where)->count();
+        $lastyear_register_customer_data = $model->table('users')->where($lastyear_where)->count();
         //总共新增注册人数
-        $total_register_customer_data         = $model->table('users')->count();
+        $total_register_customer_data = $model->table('users')->count();
         //昨天新增登录人数
         //昨天新增登录用户数sql
-        $yesterday_sign_customer_data         = $model->table('users')->where($yestime_where1)->count();
+        $yesterday_sign_customer_data = $model->table('users')->where($yestime_where1)->count();
         //过去7天新增登录人数
-        $pastsevenday_sign_customer_data      = $model->table('users')->where($sev_where1)->count();
+        $pastsevenday_sign_customer_data = $model->table('users')->where($sev_where1)->count();
         //过去30天新增登录人数
-        $pastthirtyday_sign_customer_data     = $model->table('users')->where($thirty_where1)->count();
+        $pastthirtyday_sign_customer_data = $model->table('users')->where($thirty_where1)->count();
         //当月新增登录人数
-        $thismonth_sign_customer_data         = $model->table('users')->where($thismonth_where1)->count();
+        $thismonth_sign_customer_data = $model->table('users')->where($thismonth_where1)->count();
         //上月新增登录人数
-        $lastmonth_sign_customer_data         = $model->table('users')->where($lastmonth_where1)->count();
+        $lastmonth_sign_customer_data = $model->table('users')->where($lastmonth_where1)->count();
         //今年新增登录人数
-        $thisyear_sign_customer_data          = $model->table('users')->where($thisyear_where1)->count();
+        $thisyear_sign_customer_data = $model->table('users')->where($thisyear_where1)->count();
         //去年新增登录人数
-        $lastyear_sign_customer_data          = $model->table('users')->where($lastyear_where1)->count();
+        $lastyear_sign_customer_data = $model->table('users')->where($lastyear_where1)->count();
         //总共新增登录人数
-        $total_sign_customer_data             = $total_register_customer_data;
+        $total_sign_customer_data = $total_register_customer_data;
 
         //昨日客单价data
-        $yesterday_unit_price_data                  = @round(($yesterday_sales_money_data / $yesterday_order_success_data), 2);
+        $yesterday_unit_price_data = @round(($yesterday_sales_money_data / $yesterday_order_success_data), 2);
         //过去7天客单价data
-        $pastsevenday_unit_price_data               = @round(($pastsevenday_sales_money_data / $pastsevenday_order_success_data), 2);
+        $pastsevenday_unit_price_data = @round(($pastsevenday_sales_money_data / $pastsevenday_order_success_data), 2);
         //过去30天客单价data
-        $pastthirtyday_unit_price_data              = @round(($pastthirtyday_sales_money_data / $pastthirtyday_order_success_data), 2);
+        $pastthirtyday_unit_price_data = @round(($pastthirtyday_sales_money_data / $pastthirtyday_order_success_data), 2);
         //当月客单价data
-        $thismonth_unit_price_data                  = @round(($thismonth_sales_money_data / $thismonth_order_success_data), 2);
+        $thismonth_unit_price_data = @round(($thismonth_sales_money_data / $thismonth_order_success_data), 2);
         //上月客单价data
-        $lastmonth_unit_price_data                  = @round(($lastmonth_sales_money_data / $lastmonth_order_success_data), 2);
+        $lastmonth_unit_price_data = @round(($lastmonth_sales_money_data / $lastmonth_order_success_data), 2);
         //今年客单价data
-        $thisyear_unit_price_data                   = @round(($thisyear_sales_money_data / $thisyear_order_success_data), 2);
+        $thisyear_unit_price_data = @round(($thisyear_sales_money_data / $thisyear_order_success_data), 2);
         //上一年客单价data
-        $lastyear_unit_price_data                   = @round(($lastyear_sales_money_data / $lastyear_order_success_data), 2);
+        $lastyear_unit_price_data = @round(($lastyear_sales_money_data / $lastyear_order_success_data), 2);
         //总共客单价data
-        $total_unit_price_data                      = @round(($total_sales_money_data / $total_order_success_data), 2);
+        $total_unit_price_data = @round(($total_sales_money_data / $total_order_success_data), 2);
 
-        $updateData['yesterday_sales_money']        = $yesterday_sales_money_data ?? 0;
-        $updateData['pastsevenday_sales_money']     = $pastsevenday_sales_money_data ?? 0;
-        $updateData['pastthirtyday_sales_money']    = $pastthirtyday_sales_money_data ?? 0;
-        $updateData['thismonth_sales_money']        = $thismonth_sales_money_data ?? 0;
-        $updateData['lastmonth_sales_money']        = $lastmonth_sales_money_data ?? 0;
-        $updateData['thisyear_sales_money']         = $thisyear_sales_money_data ?? 0;
-        $updateData['lastyear_sales_money']         = $lastyear_sales_money_data ?? 0;
-        $updateData['total_sales_money']            = $total_sales_money_data ?? 0;
+        $updateData['yesterday_sales_money'] = $yesterday_sales_money_data ?? 0;
+        $updateData['pastsevenday_sales_money'] = $pastsevenday_sales_money_data ?? 0;
+        $updateData['pastthirtyday_sales_money'] = $pastthirtyday_sales_money_data ?? 0;
+        $updateData['thismonth_sales_money'] = $thismonth_sales_money_data ?? 0;
+        $updateData['lastmonth_sales_money'] = $lastmonth_sales_money_data ?? 0;
+        $updateData['thisyear_sales_money'] = $thisyear_sales_money_data ?? 0;
+        $updateData['lastyear_sales_money'] = $lastyear_sales_money_data ?? 0;
+        $updateData['total_sales_money'] = $total_sales_money_data ?? 0;
 
-        $updateData['yesterday_order_num']         = $yesterday_order_num_data ?? 0;
-        $updateData['pastsevenday_order_num']      = $pastsevenday_order_num_data ?? 0;
-        $updateData['pastthirtyday_order_num']     = $pastthirtyday_order_num_data ?? 0;
-        $updateData['thismonth_order_num']         = $thismonth_order_num_data ?? 0;
-        $updateData['lastmonth_order_num']         = $lastmonth_order_num_data ?? 0;
-        $updateData['thisyear_order_num']          = $thisyear_order_num_data ?? 0;
-        $updateData['lastyear_order_num']          = $lastyear_order_num_data ?? 0;
-        $updateData['total_order_num']             = $total_order_num_data ?? 0;
+        $updateData['yesterday_order_num'] = $yesterday_order_num_data ?? 0;
+        $updateData['pastsevenday_order_num'] = $pastsevenday_order_num_data ?? 0;
+        $updateData['pastthirtyday_order_num'] = $pastthirtyday_order_num_data ?? 0;
+        $updateData['thismonth_order_num'] = $thismonth_order_num_data ?? 0;
+        $updateData['lastmonth_order_num'] = $lastmonth_order_num_data ?? 0;
+        $updateData['thisyear_order_num'] = $thisyear_order_num_data ?? 0;
+        $updateData['lastyear_order_num'] = $lastyear_order_num_data ?? 0;
+        $updateData['total_order_num'] = $total_order_num_data ?? 0;
 
-        $updateData['yesterday_order_success']      = $yesterday_order_success_data ?? 0;
-        $updateData['pastsevenday_order_success']   = $pastsevenday_order_success_data ?? 0;
-        $updateData['pastthirtyday_order_success']  = $pastthirtyday_order_success_data ?? 0;
-        $updateData['thismonth_order_success']      = $thismonth_order_success_data ?? 0;
-        $updateData['lastmonth_order_success']      = $lastmonth_order_success_data ?? 0;
-        $updateData['thisyear_order_success']       = $thisyear_order_success_data ?? 0;
-        $updateData['lastyear_order_success']       = $lastyear_order_success_data ?? 0;
-        $updateData['total_order_success']          = $total_order_success_data ?? 0;
+        $updateData['yesterday_order_success'] = $yesterday_order_success_data ?? 0;
+        $updateData['pastsevenday_order_success'] = $pastsevenday_order_success_data ?? 0;
+        $updateData['pastthirtyday_order_success'] = $pastthirtyday_order_success_data ?? 0;
+        $updateData['thismonth_order_success'] = $thismonth_order_success_data ?? 0;
+        $updateData['lastmonth_order_success'] = $lastmonth_order_success_data ?? 0;
+        $updateData['thisyear_order_success'] = $thisyear_order_success_data ?? 0;
+        $updateData['lastyear_order_success'] = $lastyear_order_success_data ?? 0;
+        $updateData['total_order_success'] = $total_order_success_data ?? 0;
 
-        $updateData['yesterday_unit_price']         = $yesterday_unit_price_data ?? 0;
-        $updateData['pastsevenday_unit_price']      = $pastsevenday_unit_price_data ?? 0;
-        $updateData['pastthirtyday_unit_price']     = $pastthirtyday_unit_price_data ?? 0;
-        $updateData['thismonth_unit_price']         = $thismonth_unit_price_data ?? 0;
-        $updateData['lastmonth_unit_price']         = $lastmonth_unit_price_data ?? 0;
-        $updateData['thisyear_unit_price']          = $thisyear_unit_price_data ?? 0;
-        $updateData['lastyear_unit_price']          = $lastyear_unit_price_data ?? 0;
-        $updateData['total_unit_price']             = $total_unit_price_data ?? 0;
+        $updateData['yesterday_unit_price'] = $yesterday_unit_price_data ?? 0;
+        $updateData['pastsevenday_unit_price'] = $pastsevenday_unit_price_data ?? 0;
+        $updateData['pastthirtyday_unit_price'] = $pastthirtyday_unit_price_data ?? 0;
+        $updateData['thismonth_unit_price'] = $thismonth_unit_price_data ?? 0;
+        $updateData['lastmonth_unit_price'] = $lastmonth_unit_price_data ?? 0;
+        $updateData['thisyear_unit_price'] = $thisyear_unit_price_data ?? 0;
+        $updateData['lastyear_unit_price'] = $lastyear_unit_price_data ?? 0;
+        $updateData['total_unit_price'] = $total_unit_price_data ?? 0;
 
-        $updateData['yesterday_register_customer']      = $yesterday_register_customer_data ?? 0;
-        $updateData['pastsevenday_register_customer']   = $pastsevenday_register_customer_data ?? 0;
-        $updateData['pastthirtyday_register_customer']  = $pastthirtyday_register_customer_data ?? 0;
-        $updateData['thismonth_register_customer']      = $thismonth_register_customer_data ?? 0;
-        $updateData['lastmonth_register_customer']      = $lastmonth_register_customer_data ?? 0;
-        $updateData['thisyear_register_customer']       = $thisyear_register_customer_data ?? 0;
-        $updateData['lastyear_register_customer']       = $lastyear_register_customer_data ?? 0;
-        $updateData['total_register_customer']          = $total_register_customer_data ?? 0;
+        $updateData['yesterday_register_customer'] = $yesterday_register_customer_data ?? 0;
+        $updateData['pastsevenday_register_customer'] = $pastsevenday_register_customer_data ?? 0;
+        $updateData['pastthirtyday_register_customer'] = $pastthirtyday_register_customer_data ?? 0;
+        $updateData['thismonth_register_customer'] = $thismonth_register_customer_data ?? 0;
+        $updateData['lastmonth_register_customer'] = $lastmonth_register_customer_data ?? 0;
+        $updateData['thisyear_register_customer'] = $thisyear_register_customer_data ?? 0;
+        $updateData['lastyear_register_customer'] = $lastyear_register_customer_data ?? 0;
+        $updateData['total_register_customer'] = $total_register_customer_data ?? 0;
 
-        $updateData['yesterday_sign_customer']      = $yesterday_sign_customer_data ?? 0;
-        $updateData['pastsevenday_sign_customer']   = $pastsevenday_sign_customer_data ?? 0;
-        $updateData['pastthirtyday_sign_customer']  = $pastthirtyday_sign_customer_data ?? 0;
-        $updateData['thismonth_sign_customer']      = $thismonth_sign_customer_data ?? 0;
-        $updateData['lastmonth_sign_customer']      = $lastmonth_sign_customer_data ?? 0;
-        $updateData['thisyear_sign_customer']       = $thisyear_sign_customer_data ?? 0;
-        $updateData['lastyear_sign_customer']       = $lastyear_sign_customer_data ?? 0;
-        $updateData['total_sign_customer']          = $total_sign_customer_data ?? 0;
+        $updateData['yesterday_sign_customer'] = $yesterday_sign_customer_data ?? 0;
+        $updateData['pastsevenday_sign_customer'] = $pastsevenday_sign_customer_data ?? 0;
+        $updateData['pastthirtyday_sign_customer'] = $pastthirtyday_sign_customer_data ?? 0;
+        $updateData['thismonth_sign_customer'] = $thismonth_sign_customer_data ?? 0;
+        $updateData['lastmonth_sign_customer'] = $lastmonth_sign_customer_data ?? 0;
+        $updateData['thisyear_sign_customer'] = $thisyear_sign_customer_data ?? 0;
+        $updateData['lastyear_sign_customer'] = $lastyear_sign_customer_data ?? 0;
+        $updateData['total_sign_customer'] = $total_sign_customer_data ?? 0;
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
         if (!$result) {
             $updateData['order_platform'] = $platform;
-            $updateData['create_time']    = date('Y-m-d h:i:s', time());
+            $updateData['create_time'] = date('Y-m-d h:i:s', time());
             $info = Db::name('operation_analysis')->insert($updateData);
         } else {
-            $updateData['update_time']    = date('Y-m-d h:i:s', time());
+            $updateData['update_time'] = date('Y-m-d h:i:s', time());
             $info = Db::name('operation_analysis')->where(['order_platform' => $platform])->update($updateData);
         }
         if ($info) {
@@ -3604,8 +3580,8 @@ class Crontab extends Backend
      * z站今天的销售额($) 订单数    订单支付成功数    客单价($)    购物车总数    购物车总转化率(%)    新增购物车数    新增购物车转化率    新增注册用户数
      * @Description created by lsw
      * @return void
-     * @since 2020/03/02 17:39:31
-     * @author lsw
+     * @since       2020/03/02 17:39:31
+     * @author      lsw
      */
     public function update_ashboard_data_twoz()
     {
@@ -3669,12 +3645,12 @@ class Crontab extends Backend
         $model->table('sales_flat_order')->query("set time_zone='+8:00'");
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         //昨天支付成功数
-        if($platform == 11){
-            $order_where['order_type'] = ['in',[1,10]];
-        }else{
+        if ($platform == 11) {
+            $order_where['order_type'] = ['in', [1, 10]];
+        } else {
             $order_where['order_type'] = 1;
         }
-        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+        $order_success_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where1 = [];
@@ -3703,7 +3679,7 @@ class Crontab extends Backend
         $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
         $lastmonth_order_success_data = $model->table('sales_flat_order')->where($lastmonth_where)->where($order_where)->where($order_success_where)->count();
         //今年支付成功数
-        $thisyear_start = date("Y", time())."-1"."-1"; //本年开始
+        $thisyear_start = date("Y", time()) . "-1" . "-1"; //本年开始
         $thisyear_end = $today;
         $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
         $thisyear_order_success_data = $model->table('sales_flat_order')->where($thisyear_where)->where($order_where)->where($order_success_where)->count();
@@ -3747,13 +3723,13 @@ class Crontab extends Backend
         //上年新增购物车总数
         $lastyear_shoppingcart_new_data = $model->table('sales_flat_quote')->where($lastyear_where1)->where($quote_where)->count();
         //总共新增购物车总数
-        $total_shoppingcart_new_data  = $total_shoppingcart_total_data;
+        $total_shoppingcart_new_data = $total_shoppingcart_total_data;
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 start
         //昨天支付成功数 从新增购物车中成功支付数
         $order_where = [];
         $order_where['o.order_type'] = 1;
         $order_success_where = [];
-        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+        $order_success_where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
         $yes_date = date("Y-m-d", strtotime("-1 day"));
         $yestime_where = [];
         $yestime_where[] = ['exp', Db::raw("DATE_FORMAT(o.created_at, '%Y-%m-%d') = '" . $yes_date . "'")];
@@ -3762,7 +3738,7 @@ class Crontab extends Backend
             ->alias('o')
             ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
             ->where($yestime_wheres)
-            ->where('p.base_grand_total','>',0)
+            ->where('p.base_grand_total', '>', 0)
             ->where($yestime_where)
             ->where($order_where)
             ->where($order_success_where)
@@ -3778,7 +3754,7 @@ class Crontab extends Backend
             ->alias('o')
             ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
             ->where($sev_wheres)
-            ->where('p.base_grand_total','>',0)
+            ->where('p.base_grand_total', '>', 0)
             ->where($sev_where)
             ->where($order_where)
             ->where($order_success_where)
@@ -3794,14 +3770,14 @@ class Crontab extends Backend
             ->alias('o')
             ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
             ->where($thirty_wheres)
-            ->where('p.base_grand_total','>',0)
+            ->where('p.base_grand_total', '>', 0)
             ->where($thirty_where)
             ->where($order_where)
             ->where($order_success_where)
             ->count();
         //当月从新增购物车中成功支付数
         $thismonth_start = date('Y-m-01', strtotime($today));
-        $thismonth_end =  $today;
+        $thismonth_end = $today;
         $thismonth_where = [];
         $thismonth_where['o.created_at'] = ['between', [$thismonth_start, $thismonth_end]];
         $thismonth_wheres['p.created_at'] = ['between', [$thismonth_start, $thismonth_end]];
@@ -3810,7 +3786,7 @@ class Crontab extends Backend
             ->alias('o')
             ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
             ->where($thismonth_wheres)
-            ->where('p.base_grand_total','>',0)
+            ->where('p.base_grand_total', '>', 0)
             ->where($thismonth_where)
             ->where($order_where)
             ->where($order_success_where)
@@ -3825,7 +3801,7 @@ class Crontab extends Backend
             ->alias('o')
             ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
             ->where($lastmonth_wheres)
-            ->where('p.base_grand_total','>',0)
+            ->where('p.base_grand_total', '>', 0)
             ->where($lastmonth_where)
             ->where($order_where)
             ->where($order_success_where)
@@ -3840,7 +3816,7 @@ class Crontab extends Backend
             ->alias('o')
             ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
             ->where($thisyear_wheres)
-            ->where('p.base_grand_total','>',0)
+            ->where('p.base_grand_total', '>', 0)
             ->where($thisyear_where)
             ->where($order_where)
             ->where($order_success_where)
@@ -3857,7 +3833,7 @@ class Crontab extends Backend
             ->alias('o')
             ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
             ->where($lastyear_wheres)
-            ->where('p.base_grand_total','>',0)
+            ->where('p.base_grand_total', '>', 0)
             ->where($lastyear_where)
             ->where($order_where)
             ->where($order_success_where)
@@ -3868,31 +3844,31 @@ class Crontab extends Backend
         $total_order_success_data1 = $model->table('sales_flat_order')
             ->alias('o')
             ->join('sales_flat_quote p', 'o.quote_id=p.entity_id')
-            ->where('p.base_grand_total','>',0)
+            ->where('p.base_grand_total', '>', 0)
             ->where($order_where)
             ->where($order_success_where)
             ->count();
         //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 end
 
         //昨天购物车转化率data
-        $yesterday_shoppingcart_conversion_data     = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
+        $yesterday_shoppingcart_conversion_data = @round(($yesterday_order_success_data1 / $yesterday_shoppingcart_total_data), 4) * 100;
         //过去7天购物车转化率data
-        $pastsevenday_shoppingcart_conversion_data  = @round(($pastsevenday_order_success_data1 / $pastsevenday_shoppingcart_total_data), 4) * 100;
+        $pastsevenday_shoppingcart_conversion_data = @round(($pastsevenday_order_success_data1 / $pastsevenday_shoppingcart_total_data), 4) * 100;
         //过去30天购物车转化率data
         $pastthirtyday_shoppingcart_conversion_data = @round(($pastthirtyday_order_success_data1 / $pastthirtyday_shoppingcart_total_data), 4) * 100;
         //当月购物车转化率data
-        $thismonth_shoppingcart_conversion_data     = @round(($thismonth_order_success_data1 / $thismonth_shoppingcart_total_data), 4) * 100;
+        $thismonth_shoppingcart_conversion_data = @round(($thismonth_order_success_data1 / $thismonth_shoppingcart_total_data), 4) * 100;
         //上月购物车转化率data
-        $lastmonth_shoppingcart_conversion_data     = @round(($lastmonth_order_success_data1 / $lastmonth_shoppingcart_total_data), 4) * 100;
+        $lastmonth_shoppingcart_conversion_data = @round(($lastmonth_order_success_data1 / $lastmonth_shoppingcart_total_data), 4) * 100;
         //今年购物车转化率
-        $thisyear_shoppingcart_conversion_data      = @round(($thisyear_order_success_data1 / $thisyear_shoppingcart_total_data), 4) * 100;
+        $thisyear_shoppingcart_conversion_data = @round(($thisyear_order_success_data1 / $thisyear_shoppingcart_total_data), 4) * 100;
         //上年购物车总数sql
-        $lastyear_shoppingcart_conversion_data      = @round(($lastyear_order_success_data1 / $lastyear_shoppingcart_total_data), 4) * 100;
+        $lastyear_shoppingcart_conversion_data = @round(($lastyear_order_success_data1 / $lastyear_shoppingcart_total_data), 4) * 100;
         //总共购物车转化率
-        $total_shoppingcart_conversion_data         = @round(($total_order_success_data1 / $total_shoppingcart_total_data), 4) * 100;
+        $total_shoppingcart_conversion_data = @round(($total_order_success_data1 / $total_shoppingcart_total_data), 4) * 100;
 
         //昨天新增购物车转化率
-        $yesterday_shoppingcart_newconversion_data  = @round(($yesterday_order_success_data / $yesterday_shoppingcart_new_data), 4) * 100;
+        $yesterday_shoppingcart_newconversion_data = @round(($yesterday_order_success_data / $yesterday_shoppingcart_new_data), 4) * 100;
         //过去7天新增购物车转化率
         $pastsevenday_shoppingcart_newconversion_data = @round(($pastsevenday_order_success_data / $pastsevenday_shoppingcart_new_data), 4) * 100;
         //过去30天新增购物车转化率
@@ -3902,55 +3878,55 @@ class Crontab extends Backend
         //上月新增购物车转化率
         $lastmonth_shoppingcart_newconversion_data = @round(($lastmonth_order_success_data / $lastmonth_shoppingcart_new_data), 4) * 100;
         //今年新增购物车转化率
-        $thisyear_shoppingcart_newconversion_data  = @round(($thisyear_order_success_data / $thisyear_shoppingcart_new_data), 4) * 100;
+        $thisyear_shoppingcart_newconversion_data = @round(($thisyear_order_success_data / $thisyear_shoppingcart_new_data), 4) * 100;
         //上年新增购物车总数sql
-        $lastyear_shoppingcart_newconversion_data  = @round(($lastyear_order_success_data / $lastyear_shoppingcart_new_data), 4) * 100;
+        $lastyear_shoppingcart_newconversion_data = @round(($lastyear_order_success_data / $lastyear_shoppingcart_new_data), 4) * 100;
         //总共新增购物车转化率
-        $total_shoppingcart_newconversion_data     = @round(($total_order_success_data / $total_shoppingcart_new_data), 4) * 100;
+        $total_shoppingcart_newconversion_data = @round(($total_order_success_data / $total_shoppingcart_new_data), 4) * 100;
 
-        $updateData['yesterday_shoppingcart_total']        = $yesterday_shoppingcart_total_data ?? 0;
-        $updateData['pastsevenday_shoppingcart_total']     = $pastsevenday_shoppingcart_total_data ?? 0;
-        $updateData['pastthirtyday_shoppingcart_total']    = $pastthirtyday_shoppingcart_total_data ?? 0;
-        $updateData['thismonth_shoppingcart_total']        = $thismonth_shoppingcart_total_data ?? 0;
-        $updateData['lastmonth_shoppingcart_total']        = $lastmonth_shoppingcart_total_data ?? 0;
-        $updateData['thisyear_shoppingcart_total']         = $thisyear_shoppingcart_total_data ?? 0;
-        $updateData['lastyear_shoppingcart_total']         = $lastyear_shoppingcart_total_data ?? 0;
-        $updateData['total_shoppingcart_total']            = $total_shoppingcart_total_data ?? 0;
+        $updateData['yesterday_shoppingcart_total'] = $yesterday_shoppingcart_total_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_total'] = $pastsevenday_shoppingcart_total_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_total'] = $pastthirtyday_shoppingcart_total_data ?? 0;
+        $updateData['thismonth_shoppingcart_total'] = $thismonth_shoppingcart_total_data ?? 0;
+        $updateData['lastmonth_shoppingcart_total'] = $lastmonth_shoppingcart_total_data ?? 0;
+        $updateData['thisyear_shoppingcart_total'] = $thisyear_shoppingcart_total_data ?? 0;
+        $updateData['lastyear_shoppingcart_total'] = $lastyear_shoppingcart_total_data ?? 0;
+        $updateData['total_shoppingcart_total'] = $total_shoppingcart_total_data ?? 0;
 
-        $updateData['yesterday_shoppingcart_conversion']         = $yesterday_shoppingcart_conversion_data ?? 0;
-        $updateData['pastsevenday_shoppingcart_conversion']      = $pastsevenday_shoppingcart_conversion_data ?? 0;
-        $updateData['pastthirtyday_shoppingcart_conversion']     = $pastthirtyday_shoppingcart_conversion_data ?? 0;
-        $updateData['thismonth_shoppingcart_conversion']         = $thismonth_shoppingcart_conversion_data ?? 0;
-        $updateData['lastmonth_shoppingcart_conversion']         = $lastmonth_shoppingcart_conversion_data ?? 0;
-        $updateData['thisyear_shoppingcart_conversion']          = $thisyear_shoppingcart_conversion_data ?? 0;
-        $updateData['lastyear_shoppingcart_conversion']          = $lastyear_shoppingcart_conversion_data ?? 0;
-        $updateData['total_shoppingcart_conversion']             = $total_shoppingcart_conversion_data ?? 0;
+        $updateData['yesterday_shoppingcart_conversion'] = $yesterday_shoppingcart_conversion_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_conversion'] = $pastsevenday_shoppingcart_conversion_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_conversion'] = $pastthirtyday_shoppingcart_conversion_data ?? 0;
+        $updateData['thismonth_shoppingcart_conversion'] = $thismonth_shoppingcart_conversion_data ?? 0;
+        $updateData['lastmonth_shoppingcart_conversion'] = $lastmonth_shoppingcart_conversion_data ?? 0;
+        $updateData['thisyear_shoppingcart_conversion'] = $thisyear_shoppingcart_conversion_data ?? 0;
+        $updateData['lastyear_shoppingcart_conversion'] = $lastyear_shoppingcart_conversion_data ?? 0;
+        $updateData['total_shoppingcart_conversion'] = $total_shoppingcart_conversion_data ?? 0;
 
-        $updateData['yesterday_shoppingcart_new']         = $yesterday_shoppingcart_new_data ?? 0;
-        $updateData['pastsevenday_shoppingcart_new']      = $pastsevenday_shoppingcart_new_data ?? 0;
-        $updateData['pastthirtyday_shoppingcart_new']     = $pastthirtyday_shoppingcart_new_data ?? 0;
-        $updateData['thismonth_shoppingcart_new']         = $thismonth_shoppingcart_new_data ?? 0;
-        $updateData['lastmonth_shoppingcart_new']         = $lastmonth_shoppingcart_new_data ?? 0;
-        $updateData['thisyear_shoppingcart_new']          = $thisyear_shoppingcart_new_data ?? 0;
-        $updateData['lastyear_shoppingcart_new']          = $lastyear_shoppingcart_new_data ?? 0;
-        $updateData['total_shoppingcart_new']             = $total_shoppingcart_new_data ?? 0;
+        $updateData['yesterday_shoppingcart_new'] = $yesterday_shoppingcart_new_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_new'] = $pastsevenday_shoppingcart_new_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_new'] = $pastthirtyday_shoppingcart_new_data ?? 0;
+        $updateData['thismonth_shoppingcart_new'] = $thismonth_shoppingcart_new_data ?? 0;
+        $updateData['lastmonth_shoppingcart_new'] = $lastmonth_shoppingcart_new_data ?? 0;
+        $updateData['thisyear_shoppingcart_new'] = $thisyear_shoppingcart_new_data ?? 0;
+        $updateData['lastyear_shoppingcart_new'] = $lastyear_shoppingcart_new_data ?? 0;
+        $updateData['total_shoppingcart_new'] = $total_shoppingcart_new_data ?? 0;
 
-        $updateData['yesterday_shoppingcart_newconversion']      = $yesterday_shoppingcart_newconversion_data ?? 0;
-        $updateData['pastsevenday_shoppingcart_newconversion']   = $pastsevenday_shoppingcart_newconversion_data ?? 0;
-        $updateData['pastthirtyday_shoppingcart_newconversion']  = $pastthirtyday_shoppingcart_newconversion_data ?? 0;
-        $updateData['thismonth_shoppingcart_newconversion']      = $thismonth_shoppingcart_newconversion_data ?? 0;
-        $updateData['lastmonth_shoppingcart_newconversion']      = $lastmonth_shoppingcart_newconversion_data ?? 0;
-        $updateData['thisyear_shoppingcart_newconversion']       = $thisyear_shoppingcart_newconversion_data ?? 0;
-        $updateData['lastyear_shoppingcart_newconversion']       = $lastyear_shoppingcart_newconversion_data ?? 0;
-        $updateData['total_shoppingcart_newconversion']          = $total_shoppingcart_newconversion_data ?? 0;
+        $updateData['yesterday_shoppingcart_newconversion'] = $yesterday_shoppingcart_newconversion_data ?? 0;
+        $updateData['pastsevenday_shoppingcart_newconversion'] = $pastsevenday_shoppingcart_newconversion_data ?? 0;
+        $updateData['pastthirtyday_shoppingcart_newconversion'] = $pastthirtyday_shoppingcart_newconversion_data ?? 0;
+        $updateData['thismonth_shoppingcart_newconversion'] = $thismonth_shoppingcart_newconversion_data ?? 0;
+        $updateData['lastmonth_shoppingcart_newconversion'] = $lastmonth_shoppingcart_newconversion_data ?? 0;
+        $updateData['thisyear_shoppingcart_newconversion'] = $thisyear_shoppingcart_newconversion_data ?? 0;
+        $updateData['lastyear_shoppingcart_newconversion'] = $lastyear_shoppingcart_newconversion_data ?? 0;
+        $updateData['total_shoppingcart_newconversion'] = $total_shoppingcart_newconversion_data ?? 0;
         //查找是否存在的记录
         $result = Db::name('operation_analysis')->where(['order_platform' => $platform])->field('id,order_platform')->find();
         if (!$result) {
             $updateData['order_platform'] = $platform;
-            $updateData['create_time']    = date('Y-m-d h:i:s', time());
+            $updateData['create_time'] = date('Y-m-d h:i:s', time());
             $info = Db::name('operation_analysis')->insert($updateData);
         } else {
-            $updateData['update_time']    = date('Y-m-d h:i:s', time());
+            $updateData['update_time'] = date('Y-m-d h:i:s', time());
             $info = Db::name('operation_analysis')->where(['order_platform' => $platform])->update($updateData);
         }
         if ($info) {
@@ -3961,228 +3937,12 @@ class Crontab extends Backend
     }
 
     /**
-     * 批发同步
-     * @return false
-     * @throws \think\Exception
-     * @throws \think\db\exception\BindParamException
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     * @throws \think\exception\PDOException
-     * @author crasphb
-     * @date   2021/5/19 10:03
-     */
-    public function get_update_ashboard_data_wesee()
-    {
-        ini_set('memory_limit', '1512M');
-        set_time_limit(0);
-        $model = Db::connect('database.db_weseeoptical');
-
-
-        if (false === $model) {
-            return false;
-        }
-
-        $today = date('Y-m-d 23:59:59');
-        $model->table('orders')->query("set time_zone='+8:00'");
-        $order_success_where['status'] = ['in', [2,3,4,9,10]];
-        $yes_date = date("Y-m-d", strtotime("-1 day"));
-        $date_time_start = date('Y-m-d 00:00:00', strtotime("-1 day"));
-        $date_time_end = date('Y-m-d 23:59:59', strtotime("-1 day"));
-        $yestime_where = [];
-        $yestime_where1 = [];
-        $yestime_where['created_at'] = ['between', [$date_time_start,$date_time_end]];
-        $yestime_where1['updated_at'] = ['between', [$date_time_start,$date_time_end]];
-        $yesterday_order_success_data = $model->table('orders')->where($yestime_where)->where($order_success_where)->count();
-        //过去7天支付成功数
-        $seven_start = date("Y-m-d", strtotime("-7 day"));
-        $seven_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
-        $sev_where['created_at'] = $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
-        $pastsevenday_order_success_data = $model->table('orders')->where($sev_where)->where($order_success_where)->count();
-        //过去30天支付成功数
-        $thirty_start = date("Y-m-d", strtotime("-30 day"));
-        $thirty_end = date("Y-m-d 23:59:59", strtotime("-1 day"));
-        $thirty_where['created_at'] = $thirty_where1['updated_at'] = ['between', [$thirty_start, $thirty_end]];
-        $pastthirtyday_order_success_data = $model->table('orders')->where($thirty_where)->where($order_success_where)->count();
-        //当月支付成功数
-        $thismonth_start = date('Y-m-01', strtotime($today));
-        $thismonth_end = $today;
-        $thismonth_where['created_at'] = ['between', [$thismonth_start, $thismonth_end]];
-        $thismonth_where1['updated_at'] = ['between', [$thismonth_start, $thismonth_end]];
-        $thismonth_order_success_data = $model->table('orders')->where($thismonth_where)->where($order_success_where)->count();
-        //上月支付成功数
-        $lastmonth_start = date('Y-m-d', strtotime("first day of -1 month"));
-        $lastmonth_end = date('Y-m-d 23:59:59', strtotime("last day of -1 month"));
-        $lastmonth_where['created_at'] = $lastmonth_where1['updated_at'] = ['between', [$lastmonth_start, $lastmonth_end]];
-        $lastmonth_order_success_data = $model->table('orders')->where($lastmonth_where)->where($order_success_where)->count();
-        //今年支付成功数
-        $thisyear_start = date("Y", time())."-1"."-1"; //本年开始
-        $thisyear_end = $today;
-        $thisyear_where['created_at'] = $thisyear_where1['updated_at'] = ['between', [$thisyear_start, $thisyear_end]];
-        $thisyear_order_success_data = $model->table('orders')->where($thisyear_where)->where($order_success_where)->count();
-        //上年支付成功数
-        $lastyear_start = date('Y-01-01 00:00:00', strtotime('last year'));
-        $lastyear_end = date('Y-12-31 23:59:59', strtotime('last year'));
-        $lastyear_where['created_at'] = $lastyear_where1['updated_at'] = ['between', [$lastyear_start, $lastyear_end]];
-        $lastyear_order_success_data = $model->table('orders')->where($lastyear_where)->where($order_success_where)->count();
-        //总共支付成功数
-        $total_order_success_data = $model->table('orders')->where($order_success_where)->count();
-
-        //昨天购物车总数
-        //$quote_where['base_grand_total'] = ['>', 0];
-        $yesterday_shoppingcart_total_data = 0;
-        //过去7天购物车总数
-        $pastsevenday_shoppingcart_total_data = 0;
-        //过去30天购物车总数
-        $pastthirtyday_shoppingcart_total_data = 0;
-        //当月购物车总数
-        $thismonth_shoppingcart_total_data = 0;
-        //上月购物车总数
-        $lastmonth_shoppingcart_total_data = 0;
-        //今年购物车总数
-        $thisyear_shoppingcart_total_data = 0;
-        //上年购物车总数
-        $lastyear_shoppingcart_total_data = 0;
-        //总共购物车总数
-        $total_shoppingcart_total_data = 0;
-        //昨天新增购物车总数
-        $yesterday_shoppingcart_new_data = 0;
-        //过去7天新增购物车总数
-        $pastsevenday_shoppingcart_new_data = 0;
-        //过去30天新增购物车总数
-        $pastthirtyday_shoppingcart_new_data = 0;
-        //当月新增购物车总数
-        $thismonth_shoppingcart_new_data = 0;
-        //上月新增购物车总数
-        $lastmonth_shoppingcart_new_data = 0;
-        //今年新增购物车总数
-        $thisyear_shoppingcart_new_data = 0;
-        //上年新增购物车总数
-        $lastyear_shoppingcart_new_data = 0;
-        //总共新增购物车总数
-        $total_shoppingcart_new_data  = 0;
-        //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 start
-        //昨天支付成功数 从新增购物车中成功支付数
-        $yesterday_order_success_data1 = 0;
-
-        //过去7天从新增购物车中成功支付数
-
-        $pastsevenday_order_success_data1 = 0;
-
-        //过去30天从新增购物车中成功支付数
-
-        $pastthirtyday_order_success_data1 = 0;
-        //当月从新增购物车中成功支付数
-
-        $thismonth_order_success_data1 = 0;
-        //上月从新增购物车中成功支付数
-
-        $lastmonth_order_success_data1 = 0;
-        //今年从新增购物车中成功支付数
-
-        $thisyear_order_success_data1 = 0;
-
-
-        //上年从新增购物车中成功支付数
-        $lastyear_order_success_data1 = 0;
-
-
-        //总共从新增购物车中成功支付数
-        $total_order_success_data1 = 0;
-        //2020-11-25 更换仪表盘页面新增购物车转化率(%)的计算方法 end
-
-        //昨天购物车转化率data
-        $yesterday_shoppingcart_conversion_data     = 0;
-        //过去7天购物车转化率data
-        $pastsevenday_shoppingcart_conversion_data  = 0;
-        //过去30天购物车转化率data
-        $pastthirtyday_shoppingcart_conversion_data = 0;
-        //当月购物车转化率data
-        $thismonth_shoppingcart_conversion_data     = 0;
-        //上月购物车转化率data
-        $lastmonth_shoppingcart_conversion_data     = 0;
-        //今年购物车转化率
-        $thisyear_shoppingcart_conversion_data      = 0;
-        //上年购物车总数sql
-        $lastyear_shoppingcart_conversion_data      = 0;
-        //总共购物车转化率
-        $total_shoppingcart_conversion_data         = 0;
-
-        //昨天新增购物车转化率
-        $yesterday_shoppingcart_newconversion_data  = 0;
-        //过去7天新增购物车转化率
-        $pastsevenday_shoppingcart_newconversion_data = 0;
-        //过去30天新增购物车转化率
-        $pastthirtyday_shoppingcart_newconversion_data = 0;
-        //当月新增购物车转化率
-        $thismonth_shoppingcart_newconversion_data = 0;
-        //上月新增购物车转化率
-        $lastmonth_shoppingcart_newconversion_data = 0;
-        //今年新增购物车转化率
-        $thisyear_shoppingcart_newconversion_data  = 0;
-        //上年新增购物车总数sql
-        $lastyear_shoppingcart_newconversion_data  = 0;
-        //总共新增购物车转化率
-        $total_shoppingcart_newconversion_data     = 0;
-
-        $updateData['yesterday_shoppingcart_total']        = $yesterday_shoppingcart_total_data ?? 0;
-        $updateData['pastsevenday_shoppingcart_total']     = $pastsevenday_shoppingcart_total_data ?? 0;
-        $updateData['pastthirtyday_shoppingcart_total']    = $pastthirtyday_shoppingcart_total_data ?? 0;
-        $updateData['thismonth_shoppingcart_total']        = $thismonth_shoppingcart_total_data ?? 0;
-        $updateData['lastmonth_shoppingcart_total']        = $lastmonth_shoppingcart_total_data ?? 0;
-        $updateData['thisyear_shoppingcart_total']         = $thisyear_shoppingcart_total_data ?? 0;
-        $updateData['lastyear_shoppingcart_total']         = $lastyear_shoppingcart_total_data ?? 0;
-        $updateData['total_shoppingcart_total']            = $total_shoppingcart_total_data ?? 0;
-
-        $updateData['yesterday_shoppingcart_conversion']         = $yesterday_shoppingcart_conversion_data ?? 0;
-        $updateData['pastsevenday_shoppingcart_conversion']      = $pastsevenday_shoppingcart_conversion_data ?? 0;
-        $updateData['pastthirtyday_shoppingcart_conversion']     = $pastthirtyday_shoppingcart_conversion_data ?? 0;
-        $updateData['thismonth_shoppingcart_conversion']         = $thismonth_shoppingcart_conversion_data ?? 0;
-        $updateData['lastmonth_shoppingcart_conversion']         = $lastmonth_shoppingcart_conversion_data ?? 0;
-        $updateData['thisyear_shoppingcart_conversion']          = $thisyear_shoppingcart_conversion_data ?? 0;
-        $updateData['lastyear_shoppingcart_conversion']          = $lastyear_shoppingcart_conversion_data ?? 0;
-        $updateData['total_shoppingcart_conversion']             = $total_shoppingcart_conversion_data ?? 0;
-
-        $updateData['yesterday_shoppingcart_new']         = $yesterday_shoppingcart_new_data ?? 0;
-        $updateData['pastsevenday_shoppingcart_new']      = $pastsevenday_shoppingcart_new_data ?? 0;
-        $updateData['pastthirtyday_shoppingcart_new']     = $pastthirtyday_shoppingcart_new_data ?? 0;
-        $updateData['thismonth_shoppingcart_new']         = $thismonth_shoppingcart_new_data ?? 0;
-        $updateData['lastmonth_shoppingcart_new']         = $lastmonth_shoppingcart_new_data ?? 0;
-        $updateData['thisyear_shoppingcart_new']          = $thisyear_shoppingcart_new_data ?? 0;
-        $updateData['lastyear_shoppingcart_new']          = $lastyear_shoppingcart_new_data ?? 0;
-        $updateData['total_shoppingcart_new']             = $total_shoppingcart_new_data ?? 0;
-
-        $updateData['yesterday_shoppingcart_newconversion']      = $yesterday_shoppingcart_newconversion_data ?? 0;
-        $updateData['pastsevenday_shoppingcart_newconversion']   = $pastsevenday_shoppingcart_newconversion_data ?? 0;
-        $updateData['pastthirtyday_shoppingcart_newconversion']  = $pastthirtyday_shoppingcart_newconversion_data ?? 0;
-        $updateData['thismonth_shoppingcart_newconversion']      = $thismonth_shoppingcart_newconversion_data ?? 0;
-        $updateData['lastmonth_shoppingcart_newconversion']      = $lastmonth_shoppingcart_newconversion_data ?? 0;
-        $updateData['thisyear_shoppingcart_newconversion']       = $thisyear_shoppingcart_newconversion_data ?? 0;
-        $updateData['lastyear_shoppingcart_newconversion']       = $lastyear_shoppingcart_newconversion_data ?? 0;
-        $updateData['total_shoppingcart_newconversion']          = $total_shoppingcart_newconversion_data ?? 0;
-        //查找是否存在的记录
-        $result = Db::name('operation_analysis')->where(['order_platform' => 5])->field('id,order_platform')->find();
-        if (!$result) {
-            $updateData['order_platform'] = 5;
-            $updateData['create_time']    = date('Y-m-d h:i:s', time());
-            $info = Db::name('operation_analysis')->insert($updateData);
-        } else {
-            $updateData['update_time']    = date('Y-m-d h:i:s', time());
-            $info = Db::name('operation_analysis')->where(['order_platform' => 5])->update($updateData);
-        }
-        if ($info) {
-            echo 'ok';
-        } else {
-            echo 'error';
-        }
-    }
-    /**
      * 定时更新供应链大屏-采购数据
      *
      * @Description
-     * @author wpl
-     * @since 2020/03/09 11:35:05
      * @return void
+     * @since  2020/03/09 11:35:05
+     * @author wpl
      */
     public function purchase_data()
     {
@@ -4296,9 +4056,9 @@ class Crontab extends Backend
      * 定时更新供应链大屏-库存数据
      *
      * @Description
-     * @author wpl
-     * @since 2020/03/09 11:42:50
      * @return void
+     * @since  2020/03/09 11:42:50
+     * @author wpl
      */
     public function stock_data()
     {
@@ -4457,9 +4217,9 @@ class Crontab extends Backend
      * 定时更新供应链大屏-仓库数据
      *
      * @Description
-     * @author wpl
-     * @since 2020/03/04 17:05:15
      * @return void
+     * @since  2020/03/04 17:05:15
+     * @author wpl
      */
     public function warehouse_data()
     {
@@ -4591,9 +4351,9 @@ class Crontab extends Backend
         $endtime = strtotime(date('Y-m-d H:i:s', time()));
         $track = new Trackingmore();
         $track = $track->getStatusNumberCount($starttime, $endtime);
+
         return $track['data'];
     }
-
 
 
     /**
@@ -4694,7 +4454,7 @@ class Crontab extends Backend
         //配镜架
         $zeeloolFrameNum = $this->zeelool->frameNum($time);
         $vooguemeFrameNum = $this->voogueme->frameNum($time);
-        $nihaoFrameNum =  $this->nihao->frameNum($time);
+        $nihaoFrameNum = $this->nihao->frameNum($time);
         $data['frame_num'] = ($zeeloolFrameNum + $vooguemeFrameNum + $nihaoFrameNum) ?? 0;
 
         //配镜片
@@ -4743,15 +4503,16 @@ class Crontab extends Backend
      * 在途库存
      *
      * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21
      * @return void
+     * @since  2020/03/02 17:20:21
+     * @author wpl
      */
     protected function onway_all_stock()
     {
         //计算SKU总采购数量
         $item = new \app\admin\model\itemmanage\Item();
         $on_way_stock = $item->where(['is_del' => 1, 'is_open' => 1])->sum('on_way_stock');
+
         return $on_way_stock;
     }
 
@@ -4759,15 +4520,16 @@ class Crontab extends Backend
      * 在途库存总金额
      *
      * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21
      * @return void
+     * @since  2020/03/02 17:20:21
+     * @author wpl
      */
     protected function onway_all_stock_price()
     {
         //计算SKU总采购数量
         $item = new \app\admin\model\itemmanage\Item();
         $on_way_stock_price = $item->where(['is_del' => 1, 'is_open' => 1])->sum('on_way_stock*purchase_price');
+
         return $on_way_stock_price;
     }
 
@@ -4775,9 +4537,9 @@ class Crontab extends Backend
      * 在途镜架库存
      *
      * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21
      * @return void
+     * @since  2020/03/02 17:20:21
+     * @author wpl
      */
     protected function onway_frame_all_stock()
     {
@@ -4788,10 +4550,11 @@ class Crontab extends Backend
         $map['is_del'] = 1;
         $ids = $category->where($map)->column('id');
 
-        $where['category_id']  = ['in', $ids];
-        $where['is_del']  = 1;
-        $where['is_open']  = 1;
+        $where['category_id'] = ['in', $ids];
+        $where['is_del'] = 1;
+        $where['is_open'] = 1;
         $on_way_stock = $item->where($where)->sum('on_way_stock');
+
         return $on_way_stock;
     }
 
@@ -4799,9 +4562,9 @@ class Crontab extends Backend
      * 在途镜架库存总金额
      *
      * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21
      * @return void
+     * @since  2020/03/02 17:20:21
+     * @author wpl
      */
     protected function onway_frame_all_stock_price()
     {
@@ -4812,10 +4575,11 @@ class Crontab extends Backend
         $map['is_del'] = 1;
         $ids = $category->where($map)->column('id');
 
-        $where['category_id']  = ['in', $ids];
-        $where['is_del']  = 1;
-        $where['is_open']  = 1;
+        $where['category_id'] = ['in', $ids];
+        $where['is_del'] = 1;
+        $where['is_open'] = 1;
         $on_way_stock_price = $item->where($where)->sum('on_way_stock*purchase_price');
+
         return $on_way_stock_price;
     }
 
@@ -4823,9 +4587,9 @@ class Crontab extends Backend
      * 在途镜架库存
      *
      * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21
      * @return void
+     * @since  2020/03/02 17:20:21
+     * @author wpl
      */
     protected function onway_ornament_all_stock()
     {
@@ -4836,10 +4600,11 @@ class Crontab extends Backend
         $map['is_del'] = 1;
         $ids = $category->where($map)->column('id');
 
-        $where['category_id']  = ['in', $ids];
-        $where['is_del']  = 1;
-        $where['is_open']  = 1;
+        $where['category_id'] = ['in', $ids];
+        $where['is_del'] = 1;
+        $where['is_open'] = 1;
         $on_way_stock = $item->where($where)->sum('on_way_stock');
+
         return $on_way_stock;
     }
 
@@ -4847,9 +4612,9 @@ class Crontab extends Backend
      * 在途镜架库存总金额
      *
      * @Description
-     * @author wpl
-     * @since 2020/03/02 17:20:21
      * @return void
+     * @since  2020/03/02 17:20:21
+     * @author wpl
      */
     protected function onway_ornament_all_stock_price()
     {
@@ -4860,28 +4625,28 @@ class Crontab extends Backend
         $map['is_del'] = 1;
         $ids = $category->where($map)->column('id');
 
-        $where['category_id']  = ['in', $ids];
-        $where['is_del']  = 1;
-        $where['is_open']  = 1;
+        $where['category_id'] = ['in', $ids];
+        $where['is_del'] = 1;
+        $where['is_open'] = 1;
         $on_way_stock_price = $item->where($where)->sum('on_way_stock*purchase_price');
+
         return $on_way_stock_price;
     }
-
 
 
     /**
      * 更新order_statistics表字段
      *
      * @Description created by lsw
-     * @author lsw
-     * @since 2020/03/11 17:11:21
      * @return void
+     * @since       2020/03/11 17:11:21
+     * @author      lsw
      */
     public function get_sales_order_update()
     {
-        $zeelool_model  = Db::connect('database.db_zeelool');
+        $zeelool_model = Db::connect('database.db_zeelool');
         $voogueme_model = Db::connect('database.db_voogueme');
-        $nihao_model    = Db::connect('database.db_nihao');
+        $nihao_model = Db::connect('database.db_nihao');
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $voogueme_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -4896,50 +4661,51 @@ class Crontab extends Backend
         }
         $data = [];
         foreach ($result as $v) {
-            $starttime          = $v['create_date'] . ' ' . '00:00:00';
-            $endtime            = $v['create_date'] . ' ' . '23:59:59';
-            $map['created_at']  = $date['created_at'] = ['between', [$starttime, $endtime]];
-            $map['status']      = ['in', ['processing', 'complete', 'creditcard_proccessing']];
+            $starttime = $v['create_date'] . ' ' . '00:00:00';
+            $endtime = $v['create_date'] . ' ' . '23:59:59';
+            $map['created_at'] = $date['created_at'] = ['between', [$starttime, $endtime]];
+            $map['status'] = ['in', ['processing', 'complete', 'creditcard_proccessing']];
             $data['all_unit_price'] = @round(($v['zeelool_unit_price'] + $v['voogueme_unit_price'] + $v['nihao_unit_price']) / 3, 2);
             //zeelool的购物车总数
-            $data['zeelool_shoppingcart_total'] =  $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            $data['zeelool_shoppingcart_total'] = $zeelool_shoppingcart_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
             //zeelool购物车转化率
             $data['zeelool_shoppingcart_conversion'] = $zeelool_shoppingcart_conversion = @round(($v['zeelool_sales_num'] / $zeelool_shoppingcart_total) * 100, 2);
             //zeelool的注册人数
             $data['zeelool_register_customer'] = $zeelool_register_customer = $zeelool_model->table('customer_entity')->where($date)->count('*');
             //voogueme的购物车总数
-            $data['voogueme_shoppingcart_total'] =  $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            $data['voogueme_shoppingcart_total'] = $voogueme_shoppingcart_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
             //voogueme的购物车转化率
             $data['voogueme_shoppingcart_conversion'] = $voogueme_shoppingcart_conversion = @round(($v['voogueme_sales_num'] / $voogueme_shoppingcart_total) * 100, 2);
             //voogueme的注册人数
             $data['voogueme_register_customer'] = $voogueme_register_customer = $voogueme_model->table('customer_entity')->where($date)->count('*');
             //nihao的购物车总数
-            $data['nihao_shoppingcart_total']   = $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            $data['nihao_shoppingcart_total'] = $nihao_shoppingcart_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
             //nihao的购物车转化率
             $data['nihao_shoppingcart_conversion'] = $nihao_shoppingcart_conversion = @round(($v['nihao_sales_num'] / $nihao_shoppingcart_total) * 100, 2);
             //nihao的注册人数
             $data['nihao_register_customer'] = $nihao_register_customer = $nihao_model->table('customer_entity')->where($date)->count('*');
-            $data['all_shoppingcart_total']  = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total;
+            $data['all_shoppingcart_total'] = $zeelool_shoppingcart_total + $voogueme_shoppingcart_total + $nihao_shoppingcart_total;
             $data['all_shoppingcart_conversion'] = @round(($zeelool_shoppingcart_conversion + $voogueme_shoppingcart_conversion + $nihao_shoppingcart_conversion) / 3, 2);
-            $data['all_register_customer']   = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer;
+            $data['all_register_customer'] = $zeelool_register_customer + $voogueme_register_customer + $nihao_register_customer;
             Db::name('order_statistics')->where(['id' => $v['id']])->update($data);
         }
         echo 'ok';
         die;
     }
+
     /**
      * 更新order_statistics表字段
      *
      * @Description created by lsw
-     * @author lsw
-     * @since 2020/03/11 17:11:21
      * @return void
+     * @since       2020/03/11 17:11:21
+     * @author      lsw
      */
     public function get_sales_order_update_two()
     {
-        $zeelool_model  = Db::connect('database.db_zeelool');
+        $zeelool_model = Db::connect('database.db_zeelool');
         $voogueme_model = Db::connect('database.db_voogueme');
-        $nihao_model    = Db::connect('database.db_nihao');
+        $nihao_model = Db::connect('database.db_nihao');
         $zeelool_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
         $zeelool_model->table('customer_entity')->query("set time_zone='+8:00'");
         $voogueme_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
@@ -4954,35 +4720,36 @@ class Crontab extends Backend
         }
         $data = [];
         foreach ($result as $v) {
-            $starttime          = $v['create_date'] . ' ' . '00:00:00';
-            $endtime            = $v['create_date'] . ' ' . '23:59:59';
+            $starttime = $v['create_date'] . ' ' . '00:00:00';
+            $endtime = $v['create_date'] . ' ' . '23:59:59';
             $date['updated_at'] = ['between', [$starttime, $endtime]];
             //zeelool的购物车总数
-            $data['zeelool_shoppingcart_update_total'] =  $zeelool_shoppingcart_update_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            $data['zeelool_shoppingcart_update_total'] = $zeelool_shoppingcart_update_total = $zeelool_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
             //zeelool购物车转化率
             $data['zeelool_shoppingcart_update_conversion'] = $zeelool_shoppingcart_update_conversion = @round(($v['zeelool_sales_num'] / $zeelool_shoppingcart_update_total) * 100, 2);
             //voogueme的购物车总数
-            $data['voogueme_shoppingcart_update_total'] =  $voogueme_shoppingcart_update_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            $data['voogueme_shoppingcart_update_total'] = $voogueme_shoppingcart_update_total = $voogueme_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
             //voogueme的购物车转化率
             $data['voogueme_shoppingcart_update_conversion'] = $voogueme_shoppingcart_update_conversion = @round(($v['voogueme_sales_num'] / $voogueme_shoppingcart_update_total) * 100, 2);
             //nihao的购物车总数
-            $data['nihao_shoppingcart_update_total']   = $nihao_shoppingcart_update_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
+            $data['nihao_shoppingcart_update_total'] = $nihao_shoppingcart_update_total = $nihao_model->table('sales_flat_quote')->where($date)->where('base_grand_total', 'GT', 0)->count('*');
             //nihao的购物车转化率
             $data['nihao_shoppingcart_update_conversion'] = $nihao_shoppingcart_update_conversion = @round(($v['nihao_sales_num'] / $nihao_shoppingcart_update_total) * 100, 2);
-            $data['all_shoppingcart_update_total']  = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total;
+            $data['all_shoppingcart_update_total'] = $zeelool_shoppingcart_update_total + $voogueme_shoppingcart_update_total + $nihao_shoppingcart_update_total;
             $data['all_shoppingcart_update_conversion'] = @round(($zeelool_shoppingcart_update_conversion + $voogueme_shoppingcart_update_conversion + $nihao_shoppingcart_update_conversion) / 3, 2);
             Db::name('order_statistics')->where(['id' => $v['id']])->update($data);
         }
         echo 'ok';
         die;
     }
+
     /**
      * 计算镜架销售副数和配饰销售副数
      *
      * @Description created by lsw
-     * @author lsw
-     * @since 2020/03/20 17:15:36
      * @return void
+     * @since       2020/03/20 17:15:36
+     * @author      lsw
      */
     public function calculate_order_item_num()
     {
@@ -5014,23 +4781,23 @@ class Crontab extends Backend
         //计算前一天的销量
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
-        $map['m.created_at'] =  ['between', [$stime, $etime]];
+        $map['m.created_at'] = ['between', [$stime, $etime]];
         $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed')";
         //求出眼镜所有sku
-        $frame_sku  = $this->itemplatformsku->getDifferencePlatformSku(1, $platform);
+        $frame_sku = $this->itemplatformsku->getDifferencePlatformSku(1, $platform);
         //求出饰品的所有sku
         $decoration_sku = $this->itemplatformsku->getDifferencePlatformSku(3, $platform);
         //眼镜销售副数
-        $data['frame_sales_num']            = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $frame_sku)->count('*');
+        $data['frame_sales_num'] = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $frame_sku)->count('*');
         //眼镜动销数
-        $data['frame_in_print_num']         = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $frame_sku)->count('distinct m.sku');
+        $data['frame_in_print_num'] = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $frame_sku)->count('distinct m.sku');
         //配饰的销售副数
-        $data['decoration_sales_num']       = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $decoration_sku)->count('*');
+        $data['decoration_sales_num'] = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $decoration_sku)->count('*');
         //配饰动销数
-        $data['decoration_in_print_num']    = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $decoration_sku)->count('distinct m.sku');
-        $data['platform']    = $platform;
+        $data['decoration_in_print_num'] = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $decoration_sku)->count('distinct m.sku');
+        $data['platform'] = $platform;
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
-        $data['createtime']  = date("Y-m-d H:i:s");
+        $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('order_item_info')->insert($data);
         echo 'ok';
         die;
@@ -5106,7 +4873,7 @@ class Crontab extends Backend
 
                 Db::table('fa_temp_stock')->where(['sku' => $v['sku']])->update([
                     'stock' => $res[$v['sku']],
-                    'type'  => 2
+                    'type'  => 2,
                 ]);
             }
             //从无到有
@@ -5118,7 +4885,7 @@ class Crontab extends Backend
 
                 Db::table('fa_temp_stock')->where(['sku' => $v['sku']])->update([
                     'stock' => $res[$v['sku']],
-                    'type'  => 1
+                    'type'  => 1,
                 ]);
             }
         }
@@ -5126,6 +4893,7 @@ class Crontab extends Backend
         Db::table('fa_goods_stock_change')->insertAll(array_values($info));
         echo "ok";
     }
+
     public function get_workload_data()
     {
         //求出平台
@@ -5134,8 +4902,8 @@ class Crontab extends Backend
             return false;
         }
         $where['type'] = $whereComments['platform'] = $platform;
-        $whereComments['author_id']    = ['neq', '382940274852'];
-        $whereComments['is_admin']  = 1;
+        $whereComments['author_id'] = ['neq', '382940274852'];
+        $whereComments['is_admin'] = 1;
         //zendesk
         $zendesk_model = Db::name('zendesk');
         $zendesk_comments = Db::name('zendesk_comments');
@@ -5146,23 +4914,23 @@ class Crontab extends Backend
         //计算前一天的销量
         $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
         $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
-        $map['create_time'] = $date['c.create_time'] = $update['zendesk_update_time'] =  ['between', [$stime, $etime]];
+        $map['create_time'] = $date['c.create_time'] = $update['zendesk_update_time'] = ['between', [$stime, $etime]];
         //获取昨天待处理的open、new量
         $wait_num = $zendesk_model->where($where)->where(['status' => ['in', '1,2'], 'channel' => ['neq', 'voice']])->count("*");
         //获取昨天新增的open、new量
         $increment_num = $zendesk_model->where($where)->where(['status' => ['in', '1,2'], 'channel' => ['neq', 'voice']])->where($update)->count("*");
         //获取昨天已回复量
-        $reply_num  = $zendesk_comments->where($map)->where(['is_public' => 1])->where($whereComments)->count('*');
+        $reply_num = $zendesk_comments->where($map)->where(['is_public' => 1])->where($whereComments)->count('*');
         //获取昨天待分配的open、new量
         $waiting_num = $zendesk_model->where($where)->where(['status' => ['in', '1,2'], 'channel' => ['neq', 'voice']])->where(['assign_id' => 0])->where($update)->count("*");
         //获取昨天的pendding量
         $pending_num = $zendesk_model->where($where)->where(['status' => ['eq', '3'], 'channel' => ['neq', 'voice']])->where($update)->count("*");
-        $data['platform']       = $platform;
-        $data['wait_num']       = $wait_num;
-        $data['increment_num']  = $increment_num;
-        $data['reply_num']      = $reply_num;
-        $data['waiting_num']    = $waiting_num;
-        $data['pending_num']    = $pending_num;
+        $data['platform'] = $platform;
+        $data['wait_num'] = $wait_num;
+        $data['increment_num'] = $increment_num;
+        $data['reply_num'] = $reply_num;
+        $data['waiting_num'] = $waiting_num;
+        $data['pending_num'] = $pending_num;
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
         Db::name('workload_statistics')->insert($data);
