@@ -168,7 +168,7 @@ class Nihao extends Model
 
         $all_frame_result = $order->alias('a')->where('a.site',3)
             ->where($whereFrame)
-            ->field('b.sku,sum(b.qty_ordered) as counter')
+            ->field('b.sku,sum(b.qty) as counter')
             ->join(['fa_order_item_option' => 'b'],'a.id=b.order_id')
             ->group('b.sku')->select();
 
