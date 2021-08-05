@@ -162,7 +162,7 @@ class Nihao extends Model
         $sku_list = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('purchase_price', 'sku');
 
         $whereFrame['a.status'] = ['in', ['complete', 'processing', 'delivered']];
-        $whereFrame['a.payment_time'] = ['between', [$start_time, $end_time]];
+        $whereFrame['a.payment_time'] = ['between', [strtotime($start_time), strtotime($end_time)]];
         $whereFrame['a.order_type'] = 1;
         $whereFrame['a.site'] = 3;
 
@@ -183,6 +183,7 @@ class Nihao extends Model
         //求销售额、运费、毛利润
         $base_grand_total_result = $order->alias('a')->where($whereFrame)
             ->field('sum(base_grand_total) base_grand_total,sum(base_shipping_amount) shipping_amount')->select();
+
         //销售额
         $all_base_grand_total = round($base_grand_total_result[0]['base_grand_total'], 2);
         //运费
