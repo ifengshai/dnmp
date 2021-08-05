@@ -295,7 +295,7 @@ class Nihao extends Model
      */
     public function get_all_order_user($createat)
     {
-        $map_where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+        $map_where['payment_time'] = ['between', [strtotime($createat[0].' '.$createat[1]), strtotime($createat[3].' '.$createat[4])]];
         $map['site'] = self::SITE;
         $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
         $map['order_type'] = 1;
@@ -309,8 +309,8 @@ class Nihao extends Model
     }
     //获取某一段时间内的复购用户数 new
     public function get_again_user($createat){
-        $map_where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-        $order_where['payment_time'] = ['lt',$createat[0]];
+        $map_where['payment_time'] = ['between', [strtotime($createat[0].' '.$createat[1]), strtotime($createat[3].' '.$createat[4])]];
+        $order_where['payment_time'] = ['lt',strtotime($createat[0])];
         $map['site'] = self::SITE;
         $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','shipped','delivered','delivery']];
         $map['order_type'] = 1;
