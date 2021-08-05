@@ -873,6 +873,8 @@ class SaleAfterTask extends Model
                 //虚拟库存
                 $item[$key]['stock'] = $itemPlatFormSku->where('platform_sku', $value['sku'])->where('platform_type', $order_platform)->value('stock');
             }
+
+            $result[$k]['item'] = $item;
             if ($order_platform == 3) {
                 //查询交易信息
                 $paypalLog = Db::connect($db)
