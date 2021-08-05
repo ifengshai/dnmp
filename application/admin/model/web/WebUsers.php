@@ -30,7 +30,7 @@ class WebUsers extends Model
      * @author wpl
      * @date   2021/4/15 9:30
      */
-    public static function setInsertData(array $data = [], int $site = null): bool
+    public static function setInsertData(array $data = [], int $site = null)
     {
         if (!$data) {
             return false;
@@ -78,7 +78,7 @@ class WebUsers extends Model
      * @author wpl
      * @date   2021/4/15 9:30
      */
-    public static function setUpdateData(array $data = [], int $site = null): bool
+    public static function setUpdateData(array $data = [], int $site = null)
     {
         if (!$data) {
             return false;
