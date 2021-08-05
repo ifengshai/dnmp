@@ -2,6 +2,7 @@
 
 namespace app\admin\model\financial;
 
+use app\admin\model\order\order\NewOrder;
 use think\Model;
 use think\Db;
 use FacebookAds\Api;
@@ -156,15 +157,21 @@ class Nihao extends Model
         $start_time = $start_time . ' 00:00:00';
         $end_time   = $end_time . ' 23:59:59';
 
+        $order = new NewOrder();
         $this->item = new \app\admin\model\itemmanage\Item();
         //查询产品库镜框采购单价
         $sku_list = $this->item->where(['is_open' => 1, 'is_del' => 1])->column('purchase_price', 'sku');
 
-        $whereFrame['o.status'] = ['in', ['complete', 'free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'delivered']];
-        $whereFrame['o.payment_time'] = ['between', [$start_time, $end_time]];
-        $whereFrame['o.order_type'] = 1;
-        $all_frame_result = Db::connect('database.db_nihao')->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
-            ->where($whereFrame)->field('m.sku,round(sum(m.qty_ordered),0) counter')->group('m.sku')->select();
+        $whereFrame['a.status'] = ['in', ['complete', 'processing', 'delivered']];
+        $whereFrame['a.payment_time'] = ['between', [$start_time, $end_time]];
+        $whereFrame['a.order_type'] = 1;
+
+        $all_frame_result = $order->alias('a')->where('a.site',3)
+            ->where($whereFrame)
+            ->field('b.sku,sum(b.qty_ordered) as counter')
+            ->join(['fa_order_item_option' => 'b'],'a.id=b.order_id')
+            ->group('b.sku')->select();
+
         //镜架成本
         $all_frame_price = 0;
         foreach ($all_frame_result as $key => $value) {
@@ -172,17 +179,10 @@ class Nihao extends Model
             $all_frame_price += $value['counter'] * $sku_list[trim($true_sku)];
         }
 
-        //求镜片成本价格
-        // $all_lens_result = Db::connect('database.db_voogueme_online')->table('sales_flat_order_item m')->join('sales_flat_order o', 'o.entity_id=m.order_id', 'left')
-        //     ->join('sales_lens sl', 'sl.lens_id=m.lens_id', 'left')->where($whereFrame)
-        //     ->field('round(sum(m.qty_ordered*sl.left_lens_cost_price),2) left_lens_cost_price,round(sum(m.qty_ordered*sl.right_lens_cost_price),2) right_lens_cost_price')
-        //     ->select();
-        //镜片成本
-        // $all_lens_price = round($all_lens_result[0]['left_lens_cost_price'] + $all_lens_result[0]['right_lens_cost_price'], 2);
         $all_lens_price = 0;
         //求销售额、运费、毛利润
-        $base_grand_total_result = Db::connect('database.db_nihao')->table('sales_flat_order o')->where($whereFrame)
-            ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select();
+        $base_grand_total_result = $order->alias('a')->where($whereFrame)
+            ->field('sum(base_grand_total) base_grand_total,sum(base_shipping_amount) shipping_amount')->select();
         //销售额
         $all_base_grand_total = round($base_grand_total_result[0]['base_grand_total'], 2);
         //运费
