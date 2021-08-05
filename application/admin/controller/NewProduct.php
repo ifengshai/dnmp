@@ -969,7 +969,7 @@ class NewProduct extends Backend
                     NewProductProcess::create([
                         'sku' => $row['sku'],
                         'admin_id' => session('admin.id'),
-                        'status' => 1,
+                        'status' => 0,
                         'goods_supply' => $row['goods_supply']
                     ]);
                     createNewProductProcessLog([$row['sku']],1,session('admin.id'));
