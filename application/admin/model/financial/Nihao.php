@@ -148,7 +148,6 @@ class Nihao extends Model
      *
      * @Author lsw 1461069578@qq.com
      * @DateTime 2020-08-14 17:13:20
-     * @return void
      */
     public function all_cost($start_time, $end_time)
     {
