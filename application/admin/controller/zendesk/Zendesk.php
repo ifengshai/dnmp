@@ -48,6 +48,7 @@ class Zendesk extends Backend
     public function _initialize()
     {
         parent::_initialize();
+        $this->order = new \app\admin\model\order\order\NewOrder();
         $this->model = new \app\admin\model\zendesk\Zendesk;
         $this->ordernodedeltail = new \app\admin\model\order\order\Ordernodedeltail();
         $this->view->assign('getTabList', $this->model->getTabList());
@@ -186,23 +187,41 @@ class Zendesk extends Backend
                         $webModel = Db::connect('database.db_nihao');
                         break;
                 }
-                //查询该用户的组别
-                $group = $webModel->table('customer_entity')
-                    ->where('email', $v['email'])
-                    ->value('group_id');
-                switch ($group) {
-                    case 1:
-                        $groupName = '普通';
-                        break;
-                    case 2:
-                        $groupName = '批发';
-                        break;
-                    case 4:
-                        $groupName = 'VIP';
-                        break;
-                    default:
-                        $groupName = '-';
-                        break;
+                if($v['type'] == 3){
+                    //查询该用户的组别
+                    $group = $webModel->table('users')
+                        ->where('email', $v['email'])
+                        ->value('group');
+                    switch ($group) {
+                        case 1:
+                            $groupName = '普通';
+                            break;
+                        case 2:
+                            $groupName = 'VIP';
+                            break;
+                        default:
+                            $groupName = '-';
+                            break;
+                    }
+                }else{
+                    //查询该用户的组别
+                    $group = $webModel->table('customer_entity')
+                        ->where('email', $v['email'])
+                        ->value('group_id');
+                    switch ($group) {
+                        case 1:
+                            $groupName = '普通';
+                            break;
+                        case 2:
+                            $groupName = '批发';
+                            break;
+                        case 4:
+                            $groupName = 'VIP';
+                            break;
+                        default:
+                            $groupName = '-';
+                            break;
+                    }
                 }
                 $list[$k]['group_name'] = $groupName;
                 $list[$k]['assign_id_nickname'] = $admin[$v['assign_id']];
@@ -499,24 +518,43 @@ class Zendesk extends Backend
                 $webModel = Db::connect('database.db_nihao');
                 break;
         }
-        //查询该用户的组别
-        $group = $webModel->table('customer_entity')
-            ->where('email', $ticket->email)
-            ->value('group_id');
-        switch ($group) {
-            case 1:
-                $groupName = '普通';
-                break;
-            case 2:
-                $groupName = '批发';
-                break;
-            case 4:
-                $groupName = 'VIP';
-                break;
-            default:
-                $groupName = '-';
-                break;
+        if($ticket->type == 3){
+            //查询该用户的组别
+            $group = $webModel->table('users')
+                ->where('email', $ticket->email)
+                ->value('group');
+            switch ($group) {
+                case 1:
+                    $groupName = '普通';
+                    break;
+                case 2:
+                    $groupName = 'VIP';
+                    break;
+                default:
+                    $groupName = '-';
+                    break;
+            }
+        }else{
+            //查询该用户的组别
+            $group = $webModel->table('customer_entity')
+                ->where('email', $ticket->email)
+                ->value('group_id');
+            switch ($group) {
+                case 1:
+                    $groupName = '普通';
+                    break;
+                case 2:
+                    $groupName = '批发';
+                    break;
+                case 4:
+                    $groupName = 'VIP';
+                    break;
+                default:
+                    $groupName = '-';
+                    break;
+            }
         }
+
         $ticket->groupName = $groupName;
 
         $siteName = 'zeelool';
@@ -777,31 +815,35 @@ class Zendesk extends Backend
         //array_unshift($templates, 'Apply Macro');
         //获取当前用户的最新5个的订单
         if ($ticket->type == 1) {
-            $orderModel = new \app\admin\model\order\order\Zeelool;
             $customer_entity = Db::connect('database.db_zeelool');
         } elseif ($ticket->type == 2) {
-            $orderModel = new \app\admin\model\order\order\Voogueme;
             $customer_entity = Db::connect('database.db_voogueme');
         } else {
-            $orderModel = new \app\admin\model\order\order\Nihao;
-            $is_vip = 0;
+            $customer_entity = Db::connect('database.db_nihao');
         }
 
         //查询该用户是否是会员
         if ($customer_entity) {
-            $is_vip = $customer_entity->table('customer_entity')->where('entity_id', $ticket->user_id)->value('is_vip');
+            if($ticket->type == 3){
+                $group = $customer_entity->table('users')->where('id', $ticket->user_id)->value('group');
+                $is_vip = $group == 2 ? 1 : 0;
+            }else{
+                $is_vip = $customer_entity->table('customer_entity')->where('entity_id', $ticket->user_id)->value('is_vip');
+            }
             if (empty($is_vip)) {
                 $is_vip = 0;
             }
         }
 
-        $orders = $orderModel
+        $orders = $this->order
+            ->where('site',$ticket->type)
             ->where('customer_email', $ticket->email)
             ->order('entity_id desc')
             ->field('increment_id,created_at,order_currency_code,status')
             ->limit(5)
             ->select();
-        $orders_count = $orderModel
+        $orders_count = $this->order
+            ->where('site',$ticket->type)
             ->where('customer_email', $ticket->email)
             ->count();
         $orders = collection($orders)->toArray();
@@ -941,12 +983,18 @@ class Zendesk extends Backend
             $customer_entity = Db::connect('database.db_voogueme');
         } else {
             $orderModel = new \app\admin\model\order\order\Nihao;
-            $is_vip = 0;
+            $customer_entity = Db::connect('database.db_nihao');
         }
 
         //查询该用户是否是会员
         if ($customer_entity) {
-            $is_vip = $customer_entity->table('customer_entity')->where('entity_id', $ticket->user_id)->value('is_vip');
+            if($ticket->type == 3){
+                $group = $customer_entity->table('users')->where('id', $ticket->user_id)->value('group');
+                $is_vip = $group == 2 ? 1 : 0;
+            }else{
+                $is_vip = $customer_entity->table('customer_entity')->where('entity_id', $ticket->user_id)->value('is_vip');
+            }
+
             if (empty($is_vip)) {
                 $is_vip = 0;
             }
@@ -1970,26 +2018,45 @@ DOC;
                     $value['site_type'] = '';
                     break;
             }
-
-            //查询该用户的组别
-            $group = $webModel->table('customer_entity')
-                ->where('email', $value['email'])
-                ->value('group_id');
-            switch ($group) {
-                case 1:
-                    $groupName = '普通';
-                    break;
-                case 2:
-                    $groupName = '批发';
-                    break;
-                case 4:
-                    $groupName = 'VIP';
-                    break;
-                default:
-                    $groupName = '-';
-                    break;
+            if($value['type'] == 3){
+                //查询该用户的组别
+                $group = $webModel->table('users')
+                    ->where('email', $value['email'])
+                    ->value('group');
+                switch ($group) {
+                    case 1:
+                        $groupName = '普通';
+                        break;
+                    case 2:
+                        $groupName = 'VIP';
+                        break;
+                    default:
+                        $groupName = '-';
+                        break;
+                }
+                $value['group_name'] = $groupName;
+            }else{
+                //查询该用户的组别
+                $group = $webModel->table('customer_entity')
+                    ->where('email', $value['email'])
+                    ->value('group_id');
+                switch ($group) {
+                    case 1:
+                        $groupName = '普通';
+                        break;
+                    case 2:
+                        $groupName = '批发';
+                        break;
+                    case 4:
+                        $groupName = 'VIP';
+                        break;
+                    default:
+                        $groupName = '-';
+                        break;
+                }
+                $value['group_name'] = $groupName;
             }
-            $value['group_name'] = $groupName;
+
             switch ($value['priority']) {
                 case 0:
                     $value['priority_name'] = '无';

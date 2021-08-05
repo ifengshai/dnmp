@@ -1382,9 +1382,15 @@ class Distribution extends Backend
                 //$getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
             } else {
                 //过滤饰品站 批发站
-                if ($value['site'] != 12) {
+                if ($value['site'] != 12 && $value['site'] != 3) {
                     //查询镜框尺寸
                     $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+                }
+
+                if ( $value['site'] == 3) {
+                    $tmp_bridge['lens_width'] = $value['lens_width'];
+                    $tmp_bridge['lens_height'] = $value['lens_height'];
+                    $tmp_bridge['bridge'] = $value['bridge'];
                 }
             }
 

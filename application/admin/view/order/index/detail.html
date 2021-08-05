@@ -129,7 +129,7 @@
             <div class="form-group">
                 <label class="control-label col-xs-12 col-sm-2">创建时间:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.created_at}"
+                    <input id="c-purchase_name" class="form-control" name="row[purchase_name]" value="{$row.created_at|date='Y-m-d H:i:s',###}"
                            type="text" readonly>
                 </div>
             </div>
@@ -472,7 +472,7 @@
                                     <td>{:$v['od_axis'] ?? ''}</td>
                                     {if $v['os_add'] && $v['od_add'] && (float) $v['os_add'] * 1
                                     != 0 && (float) $v['od_add'] * 1 != 0}
-                                    <td>{:$v['os_add'] ?? ''}</td>
+                                    <td>{:$v['od_add'] ?? ''}</td>
                                     {else/}
                                     <td rowspan="2">{:$v['os_add'] ?? $v['od_add']}</td>
                                     {/if}
@@ -493,7 +493,7 @@
                                     <td>{:$v['os_axis'] ?? ''}</td>
                                     {if $v['os_add'] && $v['od_add'] && (float) $v['os_add'] * 1
                                     != 0 && (float) $v['od_add'] * 1 != 0}
-                                    <td>{:$v['od_add'] ?? ''}</td>
+                                    <td>{:$v['os_add'] ?? ''}</td>
                                     {/if}
                                     {if $v['pdcheck'] == 'on'}
                                     <td>{:$v['pd_l'] ?? ''}</td>

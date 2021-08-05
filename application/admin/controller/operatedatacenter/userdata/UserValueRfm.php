@@ -110,7 +110,6 @@ class UserValueRfm extends Backend
             $order_model = $this->voogueme;
         } elseif ($order_platform == 3) {
             $web_model = Db::connect('database.db_nihao');
-            $order_model = $this->nihao;
         } elseif ($order_platform == 10) {
             $web_model = Db::connect('database.db_zeelool_de');
             $order_model = $this->zeeloolde;
@@ -127,23 +126,27 @@ class UserValueRfm extends Backend
             $order_model = $this->zeelool;
         }
 
-        if ($order_platform==5){
-
+        if ($order_platform==3 || $order_platform==5){
             $web_model->table('users')->query("set time_zone='+8:00'");
             $today = date('Y-m-d');
             $start = date('Y-m-d', strtotime("$today -12 month"));
             $end = date('Y-m-d 23:59:59', strtotime($today));
             $time_where['created_at'] = ['between', [$start, $end]];
-            $where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+            if($order_platform==3){
+                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+            }else{
+                $where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+            }
             $where['order_type'] = 1;
             $count = $web_model->table('users')->where($time_where)->count('id');
-
             $sql1 = $web_model->table('users')->where($time_where)->field('id')->buildSql();
             $arr_where = [];
             $arr_where[] = ['exp', Db::raw("user_id in " . $sql1)];
-
-            $sql2 = $web_model->table('orders')->alias('t1')->field('sum( base_actual_amount_paid ) AS total')->where($where)->where($arr_where)->group('user_id')->buildSql();
-
+            if($order_platform == 3){
+                $sql2 = $web_model->table('orders')->alias('t1')->field('sum(base_actual_payment ) AS total')->where($where)->where($arr_where)->group('user_id')->buildSql();
+            }else{
+                $sql2 = $web_model->table('orders')->alias('t1')->field('sum(base_actual_amount_paid ) AS total')->where($where)->where($arr_where)->group('user_id')->buildSql();
+            }
             $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 300, 1, 0 ) ) AS i,sum( IF ( total >= 200 AND total < 300, 1, 0 ) ) AS h,sum( IF ( total >= 150 AND total < 200, 1, 0 ) ) AS g,sum( IF ( total >= 80 AND total < 150, 1, 0 ) ) AS f,sum( IF ( total >= 40 AND total < 80, 1, 0 ) ) AS e,sum( IF ( total >= 30 AND total < 40, 1, 0 ) ) AS d,sum( IF ( total >= 20 AND total < 30, 1, 0 ) ) AS c,sum( IF ( total >= 10 AND total < 20, 1, 0 ) ) AS b')->select();
 
             $order_customer_count[0]['a'] = $count-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e']-$order_customer_count[0]['f']-$order_customer_count[0]['g']-$order_customer_count[0]['h']-$order_customer_count[0]['i'];
@@ -257,7 +260,6 @@ class UserValueRfm extends Backend
             $order_model = $this->voogueme;
         } elseif ($order_platform == 3) {
             $web_model = Db::connect('database.db_nihao');
-            $order_model = $this->nihao;
         } elseif ($order_platform == 10) {
             $web_model = Db::connect('database.db_zeelool_de');
             $order_model = $this->zeeloolde;
@@ -274,23 +276,23 @@ class UserValueRfm extends Backend
             $order_model = $this->zeelool;
         }
 
-        if ($order_platform==5){
-
+        if ($order_platform==3 || $order_platform==5){
             $web_model->table('users')->query("set time_zone='+8:00'");
             $today = date('Y-m-d');
             $start = date('Y-m-d', strtotime("$today -12 month"));
             $end = date('Y-m-d 23:59:59', strtotime($today));
             $time_where['created_at'] = ['between', [$start, $end]];
-            $where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+            if($order_platform == 3){
+                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+            }else{
+                $where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+            }
             $where['order_type'] = 1;
             $count = $web_model->table('users')->where($time_where)->count();
-
             $sql1 = $web_model->table('users')->where($time_where)->field('id')->buildSql();
             $arr_where = [];
             $arr_where[] = ['exp', Db::raw("user_id in " . $sql1)];
-
             $sql2 = $web_model->table('orders')->alias('t1')->field('count( user_id ) AS total')->where($where)->where($arr_where)->group('user_id')->buildSql();
-
             $order_customer_count = $web_model->table([$sql2=>'t2'])->field('sum( IF ( total >= 5, 1, 0 ) ) AS f,sum( IF ( total = 4, 1, 0 ) ) AS e,sum( IF ( total = 3, 1, 0 ) ) AS d,sum( IF ( total = 2, 1, 0 ) ) AS c,sum( IF ( total = 1, 1, 0 ) ) AS b')->select();
 
             $order_customer_count[0]['a'] = $count-$order_customer_count[0]['b']-$order_customer_count[0]['c']-$order_customer_count[0]['d']-$order_customer_count[0]['e']-$order_customer_count[0]['f'];
@@ -417,12 +419,16 @@ class UserValueRfm extends Backend
             $web_model = Db::connect('database.db_zeelool');
         }
 
-        if ($order_platform == 5) {//处理批发站数据
+        if ($order_platform == 3 || $order_platform == 5) {//处理批发站数据
             $today = date('Y-m-d');
             $start = date('Y-m-d', strtotime("$today -12 month") - 8 * 3600);
             $end = date('Y-m-d 23:59:59', strtotime($today) - 8 * 3600);
             $time_where['created_at'] = ['between', [$start, $end]];
-            $where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
+            if($order_platform == 3){
+                $where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery','shipped']];
+            }else{
+                $where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery','shipped']];
+            }
             $where['order_type'] = 1;
             $count = $web_model->table('users')->where($time_where)->count();
 
@@ -431,7 +437,6 @@ class UserValueRfm extends Backend
             $arr_where[] = ['exp', Db::raw("user_id in ".$sql1)];
 
             $sql2 = $web_model->table('orders')->alias('t1')->field('TIMESTAMPDIFF(DAY,max(created_at),now()) AS total')->where($where)->where($arr_where)->group('user_id')->buildSql();
-
             $order_customer_count = $web_model->table([$sql2 => 't2'])->field('sum( IF ( total >= 360 and total<720, 1, 0 ) ) AS g,sum( IF ( total >= 180 and total<360, 1, 0 ) ) AS f,sum( IF ( total >= 90 and total<180, 1, 0 ) ) AS e,sum( IF ( total >= 60 and total<90, 1, 0 ) ) AS d,sum( IF ( total >= 30 and total<60, 1, 0 ) ) AS c,sum( IF ( total >= 14 and total<30, 1, 0 ) ) AS b,sum( IF ( total >= 0 and total<14, 1, 0 ) ) AS a')->select();
 
             $order_customer_count[0]['h'] = $count - $order_customer_count[0]['a'] - $order_customer_count[0]['b'] - $order_customer_count[0]['c'] - $order_customer_count[0]['d'] - $order_customer_count[0]['e'] - $order_customer_count[0]['f'] - $order_customer_count[0]['g'];

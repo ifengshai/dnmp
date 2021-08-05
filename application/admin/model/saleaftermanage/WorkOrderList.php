@@ -498,19 +498,22 @@ class WorkOrderList extends Model
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
         $cache_key = $siteType . '_get_lens' . $type;
-        $data = Cache::get($cache_key);
+//        $data = Cache::get($cache_key);
+
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
                 $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized', 'PhotochromicBlueLightBlocking' => 'PhotochromicBlueLightBlocking', 'Night vision' => 'Night vision'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
-            } else {
+            } else if ($siteType == 3){
+                $data = $this->httpRequest($siteType, 'api/mj/lensData',[],'POST');
+                $data = $data['data'];
+            }else {
                 $data = $this->httpRequest($siteType, 'magic/product/lensData');
             }
-            Cache::set($cache_key, $data, 3600 * 24);
+            Cache::set($cache_key, $data, 3600 * 2);
         }
-
         //html页面所需变量
         $prescriptions = $coating_type = '';
         $prescription = $data['lens_list'];
@@ -612,11 +615,24 @@ class WorkOrderList extends Model
                 exception('网络异常');
             }
 
-            $status = -1 == $siteType || 13 == $siteType || 14 == $siteType ? $res['code'] : $res['status'];
-            if (200 == $status) {
-                return $res['data'];
+            $status = -1 == $siteType || 13 == $siteType || 14 == $siteType || $siteType == 3 ? $res['code'] : $res['status'];
+            //nihao站重构
+            if ($siteType == 3){
+                if (200 == $status) {
+                    return $res;
+                }
+                Log::write("补发单创建请求错误开始");
+                $postDatas = serialize($params);
+                Log::write($postDatas);
+                Log::write("补发单创建请求错误结束");
+                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
+                exception('网站接口提示，错误信息：' . $res['message']);
+            }else{
+                if (200 == $status) {
+                    return $res['data'];
+                }
+                exception($res['msg']);
             }
-            exception($res['msg']);
         } catch (Exception $e) {
             exception($e->getMessage());
         }
@@ -725,6 +741,9 @@ class WorkOrderList extends Model
             unset($changeAddress['email']);
             $url = 'api/mojing/modify_address';
             $_new_order->where(['increment_id' => $work->platform_order])->update($changeAddress);
+        }elseif ($work->work_platform == 3){
+            $url = 'api/mj/editAddress';
+            unset($postData['area']);
         }
         $this->httpRequest($work->work_platform, $url, $postData, 'POST');
 
@@ -741,131 +760,6 @@ class WorkOrderList extends Model
         return true;
     }
 
-    /**
-     * 更改镜片，赠品 - 弃用
-     *
-     * @param $params
-     * @param $work_id
-     *
-     * @throws \Exception
-     */
-    public function changeLensOld($params, $work_id, $measure_choose_id, $measure_id)
-    {
-        $work = $this->find($work_id);
-        $measure = '';
-        //修改镜片
-        if (($work->work_type == 1 && $measure_choose_id == 12) || ($work->work_type == 2 && $measure_choose_id == 12)) {
-            $measure = 12;
-        } elseif ($measure_choose_id == 6) { //赠品
-            $measure = 2;
-        } elseif ($measure_choose_id == 7) { //补发
-            $measure = 3;
-        }
-        if ($measure) {
-            Db::startTrans();
-            try {
-                //如果是更改镜片
-                if ($measure == 12) {
-                    $changeLens = $params['change_lens'];
-                    $change_type = 2;
-                } elseif ($measure == 2) { //赠品
-                    $changeLens = $params['gift'];
-                    $change_type = 4;
-                } elseif ($measure == 3) { //补发
-                    $changeLens = $params['replacement'];
-                    $change_type = 5;
-                    if (!$params['address']['shipping_type']) {
-                        exception('请选择运输方式');
-                    }
-                }
-                $original_skus = $changeLens['original_sku'];
-                if (!is_array($original_skus)) {
-                    exception('sss');
-                }
-                //循环插入数据
-                $changeSkuIds = [];
-                $changeSkuData = [];
-                foreach ($original_skus as $key => $val) {
-                    if (!$val) {
-                        exception('sku不能为空');
-                    }
-                    $recipe_type = $changeLens['recipe_type'][$key];
-                    if (!$recipe_type) {
-                        exception('处方类型不能为空');
-                    }
-                    $type = $params['work_platform'];
-                    $lensId = $changeLens['lens_type'][$key];
-                    $colorId = $changeLens['color_id'][$key];
-                    $coatingId = $changeLens['coating_type'][$key];
-
-                    $lensCoatName = $this->getLensCoatingName($type, $lensId, $coatingId, $colorId, $recipe_type, $work->is_new_version);
-                    $data = [
-                        'work_id'         => $work_id,
-                        'increment_id'    => $params['platform_order'],
-                        'platform_type'   => $type,
-                        'original_name'   => $changeLens['original_name'][$key] ?? '',
-                        'original_sku'    => trim($changeLens['original_sku'][$key]),
-                        'original_number' => intval($changeLens['original_number'][$key]),
-                        'change_type'     => $change_type,
-                        'change_sku'      => trim($changeLens['original_sku'][$key]),
-                        'change_number'   => intval($changeLens['original_number'][$key]),
-                        'recipe_type'     => $recipe_type,
-                        'lens_type'       => $lensCoatName['lensName'],
-                        'coating_type'    => $lensCoatName['coatingName'],
-                        'od_sph'          => $changeLens['od_sph'][$key],
-                        'od_cyl'          => $changeLens['od_cyl'][$key],
-                        'od_axis'         => $changeLens['od_axis'][$key],
-                        'od_add'          => $changeLens['od_add'][$key],
-                        'pd_r'            => $changeLens['pd_r'][$key],
-                        'od_pv'           => $changeLens['od_pv'][$key],
-                        'od_bd'           => $changeLens['od_bd'][$key],
-                        'od_pv_r'         => $changeLens['od_pv_r'][$key],
-                        'od_bd_r'         => $changeLens['od_bd_r'][$key],
-                        'os_sph'          => $changeLens['os_sph'][$key],
-                        'os_cyl'          => $changeLens['os_cyl'][$key],
-                        'os_axis'         => $changeLens['os_axis'][$key],
-                        'os_add'          => $changeLens['os_add'][$key],
-                        'pd_l'            => $changeLens['pd_l'][$key],
-                        'os_pv'           => $changeLens['os_pv'][$key],
-                        'os_bd'           => $changeLens['os_bd'][$key],
-                        'os_pv_r'         => $changeLens['os_pv_r'][$key],
-                        'os_bd_r'         => $changeLens['os_bd_r'][$key],
-                        'measure_id'      => $measure_id,
-                        'create_person'   => session('admin.nickname'),
-                        'update_time'     => date('Y-m-d H:i:s'),
-                        'create_time'     => date('Y-m-d H:i:s'),
-                    ];
-                    //补发
-
-                    $data['email'] = $params['address']['email'];
-                    if ($change_type == 5) {
-                        if (!$params['address']['country_id']) {
-                            exception('国家不能为空');
-                        }
-                    }
-                    $data['userinfo_option'] = serialize($params['address']);
-                    $prescriptionOption = [
-                        'prescription_type' => $recipe_type,
-                        'lens_id'           => $lensId,
-                        'lens_name'         => $lensCoatName['lensName'],
-                        'lens_type'         => $lensCoatName['lensType'],
-                        'coating_id'        => $coatingId,
-                        'coating_name'      => $lensCoatName['coatingName'],
-                        'color_id'          => $colorId,
-                        'color_name'        => $lensCoatName['colorName'],
-                    ];
-                    $data['prescription_option'] = serialize($prescriptionOption);
-                    //}
-                    WorkOrderChangeSku::create($data);
-                    WorkOrderMeasure::where(['id' => $measure_id])->update(['sku_change_type' => $change_type]);
-                }
-                Db::commit();
-            } catch (\Exception $e) {
-                Db::rollback();
-                exception($e->getMessage());
-            }
-        }
-    }
 
     /**
      * 更改镜片、赠品、补发新增sku表数据 - 新
@@ -936,6 +830,11 @@ class WorkOrderList extends Model
                         $web_lens_name = $lens_info['lens_name'] ?: '';
                     } else {
                         if ($lensId) {
+                            if ($work->work_platform == 3){
+                                $url = 'api/mj/lensInfo';
+                            }else{
+                                $url = 'magic/product/lenInfo';
+                            }
                             $postData = [
                                 'sku'               => trim($changeLens['original_sku']),
                                 'prescription_type' => $recipe_type,
@@ -943,9 +842,17 @@ class WorkOrderList extends Model
                                 'coating_id'        => $coatingId,
                                 'color_id'          => $colorId,
                             ];
-                            $lens_info = $this->httpRequest($work->work_platform, 'magic/product/lenInfo', $postData, 'POST');
-                            $lens_number = $lens_info['lens_number'] ?: '';
-                            $web_lens_name = $lens_info['lens_name'] ?: '';
+
+                            $lens_info = $this->httpRequest($work->work_platform, $url, $postData, 'POST');
+
+                            if ($work->work_platform == 3) {
+                                $lens_number = $lens_info['data']['lens_number'] ?: '';
+                                $web_lens_name = $lens_info['data']['lens_name'] ?: '';
+                            } else {
+                                $lens_number = $lens_info['lens_number'] ?: '';
+                                $web_lens_name = $lens_info['lens_name'] ?: '';
+                            }
+
                         }
                     }
 
@@ -1025,6 +932,7 @@ class WorkOrderList extends Model
 
                     //循环插入数据
                     $original_sku = array_filter($changeLens['original_sku']);
+
                     foreach ($original_sku as $key => $val) {
                         $lensId = $changeLens['lens_type'][$key];
                         $colorId = $changeLens['color_id'][$key];
@@ -1251,17 +1159,20 @@ class WorkOrderList extends Model
     public function getLensCoatingName($siteType, $lens_id, $coating_id, $color_id, $prescription_type)
     {
         $key = $siteType . '_get_lens';
-        $data = Cache::get($key);
+//        $data = Cache::get($key);
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
                 $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized', 'PhotochromicBlueLightBlocking' => 'PhotochromicBlueLightBlocking', 'Night vision' => 'Night vision'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
-            } else {
+            } else if ($siteType == 3){
+                $data = $this->httpRequest($siteType, 'api/mj/lensData',[],'POST');
+                $data = $data['data'];
+            }else {
                 $data = $this->httpRequest($siteType, 'magic/product/lensData');
             }
-            Cache::set($key, $data, 3600 * 24);
+            Cache::set($key, $data, 3600 * 2);
         }
         $prescription = $data['lens_list'];
         $coatingLists = $data['coating_list'];
@@ -1343,10 +1254,12 @@ class WorkOrderList extends Model
                     'pay_method'    => $address['pay_method'],
                     'cpf'           => $address['taxno'],
                 ];
+                $pdCheck1 = $prismCheck1 = 1;
                 $pdCheck = $pd = $prismCheck = '';
                 $pd_r = $pd_l = '';
                 if ($changeSku['pd_r'] && $changeSku['pd_l']) {
                     $pdCheck = 'on';
+                    $pdCheck1 = 2;
                     $pd_r = $changeSku['pd_r'];
                     $pd_l = $changeSku['pd_l'];
                 } else {
@@ -1362,50 +1275,106 @@ class WorkOrderList extends Model
                 $os_bd_r = $changeSku['os_bd_r'];
                 if ($od_pv || $os_pv || $od_bd || $os_bd || $od_pv_r || $os_pv_r || $od_bd_r || $os_bd_r) {
                     $prismCheck = 'on';
+                    $prismCheck1 = 2;
                 }
                 $is_frame_only = 0;
                 if ($prescriptions['lens_id'] || $prescriptions['coating_id'] || $prescriptions['color_id']) {
                     $is_frame_only = 1;
                 }
 
-                $postData['product'][$key] = [
-                    'sku'               => $changeSku['original_sku'],
-                    'qty'               => $changeSku['original_number'],
-                    'prescription_type' => $changeSku['recipe_type'],
-                    'is_frame_only'     => $is_frame_only,
-                    'od_sph'            => $changeSku['od_sph'],
-                    'os_sph'            => $changeSku['os_sph'],
-                    'od_cyl'            => $changeSku['od_cyl'],
-                    'os_cyl'            => $changeSku['os_cyl'],
-                    'od_axis'           => $changeSku['od_axis'],
-                    'os_axis'           => $changeSku['os_axis'],
-                    'od_add'            => $changeSku['od_add'],
-                    'os_add'            => $changeSku['os_add'],
-                    'pd'                => $pd,
-                    'pdcheck'           => $pdCheck,
-                    'pd_r'              => $pd_r,
-                    'pd_l'              => $pd_l,
-                    'prismcheck'        => $prismCheck,
-                    'od_pv'             => $changeSku['od_pv'],
-                    'os_pv'             => $changeSku['os_pv'],
-                    'od_bd'             => $changeSku['od_bd'],
-                    'os_bd'             => $changeSku['os_bd'],
-                    'od_pv_r'           => $changeSku['od_pv_r'],
-                    'os_pv_r'           => $changeSku['os_pv_r'],
-                    'od_bd_r'           => $changeSku['od_bd_r'],
-                    'os_bd_r'           => $changeSku['os_bd_r'],
-                    'lens_id'           => $prescriptions['lens_id'],
-                    'lens_name'         => $prescriptions['lens_name'],
-                    'lens_type'         => $prescriptions['lens_type'],
-                    'coating_id'        => $prescriptions['coating_id'],
-                    'coating_name'      => $prescriptions['coating_name'],
-                    'color_id'          => $prescriptions['color_id'],
-                    'color_name'        => $prescriptions['color_name'],
-                ];
                 if ($siteType == 13 || $siteType == 14) {
                     $postData['product'][$key]['lens_number'] = $prescriptions['lens_number'];
                     $postData['region'] = $address['region'];
                     $postData['area'] = $address['area'];
+                }
+                //nihao站重构
+                if ($siteType == 3){
+                    $country = json_decode(file_get_contents('assets/js/country.js'), true);
+                    $province = $country[$address['country_id']];
+                    $postDataCommon = [
+                        'order_no'      => $changeSku['increment_id'],
+                        'currency'      => $address['currency_code'],
+                        'freight_type'  => $address['shipping_type'],
+                        'payment_type'  => $address['pay_method'],
+                        'country'       => $province['country'],
+                        'country_id'    => $address['country_id'],
+                        'region_id'     => $address['region_id'],
+                        'region'        => $address['region'],
+                        'cpf'           => $address['taxno'] ?? '',
+                        'city'          => $address['city'],
+                        'street'        => $address['street'],
+                        'postcode'      => $address['postcode'],
+                        'telephone'     => $address['telephone'],
+                        'email'         => $address['email'],
+                        'lastname'     => $address['lastname'],
+                        'firstname'    => $address['firstname'],
+                        'address'       => $address['address_id'],
+                    ];
+                    $postData['items'][$key] = [
+                        'sku'               => $changeSku['original_sku'],
+                        'qty'               => $changeSku['original_number'],
+                    ];
+                    $postData['items'][$key]['option'] = [
+                        'prescription_type' => $changeSku['recipe_type'],
+                        'lens_id'           => $prescriptions['lens_id'],
+                        'coating_id'        => $prescriptions['coating_id'],
+                        'od_sph'            => $changeSku['od_sph'],
+                        'os_sph'            => $changeSku['os_sph'],
+                        'od_cyl'            => $changeSku['od_cyl'],
+                        'os_cyl'            => $changeSku['os_cyl'],
+                        'od_axis'           => $changeSku['od_axis'],
+                        'os_axis'           => $changeSku['os_axis'],
+                        'od_add'            => $changeSku['od_add'],
+                        'os_add'            => $changeSku['os_add'],
+                        'pd'                => $pd,
+                        'pd_l'              => $pd_l,
+                        'pd_r'              => $pd_r,
+                        'od_pv'             => $changeSku['od_pv'],
+                        'os_pv'             => $changeSku['os_pv'],
+                        'od_bd'             => $changeSku['od_bd'],
+                        'os_bd'             => $changeSku['os_bd'],
+                        'od_pv_r'           => $changeSku['od_pv_r'],
+                        'od_bd_r'           => $changeSku['od_bd_r'],
+                        'os_pv_r'           => $changeSku['os_pv_r'],
+                        'os_bd_r'           => $changeSku['os_bd_r'],
+                        'pd_check'          => $pdCheck1,
+                        'prism_check'       => $prismCheck1,
+                    ];
+                }else{
+                    $postData['product'][$key] = [
+                        'sku'               => $changeSku['original_sku'],
+                        'qty'               => $changeSku['original_number'],
+                        'prescription_type' => $changeSku['recipe_type'],
+                        'is_frame_only'     => $is_frame_only,
+                        'od_sph'            => $changeSku['od_sph'],
+                        'os_sph'            => $changeSku['os_sph'],
+                        'od_cyl'            => $changeSku['od_cyl'],
+                        'os_cyl'            => $changeSku['os_cyl'],
+                        'od_axis'           => $changeSku['od_axis'],
+                        'os_axis'           => $changeSku['os_axis'],
+                        'od_add'            => $changeSku['od_add'],
+                        'os_add'            => $changeSku['os_add'],
+                        'pd'                => $pd,
+                        'pdcheck'           => $pdCheck,
+                        'pd_r'              => $pd_r,
+                        'pd_l'              => $pd_l,
+                        'prismcheck'        => $prismCheck,
+                        'od_pv'             => $changeSku['od_pv'],
+                        'os_pv'             => $changeSku['os_pv'],
+                        'od_bd'             => $changeSku['od_bd'],
+                        'os_bd'             => $changeSku['os_bd'],
+                        'od_pv_r'           => $changeSku['od_pv_r'],
+                        'os_pv_r'           => $changeSku['os_pv_r'],
+                        'od_bd_r'           => $changeSku['od_bd_r'],
+                        'os_bd_r'           => $changeSku['os_bd_r'],
+                        'lens_id'           => $prescriptions['lens_id'],
+                        'lens_name'         => $prescriptions['lens_name'],
+                        'lens_type'         => $prescriptions['lens_type'],
+                        'coating_id'        => $prescriptions['coating_id'],
+                        'coating_name'      => $prescriptions['coating_name'],
+                        'color_id'          => $prescriptions['color_id'],
+                        'color_name'        => $prescriptions['color_name'],
+                    ];
                 }
                 $measure_id = $changeSku['measure_id'];
             }
@@ -1414,6 +1383,7 @@ class WorkOrderList extends Model
             Log::write("补发单创建请求");
             Log::write($postDatas);
             Log::write("补发单创建请求two");
+
             if (!empty($postData)) {
                 try {
                     $pathinfo = 'magic/order/createOrder';
@@ -1422,8 +1392,16 @@ class WorkOrderList extends Model
                         $postData['site'] = $siteType;
                         $postData['old_increment_id'] = self::where(['id' => $work_id])->value('platform_order');
                     }
+                    if ($siteType == 3){
+                        $pathinfo = 'api/mj/createOrder';
+                    }
+
                     $res = $this->httpRequest($siteType, $pathinfo, $postData, 'POST');
-                    $increment_id = $res['increment_id'];
+                    if ($siteType == 3){
+                        $increment_id = $res['data']['order_no'];
+                    }else{
+                        $increment_id = $res['increment_id'];
+                    }
 
                     //添加补发的订单号
                     WorkOrderChangeSku::where(['work_id' => $work_id, 'change_type' => 5])->setField('replacement_order', $increment_id);
@@ -1456,7 +1434,15 @@ class WorkOrderList extends Model
             'content' => $work->integral_describe,
         ];
         try {
-            $res = $this->httpRequest($work['work_platform'], 'magic/promotion/bonusPoints', $postData, 'POST');
+            if ($work['work_platform'] == 3){
+                $postDatas = [
+                    'email'   => $work->email,
+                    'point'   => $work->integral,
+                ];
+                $res = $this->httpRequest($work['work_platform'], 'api/mj/bonusPoints', $postDatas, 'POST');
+            }else{
+                $res = $this->httpRequest($work['work_platform'], 'magic/promotion/bonusPoints', $postData, 'POST');
+            }
 
             return true;
         } catch (Exception $e) {
@@ -1480,8 +1466,15 @@ class WorkOrderList extends Model
             'rule_id' => $work->coupon_id,
         ];
         try {
-            $res = $this->httpRequest($work['work_platform'], 'magic/promotion/receive', $postData, 'POST');
-            $work->coupon_str = $res['coupon_code'];
+            if ($work['work_platform'] == 3){
+                $postData['ordernum'] = $work['platform_order'];
+                $res = $this->httpRequest($work['work_platform'], 'api/mj/receive', $postData, 'POST');
+                $work->coupon_str = $res['data']['coupon_id'];
+            }else{
+                $res = $this->httpRequest($work['work_platform'], 'magic/promotion/receive', $postData, 'POST');
+                $work->coupon_str = $res['coupon_code'];
+            }
+
             $work->save();
 
             return true;
@@ -1503,15 +1496,20 @@ class WorkOrderList extends Model
     {
         $url = '';
         $key = $siteType . '_getlens_' . $is_new_version;
-        //$data = Cache::get($key);
+//        $data = Cache::get($key);
         if (!$data) {
             if ($is_new_version == 1) {
                 $url = 'magic/product/newLensData';
             } else {
                 $url = 'magic/product/lensData';
             }
-            $data = $this->httpRequest($siteType, $url);
-            Cache::set($key, $data, 3600 * 24);
+            if($siteType == 3){
+                $data = $this->httpRequest($siteType, 'api/mj/lensData',[],'POST');
+                $data = $data['data'];
+            }else{
+                $data = $this->httpRequest($siteType, $url);
+            }
+            Cache::set($key, $data, 3600 * 1);
         }
 
         $prescription = $prescriptions = $coating_type = '';
@@ -1553,17 +1551,20 @@ class WorkOrderList extends Model
     {
         //从网站端获取镜片、镀膜、颜色等列表数据
         $cache_key = $siteType . '_get_lens';
-        //$data = Cache::get($cache_key);
+//        $data = Cache::get($cache_key);
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
                 $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized', 'PhotochromicBlueLightBlocking' => 'PhotochromicBlueLightBlocking', 'Night vision' => 'Night vision'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
+            }else if ($siteType == 3){
+                $data = $this->httpRequest($siteType, 'api/mj/lensData',[],'POST');
+                $data = $data['data'];
             } else {
                 $data = $this->httpRequest($siteType, 'magic/product/lensData');
             }
-            Cache::set($cache_key, $data, 3600 * 24);
+            Cache::set($cache_key, $data, 3600 * 1);
         }
 
         //html页面所需变量
@@ -2376,7 +2377,12 @@ class WorkOrderList extends Model
     public function vipOrderRefund($siteType, $order_number)
     {
         $postData = ['order_number' => $order_number];
-        $res = $this->httpRequest($siteType, 'magic/order/cancelVip', $postData, 'POST');
+        if ($siteType == 3){
+            $url = 'api/mj/cancelVip';
+        }else{
+            $url = 'magic/order/cancelVip';
+        }
+        $res = $this->httpRequest($siteType, $url, $postData, 'POST');
 
         return $res;
     }

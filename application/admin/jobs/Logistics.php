@@ -100,7 +100,7 @@ class Logistics
                 return true;
             }
 
-            if ($track_arr['data']['track']['e'] == 40 && in_array($order_node['site'], [1, 2, 5])) {
+            if ($track_arr['data']['track']['e'] == 40 && in_array($order_node['site'], [1, 2, 3, 5])) {
                 //更新加工表中订单妥投状态
                 $process = new NewOrderProcess;
                 $process->where('increment_id', $order_node['order_number'])->update(['is_tracking' => 5]);
@@ -110,8 +110,9 @@ class Logistics
                     $url = config('url.voogueme_url') . 'magic/order/updateOrderStatus';
                 } elseif ($order_node['site'] == 5) {
                     $url = config('url.new_wesee_url') . 'api/delivered';
+                }  elseif ($order_node['site'] == 3) {
+                    $url = config('url.nihao_url') . 'api/mj/delivered';
                 }
-
                 $value['increment_id'] = $order_node['order_number'];
                 Http::post($url, $value);
             }

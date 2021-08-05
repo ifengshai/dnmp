@@ -7,7 +7,7 @@ use think\Model;
 
 class Nihao extends Model
 {
-
+    const SITE = 3;
     // 表名
     protected $name = 'datacenter_day';
 
@@ -22,11 +22,12 @@ class Nihao extends Model
     public function __construct()
     {
         $this->model = new \app\admin\model\order\order\Nihao();
+        $this->order = new \app\admin\model\order\order\NewOrder();
     }
     //获取着陆页数据
     public function getLanding($time_str = '', $type = 0)
     {
-        $where['site'] = 3;
+        $where['site'] = self::SITE;
         $start = date('Y-m-d');
 
         if ($type == 1) {
@@ -295,17 +296,14 @@ class Nihao extends Model
     public function get_all_order_user($createat)
     {
         $map_where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
-        $order_where['payment_time'] = ['lt',$createat[0]];
-
-        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['site'] = self::SITE;
+        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
         $map['order_type'] = 1;
-        $map1['customer_id'] = ['>',0];
+        $map['customer_id'] = ['>',0];
 
-        $order_model = new \app\admin\model\order\order\Nihao();
-        return $order_model
+        return $this->order
             ->where($map_where)
             ->where($map)
-            ->where($map1)
             ->group('customer_id')
             ->count('customer_id');
     }
@@ -313,15 +311,13 @@ class Nihao extends Model
     public function get_again_user($createat){
         $map_where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['payment_time'] = ['lt',$createat[0]];
-
-        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['site'] = self::SITE;
+        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','shipped','delivered','delivery']];
         $map['order_type'] = 1;
         $map1['customer_id'] = ['>',0];
-
-        $order_model = new \app\admin\model\order\order\Nihao();
         //复购用户数
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
-        $again_buy_num1 = $order_model
+        $again_buy_num1 = $this->order
             ->where($map_where)
             ->where($map)
             ->where($map1)
@@ -329,7 +325,7 @@ class Nihao extends Model
             ->having('count(customer_id)>1')
             ->count('customer_id');
 
-        $again_buy_data2 = $order_model
+        $again_buy_data2 = $this->order
             ->where($map_where)
             ->where($map)
             ->where($map1)
@@ -337,16 +333,14 @@ class Nihao extends Model
             ->having('count(customer_id)<=1')
             ->column('customer_id');
         $again_buy_num2 = 0;
-        //$again_buy_num2 = $order_model->where($order_where)->where('customer_id','in',$again_buy_data2)->where($map)->count();
         foreach ($again_buy_data2 as $v){
             //查询时间段内是否进行购买行为
             $order_where_arr['customer_id'] = $v;
-            $is_buy = $order_model->where($order_where)->where($order_where_arr)->where($map)->value('entity_id');
+            $is_buy = $this->order->where($order_where)->where($order_where_arr)->where($map)->value('entity_id');
             if($is_buy){
                 $again_buy_num2++;
             }
         }
-
         $again_buy_num = $again_buy_num1+$again_buy_num2;
         return $again_buy_num;
     }
@@ -362,41 +356,41 @@ class Nihao extends Model
         $map_where['o.payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['o.payment_time'] = ['lt',$createat[0]];
 
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery','shipped']];
         $map['o.order_type'] = 1;
-        $map1['o.customer_id'] = ['>',0];
+        $map1['o.user_id'] = ['>',0];
         $map['c.is_vip'] = 1;
 
         $order_model = new \app\admin\model\order\order\Nihao();
         //复购用户数
         //查询时间段内的订单 根据customer_id先计算出此事件段内的复购用户数
         $again_buy_num1 = $order_model->alias('o')
-            ->join('customer_entity c','o.customer_id=c.entity_id')
+            ->join('users c','o.user_id=c.id')
             ->where($map_where)
             ->where($map)
             ->where($map1)
-            ->group('o.customer_id')
-            ->having('count(o.customer_id)>1')
-            ->count('o.customer_id');
+            ->group('o.user_id')
+            ->having('count(o.user_id)>1')
+            ->count('o.user_id');
 
         $again_buy_data2 = $order_model->alias('o')
-            ->join('customer_entity c','o.customer_id=c.entity_id')
+            ->join('users c','o.user_id=c.id')
             ->where($map_where)
             ->where($map)
             ->where($map1)
-            ->group('customer_id')
-            ->having('count(customer_id)<=1')
-            ->column('customer_id');
+            ->group('user_id')
+            ->having('count(user_id)<=1')
+            ->column('user_id');
         $again_buy_num2 = 0;
         foreach ($again_buy_data2 as $v){
             //查询时间段内是否进行购买行为
-            $order_where_arr['customer_id'] = $v;
+            $order_where_arr['user_id'] = $v;
             $is_buy = $order_model->alias('o')
-                ->join('customer_entity c','o.customer_id=c.entity_id')
+                ->join('users c','o.user_id=c.id')
                 ->where($order_where)
                 ->where($order_where_arr)
                 ->where($map)
-                ->value('o.entity_id');
+                ->value('o.id');
             if($is_buy){
                 $again_buy_num2++;
             }

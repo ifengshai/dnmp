@@ -16,7 +16,7 @@ class Nihao extends Model
 
 
     // 表名
-    protected $table = 'sales_flat_order';
+    protected $table = 'orders';
 
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = false;

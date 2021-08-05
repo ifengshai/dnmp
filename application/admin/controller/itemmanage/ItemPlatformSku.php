@@ -589,59 +589,6 @@ class ItemPlatformSku extends Backend
         }
     }
 
-    /**
-     * 同步商品到magento 弃用
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/07/22 16:41:14 
-     * @param [type] $ids
-     * @return void
-     */
-    public function afterUploadItemOld($ids = null)
-    {
-        if ($this->request->isAjax()) {
-
-            $itemPlatformRow = $this->model->findItemPlatform($ids);
-            if ($itemPlatformRow['is_upload'] == 1) { //商品已经上传，无需再次上传
-                $this->error(__('The product has been uploaded, there is no need to upload again'));
-            }
-            //查询商品分类
-            $item = new \app\admin\model\itemmanage\Item();
-            $res = $item->where(['sku' => $itemPlatformRow['sku'], 'is_open' => 1, 'is_del' => 1])->find();
-            //审核通过把SKU同步到有映射关系的平台
-            if ($itemPlatformRow['platform_id'] == 12) {
-                $uploadItemArr['skus'][0] = [
-                    'sku' => $itemPlatformRow['platform_sku'],
-                    'type' => $res->category_id == 53 ? 1 : 2
-                ];
-                $uploadItemArr['sku'] = $itemPlatformRow['platform_sku'];
-                $uploadItemArr['type'] = $res->category_id == 53 ? 1 : 2;
-            } else {
-                $uploadItemArr['skus'] = [$itemPlatformRow['platform_sku']];
-            }
-            $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
-            if ($uploadItemArr['site'] == 13) {
-                $params['sku_info'] = implode(',', $uploadItemArr['skus']);
-                $params['platform_type'] = 1;
-                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
-                $thirdRes = json_decode($thirdRes, true);
-            } elseif ($uploadItemArr['site'] == 14) {
-                $params['sku_info'] = implode(',', $uploadItemArr['skus']);
-                $params['platform_type'] = 2;
-                $thirdRes = Http::post(config('url.api_zeelool_cn_url'), $params);
-                $thirdRes = json_decode($thirdRes, true);
-            } else {
-                $soapRes = Soap::createProduct($uploadItemArr);
-            }
-            if ($soapRes || $thirdRes['code'] == 1) {
-                $this->model->where(['id' => $ids])->update(['is_upload' => 1]);
-                $this->success('同步成功！！');
-            } else {
-                $this->success('同步失败！！');
-            }
-        }
-    }
 
     /**
      * 上传至对应平台
@@ -679,29 +626,35 @@ class ItemPlatformSku extends Backend
             }else{
                 $attributeType = 1;//眼镜
             }
+
+            if ($itemPlatformRow['platform_id'] != 3) {
+
+                $uploadItemArr['earrings_height'] = intval($itemAttributeDetail['earrings_height']);
+                $uploadItemArr['earrings_width'] = intval($itemAttributeDetail['earrings_width']);
+                $uploadItemArr['necklace_perimeter'] = intval($itemAttributeDetail['necklace_perimeter']);
+                $uploadItemArr['necklace_chain'] = intval($itemAttributeDetail['necklace_chain']);
+                $uploadItemArr['eyeglasses_chain'] = intval($itemAttributeDetail['eyeglasses_chain']);
+                $uploadItemArr['box_height'] = intval($itemAttributeDetail['box_height']);
+                $uploadItemArr['box_width'] = intval($itemAttributeDetail['box_width']);
+                $uploadItemArr['silk_length'] =intval( $itemAttributeDetail['silk_length']);
+                $uploadItemArr['silk_width'] = intval($itemAttributeDetail['silk_width']);
+                $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
+                $uploadItemArr['frame_length'] = intval($itemAttributeDetail['frame_length']);
+            }
+
             //审核通过把SKU同步到有映射关系的平台
             $uploadItemArr['sku'] = $itemPlatformRow['platform_sku'];
             $uploadItemArr['attribute_type'] = $attributeType;
             $uploadItemArr['frame_height'] = intval($itemAttributeDetail['frame_height']);
             $uploadItemArr['frame_width'] = intval($itemAttributeDetail['frame_width']);
-            $uploadItemArr['frame_length'] = intval($itemAttributeDetail['frame_length']);
             $uploadItemArr['frame_temple_length'] = intval($itemAttributeDetail['frame_temple_length']);
             $uploadItemArr['frame_bridge'] = intval($itemAttributeDetail['frame_bridge']);
             $uploadItemArr['mirror_width'] = intval($itemAttributeDetail['mirror_width']);
             $uploadItemArr['frame_weight'] = $itemAttributeDetail['frame_weight'];
-            $uploadItemArr['earrings_height'] = intval($itemAttributeDetail['earrings_height']);
-            $uploadItemArr['earrings_width'] = intval($itemAttributeDetail['earrings_width']);
-            $uploadItemArr['necklace_perimeter'] = intval($itemAttributeDetail['necklace_perimeter']);
-            $uploadItemArr['necklace_chain'] = intval($itemAttributeDetail['necklace_chain']);
-            $uploadItemArr['eyeglasses_chain'] = intval($itemAttributeDetail['eyeglasses_chain']);
-            $uploadItemArr['box_height'] = intval($itemAttributeDetail['box_height']);
-            $uploadItemArr['box_width'] = intval($itemAttributeDetail['box_width']);
-            $uploadItemArr['silk_length'] =intval( $itemAttributeDetail['silk_length']);
-            $uploadItemArr['silk_width'] = intval($itemAttributeDetail['silk_width']);
             $uploadItemArr['site'] = $itemPlatformRow['platform_id'];
             $uploadItemArr['status'] = $itemPlatformDetail['outer_sku_status'];
-            $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'];
-            $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
+            $uploadItemArr['picture'] = $itemAttributeDetail['frame_aws_imgs'] ?: '';
+
             if ($uploadItemArr['site'] == 13) {
                 $params['sku_info'] = $itemPlatformRow['platform_sku'];
                 $params['platform_type'] = 1;

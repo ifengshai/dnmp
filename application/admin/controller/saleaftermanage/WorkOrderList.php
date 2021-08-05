@@ -545,7 +545,6 @@ class WorkOrderList extends Backend
 
                             $gift_number = $params['gift']['original_number'];
                             !$gift_number && $this->error("赠品数量不能为空");
-
                             foreach ($gift_sku as $key => $sku) {
                                 $num = $key + 1;
                                 !$sku && $this->error("第{$num}个赠品sku不能为空");
@@ -568,7 +567,6 @@ class WorkOrderList extends Backend
 
                             $replacement_number = $params['replacement']['original_number'];
                             !$replacement_number && $this->error("补发数量不能为空");
-
                             foreach ($replacement_sku as $key => $sku) {
                                 $num = $key + 1;
                                 !$sku && $this->error("第{$num}个补发sku不能为空");
@@ -773,6 +771,7 @@ class WorkOrderList extends Backend
                 $all_group = $workOrderConfigValue['group'];//所有的成员组
                 //核算审核组
                 if (!empty($check_group_weight)) {
+
                     foreach ($check_group_weight as $gv) {
                         $all_person = [];
                         //获取当前组下的所有成员
@@ -805,6 +804,7 @@ class WorkOrderList extends Backend
                 }
                 //核算审核人
                 if (!empty($check_person_weight)) {
+
                     foreach ($check_person_weight as $wkv) {
                         if ($admin_id == $wkv['work_create_person_id']) {
                             if (!$this->weight_currency($wkv, $all_choose_ids, $params)) {
@@ -1111,7 +1111,6 @@ class WorkOrderList extends Backend
             $customer_problem_type = $workOrderConfigValue['customer_problem_type'];
             $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
             unset($customer_problem_classify['仓库问题']);
-
             foreach ($customer_problem_classify as $key => $value) {
                 $type = [];
                 foreach ($value as $v) {
@@ -1386,7 +1385,7 @@ class WorkOrderList extends Backend
             if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
-                return ['result' => false, 'msg' => $sku . '库存不足！！当前虚拟仓库存' . $stock . '，补发所需库存' . $num[$k]];
+                return ['result' => false, 'msg' => $sku . '库存不足！！当前虚拟仓库存' . $stock . '，所需库存' . $num[$k]];
             }
 
             //判断此sku是否在第三方平台
@@ -2361,14 +2360,18 @@ class WorkOrderList extends Backend
             if (!$data) {
                 if ($siteType == 13 || $siteType == 14) {
                     $data = $this->model->httpRequest($siteType, 'api/mojing/lens_data', ['prescriptionType' => $prescriptionType], 'POST');
-                } else {
+                } elseif ($siteType == 3){
+                    $data = $this->model->httpRequest($siteType, 'api/mj/lensData',[],'POST');
+                }else {
                     $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
                 }
                 Cache::set($key, $data, 3600 * 24);
             }
             if ($siteType == 13 || $siteType == 14) {
                 $lensType = $data;
-            } else {
+            } elseif ($siteType == 3){
+                $lensType = $data['data']['lens_list'][$prescriptionType] ? :[];
+            }else {
                 $lensType = $data['lens_list'][$prescriptionType] ?: [];
             }
 

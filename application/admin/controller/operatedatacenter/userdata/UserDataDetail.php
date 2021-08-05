@@ -2,12 +2,9 @@
 
 namespace app\admin\controller\operatedatacenter\userdata;
 
-use app\admin\model\platformManage\MagentoPlatform;
 use app\common\controller\Backend;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use think\Controller;
 use think\Db;
-use think\Request;
+
 
 class UserDataDetail extends Backend
 {
@@ -44,7 +41,6 @@ class UserDataDetail extends Backend
                 $web_model = Db::connect('database.db_voogueme');
                 $site = 2;
             } elseif ($filter['order_platform'] == 3) {
-                $order_model = $this->nihao;
                 $web_model = Db::connect('database.db_nihao');
                 $site = 3;
             } elseif ($filter['order_platform'] == 10) {
@@ -69,10 +65,13 @@ class UserDataDetail extends Backend
             }
 
             //批发站数据 处理
-            if ($site==5){
-
+            if ($site==3 || $site==5){
                 if ($filter['customer_type']) {
-                    $map['c.group_id'] = $filter['customer_type'];
+                    if($site == 3){
+                        $map['c.group'] = $filter['customer_type'];
+                    }else{
+                        $map['c.group_id'] = $filter['customer_type'];
+                    }
                 }
                 if ($filter['time_str']) {
                     $createat = explode(' ', $filter['time_str']);
@@ -82,7 +81,11 @@ class UserDataDetail extends Backend
                     $end = date('Y-m-d 23:59:59');
                     $map['o.created_at'] = ['between', [$start, $end]];
                 }
-                $map['o.order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+                if($site == 3){
+                    $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+                }else{
+                    $map['o.order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+                }
                 unset($filter['one_time-operate']);
                 unset($filter['time_str']);
                 unset($filter['order_platform']);
@@ -106,7 +109,7 @@ class UserDataDetail extends Backend
                     ->where($map)
                     ->order("user_id", $order)
                     ->limit($offset, $limit)
-                    ->field('c.id,c.created_at,c.email')
+                    ->field('c.id,c.created_at,c.email,c.point')
                     ->group('c.id')
                     ->select();
                 $list = collection($list)->toArray();
@@ -115,17 +118,50 @@ class UserDataDetail extends Backend
                     $list[$key]['email'] = $value['email'];          //注册邮箱
                     $list[$key]['created_at'] = $value['created_at'];  //注册时间
                     $order_where['user_id'] = $value['id'];
-                    $order_status_where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
-                    $order = $web_model->table('orders')->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_actual_amount_paid) total')->select();
-                    $list[$key]['order_num'] = $order[0]['count'];  //总支付订单数
-                    $list[$key]['order_amount'] = $order[0]['total'];//总订单金额
-                    $list[$key]['point'] = 0;  //积分
-                    $recommend_order_num = 0;   //推荐订单数
-                    $recommend_register_num = 0;   //推荐注册量
+                    if($site == 3){
+                        $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+                        $order = $web_model->table('orders')->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_actual_payment) total')->find();
+                    }else{
+                        $order_status_where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+                        $order = $web_model->table('orders')->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_actual_amount_paid) total')->find();
+                    }
+                    $list[$key]['order_num'] = $order['count'];  //总支付订单数
+                    $list[$key]['order_amount'] = $order['total'];//总订单金额
+                    $list[$key]['point'] = $value['point'];  //积分
+                    if($site==3){
+                        $sql1 = $web_model->table('referral_register_logs')
+                            ->where('referral_user_id',$value['id'])
+                            ->field('register_user_id')
+                            ->buildSql();
+                        $arr_where = [];
+                        $arr_where[] = ['exp', Db::raw("user_id in " . $sql1)];
+                        $recommend_order_num = $web_model
+                            ->table('orders')
+                            ->where($order_status_where)
+                            ->where($arr_where)
+                            ->count();   //推荐订单数
+                        $recommend_register_num = $web_model->table('referral_register_logs')
+                            ->where('referral_user_id',$value['id'])
+                            ->count();
+                        $order_coupon = $web_model->table('orders')
+                            ->where($order_where)
+                            ->where($order_status_where)
+                            ->where("coupon_id >0 ")
+                            ->field('count(*) count,sum(base_code_discounts_price) total')
+                            ->find();
+                    }else{
+                        $recommend_order_num = 0;   //推荐订单数
+                        $recommend_register_num = 0;   //推荐注册量
+                        $order_coupon = $web_model->table('orders')
+                            ->where($order_where)
+                            ->where($order_status_where)
+                            ->where("discount_coupon_id >0 ")
+                            ->field('count(*) count,sum(base_coupon_discounts_price) total')
+                            ->find();
+                    }
 
-                    $order_coupon = $web_model->table('orders')->where($order_where)->where($order_status_where)->where("discount_coupon_id >0 ")->field('count(*) count,sum(base_coupon_discounts_price) total')->select();
-                    $list[$key]['coupon_order_num'] = $order_coupon[0]['count'];//使用优惠券订单数
-                    $list[$key]['coupon_order_amount'] = $order_coupon[0]['total'];//使用优惠券订单金额
+                    $list[$key]['coupon_order_num'] = $order_coupon['count'];//使用优惠券订单数
+                    $list[$key]['coupon_order_amount'] = $order_coupon['total'];//使用优惠券订单金额
                     $list[$key]['first_order_time'] = $web_model->table('orders')->where($order_where)->where($order_status_where)->order('created_at asc')->value('created_at');//首次下单时间
                     $list[$key]['last_order_time'] = $web_model->table('orders')->where($order_where)->where($order_status_where)->order('created_at desc')->value('created_at');//最后一次下单时间
                     $list[$key]['recommend_order_num'] = $recommend_order_num;   //推荐订单数
@@ -186,23 +222,17 @@ class UserDataDetail extends Backend
                 $order = $order_model->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_grand_total) total')->select();
                 $list[$key]['order_num'] = $order[0]['count'];  //总支付订单数
                 $list[$key]['order_amount'] = $order[0]['total'];//总订单金额
-                if($site != 3){
-                    $list[$key]['point'] = $web_model->table('mw_reward_point_customer')->where('customer_id',$value['entity_id'])->value('mw_reward_point');  //积分
-                    $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->count();
-                    if($recommend_userids){
-                        $sql1 = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->field('customer_id')->buildSql();
-                        $arr_where = [];
-                        $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
-                        $recommend_order_num = $order_model->where($order_status_where)->where($arr_where)->count();   //推荐订单数
-                    }else{
-                        $recommend_order_num = 0;
-                    }
-                    $recommend_register_num = $recommend_userids;   //推荐注册量
+                $list[$key]['point'] = $web_model->table('mw_reward_point_customer')->where('customer_id',$value['entity_id'])->value('mw_reward_point');  //积分
+                $recommend_userids = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->count();
+                if($recommend_userids){
+                    $sql1 = $web_model->table('mw_reward_point_customer')->where('mw_friend_id',$value['entity_id'])->field('customer_id')->buildSql();
+                    $arr_where = [];
+                    $arr_where[] = ['exp', Db::raw("customer_id in " . $sql1)];
+                    $recommend_order_num = $order_model->where($order_status_where)->where($arr_where)->count();   //推荐订单数
                 }else{
-                    $list[$key]['point'] = 0;  //积分
-                    $recommend_order_num = 0;   //推荐订单数
-                    $recommend_register_num = 0;   //推荐注册量
+                    $recommend_order_num = 0;
                 }
+                $recommend_register_num = $recommend_userids;   //推荐注册量
                 $order_coupon = $order_model->where($order_where)->where($order_status_where)->where("coupon_code is not null")->field('count(*) count,sum(base_grand_total) total')->select();
                 $list[$key]['coupon_order_num'] = $order_coupon[0]['count'];//使用优惠券订单数
                 $list[$key]['coupon_order_amount'] = $order_coupon[0]['total'];//使用优惠券订单金额
@@ -315,7 +345,6 @@ class UserDataDetail extends Backend
             $web_model = Db::connect('database.db_voogueme');
             $site = 2;
         } elseif ($order_platform == 3) {
-            $order_model = $this->nihao;
             $web_model = Db::connect('database.db_nihao');
             $site = 3;
         } elseif ($order_platform == 10) {
@@ -338,8 +367,7 @@ class UserDataDetail extends Backend
             $web_model = Db::connect('database.db_zeelool');
             $site = 1;
         }
-        if ($site == 5) {
-
+        if ($site == 3 || $site == 5) {
             if ($time_str) {
                 $createat = explode(' ', $time_str);
                 $map['o.created_at'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
@@ -348,10 +376,18 @@ class UserDataDetail extends Backend
                 $end = date('Y-m-d 23:59:59');
                 $map['o.created_at'] = ['between', [$start, $end]];
             }
-            if ($customer_type) {
-                $map['c.group_id'] = $customer_type;
+            if($site == 3){
+                if ($customer_type) {
+                    $map['c.group'] = $customer_type;
+                }
+                $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery','shipped']];
+            }else{
+                if ($customer_type) {
+                    $map['c.group_id'] = $customer_type;
+                }
+                $map['o.order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
             }
-            $map['o.order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
+
             $total_export_count = $web_model
                 ->table('orders')
                 ->alias('o')
@@ -384,20 +420,24 @@ class UserDataDetail extends Backend
                     $created_at_index = array_keys($column_name, 'created_at');
                     $tmpRow[$created_at_index[0]] = $val['created_at'];
                     $order_where['user_id'] = $val['id'];
-                    $order_status_where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
                     $orderInfoArr=array();
                     if (in_array('order_num', $column_name)||in_array('order_amount', $column_name)){
-                        $orderInfoArr = $web_model->table('orders')->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_actual_amount_paid) total')->select();
+                        if($site == 3){
+                            $order_status_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery','shipped']];
+                            $orderInfoArr = $web_model->table('orders')->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_actual_payment) total')->find();
+                        }else{
+                            $order_status_where['order_status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery']];
+                            $orderInfoArr = $web_model->table('orders')->where($order_where)->where($order_status_where)->field('count(*) count,sum(base_actual_amount_paid) total')->find();
+                        }
                     }
-
                     if (in_array('order_num', $column_name)) {
                         //总支付订单数
                         $index = array_keys($column_name, 'order_num');
-                        $tmpRow[$index[0]] = $orderInfoArr[0]['count'];
+                        $tmpRow[$index[0]] = $orderInfoArr['count'];
                     }
                     if (in_array('order_amount', $column_name)) {
                         $index = array_keys($column_name, 'order_amount');
-                        $tmpRow[$index[0]] = $orderInfoArr[0]['total'];//总订单金额
+                        $tmpRow[$index[0]] = $orderInfoArr['total'];//总订单金额
                     }
                     if (in_array('point', $column_name)) {
                         $index = array_keys($column_name, 'point');
@@ -406,15 +446,19 @@ class UserDataDetail extends Backend
 
                     $order_coupon=array();
                     if (in_array('coupon_order_num', $column_name)||in_array('coupon_order_amount', $column_name)){
-                        $order_coupon = $web_model->table('orders')->where($order_where)->where($order_status_where)->where("discount_coupon_id >0 ")->field('count(*) count,sum(base_coupon_discounts_price) total')->select();
+                        if($site == 3){
+                            $order_coupon = $web_model->table('orders')->where($order_where)->where($order_status_where)->where("coupon_id >0 ")->field('count(*) count,sum(base_code_discounts_price) total')->find();
+                        }else{
+                            $order_coupon = $web_model->table('orders')->where($order_where)->where($order_status_where)->where("discount_coupon_id >0 ")->field('count(*) count,sum(base_coupon_discounts_price) total')->find();
+                        }
                     }
                     if (in_array('coupon_order_num', $column_name)) {
                         $index = array_keys($column_name, 'coupon_order_num');
-                        $tmpRow[$index[0]] =$order_coupon[0]['count'];//使用优惠券订单数
+                        $tmpRow[$index[0]] =$order_coupon['count'];//使用优惠券订单数
                     }
                     if (in_array('coupon_order_amount', $column_name)) {
                         $index = array_keys($column_name, 'coupon_order_amount');
-                        $tmpRow[$index[0]] = $order_coupon[0]['total'];//使用优惠券订单金额
+                        $tmpRow[$index[0]] = $order_coupon['total'];//使用优惠券订单金额
                     }
                     if (in_array('first_order_time', $column_name)) {
                         $index = array_keys($column_name, 'first_order_time');
@@ -426,11 +470,31 @@ class UserDataDetail extends Backend
                     }
                     if (in_array('recommend_order_num', $column_name)) {
                         $index = array_keys($column_name, 'recommend_order_num');
-                        $tmpRow[$index[0]] = 0;   //推荐订单数
+                        $recommend_order_num = 0;
+                        if($site == 3){
+                            $sql1 = $web_model->table('referral_register_logs')
+                                ->where('referral_user_id',$val['id'])
+                                ->field('register_user_id')
+                                ->buildSql();
+                            $arr_where = [];
+                            $arr_where[] = ['exp', Db::raw("user_id in " . $sql1)];
+                            $recommend_order_num = $web_model
+                                ->table('orders')
+                                ->where($order_status_where)
+                                ->where($arr_where)
+                                ->count();   //推荐订单数
+                        }
+                        $tmpRow[$index[0]] = $recommend_order_num;   //推荐订单数
                     }
                     if (in_array('recommend_register_num', $column_name)) {
                         $index = array_keys($column_name, 'recommend_register_num');
-                        $tmpRow[$index[0]] = 0;   //推荐注册量
+                        $recommend_register_num = 0;
+                        if($site == 3){
+                            $recommend_register_num = $web_model->table('referral_register_logs')
+                                ->where('referral_user_id',$val['id'])
+                                ->count();
+                        }
+                        $tmpRow[$index[0]] = $recommend_register_num;   //推荐注册量
                     }
                     ksort($tmpRow);
                     $rows = [];

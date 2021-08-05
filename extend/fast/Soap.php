@@ -118,7 +118,6 @@ class Soap
                 break;
         }
 
-
         $client = new Client(['verify' => false]);
         unset($params['site']);
 
@@ -127,7 +126,6 @@ class Soap
         $body = $response->getBody();
         $stringBody = (string)$body;
         $res = json_decode($stringBody, true);
-
 
         if ($res === null) {
             return false;

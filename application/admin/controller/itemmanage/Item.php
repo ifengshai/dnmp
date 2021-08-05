@@ -924,7 +924,7 @@ class Item extends Backend
             }
             //如果切换站点清除默认值
             $filter = json_decode($this->request->get('filter'), true);
-            if ($filter['platform_type']) {
+            if ($filter['platform_type'] && !empty($map)) {
                 unset($map['platform_type']);
             }
 

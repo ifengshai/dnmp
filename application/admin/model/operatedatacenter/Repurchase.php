@@ -2,7 +2,6 @@
 
 namespace app\admin\model\operatedatacenter;
 
-use think\Db;
 use think\Model;
 
 /**

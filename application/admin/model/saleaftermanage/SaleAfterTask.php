@@ -873,23 +873,54 @@ class SaleAfterTask extends Model
                 //虚拟库存
                 $item[$key]['stock'] = $itemPlatFormSku->where('platform_sku', $value['sku'])->where('platform_type', $order_platform)->value('stock');
             }
-            $result[$k]['item'] = $item;
-            $result[$k]['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
-            //查询交易信息
-            $result[$k]['additional_information'] = Db::connect($db)
-                ->table('sales_flat_order_payment')
-                ->where(['parent_id' => $v['entity_id']])
-                ->value('additional_information');
+            if ($order_platform == 3) {
+                //查询交易信息
+                $paypalLog = Db::connect($db)
+                    ->table('paypal_logs')
+                    ->where(['order_no' => $v['increment_id']])
+                    ->value('response');
+                $paypalLog = $paypalLog ? json_decode($paypalLog,true) : [];
+                $result[$k]['additional_information'] = [];
+                $result[$k]['additional_information']['paypal_payer_email'] =  $paypalLog['result']['purchase_units']['payee']['email_address'];
+                $result[$k]['additional_information']['paypal_payer_id'] =  $paypalLog['result']['id'];
+                $result[$k]['additional_information']['paypal_payment_status'] =  $paypalLog['result']['status'];
+                $result[$k]['additional_information']['paypal_payer_status'] =  $paypalLog['result']['status'];
 
+            } else {
+                //查询交易信息
+                $result[$k]['additional_information'] = Db::connect($db)
+                    ->table('sales_flat_order_payment')
+                    ->where(['parent_id' => $v['entity_id']])
+                    ->value('additional_information');
+            }
             //订单地址表
-            $address = Db::connect($db)->table('sales_flat_order_address')->where(['parent_id' => $v['entity_id']])->field('address_type,telephone,postcode,street,city,region,country_id,firstname,lastname')->select();
+            if ($order_platform == 3) {
+                $address = Db::connect($db)->table('order_addresses')
+                    ->where(['order_id' => $v['entity_id']])
+                    ->field('type as address_type,telephone,postcode,street,city,region,country_id,firstname,lastname')
+                    ->select();
+            } else {
+                $address = Db::connect($db)->table('sales_flat_order_address')
+                    ->where(['parent_id' => $v['entity_id']])
+                    ->field('address_type,telephone,postcode,street,city,region,country_id,firstname,lastname')
+                    ->select();
+            }
+
             $result[$k]['address'] = $address;
 
             //工单列表
             $workOrderListResult = WorkOrderList::workOrderListInfo($v['increment_id']);
 
             //补差价列表
-            $differencePriceList = Db::connect($db)->table('oc_difference_price_order')->where(['origin_order_number' => $v['increment_id']])->select();
+            if ($order_platform == 3) {
+                $differencePriceList = Db::connect($db)
+                    ->table('attach_orders')
+                    ->field('order_no as order_number,status as order_status,actual_payment as order_amount,currency as order_currency,created_at as start_time')
+                    ->where(['order_no' => $v['increment_id']])
+                    ->select();
+            } else {
+                $differencePriceList = Db::connect($db)->table('oc_difference_price_order')->where(['origin_order_number' => $v['increment_id']])->select();
+            }
 
             $result[$k]['workOrderList'] = $workOrderListResult['list'];
             $result[$k]['differencePriceList'] = $differencePriceList;
@@ -947,11 +978,13 @@ class SaleAfterTask extends Model
 
             //求出所有的订单号
             $result['increment_id'][] = $val['increment_id'];
-            $result[$key]['additional_information'] = unserialize($val['additional_information']);
-            $result[$key]['additional_information']['paypal_payer_email'] = isset($result[$key]['additional_information']['paypal_payer_email']) ? $result[$key]['additional_information']['paypal_payer_email'] : '';
-            $result[$key]['additional_information']['paypal_payer_id'] = isset($result[$key]['additional_information']['paypal_payer_id']) ? $result[$key]['additional_information']['paypal_payer_id'] : '';
-            $result[$key]['additional_information']['paypal_payer_status'] = isset($result[$key]['additional_information']['paypal_payer_status']) ? $result[$key]['additional_information']['paypal_payer_status'] : '';
-            $result[$key]['additional_information']['paypal_payment_status'] = isset($result[$key]['additional_information']['paypal_payment_status']) ? $result[$key]['additional_information']['paypal_payment_status'] : '';
+            if ($order_platform != 3) {
+                $result[$key]['additional_information'] = unserialize($val['additional_information']);
+                $result[$key]['additional_information']['paypal_payer_email'] = isset($result[$key]['additional_information']['paypal_payer_email']) ? $result[$key]['additional_information']['paypal_payer_email'] : '';
+                $result[$key]['additional_information']['paypal_payer_id'] = isset($result[$key]['additional_information']['paypal_payer_id']) ? $result[$key]['additional_information']['paypal_payer_id'] : '';
+                $result[$key]['additional_information']['paypal_payer_status'] = isset($result[$key]['additional_information']['paypal_payer_status']) ? $result[$key]['additional_information']['paypal_payer_status'] : '';
+                $result[$key]['additional_information']['paypal_payment_status'] = isset($result[$key]['additional_information']['paypal_payment_status']) ? $result[$key]['additional_information']['paypal_payment_status'] : '';
+            }
             //求出订单下的商品信息
             $result[$key]['arr'] = [];
         }

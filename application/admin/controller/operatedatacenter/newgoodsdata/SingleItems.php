@@ -2,12 +2,10 @@
 
 namespace app\admin\controller\operatedatacenter\NewGoodsData;
 
-use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use think\Controller;
 use think\Db;
-use think\Request;
+
 
 class SingleItems extends Backend
 {
@@ -57,7 +55,7 @@ class SingleItems extends Backend
             unset($filter['sku']);
             unset($filter['order_platform']);
             $this->request->get(['filter' => json_encode($filter)]);
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
             $map['o.order_type'] = 1;
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $total = $this->order
@@ -117,7 +115,7 @@ class SingleItems extends Backend
             $sku = input('sku');
             //此sku的总订单量
             $map['i.sku'] = ['like', $sku . '%'];
-            $where['o.status'] = $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+            $where['o.status'] = $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
             $where['o.payment_time'] = $map['o.payment_time'] = ['between', [strtotime($createat[0] . ' ' . $createat[1]), strtotime($createat[3] . ' ' . $createat[4])]];
             $where['o.order_type'] = $map['o.order_type'] = 1;
             $total = $this->order
@@ -227,7 +225,7 @@ class SingleItems extends Backend
                 $orderWhere['o.payment_time'] = ['lt',$start];
             }
             $map["o.site"] = $site;
-            $map["o.status"] = ["in", ["free_processing", "processing", "complete", "paypal_reversed", "payment_review", "paypal_canceled_reversal","delivered"]];
+            $map["o.status"] = ["in", ["free_processing", "processing", "complete", "paypal_reversed", "payment_review", "paypal_canceled_reversal","delivered","shipped"]];
             $mapSku["i.sku"] = ["like",$sku."%"];
             $map["o.order_type"] = 1;
             //在时间段内进行过购买行为的用户
@@ -508,7 +506,7 @@ class SingleItems extends Backend
         }
 
         $where['o.payment_time'] = ['between', [$start, $end]];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
         $where['i.sku'] = ['like',$sku.'%'];
         $where['o.order_type'] = 1;
         $where['o.site'] = $site;
@@ -619,7 +617,7 @@ class SingleItems extends Backend
             $map['o.payment_time'] = ['between', [$start, $end]];
         }
         $map['i.sku'] = ['like', $sku . '%'];
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
         $map['o.order_type'] = 1;
         //关联购买
         $orderIds = $this->order
