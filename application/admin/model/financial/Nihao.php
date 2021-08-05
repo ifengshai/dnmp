@@ -164,8 +164,9 @@ class Nihao extends Model
         $whereFrame['a.status'] = ['in', ['complete', 'processing', 'delivered']];
         $whereFrame['a.payment_time'] = ['between', [$start_time, $end_time]];
         $whereFrame['a.order_type'] = 1;
+        $whereFrame['a.site'] = 3;
 
-        $all_frame_result = $order->alias('a')->where('a.site',3)
+        $all_frame_result = $order->alias('a')
             ->where($whereFrame)
             ->field('b.sku,sum(b.qty) as counter')
             ->join(['fa_order_item_option' => 'b'],'a.id=b.order_id')
