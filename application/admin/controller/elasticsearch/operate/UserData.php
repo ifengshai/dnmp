@@ -223,8 +223,8 @@ class UserData extends BaseElasticsearch
                 $customer = $model
                     ->table('users')
                     ->where($customerWhere)
-                    ->group('group')
-                    ->column('count(*) as count,group');
+                    ->group('`group`')
+                    ->column('count(*) as count,`group`');
                 $orderCount = $model
                     ->table('orders')
                     ->alias('o')
