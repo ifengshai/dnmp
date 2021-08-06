@@ -2707,7 +2707,6 @@ class TrackReg extends Backend
         }
         $model->table('orders')->query("set time_zone='+8:00'");
         $model->table('users')->query("set time_zone='+8:00'");
-        $orderModel = $model->table('orders');
         $dateTime = date('Y-m-d', strtotime("-1 day"));
         $dateTimeStart = date('Y-m-d 00:00:00', strtotime("-1 day"));
         $dateTimeEnd = date('Y-m-d 23:59:59', strtotime("-1 day"));
@@ -2721,13 +2720,13 @@ class TrackReg extends Backend
         if($site == 3){
             $orderSuccessWhere['status'] = ['in',['processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed','delivered','delivery','shipped']];
             $orderTypeWhere['order_type'] = 1;
-            $arr['sum_order_num'] = $orderModel->where($createWhere)->where($orderTypeWhere)->count();//总的订单数
-            $arr['order_num'] = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->count(); //支付成功的订单数
-            $arr['sales_total_money'] = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->sum('base_actual_payment');//销售额
-            $arr['shipping_total_money'] = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->sum('base_freight_price');//邮费
-            $salesTotalMoney = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->column('base_actual_payment');//销售额数组（求中位数和标准差需用到）
-            $arr['replacement_order_num'] = $orderModel->where($orderSuccessWhere)->where('order_type', 4)->count();//补发订单数
-            $arr['replacement_order_total'] = $orderModel->where($orderSuccessWhere)->where('order_type',4)->sum('base_actual_payment');//补发销售额
+            $arr['sum_order_num'] = $model->table('orders')->where($createWhere)->where($orderTypeWhere)->count();//总的订单数
+            $arr['order_num'] = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->count(); //支付成功的订单数
+            $arr['sales_total_money'] = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->sum('base_actual_payment');//销售额
+            $arr['shipping_total_money'] = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->sum('base_freight_price');//邮费
+            $salesTotalMoney = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->column('base_actual_payment');//销售额数组（求中位数和标准差需用到）
+            $arr['replacement_order_num'] = $model->table('orders')->where($orderSuccessWhere)->where('order_type', 4)->count();//补发订单数
+            $arr['replacement_order_total'] = $model->table('orders')->where($orderSuccessWhere)->where('order_type',4)->sum('base_actual_payment');//补发销售额
             //当天创建的用户当天产生订单的转化率
             $registerUserids = $model->table('users')->where($createWhere)->column('id');//当天注册用户数
             $registerNum = count($registerUserids);
@@ -2735,7 +2734,7 @@ class TrackReg extends Backend
             $orderUserCount1 = 0;
             foreach ($registerUserids as $registerUserid) {
                 //判断当前用户在当天是否下单
-                $order = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->where('user_id',$registerUserid)->value('id');
+                $order = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->where('user_id',$registerUserid)->value('id');
                 if ($order) {
                     $orderUserCount1++;
                 }
@@ -2748,7 +2747,7 @@ class TrackReg extends Backend
             $orderUserCount2 = 0;
             foreach ($updateUserids as $updateUserid) {
                 //判断活跃用户在当天下单的用户数
-                $order = $orderModel->where($orderSuccessWhere)->where($orderTypeWhere)->where('user_id', $updateUserid)->value('id');
+                $order = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->where('user_id', $updateUserid)->value('id');
                 if ($order) {
                     $orderUserCount2++;
                 }
@@ -2756,11 +2755,11 @@ class TrackReg extends Backend
             $arr['update_user_change_rate'] = $updateNum ? round($orderUserCount2 / $updateNum * 100, 0) : 0;
         }else{
             $orderSuccessWhere['status'] = ['in',[2, 3, 4, 9, 10]];
-            $arr['sum_order_num'] = $orderModel->where($createWhere)->count();//总的订单数
-            $arr['order_num'] = $orderModel->where($orderSuccessWhere)->count(); //支付成功的订单数
-            $arr['sales_total_money'] = $orderModel->where($orderSuccessWhere)->sum('base_actual_amount_paid');  //销售额
-            $arr['shipping_total_money'] = $orderModel->where($orderSuccessWhere)->sum('base_freight_price'); //邮费
-            $salesTotalMoney = $orderModel->where($orderSuccessWhere)->column('base_actual_amount_paid');//销售额数组（求中位数和标准差需用到）
+            $arr['sum_order_num'] = $model->table('orders')->where($createWhere)->count();//总的订单数
+            $arr['order_num'] = $model->table('orders')->where($orderSuccessWhere)->count(); //支付成功的订单数
+            $arr['sales_total_money'] = $model->table('orders')->where($orderSuccessWhere)->sum('base_actual_amount_paid');  //销售额
+            $arr['shipping_total_money'] = $model->table('orders')->where($orderSuccessWhere)->sum('base_freight_price'); //邮费
+            $salesTotalMoney = $model->table('orders')->where($orderSuccessWhere)->column('base_actual_amount_paid');//销售额数组（求中位数和标准差需用到）
             $arr['replacement_order_num'] = 0;  //补发订单数
             $arr['replacement_order_total'] = 0; //补发销售额
             //当天创建的用户当天产生订单的转化率
@@ -2770,7 +2769,7 @@ class TrackReg extends Backend
             $orderUserCount1 = 0;
             foreach ($registerUserids as $registerUserid) {
                 //判断当前用户在当天是否下单
-                $order = $orderModel->where($orderSuccessWhere)->where('user_id',$registerUserid)->value('id');
+                $order = $model->table('orders')->where($orderSuccessWhere)->where('user_id',$registerUserid)->value('id');
                 if ($order) {
                     $orderUserCount1++;
                 }
@@ -2783,7 +2782,7 @@ class TrackReg extends Backend
             $orderUserCount2 = 0;
             foreach ($updateUserids as $updateUserid) {
                 //判断活跃用户在当天下单的用户数
-                $order = $orderModel->where($orderSuccessWhere)->where('user_id', $updateUserid)->value('id');
+                $order = $model->table('orders')->where($orderSuccessWhere)->where('user_id', $updateUserid)->value('id');
                 if ($order) {
                     $orderUserCount2++;
                 }
@@ -2813,7 +2812,7 @@ class TrackReg extends Backend
         $siteWhere['platform_type'] = $site;
         $skus = $item->getFrameSku();
         $mapWhere['sku'] = ['in', $skus];
-        $webSkus = $model->where($mapWhere)->where($siteWhere)->select();
+        $webSkus = $itemSkuModel->where($mapWhere)->where($siteWhere)->select();
         $onSalesNum = 0;  //在售
         $SalesOutNum = 0;  //售罄
         $downShelvesNum = 0;  //下架
@@ -2847,7 +2846,7 @@ class TrackReg extends Backend
         $arr['glass_presell_num'] = $SalesOutNum;  //售罄
         $skus1 = $item->getOrnamentsSku();
         $mapWhere1['sku'] = ['in', $skus1];
-        $webSkus1 = $model->where($mapWhere1)->where($siteWhere)->select();
+        $webSkus1 = $itemSkuModel->where($mapWhere1)->where($siteWhere)->select();
         $onSalesNum1 = 0;  //在售
         $SalesOutNum1 = 0;  //售罄
         $downShelvesNum1 = 0;  //下架
