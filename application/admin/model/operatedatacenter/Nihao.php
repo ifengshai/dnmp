@@ -1259,7 +1259,6 @@ class Nihao extends Model
             ->where($orderWhere)
             ->where('user_id','in',$customerCountVip)
             ->sum('base_actual_payment');
-        $customerCount = 0;
         $vip = [
             'count' => $customerCountVip,
             'name' => 'VIP',
