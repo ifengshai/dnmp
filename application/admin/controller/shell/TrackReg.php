@@ -2697,7 +2697,7 @@ class TrackReg extends Backend
     {
         $itemSkuModel = new \app\admin\model\itemmanage\ItemPlatformSku();
         $item = new \app\admin\model\itemmanage\Item();
-        $orderModel = new \app\admin\model\order\order\NewOrder();
+//        $orderModel = new \app\admin\model\order\order\NewOrder();
         switch ($site){
             case 3:
                 $model = Db::connect('database.db_nihao_online');
@@ -2706,6 +2706,7 @@ class TrackReg extends Backend
                 $model = Db::connect('database.db_weseeoptical');
                 break;
         }
+        $orderModel = $model->table('orders')->query("set time_zone='+8:00'");
         $model->table('users')->query("set time_zone='+8:00'");
         $dateTime = date('Y-m-d', strtotime("-1 day"));
         $dateTimeStart = date('Y-m-d 00:00:00', strtotime("-1 day"));
