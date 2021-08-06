@@ -881,12 +881,12 @@ class SaleAfterTask extends Model
                     ->table('paypal_logs')
                     ->where(['order_no' => $v['increment_id']])
                     ->value('response');
-                $paypalLog = $paypalLog ? json_decode($paypalLog,true) : [];
+                $paypalLog = $paypalLog ? json_decode($paypalLog, true) : [];
                 $result[$k]['additional_information'] = [];
-                $result[$k]['additional_information']['paypal_payer_email'] =  $paypalLog['result']['purchase_units']['payee']['email_address'];
-                $result[$k]['additional_information']['paypal_payer_id'] =  $paypalLog['result']['id'];
-                $result[$k]['additional_information']['paypal_payment_status'] =  $paypalLog['result']['status'];
-                $result[$k]['additional_information']['paypal_payer_status'] =  $paypalLog['result']['status'];
+                $result[$k]['additional_information']['paypal_payer_email'] = $paypalLog['result']['purchase_units']['payee']['email_address'];
+                $result[$k]['additional_information']['paypal_payer_id'] = $paypalLog['result']['id'];
+                $result[$k]['additional_information']['paypal_payment_status'] = $paypalLog['result']['status'];
+                $result[$k]['additional_information']['paypal_payer_status'] = $paypalLog['result']['status'];
 
             } else {
                 //查询交易信息
@@ -909,6 +909,7 @@ class SaleAfterTask extends Model
             }
 
             $result[$k]['address'] = $address;
+            $result[$k]['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
 
             //工单列表
             $workOrderListResult = WorkOrderList::workOrderListInfo($v['increment_id']);
