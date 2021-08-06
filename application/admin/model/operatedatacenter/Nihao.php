@@ -1237,52 +1237,47 @@ class Nihao extends Model
         }
         $createat = explode(' ', $time_str);
         $customerWhere['created_at'] = ['between', [$createat[0], $createat[3].' 23:59:59']];
-        $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+        $orderWhere['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
         $orderWhere['order_type'] = 1;
-        $order = Db::connect('database.db_nihao')
-            ->table('sales_flat_order')
-            ->field('customer_group_id,sum(base_grand_total) as total,count(*) as count')
-            ->group('customer_group_id')
-            //->where('customer_group_id','>',0)
+        //用户统计
+        $customerCount = Db::connect('database.db_nihao')
+            ->table('users')
             ->where($customerWhere)
-            ->where($orderWhere)
-            ->select();
+            ->count();
+        $customerCountVip = Db::connect('database.db_nihao')
+            ->table('users')
+            ->where($customerWhere)
+            ->column('id');
         $orderCount = Db::connect('database.db_nihao')
-            ->table('sales_flat_order')
+            ->table('orders')
             ->where($customerWhere)
             ->where($orderWhere)
-            //->where('customer_group_id','>',0)
-            ->sum('base_grand_total');
-        $result = [];
+            ->sum('base_actual_payment');
+        $vipOrderCount = Db::connect('database.db_nihao')
+            ->table('orders')
+            ->where($customerWhere)
+            ->where($orderWhere)
+            ->where('user_id','in',$customerCountVip)
+            ->sum('base_actual_payment');
         $customerCount = 0;
-        foreach($order as $k => $v){
-            $customerCount += $v['count'];
-        }
-        foreach($order as $k => $v){
-            switch($v['customer_group_id']) {
-                case 0:
-                    $name = '游客';
-                    break;
-                case 1:
-                    $name = '普通用户';
-                    break;
-                case 2:
-                    $name = '批发用户';
-                    break;
-                case 4:
-                    $name = 'VIP';
-                    break;
-                default:
-                    $name = "其余非游客用户";
-            }
-            $result[$k] = [
-                'count' => $v['count'],
-                'name' => $name,
-                'num'  => round($v['total'],2),
-                'rate' => bcmul(bcdiv($v['total'], $orderCount,4),100,2).'%',
-                'customerRate' => bcmul(bcdiv($v['count'], $customerCount,4),100,2).'%',
-            ];
-        }
+        $vip = [
+            'count' => $customerCountVip,
+            'name' => 'VIP',
+            'num'  => round($vipOrderCount,2),
+            'rate' => bcmul(bcdiv($vipOrderCount, $orderCount,4),100,2).'%',
+            'customerRate' => bcmul(bcdiv($customerCountVip, $customerCount,4),100,2).'%',
+        ];
+        $result = [
+            [
+                'count' => bcsub($customerCount,$customerCountVip),
+                'name' => '普通用户',
+                'num'  => bcsub($orderCount,$vipOrderCount),
+                'rate' => bcmul(bcdiv(bcsub($orderCount,$vipOrderCount), $orderCount,4),100,2).'%',
+                'customerRate' => bcmul(bcdiv(bcsub($customerCount,$customerCountVip), $customerCount,4),100,2).'%',
+            ],
+            $vip
+
+        ];
         return $result;
     }
 }
