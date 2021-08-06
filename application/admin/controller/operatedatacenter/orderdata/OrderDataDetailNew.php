@@ -315,7 +315,7 @@ class OrderDataDetailNew extends Backend
                         $frame_price = $order_model->table('order_items')->where('order_id',$value['entity_id'])->sum('base_goods_price');
                         $arr[$i]['frame_num'] = $order_model->table('order_items')->where('order_id',$value['entity_id'])->sum('goods_count');
                         $arr[$i]['lens_num'] = $order_model->table('order_items')->where('order_id',$value['entity_id'])->where('base_lens_price','neq',0)->count();
-                        $lens_price = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->sum('base_lens_price');
+                        $lens_price = $order_model->table('order_items')->where('order_id',$value['entity_id'])->sum('base_lens_price');
                         $skus = $order_model->table('order_items')->where('order_id',$value['entity_id'])->column('goods_sku');
                     }else{
                         $frame_price = $order_model->table('orders_items')->where('order_id',$value['entity_id'])->sum('base_goods_total_price');
