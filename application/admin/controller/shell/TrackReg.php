@@ -2722,6 +2722,7 @@ class TrackReg extends Backend
             $orderTypeWhere['order_type'] = 1;
             $arr['sum_order_num'] = $model->table('orders')->where($createWhere)->where($orderTypeWhere)->count();//总的订单数
             $arr['order_num'] = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->count(); //支付成功的订单数
+            echo $model->table('orders')->getLastSql();
             $arr['sales_total_money'] = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->sum('base_actual_payment');//销售额
             $arr['shipping_total_money'] = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->sum('base_freight_price');//邮费
             $salesTotalMoney = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->column('base_actual_payment');//销售额数组（求中位数和标准差需用到）
