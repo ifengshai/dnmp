@@ -27,6 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 url: $.fn.bootstrapTable.defaults.extend.index_url,
                 pk: 'id',
                 sortName: 'id',
+                pagination: true,
                 columns: [
                     [
                         {field: 'rule_id', title: __('优惠券id'), operate: false},
