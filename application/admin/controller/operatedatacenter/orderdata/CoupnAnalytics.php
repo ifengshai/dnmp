@@ -190,7 +190,7 @@ class CoupnAnalytics extends Backend
                         $andWhere[] = ['exp', Db::raw("discount_coupon_id in " . $sql)];
                     }
                     //应用订单数量，应用订单金额
-                    list($list[$k]['use_order_num'], $list[$k]['use_order_total_price']) = $model->table('orders')
+                    ['c' => $list[$k]['use_order_num'], 's' => $list[$k]['use_order_total_price']] = $model->table('orders')
                         ->where($map)
                         ->where($andWhere)
                         ->field('count(*) as c, sum(`base_grand_total`) as s')
@@ -202,7 +202,7 @@ class CoupnAnalytics extends Backend
                 }else{
                     $andWhere = "FIND_IN_SET({$v['rule_id']},applied_rule_ids)";
                     //应用订单数量，应用订单金额
-                    list($list[$k]['use_order_num'], $list[$k]['use_order_total_price']) = $model->table('sales_flat_order')
+                    ['c' => $list[$k]['use_order_num'], 's' => $list[$k]['use_order_total_price']] = $model->table('sales_flat_order')
                         ->where($map)
                         ->where($andWhere)
                         ->field('count(*) as c, sum(`base_grand_total`) as s')
