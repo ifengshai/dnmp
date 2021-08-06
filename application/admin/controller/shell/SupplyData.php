@@ -552,6 +552,10 @@ class SupplyData extends Backend
         $this->getVirtualData(9);
         $this->getVirtualData(10);
         $this->getVirtualData(11);
+        $this->getVirtualData(12);
+        $this->getVirtualData(13);
+        $this->getVirtualData(14);
+        $this->getVirtualData(15);
     }
 
     //获取虚拟仓、周转天数方法
