@@ -4004,6 +4004,8 @@ class Test4 extends Controller
             unset($items[$key]['stock_id']);
             unset($items[$key]['area_id']);
         }
+        $cmf_arr = array_column($items, 'sku');
+        array_multisort($cmf_arr, SORT_ASC, $items);
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         //常规方式：利用setCellValue()填充数据
