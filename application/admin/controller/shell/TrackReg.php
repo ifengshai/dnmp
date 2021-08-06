@@ -2716,13 +2716,12 @@ class TrackReg extends Backend
         $arr['day_date'] = $dateTime;
         $createWhere['created_at'] = $updateWhere['updated_at'] = ['between',[$dateTimeStart, $dateTimeEnd]];
         $arr['register_num'] = $model->table('users')->where($createWhere)->count();//注册用户数
-        $orderSuccessWhere['payment_time'] = ['between',[strtotime($dateTimeStart), strtotime($dateTimeEnd)]];
+        $orderSuccessWhere['payment_time'] = ['between',[$dateTimeStart, $dateTimeEnd]];
         if($site == 3){
             $orderSuccessWhere['status'] = ['in',['processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed','delivered','delivery','shipped']];
             $orderTypeWhere['order_type'] = 1;
             $arr['sum_order_num'] = $model->table('orders')->where($createWhere)->where($orderTypeWhere)->count();//总的订单数
             $arr['order_num'] = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->count(); //支付成功的订单数
-            echo $model->table('orders')->getLastSql();
             $arr['sales_total_money'] = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->sum('base_actual_payment');//销售额
             $arr['shipping_total_money'] = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->sum('base_freight_price');//邮费
             $salesTotalMoney = $model->table('orders')->where($orderSuccessWhere)->where($orderTypeWhere)->column('base_actual_payment');//销售额数组（求中位数和标准差需用到）
