@@ -738,9 +738,9 @@ class OrderDataDetailNew extends Backend
         }
         if($site == 3 || $site == 5){
             if($site == 3){
-                $order_model = Db::connect('database.db_nihao');
+                $order_model = $web_model = Db::connect('database.db_nihao');
             }else{
-                $order_model = Db::connect('database.db_wesee_temp');
+                $order_model = $web_model = Db::connect('database.db_wesee_temp');
             }
             $order_model->table('orders')->query("set time_zone='+8:00'");
             $total_export_count = $order_model->table('orders')
