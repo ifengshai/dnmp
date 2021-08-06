@@ -625,7 +625,7 @@ class WorkOrderList extends Model
                 $postDatas = serialize($params);
                 Log::write($postDatas);
                 Log::write("补发单创建请求错误结束");
-                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
+//                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
                 exception('网站接口提示，错误信息：' . $res['message']);
             }else{
                 if (200 == $status) {
