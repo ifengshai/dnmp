@@ -136,7 +136,7 @@
                     {foreach name="orders" item="vo" key="key"}
                     <tr>
                         <td ><a href="{$orderUrl}{$vo->entity_id}" target="_blank" style="font-size: 15px">{$vo['increment_id']}</a></td>
-                        <td style="font-size: 15px"> {$vo['created_at']|strtotime|date='d/m/Y',###}</td>
+                        <td style="font-size: 15px"> {$vo['created_at']|date='d/m/Y',###}</td>
                         <td style="font-size: 15px"> {$vo['order_currency_code']}{$vo['grand_total']|substr=0,-2}</h5></td>
                         <td style="font-size: 15px"> {$vo['status']}</td>
                         <td style="font-size: 15px" id="showmessage" data-value="{$key}"> {$vo['increment_id']}</td>
