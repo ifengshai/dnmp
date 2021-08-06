@@ -93,8 +93,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                     $.each($("#form").serializeArray(), function(i, field) {
                         filter[field.name] = field.value;
                     });
-                    filter['channel'] = $("#channel").val();
-                    filter['name'] = $("#name").val();
+                    let channel = $("#channel").val();
+                    if (channel) {
+                        filter['channel'] = channel;
+                    }
+                    let name = $("#name").val();
+                    if (name) {
+                        filter['name'] = name;
+                    }
                     //参数转为json字符串
                     params.filter = JSON.stringify(filter)
                     return params;
