@@ -1004,7 +1004,7 @@ class OrderDataDetailNew extends Backend
                 if(in_array('payment_method',$column_name)){
                     $index = array_keys($column_name,'payment_method');
                     if($site == 3 || $site == 5){
-                        $payment = $web_model->table('orders')->where('order_id',$val['entity_id'])->value('payment_type');
+                        $payment = $web_model->table('orders')->where('id',$val['entity_id'])->value('payment_type');
                     }else{
                         //支付信息
                         $payment_where['parent_id'] = $val['entity_id'];
