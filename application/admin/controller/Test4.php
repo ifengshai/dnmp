@@ -3994,6 +3994,7 @@ class Test4 extends Controller
             ->alias('a')
             ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
             ->where('b.area_id','in',[3,6])
+            ->where('a.is_del',1)
             ->field('a.sku,a.stock_id,b.area_id,b.coding')
             ->select();
         $stockArr = [1=>'郑州仓',2=>'丹阳仓'];
