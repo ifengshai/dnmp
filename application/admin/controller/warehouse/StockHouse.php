@@ -105,6 +105,7 @@ class StockHouse extends Backend
             //获得库位所属库区编码
             foreach ($list as $k => $v) {
                 $list[$k]['area_coding'] = $areaCoding[$v['area_id']];
+                $list[$k]['sku_num'] = Db::name('store_sku')->where('store_id',$v['id'])->where('is_del',1)->count();
             }
             $result = ["total" => $total, "rows" => $list];
 
