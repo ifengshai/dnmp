@@ -3024,11 +3024,17 @@ class TrackReg extends Backend
     public function only_ga_data()
     {
         $this->getGaData(1);   //zeelool
+        echo "1-ok".PHP_EOL;
         $this->getGaData(2);   //voogueme
+        echo "2-ok".PHP_EOL;
         $this->getGaData(3);   //nihao
+        echo "3-ok".PHP_EOL;
         $this->getGaData(5);   //批发站
+        echo "5-ok".PHP_EOL;
         $this->getGaData(10);  //de站
+        echo "10-ok".PHP_EOL;
         $this->getGaData(11);  //jp站
+        echo "11-ok".PHP_EOL;
         $this->getGaData(15);  //fr站
         echo "ok";
     }
