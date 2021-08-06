@@ -482,7 +482,7 @@ class CoupnAnalytics extends Backend
                     ],
                     [
                         'name' => '未使用优惠券',
-                        'value' => $model->table('sales_flat_order')->where($maps)->count(),
+                        'value' => $model->table('sales_flat_order')->alias('sfo')->where($maps)->count(),
                     ],
                 ];
 
@@ -730,7 +730,7 @@ class CoupnAnalytics extends Backend
                     ],
                     [
                         'name' => '未使用优惠券',
-                        'value' => $model->table('sales_flat_order')->where($maps)->sum('base_grand_total'),
+                        'value' => $model->table('sales_flat_order')->alias('o')->where($maps)->sum('base_grand_total'),
                     ],
                 ];
                 $json['total'] = ($plat->getSalesTotalMoney($seven_days, ''))['sales_total_money'];
