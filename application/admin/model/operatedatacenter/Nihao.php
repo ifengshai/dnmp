@@ -1259,20 +1259,21 @@ class Nihao extends Model
             ->where($orderWhere)
             ->where('user_id','in',$customerCountVip)
             ->sum('base_actual_payment');
+        $customerCountVipCount = count($customerCountVip);
         $vip = [
-            'count' => $customerCountVip,
+            'count' => $customerCountVipCount,
             'name' => 'VIP',
             'num'  => round($vipOrderCount,2),
             'rate' => bcmul(bcdiv($vipOrderCount, $orderCount,4),100,2).'%',
-            'customerRate' => bcmul(bcdiv($customerCountVip, $customerCount,4),100,2).'%',
+            'customerRate' => bcmul(bcdiv($customerCountVipCount, $customerCount,4),100,2).'%',
         ];
         $result = [
             [
-                'count' => bcsub($customerCount,$customerCountVip),
+                'count' => bcsub($customerCount,$customerCountVipCount),
                 'name' => '普通用户',
                 'num'  => bcsub($orderCount,$vipOrderCount),
                 'rate' => bcmul(bcdiv(bcsub($orderCount,$vipOrderCount), $orderCount,4),100,2).'%',
-                'customerRate' => bcmul(bcdiv(bcsub($customerCount,$customerCountVip), $customerCount,4),100,2).'%',
+                'customerRate' => bcmul(bcdiv(bcsub($customerCount,$customerCountVipCount), $customerCount,4),100,2).'%',
             ],
             $vip
 
