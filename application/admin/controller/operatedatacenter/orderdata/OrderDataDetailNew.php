@@ -166,7 +166,7 @@ class OrderDataDetailNew extends Backend
                         ->where('d.type',1)
                         ->order($sort, $order)
                         ->limit($offset, $limit)
-                        ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.discount_code_id as code,o.coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.payer_email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group as group_id')
+                        ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.code as coupon_code,o.coupon_id as discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.payer_email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group as group_id')
                         ->select();
                 }else{
                     $list = $order_model->table('orders')->alias('o')
