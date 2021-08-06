@@ -976,13 +976,13 @@ class Zendesk extends Backend
         //array_unshift($templates, 'Apply Macro');
         //获取当前用户的最新5个的订单
         if ($ticket->type == 1) {
-            $orderModel = new \app\admin\model\order\order\Zeelool;
+            //$orderModel = new \app\admin\model\order\order\Zeelool;
             $customer_entity = Db::connect('database.db_zeelool');
         } elseif ($ticket->type == 2) {
-            $orderModel = new \app\admin\model\order\order\Voogueme;
+            //$orderModel = new \app\admin\model\order\order\Voogueme;
             $customer_entity = Db::connect('database.db_voogueme');
         } else {
-            $orderModel = new \app\admin\model\order\order\Nihao;
+            //$orderModel = new \app\admin\model\order\order\Nihao;
             $customer_entity = Db::connect('database.db_nihao');
         }
 
@@ -1000,13 +1000,15 @@ class Zendesk extends Backend
             }
         }
 
-        $orders = $orderModel
+        $orders = $this->order
+            ->where('site',$ticket->type)
             ->where('customer_email', $ticket->email)
             ->order('entity_id desc')
             ->field('increment_id,created_at,order_currency_code,status')
             ->limit(5)
             ->select();
-        $orders_count = $orderModel
+        $orders_count = $this->order
+            ->where('site',$ticket->type)
             ->where('customer_email', $ticket->email)
             ->count();
         $orders = collection($orders)->toArray();
@@ -1062,15 +1064,16 @@ class Zendesk extends Backend
     {
         $this->view->engine->layout(false);
         $data = input();
-        if ($data['type'] == 1) {
-            $orderModel = new \app\admin\model\order\order\Zeelool;
-        } elseif ($data['type'] == 2) {
-            $orderModel = new \app\admin\model\order\order\Voogueme;
-        } else {
-            $orderModel = new \app\admin\model\order\order\Nihao;
-        }
+//        if ($data['type'] == 1) {
+//            $orderModel = new \app\admin\model\order\order\Zeelool;
+//        } elseif ($data['type'] == 2) {
+//            $orderModel = new \app\admin\model\order\order\Voogueme;
+//        } else {
+//            $orderModel = new \app\admin\model\order\order\Nihao;
+//        }
         $page = $data['page'] ? $data['page'] : 1;
-        $orders = $orderModel
+        $orders = $this->order
+            ->where('site',$data['type'])
             ->where('customer_email', $data['email'])
             ->order('entity_id desc')
             ->field('increment_id,created_at,order_currency_code,status,entity_id')
