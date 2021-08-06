@@ -66,11 +66,14 @@ class OrderDataDetailNew extends Backend
             $map = [];
             $node_where = [];
             $mapWesee = [];
+            $mapNihao = [];
             $nodeWhereWesee = [];
+            $nodeWhereNihao = [];
             $whereWesee = [];
+            $whereNihao = [];
             if($filter['time_str']){
                 $createat = explode(' ', $filter['time_str']);
-                $mapWesee['o.payment_time'] = $map['o.payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
+                $mapWesee['o.payment_time'] = $mapNihao['o.payment_time'] = $map['o.payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
             }else{
                 if(isset($filter['time_str'])){
                     unset($filter['time_str']);
@@ -78,7 +81,7 @@ class OrderDataDetailNew extends Backend
                 }
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end   = date('Y-m-d 23:59:59');
-                $mapWesee['o.payment_time'] = $map['o.payment_time'] = ['between', [$start,$end]];
+                $mapWesee['o.payment_time'] = $mapNihao['o.payment_time'] = $map['o.payment_time'] = ['between', [$start,$end]];
             }
             if($filter['order_status']){
                 if($filter['order_status'] == 1){
@@ -96,7 +99,7 @@ class OrderDataDetailNew extends Backend
                 $node_where['site'] = $site;
                 $order_ids = Db::name('order_node')->where($node_where)->column('order_id');
                 $map['o.entity_id'] = ['in',$order_ids];
-                $mapWesee['o.id'] = ['in',$order_ids];
+                $mapWesee['o.id'] = $mapNihao['o.id'] =  ['in',$order_ids];
             }
             if($filter['customer_type']){
                 $map['c.group_id'] = $filter['customer_type'];
@@ -127,11 +130,19 @@ class OrderDataDetailNew extends Backend
                         $weseeStoreId = 1;
                     }
                     $mapWesee['o.source'] = $weseeStoreId;
+                }elseif($filter['order_platform'] == 3){
+                    $nihaoStoreId = '';
+                    if($filter['store_id'] == 4) {
+                        $nihaoStoreId = 'wap';
+                    }elseif($filter['store_id'] == 1) {
+                        $nihaoStoreId = 'pc';
+                    }
+                    $mapNihao['o.source'] = $nihaoStoreId;
                 }
             }
             if($filter['increment_id']){
                 $map['o.increment_id'] = $filter['increment_id'];
-                $mapWesee['o.order_no'] = $filter['increment_id'];
+                $mapWesee['o.order_no'] = $mapNihao['o.order_no'] = $filter['increment_id'];
             }
             $has_filter_is_refund = isset($filter['is_refund']) ? 1 : 0;
             if($filter['is_refund'] && $filter['is_refund'] > 0){
@@ -162,7 +173,7 @@ class OrderDataDetailNew extends Backend
                         ->join('users c','o.user_id=c.id','left')
                         ->join('order_addresses d','d.order_id = o.id')
                         ->where($where)
-                        ->where($mapWesee)
+                        ->where($mapNihao)
                         ->where('d.type',1)
                         ->order($sort, $order)
                         ->limit($offset, $limit)
