@@ -3885,4 +3885,185 @@ class Test4 extends Controller
             }
         }
     }
+    //导出所有网站在售SKU数据
+    public function export_on_sale_sku_data()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $platformSku = new ItemPlatformSku();
+        $items = $platformSku
+            ->where(['outer_sku_status'=>1])
+            ->field('sku,platform_type')
+            ->select();
+        $platArr = [
+            1  => 'Zeelool',
+            2  => 'Voogueme',
+            3  => 'Nihao',
+            4  => 'Meeloog',
+            5  => 'Wesee',
+            8  => 'Amazon',
+            9  => 'Zeelool_es',
+            10 => 'Zeelool_de',
+            11 => 'Zeelool_jp',
+            12 => 'voogmechic',
+            13 => 'zeelool_cn',
+            14 => 'alibaba',
+            15 => 'Zeelool_fr',
+        ];
+        $skuArr = [];
+        foreach ($items as $key => $value) {
+            $items[$key]['site'] = $platArr[$value['platform_type']];
+            if (isset($skuArr[$value['sku']])){
+                $skuArr[$value['sku']] = $skuArr[$value['sku']].','.$items[$key]['site'];
+            }else{
+                $skuArr[$value['sku']] = $items[$key]['site'];
+            }
+
+        }
+        $keys = 0;
+        $skuArrs = [];
+        foreach ($skuArr as $k => $v) {
+            $skuArrs[$keys]['sku'] = $k;
+            $skuArrs[$keys]['plat'] = $v;
+            $keys = $keys + 1;
+        }
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "sku")
+            ->setCellValue("B1", "站点");
+
+        foreach ($skuArrs as $key => $value) {
+            $keys = 0;
+            $keys ++;
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['plat']);
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(150);
+
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:N' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '导出所有网站在售SKU数据';
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+    // 导出绑定拣货区库位SKU数据
+    public function export_store_sku_data()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $items = Db::name('store_sku')
+            ->alias('a')
+            ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+            ->where('b.area_id','in',[3,6])
+            ->field('a.sku,a.stock_id,b.area_id,b.coding')
+            ->select();
+        $stockArr = [1=>'郑州仓',2=>'丹阳仓'];
+        $stockAreaArr = [3=>'拣货区',6=>'丹阳拣货区'];
+        foreach ($items as $key => $value) {
+            $items[$key]['area'] = $stockAreaArr[$value['area_id']];
+            $items[$key]['stock'] = $stockArr[$value['stock_id']];
+            unset($items[$key]['stock_id']);
+            unset($items[$key]['area_id']);
+        }
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "sku")
+            ->setCellValue("B1", "实体仓")
+            ->setCellValue("C1", "库区");   //利用setCellValues()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "库位");
+
+        foreach ($items as $key => $value) {
+
+            $spreadsheet->getActiveSheet()->setCellValueExplicit("A" . ($key * 1 + 2), $value['sku'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2),  $value['stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['area']);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['coding']);
+        }
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:N' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xlsx';
+        $savename = '导出数据-导出绑定拣货区库位SKU数据';
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
+
 }
