@@ -2579,6 +2579,25 @@ class TrackReg extends Backend
         //同步es数据
         (new AsyncDatacenterDay())->runInsert($datacenterDayId);
 
+        //饰品站
+        $arr = $this->getGoodsStatus(12);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
+
+        //zeelool_cn
+        $arr = $this->getGoodsStatus(13);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
+
+        //alibaba
+        $arr = $this->getGoodsStatus(14);
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+
+        //同步es数据
+        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
+
         echo date("Y-m-d H:i:s") . "\n";
         echo "all is ok" . "\n";
     }
