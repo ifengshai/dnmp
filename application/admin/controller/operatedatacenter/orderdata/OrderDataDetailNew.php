@@ -937,19 +937,21 @@ class OrderDataDetailNew extends Backend
                                     $group = 'VIP';
                                     break;
                             }
+                        }else{
+                            $customer = $web_model->table('customer_entity')->where('entity_id',$val['customer_id'])->field('email,group_id,created_at')->find();
+                            switch ($customer['group_id']){
+                                case 1:
+                                    $group = '普通';
+                                    break;
+                                case 2:
+                                    $group = '批发';
+                                    break;
+                                case 4:
+                                    $group = 'VIP';
+                                    break;
+                            }
                         }
-                        $customer = $web_model->table('customer_entity')->where('entity_id',$val['customer_id'])->field('email,group_id,created_at')->find();
-                        switch ($customer['group_id']){
-                            case 1:
-                                $group = '普通';
-                                break;
-                            case 2:
-                                $group = '批发';
-                                break;
-                            case 4:
-                                $group = 'VIP';
-                                break;
-                        }
+
                         $register_time = $customer['created_at'];
                         $register_email = $customer['email'];
                     }else{
