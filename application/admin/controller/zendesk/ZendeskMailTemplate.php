@@ -362,7 +362,8 @@ class ZendeskMailTemplate extends Backend
                 $orderModel = new \app\admin\model\order\order\Nihao;
             }
             //通过邮件获取最新的订单号
-            $increment_id = $orderModel
+            $increment_id = Db::connect('database.db_mojing_order')
+                ->table('fa_order')
                 ->where('customer_email', $ticket->email)
                 ->order('entity_id desc')->value('increment_id');
             //通过订单号获取运单号/发货时间
