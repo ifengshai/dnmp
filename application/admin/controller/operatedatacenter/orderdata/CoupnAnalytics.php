@@ -193,7 +193,7 @@ class CoupnAnalytics extends Backend
                     ['c' => $list[$k]['use_order_num'], 's' => $list[$k]['use_order_total_price']] = $model->table('orders')
                         ->where($map)
                         ->where($andWhere)
-                        ->field('count(*) as c, sum(`base_grand_total`) as s')
+                        ->field('count(*) as c, sum(`base_actual_payment`) as s')
                         ->find();
                     //应用订单数量占比
                     $list[$k]['use_order_num_rate'] = $whole_order != 0 ? round($list[$k]['use_order_num'] / $whole_order* 100,2)  .'%' : 0;
@@ -336,7 +336,7 @@ class CoupnAnalytics extends Backend
                         ->join('discount_coupons c','c.id=t.discount_coupon_id')
                         ->where($map)
                         ->group('department')
-                        ->column('count(*) count','department');
+                        ->column('count(*) as count, department', 'department');
                     $json['column'] = ['运营优惠券', '渠道优惠券', '用户优惠券', '红人优惠券','主页优惠券', '客服优惠券', '网站优惠券','未使用优惠券'];
                     $json['columnData'] = [
                         [
@@ -588,7 +588,7 @@ class CoupnAnalytics extends Backend
                         ->join('discount_coupons c','c.id=t.discount_coupon_id')
                         ->where($map)
                         ->group('department')
-                        ->column('sum(base_actual_payment) base_actual_payment','department');
+                        ->column('sum(base_actual_payment) as sum, department', 'department');
                     $json['column'] = ['运营优惠券', '渠道优惠券', '用户优惠券', '红人优惠券','主页优惠券', '客服优惠券', '网站优惠券','未使用优惠券'];
                     $json['columnData'] = [
                         [
