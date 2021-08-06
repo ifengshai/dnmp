@@ -1246,6 +1246,7 @@ class Nihao extends Model
             ->count();
         $customerCountVip = Db::connect('database.db_nihao')
             ->table('users')
+            ->where('group',2)
             ->where($customerWhere)
             ->column('id');
         $orderCount = Db::connect('database.db_nihao')
