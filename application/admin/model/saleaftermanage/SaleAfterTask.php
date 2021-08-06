@@ -919,7 +919,7 @@ class SaleAfterTask extends Model
                 $differencePriceList = Db::connect($db)
                     ->table('attach_orders')
                     ->field('order_no as order_number,status as order_status,actual_payment as order_amount,currency as order_currency,created_at as start_time')
-                    ->where(['order_no' => $v['increment_id']])
+                    ->where(['order_id' => $v['entity_id']])
                     ->select();
             } else {
                 $differencePriceList = Db::connect($db)->table('oc_difference_price_order')->where(['origin_order_number' => $v['increment_id']])->select();
