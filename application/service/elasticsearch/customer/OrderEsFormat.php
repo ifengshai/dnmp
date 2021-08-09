@@ -473,8 +473,8 @@ class OrderEsFormat extends BaseEsFormatData
         //求更新购物车产生的订单数
         $allUpdateCartToOrderNum = $allOrderCount;
         //新增购物车转化率
-        $createCartRate = $arr[$key]['createCartCount'] ? bcmul(bcdiv($allCreateCartToOrderNum, count($allCartCreateIds), 4),100,2) . '%' : '0%';
-        $updateCartRate = $arr[$key]['updateCartCount'] ? bcmul(bcdiv($allUpdateCartToOrderNum, count($allCartUpdateIds), 4),100,2) . '%' : '0%';
+        $createCartRate = $arr[$key]['createCartCount'] ? bcmul(bcdiv($allCreateCartToOrderNum, $allHourCreateCart, 4),100,2) . '%' : '0%';
+        $updateCartRate = $arr[$key]['updateCartCount'] ? bcmul(bcdiv($allUpdateCartToOrderNum,$allHourUpdateCart, 4),100,2) . '%' : '0%';
         //回话转化率
         $sessionRate = $allSession ? bcmul(bcdiv($allOrderCount, $allSession, 4),100,2) . '%' : '0%';
 
