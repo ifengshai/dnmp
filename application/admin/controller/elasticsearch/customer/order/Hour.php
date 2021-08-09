@@ -234,12 +234,21 @@ class Hour extends BaseElasticsearch
             $cacheData = Cache::get($cacheStr);
             if (!$cacheData) {
                 $hourOrderData = $this->buildHourOrderSearch($site, $start, $end);
-                $hourCreateCartData = $this->buildHourCreateCartSearch($site, $start, $end);
-                $hourUpdateCartData = $this->buildHourUpdateCartSearch($site, $start, $end);
+                if($site == 3) {
+                    $hourCreateCartData = $this->buildHourCreateCartSearchNew($site, $start, $end);
+                    $hourUpdateCartData = $this->buildHourUpdateCartSearchNew($site, $start, $end);
+                }else{
+                    $hourCreateCartData = $this->buildHourCreateCartSearch($site, $start, $end);
+                    $hourUpdateCartData = $this->buildHourUpdateCartSearch($site, $start, $end);
+                }
                 $sessionService = new Session($site);
                 $gaData = $sessionService->gaHourData($gaStart, $gaEnd);
+                if($site == 3) {
+                    $allData = $this->esFormat->formatHourDataNew($hourOrderData, $hourCreateCartData, $hourUpdateCartData, $gaData, $today);
+                }else{
+                    $allData = $this->esFormat->formatHourData($hourOrderData, $hourCreateCartData, $hourUpdateCartData, $gaData, $today);
+                }
 
-                $allData = $this->esFormat->formatHourData($hourOrderData, $hourCreateCartData, $hourUpdateCartData, $gaData, $today);
                 Cache::set($cacheStr, $allData, 600);
             } else {
                 $allData = $cacheData;
@@ -502,6 +511,128 @@ class Hour extends BaseElasticsearch
                                 ],
                             ],
                         ],
+                    ],
+                    "sumCarts" => [
+                        "sum_bucket" => [
+                            "buckets_path" => "hourCart>_count",
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        return $this->esService->search($params);
+    }
+    /**
+     * 获取新增购物车数据
+     *
+     * @param $site
+     * @param $start
+     * @param $end
+     *
+     * @return mixed
+     * @author crasphb
+     * @date   2021/4/14 13:56
+     */
+    public function buildHourCreateCartSearchNew($site, $start, $end)
+    {
+        if (!is_array($site)) {
+            $site = [$site];
+        }
+        $params = [
+            'index' => 'mojing_cart',
+            'body'  => [
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            [
+                                'range' => [
+                                    'day_date' => [
+                                        'gte' => $start,
+                                        'lte' => $end,
+                                    ],
+                                ],
+                            ],
+                            //in查询
+                            [
+                                'terms' => [
+                                    'site' => $site,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                "aggs"  => [
+                    "hourCart" => [
+                        "terms" => [
+                            "field" => 'hour',
+                            'size'  => '24',
+                            'order' => [
+                                '_key' => 'asc',
+                            ],
+                        ]
+                    ],
+                    "sumCarts" => [
+                        "sum_bucket" => [
+                            "buckets_path" => "hourCart>_count",
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        return $this->esService->search($params);
+    }
+
+
+    /**
+     * 更新购物车筛选
+     *
+     * @param $site
+     * @param $start
+     * @param $end
+     *
+     * @return mixed
+     * @author crasphb
+     * @date   2021/5/13 21:03
+     */
+    public function buildHourUpdateCartSearchNew($site, $start, $end)
+    {
+        if (!is_array($site)) {
+            $site = [$site];
+        }
+        $params = [
+            'index' => 'mojing_cart',
+            'body'  => [
+                'query' => [
+                    'bool' => [
+                        'must' => [
+                            [
+                                'range' => [
+                                    'update_time_day' => [
+                                        'gte' => $start,
+                                        'lte' => $end,
+                                    ],
+                                ],
+                            ],
+                            //in查询
+                            [
+                                'terms' => [
+                                    'site' => $site,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                "aggs"  => [
+                    "hourCart" => [
+                        "terms" => [
+                            "field" => 'update_time_hour',
+                            'size'  => '24',
+                            'order' => [
+                                '_key' => 'asc',
+                            ],
+                        ]
                     ],
                     "sumCarts" => [
                         "sum_bucket" => [
