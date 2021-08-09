@@ -469,9 +469,9 @@ class OrderEsFormat extends BaseEsFormatData
         //加购率
         $addCartRate = $allSession ? bcmul(bcdiv($allHourCreateCart, $allSession, 4),100,2) . '%' : '0%';
         //求新增购物车产生的订单数
-        $allCreateCartToOrderNum = count($hourOrderData['doc_count']);
+        $allCreateCartToOrderNum = $allOrderCount;
         //求更新购物车产生的订单数
-        $allUpdateCartToOrderNum = count($hourOrderData['doc_count']);
+        $allUpdateCartToOrderNum = $allOrderCount;
         //新增购物车转化率
         $createCartRate = $arr[$key]['createCartCount'] ? bcmul(bcdiv($allCreateCartToOrderNum, count($allCartCreateIds), 4),100,2) . '%' : '0%';
         $updateCartRate = $arr[$key]['updateCartCount'] ? bcmul(bcdiv($allUpdateCartToOrderNum, count($allCartUpdateIds), 4),100,2) . '%' : '0%';
