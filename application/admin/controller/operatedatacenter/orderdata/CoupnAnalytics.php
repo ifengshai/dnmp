@@ -122,7 +122,7 @@ class CoupnAnalytics extends Backend
                 //所有的优惠券
                 $list = $salesrule->table('discount_codes')
                     ->where('department', '>', 0)
-                    ->field('name,id,department')
+                    ->field('name,id,department as channel')
                      ->where($where)
                     ->where($map1)
                     ->where($map2)
@@ -341,31 +341,31 @@ class CoupnAnalytics extends Backend
                     $json['columnData'] = [
                         [
                             'name' => '运营优惠券',
-                            'value' => $total[1],
+                            'value' => $total[1] ?: 0,
                         ],
                         [
                             'name' => '渠道优惠券',
-                            'value' => $total[2],
+                            'value' => $total[2] ?: 0,
                         ],
                         [
                             'name' => '用户优惠券',
-                            'value' => $total[3],
+                            'value' => $total[3] ?: 0,
                         ],
                         [
                             'name' => '红人优惠券',
-                            'value' => $total[4],
+                            'value' => $total[4] ?: 0,
                         ],
                         [
                             'name' => '主页优惠券',
-                            'value' => $total[5],
+                            'value' => $total[5] ?: 0,
                         ],
                         [
                             'name' => '客服优惠券',
-                            'value' => $total[6],
+                            'value' => $total[6] ?: 0,
                         ],
                         [
                             'name' => '网站优惠券',
-                            'value' => $total[7],
+                            'value' => $total[7] ?: 0,
                         ],
                         [
                             'name' => '未使用优惠券',
@@ -389,15 +389,15 @@ class CoupnAnalytics extends Backend
                     $json['columnData'] = [
                         [
                             'name' => '运营优惠券',
-                            'value' => $total[1],
+                            'value' => $total[1] ?: 0,
                         ],
                         [
                             'name' => '客服优惠券',
-                            'value' => $total[2],
+                            'value' => $total[2] ?: 0,
                         ],
                         [
                             'name' => '整站优惠券',
-                            'value' => $total[3],
+                            'value' => $total[3] ?: 0,
                         ],
                         [
                             'name' => '未使用优惠券',
@@ -593,31 +593,31 @@ class CoupnAnalytics extends Backend
                     $json['columnData'] = [
                         [
                             'name' => '运营优惠券',
-                            'value' => $total[1],
+                            'value' => $total[1] ?: 0,
                         ],
                         [
                             'name' => '渠道优惠券',
-                            'value' => $total[2],
+                            'value' => $total[2] ?: 0,
                         ],
                         [
                             'name' => '用户优惠券',
-                            'value' => $total[3],
+                            'value' => $total[3] ?: 0,
                         ],
                         [
                             'name' => '红人优惠券',
-                            'value' => $total[4],
+                            'value' => $total[4] ?: 0,
                         ],
                         [
                             'name' => '主页优惠券',
-                            'value' => $total[5],
+                            'value' => $total[5] ?: 0,
                         ],
                         [
                             'name' => '客服优惠券',
-                            'value' => $total[6],
+                            'value' => $total[6] ?: 0,
                         ],
                         [
                             'name' => '网站优惠券',
-                            'value' => $total[7],
+                            'value' => $total[7] ?: 0,
                         ],
                         [
                             'name' => '未使用优惠券',
@@ -643,15 +643,15 @@ class CoupnAnalytics extends Backend
                     $json['columnData'] = [
                         [
                             'name' => '运营优惠券',
-                            'value' => $total[1],
+                            'value' => $total[1] ?: 0,
                         ],
                         [
                             'name' => '客服优惠券',
-                            'value' => $total[2],
+                            'value' => $total[2] ?: 0,
                         ],
                         [
                             'name' => '整站优惠券',
-                            'value' => $total[3],
+                            'value' => $total[3] ?: 0,
                         ],
                         [
                             'name' => '未使用优惠券',
