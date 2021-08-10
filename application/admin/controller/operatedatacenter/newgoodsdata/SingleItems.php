@@ -10,6 +10,7 @@ use think\Db;
 class SingleItems extends Backend
 {
     protected $noNeedRight = ['*'];
+
     public function _initialize()
     {
         parent::_initialize();
@@ -17,6 +18,7 @@ class SingleItems extends Backend
         $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
     }
+
     /**
      * 单品查询某个sku的订单列表
      *
@@ -44,7 +46,7 @@ class SingleItems extends Backend
                 $map['o.payment_time'] = ['between', [$start, $end]];
             }
             if ($filter['sku']) {
-                $map['i.sku'] = ['like','%'.$filter['sku'].'%'];
+                $map['i.sku'] = ['like', '%' . $filter['sku'] . '%'];
             }
 
             if ($filter['order_platform']) {
@@ -55,9 +57,9 @@ class SingleItems extends Backend
             unset($filter['sku']);
             unset($filter['order_platform']);
             $this->request->get(['filter' => json_encode($filter)]);
-            $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+            $map['o.status'] = ['in', ['processing', 'complete', 'delivered', 'delivery', 'shipped']];
             $map['o.order_type'] = 1;
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->order
                 ->alias('o')
                 ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
@@ -69,28 +71,29 @@ class SingleItems extends Backend
                 ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->group('o.entity_id')
-                ->order('o.payment_time','desc')
+                ->order('o.payment_time', 'desc')
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            foreach ($list as $key=>$value){
-                $list[$key]['base_grand_total'] = round($value['base_grand_total'],2);
-                $list[$key]['base_discount_amount'] = round($value['base_discount_amount'],2);
-                $list[$key]['payment_time'] = date('Y-m-d H:i:s',$value['payment_time']);
+            foreach ($list as $key => $value) {
+                $list[$key]['base_grand_total'] = round($value['base_grand_total'], 2);
+                $list[$key]['base_discount_amount'] = round($value['base_discount_amount'], 2);
+                $list[$key]['payment_time'] = date('Y-m-d H:i:s', $value['payment_time']);
             }
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
 
             return json($result);
         }
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee','zeelool_de','zeelool_jp','zeelool_fr'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog', 'wesee', 'zeelool_de', 'zeelool_jp', 'zeelool_fr'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
         $this->view->assign('magentoplatformarr', $magentoplatformarr);
+
         return $this->view->fetch();
     }
 
@@ -115,7 +118,7 @@ class SingleItems extends Backend
             $sku = input('sku');
             //此sku的总订单量
             $map['i.sku'] = ['like', $sku . '%'];
-            $where['o.status'] = $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+            $where['o.status'] = $map['o.status'] = ['in', ['processing', 'complete', 'delivered', 'delivery', 'shipped']];
             $where['o.payment_time'] = $map['o.payment_time'] = ['between', [strtotime($createat[0] . ' ' . $createat[1]), strtotime($createat[3] . ' ' . $createat[4])]];
             $where['o.order_type'] = $map['o.order_type'] = 1;
             $total = $this->order
@@ -130,7 +133,7 @@ class SingleItems extends Backend
                 ->where($where)
                 ->count('distinct magento_order_id');
             //订单占比
-            $orderRate = $wholePlatformOrderNum? round($total / $wholePlatformOrderNum * 100, 2) . '%' : 0;
+            $orderRate = $wholePlatformOrderNum ? round($total / $wholePlatformOrderNum * 100, 2) . '%' : 0;
             //平均订单副数
             $wholeGlass = $this->order
                 ->alias('o')
@@ -139,7 +142,7 @@ class SingleItems extends Backend
                 ->sum('i.qty');//sku总副数
             $avgOrderGlass = $total ? round($wholeGlass / $total, 2) : 0;
             //付费镜片订单数
-            $where1['i.index_price|i.coating_price'] = ['>',0];
+            $where1['i.index_price|i.coating_price'] = ['>', 0];
             $payLens = $this->order
                 ->alias('o')
                 ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
@@ -153,33 +156,28 @@ class SingleItems extends Backend
                 ->alias('o')
                 ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
-                ->where('total_qty_ordered',1)
+                ->where('total_qty_ordered', 1)
                 ->count('distinct magento_order_id');
             //只买一副的订单占比
             $onlyOneGlassRate = $total == 0 ? 0 : round($onlyOneGlassNum / $total * 100, 2) . '%';
             //订单总金额
-            $glassSql = $this->order
+            $wholeData = $this->order
                 ->alias('o')
                 ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
-                ->field('distinct magento_order_id')
-                ->buildSql();
-            $glassWhere2 = [];
-            $glassWhere2[] = ['exp', Db::raw("entity_id in " . $glassSql)];
-            $wholePrice = $this->order
-                ->where($glassWhere2)
-                ->where('site',$site)
-                ->sum('base_grand_total');
+                ->group('o.id')
+                ->field('sum(base_grand_total),sum(base_discount_amount)')
+                ->find();
+            //总支付金额
+            $wholePrice =  $wholeData['base_grand_total'];
+            //总折扣金额
+            $baseDiscountAmount =  $wholeData['base_discount_amount'];
             //订单客单价
             $everyPrice = $total == 0 ? 0 : round($wholePrice / $total, 2);
-            //该sku的总副数金额
-            $sumSkuTotal = $this->order
-                ->alias('o')
-                ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
-                ->where($map)
-                ->value('sum(base_original_price-i.base_discount_amount) as price');
+
             //平均每副订单金额
-            $everyMoney = $total ? round($sumSkuTotal/$wholeGlass,2) : 0;
+            $everyMoney = $total ? round($wholePrice / $wholeGlass, 2) : 0;
+
             //关联购买
             $orderIds = $this->order
                 ->alias('o')
@@ -191,12 +189,12 @@ class SingleItems extends Backend
             $orderIdsWhere[] = ['exp', Db::raw("magento_order_id in " . $orderIds)];
             $arraySku = $this->orderitemoption
                 ->where($orderIdsWhere)
-                ->where('site',$site)
-                ->where('sku','not like',$sku . '%')
+                ->where('site', $site)
+                ->where('sku', '<>', $sku)
                 ->group('sku')
                 ->order('count desc')
-                ->column('sum(qty) count','sku');
-            $data = compact('sku', 'arraySku', 'total', 'wholePlatformOrderNum', 'orderRate', 'avgOrderGlass', 'payLens', 'payLensRate', 'onlyOneGlassNum', 'onlyOneGlassRate', 'everyPrice', 'wholePrice','everyMoney');
+                ->column('sum(qty) count', 'sku');
+            $data = compact('baseDiscountAmount','wholeGlass', 'sku', 'arraySku', 'total', 'wholePlatformOrderNum', 'orderRate', 'avgOrderGlass', 'payLens', 'payLensRate', 'onlyOneGlassNum', 'onlyOneGlassRate', 'everyPrice', 'wholePrice', 'everyMoney');
             $this->success('', '', $data);
         }
     }
@@ -215,23 +213,23 @@ class SingleItems extends Backend
             if ($params['time_str']) {
                 $createat = explode(' ', $params['time_str']);
                 $start = strtotime($createat[0]);
-                $end = strtotime($createat[3].' 23:59:59');
+                $end = strtotime($createat[3] . ' 23:59:59');
                 $userWhere['o.payment_time'] = ['between', [$start, $end]];
-                $orderWhere['o.payment_time'] = ['lt',$start];
-            } else{
+                $orderWhere['o.payment_time'] = ['lt', $start];
+            } else {
                 $start = strtotime(date('Y-m-d', strtotime('-6 day')));
-                $end   = time();
-                $userWhere['o.payment_time'] = ['between', [$start,$end]];
-                $orderWhere['o.payment_time'] = ['lt',$start];
+                $end = time();
+                $userWhere['o.payment_time'] = ['between', [$start, $end]];
+                $orderWhere['o.payment_time'] = ['lt', $start];
             }
             $map["o.site"] = $site;
-            $map["o.status"] = ["in", ["free_processing", "processing", "complete", "paypal_reversed", "payment_review", "paypal_canceled_reversal","delivered","shipped"]];
-            $mapSku["i.sku"] = ["like",$sku."%"];
+            $map["o.status"] = ["in", ["free_processing", "processing", "complete", "paypal_reversed", "payment_review", "paypal_canceled_reversal", "delivered", "shipped"]];
+            $mapSku["i.sku"] = ["like", $sku . "%"];
             $map["o.order_type"] = 1;
             //在时间段内进行过购买行为的用户
             $emails = $this->order
                 ->alias("o")
-                ->join("fa_order_item_option i","o.entity_id=i.magento_order_id and o.site=i.site")
+                ->join("fa_order_item_option i", "o.entity_id=i.magento_order_id and o.site=i.site")
                 ->where($map)
                 ->where($mapSku)
                 ->where($userWhere)
@@ -243,7 +241,7 @@ class SingleItems extends Backend
             //是否产生购买行为
             $againUserSql = $this->order
                 ->alias("o")
-                ->join("fa_order_item_option i","o.entity_id=i.magento_order_id and o.site=i.site")
+                ->join("fa_order_item_option i", "o.entity_id=i.magento_order_id and o.site=i.site")
                 ->where($map)
                 ->where($orderWhere)
                 ->where($arrWhere)
@@ -252,30 +250,31 @@ class SingleItems extends Backend
                 ->having("count>=1")
                 ->buildSql();
             $againCount = $this->order
-                ->table([$againUserSql=>"t1"])
+                ->table([$againUserSql => "t1"])
                 ->count();
             //总人数
             $count = $this->order
                 ->alias("o")
-                ->join("fa_order_item_option i","o.entity_id=i.magento_order_id and o.site=i.site")
+                ->join("fa_order_item_option i", "o.entity_id=i.magento_order_id and o.site=i.site")
                 ->where($map)
                 ->where($mapSku)
                 ->where($userWhere)
                 ->where("o.customer_email is not null")
                 ->count("distinct o.customer_email");
             //首次购买人数
-            $firstCount = $count-$againCount;
+            $firstCount = $count - $againCount;
             $json['column'] = ['首购人数', '复购人数'];
             $json['columnData'] = [
                 [
-                    'name' => '首购人数',
+                    'name'  => '首购人数',
                     'value' => $firstCount,
                 ],
                 [
-                    'name' => '复购人数',
+                    'name'  => '复购人数',
                     'value' => $againCount,
                 ],
             ];
+
             return json(['code' => 1, 'data' => $json]);
         }
     }
@@ -291,227 +290,235 @@ class SingleItems extends Backend
         if ($this->request->isAjax()) {
             $params = $this->request->param();
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
-            $data = $this->prescrtion_data($site,$params['time_str'],$params['sku']);
-            $column = array_column($data,'name');
+            $data = $this->prescrtion_data($site, $params['time_str'], $params['sku']);
+            $column = array_column($data, 'name');
             $json['column'] = $column;
             $json['columnData'] = $data;
+
             return json(['code' => 1, 'data' => $json]);
         }
     }
 
     /**
      * 获取处方数据
-     * @param int $site  站点
-     * @param string $timeStr  时间
-     * @param string $sku   sku
+     *
+     * @param int    $site    站点
+     * @param string $timeStr 时间
+     * @param string $sku     sku
+     *
      * @return array[]
      * @author mjj
      * @date   2021/5/18 15:39:21
      */
-    function prescrtion_data($site = 1,$timeStr = '',$sku = ''){
-        $orderNum = $this->prescrtion_num('',$site,$timeStr,$sku);
-        if($site == 1 || $site == 2 || $site == 3 || $site == 10 || $site == 11 || $site == 15){
-            $singleVisionNum = $this->prescrtion_num('SingleVision',$site,$timeStr,$sku);
-            $singleVisionArr = array(
-                'name'=>'single vision',
-                'value'=>$singleVisionNum,
-            );
-            $progressiveNum = $this->prescrtion_num('Progressive',$site,$timeStr,$sku);
-            $progressiveArr = array(
-                'name'=>'progressive',
-                'value'=>$progressiveNum,
-            );
-            if($site == 1){
-                $readingGlassesNum = $this->prescrtion_num('Readingglasses',$site,$timeStr,$sku);
-                $readingGlassesArr = array(
-                    'name'=>'reading glasses',
-                    'value'=>$readingGlassesNum,
-                );
-                $readingGlassesNoNum = $this->prescrtion_num('ReadingGlassesNon',$site,$timeStr,$sku);
-                $readingGlassesNoArr = array(
-                    'name'=>'reading glasses no prescription',
-                    'value'=>$readingGlassesNoNum,
-                );
-                $noPrescriptionNum1 = $this->prescrtion_num('Noprescription',$site,$timeStr,$sku);
-                $noPrescriptionNum2 = $this->prescrtion_num('Nonprescription',$site,$timeStr,$sku);
-                $noPrescriptionNum = $noPrescriptionNum1+$noPrescriptionNum2;
-                $noPrescriptionArr = array(
-                    'name'=>'no prescription',
-                    'value'=>$noPrescriptionNum,
-                );
-                $sunglassesNum = $this->prescrtion_num('Sunglasses',$site,$timeStr,$sku);
-                $sunglassesArr = array(
-                    'name'=>'sunglasses',
-                    'value'=>$sunglassesNum,
-                );
-                $sunglassesNoNum1 = $this->prescrtion_num('Sunglasses_NonPrescription',$site,$timeStr,$sku);
-                $sunglassesNoNum2 = $this->prescrtion_num('SunGlassesNoprescription',$site,$timeStr,$sku);
-                $sunglassesNoNum = $sunglassesNoNum1+$sunglassesNoNum2;
-                $sunglassesNoArr = array(
-                    'name'=>'sunglasses non-prescription',
-                    'value'=>$sunglassesNoNum,
-                );
-                $sportsProgressiveNum = $this->prescrtion_num('SportsProgressive',$site,$timeStr,$sku);
-                $sportsProgressiveArr = array(
-                    'name'=>'sports progressive',
-                    'value'=>$sportsProgressiveNum,
-                );
-                $frameOnlyNum = $orderNum-$singleVisionNum-$progressiveNum-$readingGlassesNum-$readingGlassesNoNum-$noPrescriptionNum-$sunglassesNum-$sunglassesNoNum-$sportsProgressiveNum;
-                $frameOnlyArr = array(
-                    'name'=>'frame only',
-                    'value'=>$frameOnlyNum,
-                );
-                $arr = [$singleVisionArr,$progressiveArr,$readingGlassesArr,$readingGlassesNoArr,$noPrescriptionArr,$sunglassesArr,$sunglassesNoArr,$sportsProgressiveArr,$frameOnlyArr];
-            }elseif($site == 2 || $site == 10 || $site == 11 || $site == 15){
-                $readingGlassesNum = $this->prescrtion_num('ReadingGlasses',$site,$timeStr,$sku);
-                $readingGlassesArr = array(
-                    'name'=>'reading glasses',
-                    'value'=>$readingGlassesNum,
-                );
-                $readingGlassesNoNum = $this->prescrtion_num('ReadingNoprescription',$site,$timeStr,$sku);
-                $readingGlassesNoArr = array(
-                    'name'=>'reading glasses no prescription',
-                    'value'=>$readingGlassesNoNum,
-                );
-                $noPrescriptionNum1 = $this->prescrtion_num('Noprescription',$site,$timeStr,$sku);
-                $noPrescriptionNum2 = $this->prescrtion_num('NonPrescription',$site,$timeStr,$sku);
-                $noPrescriptionNum = $noPrescriptionNum1+$noPrescriptionNum2;
-                $noPrescriptionArr = array(
-                    'name'=>'no prescription',
-                    'value'=>$noPrescriptionNum,
-                );
-                if($site == 2){
-                    $sunglassesNum = $this->prescrtion_num('Sunglasses',$site,$timeStr,$sku);
-                    $sunglassesArr = array(
-                        'name'=>'sunglasses',
-                        'value'=>$sunglassesNum,
-                    );
-                    $sunglassesNoNum1 = $this->prescrtion_num('Sunglasses_NonPrescription',$site,$timeStr,$sku);
-                    $sunglassesNoNum2 = $this->prescrtion_num('SunGlassesNoprescription',$site,$timeStr,$sku);
-                    $sunglassesNoNum = $sunglassesNoNum1+$sunglassesNoNum2;
-                    $sunglassesNoArr = array(
-                        'name'=>'sunglasses non-prescription',
-                        'value'=>$sunglassesNoNum,
-                    );
-                    $frameOnlyNum = $orderNum-$singleVisionNum-$progressiveNum-$readingGlassesNum-$readingGlassesNoNum-$noPrescriptionNum-$sunglassesNum-$sunglassesNoNum;
-                    $frameOnlyArr = array(
-                        'name'=>'frame only',
-                        'value'=>$frameOnlyNum,
-                    );
-                    $arr = [$singleVisionArr,$progressiveArr,$readingGlassesArr,$readingGlassesNoArr,$noPrescriptionArr,$sunglassesArr,$sunglassesNoArr,$frameOnlyArr];
-                }elseif($site == 11){
-                    $sunglassesNum = $this->prescrtion_num('SunGlasses',$site,$timeStr,$sku);
-                    $sunglassesArr = array(
-                        'name'=>'sunglasses',
-                        'value'=>$sunglassesNum,
-                    );
-                    $sunglassesNoNum = $this->prescrtion_num('SunGlassesNoprescription',$site,$timeStr,$sku);
-                    $sunglassesNoArr = array(
-                        'name'=>'sunglasses non-prescription',
-                        'value'=>$sunglassesNoNum,
-                    );
-                    $frameOnlyNum = $orderNum-$singleVisionNum-$progressiveNum-$readingGlassesNum-$readingGlassesNoNum-$noPrescriptionNum-$sunglassesNum-$sunglassesNoNum;
-                    $frameOnlyArr = array(
-                        'name'=>'frame only',
-                        'value'=>$frameOnlyNum,
-                    );
-                    $arr = [$singleVisionArr,$progressiveArr,$readingGlassesArr,$readingGlassesNoArr,$noPrescriptionArr,$sunglassesArr,$sunglassesNoArr,$frameOnlyArr];
-                }else{
-                    $frameOnlyNum = $orderNum-$singleVisionNum-$progressiveNum-$readingGlassesNum-$readingGlassesNoNum-$noPrescriptionNum;
-                    $frameOnlyArr = array(
-                        'name'=>'frame only',
-                        'value'=>$frameOnlyNum,
-                    );
-                    $arr = [$singleVisionArr,$progressiveArr,$readingGlassesArr,$readingGlassesNoArr,$noPrescriptionArr,$frameOnlyArr];
+    function prescrtion_data($site = 1, $timeStr = '', $sku = '')
+    {
+        $orderNum = $this->prescrtion_num('', $site, $timeStr, $sku);
+        if ($site == 1 || $site == 2 || $site == 3 || $site == 10 || $site == 11 || $site == 15) {
+            $singleVisionNum = $this->prescrtion_num('SingleVision', $site, $timeStr, $sku);
+            $singleVisionArr = [
+                'name'  => 'single vision',
+                'value' => $singleVisionNum,
+            ];
+            $progressiveNum = $this->prescrtion_num('Progressive', $site, $timeStr, $sku);
+            $progressiveArr = [
+                'name'  => 'progressive',
+                'value' => $progressiveNum,
+            ];
+            if ($site == 1) {
+                $readingGlassesNum = $this->prescrtion_num('Readingglasses', $site, $timeStr, $sku);
+                $readingGlassesArr = [
+                    'name'  => 'reading glasses',
+                    'value' => $readingGlassesNum,
+                ];
+                $readingGlassesNoNum = $this->prescrtion_num('ReadingGlassesNon', $site, $timeStr, $sku);
+                $readingGlassesNoArr = [
+                    'name'  => 'reading glasses no prescription',
+                    'value' => $readingGlassesNoNum,
+                ];
+                $noPrescriptionNum1 = $this->prescrtion_num('Noprescription', $site, $timeStr, $sku);
+                $noPrescriptionNum2 = $this->prescrtion_num('Nonprescription', $site, $timeStr, $sku);
+                $noPrescriptionNum = $noPrescriptionNum1 + $noPrescriptionNum2;
+                $noPrescriptionArr = [
+                    'name'  => 'no prescription',
+                    'value' => $noPrescriptionNum,
+                ];
+                $sunglassesNum = $this->prescrtion_num('Sunglasses', $site, $timeStr, $sku);
+                $sunglassesArr = [
+                    'name'  => 'sunglasses',
+                    'value' => $sunglassesNum,
+                ];
+                $sunglassesNoNum1 = $this->prescrtion_num('Sunglasses_NonPrescription', $site, $timeStr, $sku);
+                $sunglassesNoNum2 = $this->prescrtion_num('SunGlassesNoprescription', $site, $timeStr, $sku);
+                $sunglassesNoNum = $sunglassesNoNum1 + $sunglassesNoNum2;
+                $sunglassesNoArr = [
+                    'name'  => 'sunglasses non-prescription',
+                    'value' => $sunglassesNoNum,
+                ];
+                $sportsProgressiveNum = $this->prescrtion_num('SportsProgressive', $site, $timeStr, $sku);
+                $sportsProgressiveArr = [
+                    'name'  => 'sports progressive',
+                    'value' => $sportsProgressiveNum,
+                ];
+                $frameOnlyNum = $orderNum - $singleVisionNum - $progressiveNum - $readingGlassesNum - $readingGlassesNoNum - $noPrescriptionNum - $sunglassesNum - $sunglassesNoNum - $sportsProgressiveNum;
+                $frameOnlyArr = [
+                    'name'  => 'frame only',
+                    'value' => $frameOnlyNum,
+                ];
+                $arr = [$singleVisionArr, $progressiveArr, $readingGlassesArr, $readingGlassesNoArr, $noPrescriptionArr, $sunglassesArr, $sunglassesNoArr, $sportsProgressiveArr, $frameOnlyArr];
+            } elseif ($site == 2 || $site == 10 || $site == 11 || $site == 15) {
+                $readingGlassesNum = $this->prescrtion_num('ReadingGlasses', $site, $timeStr, $sku);
+                $readingGlassesArr = [
+                    'name'  => 'reading glasses',
+                    'value' => $readingGlassesNum,
+                ];
+                $readingGlassesNoNum = $this->prescrtion_num('ReadingNoprescription', $site, $timeStr, $sku);
+                $readingGlassesNoArr = [
+                    'name'  => 'reading glasses no prescription',
+                    'value' => $readingGlassesNoNum,
+                ];
+                $noPrescriptionNum1 = $this->prescrtion_num('Noprescription', $site, $timeStr, $sku);
+                $noPrescriptionNum2 = $this->prescrtion_num('NonPrescription', $site, $timeStr, $sku);
+                $noPrescriptionNum = $noPrescriptionNum1 + $noPrescriptionNum2;
+                $noPrescriptionArr = [
+                    'name'  => 'no prescription',
+                    'value' => $noPrescriptionNum,
+                ];
+                if ($site == 2) {
+                    $sunglassesNum = $this->prescrtion_num('Sunglasses', $site, $timeStr, $sku);
+                    $sunglassesArr = [
+                        'name'  => 'sunglasses',
+                        'value' => $sunglassesNum,
+                    ];
+                    $sunglassesNoNum1 = $this->prescrtion_num('Sunglasses_NonPrescription', $site, $timeStr, $sku);
+                    $sunglassesNoNum2 = $this->prescrtion_num('SunGlassesNoprescription', $site, $timeStr, $sku);
+                    $sunglassesNoNum = $sunglassesNoNum1 + $sunglassesNoNum2;
+                    $sunglassesNoArr = [
+                        'name'  => 'sunglasses non-prescription',
+                        'value' => $sunglassesNoNum,
+                    ];
+                    $frameOnlyNum = $orderNum - $singleVisionNum - $progressiveNum - $readingGlassesNum - $readingGlassesNoNum - $noPrescriptionNum - $sunglassesNum - $sunglassesNoNum;
+                    $frameOnlyArr = [
+                        'name'  => 'frame only',
+                        'value' => $frameOnlyNum,
+                    ];
+                    $arr = [$singleVisionArr, $progressiveArr, $readingGlassesArr, $readingGlassesNoArr, $noPrescriptionArr, $sunglassesArr, $sunglassesNoArr, $frameOnlyArr];
+                } elseif ($site == 11) {
+                    $sunglassesNum = $this->prescrtion_num('SunGlasses', $site, $timeStr, $sku);
+                    $sunglassesArr = [
+                        'name'  => 'sunglasses',
+                        'value' => $sunglassesNum,
+                    ];
+                    $sunglassesNoNum = $this->prescrtion_num('SunGlassesNoprescription', $site, $timeStr, $sku);
+                    $sunglassesNoArr = [
+                        'name'  => 'sunglasses non-prescription',
+                        'value' => $sunglassesNoNum,
+                    ];
+                    $frameOnlyNum = $orderNum - $singleVisionNum - $progressiveNum - $readingGlassesNum - $readingGlassesNoNum - $noPrescriptionNum - $sunglassesNum - $sunglassesNoNum;
+                    $frameOnlyArr = [
+                        'name'  => 'frame only',
+                        'value' => $frameOnlyNum,
+                    ];
+                    $arr = [$singleVisionArr, $progressiveArr, $readingGlassesArr, $readingGlassesNoArr, $noPrescriptionArr, $sunglassesArr, $sunglassesNoArr, $frameOnlyArr];
+                } else {
+                    $frameOnlyNum = $orderNum - $singleVisionNum - $progressiveNum - $readingGlassesNum - $readingGlassesNoNum - $noPrescriptionNum;
+                    $frameOnlyArr = [
+                        'name'  => 'frame only',
+                        'value' => $frameOnlyNum,
+                    ];
+                    $arr = [$singleVisionArr, $progressiveArr, $readingGlassesArr, $readingGlassesNoArr, $noPrescriptionArr, $frameOnlyArr];
                 }
-            }elseif($site == 3){
-                $readingGlassesNum = $this->prescrtion_num('Reading Glasses',$site,$timeStr,$sku);
-                $readingGlassesArr = array(
-                    'name'=>'reading glasses',
-                    'value'=>$readingGlassesNum,
-                );
-                $readingGlassesNoNum = $this->prescrtion_num('Reading Glasses2',$site,$timeStr,$sku);
-                $readingGlassesNoArr = array(
-                    'name'=>'reading glasses no prescription',
-                    'value'=>$readingGlassesNoNum,
-                );
-                $noPrescriptionNum = $this->prescrtion_num('NonPrescription',$site,$timeStr,$sku);
-                $noPrescriptionArr = array(
-                    'name'=>'no prescription',
-                    'value'=>$noPrescriptionNum,
-                );
-                $sunglassesNum = $this->prescrtion_num('SunSingleVision',$site,$timeStr,$sku);
-                $sunglassesArr = array(
-                    'name'=>'sunglasses',
-                    'value'=>$sunglassesNum,
-                );
-                $sunglassesNoNum = $this->prescrtion_num('SunNonPrescription',$site,$timeStr,$sku);
-                $sunglassesNoArr = array(
-                    'name'=>'sunglasses non-prescription',
-                    'value'=>$sunglassesNoNum,
-                );
-                $frameOnlyNum = $orderNum-$singleVisionNum-$progressiveNum-$readingGlassesNum-$readingGlassesNoNum-$noPrescriptionNum-$sunglassesNum-$sunglassesNoNum;
-                $frameOnlyArr = array(
-                    'name'=>'frame only',
-                    'value'=>$frameOnlyNum,
-                );
-                $arr = [$singleVisionArr,$progressiveArr,$readingGlassesArr,$readingGlassesNoArr,$noPrescriptionArr,$sunglassesArr,$sunglassesNoArr,$frameOnlyArr];
+            } elseif ($site == 3) {
+                $readingGlassesNum = $this->prescrtion_num('Reading Glasses', $site, $timeStr, $sku);
+                $readingGlassesArr = [
+                    'name'  => 'reading glasses',
+                    'value' => $readingGlassesNum,
+                ];
+                $readingGlassesNoNum = $this->prescrtion_num('Reading Glasses2', $site, $timeStr, $sku);
+                $readingGlassesNoArr = [
+                    'name'  => 'reading glasses no prescription',
+                    'value' => $readingGlassesNoNum,
+                ];
+                $noPrescriptionNum = $this->prescrtion_num('NonPrescription', $site, $timeStr, $sku);
+                $noPrescriptionArr = [
+                    'name'  => 'no prescription',
+                    'value' => $noPrescriptionNum,
+                ];
+                $sunglassesNum = $this->prescrtion_num('SunSingleVision', $site, $timeStr, $sku);
+                $sunglassesArr = [
+                    'name'  => 'sunglasses',
+                    'value' => $sunglassesNum,
+                ];
+                $sunglassesNoNum = $this->prescrtion_num('SunNonPrescription', $site, $timeStr, $sku);
+                $sunglassesNoArr = [
+                    'name'  => 'sunglasses non-prescription',
+                    'value' => $sunglassesNoNum,
+                ];
+                $frameOnlyNum = $orderNum - $singleVisionNum - $progressiveNum - $readingGlassesNum - $readingGlassesNoNum - $noPrescriptionNum - $sunglassesNum - $sunglassesNoNum;
+                $frameOnlyArr = [
+                    'name'  => 'frame only',
+                    'value' => $frameOnlyNum,
+                ];
+                $arr = [$singleVisionArr, $progressiveArr, $readingGlassesArr, $readingGlassesNoArr, $noPrescriptionArr, $sunglassesArr, $sunglassesNoArr, $frameOnlyArr];
             }
         }
-        if($site == 5){
-            $readingGlassesNum = $this->prescrtion_num('ReadingGlasses',$site,$timeStr,$sku);
-            $readingGlassesArr = array(
-                'name'=>'reading glasses',
-                'value'=>$readingGlassesNum,
-            );
-            $noPrescriptionNum = $this->prescrtion_num('NoPrescription',$site,$timeStr,$sku);
-            $noPrescriptionArr = array(
-                'name'=>'no prescription',
-                'value'=>$noPrescriptionNum,
-            );
-            $lensOnlyNum = $this->prescrtion_num('LensOnly',$site,$timeStr,$sku);
-            $lensOnlyNumArr = array(
-                'name'=>'lens only',
-                'value'=>$lensOnlyNum,
-            );
-            $frameOnlyNum = $orderNum-$readingGlassesNum-$noPrescriptionNum-$lensOnlyNum;
-            $frameOnlyArr = array(
-                'name'=>'frame only',
-                'value'=>$frameOnlyNum,
-            );
-            $arr = [$readingGlassesArr,$noPrescriptionArr,$lensOnlyNumArr,$frameOnlyArr];
+        if ($site == 5) {
+            $readingGlassesNum = $this->prescrtion_num('ReadingGlasses', $site, $timeStr, $sku);
+            $readingGlassesArr = [
+                'name'  => 'reading glasses',
+                'value' => $readingGlassesNum,
+            ];
+            $noPrescriptionNum = $this->prescrtion_num('NoPrescription', $site, $timeStr, $sku);
+            $noPrescriptionArr = [
+                'name'  => 'no prescription',
+                'value' => $noPrescriptionNum,
+            ];
+            $lensOnlyNum = $this->prescrtion_num('LensOnly', $site, $timeStr, $sku);
+            $lensOnlyNumArr = [
+                'name'  => 'lens only',
+                'value' => $lensOnlyNum,
+            ];
+            $frameOnlyNum = $orderNum - $readingGlassesNum - $noPrescriptionNum - $lensOnlyNum;
+            $frameOnlyArr = [
+                'name'  => 'frame only',
+                'value' => $frameOnlyNum,
+            ];
+            $arr = [$readingGlassesArr, $noPrescriptionArr, $lensOnlyNumArr, $frameOnlyArr];
         }
+
         return $arr;
     }
 
     /**
      * 获取sku销量
-     * @param string $flag  标识：不传值查所有
-     * @param $site  站点
-     * @param string $time_str  时间
-     * @param string $sku  sku
+     *
+     * @param string $flag     标识：不传值查所有
+     * @param        $site     站点
+     * @param string $time_str 时间
+     * @param string $sku      sku
+     *
      * @return mixed
      * @author mjj
      * @date   2021/5/18 15:40:00
      */
-    function prescrtion_num($flag = '',$site,$time_str = '',$sku = ''){
-        if(!$time_str){
+    function prescrtion_num($flag = '', $site, $time_str = '', $sku = '')
+    {
+        if (!$time_str) {
             $start = strtotime(date('Y-m-d', strtotime('-6 day')));
-            $end   = time();
+            $end = time();
 
-        }else{
+        } else {
             $createat = explode(' ', $time_str);
             $start = strtotime($createat[0]);
-            $end = strtotime($createat[3].' 23:59:59');
+            $end = strtotime($createat[3] . ' 23:59:59');
         }
 
         $where['o.payment_time'] = ['between', [$start, $end]];
-        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
-        $where['i.sku'] = ['like',$sku.'%'];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery', 'shipped']];
+        $where['i.sku'] = ['like', $sku . '%'];
         $where['o.order_type'] = 1;
         $where['o.site'] = $site;
 
-        if($flag){
+        if ($flag) {
             $where['i.prescription_type'] = $flag;
         }
         $count = $this->order
@@ -519,6 +526,7 @@ class SingleItems extends Backend
             ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
             ->where($where)
             ->sum('i.qty');
+
         return $count;
     }
 
@@ -545,21 +553,22 @@ class SingleItems extends Backend
             $json['xColumnName'] = array_keys($recent_day_num);
             $json['columnData'] = [
                 [
-                    'type' => 'line',
-                    'data' => array_values($recent_day_num),
-                    'name' => '商品销量',
+                    'type'       => 'line',
+                    'data'       => array_values($recent_day_num),
+                    'name'       => '商品销量',
                     'yAxisIndex' => 0,
-                    'smooth' => true //平滑曲线
+                    'smooth'     => true //平滑曲线
                 ],
                 [
-                    'type' => 'line',
-                    'data' => array_values($recent_day_now),
-                    'name' => '售价',
+                    'type'       => 'line',
+                    'data'       => array_values($recent_day_now),
+                    'name'       => '售价',
                     'yAxisIndex' => 1,
-                    'smooth' => true //平滑曲线
+                    'smooth'     => true //平滑曲线
                 ],
 
             ];
+
             return json(['code' => 1, 'data' => $json]);
         }
     }
@@ -587,8 +596,9 @@ class SingleItems extends Backend
             $json['columnData'] = [
                 'type' => 'bar',
                 'data' => array_values($recent_30_day),
-                'name' => '销量'
+                'name' => '销量',
             ];
+
             return json(['code' => 1, 'data' => $json]);
         }
     }
@@ -601,7 +611,8 @@ class SingleItems extends Backend
      * Date: 2020/12/17
      * Time: 13:45:51
      */
-    public function export(){
+    public function export()
+    {
         set_time_limit(0);
         ini_set('memory_limit', '512M');
         $time_str = input('time_str') ? input('time_str') : '';
@@ -617,7 +628,7 @@ class SingleItems extends Backend
             $map['o.payment_time'] = ['between', [$start, $end]];
         }
         $map['i.sku'] = ['like', $sku . '%'];
-        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery','shipped']];
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery', 'shipped']];
         $map['o.order_type'] = 1;
         //关联购买
         $orderIds = $this->order
@@ -630,11 +641,11 @@ class SingleItems extends Backend
         $orderIdsWhere[] = ['exp', Db::raw("magento_order_id in " . $orderIds)];
         $arraySku = $this->orderitemoption
             ->where($orderIdsWhere)
-            ->where('site',$site)
-            ->where('sku','not like',$sku . '%')
+            ->where('site', $site)
+            ->where('sku', 'not like', $sku . '%')
             ->group('sku')
             ->order('count desc')
-            ->column('sum(qty) count','sku');
+            ->column('sum(qty) count', 'sku');
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
         $spreadsheet->setActiveSheetIndex(0);
@@ -646,7 +657,7 @@ class SingleItems extends Backend
         $spreadsheet->setActiveSheetIndex(0)->setTitle('SKU明细');
         $spreadsheet->setActiveSheetIndex(0);
         $num = 0;
-        foreach ($arraySku as $k=>$v){
+        foreach ($arraySku as $k => $v) {
             $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $k);
             $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v);
             $num += 1;
@@ -666,7 +677,7 @@ class SingleItems extends Backend
         $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
         $format = 'xlsx';
-        $savename = 'sku:'.$sku .' '. $createat[0] .'至'.$createat[3] .'关联购买情况';
+        $savename = 'sku:' . $sku . ' ' . $createat[0] . '至' . $createat[3] . '关联购买情况';
         if ($format == 'xls') {
             //输出Excel03版本
             header('Content-Type:application/vnd.ms-excel');
