@@ -166,7 +166,7 @@ class SingleItems extends Backend
                 ->join(['fa_order_item_option' => 'i'], 'o.entity_id=i.magento_order_id and o.site=i.site')
                 ->where($map)
                 ->group('o.id')
-                ->field('sum(o.base_grand_total),sum(o.base_discount_amount)')
+                ->field('sum(o.base_grand_total) as base_grand_total,sum(o.base_discount_amount) as base_discount_amount')
                 ->find();
             //总支付金额
             $wholePrice =  $wholeData['base_grand_total'];
