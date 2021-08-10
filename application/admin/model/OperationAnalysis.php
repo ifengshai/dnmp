@@ -389,22 +389,21 @@ class OperationAnalysis extends Model
         $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
         //新增购物车传化率 2020-11-25要改成 新增购物车产生的订单/新增的购物车数量 现在的计算方法是 订单支付成功数/新增购物车的数量
         if (false != $today_shoppingcart_total_data) {
-            //今日所有购物车的ids
-            $today_shoppingcart_total_sql = "SELECT entity_id from sales_flat_quote where base_grand_total>0 AND created_at between '$date_time_start' and '$date_time_end'";
-            $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-            $today_shoppingcart_total_ids = $model->query($today_shoppingcart_total_sql);
-            $today_shoppingcart_total_ids = implode(',', array_column($today_shoppingcart_total_ids, 'entity_id'));
-
-            //今天新增购物车产生的订单
-            $order_status = $this->order_status;
-            if($id == 11){
-                $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and (order_type=1 or order_type=10) and quote_id in ({$today_shoppingcart_total_ids})";
-            }else{
-                $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and order_type=1 and quote_id in ({$today_shoppingcart_total_ids})";
-            }
-
             //Meeloog站直接用上边的成功订单数
             if ($id != 3){
+                //今日所有购物车的ids
+                $today_shoppingcart_total_sql = "SELECT entity_id from sales_flat_quote where base_grand_total>0 AND created_at between '$date_time_start' and '$date_time_end'";
+                $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+                $today_shoppingcart_total_ids = $model->query($today_shoppingcart_total_sql);
+                $today_shoppingcart_total_ids = implode(',', array_column($today_shoppingcart_total_ids, 'entity_id'));
+
+                //今天新增购物车产生的订单
+                $order_status = $this->order_status;
+                if($id == 11){
+                    $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and (order_type=1 or order_type=10) and quote_id in ({$today_shoppingcart_total_ids})";
+                }else{
+                    $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and order_type=1 and quote_id in ({$today_shoppingcart_total_ids})";
+                }
                 $model->table('sales_flat_order')->query("set time_zone='+8:00'");
                 $today_order_success_rs = $model->query($today_order_success_sql);
                 $today_order_success_data_cart = $today_order_success_rs[0]['counter'];
