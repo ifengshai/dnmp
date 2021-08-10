@@ -169,9 +169,9 @@ class SingleItems extends Backend
                 ->field('sum(o.base_grand_total) as base_grand_total,sum(o.base_discount_amount) as base_discount_amount')
                 ->find();
             //总支付金额
-            $wholePrice =  $wholeData['base_grand_total'];
+            $wholePrice =  $wholeData->base_grand_total;
             //总折扣金额
-            $baseDiscountAmount =  $wholeData['base_discount_amount'];
+            $baseDiscountAmount =  $wholeData->base_discount_amount;
             //订单客单价
             $everyPrice = $total == 0 ? 0 : round($wholePrice / $total, 2);
 
