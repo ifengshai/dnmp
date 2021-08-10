@@ -11,7 +11,6 @@ use app\admin\model\itemmanage\Item;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\OrderNode;
 use app\admin\model\OrderNodeDetail;
-use app\admin\model\web\WebShoppingCart;
 use app\common\controller\Backend;
 use app\enum\Site;
 use fast\Excel;
@@ -2713,15 +2712,6 @@ class TrackReg extends Backend
         $platform = $this->request->get('platform');
         $this->getRefactDayData($platform);
     }
-
-    /**
-     * @throws \think\db\exception\BindParamException
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\ModelNotFoundException
-     * @throws \think\exception\DbException
-     * @throws \think\exception\PDOException
-     * @throws \think\Exception
-     */
     public function getRefactDayData($site)
     {
         $itemSkuModel = new \app\admin\model\itemmanage\ItemPlatformSku();
@@ -2827,16 +2817,10 @@ class TrackReg extends Backend
         $arr['order_total_standard'] = $this->getVariance($salesTotalMoney);//标准差
         $arr['online_celebrity_order_num'] = 0; //网红订单数
         $arr['online_celebrity_order_total'] = 0; //补发销售额
-
-        $shopping_cart = new WebShoppingCart();
-        $newCartNum = $shopping_cart->where('site', $site)->where($createWhere)->count(1);
-        $updateCartNum = $shopping_cart->where('site', $site)->where($updateWhere)->count(1);
-
-        $arr['new_cart_num'] = $newCartNum;//新建购物车数量
-        $arr['update_cart_num'] = $updateCartNum; //更新购物车数量
-        $arr['cart_rate'] = $newCartNum > 0 ? round(($arr['order_num'] / $newCartNum) * 100, 2) : 0;//新增购物车转化率
-        $arr['update_cart_cart'] = $updateCartNum > 0 ? round(($arr['order_num'] / $updateCartNum) * 100,
-            2) : 0;//更新购物车转化率
+        $arr['new_cart_num'] = 0;//新建购物车数量
+        $arr['update_cart_num'] = 0; //更新购物车数量
+        $arr['cart_rate'] = 0;//新增购物车转化率
+        $arr['update_cart_cart'] = 0;//更新购物车转化率
         //虚拟库存
         $virtualWhere['platform_type'] = $site;
         $virtualWhere['i.category_id'] = ['<>', 43];
