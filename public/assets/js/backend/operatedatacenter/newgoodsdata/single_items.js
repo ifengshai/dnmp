@@ -300,6 +300,12 @@ function order_data_view() {
         $('#whole_price').text(whole_price);
         var every_money = ret.data.everyMoney;
         $('#every_money').text(every_money);
+        var baseDiscountAmount = ret.data.baseDiscountAmount;
+        $('#baseDiscountAmount').text(baseDiscountAmount);
+        var wholeGlass = ret.data.wholeGlass;
+        $('#wholeGlass').text(wholeGlass);
+        var stock = ret.data.stock;
+        $('#stock').text(stock);
 
         var $table = $('#guanliangoumai');
         $table.html($("<tr>" + "<td>" + "SKU" + "</td>" + "<td>" + "数量" + "</td>" + "</tr>"));
