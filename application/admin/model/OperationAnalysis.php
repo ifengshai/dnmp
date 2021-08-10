@@ -2,7 +2,6 @@
 
 namespace app\admin\model;
 
-use app\admin\model\web\WebShoppingCart;
 use think\Collection;
 use think\Model;
 use think\Db;
@@ -200,93 +199,65 @@ class OperationAnalysis extends Model
         // Cache::set('operationAnalysis_get_today_order_success_'.$id,$today_order_success_data,3600);
         return $today_order_success_data;
     }
-
-    /**
+     /**
      * 根据站点获取今日购物车总数
      *
      * @Description created by lsw
-     * @param $id
-     * @return int
-     * @throws \think\Exception
-     * @since 2020/03/06 16:11:26
      * @author lsw
+     * @since 2020/03/06 16:11:26 
+     * @return void
      */
-    public function get_today_shoppingcart_total($id): int
+    public function get_today_shoppingcart_total($id)
     {
         //批发站无购物车
-        if ($id == 5) {
+        if ($id == 3 || $id == 5) {
             return 0;
         }
-        $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_total_'.$id);
+        $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_total_' . $id);
         if ($cacheData) {
-            return $cacheData;
+            // return $cacheData;
         }
-
-        $date_time_start = date('Y-m-d 00:00:00', time() - 8 * 3600);
-        $date_time_end = date('Y-m-d 23:59:59', time() - 8 * 3600);
-        $shopping_cart = new WebShoppingCart();
-        $where['created_at'] = ['between', [$date_time_start, $date_time_end]];
-        $where['site'] = $id;
-        // 除Meeloog外需要增加金额条件
-        if ($id != 3) {
-            $where['base_grand_total'] = ['>', 0];
-        }
-        $today_shoppingcart_total_data = $shopping_cart->where('site', $id)->where($where)->count(1);
-
-//        $model = $this->get_model_by_id($id);
-//        //今日购物车总数sql
-//        $today_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND created_at between '$date_time_start' and '$date_time_end'";
-//        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-//        //今日购物车总数
-//        $today_shoppingcart_total_rs = $model->query($today_shoppingcart_total_sql);
-//        $today_shoppingcart_total_data = $today_shoppingcart_total_rs[0]['counter'];
-
-
-        Cache::set('operationAnalysis_get_today_shoppingcart_total_'.$id, $today_shoppingcart_total_data, 3600);
+        $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
+        $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
+        $model = $this->get_model_by_id($id);
+        //今日购物车总数sql
+        $today_shoppingcart_total_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND created_at between '$date_time_start' and '$date_time_end'";
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        //今日购物车总数
+        $today_shoppingcart_total_rs = $model->query($today_shoppingcart_total_sql);
+        $today_shoppingcart_total_data = $today_shoppingcart_total_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_shoppingcart_total_' . $id, $today_shoppingcart_total_data, 360);
 
         return $today_shoppingcart_total_data;
-    }
 
+    }
     /**
      * 根据站点获取今日购物车新增总数
      *
      * @Description created by lsw
-     * @param $id
-     * @return int
-     * @throws \think\Exception
      * @author lsw
-     * @since 2020/03/06 16:11:26
+     * @since 2020/03/06 16:11:26 
+     * @return void
      */
-    public function get_today_shoppingcart_new($id): int
+    public function get_today_shoppingcart_new($id)
     {
-        if ($id == 5) {
+        if ($id == 3 || $id == 5) {
             return 0;
         }
-        $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_new_'.$id);
+        $cacheData = Cache::get('operationAnalysis_get_today_shoppingcart_new_' . $id);
         if ($cacheData) {
             return $cacheData;
         }
-        $date_time_start = date('Y-m-d 00:00:00', time() - 8 * 3600);
-        $date_time_end = date('Y-m-d 23:59:59', time() - 8 * 3600);
-
-        $shopping_cart = new WebShoppingCart();
-        $where['updated_at'] = ['between', [$date_time_start, $date_time_end]];
-        $where['site'] = $id;
-        // 除Meeloog外需要增加金额条件
-        if ($id != 3) {
-            $where['base_grand_total'] = ['>', 0];
-        }
-        $today_shoppingcart_new_data = $shopping_cart->where($where)->count(1);
-
-//        $model = $this->get_model_by_id($id);
-//        //今日新增购物车sql
-//        $today_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND updated_at between '$date_time_start' and '$date_time_end'";
-//        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
-//        //今日新增购物车总数
-//        $today_shoppingcart_new_rs = $model->query($today_shoppingcart_new_sql);
-//        $today_shoppingcart_new_data = $today_shoppingcart_new_rs[0]['counter'];
-
-        Cache::set('operationAnalysis_get_today_shoppingcart_new_'.$id, $today_shoppingcart_new_data, 3600);
+        $date_time_start = date('Y-m-d 00:00:00',time() - 8*3600);
+        $date_time_end = date('Y-m-d 23:59:59',time() - 8*3600);
+        $model = $this->get_model_by_id($id);
+        //今日新增购物车sql
+        $today_shoppingcart_new_sql = "SELECT count(*) counter from sales_flat_quote where base_grand_total>0 AND updated_at between '$date_time_start' and '$date_time_end'";
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        //今日新增购物车总数
+        $today_shoppingcart_new_rs = $model->query($today_shoppingcart_new_sql);
+        $today_shoppingcart_new_data = $today_shoppingcart_new_rs[0]['counter'];
+        Cache::set('operationAnalysis_get_today_shoppingcart_new_' . $id, $today_shoppingcart_new_data, 3600);
 
         return $today_shoppingcart_new_data;
     }   
@@ -403,14 +374,9 @@ class OperationAnalysis extends Model
                 $today_order_success_sql = "SELECT count(*) counter FROM sales_flat_order WHERE created_at between '$date_time_start' and '$date_time_end' $order_status and order_type=1 and quote_id in ({$today_shoppingcart_total_ids})";
             }
 
-            //Meeloog站直接用上边的成功订单数
-            if ($id != 3){
-                $model->table('sales_flat_order')->query("set time_zone='+8:00'");
-                $today_order_success_rs = $model->query($today_order_success_sql);
-                $today_order_success_data_cart = $today_order_success_rs[0]['counter'];
-            }else{
-                $today_order_success_data_cart = $today_order_success_data;
-            }
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+            $today_order_success_rs = $model->query($today_order_success_sql);
+            $today_order_success_data_cart = $today_order_success_rs[0]['counter'];
 
             // $today_shoppingcart_conversion_data     = round(($today_order_success_data/$today_shoppingcart_total_data),4)*100;
             $today_shoppingcart_conversion_data     = round(($today_order_success_data_cart/$today_shoppingcart_total_data),4)*100;

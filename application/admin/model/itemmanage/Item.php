@@ -417,11 +417,11 @@ class Item extends Model
      * 获取仓库镜架SKU
      *
      * @Description
-     * @return array
-     * @since 2020/02/24 16:47:21
      * @author wpl
+     * @since 2020/02/24 16:47:21 
+     * @return void
      */
-    public function getFrameSku(): array
+    public function getFrameSku()
     {
         //查询镜框分类有哪些
         $category = new \app\admin\model\itemmanage\ItemCategory;
@@ -429,10 +429,9 @@ class Item extends Model
         $map['is_del'] = 1;
         $ids = $category->where($map)->column('id');
 
-        $where['category_id'] = ['in', $ids];
-        $where['is_del'] = 1;
-        $where['is_open'] = 1;
-
+        $where['category_id']  = ['in', $ids];
+        $where['is_del']  = 1;
+        $where['is_open']  = 1;
         return $this->where($where)->column('sku');
     }
 

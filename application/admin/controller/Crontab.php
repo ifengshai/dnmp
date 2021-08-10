@@ -2306,7 +2306,7 @@ class Crontab extends Backend
         $map['created_at'] = $date['created_at'] = $update['updated_at'] = ['between', [$stime, $etime]];
         $map['status'] = [
             'in',
-            ['processing', 'complete', 'delivered', 'delivery', 'shipped'],
+            ['processing', 'complete', 'delivered', 'delivery'],
         ];
         $map['order_type'] = 1;
 
