@@ -639,7 +639,6 @@ class ItemPlatformSku extends Backend
                 $uploadItemArr['silk_length'] =intval( $itemAttributeDetail['silk_length']);
                 $uploadItemArr['silk_width'] = intval($itemAttributeDetail['silk_width']);
                 $uploadItemArr['pic'] = $itemAttributeDetail['frame_aws_imgs'];
-                $uploadItemArr['frame_length'] = intval($itemAttributeDetail['frame_length']);
             }
 
             //审核通过把SKU同步到有映射关系的平台
@@ -648,6 +647,7 @@ class ItemPlatformSku extends Backend
             $uploadItemArr['frame_height'] = intval($itemAttributeDetail['frame_height']);
             $uploadItemArr['frame_width'] = intval($itemAttributeDetail['frame_width']);
             $uploadItemArr['frame_temple_length'] = intval($itemAttributeDetail['frame_temple_length']);
+            $uploadItemArr['frame_length'] = intval($itemAttributeDetail['frame_length']);
             $uploadItemArr['frame_bridge'] = intval($itemAttributeDetail['frame_bridge']);
             $uploadItemArr['mirror_width'] = intval($itemAttributeDetail['mirror_width']);
             $uploadItemArr['frame_weight'] = $itemAttributeDetail['frame_weight'];
