@@ -231,7 +231,7 @@ class OperationAnalysis extends Model
         if ($id != 3) {
             $where['base_grand_total'] = ['>', 0];
         }
-        $today_shoppingcart_total_data = $shopping_cart->where('site', $id)->where($where)->count(1);
+        $today_shoppingcart_total_data = $shopping_cart->where($where)->count(1);
 
 //        $model = $this->get_model_by_id($id);
 //        //今日购物车总数sql
@@ -266,8 +266,8 @@ class OperationAnalysis extends Model
         if ($cacheData) {
             return $cacheData;
         }
-        $date_time_start = date('Y-m-d 00:00:00', time() - 8 * 3600);
-        $date_time_end = date('Y-m-d 23:59:59', time() - 8 * 3600);
+        $date_time_start = strtotime(date('Y-m-d 00:00:00', time() - 8 * 3600));
+        $date_time_end = strtotime(date('Y-m-d 23:59:59', time() - 8 * 3600));
 
         $shopping_cart = new WebShoppingCart();
         $where['updated_at'] = ['between', [$date_time_start, $date_time_end]];
