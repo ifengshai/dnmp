@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\operatedatacenter\NewGoodsData;
 
+use app\admin\model\itemmanage\ItemPlatformSku;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
@@ -194,7 +195,11 @@ class SingleItems extends Backend
                 ->group('sku')
                 ->order('count desc')
                 ->column('sum(qty) count', 'sku');
-            $data = compact('baseDiscountAmount','wholeGlass', 'sku', 'arraySku', 'total', 'wholePlatformOrderNum', 'orderRate', 'avgOrderGlass', 'payLens', 'payLensRate', 'onlyOneGlassNum', 'onlyOneGlassRate', 'everyPrice', 'wholePrice', 'everyMoney');
+
+            //查询虚拟仓库存
+            $itemPlatFormSku = new ItemPlatformSku();
+            $stock = $itemPlatFormSku->where(['platform_type' => $site,'platform_sku' => $sku])->value('stock');
+            $data = compact('stock','baseDiscountAmount','wholeGlass', 'sku', 'arraySku', 'total', 'wholePlatformOrderNum', 'orderRate', 'avgOrderGlass', 'payLens', 'payLensRate', 'onlyOneGlassNum', 'onlyOneGlassRate', 'everyPrice', 'wholePrice', 'everyMoney');
             $this->success('', '', $data);
         }
     }
