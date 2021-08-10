@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\admin\model\order\order\NewOrder;
+use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\purchase\PurchaseOrder;
 use app\admin\model\warehouse\LogisticsInfo;
 use app\admin\model\web\WebShoppingCart;
@@ -4747,9 +4748,10 @@ class Crontab extends Backend
      * 计算镜架销售副数和配饰销售副数
      *
      * @Description created by lsw
-     * @return void
-     * @since       2020/03/20 17:15:36
+     * @return string
+     * @throws \think\Exception
      * @author      lsw
+     * @since       2020/03/20 17:15:36
      */
     public function calculate_order_item_num()
     {
@@ -4757,50 +4759,45 @@ class Crontab extends Backend
         if (!$platform) {
             return 'error';
         }
-        switch ($platform) {
-            case 1:
-                $model = Db::connect('database.db_zeelool');
-                break;
-            case 2:
-                $model = Db::connect('database.db_voogueme');
-                break;
-            case 3:
-                $model = Db::connect('database.db_nihao');
-                break;
-            case 4:
-                $model = Db::connect('database.db_meeloog');
-                break;
-            default:
-                $model = false;
-                break;
-        }
-        if (false === $model) {
-            return false;
-        }
-        $model->query("set time_zone='+8:00'");
+
         //计算前一天的销量
-        $stime = date("Y-m-d 00:00:00", strtotime("-1 day"));
-        $etime = date("Y-m-d 23:59:59", strtotime("-1 day"));
-        $map['m.created_at'] = ['between', [$stime, $etime]];
-        $whereItem = " o.status in ('processing','complete','creditcard_proccessing','free_processing','paypal_canceled_reversal','paypal_reversed')";
+        $stime = strtotime(date("Y-m-d 00:00:00", strtotime("-1 day")));
+        $etime = strtotime(date("Y-m-d 23:59:59", strtotime("-1 day")));
+        $status = ['processing', 'complete', 'delivered'];
+
         //求出眼镜所有sku
         $frame_sku = $this->itemplatformsku->getDifferencePlatformSku(1, $platform);
         //求出饰品的所有sku
         $decoration_sku = $this->itemplatformsku->getDifferencePlatformSku(3, $platform);
-        //眼镜销售副数
-        $data['frame_sales_num'] = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $frame_sku)->count('*');
-        //眼镜动销数
-        $data['frame_in_print_num'] = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $frame_sku)->count('distinct m.sku');
-        //配饰的销售副数
-        $data['decoration_sales_num'] = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $decoration_sku)->count('*');
-        //配饰动销数
-        $data['decoration_in_print_num'] = $model->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')->where($whereItem)->where($map)->where('m.sku', 'in', $decoration_sku)->count('distinct m.sku');
+
+        $data = [];
+        $orderIds = (new NewOrder())->where('site', $platform)
+            ->whereBetween('created_at', [$stime, $etime])
+            ->whereIn('status', $status)
+            ->column('id');
+
+        $frames = (new NewOrderItemProcess())->whereIn('order_id', $orderIds)
+            ->whereIn('sku', $frame_sku)
+            ->where('site', $platform)
+            ->column('sku');
+
+        $data['frame_sales_num'] = count($frames);
+        $data['frame_in_print_num'] = count(array_unique($frames));
+        $decorations = (new NewOrderItemProcess())->whereIn('order_id', $orderIds)
+            ->where('site', $platform)
+            ->whereIn('sku', $decoration_sku)
+            ->column('sku');
+
+        $data['decoration_sales_num'] = count($decorations);
+        $data['decoration_in_print_num'] = count(array_unique($decorations));
+
         $data['platform'] = $platform;
         $data['create_date'] = date("Y-m-d", strtotime("-1 day"));
         $data['createtime'] = date("Y-m-d H:i:s");
+
         Db::name('order_item_info')->insert($data);
-        echo 'ok';
-        die;
+
+        return 'ok';
     }
 
     /**

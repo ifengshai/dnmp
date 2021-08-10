@@ -315,7 +315,7 @@ class ItemPlatformSku extends Model
      * @since 2020/03/23 10:04:36 
      * @param [type] $id 商品类型 1 镜架 3 配饰
      * @param [type] $platform 平台
-     * @return void
+     * @return array
      */
     public function getDifferencePlatformSku($id, $platform)
     {

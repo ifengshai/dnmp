@@ -2828,6 +2828,10 @@ class TrackReg extends Backend
         $arr['online_celebrity_order_num'] = 0; //网红订单数
         $arr['online_celebrity_order_total'] = 0; //补发销售额
 
+        $createWhere['created_at'] = $updateWhere['updated_at'] = [
+            'between', [strtotime($dateTimeStart), strtotime($dateTimeEnd)]
+        ];
+
         $shopping_cart = new WebShoppingCart();
         $newCartNum = $shopping_cart->where('site', $site)->where($createWhere)->count(1);
         $updateCartNum = $shopping_cart->where('site', $site)->where($updateWhere)->count(1);
