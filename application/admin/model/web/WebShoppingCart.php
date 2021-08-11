@@ -59,8 +59,8 @@ class WebShoppingCart extends Model
                     $params['customer_email'] = $v['customer_email'] ?: '';
                 }
                 $params['site'] = $site;
-                $params['created_at'] = strtotime($v['created_at']) ?: 0;
-                $params['updated_at'] = strtotime($v['updated_at']) ?: 0;
+                $params['created_at'] = strtotime($v['created_at'])+86400 ?: 0;
+                $params['updated_at'] = strtotime($v['updated_at'])+86400 ?: 0;
                 $cartId = (new WebShoppingCart())->insertGetId($params);
                 (new AsyncCart())->runInsert($params, $cartId);
 
@@ -110,7 +110,7 @@ class WebShoppingCart extends Model
                     $params['customer_email'] = $v['customer_email'] ?: '';
                     $id = $v['entity_id'];
                 }
-                $params['updated_at'] = strtotime($v['updated_at']) ?: 0;
+                $params['updated_at'] = strtotime($v['updated_at'])+86400 ?: 0;
                 (new WebShoppingCart())->where(['entity_id' => $id, 'site' => $site])->update($params);
                 $cart = (new WebShoppingCart())->where(['entity_id' => $id, 'site' => $site])->find();
                 if ($cart) {
