@@ -179,6 +179,13 @@ class OrderDataDetailNew extends Backend
                         ->limit($offset, $limit)
                         ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.code as coupon_code,o.coupon_id as discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.payer_email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group as group_id')
                         ->select();
+                    $count = $order_model->table('orders')->alias('o')
+                        ->join('users c','o.user_id=c.id','left')
+                        ->join('order_addresses d','d.order_id = o.id')
+                        ->where($where)
+                        ->where($mapNihao)
+                        ->where('d.type',1)
+                        ->select();
                 }else{
                     $list = $order_model->table('orders')->alias('o')
                         ->join('users c','o.user_id=c.id','left')
@@ -189,6 +196,13 @@ class OrderDataDetailNew extends Backend
                         ->order($sort, $order)
                         ->limit($offset, $limit)
                         ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.discount_code_id as coupon_code,o.discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group_id')
+                        ->select();
+                    $count = $order_model->table('orders')->alias('o')
+                        ->join('users c','o.user_id=c.id','left')
+                        ->join('orders_addresses d','d.order_id = o.id')
+                        ->where($where)
+                        ->where($mapWesee)
+                        ->where('d.type',1)
                         ->select();
                 }
                 $arr = array();
