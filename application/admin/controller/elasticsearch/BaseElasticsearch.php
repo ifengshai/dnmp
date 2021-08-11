@@ -440,39 +440,44 @@ class BaseElasticsearch extends Backend
      * @author crasphb
      * @date   2021/4/1 15:23
      */
-    public function deleteIndex()
+    public function deleteIndex(): array
     {
         return $this->esService->deleteIndex('mojing_order');
     }
+
     /**
      * 通过id更新order_node表中es条目
-     * @param $index  索引
-     * @param $data   数组数据
+     * @param $index
+     * @param $data
+     * @return array|callable|void
      * @author mjj
      * @date   2021/4/22 16:16:09
      */
-    public function updateEsById($index,$data){
-       return $this->esService->updateEs($index,$data);
+    public function updateEsById($index, $data)
+    {
+        return $this->esService->updateEs($index, $data);
     }
+
     /**
      * 格式化时间字段，方便后续查询聚合
      *
+     * @param $value
      * @param $date
      *
      * @return array
      * @author crasphb
      * @date   2021/4/1 15:21
      */
-    public function formatDate($value,$date)
+    public function formatDate($value, $date): array
     {
-        $format =  [
-            'year'       => date('Y', $date),
-            'month'      => date('m', $date),
+        $format = [
+            'year' => date('Y', $date),
+            'month' => date('m', $date),
             'month_date' => date('Ym', $date),
-            'day'        => date('d', $date),
-            'day_date'   => date('Ymd', $date),
-            'hour'       => date('H', $date),
-            'hour_date'  => date('YmdH', $date),
+            'day' => date('d', $date),
+            'day_date' => date('Ymd', $date),
+            'hour' => date('H', $date),
+            'hour_date' => date('YmdH', $date),
         ];
         return array_merge($value, $format);
     }

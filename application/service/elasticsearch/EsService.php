@@ -223,13 +223,13 @@ class EsService
     /**
      * 删除索引
      *
-     * @param $indexName
+     * @param  string  $indexName
      *
      * @return array
      * @author crasphb
      * @date   2021/4/1 15:23
      */
-    public function deleteIndex(string $indexName)
+    public function deleteIndex(string $indexName): array
     {
         $params = ['index' => $indexName];
 

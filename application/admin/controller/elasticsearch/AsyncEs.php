@@ -254,6 +254,42 @@ class AsyncEs extends BaseElasticsearch
     }
 
     /**
+     * 同步Meeloog购物车
+     * @author crasphb
+     * @date   2021/5/10 13:51
+     */
+    public function syncMeeloogCart()
+    {
+        WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,updated_at,created_at')
+            ->where('site', 3)
+            ->where('created_at', '>', strtotime('2021-08-01 00:00:00'))
+            ->chunk(10000, function ($carts) {
+                array_map(function ($value) {
+                    $value = array_map(function ($v) {
+                        return $v === null ? 0 : $v;
+                    }, $value);
+                    $mergeData = $value['created_at'] + 8 * 3600;
+                    $insertData = [
+                        'id' => $value['id'],
+                        'site' => $value['site'],
+                        'entity_id' => $value['entity_id'],
+                        'status' => $value['is_active'],
+                        'base_grand_total' => $value['base_grand_total'],
+                        'update_time_day' => date('Ymd', $value['updated_at'] + 8 * 3600),
+                        'update_time_hour' => date('H', $value['updated_at'] + 8 * 3600),
+                        'update_time' => $value['updated_at'] + 8 * 3600,
+                        'create_time' => $mergeData,
+                    ];
+
+                    $data = $this->formatDate($insertData, $mergeData);
+                    $this->updateEsById('mojing_cart', $data);
+
+                    echo $value['id'].PHP_EOL;
+                }, collection($carts)->toArray());
+            }, 'id', 'desc');
+    }
+
+    /**
      * 同步用户数据
      * @author crasphb
      * @date   2021/5/10 13:58
