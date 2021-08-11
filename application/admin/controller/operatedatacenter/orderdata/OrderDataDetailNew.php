@@ -185,7 +185,7 @@ class OrderDataDetailNew extends Backend
                         ->where($where)
                         ->where($mapNihao)
                         ->where('d.type',1)
-                        ->select();
+                        ->count();
                 }else{
                     $list = $order_model->table('orders')->alias('o')
                         ->join('users c','o.user_id=c.id','left')
@@ -203,7 +203,7 @@ class OrderDataDetailNew extends Backend
                         ->where($where)
                         ->where($mapWesee)
                         ->where('d.type',1)
-                        ->select();
+                        ->count();
                 }
                 $arr = array();
                 $i = 0;
