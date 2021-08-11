@@ -56,8 +56,8 @@ class WebVipOrder extends Model
                 }
 
                 $params[$k]['site'] = $site;
-                $params[$k]['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) : 0;
-                $params[$k]['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) : 0;
+                $params[$k]['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time'])+86400 : 0;
+                $params[$k]['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time'])+86400 : 0;
                 $params[$k]['created_at'] = time();
                 $params[$k]['updated_at'] = time();
 
@@ -104,8 +104,8 @@ class WebVipOrder extends Model
                     $params[$k]['pay_status'] = $v['pay_status'] ?: 0;
                     $params[$k]['is_active_status'] = $v['is_active_status'] ?: 0;
                 }
-                $params[$k]['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time']) : 0;
-                $params[$k]['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time']) : 0;
+                $params[$k]['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time'])+86400 : 0;
+                $params[$k]['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time'])+86400 : 0;
                 $params[$k]['updated_at'] = time();
 
                 $params[$k]['country_id'] = $v['country_id'] ?: 0;
