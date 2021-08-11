@@ -261,6 +261,7 @@ class AsyncEs extends BaseElasticsearch
     public function syncMeeloogCart()
     {
         WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
+            ->where('site', 3)
             ->where('created_at', '>', strtotime('2021-08-01 00:00:00'))
             ->chunk(10000, function ($carts) {
                 array_map(function ($value) {
@@ -296,7 +297,80 @@ class AsyncEs extends BaseElasticsearch
     public function syncMeeloogUpdateCart()
     {
         WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
+            ->where('site', 3)
             ->where('updated_at', '>', strtotime('2021-08-01 00:00:00'))
+            ->chunk(10000, function ($carts) {
+                array_map(function ($value) {
+                    $value = array_map(function ($v) {
+                        return $v === null ? 0 : $v;
+                    }, $value);
+                    $mergeData = $value['created_at'];
+                    $insertData = [
+                        'id' => $value['id'],
+                        'site' => $value['site'],
+                        'entity_id' => $value['entity_id'],
+                        'status' => $value['is_active'],
+                        'base_grand_total' => $value['base_grand_total'],
+                        'update_time_day' => date('Ymd', $value['updated_at']),
+                        'update_time_hour' => date('H', $value['updated_at']),
+                        'update_time' => $value['updated_at'],
+                        'create_time' => $mergeData,
+                    ];
+
+                    $data = $this->formatDate($insertData, $mergeData);
+                    $this->updateEsById('mojing_cart', $data);
+
+                    echo $value['id'].PHP_EOL;
+                }, collection($carts)->toArray());
+            }, 'id', 'desc');
+    }
+
+    /**
+     * 同步购物车
+     *
+     * @author fangke
+     * @date   2021/8/11 4:24 下午
+     */
+    public function syncCart()
+    {
+        WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
+            ->where('created_at', '>', strtotime('2021-08-11 00:00:00'))
+            ->chunk(10000, function ($carts) {
+                array_map(function ($value) {
+                    $value = array_map(function ($v) {
+                        return $v === null ? 0 : $v;
+                    }, $value);
+                    $mergeData = $value['created_at'];
+                    $insertData = [
+                        'id' => $value['id'],
+                        'site' => $value['site'],
+                        'entity_id' => $value['entity_id'],
+                        'status' => $value['is_active'],
+                        'base_grand_total' => $value['base_grand_total'],
+                        'update_time_day' => date('Ymd', $value['updated_at']),
+                        'update_time_hour' => date('H', $value['updated_at']),
+                        'update_time' => $value['updated_at'],
+                        'create_time' => $mergeData,
+                    ];
+
+                    $data = $this->formatDate($insertData, $mergeData);
+                    $this->updateEsById('mojing_cart', $data);
+
+                    echo $value['id'].PHP_EOL;
+                }, collection($carts)->toArray());
+            }, 'id', 'desc');
+    }
+
+    /**
+     * 同步M更新购物车
+     *
+     * @author fangke
+     * @date   2021/8/11 4:24 下午
+     */
+    public function syncUpdateCart()
+    {
+        WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
+            ->where('updated_at', '>', strtotime('2021-08-11 00:00:00'))
             ->chunk(10000, function ($carts) {
                 array_map(function ($value) {
                     $value = array_map(function ($v) {
