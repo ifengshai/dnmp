@@ -55,8 +55,8 @@ class WebUsers extends Model
                     $params['resouce'] = $v['resouce'] ?: 0;
                 }
                 $params['site'] = $site;
-                $params['created_at'] = strtotime($v['created_at'])+86400;
-                $params['updated_at'] = strtotime($v['updated_at'])+86400;
+                $params['created_at'] = strtotime($v['created_at'])+28800;
+                $params['updated_at'] = strtotime($v['updated_at'])+28800;
                 $userId = (new WebUsers)->insertGetId($params);
                 //新增用户信息
                 (new AsyncCustomer())->runInsert($params, $userId);
@@ -104,7 +104,7 @@ class WebUsers extends Model
                     $id = $v['entity_id'];
                 }
 
-                $params['updated_at'] = strtotime($v['updated_at'])+86400;
+                $params['updated_at'] = strtotime($v['updated_at'])+28800;
                 (new WebUsers())->where(['entity_id' => $id, 'site' => $site])->update($params);
 
                 $user = (new WebUsers())->where(['entity_id' => $id, 'site' => $site])->find();
@@ -149,8 +149,8 @@ class WebUsers extends Model
                 $params['site'] = $site;
                 $params['group_id'] = $v['group_id'] ?: 0;
                 $params['store_id'] = $v['store_id'] ?: 0;
-                $params['created_at'] = strtotime($v['created_at'])+86400;
-                $params['updated_at'] = strtotime($v['updated_at'])+86400;
+                $params['created_at'] = strtotime($v['created_at'])+28800;
+                $params['updated_at'] = strtotime($v['updated_at'])+28800;
                 $params['is_vip'] = $v['is_vip'];
                 $userId = (new WebUsers)->insertGetId($params);
                 //新增用户信息
@@ -188,7 +188,7 @@ class WebUsers extends Model
                 $params['email'] = $v['email'];
                 $params['group_id'] = $v['group_id'] ?: 0;
                 $params['store_id'] = $v['store_id'] ?: 0;
-                $params['updated_at'] = strtotime($v['updated_at'])+86400;
+                $params['updated_at'] = strtotime($v['updated_at'])+28800;
                 $params['is_vip'] = $v['is_vip'] ?: 0;
 
                 (new WebUsers())->where(['entity_id' => $v['id'], 'site' => $site])->update($params);
