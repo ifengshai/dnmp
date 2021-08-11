@@ -222,8 +222,8 @@ class OperationAnalysis extends Model
             return $cacheData;
         }
 
-        $date_time_start = strtotime(date('Y-m-d 00:00:00', time() - 8 * 3600));
-        $date_time_end = strtotime(date('Y-m-d 23:59:59', time() - 8 * 3600));
+        $date_time_start = strtotime(date('Y-m-d 00:00:00', time()));
+        $date_time_end = strtotime(date('Y-m-d 23:59:59', time()));
         $shopping_cart = new WebShoppingCart();
         $where['created_at'] = ['between', [$date_time_start, $date_time_end]];
         $where['site'] = $id;
@@ -266,8 +266,8 @@ class OperationAnalysis extends Model
         if ($cacheData) {
             return $cacheData;
         }
-        $date_time_start = strtotime(date('Y-m-d 00:00:00', time() - 8 * 3600));
-        $date_time_end = strtotime(date('Y-m-d 23:59:59', time() - 8 * 3600));
+        $date_time_start = strtotime(date('Y-m-d 00:00:00', time()));
+        $date_time_end = strtotime(date('Y-m-d 23:59:59', time()));
 
         $shopping_cart = new WebShoppingCart();
         $where['updated_at'] = ['between', [$date_time_start, $date_time_end]];
