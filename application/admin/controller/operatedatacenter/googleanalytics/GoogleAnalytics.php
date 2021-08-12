@@ -47,7 +47,6 @@ class GoogleAnalytics  extends Backend
 
             echo $start. PHP_EOL;
             echo $end. PHP_EOL;
-            dump($getGaResult);
             dump($orders);
             dump($quotes);die;
             $skus = array_unique(array_merge(array_keys($orders),array_keys($quotes)));
@@ -61,8 +60,8 @@ class GoogleAnalytics  extends Backend
                     if ((strpos($ga_value['pagePath'], strtolower($sku)) !== false   && strpos($ga_value['pagePath'], 'goods-detail') !== false)) {
                         // echo '包含该SKU';
                         $magento_list[$key]['pagePath'] += $ga_value['pagePath'].'</br>';
-                        $magento_list[$key]['pageviews'] += $ga_value['pageviews'];
-                        $magento_list[$key]['uniquePageviews'] += $ga_value['uniquePageviews'];
+                        $magento_list[$key]['pageviews'] += (int)$ga_value['pageviews'];
+                        $magento_list[$key]['uniquePageviews'] += (int)$ga_value['uniquePageviews'];
                         //由于获取数据是降序排序，取uniquePageviews最大值为有效值
                         if ($magento_list[$key]['uniquePageviews'] == $ga_value['uniquePageviews']) {
                             $magento_list[$key]['avgTimeOnPage'] = $ga_value['avgTimeOnPage'];
