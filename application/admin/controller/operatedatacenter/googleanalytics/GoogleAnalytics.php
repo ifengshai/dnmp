@@ -46,9 +46,6 @@ class GoogleAnalytics  extends Backend
             $quotes = $this->getCart($site,$start . ' 00:00:00',$end. ' 23:59:59');
 
             $skus = array_unique(array_merge(array_keys($orders),array_keys($quotes)));
-            dump($orders);
-            dump($quotes);
-            echo array_pop($skus);die;
             $magento_list = [];
             foreach ($skus as $key => $sku) {
 
@@ -115,7 +112,7 @@ class GoogleAnalytics  extends Backend
         $orders = $model->table('fa_order_item_option')
             ->alias('a')
             ->join('fa_order b','b.id=a.order_id')
-            ->field('sum(a.qty) as qtycount,sku')
+            ->field('round(sum(a.qty),0) as qtycount,sku')
             ->where('b.site',$site)
             ->where('b.status','in','complete','processing','delivered','delivery')
             ->where('b.created_at','between',[strtotime($start),strtotime($end)])
@@ -167,7 +164,7 @@ class GoogleAnalytics  extends Backend
         }else{
             $quoteSKuCount = $model->table('sales_flat_quote_item');
         }
-        $quotes = $quoteSKuCount->field('sum(qty) as qtycount,sku')
+        $quotes = $quoteSKuCount->field('round(sum(a.qty),0) as qtycount,sku')
             ->where('created_at','between',[$start,$end])
             ->group('sku')
             ->select();
