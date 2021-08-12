@@ -78,14 +78,14 @@ class GoogleAnalytics  extends Backend
 
             foreach ($magento_list as $key => $magento_value) {
                 if ($magento_value['sku_quote_counter'] && $magento_value['uniquePageviews']) {
-                    $magento_list[$key]['quote_uniquePageviews_percent'] = round($magento_value['sku_quote_counter'] / $sku['uniquePageviews'] * 100, 2) . '%';
+                    $magento_list[$key]['quote_uniquePageviews_percent'] = round($magento_value['sku_quote_counter'] / $magento_value['uniquePageviews'] * 100, 2) . '%';
                 }
 
                 if ($magento_value['sku_quote_counter'] && $magento_value['sku_order_counter']) {
                     $magento_list[$key]['order_quote_percent'] = round($magento_value['sku_order_counter'] / $magento_value['sku_quote_counter'] * 100, 2) . '%';
                 }
                 if ($magento_value['uniquePageviews'] && $magento_value['sku_order_counter']) {
-                    $magento_list[$key]['order_uniquePageviews_percent'] = round($sku['sku_order_counter'] / $sku['uniquePageviews'] * 100, 2) . '%';
+                    $magento_list[$key]['order_uniquePageviews_percent'] = round($magento_value['sku_order_counter'] / $magento_value['uniquePageviews'] * 100, 2) . '%';
                 }
             }
             $result = array("total" => count($magento_list), "rows" => $magento_list);
