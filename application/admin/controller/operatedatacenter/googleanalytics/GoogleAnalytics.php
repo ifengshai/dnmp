@@ -42,13 +42,8 @@ class GoogleAnalytics  extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             $googleAnalytics = new \app\service\google\GoogleAnalytics($site);
             $getGaResult = $googleAnalytics->getGaResult($start,$end);
-            $orders = $this->getOrder($site,$start,$end);
-            $quotes = $this->getCart($site,$start,$end);
-
-            echo $start. PHP_EOL;
-            echo $end. PHP_EOL;
-            dump($orders);
-            dump($quotes);die;
+            $orders = $this->getOrder($site,$start . ' 00:00:00',$end. ' 23:59:59');
+            $quotes = $this->getCart($site,$start . ' 00:00:00',$end. ' 23:59:59');
             $skus = array_unique(array_merge(array_keys($orders),array_keys($quotes)));
             $magento_list = [];
             foreach ($skus as $key => $sku) {
