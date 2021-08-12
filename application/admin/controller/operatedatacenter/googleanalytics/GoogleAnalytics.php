@@ -1,0 +1,177 @@
+<?php
+/**
+ * GoogleAnalytics.php
+ * @author huangbinbin
+ * @date   2021/8/10 17:11
+ */
+
+namespace app\admin\controller\operatedatacenter\googleanalytics;
+
+
+use app\common\controller\Backend;
+use app\enum\Site;
+use think\Db;
+
+class GoogleAnalytics  extends Backend
+{
+    /**
+     * @throws \Google_Exception
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            $end = date('Ymd');
+            $filter = json_decode($this->request->get('filter'), true);
+            $site = 1;
+            $start = date('Y-m-d', strtotime('-6 day'));
+            if($filter['site']){
+                $site = $filter['site'];
+            }
+            if($filter['time']){
+                $createat = explode(' ', $filter['time']);
+                $start = date('Ymd', strtotime($createat[0]));
+                $end = date('Ymd', strtotime($createat[3]));
+            }
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $googleAnalytics = new \app\service\google\GoogleAnalytics($site);
+            $getGaResult = $googleAnalytics->getGaResult($start,$end);
+            $orders = $this->getOrder($site,$start,$end);
+            $quotes = $this->getCart($site,$start,$end);
+
+            $skus = array_unique(array_merge(array_keys($orders),array_keys($quotes)));
+            $magento_list = [];
+            foreach ($skus as $key => $sku) {
+
+                $magento_list[$key]['sku_quote_counter'] = $quotes[$sku] ?? 0;
+                $magento_list[$key]['sku_order_counter'] = $orders[$sku] ?? 0;
+
+                foreach ($getGaResult as $ga_key => $ga_value) {
+                    if ((strpos($ga_value['pagePath'], strtolower($sku)) !== false   && strpos($ga_value['pagePath'], 'goods-detail') !== false)) {
+                        // echo '包含该SKU';
+                        $magento_list[$key]['pagePath'] += $ga_value['pagePath'].'</br>';
+                        $magento_list[$key]['pageviews'] += $ga_value['pageviews'];
+                        $magento_list[$key]['uniquePageviews'] += $ga_value['uniquePageviews'];
+                        //由于获取数据是降序排序，取uniquePageviews最大值为有效值
+                        if ($magento_list[$key]['uniquePageviews'] == $ga_value['uniquePageviews']) {
+                            $magento_list[$key]['avgTimeOnPage'] = $ga_value['avgTimeOnPage'];
+                            $magento_list[$key]['entranceRate'] = $ga_value['entranceRate'];
+                            $magento_list[$key]['exitRate'] = $ga_value['exitRate'];
+                            $magento_list[$key]['pageValue'] = $ga_value['pageValue'];
+                        }
+                        $magento_list[$key]['entrances'] += $ga_value['entrances'];
+                        $magento_list[$key]['exits'] += $ga_value['exits'];
+                    }
+                }
+                $magento_list[$key]['true_sku'] = $sku;
+                $magento_list[$key]['entrances'] = sprintf('%.2f',$magento_list[$key]['entrances']).'%';
+                $magento_list[$key]['exits'] = sprintf('%.2f',$magento_list[$key]['exits']).'%';
+                $magento_list[$key]['pageValue'] = sprintf('%.2f',$magento_list[$key]['pageValue']);
+                $magento_list[$key]['time'] = date('Y-m-d H:i:s');
+                $magento_list[$key]['site'] = rand(1,20);
+            }
+
+            foreach ($magento_list as $key => $magento_value) {
+                if ($magento_value['sku_quote_counter'] && $magento_value['uniquePageviews']) {
+                    $magento_list[$key]['quote_uniquePageviews_percent'] = round($magento_value['sku_quote_counter'] / $sku['uniquePageviews'] * 100, 2) . '%';
+                }
+
+                if ($magento_value['sku_quote_counter'] && $magento_value['sku_order_counter']) {
+                    $magento_list[$key]['order_quote_percent'] = round($magento_value['sku_order_counter'] / $magento_value['sku_quote_counter'] * 100, 2) . '%';
+                }
+                if ($magento_value['uniquePageviews'] && $magento_value['sku_order_counter']) {
+                    $magento_list[$key]['order_uniquePageviews_percent'] = round($sku['sku_order_counter'] / $sku['uniquePageviews'] * 100, 2) . '%';
+                }
+            }
+            $result = array("total" => count($magento_list), "rows" => $magento_list);
+
+            return json($result);
+        }
+        return $this->view->fetch();
+    }
+
+    /**
+     * @param $site
+     * @param $start
+     * @param $end
+     *
+     * @return mixed
+     * @author huangbinbin
+     * @date   2021/8/11 18:10
+     */
+    public function getOrder($site,$start,$end)
+    {
+        $model = Db::connect('database.db_mojing_order');
+
+        $orders = $model->table('fa_order_item_option')
+            ->alias('a')
+            ->join('fa_order b','b.id=a.order_id')
+            ->field('sum(a.qty) as qtycount,sku')
+            ->where('b.site',$site)
+            ->where('b.status','in','complete','processing','delivered','delivery')
+            ->where('b.created_at','between',[strtotime($start),strtotime($end)])
+            ->group('a.sku')
+            ->select();
+        if($orders) {
+            return array_column($orders,'qtycount','sku');
+        }
+        return [];
+    }
+
+    /**
+     * @param $site
+     * @param $start
+     * @param $end
+     *
+     * @return mixed
+     * @author huangbinbin
+     * @date   2021/8/11 18:27
+     */
+    public function getCart($site,$start,$end)
+    {
+        switch ($site) {
+            case Site::ZEELOOL:
+                $model = Db::connect('database.db_zeelool');
+                break;
+            case Site::VOOGUEME:
+                $model = Db::connect('database.db_voogueme');
+                break;
+            case Site::NIHAO:
+                $model = Db::connect('database.db_nihao');
+                break;
+            case Site::ZEELOOL_DE:
+                $model = Db::connect('database.db_zeelool_de');
+                break;
+            case Site::ZEELOOL_JP:
+                $model = Db::connect('database.db_zeelool_jp');
+                break;
+            case Site::WESEEOPTICAL:
+                $model = Db::connect('database.db_weseeoptical');
+                break;
+            case Site::ZEELOOL_FR:
+                $model = Db::connect('database.db_zeelool_fr');
+                break;
+        }
+        if($site == 3 || $site == 5) {
+            $quoteSKuCount = $model->table('carts');
+
+        }else{
+            $quoteSKuCount = $model->table('sales_flat_quote_item');
+        }
+        $quotes = $quoteSKuCount->field('sum(qty) as qtycount,sku')
+            ->where('created_at','between',[$start,$end])
+            ->group('sku')
+            ->select();
+        if($quotes) {
+            return array_column($quotes,'qtycount','sku');
+        }
+        return [];
+
+    }
+}
