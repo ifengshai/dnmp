@@ -109,15 +109,13 @@ class GoogleAnalytics  extends Backend
     {
         $model = Db::connect('database.db_mojing_order');
 
-        echo $start.PHP_EOL;
-        echo $end;
         $orders = $model->table('fa_order_item_option')
             ->alias('a')
             ->join('fa_order b','b.id=a.order_id')
             ->field('round(sum(a.qty),0) as qtycount,sku')
             ->where('b.site',$site)
             ->where('b.status','in','complete','processing','delivered','delivery')
-            ->where('b.created_at','between',[strtotime($start),strtotime($end)])
+            ->where('b.created_at','between',[strtotime($start) - 8*3600,strtotime($end) - 8*3600])
             ->group('a.sku')
             ->select();
         if($orders) {
