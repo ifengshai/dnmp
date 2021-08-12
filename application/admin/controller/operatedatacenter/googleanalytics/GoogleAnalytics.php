@@ -164,7 +164,7 @@ class GoogleAnalytics  extends Backend
         }else{
             $quoteSKuCount = $model->table('sales_flat_quote_item');
         }
-        $quotes = $quoteSKuCount->field('round(sum(a.qty),0) as qtycount,sku')
+        $quotes = $quoteSKuCount->field('round(sum(qty),0) as qtycount,sku')
             ->where('created_at','between',[$start,$end])
             ->group('sku')
             ->select();
