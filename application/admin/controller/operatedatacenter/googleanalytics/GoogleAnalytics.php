@@ -54,7 +54,7 @@ class GoogleAnalytics  extends Backend
                 foreach ($getGaResult as $ga_key => $ga_value) {
                     if ((strpos($ga_value['pagePath'], strtolower($sku)) !== false   && strpos($ga_value['pagePath'], 'goods-detail') !== false)) {
                         // echo '包含该SKU';
-                        $magento_list[$key]['pagePath'] += $ga_value['pagePath'].'</br>';
+                        $magento_list[$key]['pagePath'] .= $ga_value['pagePath'].'</br>';
                         $magento_list[$key]['pageviews'] += (int)$ga_value['pageviews'];
                         $magento_list[$key]['uniquePageviews'] += (int)$ga_value['uniquePageviews'];
                         //由于获取数据是降序排序，取uniquePageviews最大值为有效值
