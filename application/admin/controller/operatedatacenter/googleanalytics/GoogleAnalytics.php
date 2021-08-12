@@ -22,7 +22,7 @@ class GoogleAnalytics  extends Backend
         //设置过滤方法
         $this->request->filter(['strip_tags']);
         if ($this->request->isAjax()) {
-            $end = date('Ymd');
+            $end = date('Y-m-d');
             $filter = json_decode($this->request->get('filter'), true);
             $site = 1;
             $start = date('Y-m-d', strtotime('-6 day'));
@@ -31,8 +31,8 @@ class GoogleAnalytics  extends Backend
             }
             if($filter['time']){
                 $createat = explode(' ', $filter['time']);
-                $start = date('Ymd', strtotime($createat[0]));
-                $end = date('Ymd', strtotime($createat[3]));
+                $start = date('Y-m-d', strtotime($createat[0]));
+                $end = date('Y-m-d', strtotime($createat[3]));
             }
             //如果发送的来源是Selectpage，则转发到Selectpage
             if ($this->request->request('keyField')) {
