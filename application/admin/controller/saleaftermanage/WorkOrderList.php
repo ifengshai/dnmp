@@ -2356,7 +2356,7 @@ class WorkOrderList extends Backend
             $siteType = input('site_type');
             $prescriptionType = input('prescription_type', '');
             $key = $siteType . '_get_lens';
-            //$data = Cache::get($key);
+            $data = Cache::get($key);
             if (!$data) {
                 if ($siteType == 13 || $siteType == 14) {
                     $data = $this->model->httpRequest($siteType, 'api/mojing/lens_data', ['prescriptionType' => $prescriptionType], 'POST');
@@ -2365,7 +2365,7 @@ class WorkOrderList extends Backend
                 }else {
                     $data = $this->model->httpRequest($siteType, 'magic/product/lensData');
                 }
-                Cache::set($key, $data, 3600 * 24);
+                Cache::set($key, $data, 3600);
             }
             if ($siteType == 13 || $siteType == 14) {
                 $lensType = $data;
@@ -3743,7 +3743,9 @@ EOF;
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $_new_order_item_process = new NewOrderItemProcess();
         foreach ($list as $key => $item) {
-
+            if (!$item['order_item_numbers']) {
+                continue;
+            }
             $orders = $_new_order_item_process->field('item_order_number,site,sku')
                 ->where(['item_order_number' => ['in', $item['order_item_numbers']]])
                 ->select();
