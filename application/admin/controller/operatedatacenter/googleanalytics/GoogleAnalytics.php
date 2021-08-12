@@ -45,6 +45,11 @@ class GoogleAnalytics  extends Backend
             $orders = $this->getOrder($site,$start,$end);
             $quotes = $this->getCart($site,$start,$end);
 
+            echo $start. PHP_EOL;
+            echo $end. PHP_EOL;
+            dump($getGaResult);
+            dump($orders);
+            dump($quotes);die;
             $skus = array_unique(array_merge(array_keys($orders),array_keys($quotes)));
             $magento_list = [];
             foreach ($skus as $key => $sku) {
