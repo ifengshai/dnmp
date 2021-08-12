@@ -44,7 +44,11 @@ class GoogleAnalytics  extends Backend
             $getGaResult = $googleAnalytics->getGaResult($start,$end);
             $orders = $this->getOrder($site,$start . ' 00:00:00',$end. ' 23:59:59');
             $quotes = $this->getCart($site,$start . ' 00:00:00',$end. ' 23:59:59');
+
             $skus = array_unique(array_merge(array_keys($orders),array_keys($quotes)));
+            dump($orders);
+            dump($quotes);
+            echo array_pop($skus);die;
             $magento_list = [];
             foreach ($skus as $key => $sku) {
 
@@ -68,7 +72,7 @@ class GoogleAnalytics  extends Backend
                         $magento_list[$key]['exits'] += $ga_value['exits'];
                     }
                 }
-                $magento_list[$key]['true_sku'] = $sku;
+                $magento_list[$key]['sku'] = $sku;
                 $magento_list[$key]['entrances'] = sprintf('%.2f',$magento_list[$key]['entrances']).'%';
                 $magento_list[$key]['exits'] = sprintf('%.2f',$magento_list[$key]['exits']).'%';
                 $magento_list[$key]['pageValue'] = sprintf('%.2f',$magento_list[$key]['pageValue']);
