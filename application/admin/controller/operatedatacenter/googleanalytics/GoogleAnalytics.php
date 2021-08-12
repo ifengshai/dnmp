@@ -53,7 +53,7 @@ class GoogleAnalytics  extends Backend
                 $magento_list[$key]['sku_order_counter'] = $orders[$sku] ?? 0;
 
                 foreach ($getGaResult as $ga_key => $ga_value) {
-                    if ((strpos($ga_value['pagePath'], strtolower($sku)) !== false   && strpos($ga_value['pagePath'], 'goods-detail') !== false)) {
+                    if ((strpos(strtolower($ga_value['pagePath']), strtolower($sku)) !== false   && strpos(strtolower($ga_value['pagePath']), 'goods-detail') !== false)) {
                         // echo '包含该SKU';
                         $magento_list[$key]['pagePath'] .= $ga_value['pagePath'].'</br>';
                         $magento_list[$key]['pageviews'] += (int)$ga_value['pageviews'];
@@ -109,6 +109,8 @@ class GoogleAnalytics  extends Backend
     {
         $model = Db::connect('database.db_mojing_order');
 
+        echo $start.PHP_EOL;
+        echo $end;
         $orders = $model->table('fa_order_item_option')
             ->alias('a')
             ->join('fa_order b','b.id=a.order_id')
