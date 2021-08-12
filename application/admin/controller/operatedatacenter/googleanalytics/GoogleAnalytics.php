@@ -137,25 +137,25 @@ class GoogleAnalytics  extends Backend
     {
         switch ($site) {
             case Site::ZEELOOL:
-                $model = Db::connect('database.db_zeelool');
+                $model = Db::connect('database.db_zeelool_online');
                 break;
             case Site::VOOGUEME:
-                $model = Db::connect('database.db_voogueme');
+                $model = Db::connect('database.db_voogueme_online');
                 break;
             case Site::NIHAO:
-                $model = Db::connect('database.db_nihao');
+                $model = Db::connect('database.db_nihao_online');
                 break;
             case Site::ZEELOOL_DE:
-                $model = Db::connect('database.db_zeelool_de');
+                $model = Db::connect('database.db_zeelool_de_online');
                 break;
             case Site::ZEELOOL_JP:
-                $model = Db::connect('database.db_zeelool_jp');
+                $model = Db::connect('database.db_zeelool_jp_online');
                 break;
             case Site::WESEEOPTICAL:
-                $model = Db::connect('database.db_weseeoptical');
+                $model = Db::connect('database.db_weseeoptical_online');
                 break;
             case Site::ZEELOOL_FR:
-                $model = Db::connect('database.db_zeelool_fr');
+                $model = Db::connect('database.db_zeelool_fr_online');
                 break;
         }
         if($site == 3 || $site == 5) {
