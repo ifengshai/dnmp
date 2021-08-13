@@ -1662,7 +1662,7 @@ class Distribution extends Backend
         set_time_limit(0);
         ini_set('memory_limit', '1048M');
         //获取所有spu对应的
-        $spu = Db::connect('database.db_stock')->table('fa_item')->column('sku','origin_sku');
+        $spu = Db::connect('database.db_stock')->table('fa_item')->column('origin_sku','sku');
         $spuEd = Db::name('zz_temp3')->where("1=1")->column('a,ed','sku');
 
 
