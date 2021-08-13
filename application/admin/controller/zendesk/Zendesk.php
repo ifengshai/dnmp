@@ -404,6 +404,8 @@ class Zendesk extends Backend
                         'raw_subject' => $rawSubject,
                         'assignee_id' => $assignee_id,
                         'assign_id' => session('admin.id'),
+                        'due_id' => session('admin.id'),
+                        'assign_time' => date('Y-m-d H:i:s', time()),
                         'email_cc' => $params['email_cc'],
                         'zendesk_update_time' => date('Y-m-d H:i:s', time()),
                         'is_urgency' => $params['is_urgency'] ?? 0,
