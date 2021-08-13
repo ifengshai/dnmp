@@ -862,6 +862,11 @@ class DataMarket extends Backend
                     ->join(['fa_purchase_order_item' => 'b'],'a.id=b.purchase_id')
                     ->sum('b.purchase_num');
                 $data[$key]['purchase_num'] = $purchaseNum;
+
+                $instockNum = $this->instock->alias('o')->join('fa_in_stock_item i', 'o.id=i.in_stock_id',
+                    'left')->where('status', 2)->where('createtime', 'between', $mapWhere['createtime'][1])->sum('i.in_stock_num');;
+                $data[$key]['instock_num'] = $instockNum;
+
                 $data[$key]['purchase_sales_rate'] = $value['sales_num'] != 0 ? round($purchaseNum / $value['sales_num'] * 100, 2) : 0;
             }
             $arr['day_date'] = date('Y-m');
@@ -888,16 +893,30 @@ class DataMarket extends Backend
                 ]
             ];
             $sales_num = $this->order->where($map1)->sum('total_qty_ordered');
+            $arr['sales_num'] = $sales_num;
+            $instockNum = $this->instock->alias('o')->join('fa_in_stock_item i', 'o.id=i.in_stock_id',
+                'left')->where('status', 2)->where('createtime', 'between', $map['createtime'][1])->sum('i.in_stock_num');
+            $arr['instock_num'] = $instockNum;
             $arr['purchase_sales_rate'] = $sales_num != 0 ? round($purchase_num / $sales_num * 100, 2) : 0;
             $data[] = $arr;
 
             $json['xColumnName'] = array_column($data, 'day_date');
-            $json['column'] = ['月度采购数量'];
+            $json['column'] = ['采购数量', '入库数量', '销售数量'];
             $json['columnData'] = [
                 [
                     'type' => 'bar',
                     'data' => array_column($data, 'purchase_num'),
-                    'name' => '月度采购数量'
+                    'name' => '采购数量'
+                ],
+                [
+                    'type' => 'bar',
+                    'data' => array_column($data, 'instock_num'),
+                    'name' => '入库数量'
+                ],
+                [
+                    'type' => 'bar',
+                    'data' => array_column($data, 'sales_num'),
+                    'name' => '销售数量'
                 ],
                 [
                     'type' => 'line',
