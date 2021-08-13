@@ -1657,6 +1657,485 @@ class Distribution extends Backend
         $writer->save('php://output');
     }
 
+    public function batch_export_xls_new()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '1048M');
+        //获取所有spu对应的
+        $spu = Db::connect('database.db_stock')->table('fa_item')->column('sku','origin_sku');
+        $spuEd = Db::name('zz_temp3')->where("1=1")->column('a,ed','sku');
+
+        $list = $this->model
+            ->alias('a')
+            ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time,b.payment_method,d.check_time')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
+            ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
+            ->where('b.status','in','complete, processing, creditcard_proccessing')
+            ->where('b.payment_time','between',['1614589573','1630487173'])
+            ->where('c.prescription_type','SingleVision')
+            ->limit(20)
+            ->select();
+        $list = collection($list)->toArray();
+
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)
+            ->setCellValue("A1", "ID")
+            ->setCellValue("B1", "日期")
+            ->setCellValue("C1", "订单号")
+            ->setCellValue("D1", "站点")
+            ->setCellValue("E1", "订单类型")
+            ->setCellValue("F1", "订单状态")
+            ->setCellValue("G1", "子单号")
+            ->setCellValue("H1", "SKU")
+            ->setCellValue("I1", "眼球")
+            ->setCellValue("J1", "SPH")
+            ->setCellValue("K1", "CYL")
+            ->setCellValue("L1", "AXI")
+            ->setCellValue("M1", "ADD")
+            ->setCellValue("N1", "PD")
+            ->setCellValue("O1", "镜片")
+            ->setCellValue("P1", "镜框宽度")
+            ->setCellValue("Q1", "镜框高度")
+            ->setCellValue("R1", "bridge")
+            ->setCellValue("S1", "处方类型")
+            ->setCellValue("T1", "(A)配镜片直径")
+            ->setCellValue("U1", "(A)定制/现片")
+            ->setCellValue("V1", "(A)定制/现片")
+            ->setCellValue("W1", "(ED)配镜片直径")
+            ->setCellValue("X1", "(ED)定制/现片")
+            ->setCellValue("Y1", "(ED)定制/现片");
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
+
+        //站点列表
+        $site_list = [
+            1  => 'Zeelool',
+            2  => 'Voogueme',
+            3  => 'Nihao',
+            4  => 'Meeloog',
+            5  => 'Wesee',
+            8  => 'Amazon',
+            9  => 'Zeelool_es',
+            10 => 'Zeelool_de',
+            11 => 'Zeelool_jp',
+            15 => 'Zeelool_fr',
+        ];
+
+        //子单号状态
+        $distribution_status_list = [
+            1 => '待打印标签',
+            2 => '待配货',
+            3 => '待配镜片',
+            4 => '待加工',
+            5 => '待印logo',
+            6 => '待成品质检',
+            7 => '待合单',
+            8 => '合单中',
+            9 => '合单完成',
+        ];
+
+
+        //获取更改镜框最新信息
+        $change_sku = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'       => 1,
+                'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
+                'b.operation_type'    => 1,
+            ])
+            ->column('a.change_sku', 'a.item_order_number');
+
+        //获取更改镜片最新处方信息
+        $change_lens = $this->_work_order_change_sku
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'       => 2,
+                'a.item_order_number' => ['in', array_column($list, 'item_order_number')],
+                'b.operation_type'    => 1,
+            ])
+            ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,a.web_lens_name', 'a.item_order_number');
+
+        if ($change_lens) {
+            foreach ($change_lens as $key => $val) {
+                if ($val['pd_l'] && $val['pd_r']) {
+                    $change_lens[$key]['pd'] = '';
+                    $change_lens[$key]['pdcheck'] = 'on';
+                } else {
+                    $change_lens[$key]['pd'] = $val['pd_r'] ?: $val['pd_l'];
+                    $change_lens[$key]['pdcheck'] = '';
+                }
+            }
+        }
+
+        //获取镜片编码及名称
+        $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
+        foreach ($list as $key => &$value) {
+            //更改镜框最新sku
+            if ($change_sku[$value['item_order_number']] || $value['site'] == 13 || $value['site'] == 14 || $value['site'] == 15) {
+                $value['sku'] = $change_sku[$value['item_order_number']] ?? $value['sku'];
+                $tmp_bridge = $this->getSkuAttr($value['sku'], $value['site']);
+                //$getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
+            } else {
+                //过滤饰品站 批发站
+                if ($value['site'] != 12 && $value['site'] != 3) {
+                    //查询镜框尺寸
+                    $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
+                }
+
+                if ( $value['site'] == 3) {
+                    $tmp_bridge['lens_width'] = $value['lens_width'];
+                    $tmp_bridge['lens_height'] = $value['lens_height'];
+                    $tmp_bridge['bridge'] = $value['bridge'];
+                }
+            }
+
+            $data[$value['increment_id']]['item_order'][$key]['lens_width'] = $tmp_bridge['lens_width'];
+            $data[$value['increment_id']]['item_order'][$key]['lens_height'] = $tmp_bridge['lens_height'];
+            $data[$value['increment_id']]['item_order'][$key]['bridge'] = $tmp_bridge['bridge'];
+
+            //更改镜片最新数据
+            if ($change_lens[$value['item_order_number']]) {
+                $value = array_merge($value, $change_lens[$value['item_order_number']]);
+            }
+
+            $data[$value['increment_id']]['id'] = $value['id'];
+            $data[$value['increment_id']]['created_at'] = $value['created_at'];
+            $data[$value['increment_id']]['increment_id'] = $value['increment_id'];
+            $data[$value['increment_id']]['site'] = $value['site'];
+            $data[$value['increment_id']]['order_type'] = $value['order_type'];
+            $data[$value['increment_id']]['status'] = $value['status'];
+            $data[$value['increment_id']]['item_order'][$key]['item_order_number'] = $value['item_order_number'];
+            $data[$value['increment_id']]['item_order'][$key]['sku'] = $value['sku'];
+            $data[$value['increment_id']]['item_order'][$key]['od_sph'] = $value['od_sph'];
+            $data[$value['increment_id']]['item_order'][$key]['od_cyl'] = $value['od_cyl'];
+            $data[$value['increment_id']]['item_order'][$key]['od_axis'] = $value['od_axis'];
+            $data[$value['increment_id']]['item_order'][$key]['od_add'] = $value['od_add'];
+            $data[$value['increment_id']]['item_order'][$key]['os_add'] = $value['os_add'];
+            $data[$value['increment_id']]['item_order'][$key]['pd'] = $value['pd'];
+            $data[$value['increment_id']]['item_order'][$key]['pdcheck'] = $value['pdcheck'];
+            $data[$value['increment_id']]['item_order'][$key]['product_id'] = $value['product_id'];
+
+            $data[$value['increment_id']]['item_order'][$key]['prescription_type'] = $value['prescription_type'];
+            $data[$value['increment_id']]['item_order'][$key]['od_pv'] = $value['od_pv'];
+            $data[$value['increment_id']]['item_order'][$key]['os_pv'] = $value['os_pv'];
+            $data[$value['increment_id']]['item_order'][$key]['pd_r'] = $value['pd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['pd_l'] = $value['pd_l'];
+            $data[$value['increment_id']]['item_order'][$key]['os_pv'] = $value['os_pv'];
+            $data[$value['increment_id']]['item_order'][$key]['os_bd'] = $value['os_bd'];
+            $data[$value['increment_id']]['item_order'][$key]['od_bd'] = $value['od_bd'];
+            $data[$value['increment_id']]['item_order'][$key]['od_pv_r'] = $value['od_pv_r'];
+            $data[$value['increment_id']]['item_order'][$key]['os_bd_r'] = $value['os_bd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['od_bd_r'] = $value['od_bd_r'];
+            $data[$value['increment_id']]['item_order'][$key]['os_pv_r'] = $value['os_pv_r'];
+            $data[$value['increment_id']]['item_order'][$key]['os_sph'] = $value['os_sph'];
+            $data[$value['increment_id']]['item_order'][$key]['od_sph'] = $value['od_sph'];
+            $data[$value['increment_id']]['item_order'][$key]['os_cyl'] = $value['os_cyl'];
+            $data[$value['increment_id']]['item_order'][$key]['od_cyl'] = $value['od_cyl'];
+            $data[$value['increment_id']]['item_order'][$key]['os_axis'] = $value['os_axis'];
+            $data[$value['increment_id']]['item_order'][$key]['od_axis'] = $value['od_axis'];
+            $data[$value['increment_id']]['item_order'][$key]['lens_number'] = $value['lens_number'];
+            $data[$value['increment_id']]['item_order'][$key]['web_lens_name'] = $value['web_lens_name'] ?: $value['index_name'];
+            $data[$value['increment_id']]['item_order'][$key]['product_id'] = $value['product_id'];
+            $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];
+            $data[$value['increment_id']]['base_currency_code'] = $value['base_currency_code'];
+            $data[$value['increment_id']]['base_grand_total'] = $value['base_grand_total'];
+            $data[$value['increment_id']]['payment_method'] = $value['payment_method'];
+            $data[$value['increment_id']]['payment_time'] = $value['payment_time'];
+            $data[$value['increment_id']]['check_time'] = $value['check_time'];
+        }
+        unset($value);
+        $cat = '0';
+        foreach ($data as $key => &$value) {
+            $num = $cat + 2;
+
+
+            //网站SKU转换仓库SKU
+            $value['prescription_type'] = isset($value['prescription_type']) ? $value['prescription_type'] : '';
+
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($num), $value['id']); //id
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($num), date('Y-m-d', $value['created_at'])); //日期
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($num), $value['increment_id']); //订单号
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($num), $site_list[$value['site']]); //站点
+            switch ($value['order_type']) {
+                case OrderType::REGULAR_ORDER:
+                    $value['order_type'] = '普通订单';
+                    break;
+                case OrderType::WHOLESALE_ORDER:
+                    $value['order_type'] = '批发单';
+                    break;
+                case OrderType::SOCIAL_ORDER:
+                    $value['order_type'] = '网红单';
+                    break;
+                case OrderType::REPLACEMENT_ORDER:
+                    $value['order_type'] = '补发单';
+                    break;
+                case OrderType::DIFFERENCE_ORDER:
+                    $value['order_type'] = '补差价';
+                    break;
+                case OrderType::PAYROLL_ORDER:
+                    $value['order_type'] = '一件代发';
+                    break;
+                case OrderType::VIP_ORDER:
+                    $value['order_type'] = 'vip订单';
+                    break;
+                case OrderType::CASH_DELIVERY_ORDER:
+                    $value['order_type'] = '货到付款';
+                    break;
+                case OrderType::CONVENIENCE_ORDER:
+                    $value['order_type'] = '便利店支付';
+                    break;
+                default:
+                    break;
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($num), $value['order_type']); //订单类型
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($num), $value['status']); //订单状态
+            foreach ($value['item_order'] as $k => $v) {
+                $v['od_sph'] = isset($v['od_sph']) ? urldecode($v['od_sph']) : '';
+                $v['os_sph'] = isset($v['os_sph']) ? urldecode($v['os_sph']) : '';
+                $v['od_cyl'] = isset($v['od_cyl']) ? urldecode($v['od_cyl']) : '';
+                $v['os_cyl'] = isset($v['os_cyl']) ? urldecode($v['os_cyl']) : '';
+                $cat += 2;
+                $spreadsheet->getActiveSheet()->setCellValue("G" . ($cat), $v['item_order_number']); //子单号
+                $spreadsheet->getActiveSheet()->setCellValue("H" . ($cat), $v['sku']); //sku
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($cat), '右眼'); //眼球
+                $spreadsheet->getActiveSheet()->setCellValue("I" . ($cat + 1), '左眼'); //眼球
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($cat), (float)$v['od_sph'] > 0 ? ' +' . number_format($v['od_sph'] * 1, 2) : ' ' . $v['od_sph']); //SPH
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($cat + 1), (float)$v['os_sph'] > 0 ? ' +' . number_format($v['os_sph'] * 1, 2) : ' ' . $v['os_sph']); //SPH
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($cat), (float)$v['od_cyl'] > 0 ? ' +' . number_format($v['od_cyl'] * 1, 2) : ' ' . $v['od_cyl']); //CYL
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($cat + 1), (float)$v['os_cyl'] > 0 ? ' +' . number_format($v['os_cyl'] * 1, 2) : ' ' . $v['os_cyl']); //CYL
+                $spreadsheet->getActiveSheet()->setCellValue("L" . ($cat), $v['od_axis']); //AXI
+                $spreadsheet->getActiveSheet()->setCellValue("L" . ($cat + 1), $v['os_axis']); //AXI
+                $v['os_add'] = urldecode($v['os_add']);
+                $v['od_add'] = urldecode($v['od_add']);
+
+
+
+                //计算逻辑
+//                1.单眼定制/现片的判断：
+//
+//            当SPH>0，镜片直径RD/LD>65时，判断为定制；镜片直径RD/LD<65时，判断为现片；
+//
+//            当SPH<0，镜片直径RD/LD>70时，判断为定制；镜片直径RD/LD<70时，判断为现片；
+//
+//        2.眼镜的定制/现片
+//
+//            镜片直径的计算：（若客户提供的是总PD则需要将总PD拆分成单眼PD进行计算）
+//
+//                1.根据ED值进行计算
+//
+//                右眼镜片直径RD=向下取整[ED*2+DBL+3-向上取整（右眼PD*2）]
+//
+//                左眼镜片直径LD=向下取整[ED*2+DBL+3-向上取整（左眼PD*2）]
+//
+//                2.根据A值进行计算
+//
+//                右眼镜片直径RD=向下取整[A*2+DBL+3-向上取整（右眼PD*2）]
+//
+//                左眼镜片直径LD=向下取整[A*2+DBL+3-向上取整（左眼PD*2）]
+
+                $ed = isset($spuEd[$spu[$v['sku']]]) ? $spuEd[$spu[$v['sku']]]['ed'] : 0;
+                $a = isset($spuEd[$spu[$v['sku']]]) ? $spuEd[$spu[$v['sku']]]['a'] : 0;
+                $dbl = $v['bridge'];
+                if($v['pdcheck'] == 'on') {
+                    $pdr =  bcmul($v['pd_r'],2);
+                    $pdl =  bcmul($v['pd_l'],2);
+                    $edRd = floor(bcsub(bcadd(bcadd(bcmul($ed,2),3),$dbl,4))) - ceil($pdr);
+                    $edLd = floor(bcsub(bcadd(bcadd(bcmul($ed,2),3),$dbl,4))) - ceil($pdl);
+                    $ARd = floor(bcsub(bcadd(bcadd(bcmul($a,2),3),$dbl,4))) - ceil($pdr);
+                    $ALd = floor(bcsub(bcadd(bcadd(bcmul($a,2),3),$dbl,4))) - ceil($pdl);
+
+                }else{
+                    $edLd = $edRd = floor(bcsub(bcadd(bcadd(bcmul($ed,2),3),$dbl,4))) - ceil($v['pd']);
+                    $ARd = $ALd = floor(bcsub(bcadd(bcadd(bcmul($a,2),3),$dbl,4))) - ceil($v['pd']);
+                }
+                $edRLable = $aRLable = $edLable = $aLable = '';
+                if((float)$v['od_sph'] > 0) {
+                    if(bcdiv($edRd,$edLd,0) > 65) {
+                        $edRLable = '定制片';
+                    }else{
+                        $edRLable = '现片';
+                    }
+                    if(bcdiv($ARd,$ALd,0) > 65) {
+                        $aRLable = '定制片';
+                    }else{
+                        $aRLable = '现片';
+                    }
+                }else{
+                    if(bcdiv($edRd,$edLd,0) > 70) {
+                        $edRLable = '定制片';
+                    }else{
+                        $edRLable = '现片';
+                    }
+                    if(bcdiv($ARd,$ALd,0) > 70) {
+                        $aRLable = '定制片';
+                    }else{
+                        $aRLable = '现片';
+                    }
+                }
+                if((float)$v['os_sph'] > 0) {
+                    if(bcdiv($edRd,$edLd,0) > 65) {
+                        $edLable = '定制片';
+                    }else{
+                        $edLable = '现片';
+                    }
+                    if(bcdiv($ARd,$ALd,0) > 65) {
+                        $aLable = '定制片';
+                    }else{
+                        $aLable = '现片';
+                    }
+                }else{
+                    if(bcdiv($edRd,$edLd,0) > 70) {
+                        $edLable = '定制片';
+                    }else{
+                        $edLable = '现片';
+                    }
+                    if(bcdiv($ARd,$ALd,0) > 70) {
+                        $aLable = '定制片';
+                    }else{
+                        $aLable = '现片';
+                    }
+                }
+
+
+
+                if ($v['os_add'] && $v['od_add'] && (float)($v['os_add']) * 1 != 0 && (float)($v['od_add']) * 1 != 0) {
+                    $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat), $v['od_add']); //ADD
+                    $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat + 1), $v['os_add']); //ADD
+                } else {
+
+                    if ($v['os_add'] && (float)$v['os_add'] * 1 != 0) {
+                        //数值在上一行合并有效，数值在下一行合并后为空
+                        $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat), $v['os_add']);
+                        $spreadsheet->getActiveSheet()->mergeCells("M" . ($cat) . ":M" . ($cat + 1));
+                    } else {
+                        //数值在上一行合并有效，数值在下一行合并后为空
+                        $spreadsheet->getActiveSheet()->setCellValue("M" . ($cat), $v['od_add']);
+                        $spreadsheet->getActiveSheet()->mergeCells("M" . ($cat) . ":M" . ($cat + 1));
+                    }
+                }
+
+                if ($v['pdcheck'] == 'on') {
+                    $spreadsheet->getActiveSheet()->setCellValue("N" . ($cat), $v['pd_r']); //单PD
+                    $spreadsheet->getActiveSheet()->setCellValue("N" . ($cat + 1), $v['pd_l']); //单PD
+                } else {
+                    $spreadsheet->getActiveSheet()->setCellValue("N" . ($cat), $v['pd']); //PD
+                    $spreadsheet->getActiveSheet()->mergeCells("N" . ($cat) . ":N" . ($cat + 1)); //PD
+                }
+
+                $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
+                $spreadsheet->getActiveSheet()->setCellValue("O" . ($cat), $lens_name); //镜片
+                $spreadsheet->getActiveSheet()->setCellValue("P" . ($cat), $v['lens_width']); //镜框宽度
+                $spreadsheet->getActiveSheet()->setCellValue("Q" . ($cat), $v['lens_height']); //镜框高度
+                $spreadsheet->getActiveSheet()->setCellValue("R" . ($cat), $v['bridge']); //bridge
+                $spreadsheet->getActiveSheet()->setCellValue("S" . ($cat), $v['prescription_type']); //处方类型
+
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat), $a); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat + 1), $a); //Prism
+
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($cat), $aRLable); //Direct
+                $spreadsheet->getActiveSheet()->setCellValue("U" . ($cat + 1), $aLable); //Direct
+
+                $spreadsheet->getActiveSheet()->setCellValue("V" . ($cat), $aRLable . '/' . $aLable); //处方类型
+
+                $spreadsheet->getActiveSheet()->setCellValue("W" . ($cat), $ed); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("W" . ($cat + 1), $ed); //Prism
+
+                $spreadsheet->getActiveSheet()->setCellValue("X" . ($cat), $edRLable); //Direct
+                $spreadsheet->getActiveSheet()->setCellValue("X" . ($cat + 1), $edLable); //Direct
+
+                $spreadsheet->getActiveSheet()->setCellValue("Y" . ($cat), $edRLable . '/' . $edLable); //处方类型
+                //单元格合并
+                $spreadsheet->getActiveSheet()->mergeCells("G" . ($cat) . ":G" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("H" . ($cat) . ":H" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("O" . ($cat) . ":O" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("P" . ($cat) . ":P" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("Q" . ($cat) . ":Q" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("R" . ($cat) . ":R" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("S" . ($cat) . ":S" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("V" . ($cat) . ":V" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("Y" . ($cat) . ":Y" . ($cat + 1));
+
+
+
+            }
+
+            //合并单元格
+
+            $spreadsheet->getActiveSheet()->mergeCells("A" . ($num) . ":A" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("B" . ($num) . ":B" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("C" . ($num) . ":C" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("D" . ($num) . ":D" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("E" . ($num) . ":E" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("F" . ($num) . ":F" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("G" . ($num) . ":G" . ($num + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("H" . ($num) . ":H" . ($num + 1));
+
+
+            $spreadsheet->getActiveSheet()->mergeCells("X" . ($num) . ":X" . ($cat + 1));
+            $spreadsheet->getActiveSheet()->mergeCells("Y" . ($num) . ":Y" . ($cat + 1));
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('O')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('P')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Q')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('R')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('S')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(15);
+        //自动换行
+        $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:AC' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AC' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $save_name = '配货列表' . date("YmdHis", time());
+        //输出07Excel版本
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $save_name . '.xlsx"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+    }
+
     /**
      * 获取SKU属性
      *
