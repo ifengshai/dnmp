@@ -147,7 +147,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                 }, function (data, ret) {
                     table.bootstrapTable('refresh');
                 });
-            })
+            });
+            //批量导出xls
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                if (ids.length > 0) {
+                    window.open(Config.moduleurl + '/warehouse/stock_transfer_order/batch_export_xls?id_params=' + ids, '_blank');
+                } else {
+                    var options = table.bootstrapTable('getOptions');
+                    var search = options.queryParams({});
+                    var filter = search.filter;
+                    var op = search.op;
+                    window.open(Config.moduleurl + '/warehouse/stock_transfer_order/batch_export_xls?filter=' + filter + '&op=' + op, '_blank');
+                }
+
+            });
             //审核拒绝
             $(document).on('click', '.btn-close', function () {
                 var ids = Table.api.selectedids(table);
