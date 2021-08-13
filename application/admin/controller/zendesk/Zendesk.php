@@ -262,6 +262,7 @@ class Zendesk extends Backend
                         $this->model->validateFailException(true)->validate($validate);
                     }
                     $type = input('type');
+                    $admin_id = input('admin_id');
                     $siteName = 'zeelool';
                     if ($type == 2) {
                         $siteName = 'voogueme';
@@ -271,7 +272,7 @@ class Zendesk extends Backend
                     $tags = ZendeskTags::where('id', 'in', $params['tags'])->column('name');
                     $status = config('zendesk.status')[$params['status']];
                     $author_id = $assignee_id = ZendeskAgents::where([
-                        'admin_id' => session('admin.id'),
+                        'admin_id' => $admin_id,
                         'type' => $type
                     ])->value('agent_id');
                     if (!$author_id) {
@@ -320,7 +321,7 @@ class Zendesk extends Backend
                     $sign = Db::name('zendesk_signvalue')->where('site', $type)->value('signvalue');
                     //获取zendesk用户的昵称
                     $zendeskAgentInfo = Db::name('zendesk_agents')->where('type', $type)->where('admin_id',
-                        session('admin.id'))->field('nickname,account_level')->find();
+                        $admin_id)->field('nickname,account_level')->find();
                     $zendeskNickname = $zendeskAgentInfo['nickname'] ? $zendeskAgentInfo['nickname'] : $siteName;
                     //替换签名中的昵称
                     if (strpos($sign, '{{agent.name}}') !== false) {
@@ -378,7 +379,7 @@ class Zendesk extends Backend
                     }
                     //开始写入数据库
                     $agent_id = ZendeskAgents::where([
-                        'admin_id' => session('admin.id'),
+                        'admin_id' => $admin_id,
                         'type' => $type
                     ])->value('agent_id');
                     //对tag进行排序
@@ -403,8 +404,8 @@ class Zendesk extends Backend
                         'subject' => $subject,
                         'raw_subject' => $rawSubject,
                         'assignee_id' => $assignee_id,
-                        'assign_id' => session('admin.id'),
-                        'due_id' => session('admin.id'),
+                        'assign_id' => $admin_id,
+                        'due_id' => $admin_id,
                         'assign_time' => date('Y-m-d H:i:s', time()),
                         'email_cc' => $params['email_cc'],
                         'zendesk_update_time' => date('Y-m-d H:i:s', time()),
@@ -423,14 +424,14 @@ class Zendesk extends Backend
                             'html_body' => $params['content'],
                             'is_public' => $params['public_type'],
                             'is_admin' => 1,
-                            'due_id' => session('admin.id'),
+                            'due_id' => $admin_id,
                             'attachments' => $params['image'],
                             'mail_template_id' => $params['mail_template_id'],
                             'platform' => $type
                         ]);
                         ZendeskTasks::whereTime('create_time', 'today')
                             ->where([
-                                'admin_id' => session('admin.id'),
+                                'admin_id' => $admin_id,
                                 'type' => $type,
                             ])
                             ->setInc('reply_count', 1);
@@ -479,8 +480,9 @@ class Zendesk extends Backend
             ];
 
         }
+        $admin_id = session('admin.id');
+        $this->view->assign(compact('tags', 'templates', 'type', 'admin_id'));
 
-        $this->view->assign(compact('tags', 'templates', 'type'));
         return $this->view->fetch();
     }
 
