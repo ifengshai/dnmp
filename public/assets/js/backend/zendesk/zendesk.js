@@ -238,7 +238,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             })
             // 启动和暂停按钮
             $(document).on("click", ".btn-start", function () {
-
                 var url = $(this).data('url');
                 $.post(url,{},function(data){
                     if(data.code == 1) {
@@ -258,6 +257,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
             });
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            // 主动发送邮件
+            $(document).on("click", ".email_send_btn", function () {
+                window.open($(this).data('url'), '_blank');
+            });
 
             $(document).on("click", ".btn-synchronous", function () {
                 Backend.api.open('zendesk/zendesk/artificial_synchronous' , '同步数据',{area: ['50%', '45%'] });
