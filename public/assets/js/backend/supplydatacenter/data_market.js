@@ -346,7 +346,11 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                                 },
                                 formatter: function (param) { //格式化提示信息
                                     console.log(param);
-                                    return param[0].name + '<br/>' + param[0].seriesName + '：' + param[0].value + '<br/>' + param[1].seriesName + '：' + param[1].value + '%';
+                                    return param[0].name + '<br/>'
+                                        + param[0].seriesName + '：' + param[0].value + '<br/>'
+                                        + param[1].seriesName + '：' + param[1].value + '<br/>'
+                                        + param[2].seriesName + '：' + param[2].value + '<br/>'
+                                        + param[3].seriesName + '：' + param[3].value + '%';
                                 }
                             },
                             grid: { //直角坐标系内绘图网格
@@ -359,7 +363,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             legend: { //图例配置
                                 padding: 5,
                                 top: '2%',
-                                data: ['月度采购数量', '采销比']
+                                data: ['采购数量', '入库数量', '销售数量', '采销比']
                             },
                             xAxis: [
                                 {
@@ -369,7 +373,21 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table', 'form', 'echartsob
                             yAxis: [
                                 {
                                     type: 'value',
-                                    name: '月度采购数量',
+                                    name: '采购数量',
+                                    axisLabel: {
+                                        formatter: '{value} 个'
+                                    }
+                                },
+                                {
+                                    type: 'value',
+                                    name: '入库数量',
+                                    axisLabel: {
+                                        formatter: '{value} 个'
+                                    }
+                                },
+                                {
+                                    type: 'value',
+                                    name: '销售数量',
                                     axisLabel: {
                                         formatter: '{value} 个'
                                     }
