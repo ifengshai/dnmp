@@ -1944,14 +1944,14 @@ class Distribution extends Backend
                 if($v['pdcheck'] == 'on') {
                     $pdr =  bcmul($v['pd_r'],2);
                     $pdl =  bcmul($v['pd_l'],2);
-                    $edRd = floor(bcsub(bcadd(bcadd(bcmul($ed,2),3),$dbl,4))) - ceil($pdr);
-                    $edLd = floor(bcsub(bcadd(bcadd(bcmul($ed,2),3),$dbl,4))) - ceil($pdl);
-                    $ARd = floor(bcsub(bcadd(bcadd(bcmul($a,2),3),$dbl,4))) - ceil($pdr);
-                    $ALd = floor(bcsub(bcadd(bcadd(bcmul($a,2),3),$dbl,4))) - ceil($pdl);
+                    $edRd = bcsub(floor(bcadd(bcadd(bcmul($ed,2),3),$dbl,4)) - ceil($pdr));
+                    $edLd = bcsub(floor(bcadd(bcadd(bcmul($ed,2),3),$dbl,4)) - ceil($pdl));
+                    $ARd = bcsub(floor(bcadd(bcadd(bcmul($a,2),3),$dbl,4)) - ceil($pdr));
+                    $ALd = bcsub(floor(bcadd(bcadd(bcmul($a,2),3),$dbl,4)) - ceil($pdl));
 
                 }else{
-                    $edLd = $edRd = floor(bcsub(bcadd(bcadd(bcmul($ed,2),3),$dbl,4))) - ceil($v['pd']);
-                    $ARd = $ALd = floor(bcsub(bcadd(bcadd(bcmul($a,2),3),$dbl,4))) - ceil($v['pd']);
+                    $edLd = $edRd = bcsub(floor(bcadd(bcadd(bcmul($ed,2),3),$dbl,4)) - ceil($v['pd']));
+                    $ARd = $ALd = bcsub(floor(bcadd(bcadd(bcmul($a,2),3),$dbl,4)) - ceil($v['pd']));
                 }
                 $edRLable = $aRLable = $edLable = $aLable = '';
                 if((float)$v['od_sph'] > 0) {
