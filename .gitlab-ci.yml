@@ -4,10 +4,10 @@ stages:
 jobTest_env:
   stage: deploy-test-env
   script:
-    - cd /www/wwwroot/mojing
+    - cd /opt/code/mojing
     - sudo git pull origin test
   tags:
-    - mojing-test-runner
+    - test-mojing-lan-runner
   only:
     - test
 jobMaster_env:
