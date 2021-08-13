@@ -31,7 +31,7 @@ class Zendesk extends Model
         self::beforeInsert(function ($zendesk) {
             //判断是否已分配，chat的情况会存在自动分配的情况，所有此处需要判断下
             //如果不存在assign_id,则需要自动分配
-            if ($zendesk->user_id && !empty($zendesk->assign_id)) {
+            if ($zendesk->user_id && empty($zendesk->assign_id)) {
                 $assign_id = $due_id = Zendesk::where('user_id', $zendesk->user_id)->order('id',
                     'desc')->value('assign_id');
                 $zendesk->assign_id = $assign_id;
