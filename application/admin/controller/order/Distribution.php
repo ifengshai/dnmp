@@ -1709,8 +1709,8 @@ class Distribution extends Backend
             ->setCellValue("W1", "(ED)配镜片直径")
             ->setCellValue("X1", "(ED)定制/现片")
             ->setCellValue("Y1", "(ED)定制/现片")
-            ->setCellValue("AA", "A")
-            ->setCellValue("BB", "ED");
+            ->setCellValue("AA1", "A")
+            ->setCellValue("BB1", "ED");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
         //站点列表
