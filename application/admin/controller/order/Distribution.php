@@ -1665,6 +1665,7 @@ class Distribution extends Backend
         $spu = Db::connect('database.db_stock')->table('fa_item')->column('sku','origin_sku');
         $spuEd = Db::name('zz_temp3')->where("1=1")->column('a,ed','sku');
 
+
         $list = $this->model
             ->alias('a')
             ->field('a.id as aid,a.item_order_number,a.sku,a.order_prescription_type,b.increment_id,b.status,b.total_qty_ordered,b.site,a.distribution_status,a.created_at,c.*,b.base_grand_total,b.order_type,b.base_currency_code,b.payment_time,b.payment_method,d.check_time')
@@ -1707,7 +1708,9 @@ class Distribution extends Backend
             ->setCellValue("V1", "(A)定制/现片")
             ->setCellValue("W1", "(ED)配镜片直径")
             ->setCellValue("X1", "(ED)定制/现片")
-            ->setCellValue("Y1", "(ED)定制/现片");
+            ->setCellValue("Y1", "(ED)定制/现片")
+            ->setCellValue("AA", "A")
+            ->setCellValue("BB", "ED");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
         //站点列表
@@ -1914,30 +1917,9 @@ class Distribution extends Backend
                 $v['od_add'] = urldecode($v['od_add']);
 
 
-
-                //计算逻辑
-//                1.单眼定制/现片的判断：
-//
-//            当SPH>0，镜片直径RD/LD>65时，判断为定制；镜片直径RD/LD<65时，判断为现片；
-//
-//            当SPH<0，镜片直径RD/LD>70时，判断为定制；镜片直径RD/LD<70时，判断为现片；
-//
-//        2.眼镜的定制/现片
-//
-//            镜片直径的计算：（若客户提供的是总PD则需要将总PD拆分成单眼PD进行计算）
-//
-//                1.根据ED值进行计算
-//
-//                右眼镜片直径RD=向下取整[ED*2+DBL+3-向上取整（右眼PD*2）]
-//
-//                左眼镜片直径LD=向下取整[ED*2+DBL+3-向上取整（左眼PD*2）]
-//
-//                2.根据A值进行计算
-//
-//                右眼镜片直径RD=向下取整[A*2+DBL+3-向上取整（右眼PD*2）]
-//
-//                左眼镜片直径LD=向下取整[A*2+DBL+3-向上取整（左眼PD*2）]
-
+                echo $v['sku'] . PHP_EOL;
+                echo $spu[$v['sku']] . PHP_EOL;
+                echo $spuEd[$spu[$v['sku']]] . PHP_EOL;
                 $ed = isset($spuEd[$spu[$v['sku']]]) ? $spuEd[$spu[$v['sku']]]['ed'] : 0;
                 $a = isset($spuEd[$spu[$v['sku']]]) ? $spuEd[$spu[$v['sku']]]['a'] : 0;
                 $dbl = $v['bridge'];
@@ -2049,6 +2031,10 @@ class Distribution extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("X" . ($cat + 1), $edLable); //Direct
 
                 $spreadsheet->getActiveSheet()->setCellValue("Y" . ($cat), $edRLable . '/' . $edLable); //处方类型
+                $spreadsheet->getActiveSheet()->setCellValue("AA" . ($cat), $a); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("AA" . ($cat + 1), $a); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("BB" . ($cat), $ed); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("BB" . ($cat + 1), $ed); //Prism
                 //单元格合并
                 $spreadsheet->getActiveSheet()->mergeCells("G" . ($cat) . ":G" . ($cat + 1));
                 $spreadsheet->getActiveSheet()->mergeCells("H" . ($cat) . ":H" . ($cat + 1));
@@ -2102,6 +2088,8 @@ class Distribution extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AA')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('BB')->setWidth(15);
         //自动换行
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
