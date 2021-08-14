@@ -34,7 +34,7 @@ class Index extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
-        $this->nihaoOld = new \app\admin\model\order\order\NihaoOld;
+        //$this->nihaoOld = new \app\admin\model\order\order\NihaoOld;
         //$this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->wesee = new \app\admin\model\order\order\Weseeoptical;
         $this->zeeloolDe = new \app\admin\model\order\order\ZeeloolDe;
