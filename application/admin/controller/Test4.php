@@ -4135,7 +4135,7 @@ class Test4 extends Controller
         }
         $header = ['SKU','库存数量'];
         $filename = $stockNameArr[$stockId].'在配货加工流程中且未出库的sku及sku对应的库存数量';
-        Excel::writeCsv($skuArr, $header, $filename);
+        Excel::writeCsv($skuArr, $header, $filename,true);
     }
 
     // 按上架时间导出SKU销售数据
