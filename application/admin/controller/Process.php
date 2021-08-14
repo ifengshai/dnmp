@@ -2466,7 +2466,8 @@ class Process extends Backend
             ->field('id,order_id,goods_type')
             ->where('created_at', '>' . '2021-08-01')
             ->limit(100)
-            ->select();
+            ->select(false);
+        dump(Db::connect('database.db_nihao'));
         dump($list);
 //            ->chunk(1000, function ($row) use ($orderitem) {
 //                halt($row);
