@@ -104,6 +104,7 @@ class Index extends Backend
                     $map['lens_type'] = $params['refractive_index'] . ' ' . $params['lens_type'];
                     $map['sph'] = $params['sph'];
                     $map['cyl'] = $params['cyl'];
+                    $map['stock_id'] = $params['stock_id'];
                     $count =  $this->model->where($map)->count();
                     if ($count > 0) {
                         $this->error('已存在此记录！！');
