@@ -56,7 +56,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             title: __('时间'),
                             operate: 'RANGE',
                             addclass: 'datetimerange',
-                            visable: false,
+                            visible: false
                         },
                     ]
                 ]
