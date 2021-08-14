@@ -1157,7 +1157,7 @@ class Index extends Backend
 
         $voogueme = $this->voogueme->getProcessingAging();
 
-        $nihao = $this->nihaoOld->getProcessingAging();
+        $nihao = $this->nihao->getProcessingAging();
 
         //打印标签未超时未处理
         $data['labelNotOvertime'] = $zeelool['labelNotOvertime'] + $voogueme['labelNotOvertime'] + $nihao['labelNotOvertime'];
