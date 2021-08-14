@@ -1916,9 +1916,9 @@ class Distribution extends Backend
                 $v['os_add'] = urldecode($v['os_add']);
                 $v['od_add'] = urldecode($v['od_add']);
 
-
-                $ed = isset($spuEd[$spu[$v['sku']]]) ? $spuEd[$spu[$v['sku']]]['ed'] : 0;
-                $a = isset($spuEd[$spu[$v['sku']]]) ? $spuEd[$spu[$v['sku']]]['a'] : 0;
+                $getSpu = substr($spu[$v['sku']],1);
+                $ed = isset($spuEd[$getSpu]) ? $spuEd[$getSpu]['ed'] : 0;
+                $a = isset($spuEd[$getSpu]) ? $spuEd[$getSpu]['a'] : 0;
                 $dbl = $v['bridge'];
                 if($v['pdcheck'] == 'on') {
                     $pdr =  bcmul($v['pd_r'],2);
@@ -2007,7 +2007,7 @@ class Distribution extends Backend
                 }
 
                 $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
-                $spreadsheet->getActiveSheet()->setCellValue("O" . ($cat), $spu[$v['sku']]); //镜片
+                $spreadsheet->getActiveSheet()->setCellValue("O" . ($cat), $getSpu); //镜片
                 $spreadsheet->getActiveSheet()->setCellValue("P" . ($cat), $v['lens_width']); //镜框宽度
                 $spreadsheet->getActiveSheet()->setCellValue("Q" . ($cat), $v['lens_height']); //镜框高度
                 $spreadsheet->getActiveSheet()->setCellValue("R" . ($cat), $v['bridge']); //bridge
