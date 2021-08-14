@@ -20,6 +20,7 @@ use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
 use fast\Trackingmore;
 use think\Log;
+use think\Model;
 use think\Request;
 
 class Test4 extends Controller
@@ -4067,6 +4068,73 @@ class Test4 extends Controller
         $writer = new $class($spreadsheet);
 
         $writer->save('php://output');
+    }
+    //导出郑州仓或者丹阳仓在货架上sku及sku对应的库存数量
+    public function export_store_sku_all_data()
+    {
+        $stockId = input('stock_id');
+        $startId = input('start_id');
+        $endId = input('end_id');
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $list = Db::name('store_sku')
+            ->alias('a')
+            ->join(['fa_store_house' => 'b'], 'a.store_id=b.id')
+            ->where('a.is_del',1)
+            ->where('a.stock_id',$stockId)
+            ->where('a.store_id','between',[$startId,$endId])
+            ->field('a.sku,a.stock_id,b.area_id,b.coding')
+            ->select();
+
+        $productbarcodeitem = new ProductBarCodeItem();
+        $stockNameArr = [1=>'郑州仓',2=>'丹阳仓'];
+        $stockAreaArr = [1=>'大货区',2=>'货架区',4=>'丹阳大货区',5=>'丹阳货架区',3=>'拣货区',6=>'丹阳拣货区'];
+        foreach ($list as $k => $row) {
+            //在库 子单号为空 库位号 库区id都一致的库存作为此库位的库存
+            $list[$k]['stock_name'] = $stockNameArr[$row['stock_id']];
+            $list[$k]['area_name'] = $stockAreaArr[$row['area_id']];
+            $coding = $row['coding'];
+            unset($list[$k]['coding']);
+            $list[$k]['coding'] = $coding;
+            unset($list[$k]['stock_id']);
+            unset($list[$k]['area_id']);
+            $list[$k]['stock'] = $productbarcodeitem
+                ->where(['location_id'=>$row['area_id'],'location_code'=>$row['coding'],'library_status'=>1,'item_order_number'=>'','sku'=>$row['sku'],'stock_id' => $row['stock_id']])
+                ->count();
+        }
+        $header = ['SKU', '仓库', '库区','库位','库位库存'];
+        $filename = $stockNameArr[$stockId].'当前库位库存';
+        Excel::writeCsv($list, $header, $filename);
+    }
+    //导出郑州仓或者丹阳仓在配货加工流程中且未出库的sku及sku对应的库存数量
+    public function export_store_sku_all_run_data()
+    {
+        $stockId = input('stock_id');
+        $startId = input('start_id');
+        $endId = input('end_id');
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $item = new Item();
+        $list = $item
+            ->where('distribution_occupy_stock','>',0)
+            ->field('sku,distribution_occupy_stock')
+            ->where('id','between',[$startId,$endId])
+            ->select();
+
+        $productbarcodeitem = new ProductBarCodeItem();
+        $stockNameArr = [1=>'郑州仓',2=>'丹阳仓'];
+        $skuArr = [];
+        foreach ($list as $k => $row) {
+            $skuArr[$k]['sku'] = $row['sku'];
+            $skuArr[$k]['stock'] = $productbarcodeitem
+                ->where(['library_status'=>1,'sku'=>$row['sku'],'stock_id' => $stockId,'is_loss_report_out'=>0])
+                ->where('item_order_number','<>','')
+                ->where('in_stock_time','>','2020-12-30 14:49:34')
+                ->count();
+        }
+        $header = ['SKU','库存数量'];
+        $filename = $stockNameArr[$stockId].'在配货加工流程中且未出库的sku及sku对应的库存数量';
+        Excel::writeCsv($skuArr, $header, $filename);
     }
 
 }
