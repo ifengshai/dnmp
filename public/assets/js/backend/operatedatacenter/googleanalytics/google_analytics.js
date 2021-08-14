@@ -26,7 +26,17 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'quote_uniquePageviews_percent', title: __('加购转化率'),operate:false},
                         {field: 'order_quote_percent', title: __('购物车转化率'),operate:false},
                         {field: 'order_uniquePageviews_percent', title: __('订单转化率'),operate:false},
-                        {field: 'pagePath', title: __('pagePath'),operate:false},
+                        {field: 'pagePath', title: __('pagePath'),formatter: function (value, row, index) {
+                               let page = '';
+                               if(value){
+                                   for (var i=0;i<value.length;i++)
+                                   {
+                                       page += value[i] + '</br>';
+                                   }
+                               }
+                                return page;
+                            }, operate: false
+                        },
                         {field: 'pageviews', title: __('pageviews'),operate:false},
                         {field: 'uniquePageviews', title: __('uniquePageviews'),operate:false},
                         {field: 'entrances', title: __('entrances'),operate:false},
