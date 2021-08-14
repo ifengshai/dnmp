@@ -89,7 +89,7 @@ class GoogleAnalytics  extends Backend
                     $magento_list[$key]['order_uniquePageviews_percent'] = round($magento_value['sku_order_counter'] / $magento_value['uniquePageviews'] * 100, 2) . '%';
                 }
             }
-            $result = array("total" => count($magento_list), "rows" => $magento_list);
+            $result = array("total" => count($magento_list), "rows" => array_values($magento_list));
 
             return json($result);
         }
