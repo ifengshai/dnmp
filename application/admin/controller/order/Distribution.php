@@ -1698,7 +1698,7 @@ class Distribution extends Backend
             ->setCellValue("L1", "AXI")
             ->setCellValue("M1", "ADD")
             ->setCellValue("N1", "PD")
-            ->setCellValue("O1", "镜片")
+            ->setCellValue("O1", "SPU")
             ->setCellValue("P1", "镜框宽度")
             ->setCellValue("Q1", "镜框高度")
             ->setCellValue("R1", "bridge")
@@ -2007,7 +2007,7 @@ class Distribution extends Backend
                 }
 
                 $lens_name = $lens_list[$v['lens_number']] ?: $v['web_lens_name'];
-                $spreadsheet->getActiveSheet()->setCellValue("O" . ($cat), $lens_name); //镜片
+                $spreadsheet->getActiveSheet()->setCellValue("O" . ($cat), $spu[$v['sku']]); //镜片
                 $spreadsheet->getActiveSheet()->setCellValue("P" . ($cat), $v['lens_width']); //镜框宽度
                 $spreadsheet->getActiveSheet()->setCellValue("Q" . ($cat), $v['lens_height']); //镜框高度
                 $spreadsheet->getActiveSheet()->setCellValue("R" . ($cat), $v['bridge']); //bridge
@@ -2042,8 +2042,6 @@ class Distribution extends Backend
                 $spreadsheet->getActiveSheet()->mergeCells("S" . ($cat) . ":S" . ($cat + 1));
                 $spreadsheet->getActiveSheet()->mergeCells("V" . ($cat) . ":V" . ($cat + 1));
                 $spreadsheet->getActiveSheet()->mergeCells("Y" . ($cat) . ":Y" . ($cat + 1));
-                $spreadsheet->getActiveSheet()->mergeCells("Z" . ($num) . ":AA" . ($cat + 1));
-                $spreadsheet->getActiveSheet()->mergeCells("AA" . ($num) . ":AB" . ($cat + 1));
 
 
 
