@@ -117,8 +117,7 @@ class GoogleAnalytics  extends Backend
             ->where('b.status','in','complete','processing','delivered','delivery')
             ->where('b.created_at','between',[strtotime($start) - 8*3600,strtotime($end) - 8*3600])
             ->group('a.sku')
-            ->select(false);
-        echo $orders;die;
+            ->select();
         if($orders) {
             return array_column($orders,'qtycount','sku');
         }
