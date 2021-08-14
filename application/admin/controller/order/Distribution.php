@@ -1668,7 +1668,7 @@ class Distribution extends Backend
         $spuEd = Db::name('zz_temp3')->where("1=1")->column('a,ed','sku');
 
         $startTime = strtotime($start);
-        $endTime = strtotime($endTime);
+        $endTime = strtotime($end);
 
         $list = $this->model
             ->alias('a')
