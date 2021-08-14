@@ -1916,7 +1916,7 @@ class Distribution extends Backend
                 $v['os_add'] = urldecode($v['os_add']);
                 $v['od_add'] = urldecode($v['od_add']);
 
-                $getSpu = $spu[substr($v['sku'],1)];
+                $getSpu = $spu[substr($v['sku'],1)] ?: $spu[$v['sku']];
                 $ed = isset($spuEd[$getSpu]) ? $spuEd[$getSpu]['ed'] : 0;
                 $a = isset($spuEd[$getSpu]) ? $spuEd[$getSpu]['a'] : 0;
                 $dbl = $v['bridge'];
