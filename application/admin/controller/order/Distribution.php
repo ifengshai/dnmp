@@ -1709,8 +1709,8 @@ class Distribution extends Backend
             ->setCellValue("W1", "(ED)配镜片直径")
             ->setCellValue("X1", "(ED)定制/现片")
             ->setCellValue("Y1", "(ED)定制/现片")
-            ->setCellValue("AA1", "A")
-            ->setCellValue("AB1", "ED");
+            ->setCellValue("Z1", "A")
+            ->setCellValue("AA1", "ED");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('订单处方');
 
         //站点列表
@@ -2028,10 +2028,10 @@ class Distribution extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("X" . ($cat + 1), $edLable); //Direct
 
                 $spreadsheet->getActiveSheet()->setCellValue("Y" . ($cat), $edRLable . '/' . $edLable); //处方类型
-                $spreadsheet->getActiveSheet()->setCellValue("AA" . ($cat), $a); //Prism
-                $spreadsheet->getActiveSheet()->setCellValue("AA" . ($cat + 1), $a); //Prism
-                $spreadsheet->getActiveSheet()->setCellValue("AB" . ($cat), $ed); //Prism
-                $spreadsheet->getActiveSheet()->setCellValue("AB" . ($cat + 1), $ed); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("Z" . ($cat), $a); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("Z" . ($cat + 1), $a); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("AA" . ($cat), $ed); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("AA" . ($cat + 1), $ed); //Prism
                 //单元格合并
                 $spreadsheet->getActiveSheet()->mergeCells("G" . ($cat) . ":G" . ($cat + 1));
                 $spreadsheet->getActiveSheet()->mergeCells("H" . ($cat) . ":H" . ($cat + 1));
@@ -2042,6 +2042,8 @@ class Distribution extends Backend
                 $spreadsheet->getActiveSheet()->mergeCells("S" . ($cat) . ":S" . ($cat + 1));
                 $spreadsheet->getActiveSheet()->mergeCells("V" . ($cat) . ":V" . ($cat + 1));
                 $spreadsheet->getActiveSheet()->mergeCells("Y" . ($cat) . ":Y" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("Z" . ($num) . ":AA" . ($cat + 1));
+                $spreadsheet->getActiveSheet()->mergeCells("AA" . ($num) . ":AB" . ($cat + 1));
 
 
 
@@ -2058,11 +2060,6 @@ class Distribution extends Backend
             $spreadsheet->getActiveSheet()->mergeCells("G" . ($num) . ":G" . ($num + 1));
             $spreadsheet->getActiveSheet()->mergeCells("H" . ($num) . ":H" . ($num + 1));
 
-
-            $spreadsheet->getActiveSheet()->mergeCells("X" . ($num) . ":X" . ($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("Y" . ($num) . ":Y" . ($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("AA" . ($num) . ":AA" . ($cat + 1));
-            $spreadsheet->getActiveSheet()->mergeCells("AB" . ($num) . ":AB" . ($cat + 1));
         }
 
         //设置宽度
@@ -2087,8 +2084,8 @@ class Distribution extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('T')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('U')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('V')->setWidth(15);
+        $spreadsheet->getActiveSheet()->getColumnDimension('Z')->setWidth(15);
         $spreadsheet->getActiveSheet()->getColumnDimension('AA')->setWidth(15);
-        $spreadsheet->getActiveSheet()->getColumnDimension('AB')->setWidth(15);
         //自动换行
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
