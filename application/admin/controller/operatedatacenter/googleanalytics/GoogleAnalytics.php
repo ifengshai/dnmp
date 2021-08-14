@@ -21,7 +21,7 @@ class GoogleAnalytics  extends Backend
     {
         //设置过滤方法
         $this->request->filter(['strip_tags']);
-        $site = 1;
+        $site = $this->request()->get('site') ?? 1;
         if ($this->request->isAjax()) {
             $end = date('Y-m-d');
             $filter = json_decode($this->request->get('filter'), true);
@@ -93,7 +93,7 @@ class GoogleAnalytics  extends Backend
 
             return json($result);
         }
-        $this->assignconfig('site',$this->request()->get('site'));
+        $this->assignconfig('site',$site);
         return $this->view->fetch();
     }
 
