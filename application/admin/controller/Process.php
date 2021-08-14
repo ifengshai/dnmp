@@ -2462,14 +2462,15 @@ class Process extends Backend
     public function edit_meeloog_goods_type()
     {
         $orderitem = new OrderItemOption();
-        Db::connect('database.db_nihao')->table('order_items')->field('id,order_id,goods_type')
+        Db::connect('database.db_nihao')->table('order_items')
+            ->field('id,order_id,goods_type')
             ->where('created_at', '>' . '2021-08-01')
-            ->chunk(10000, function ($row) use ($orderitem) {
-
-            foreach ($row as $k => $v) {
-                $orderitem->where(['magento_order_id' => $v['order_id'], 'item_id' => $v['id'], 'site' => 3])->update(['goods_type' => $v['goods_type']]);
-                echo $k ."\n";
-            }
+            ->chunk(1000, function ($row) use ($orderitem) {
+                halt($row);
+                foreach ($row as $k => $v) {
+                    $orderitem->where(['magento_order_id' => $v['order_id'], 'item_id' => $v['id'], 'site' => 3])->update(['goods_type' => $v['goods_type']]);
+                    echo $k ."\n";
+                }
         });
 
     }
