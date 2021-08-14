@@ -46,15 +46,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'entrances', title: __('entrances'),operate:false},
                         {field: 'exits', title: __('exits'),operate:false},
                         {field: 'pageValue', title: __('pageValue'),operate:false},
-                        {
-                            field: 'site', title: __('站点'), visible: false,
-                            operate: 'IN',
-                            searchList: {
-                                1: 'zeelool', 2: 'voogueme', 3: 'meeloog', 5: 'wesee', 10: 'zeelool_de', 11: 'zeelool_jp',
-                                12: 'voogmechic', 15: 'zeelool_fr'
-                            },
-                            formatter: Table.api.formatter.status
-                        },
+                        // {
+                        //     field: 'site', title: __('站点'), visible: false,
+                        //     operate: 'IN',
+                        //     searchList: {
+                        //         1: 'zeelool', 2: 'voogueme', 3: 'meeloog', 5: 'wesee', 10: 'zeelool_de', 11: 'zeelool_jp',
+                        //         12: 'voogmechic', 15: 'zeelool_fr'
+                        //     },
+                        //     formatter: Table.api.formatter.status
+                        // },
                         {
                             field: 'time',
                             title: __('时间'),
