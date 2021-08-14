@@ -249,12 +249,8 @@ class DataMarket extends Backend
         $order_where['status'] = [
             'in',
             [
-                'free_processing',
                 'processing',
                 'complete',
-                'paypal_reversed',
-                'payment_review',
-                'paypal_canceled_reversal',
                 'delivered',
                 'delivery'
             ]
@@ -313,12 +309,8 @@ class DataMarket extends Backend
                 $order_where['status'] = [
                     'in',
                     [
-                        'free_processing',
                         'processing',
                         'complete',
-                        'paypal_reversed',
-                        'payment_review',
-                        'paypal_canceled_reversal',
                         'delivered'
                     ]
                 ];
