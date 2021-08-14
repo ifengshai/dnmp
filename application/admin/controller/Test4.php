@@ -4240,4 +4240,54 @@ class Test4 extends Controller
 
         $writer->save('php://output');
     }
+    //跑你好站 08-06-08-09的品类数据
+    public function goods_type_day_center1($plat, $goods_type,$time)
+    {
+        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
+        $start = $time;
+        $seven_days = $start . ' 00:00:00 - ' . $start . ' 23:59:59';
+        $createat = explode(' ', $seven_days);
+        $where['o.payment_time'] = ['between', [strtotime($createat[0] . ' ' . $createat[1]), strtotime($createat[3] . ' ' . $createat[4])]];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery','shipped']];
+        $where['order_type'] = 1;
+        $where['o.site'] = $plat;
+        $where['goods_type'] = $goods_type;
+
+        //某个品类眼镜的销售副数
+        $frame_sales_num = $this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
+            ->where($where)
+            ->sum('i.qty');
+        //眼镜的折扣价格
+        $frame_money = $this->orderitemoption
+            ->alias('i')
+            ->join('fa_order o', 'i.magento_order_id=o.entity_id', 'left')
+            ->where($where)
+            ->value('sum(base_original_price-i.base_discount_amount) as price');
+        $frame_money = $frame_money ? round($frame_money, 2) : 0;
+        $arr['goods_type'] = $goods_type;
+        $arr['glass_num'] = $frame_sales_num;
+        $arr['sales_total_money'] = $frame_money;
+
+        return $arr;
+    }
+
+    public function run_nihao_goods_type_data()
+    {
+        $time = input('time');
+        $res10 = Db::name('datacenter_goods_type_data')->where(['site'=>3,'day_date'=>$time])->update($this->goods_type_day_center1(3, 1,$time));
+        if ($res10) {
+            echo 'nihao站平光镜ok';
+        } else {
+            echo 'nihao站平光镜不ok';
+        }
+        $res11 = Db::name('datacenter_goods_type_data')->where(['site'=>3,'day_date'=>$time])->update($this->goods_type_day_center1(3, 2,$time));
+        if ($res11) {
+            echo 'nihao站配饰ok';
+        } else {
+            echo 'nihao站配饰不ok';
+        }
+    }
 }
