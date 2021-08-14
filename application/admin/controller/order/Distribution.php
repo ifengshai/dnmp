@@ -1676,7 +1676,7 @@ class Distribution extends Backend
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
-            ->where('b.status','in','complete, processing, creditcard_proccessing')
+            ->where('b.status','in',['complete', 'processing', 'creditcard_proccessing'])
             ->where('b.payment_time','between',[$startTime,$endTime])
             ->where('c.prescription_type','SingleVision')
             ->select();
