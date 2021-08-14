@@ -100,6 +100,22 @@ return [
         'charset'     => Env::get('db_nihao.charset'),
         'prefix'      => Env::get('db_nihao.prefix'),
     ],
+
+    'db_nihao_old' => [
+        // 数据库类型
+        'type'        => Env::get('db_nihao_old.type'),
+        // 服务器地址
+        'hostname'    => Env::get('db_nihao_old.hostname'),
+        // 数据库名
+        'database'    => Env::get('db_nihao_old.database'),
+        // 数据库用户名
+        'username'    => Env::get('db_nihao_old.username'),
+        // 密码
+        'password'    => Env::get('db_nihao_old.password'),
+        // 数据库编码默认采用utf8
+        'charset'     => Env::get('db_nihao_old.charset'),
+        'prefix'      => Env::get('db_nihao_old.prefix'),
+    ],
     'db_weseeoptical' => [
         // 数据库类型
         'type'        => Env::get('db_weseeoptical.type'),

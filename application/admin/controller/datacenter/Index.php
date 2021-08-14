@@ -34,7 +34,7 @@ class Index extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->nihao = new \app\admin\model\order\order\Nihao;
-        //$this->nihaoOld = new \app\admin\model\order\order\NihaoOld;
+        $this->nihaoOld = new \app\admin\model\order\order\NihaoOld;
         //$this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->wesee = new \app\admin\model\order\order\Weseeoptical;
         $this->zeeloolDe = new \app\admin\model\order\order\ZeeloolDe;
@@ -1157,7 +1157,7 @@ class Index extends Backend
 
         $voogueme = $this->voogueme->getProcessingAging();
 
-        $nihao = $this->nihao->getProcessingAging();
+        $nihao = $this->nihaoOld->getProcessingAging();
 
         //打印标签未超时未处理
         $data['labelNotOvertime'] = $zeelool['labelNotOvertime'] + $voogueme['labelNotOvertime'] + $nihao['labelNotOvertime'];
