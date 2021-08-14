@@ -15,6 +15,7 @@ class Nihao extends Model
     protected $connection = 'database.db_nihao';
 
 
+
     // 表名
     protected $table = 'orders';
 
