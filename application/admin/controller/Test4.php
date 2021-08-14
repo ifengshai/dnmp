@@ -4103,8 +4103,9 @@ class Test4 extends Controller
                 ->count();
         }
         $header = ['SKU', '仓库', '库区','库位','库位库存'];
-        $filename = $stockNameArr[$stockId].'当前库位库存';
-        Excel::writeCsv($list, $header, $filename);
+//        $filename = $stockNameArr[$stockId].'当前库位库存';
+        $filename = 'zhengzhoukuweikucun';
+        Excel::writeCsv($list, $header, $filename,true);
     }
     //导出郑州仓或者丹阳仓在配货加工流程中且未出库的sku及sku对应的库存数量
     public function export_store_sku_all_run_data()
