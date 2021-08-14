@@ -29,17 +29,17 @@ class Zendesk extends Model
         parent::init();
         //新增后的回调函数，进行任务分配
         self::beforeInsert(function ($zendesk) {
-            //如果存在assignee_id,则不需要自动分配
             //判断是否已分配，chat的情况会存在自动分配的情况，所有此处需要判断下
-            if($zendesk->user_id){
-                $assign_id = $due_id = Zendesk::where('user_id',$zendesk->user_id)->order('id','desc')->value('assign_id');
+            //如果不存在assign_id,则需要自动分配
+            if ($zendesk->user_id && empty($zendesk->assign_id)) {
+                $assign_id = $due_id = Zendesk::where('user_id', $zendesk->user_id)->order('id',
+                    'desc')->value('assign_id');
                 $zendesk->assign_id = $assign_id;
                 $zendesk->due_id = $due_id;
-                $zendesk->assign_time = date('Y-m-d H:i:s',time());
-            }elseif($zendesk->channel != 'voice'){  //电话的不自动分配
+                $zendesk->assign_time = date('Y-m-d H:i:s', time());
+            } elseif ($zendesk->channel != 'voice') {  //电话的不自动分配
                 self::assignTicket($zendesk);
             }
-
         });
     }
 

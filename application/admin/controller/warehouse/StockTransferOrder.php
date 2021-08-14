@@ -10,6 +10,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
 use think\Exception;
 use think\exception\PDOException;
@@ -75,7 +76,7 @@ class StockTransferOrder extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($map)
@@ -371,7 +372,7 @@ class StockTransferOrder extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $allIds = Db::name('stock_transfer_order_item')
                 ->where('real_instock_num','>',0)
                 ->where('real_num','>',0)
@@ -421,5 +422,148 @@ class StockTransferOrder extends Backend
         $allStock = Db::name('warehouse_stock')->column('name','id');
         $this->assign('all_stock', $allStock);
         return $this->view->fetch();
+    }
+
+    /**
+     * 实体仓调拨单批量导出
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @author jianghaohui
+     * @date   2021/8/13 9:38:41
+     */
+    public function batch_export_xls()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '512M');
+        $ids = input('id_params');
+        if (!empty($ids)) {
+            $item_map['s.id'] = ['in', $ids];
+        }
+        $map = [];
+        //自定义sku搜索
+        $filter = json_decode($this->request->get('filter'), true);
+        if ($filter['sku']) {
+            $allIds = Db::name('stock_transfer_order_item')->where('sku','like','%'.$filter['sku'].'%')->group('transfer_order_id')->column('transfer_order_id');
+            $map['s.id'] = ['in',$allIds];
+            unset($filter['sku']);
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+        if ($filter['status']) {
+            $map['s.status'] = ['=',$filter['status']];
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+        if ($filter['id']) {
+            $map['s.id'] = ['=',$filter['id']];
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+        if ($filter['response_person']) {
+            $map['s.response_person'] = ['like','%'.$filter['response_person'].'%'];
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+        if ($filter['create_person']) {
+            $map['s.create_person'] = ['like','%'.$filter['create_person'].'%'];
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+        if ($filter['transfer_order_number']) {
+            $map['s.transfer_order_number'] = ['like','%'.$filter['transfer_order_number'].'%'];
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+        if ($filter['create_time']) {
+            $createat = explode(' ', $filter['create_time']);
+            $map['s.create_time'] = ['between', [strtotime($createat[0].$createat[1]), strtotime($createat[3].$createat[4])]];
+            $this->request->get(['filter' => json_encode($filter)]);
+        }
+        $list = Db::name('stock_transfer_order_item')
+            ->alias('o')
+            ->join(['fa_stock_transfer_order' => 's'], 'o.transfer_order_id = s.id')
+            ->field('o.sku,o.hope_num,o.real_num,o.real_instock_num,s.transfer_order_number,s.status,s.out_stock_id,s.in_stock_id')
+            ->order('s.id desc')
+            ->where($item_map)
+            ->where($map)
+            ->select();
+        $list = collection($list)->toArray();
+        $statusArr = ['新建','待审核','待配货','待物流揽收','待收货','待入库','已完成','审核拒绝','已取消'];
+        $stockArr = [1=>'郑州仓',2=>'丹阳仓'];
+        $spreadsheet = new Spreadsheet();
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)
+            ->setCellValue("A1", "实体仓调拨单号")
+            ->setCellValue("B1", "实体仓调拨单状态")
+            ->setCellValue("C1", "调出仓")
+            ->setCellValue("D1", "调入仓")
+            ->setCellValue("E1", "调拨单中的SKU")
+            ->setCellValue("F1", "期望调拨数量")
+            ->setCellValue("G1", "实际调出数量")
+            ->setCellValue("H1", "实际调入数量");
+        // Rename worksheet
+        $spreadsheet->setActiveSheetIndex(0)->setTitle('出库列表数据');
+        foreach ($list as $key => $value) {
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['transfer_order_number']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $statusArr[$value['status']]);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $stockArr[$value['out_stock_id']]);
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $stockArr[$value['in_stock_id']]);
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['sku']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['hope_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['real_num']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['real_instock_num']);
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(32);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+        //自动换行
+        $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        // $spreadsheet->getActiveSheet()->getStyle('A1:Z'.$key)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:E' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:E' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+
+        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = '实体仓调拨单导出数据';
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
     }
 }
