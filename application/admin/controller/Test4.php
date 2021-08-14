@@ -4267,6 +4267,8 @@ class Test4 extends Controller
             ->where($where)
             ->value('sum(base_original_price-i.base_discount_amount) as price');
         $frame_money = $frame_money ? round($frame_money, 2) : 0;
+        $arr['day_date'] = $start;
+        $arr['site'] = $plat;
         $arr['goods_type'] = $goods_type;
         $arr['glass_num'] = $frame_sales_num;
         $arr['sales_total_money'] = $frame_money;
@@ -4277,13 +4279,14 @@ class Test4 extends Controller
     public function run_nihao_goods_type_data()
     {
         $time = input('time');
-        $res10 = Db::name('datacenter_goods_type_data')->where(['site'=>3,'day_date'=>$time])->update($this->goods_type_day_center1(3, 1,$time));
+        Db::name('datacenter_goods_type_data')->where('day_date',$time)->where('site',3)->delete();
+        $res10 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center1(3, 1,$time));
         if ($res10) {
             echo 'nihao站平光镜ok';
         } else {
             echo 'nihao站平光镜不ok';
         }
-        $res11 = Db::name('datacenter_goods_type_data')->where(['site'=>3,'day_date'=>$time])->update($this->goods_type_day_center1(3, 2,$time));
+        $res11 = Db::name('datacenter_goods_type_data')->insert($this->goods_type_day_center1(3, 2,$time));
         if ($res11) {
             echo 'nihao站配饰ok';
         } else {
