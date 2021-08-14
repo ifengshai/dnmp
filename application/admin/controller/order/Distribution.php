@@ -2091,8 +2091,8 @@ class Distribution extends Backend
         //自动换行
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
-        $objPHPExcel->getActiveSheet()->getStyle ('Z')->getNumberFormat()->setFormatCode ("0.00");
-        $objPHPExcel->getActiveSheet()->getStyle ('AA')->getNumberFormat()->setFormatCode ("0.00");
+        $spreadsheet->getActiveSheet()->getStyle ('Z')->getNumberFormat()->setFormatCode ("0.00");
+        $spreadsheet->getActiveSheet()->getStyle ('AA')->getNumberFormat()->setFormatCode ("0.00");
 
         //设置边框
         $border = [
