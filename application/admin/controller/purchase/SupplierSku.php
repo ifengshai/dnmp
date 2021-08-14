@@ -233,6 +233,7 @@ class SupplierSku extends Backend
                     //判断是否重复
                     $where['sku'] = $params['sku'];
                     $where['supplier_id'] = $params['supplier_id'];
+                    $where['status'] = 1;
                     $count = $this->model->where($where)->count();
                     if ($count > 1) {
                         $this->error('记录已存在！！SKU:' . $params['sku']);
