@@ -605,7 +605,7 @@ class NihaoOld extends Model
      */
     public function getPendingOrderNum()
     {
-        $where['custom_print_label_new'] = 0;
+        //$where['custom_print_label_new'] = 0;
         //过滤补差价单
         $where['order_type'] = ['<>', 5];
         $where['status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete']];
