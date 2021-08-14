@@ -39,6 +39,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { field: 'cyl', title: __('Cyl') },
                         { field: 'stock_num', title: __('Stock_num') },
                         { field: 'price', title: __('Price'), operate: 'BETWEEN' },
+                        { field: 'stock_id', title: __('所属仓库'), searchList: { 1: '郑州仓', 2: '丹阳仓' },formatter: Table.api.formatter.status },
+
                         { field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange' },
                         { field: 'create_person', title: __('Create_person') },
                         { field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate }
