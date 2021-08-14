@@ -1661,10 +1661,14 @@ class Distribution extends Backend
     {
         set_time_limit(0);
         ini_set('memory_limit', '1048M');
+        $start = input('start','1614589573');
+        $end = input('end','1630487173');
         //获取所有spu对应的
         $spu = Db::connect('database.db_stock')->table('fa_item')->column('origin_sku','sku');
         $spuEd = Db::name('zz_temp3')->where("1=1")->column('a,ed','sku');
 
+        $startTime = strtotime($start);
+        $endTime = strtotime($endTime);
 
         $list = $this->model
             ->alias('a')
@@ -1673,7 +1677,7 @@ class Distribution extends Backend
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
             ->where('b.status','in','complete, processing, creditcard_proccessing')
-            ->where('b.payment_time','between',['1614589573','1630487173'])
+            ->where('b.payment_time','between',[$startTime,$endTime])
             ->where('c.prescription_type','SingleVision')
             ->limit(20)
             ->select();
