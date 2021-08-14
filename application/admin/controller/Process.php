@@ -18,6 +18,7 @@ use app\admin\model\order\order\Voogueme;
 use app\admin\model\order\order\Zeelool;
 use app\admin\model\order\order\ZeeloolDe;
 use app\admin\model\order\order\ZeeloolJp;
+use app\admin\model\order\OrderItemOption;
 use app\admin\model\OrderNode;
 use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\saleaftermanage\WorkOrderMeasure;
@@ -2407,11 +2408,11 @@ class Process extends Backend
             ->field('id,item_id')
             ->chunk(10000, function ($row) use ($options) {
                 $row = collection($row)->toArray();
-                $item_id = array_column($row,'item_id');
+                $item_id = array_column($row, 'item_id');
                 $list = Db::connect('database.db_zeelool')
                     ->table('sales_flat_order_item')
-                    ->where(['item_id'=> ['in',$item_id]])
-                    ->column('name,product_options','item_id');
+                    ->where(['item_id' => ['in', $item_id]])
+                    ->column('name,product_options', 'item_id');
                 $data = [];
                 foreach ($row as $k => $v) {
                     $description = unserialize($list[$v['item_id']]['product_options']);
@@ -2438,21 +2439,36 @@ class Process extends Backend
     {
         $url = 'https://meeloogapi.xmslol.cn/api/mj/updateDeliveredTime';
         $orderNodeModel = new OrderNode();
-        Order::where('site',3)->where('status','in',['processing', 'complete', 'delivered', 'delivery'])->where('created_at','>=','1616515200')->chunk(1000,function ($orders) use ($url, $orderNodeModel){
-            $incrementId = array_column(collection($orders)->toArray(),'increment_id');
-            $orderValues = $orderNodeModel->where('site',3)->where('order_number','in',$incrementId)->where('node_type','40')->field('order_number as order_no,signing_time as delivered_at')->select();
-            if($orderValues) {
+        Order::where('site', 3)->where('status', 'in', ['processing', 'complete', 'delivered', 'delivery'])->where('created_at', '>=', '1616515200')->chunk(1000, function ($orders) use ($url, $orderNodeModel) {
+            $incrementId = array_column(collection($orders)->toArray(), 'increment_id');
+            $orderValues = $orderNodeModel->where('site', 3)->where('order_number', 'in', $incrementId)->where('node_type', '40')->field('order_number as order_no,signing_time as delivered_at')->select();
+            if ($orderValues) {
                 $values = collection($orderValues)->toArray();
                 $res = Http::post($url, ['data' => $values]);
                 dump($res);
             }
-        },'id','asc');
+        }, 'id', 'asc');
     }
+
     public function updateTrackEs()
     {
-        $orderNodes = Db::name('order_node')->where("delivery_time>='2021-06-01' and delivery_time<='2021-08-01'")->where('shipment_data_type','丹阳UPS')->where('node_type','<>',40)->field('track_number,shipment_type as shipment_title')->select();
-        foreach($orderNodes as $orderNode) {
-            dump(Http::post('https://mojing.nextmar.com/api/self_api/getLogistics',$orderNode));
+        $orderNodes = Db::name('order_node')->where("delivery_time>='2021-06-01' and delivery_time<='2021-08-01'")->where('shipment_data_type', '丹阳UPS')->where('node_type', '<>', 40)->field('track_number,shipment_type as shipment_title')->select();
+        foreach ($orderNodes as $orderNode) {
+            dump(Http::post('https://mojing.nextmar.com/api/self_api/getLogistics', $orderNode));
         }
+    }
+
+
+    public function edit_meeloog_goods_type()
+    {
+        $orderitem = new OrderItemOption();
+        Db::connect('database.db_nihao')->table('order_items')->field('id,order_id,goods_type')->where('created_at', '>' . '2021-08-01')->chunk(10000, function ($row) use ($orderitem) {
+
+            foreach ($row as $k => $v) {
+                $orderitem->where(['magento_order_id' => $v['order_id'], 'item_id' => $v['id'], 'site' => 3])->update(['goods_type' => $v['goods_type']]);
+                echo $k ."\n";
+            }
+        });
+
     }
 }
