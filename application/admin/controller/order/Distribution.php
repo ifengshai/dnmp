@@ -2013,25 +2013,25 @@ class Distribution extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue("R" . ($cat), $v['bridge']); //bridge
                 $spreadsheet->getActiveSheet()->setCellValue("S" . ($cat), $v['prescription_type']); //处方类型
 
-                $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat), $a); //Prism
-                $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat + 1), $a); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat), $ARd); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat + 1), $ALd); //Prism
 
                 $spreadsheet->getActiveSheet()->setCellValue("U" . ($cat), $aRLable); //Direct
                 $spreadsheet->getActiveSheet()->setCellValue("U" . ($cat + 1), $aLable); //Direct
 
                 $spreadsheet->getActiveSheet()->setCellValue("V" . ($cat), $aRLable . '/' . $aLable); //处方类型
 
-                $spreadsheet->getActiveSheet()->setCellValue("W" . ($cat), $ed); //Prism
-                $spreadsheet->getActiveSheet()->setCellValue("W" . ($cat + 1), $ed); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("W" . ($cat), $edRd); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("W" . ($cat + 1), $edLd); //Prism
 
                 $spreadsheet->getActiveSheet()->setCellValue("X" . ($cat), $edRLable); //Direct
                 $spreadsheet->getActiveSheet()->setCellValue("X" . ($cat + 1), $edLable); //Direct
 
                 $spreadsheet->getActiveSheet()->setCellValue("Y" . ($cat), $edRLable . '/' . $edLable); //处方类型
-                $spreadsheet->getActiveSheet()->setCellValue("Z" . ($cat), $a); //Prism
-                $spreadsheet->getActiveSheet()->setCellValue("Z" . ($cat + 1), $a); //Prism
-                $spreadsheet->getActiveSheet()->setCellValue("AA" . ($cat), $ed); //Prism
-                $spreadsheet->getActiveSheet()->setCellValue("AA" . ($cat + 1), $ed); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("Z" . ($cat), number_format($a,2,'.','')); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("Z" . ($cat + 1), number_format($a,2,'.','')); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("AA" . ($cat), number_format($ed,2,'.','')); //Prism
+                $spreadsheet->getActiveSheet()->setCellValue("AA" . ($cat + 1), number_format($ed,2,'.','')); //Prism
                 //单元格合并
                 $spreadsheet->getActiveSheet()->mergeCells("G" . ($cat) . ":G" . ($cat + 1));
                 $spreadsheet->getActiveSheet()->mergeCells("H" . ($cat) . ":H" . ($cat + 1));
@@ -2087,6 +2087,8 @@ class Distribution extends Backend
         //自动换行
         $spreadsheet->getDefaultStyle()->getAlignment()->setWrapText(true);
         $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $objPHPExcel->getActiveSheet()->getStyle ('Z')->getNumberFormat()->setFormatCode ("0.00");
+        $objPHPExcel->getActiveSheet()->getStyle ('AA')->getNumberFormat()->setFormatCode ("0.00");
 
         //设置边框
         $border = [
