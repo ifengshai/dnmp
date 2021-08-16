@@ -89,13 +89,10 @@
     </div>
 
     <div class="form-group">
-
-        <label class="control-label col-xs-12 col-sm-2">备注:</label>
+        <label class="control-label col-xs-12 col-sm-2">订单生效时间:</label>
         <div class="col-xs-12 col-sm-3">
-            <textarea id="c-quality_standard" class="form-control " readonly rows="5" name="row[remark]"
-                cols="50">{$row.remark}</textarea>
+            <input  class="form-control batch_id"  value="{$purchase_data['effect_time']}" readonly type="text" >
         </div>
-
         <label class="control-label col-xs-12 col-sm-2">是否错发:</label>
         <div class="col-xs-12 col-sm-3">
             <select class="form-control is_error" name="row[is_error]">
@@ -103,6 +100,17 @@
                 <option value="0" {:$row['is_error']==0 ? 'selected' : '' }>否</option>
                 <option value="1" {:$row['is_error']==1 ? 'selected' : '' }>是</option>
             </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">采购单备注:</label>
+        <div class="col-xs-12 col-sm-3">
+            <textarea class="form-control " rows="5" value = "{$purchase_data['purchase_remark']}" readonly cols="50">{$purchase_data['purchase_remark']}</textarea>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">备注:</label>
+        <div class="col-xs-12 col-sm-3">
+            <textarea id="c-quality_standard" class="form-control " readonly rows="5" name="row[remark]"
+                cols="50">{$row.remark}</textarea>
         </div>
     </div>
     <style>
