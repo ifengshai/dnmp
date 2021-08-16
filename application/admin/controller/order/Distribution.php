@@ -1937,46 +1937,46 @@ class Distribution extends Backend
                 }
                 $edRLable = $aRLable = $edLable = $aLable = '';
                 if((float)$v['od_sph'] > 0) {
-                    if(bcdiv($edRd,$edLd,0) > 65) {
+                    if($edRd > 65 || $edLd > 65) {
                         $edRLable = '定制片';
                     }else{
                         $edRLable = '现片';
                     }
-                    if(bcdiv($ARd,$ALd,0) > 65) {
+                    if($ARd> 65 || $ALd > 65) {
                         $aRLable = '定制片';
                     }else{
                         $aRLable = '现片';
                     }
                 }else{
-                    if(bcdiv($edRd,$edLd,0) > 70) {
+                    if($edRd > 70 || $edLd > 70) {
                         $edRLable = '定制片';
                     }else{
                         $edRLable = '现片';
                     }
-                    if(bcdiv($ARd,$ALd,0) > 70) {
+                    if($ARd> 70 || $ALd > 70) {
                         $aRLable = '定制片';
                     }else{
                         $aRLable = '现片';
                     }
                 }
                 if((float)$v['os_sph'] > 0) {
-                    if(bcdiv($edRd,$edLd,0) > 65) {
+                    if($edRd > 65 || $edLd > 65) {
                         $edLable = '定制片';
                     }else{
                         $edLable = '现片';
                     }
-                    if(bcdiv($ARd,$ALd,0) > 65) {
+                    if($ARd> 65 || $ALd > 65) {
                         $aLable = '定制片';
                     }else{
                         $aLable = '现片';
                     }
                 }else{
-                    if(bcdiv($edRd,$edLd,0) > 70) {
+                    if($edRd > 70 || $edLd > 70) {
                         $edLable = '定制片';
                     }else{
                         $edLable = '现片';
                     }
-                    if(bcdiv($ARd,$ALd,0) > 70) {
+                    if($ARd> 70 || $ALd > 70) {
                         $aLable = '定制片';
                     }else{
                         $aLable = '现片';
