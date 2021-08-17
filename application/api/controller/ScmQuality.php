@@ -259,7 +259,7 @@ class ScmQuality extends Scm
         empty($logistics_data) && $this->error(__('物流单不存在'), [], 403);
 
         //获取采购单数据
-        $purchase_data = $this->_purchase_order->where('id', $logistics_data['purchase_id'])->field('purchase_number,supplier_id,replenish_id')->find();
+        $purchase_data = $this->_purchase_order->where('id', $logistics_data['purchase_id'])->field('purchase_number,supplier_id,replenish_id,purchase_remark,effect_time')->find();
         empty($purchase_data) && $this->error(__('采购单不存在'), [], 403);
 
         //获取采购单商品数据
@@ -313,6 +313,8 @@ class ScmQuality extends Scm
             'supplier_id'        => $purchase_data['supplier_id'],
             'batch_id'           => $logistics_data['batch_id'],
             'replenish_id'       => $purchase_data['replenish_id'],
+            'purchase_remark'    => $purchase_data['purchase_remark'],
+            'effect_time'        => $purchase_data['effect_time'],
             'item_list'          => $item_list,
         ];
 
