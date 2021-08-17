@@ -169,6 +169,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { checkbox: true },
                         { field: 'id', title: __('Id'), operate: false },
                         { field: 'order_number', title: __('订单号') },
+                        { field: 'stock_id', title: __('所属仓库'), searchList: { 1: '郑州仓', 2: '丹阳仓' },formatter: Table.api.formatter.status },
                         { field: 'sku', title: __('SKU') },
 
                         {

@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\lens;
 
+use app\admin\model\order\OrderItemProcess;
 use app\common\controller\Backend;
 use think\Db;
 use think\Exception;
@@ -58,7 +59,7 @@ class Index extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->order($sort, $order)
@@ -207,6 +208,17 @@ class Index extends Backend
             $this->assign('lens_type', $lens_type);
         }
 
+        $stock_id = input('stock_id');
+        if ($stock_id) {
+            $map['stock_id'] = $stock_id;
+            $this->assign('stock_id', $stock_id);
+        }
+
+        if ($lens_type) {
+            $map['lens_type'] = $refractive_index . ' ' . $lens_type;
+            $this->assign('lens_type', $lens_type);
+        }
+
         //显示类型 1是库存  2是价格
         $type = input('type', 1);
         if ($type == 2) {
@@ -285,7 +297,7 @@ class Index extends Backend
                 return $this->selectpage();
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
 
             $total = $this->outorder
                 ->where($where)
@@ -354,7 +366,7 @@ class Index extends Backend
         //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
         //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
         //模板文件列名
-        $listName = ['折射率', '镜片类型', 'SPH', 'CYL', '库存数量', '镜片价格'];
+        $listName = ['折射率', '镜片类型', 'SPH', 'CYL', '库存数量', '镜片价格','所属仓库'];
         try {
             if (!$PHPExcel = $reader->load($filePath)) {
                 $this->error(__('Unknown data format'));
@@ -410,15 +422,25 @@ class Index extends Backend
             } else {
                 $cyl = '+' . number_format($cyl, 2);
             }
+            $stock_id = 1;
+            if (!$v[6]) {
+                $this->error('所属仓库不能为空');
+            } elseif ($v[6] == '郑州仓') {
+                $stock_id = 1;
+            } elseif ($v[6] == '丹阳仓') {
+                $stock_id = 2;
+            }
 
             $map['sph'] = $sph;
             $map['cyl'] = $cyl;
+            $map['stock_id'] = $stock_id;
             $res = $this->model->where($map)->find();
 
             if ($res) {
                 $params[$k]['id'] = $res->id;
                 $params[$k]['stock_num'] = $v[4] * 1;
                 $params[$k]['price'] = $v[5];
+
             } else {
                 $params[$k]['refractive_index'] = trim($v[0]);
                 $params[$k]['lens_type'] = trim($v[1]);
@@ -428,6 +450,7 @@ class Index extends Backend
                 $params[$k]['price'] = $v[5];
                 $params[$k]['createtime'] = date('Y-m-d H:i:s', time());
                 $params[$k]['create_person'] = session('admin.nickname');
+                $params[$k]['stock_id'] = $stock_id;
             }
         }
 
@@ -439,6 +462,13 @@ class Index extends Backend
         }
     }
 
+
+    protected function isEmptyRow($row) {
+        foreach($row as $cell){
+            if (null !== $cell) return false;
+        }
+        return true;
+    }
 
     /**
      * 批量导入出库单
@@ -536,7 +566,12 @@ class Index extends Backend
          * 若带有ADD，sph=SPH+ADD,用新sph带入上面正负号判断里判断
          */
         //补充第二列订单号
+        $itemOrderNumbers = [];
         foreach ($data as $k => $v) {
+            if (!$v[3]) {
+                unset($data[$k]);
+                continue;
+            }
             if (!$v[1]) {
                 $data[$k][0] = $data[$k - 1][0];
                 $data[$k][1] = $data[$k - 1][1];
@@ -547,8 +582,11 @@ class Index extends Backend
                 $data[$k][8] = $data[$k - 1][8];
                 $data[$k][9] = $data[$k - 1][9];
             }
+            $itemOrderNumbers[] = $v[1];
         }
 
+        $orderItemProcess = new OrderItemProcess();
+        $orderStockId = $orderItemProcess->where(['item_order_number' => ['in',$itemOrderNumbers]])->column('stock_id','item_order_number');
         foreach ($data as $k => $v) {
             $lens_type = trim($v[8]);
             //如果ADD为真  sph = sph + ADD;
@@ -590,6 +628,7 @@ class Index extends Backend
                 $map['sph'] = trim($sph);
                 $map['cyl'] = trim($cyl);
                 $map['lens_type'] = ['like', '%' . $lens_type . '%'];
+                $map['stock_id'] = $orderStockId[$v[1]];
                 $res = $this->model->where($map)->setDec('stock_num');
 
                 //生成出库单
@@ -611,11 +650,11 @@ class Index extends Backend
                 $params[$k]['eye_type'] = $v[3];
                 $params[$k]['order_sph'] = trim($v[4]);
                 $params[$k]['order_cyl'] = trim($v[5]);
-                $params[$k]['order_date'] = $v[0];
                 $params[$k]['axi'] = $v[6];
                 $params[$k]['add'] = trim($v[7]);
                 $params[$k]['order_lens_type'] = $v[8];
                 $params[$k]['prescription_type'] = $v[9];
+                $params[$k]['stock_id'] = $orderStockId[$v[1]] ?: 1;
             }
         }
 
