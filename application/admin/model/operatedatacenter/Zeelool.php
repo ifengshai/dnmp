@@ -256,7 +256,7 @@ class Zeelool extends Model
         $map_where['payment_time'] = ['between', [$createat[0].' '.$createat[1], $createat[3].' '.$createat[4]]];
         $order_where['payment_time'] = ['lt',$createat[0]];
 
-        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal']];
+        $map['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
         $map['order_type'] = 1;
         $map1['customer_id'] = ['>',0];
 

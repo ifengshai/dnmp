@@ -230,7 +230,9 @@ class Check extends Backend
             $this->assign('info', $info);
             //查询分批数据
             $batch = $this->batch->hasWhere('purchaseBatchItem')->where('purchase_id', $info->purchase_id)->select();
+            $purchaseDetail = Db::name('purchase_order')->where('id',$info->purchase_id)->field('effect_time,purchase_remark')->find();
             $this->assign('batch', $batch);
+            $this->assign('purchaseDetail', $purchaseDetail);
         }
 
         //查询供应商
