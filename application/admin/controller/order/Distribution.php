@@ -1663,7 +1663,7 @@ class Distribution extends Backend
         ini_set('memory_limit', '1048M');
         $start = input('start','2021-05-31');
         $end = input('end','2021-06-01');
-        $type = input('type','SingleVision');
+        $type = input('type','');
         $where = [];
         if($type) {
             $where['c.prescription_type'] = $type;
