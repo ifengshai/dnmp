@@ -257,10 +257,10 @@ class OrderDataDetailNew extends Backend
                     }
                     $arr[$i]['coupon_code'] = $value['coupon_code'];
                     if($site == 3){
-                        $arr[$i]['coupon_rule_name'] = $order_model->table('discount_coupon_tickets')->alias('a')
+                        $arr[$i]['coupon_rule_name'] = $order_model->table('discount_coupon_tickets')->alias('a')->where('a.discount_coupon_id',$value['discount_coupon_id'])
                         ->join('discount_coupons b','b.id=a.discount_coupon_id')->value('b.name');
                     }else{
-                        $arr[$i]['coupon_rule_name'] = $order_model->table('user_coupons')->alias('a')
+                        $arr[$i]['coupon_rule_name'] = $order_model->table('user_coupons')->alias('a')->where('a.discount_coupon_id',$value['discount_coupon_id'])
                         ->join('discount_coupons b','b.id=a.discount_coupon_id')->value('b.name');
                     }
                     $arr[$i]['shipping_method'] = $value['shipping_method'];  //快递类别
