@@ -1380,7 +1380,7 @@ class WorkOrderList extends Model
             }
             $postData = array_merge($postData, $postDataCommon);
             $postDatas = serialize($postData);
-            Log::write("补发单创建请求");
+            Log::write("补发单创建请求".$postDatas);
             Log::write($postDatas);
             Log::write("补发单创建请求two");
 
