@@ -1661,8 +1661,13 @@ class Distribution extends Backend
     {
         set_time_limit(0);
         ini_set('memory_limit', '1048M');
-        $start = input('start','1614589573');
-        $end = input('end','1630487173');
+        $start = input('start','2021-05-31');
+        $end = input('end','2021-06-01');
+        $type = input('type','SingleVision');
+        $where = [];
+        if($type) {
+            $where['c.prescription_type'] = $type;
+        }
         //获取所有spu对应的
         $spu = Db::connect('database.db_stock')->table('fa_item')->column('origin_sku','sku');
         $spuEd = Db::name('zz_temp3')->where("1=1")->column('a,ed','sku');
@@ -1678,7 +1683,7 @@ class Distribution extends Backend
             ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
             ->where('b.status','in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery','shipped'])
             ->where('b.payment_time','between',[$startTime,$endTime])
-            ->where('c.prescription_type','SingleVision')
+            ->where($where)
             ->select();
         $list = collection($list)->toArray();
 
