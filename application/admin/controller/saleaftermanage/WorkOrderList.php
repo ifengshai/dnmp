@@ -220,6 +220,12 @@ class WorkOrderList extends Backend
                 $map1['payment_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
                 unset($filter['payment_time']);
             }
+            $fa_order = new NewOrder();
+            if ($filter['telephone']) {
+                $orderIds = $fa_order->where('telephone', $filter['telephone'])->column('increment_id');
+                $map3['platform_order'] = ['in', $orderIds];
+                unset($filter['telephone']);
+            }
 
             $this->request->get(['filter' => json_encode($filter)]);
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
@@ -228,6 +234,7 @@ class WorkOrderList extends Backend
                 ->where($map)
                 ->where($map1)
                 ->where($map2)
+                ->where($map3)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
@@ -235,11 +242,12 @@ class WorkOrderList extends Backend
                 ->where($map)
                 ->where($map1)
                 ->where($map2)
+                ->where($map3)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             $list = collection($list)->toArray();
-            $fa_order = new NewOrder();
+
             //用户
             $user_list = $this->users;
             foreach ($list as $k => $v) {
@@ -300,7 +308,9 @@ class WorkOrderList extends Backend
                 } else {
                     $list[$k]['has_recept'] = 1;
                 }
-                $list[$k]['order_status'] = $fa_order->where('increment_id', $list[$k]['platform_order'])->value('status');
+                $orderDetail = $fa_order->where('increment_id', $list[$k]['platform_order'])->field('telephone,status')->find();
+                $list[$k]['order_status'] = $orderDetail['status'];
+                $list[$k]['telephone'] = $orderDetail['telephone'];
             }
             $result = ["total" => $total, "rows" => $list];
 
