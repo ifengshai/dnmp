@@ -145,7 +145,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jq-tags', 'jqui','te
                                         return row.status == 5 ? true : false;
                                     },
                                     title: function (row) {
-                                        return __('Answer') + '【' + row.ticket_id + '】' + row.subject;
+                                        return __('Answer') + '【' + row.ticket_id + '】';
                                     },
                                     classname: 'btn btn-xs btn-success',
                                     icon: '',
