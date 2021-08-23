@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\order\Order;
 use app\common\controller\Backend;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Think\Db;
@@ -45,42 +46,40 @@ class OcPrescriptionPic extends Backend
         $this->relationSearch = false;
         //设置过滤方法
         $this->request->filter(['strip_tags']);
-        if ($this->request->isAjax())
-        {
+        if ($this->request->isAjax()) {
             //如果发送的来源是Selectpage，则转发到Selectpage
-            if ($this->request->request('keyField'))
-            {
+            if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
             $WhereSql = ' id > 0';
             $filter = json_decode($this->request->get('filter'), true);
-            list($where, $sort, $order,$offset,$limit) = $this->buildparams();
-            if ($filter['id']){
-                $WhereSql .= ' and id = '.$filter['id'];
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
+            if ($filter['id']) {
+                $WhereSql .= ' and id = ' . $filter['id'];
             }
-            if ($filter['status']){
-                $WhereSql .= ' and status='.$filter['status'];
+            if ($filter['status']) {
+                $WhereSql .= ' and status=' . $filter['status'];
             }
-            if ($filter['created_at']){
-                $created_at = explode(' - ',$filter['created_at']);
-                $created_at[0] = date("Y-m-d H:i:s",strtotime($created_at[0])-28800);
-                $created_at[1] = date("Y-m-d H:i:s",strtotime($created_at[1])-28800);
+            if ($filter['created_at']) {
+                $created_at = explode(' - ', $filter['created_at']);
+                $created_at[0] = date("Y-m-d H:i:s", strtotime($created_at[0]) - 28800);
+                $created_at[1] = date("Y-m-d H:i:s", strtotime($created_at[1]) - 28800);
                 $WhereSql .= " and created_at between '$created_at[0]' and '$created_at[1]' ";
             }
-            if ($filter['completion_time']){
-                $completion_time = explode(' - ',$filter['completion_time']);
+            if ($filter['completion_time']) {
+                $completion_time = explode(' - ', $filter['completion_time']);
                 $WhereSql .= " and completion_time between '$completion_time[0]' and '$completion_time[1]' ";
             }
-            $model  = Db::connect('database.db_zeelool');
+            $model = Db::connect('database.db_zeelool');
             $WhereOrder = '  ORDER BY  created_at desc';
-            if ($filter['site']){
-                if ($filter['site'] ==1){
+            if ($filter['site']) {
+                if ($filter['site'] == 1) {
                     $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where" . $WhereSql;
                     $sql = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
                                 zeelool.oc_prescription_pic.pic AS pic ,zeelool.oc_prescription_pic.status AS status,zeelool.oc_prescription_pic.handler_name AS handler_name,
                                 zeelool.oc_prescription_pic.created_at AS created_at,zeelool.oc_prescription_pic.completion_time AS completion_time,
                                 zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where" . $WhereSql . $WhereOrder . " limit  " . $offset . ',' . $limit;
-                }else {
+                } else {
                     $count = "SELECT COUNT(1) FROM voogueme.oc_prescription_pic where" . $WhereSql;
                     $sql = "SELECT voogueme.oc_prescription_pic.id AS id,voogueme.oc_prescription_pic.email AS email,voogueme.oc_prescription_pic.query AS query,
                                 voogueme.oc_prescription_pic.pic AS pic ,voogueme.oc_prescription_pic.status AS status,voogueme.oc_prescription_pic.handler_name AS handler_name,
@@ -89,7 +88,7 @@ class OcPrescriptionPic extends Backend
                 }
                 $count = $model->query($count);
                 $total = $count[0]['COUNT(1)'];
-            }else {
+            } else {
                 $count = "SELECT COUNT(1) FROM zeelool.oc_prescription_pic where" . $WhereSql . " union all  SELECT COUNT(1) FROM voogueme.oc_prescription_pic where" . $WhereSql;
                 $sql = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
                                 zeelool.oc_prescription_pic.pic AS pic ,zeelool.oc_prescription_pic.status AS status,zeelool.oc_prescription_pic.handler_name AS handler_name,
@@ -102,25 +101,33 @@ class OcPrescriptionPic extends Backend
                 $count = $model->query($count);
                 $total = $count[0]['COUNT(1)'] + $count[1]['COUNT(1)'];
             }
-            $list  = $model->query($sql);
-
-            foreach ($list as $key=>$item){
-                $list[$key]['created_at'] =   date("Y-m-d H:i:s",strtotime($item['created_at'])+28800);
-                $list[$key]['realy_pk'] = $item['id'].'-'.$item['site'];
-                if ($item['status'] ==1){
-                    $list[$key]['status']='未处理';
-                }else{
-                    $list[$key]['status']= '已处理';
+            $list = $model->query($sql);
+            $order = new Order();
+            foreach ($list as $key => $item) {
+                $orderDetail = $order->where('customer_email', $item['email'])->order('created_at', 'desc')->field('increment_id,created_at,status')->find();
+                $list[$key]['created_at'] = date("Y-m-d H:i:s", strtotime($item['created_at']) + 28800);
+                $list[$key]['order_created_at'] = !empty($orderDetail) ? date("Y-m-d H:i:s", $orderDetail['created_at']) : '-';
+                $list[$key]['order_status'] = !empty($orderDetail) ? $orderDetail['status'] : '-';
+                $list[$key]['increment_id'] = !empty($orderDetail) ? $orderDetail['increment_id'] : '-';
+                $list[$key]['realy_pk'] = $item['id'] . '-' . $item['site'];
+                if ($item['status'] == 1) {
+                    $list[$key]['status'] = '未处理';
+                } else {
+                    $list[$key]['status'] = '已处理';
                 }
             }
 
-            $result = array("total" => $total, "rows" => $list);
+            $result = ["total" => $total, "rows" => $list];
+
             return json($result);
         }
+
         return $this->view->fetch();
     }
+
     /**
      * @param null $ids
+     *
      * @return string
      * @throws \think\Exception
      * @throws \think\db\exception\DataNotFoundException
@@ -129,125 +136,125 @@ class OcPrescriptionPic extends Backend
      * @throws \think\exception\PDOException
      * 问题详情
      */
-    public function question_message($ids = null){
+    public function question_message($ids = null)
+    {
 
-        if ($this->request->isPost()){
+        if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
-            if ($params['site'] ==1){
+            if ($params['site'] == 1) {
                 $model = Db::connect('database.db_zeelool');
-            }else{
+            } else {
                 $model = Db::connect('database.db_voogueme');
             }
-            $updata_queertion =$model->table('oc_prescription_pic')->where('id',$params['id'])->update(['status'=>2,'handler_name'=>$this->auth->nickname,'completion_time'=>date('Y-m-d H:i:s',time()),'remarks'=>$params['remarks']]);
-            if ($updata_queertion){
-                $this->success('操作成功','oc_prescription_pic/index');
-            }else{
+            $updata_queertion = $model->table('oc_prescription_pic')->where('id', $params['id'])->update(['status' => 2, 'handler_name' => $this->auth->nickname, 'completion_time' => date('Y-m-d H:i:s', time()), 'remarks' => $params['remarks']]);
+            if ($updata_queertion) {
+                $this->success('操作成功', 'oc_prescription_pic/index');
+            } else {
                 $this->error('操作失败');
             }
         }
         $site = input('param.site');
-        if ($site ==1){
+        if ($site == 1) {
             $model = Db::connect('database.db_zeelool');
-            $url =config('url.zeelool_url').'/media';
-        }else{
+            $url = config('url.zeelool_url') . '/media';
+        } else {
             $model = Db::connect('database.db_voogueme');
-            $url =config('url.voogueme_url').'/media';
+            $url = config('url.voogueme_url') . '/media';
         }
-        $row =$model->table('oc_prescription_pic')->where('id',$ids)->find();
-        $photo_href = $row['pic'] =explode(',',$row['pic']);
-        foreach ($photo_href as $key=>$item){
-            $photo_href[$key]= $url.$item;
+        $row = $model->table('oc_prescription_pic')->where('id', $ids)->find();
+        $photo_href = $row['pic'] = explode(',', $row['pic']);
+        foreach ($photo_href as $key => $item) {
+            $photo_href[$key] = $url . $item;
         }
         $row['pic'] = $photo_href;
 
-        $this->assign('row',$row);
-        $this->assign('zhandian',$site);
+        $this->assign('row', $row);
+        $this->assign('zhandian', $site);
 
 
         return $this->view->fetch();
     }
 
 
-
     public function batch_export_xls()
     {
-        $data  =  input('get.ids');
-        if ($data){
-            $ct =explode(',',$data);
-            $ids = explode(',',$data);
-            foreach ($ids as $key=>$item){
-                $ids[$key] = explode('-',$item);
+        $data = input('get.ids');
+        if ($data) {
+            $ct = explode(',', $data);
+            $ids = explode(',', $data);
+            foreach ($ids as $key => $item) {
+                $ids[$key] = explode('-', $item);
             }
-            foreach ($ids as $key=>$item){
-                if ($item[1] ==1 ){
+            foreach ($ids as $key => $item) {
+                if ($item[1] == 1) {
                     $model = Db::connect('database.db_zeelool');
-                }else{
+                } else {
                     $model = Db::connect('database.db_voogueme');
                 }
-                $list[] = $model->table('oc_prescription_pic')->where('id',$item[0])->find();
+                $list[] = $model->table('oc_prescription_pic')->where('id', $item[0])->find();
                 $list[$key]['site'] = $item[1];
             }
-        }else{
+        } else {
 
             $filter = json_decode($this->request->get('filter'), true);
             $WhereSql = ' id > 0';
-            list($where, $sort, $order,$offset,$limit) = $this->buildparams();
-            if ($filter['id']){
-                $WhereSql .= ' and id = '.$filter['id'];
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
+            if ($filter['id']) {
+                $WhereSql .= ' and id = ' . $filter['id'];
             }
-            if ($filter['status']){
-                $WhereSql .= ' and status='.$filter['status'];
+            if ($filter['status']) {
+                $WhereSql .= ' and status=' . $filter['status'];
             }
-            if ($filter['created_at']){
-                $createdAt = explode(' - ',$filter['created_at']);
-                $createdAt[0] = date("Y-m-d H:i:s",strtotime($createdAt[0])-28800);
-                $createdAt[1] = date("Y-m-d H:i:s",strtotime($createdAt[1])-28800);
+            if ($filter['created_at']) {
+                $createdAt = explode(' - ', $filter['created_at']);
+                $createdAt[0] = date("Y-m-d H:i:s", strtotime($createdAt[0]) - 28800);
+                $createdAt[1] = date("Y-m-d H:i:s", strtotime($createdAt[1]) - 28800);
                 $WhereSql .= " and created_at between '$createdAt[0]' and '$createdAt[1]' ";
             }
-            if ($filter['completion_time']){
-                $completionTime = explode(' - ',$filter['completion_time']);
+            if ($filter['completion_time']) {
+                $completionTime = explode(' - ', $filter['completion_time']);
                 $WhereSql .= " and completion_time between '$completionTime[0]' and '$completionTime[1]' ";
             }
-            $model  = Db::connect('database.db_zeelool');
+            $model = Db::connect('database.db_zeelool');
             $WhereOrder = '  ORDER BY  created_at desc';
-            if ($filter['site']){
-                if ($filter['site'] ==1){
-                   $sql  = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
+            if ($filter['site']) {
+                if ($filter['site'] == 1) {
+                    $sql = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
                                 zeelool.oc_prescription_pic.pic AS pic ,zeelool.oc_prescription_pic.status AS status,zeelool.oc_prescription_pic.handler_name AS handler_name,
                                 zeelool.oc_prescription_pic.created_at AS created_at,zeelool.oc_prescription_pic.completion_time AS completion_time,
-                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql . $WhereOrder;
-                }else{
-                   $sql  = "SELECT voogueme.oc_prescription_pic.id AS id,voogueme.oc_prescription_pic.email AS email,voogueme.oc_prescription_pic.query AS query,
+                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where" . $WhereSql . $WhereOrder;
+                } else {
+                    $sql = "SELECT voogueme.oc_prescription_pic.id AS id,voogueme.oc_prescription_pic.email AS email,voogueme.oc_prescription_pic.query AS query,
                                 voogueme.oc_prescription_pic.pic AS pic ,voogueme.oc_prescription_pic.status AS status,voogueme.oc_prescription_pic.handler_name AS handler_name,
                                 voogueme.oc_prescription_pic.created_at AS created_at,voogueme.oc_prescription_pic.completion_time AS completion_time,
-                                voogueme.oc_prescription_pic.remarks AS remarks ,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql . $WhereOrder;
+                                voogueme.oc_prescription_pic.remarks AS remarks ,2 as site FROM voogueme.oc_prescription_pic where" . $WhereSql . $WhereOrder;
                 }
 
-            }else{
-              $sql  = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
+            } else {
+                $sql = "SELECT zeelool.oc_prescription_pic.id AS id,zeelool.oc_prescription_pic.email AS email,zeelool.oc_prescription_pic.query AS query,
                                 zeelool.oc_prescription_pic.pic AS pic ,zeelool.oc_prescription_pic.status AS status,zeelool.oc_prescription_pic.handler_name AS handler_name,
                                 zeelool.oc_prescription_pic.created_at AS created_at,zeelool.oc_prescription_pic.completion_time AS completion_time,
-                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where".$WhereSql." union all  
+                                zeelool.oc_prescription_pic.remarks AS remarks,1 as site FROM zeelool.oc_prescription_pic where" . $WhereSql . " union all  
                          SELECT voogueme.oc_prescription_pic.id AS id,voogueme.oc_prescription_pic.email AS email,voogueme.oc_prescription_pic.query AS query,
                                 voogueme.oc_prescription_pic.pic AS pic ,voogueme.oc_prescription_pic.status AS status,voogueme.oc_prescription_pic.handler_name AS handler_name,
                                 voogueme.oc_prescription_pic.created_at AS created_at,voogueme.oc_prescription_pic.completion_time AS completion_time,
-                                voogueme.oc_prescription_pic.remarks AS remarks,2 as site FROM voogueme.oc_prescription_pic where".$WhereSql. $WhereOrder;
+                                voogueme.oc_prescription_pic.remarks AS remarks,2 as site FROM voogueme.oc_prescription_pic where" . $WhereSql . $WhereOrder;
 
 
             }
 
-            $list  = $model->query($sql);
+            $list = $model->query($sql);
         }
-        foreach ($list as $key=>$item){
-            if ($item['status'] ==1){
-                $list[$key]['status']='未处理';
-            }else{
-                $list[$key]['status']= '已处理';
+        foreach ($list as $key => $item) {
+            if ($item['status'] == 1) {
+                $list[$key]['status'] = '未处理';
+            } else {
+                $list[$key]['status'] = '已处理';
             }
-            if ($item['site'] ==1){
-                $list[$key]['site']='Z站';
-            }else{
-                $list[$key]['site']= 'V站';
+            if ($item['site'] == 1) {
+                $list[$key]['site'] = 'Z站';
+            } else {
+                $list[$key]['site'] = 'V站';
             }
         }
 

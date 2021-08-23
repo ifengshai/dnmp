@@ -47,7 +47,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         },
                         { field: 'area_coding', title: __('库区编码') },
                         { field: 'coding', title: __('Coding'), operate: 'like' },
-                        { field: 'sku_num', title: __('绑定SKU数量'), operate: false },
+                        { field: 'sku_num', title: __('绑定SKU数量')},
                         { field: 'volume', title: __('库容') },
                         { field: 'library_name', title: __('Library_name') },
                         { field: 'picking_sort', title: __('库位顺序') },
