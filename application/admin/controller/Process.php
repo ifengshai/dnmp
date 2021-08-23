@@ -1405,8 +1405,8 @@ class Process extends Backend
         $type = 2;
         $site = 'voogueme';
         for ($i = 0; $i < 24; $i++) {
-            $start = '2021-08-03T' . $i . ':00:00Z';
-            $end = '2021-08-03T' . $i . ':59:59Z';
+            $start = '2021-08-20T' . $i . ':00:00Z';
+            $end = '2021-08-20T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(10000);
@@ -1421,8 +1421,8 @@ class Process extends Backend
         $type = 3;
         $site = 'nihao';
         for ($i = 0; $i < 24; $i++) {
-            $start = '2021-07-31T' . $i . ':00:00Z';
-            $end = '2021-07-31T' . $i . ':59:59Z';
+            $start = '2021-08-20T' . $i . ':00:00Z';
+            $end = '2021-08-20T' . $i . ':59:59Z';
             try {
                 $this->asyncTicketHttps($type, $site, $start, $end);
                 usleep(10000);
