@@ -90,6 +90,16 @@
             <input id="c-frame_temple_length" data-rule="required" class="form-control" step="0.01" name="row[frame_weight]" type="number" value="{$row->frame_weight}" readonly >
         </div>
     </div>
+    <div class="form-group ajax-add">
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽度（A）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="mirror_width_a" data-rule="" class="form-control" name="row[mirror_width_a]" type="number" value="{$row->mirror_width_a}" readonly>
+        </div>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽度（ED）')}:</label>
+        <div class="col-xs-12 col-sm-3">
+            <input id="mirror_width_ed" data-rule="" class="form-control"  name="row[mirror_width_ed]" type="number" value="{$row->mirror_width_ed}" readonly>
+        </div>
+    </div>
     <!--镜盒-->
     {elseif $attributeType == '32'}
     <div class="form-group ajax-add">

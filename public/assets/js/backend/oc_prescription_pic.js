@@ -40,8 +40,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         },
                         {field: 'query', title: __('Query'),operate: false,
                             cellStyle:formatTableUnit
-                        },
-
+                        },                        {field: 'increment_id', title: __('订单号'),operate: false,},
+                        {field: 'order_status', title: __('订单状态'),operate: false,},
+                        {field: 'order_created_at', title: __('订单创建时间'), operate:'RANGE', addclass:'datetimerange'},
                         // {
                         //     field: 'query',
                         //     title: __('Query'),

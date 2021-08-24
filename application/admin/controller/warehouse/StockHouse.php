@@ -80,6 +80,45 @@ class StockHouse extends Backend
                 unset($filter['shelf_number']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
+            if (array_key_exists('sku_num',$filter)) {
+
+                $num = $filter['sku_num'];
+                unset($filter['sku_num']);
+                $this->request->get(['filter' => json_encode($filter)]);
+                [$where] = $this->buildparams();
+                if ($num == 0){
+                    $ids = $this->model
+                        ->where(['type' => 1])
+                        ->where($where)
+                        ->where($map)
+                        ->column('id');
+                    $allStoreSku = Db::name('store_sku')->where('is_del',1)->column('store_id');
+                    $map['id'] = ['in',array_diff($ids,$allStoreSku)];
+                }else{
+                    $ids = $this->model
+                        ->where(['type' => 1])
+                        ->where($where)
+                        ->where($map)
+                        ->field('id')
+                        ->select();
+                    $idsArr = array();
+                    $skuArr = array();
+                    $allStoreSku = Db::name('store_sku')->where('is_del',1)->field('store_id')->select();
+                    foreach ($allStoreSku as $vvv){
+                        if ($skuArr[$vvv['store_id']]){
+                            $skuArr[$vvv['store_id']] += 1;
+                        }else{
+                            $skuArr[$vvv['store_id']] = 1;
+                        }
+                    }
+                    foreach ($ids as $vv){
+                        if ($skuArr[$vv['id']] == $num){
+                            array_push($idsArr,$vv['id']);
+                        }
+                    }
+                    $map['id'] = ['in',$idsArr];
+                }
+            }
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where(['type' => 1])
