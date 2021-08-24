@@ -39,9 +39,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             formatter: Table.api.formatter.status
                         },
                         {field: 'name', title: __('优惠券名称'), operate: 'like'},
-                        {field: 'use_order_num', title: __('应用订单数量'), operate: false, sortable: true},
+                        {field: 'use_order_num', title: __('应用订单数量'), operate: false, sortable: false},
                         {field: 'use_order_num_rate', title: __('订单数量占比'), operate: false},
-                        {field: 'use_order_total_price', title: __('订单金额'), operate: false, sortable: true},
+                        {field: 'use_order_total_price', title: __('订单金额'), operate: false, sortable: false},
                         {field: 'use_order_total_price_rate', title: __('订单金额占比'), operate: false},
                         {
                             field: 'time_str',
