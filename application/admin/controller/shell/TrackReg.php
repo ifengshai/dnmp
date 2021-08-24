@@ -2145,7 +2145,7 @@ class TrackReg extends Backend
         $order_where = [];
         $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
         $arr['sum_order_num'] = $operate_model->table('sales_flat_order')->where($order_where)->where('order_type',
-            1)->count();
+            'in',[1,10,11])->count();
         //登录用户数
         $customer_where = [];
         $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
@@ -2171,16 +2171,19 @@ class TrackReg extends Backend
                 'delivery',
             ],
         ];
-        $arr['order_num'] = $this->order->where($order_where)->where('order_type', 1)->count();
+        $arr['order_num'] = $this->order->where($order_where)->where('order_type',
+            'in',[1,10,11])->count();
         //销售额
-        $arr['sales_total_money'] = $this->order->where($order_where)->where('order_type', 1)->sum('base_grand_total');
+        $arr['sales_total_money'] = $this->order->where($order_where)->where('order_type',
+            'in',[1,10,11])->sum('base_grand_total');
         //邮费
         $arr['shipping_total_money'] = $this->order->where($order_where)->where('order_type',
-            1)->sum('base_shipping_amount');
+            'in',[1,10,11])->sum('base_shipping_amount');
         //客单价
         $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
         //中位数
-        $sales_total_money = $this->order->where($order_where)->where('order_type', 1)->column('base_grand_total');
+        $sales_total_money = $this->order->where($order_where)->where('order_type',
+            'in',[1,10,11])->column('base_grand_total');
         $arr['order_total_midnum'] = $this->median($sales_total_money);
         //标准差
         $arr['order_total_standard'] = $this->getVariance($sales_total_money);
@@ -2223,7 +2226,7 @@ class TrackReg extends Backend
                 'delivery',
             ],
         ];
-        $status_where['order_type'] = 1;
+        $status_where['order_type'] = ['in',[1,10,11]];
         //当天注册用户数
         $register_userids = $operate_model->table('customer_entity')->where($cart_where1)->column('entity_id');
         $register_num = count($register_userids);
