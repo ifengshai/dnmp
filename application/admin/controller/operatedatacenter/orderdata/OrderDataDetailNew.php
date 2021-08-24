@@ -486,7 +486,7 @@ class OrderDataDetailNew extends Backend
                     //支付信息
                     $payment_where['parent_id'] = $value['entity_id'];
                     $payment = $web_model->table('sales_flat_order_payment')->where($payment_where)->value('method');
-                    $arr[$i]['payment_method'] = $payment == 'oceanpayment_creditcard' ? '钱海' : 'Paypal';  //支付方式
+                    $arr[$i]['payment_method'] = $payment;  //支付方式
                     //处方信息
                     $prescription_where['magento_order_id'] = $value['entity_id'];
                     $prescription_where['site'] = $site;
@@ -1024,7 +1024,7 @@ class OrderDataDetailNew extends Backend
                         $payment_where['parent_id'] = $val['entity_id'];
                         $payment = $web_model->table('sales_flat_order_payment')->where($payment_where)->value('method');
                     }
-                    $tmpRow[$index[0]] = $payment == 'oceanpayment_creditcard' ? '钱海' : 'Paypal';  //支付方式
+                    $tmpRow[$index[0]] = $payment;  //支付方式
                 }
                 if(in_array('frame_price',$column_name) || in_array('frame_num',$column_name) || in_array('lens_price',$column_name)){
                     //处方信息
