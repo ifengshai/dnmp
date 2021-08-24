@@ -80,13 +80,13 @@ class StockHouse extends Backend
                 unset($filter['shelf_number']);
                 $this->request->get(['filter' => json_encode($filter)]);
             }
+            if (array_key_exists('sku_num',$filter)) {
 
-            if ($filter['sku_num'] || $filter['sku_num'] == 0) {
                 $num = $filter['sku_num'];
                 unset($filter['sku_num']);
                 $this->request->get(['filter' => json_encode($filter)]);
                 [$where] = $this->buildparams();
-                if ($filter['sku_num'] == 0){
+                if ($num == 0){
                     $ids = $this->model
                         ->where(['type' => 1])
                         ->where($where)
