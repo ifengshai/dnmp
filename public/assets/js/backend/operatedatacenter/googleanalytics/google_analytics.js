@@ -23,7 +23,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 paginationLoop: false,
                 columns: [
                     [
-                        {checkbox: true},
+                        // {checkbox: true},
                         {field: 'sku', title: __('SKU'),operate:false},
                         {field: 'sku_quote_counter', title: __('加购数目'),operate:false},
                         {field: 'sku_order_counter', title: __('订单数目'),operate:false},
