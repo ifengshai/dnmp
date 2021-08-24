@@ -17,7 +17,7 @@ class NewProductProcesses extends Backend
     /**
      * @inheritdoc
      */
-    protected $noNeedRight = ['funnel'];
+    protected $noNeedRight = ['funnel','operationLog'];
 
     /**
      * NewProductProcesses模型对象
