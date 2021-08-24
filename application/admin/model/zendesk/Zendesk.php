@@ -16,6 +16,7 @@ class Zendesk extends Model
     protected $autoWriteTimestamp = 'timestamp';
     protected $dateFormat = 'Y-m-d H:i:s';
 
+
     // 追加属性
     protected $append = [
         'tag_format',

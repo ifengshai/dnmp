@@ -89,10 +89,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     'click .btn-getcontent': function (e, value, row, index) {
 
                         let pagePath = '';
-                        if(value){
-                            for (var i=0;i<value.length;i++)
+                        let pagePathvalue = row.pagePath
+                        if(pagePathvalue){
+                            for (var i=0;i<pagePathvalue.length;i++)
                             {
-                                pagePath += value[i] + '</br>';
+                                pagePath += pagePathvalue[i] + '</br>';
                             }
                         }
                         var str = '标题：pagePath详情<br><hr>内容：' + pagePath;

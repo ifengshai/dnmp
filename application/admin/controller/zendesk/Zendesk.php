@@ -145,6 +145,7 @@ class Zendesk extends Backend
                 unset($filter['content']);
             }
             $this->request->get(['filter' => json_encode($filter)]);
+
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             //默认使用
             //$orderSet = 'priority desc,zendesk_update_time asc,id asc';
