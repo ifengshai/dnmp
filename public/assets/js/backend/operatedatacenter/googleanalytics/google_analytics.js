@@ -92,7 +92,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         if(value){
                             for (var i=0;i<value.length;i++)
                             {
-                                page += value[i] + '</br>';
+                                pagePath += value[i] + '</br>';
                             }
                         }
                         var str = '标题：pagePath详情<br><hr>内容：' + pagePath;
