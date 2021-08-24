@@ -30,16 +30,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'quote_uniquePageviews_percent', title: __('加购转化率'),operate:false},
                         {field: 'order_quote_percent', title: __('购物车转化率'),operate:false},
                         {field: 'order_uniquePageviews_percent', title: __('订单转化率'),operate:false},
-                        {field: 'pagePath', title: __('pagePath'),formatter: function (value, row, index) {
-                               let page = '';
-                               if(value){
-                                   for (var i=0;i<value.length;i++)
-                                   {
-                                       page += value[i] + '</br>';
-                                   }
-                               }
-                                return page;
-                            }, operate: false
+                        {
+                            field: 'pagePathOne',
+                            operate: false,
+                            title: __('pagePath'),
+                            events: Controller.api.events.getcontent,
+                            formatter: Controller.api.formatter.getcontent,
                         },
                         {field: 'pageviews', title: __('pageviews'),operate:false},
                         {field: 'uniquePageviews', title: __('uniquePageviews'),operate:false},
@@ -78,6 +74,37 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
+            },
+            formatter: {
+                getcontent: function (value, row) {
+                    if (value == null || value == undefined) {
+                        value = '';
+                    }
+                    return '<div style="float: left;width: 100%;"><span class="btn-getcontent">pagePath详情</span></div>';
+                },
+            },
+            events: {//绑定事件的方法
+                getcontent: {
+                    //格式为：方法名+空格+DOM元素
+                    'click .btn-getcontent': function (e, value, row, index) {
+
+                        let pagePath = '';
+                        if(value){
+                            for (var i=0;i<value.length;i++)
+                            {
+                                page += value[i] + '</br>';
+                            }
+                        }
+                        var str = '标题：pagePath详情<br><hr>内容：' + pagePath;
+                        Layer.open({
+                            closeBtn: 1,
+                            title: "详情",
+                            content: str,
+                            area: ['80%', '80%'],
+                            anim: 0
+                        });
+                    }
+                }
             }
         }
     };
