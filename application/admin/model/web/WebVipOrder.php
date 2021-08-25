@@ -91,24 +91,24 @@ class WebVipOrder extends Model
             foreach ($data as $k => $v) {
                 $params = [];
                 if ($site == Site::NIHAO) {
-                    $params[$k]['order_number'] = $v['order_no'] ?: '';
-                    $params[$k]['order_amount'] = $v['actual_payment'] ?: 0;
-                    $params[$k]['order_status'] = $v['status'] ?: 0;
+                    $params['order_number'] = $v['order_no'] ?: '';
+                    $params['order_amount'] = $v['actual_payment'] ?: 0;
+                    $params['order_status'] = $v['status'] ?: 0;
                 } else {
-                    $params[$k]['order_number'] = $v['order_number'] ?: '';
-                    $params[$k]['order_amount'] = $v['order_amount'] ?: 0;
-                    $params[$k]['order_status'] = $v['order_status'] ?: 0;
-                    $params[$k]['customer_email'] = $v['customer_email'] ?: '';
-                    $params[$k]['order_type'] = $v['order_type'] ?: 0;
-                    $params[$k]['paypal_token'] = $v['paypal_token'] ?: '';
-                    $params[$k]['pay_status'] = $v['pay_status'] ?: 0;
-                    $params[$k]['is_active_status'] = $v['is_active_status'] ?: 0;
+                    $params['order_number'] = $v['order_number'] ?: '';
+                    $params['order_amount'] = $v['order_amount'] ?: 0;
+                    $params['order_status'] = $v['order_status'] ?: 0;
+                    $params['customer_email'] = $v['customer_email'] ?: '';
+                    $params['order_type'] = $v['order_type'] ?: 0;
+                    $params['paypal_token'] = $v['paypal_token'] ?: '';
+                    $params['pay_status'] = $v['pay_status'] ?: 0;
+                    $params['is_active_status'] = $v['is_active_status'] ?: 0;
                 }
-                $params[$k]['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time'])+28800 : 0;
-                $params[$k]['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time'])+28800 : 0;
-                $params[$k]['updated_at'] = time();
+                $params['start_time'] = strtotime($v['start_time']) > 0 ? strtotime($v['start_time'])+28800 : 0;
+                $params['end_time'] = strtotime($v['end_time']) > 0 ? strtotime($v['end_time'])+28800 : 0;
+                $params['updated_at'] = time();
 
-                $params[$k]['country_id'] = $v['country_id'] ?: 0;
+                $params['country_id'] = $v['country_id'] ?: 0;
                 (new WebVipOrder)->where(['web_id' => $v['id'], 'site' => $site])->update($params);
             }
 
