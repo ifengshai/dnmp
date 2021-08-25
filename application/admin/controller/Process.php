@@ -2484,12 +2484,12 @@ class Process extends Backend
         foreach ($list as $k => $v) {
             $params = [];
             if ($v['site'] == 1) {
-                $res = Db::connect('database.zeelool')
+                $res = Db::connect('database.db_zeelool')
                     ->table('oc_vip_order')
                     ->where(['id' => $v['web_id']])
                     ->find();
             } elseif ($v['site'] == 2) {
-                $res = Db::connect('database.voogueme')
+                $res = Db::connect('database.db_voogueme')
                     ->table('oc_vip_order')
                     ->where(['id' => $v['web_id']])
                     ->find();
