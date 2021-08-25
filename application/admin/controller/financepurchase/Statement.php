@@ -341,7 +341,7 @@ class Statement extends Backend
                     //更新主表待结算总金额
                     Db::name('finance_statement')->where('id', $ids)->update(['wait_statement_total' => $params['product_total'], 'status' => $params['status']]);
                     foreach ($list as $k => $v) {
-                        Db::name('finance_statement_item')->where('id', $v['in_stock_id'])->update(['deduction_total' => $v['kou_money'], 'deduction_reason' => $v['kou_reason']]);
+                        Db::name('finance_statement_item')->where('id', $v['in_stock_id'])->update(['deduction_total' => $v['kou_money'], 'deduction_reason' => $v['kou_reason'], 'wait_statement_total' => ($v['instock_total'] - $v['kou_money'])]);
                     }
                     Db::commit();
                 } catch (ValidateException $e) {
