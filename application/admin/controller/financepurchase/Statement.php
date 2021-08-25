@@ -146,7 +146,7 @@ class Statement extends Backend
                             $this->error(__('有扣款金额不能没有扣款原因', ''));
                         }
                     }
-                    if (bcsub(bcadd($v['all_money'], $v['kou_money'], 2), $v['all_money1'], 2) != 0) {
+                    if (bcsub(round(bcadd($v['all_money'], $v['kou_money'], 4),2), $v['all_money1'], 2) != 0) {
                         $this->error(__('采购单' . $v['name'] . '金额计算错误，请关闭页面后重试', ''));
                     }
                 }
@@ -331,17 +331,18 @@ class Statement extends Backend
                             $this->error(__('有扣款金额不能没有扣款原因', ''));
                         }
                     }
-                    if (bcsub(bcadd($v['all_money'], $v['kou_money'], 2), $v['all_money1'], 2) != 0) {
-//                    if (($v['all_money'] + $v['kou_money']) != $v['all_money1']) {
+                    if (bcsub(round(bcadd($v['all_money'], $v['kou_money'], 4),2), $v['all_money1'], 2) != 0) {
+                        //                    if (($v['all_money'] + $v['kou_money']) != $v['all_money1']) {
                         $this->error(__('采购单' . $v['name'] . '金额计算错误，请关闭页面后重试', ''));
                     }
                 }
+//                dump($list);die;
                 Db::startTrans();
                 try {
                     //更新主表待结算总金额
                     Db::name('finance_statement')->where('id', $ids)->update(['wait_statement_total' => $params['product_total'], 'status' => $params['status']]);
                     foreach ($list as $k => $v) {
-                        Db::name('finance_statement_item')->where('id', $v['in_stock_id'])->update(['deduction_total' => $v['kou_money'], 'deduction_reason' => $v['kou_reason'], 'wait_statement_total' => ($v['instock_total'] - $v['kou_money'])]);
+                        Db::name('finance_statement_item')->where('id', $v['in_stock_id'])->update(['deduction_total' => $v['kou_money'], 'deduction_reason' => $v['kou_reason'], 'wait_statement_total' => $v['all_money']]);
                     }
                     Db::commit();
                 } catch (ValidateException $e) {
