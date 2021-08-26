@@ -62,14 +62,14 @@ class PurchasePay extends Backend
                 //查询审批记录表我的待审核
                 $finance_purchase_id = Db::name('finance_purchase_workflow_records')->where(['assignee_id' => $userid, 'audit_status' => 0])->column('finance_purchase_id');
                 $map['id'] = ['in', $finance_purchase_id];
-            } else {
+            } /*else { //需求2475去除展示限制，拥有页面权限即可看到所有数据
                 //审核人可以看所有的 其他人只能看自己创建的
                 $audit = ['1', '50', '56', '232', '154', '191'];
                 if (!in_array($userid, $audit)) {
                     //创建人
                     $map['create_person'] = session('admin.nickname');
                 }
-            }
+            }*/
 
             if ($filter['check_user_id']) {
                 //查询审批记录表我的待审核
