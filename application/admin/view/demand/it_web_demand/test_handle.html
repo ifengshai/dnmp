@@ -63,6 +63,12 @@
                 {:Form::select('row[test_group]', $status, $row['test_group'], ['class'=>'selectpicker select_input web_group_status','title'=>'请选择','data-rule'=>'required'])}
                 </span>
             </div>
+            <div class="input_item">
+                <label class="input_tiem_label">预计工时：</label>
+                <span class="input_tiem_span">
+                       <input type="text" id="test_working_hour" required name="row['test_working_hour']" style="width: 65%;height: 35px" value="{$row['test_working_hour']}">
+                </span>
+            </div>
             <div class="item_button1">
                 <label class="input_tiem_label"></label>
                 {if $row['status'] == 3}

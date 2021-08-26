@@ -99,6 +99,16 @@
                     {/if}
                 </span>
             </div>
+            <div class="input_item web_html" style="{if $row['web_designer_group'] != 1}display:none;{/if}">
+                <label class="input_tiem_label">预计工时：</label>
+                <span class="input_tiem_span">
+                    {if $row['test_status'] == 1}
+                       <input type="text" id="web_designer_working_hour" required name="row['web_designer_working_hour']" style="width: 65%;height: 35px" value="{$row['web_designer_working_hour']}">
+                    {else}
+                        <input type="text" id="web_designer_working_hour" required name="row['web_designer_working_hour']" style="width: 65%;height: 35px" value="{$row['web_designer_working_hour']}" disabled>
+                    {/if}
+                </span>
+            </div>
             <div class="input_item web_htmls">
                 <label class="input_tiem_label">备注：</label>
                 <span class="input_tiem_span">
@@ -215,6 +225,16 @@
                     {/if}
                 </span>
             </div>
+            <div class="input_item web_html" style="{if $row['web_designer_group'] != 1}display:none;{/if}">
+                <label class="input_tiem_label">预计工时：</label>
+                <span class="input_tiem_span">
+                    {if $row['test_status'] == 1}
+                       <input type="text" id="phper_working_hour" required name="row['phper_working_hour']" style="width: 65%;height: 35px" value="{$row['phper_working_hour']}">
+                    {else}
+                        <input type="text" id="phper_working_hour" required name="row['phper_working_hour']" style="width: 65%;height: 35px" value="{$row['phper_working_hour']}" disabled>
+                    {/if}
+                </span>
+            </div>
             <div class="input_item php_htmls">
                 <label class="input_tiem_label">备注：</label>
                 <span class="input_tiem_span">
@@ -326,6 +346,16 @@
                             {:Form::select('row[app_complexity]', config('demand.allComplexity'), $row['app_complexity'], ['class'=>'selectpicker select_input','title'=>'请选择','disabled'=>'true'])}
                         {/if}
                     </span>
+                </div>
+                <div class="input_item web_html" style="{if $row['web_designer_group'] != 1}display:none;{/if}">
+                    <label class="input_tiem_label">预计工时：</label>
+                    <span class="input_tiem_span">
+                    {if $row['test_status'] == 1}
+                       <input type="text" id="app_working_hour" required name="row['app_working_hour']" style="width: 65%;height: 35px" value="{$row['app_working_hour']}">
+                    {else}
+                        <input type="text" id="app_working_hour" required name="row['app_working_hour']" style="width: 65%;height: 35px" value="{$row['app_working_hour']}" disabled>
+                    {/if}
+                </span>
                 </div>
                 <div class="input_item app_htmls">
                     <label class="input_tiem_label">备注：</label>
