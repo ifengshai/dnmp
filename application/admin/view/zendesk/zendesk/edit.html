@@ -86,10 +86,30 @@
                             </div>
                         </div>
                         {if condition="in_array($ticket->rating,['bad','good'])"}
-                        <div class="callout" style="background-color:#fffcf3;">
-                            <h4>Rating! <button type="button" class="btn btn-block btn-warning btn-flat">{$ticket->rating}</button></h4>
-                            {$ticket->comment}
+                        {if condition="$ticket->rating == 'bad'"}
+                        <div class="callout" style="margin-left: 105px;">
+                            <h4>Rating：<button type="button" class="btn btn-warning btn-flat" style="background-color:#B13C2F;border-radius:4px;font-size: 15px">Bad,I'm unsatisfied</button></h4>
+                            {if condition="!empty($ticket->reason)"}
+                            <div><h4 style="display: inline-block">Reason：</h4><span style="font-size: 15px;display: inline-block">{$ticket->reason}</span></div>
+                            {/if}
+                            <div style="margin-left: 70px;font-size: 15px;">{$ticket->comment}</div>
                         </div>
+<!--                        <div class="form-group" >-->
+<!--                            <label class="control-label col-xs-12 col-sm-2"><h4 style="display: inline-block;font-weight:bolder;">Reason：</h4></label>-->
+<!--                            <div class="col-xs-12 col-sm-9" style="width: 71.5%">-->
+<!--                                <button type="button" class="btn btn-warning btn-flat" style="background-color:#B13C2F;border-radius:4px;font-size: 15px">Bad,I'm unsatisfied</button>-->
+<!--                            </div>-->
+<!--                        </div>-->
+                        {/if}
+                        {if condition="$ticket->rating == 'good'"}
+                        <div class="callout" style="margin-left: 105px;">
+                            <h4>Rating：<button type="button" class="btn btn-warning btn-flat" style="background-color:#81A331;border-radius:4px;font-size: 15px">Good,I'm satisfied</button></h4>
+                            {if condition="!empty($ticket->reason)"}
+                            <div><h4 style="display: inline-block">Reason：</h4><span style="font-size: 15px;display: inline-block">{$ticket->reason}</span></div>
+                            {/if}
+                            <div style="margin-left: 70px;font-size: 15px;">{$ticket->comment}</div>
+                        </div>
+                        {/if}
                         {/if}
 
                         <div class="form-group" >

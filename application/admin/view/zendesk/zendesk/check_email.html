@@ -14,6 +14,28 @@
                     <br />
                     <div class="tab-content">
                         <div class="active tab-pane" id="activity">
+
+                            {if condition="in_array($ticket->rating,['bad','good'])"}
+                            {if condition="$ticket->rating == 'bad'"}
+                            <div class="callout" style="background-color:#fffcf3;">
+                                <h4>Rating：<button type="button" class="btn btn-warning btn-flat" style="background-color:#B13C2F;border-radius:4px;font-size: 15px">Bad,I'm unsatisfied</button></h4>
+                                {if condition="!empty($ticket->reason)"}
+                                <div><h4 style="display: inline-block">Reason：</h4><span style="font-size: 15px;display: inline-block">{$ticket->reason}</span></div>
+                                {/if}
+                                <div style="margin-left: 70px;font-size: 15px;">{$ticket->comment}</div>
+                            </div>
+                            {/if}
+                            {if condition="$ticket->rating == 'good'"}
+                            <div class="callout" style="background-color:#fffcf3;">
+                                <h4>Rating：<button type="button" class="btn btn-warning btn-flat" style="background-color:#81A331;border-radius:4px;font-size: 15px">Good,I'm satisfied</button></h4>
+                                {if condition="!empty($ticket->reason)"}
+                                <div><h4 style="display: inline-block">Reason：</h4><span style="font-size: 15px;display: inline-block">{$ticket->reason}</span></div>
+                                {/if}
+                                <div style="margin-left: 70px;font-size: 15px;">{$ticket->comment}</div>
+                            </div>
+                            {/if}
+                            {/if}
+
                             <!-- Post -->
                             {foreach name="comments" item="vo"}
                             <div class="post"  {if condition="$vo['comment_id'] eq 0"}style="word-break: break-all;background-color: #f7f7bf!important"{else}style="word-break: break-all;"{/if}>
