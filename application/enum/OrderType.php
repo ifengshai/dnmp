@@ -30,6 +30,10 @@ class OrderType
     const DIFFERENCE_ORDER = 5;
     //一件代发
     const PAYROLL_ORDER = 6;
+    //手动补发
+    const MANUAL_REISSUE = 7;
+    //TT订单
+    const TT_ORDER = 8;
     //vip订单
     const VIP_ORDER = 9;
     //货到付款
