@@ -79,6 +79,7 @@ class GoogleAnalytics  extends Backend
                 $magento_list[$key]['site'] = rand(1,20);
             }
 
+            $i = 1;
             foreach ($magento_list as $key => $magento_value) {
                 if ($magento_value['sku_quote_counter'] && $magento_value['uniquePageviews']) {
                     $magento_list[$key]['quote_uniquePageviews_percent'] = round($magento_value['sku_quote_counter'] / $magento_value['uniquePageviews'] * 100, 2) . '%';
@@ -90,6 +91,8 @@ class GoogleAnalytics  extends Backend
                 if ($magento_value['uniquePageviews'] && $magento_value['sku_order_counter']) {
                     $magento_list[$key]['order_uniquePageviews_percent'] = round($magento_value['sku_order_counter'] / $magento_value['uniquePageviews'] * 100, 2) . '%';
                 }
+                $magento_list[$key]['id'] = $i;
+                $i++;
             }
             $result = array("total" => count($magento_list), "rows" => array_values($magento_list));
 
