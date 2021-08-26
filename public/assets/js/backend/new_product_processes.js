@@ -139,7 +139,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echarts'], function 
                     tooltip: {
                         trigger: 'item',
                     },
-                    color: ['#3fb1e3', '#6be6c1', '#626c91', '#a0a7e6', '#c4ebad', '#96dee8', '#d1b19d', '#dfecd4', '#d0afe1', '#f2d3c7'],
+                    color: ['#1e239b', '#3312d4', '#632ef0', '#ba3779', '#d4793a', '#d2b54a', '#4fb495', '#dfecd4', '#d0afe1', '#f2d3c7'],
                     legend: {
                         data: [],
                         show: false
