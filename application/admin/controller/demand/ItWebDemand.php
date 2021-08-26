@@ -1115,6 +1115,10 @@ class ItWebDemand extends Backend
                     $add['status'] = 1;
                     $add['create_time'] = date('Y-m-d H:i', time());
                     $add['pm_audit_status'] = 1;
+                    $add['web_designer_working_hour'] = $data['web_designer_working_hour'];
+                    $add['phper_working_hour'] = $data['phper_working_hour'];
+                    $add['app_working_hour'] = $data['app_working_hour'];
+                    $add['test_working_hour'] = $data['test_working_hour'];
 
                     if (!empty($data['important_reasons'])) {
                         $add['important_reasons'] = implode(',', $data['important_reasons']);
@@ -1228,6 +1232,10 @@ class ItWebDemand extends Backend
                     $add['importance'] = $params['importance'];
                     $add['degree_of_urgency'] = $params['degree_of_urgency'];
                     $add['development_difficulty'] = $params['development_difficulty'];
+                    $add['web_designer_working_hour'] = $params['web_designer_working_hour'];
+                    $add['phper_working_hour'] = $params['phper_working_hour'];
+                    $add['app_working_hour'] = $params['app_working_hour'];
+                    $add['test_working_hour'] = $params['test_working_hour'];
 
                     $add['priority'] = $params['priority'];
                     if (!empty($params['important_reasons'])) {
