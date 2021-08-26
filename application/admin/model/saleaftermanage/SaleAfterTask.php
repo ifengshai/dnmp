@@ -6,6 +6,7 @@ use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\web\WebUsers;
 use app\admin\model\web\WebVipOrder;
+use app\enum\OrderType;
 use Think\Log;
 use think\Model;
 use think\Db;
@@ -929,17 +930,40 @@ class SaleAfterTask extends Model
             $result[$k]['differencePriceList'] = $differencePriceList;
             $result[$k]['order_type_id'] = $v['order_type'];
             switch ($v['order_type']) {
-                case 2:
+                case OrderType::REGULAR_ORDER:
+                    $result[$k]['order_type'] = '<span style="color:#0073b7">普通</span>';
+                    break;
+                case OrderType::WHOLESALE_ORDER:
                     $result[$k]['order_type'] = '<span style="color:#f39c12">批发</span>';
                     break;
-                case 3:
+                case OrderType::SOCIAL_ORDER:
                     $result[$k]['order_type'] = '<span style="color:#18bc9c">网红</span>';
                     break;
-                case 4:
+                case OrderType::REPLACEMENT_ORDER:
                     $result[$k]['order_type'] = '<span style="color:#e74c3c">补发</span>';
                     break;
+                case OrderType::DIFFERENCE_ORDER:
+                    $result[$k]['order_type'] = '<span style="color:#0073b7">补差价</span>';
+                    break;
+                case OrderType::PAYROLL_ORDER:
+                    $result[$k]['order_type'] = '<span style="color:#0073b7">一件代发</span>';
+                    break;
+                case OrderType::MANUAL_REISSUE:
+                    $result[$k]['order_type'] = '<span style="color:#0073b7">手动补发</span>';
+                    break;
+                case OrderType::TT_ORDER:
+                    $result[$k]['order_type'] = '<span style="color:#0073b7">TT订单</span>';
+                    break;
+                case OrderType::VIP_ORDER:
+                    $result[$k]['order_type'] = '<span style="color:#0073b7">vip订单</span>';
+                    break;
+                case OrderType::CASH_DELIVERY_ORDER:
+                    $result[$k]['order_type'] = '<span style="color:#0073b7">货到付款</span>';
+                    break;
+                case OrderType::CONVENIENCE_ORDER:
+                    $result[$k]['order_type'] = '<span style="color:#0073b7">便利店支付</span>';
+                    break;
                 default:
-                    $result[$k]['order_type'] = '<span style="color:#0073b7">普通</span>';
                     break;
             }
 

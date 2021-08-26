@@ -228,6 +228,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 5: '补差价',
                                 6: '一件代发',
                                 7: '手动补单',
+                                8: 'TT订单',
                                 10: '货到付款',
                                 11: '普通订单'
                             },
