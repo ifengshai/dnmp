@@ -1480,6 +1480,12 @@ class Distribution extends Backend
                 case OrderType::PAYROLL_ORDER:
                     $value['order_type'] = '一件代发';
                     break;
+                case OrderType::MANUAL_REISSUE:
+                    $value['order_type'] = '手动补发';
+                    break;
+                case OrderType::TT_ORDER:
+                    $value['order_type'] = 'TT订单';
+                    break;
                 case OrderType::VIP_ORDER:
                     $value['order_type'] = 'vip订单';
                     break;
@@ -1890,6 +1896,12 @@ class Distribution extends Backend
                     break;
                 case OrderType::PAYROLL_ORDER:
                     $value['order_type'] = '一件代发';
+                    break;
+                case OrderType::MANUAL_REISSUE:
+                    $value['order_type'] = '手动补发';
+                    break;
+                case OrderType::TT_ORDER:
+                    $value['order_type'] = 'TT订单';
                     break;
                 case OrderType::VIP_ORDER:
                     $value['order_type'] = 'vip订单';
@@ -2394,6 +2406,12 @@ class Distribution extends Backend
                     case OrderType::PAYROLL_ORDER:
                         $value['order_type'] = '一件代发';
                         break;
+                    case OrderType::MANUAL_REISSUE:
+                        $value['order_type'] = '手动补发';
+                        break;
+                    case OrderType::TT_ORDER:
+                        $value['order_type'] = 'TT订单';
+                        break;
                     case OrderType::VIP_ORDER:
                         $value['order_type'] = 'vip订单';
                         break;
@@ -2570,33 +2588,39 @@ class Distribution extends Backend
                 $data[$k]['item_order_number'] = $v['item_order_number'];
                 $data[$k]['site'] = $siteList[$v['site']];
 
-                switch ($v['order_type']) {
+                switch ($value['order_type']) {
                     case OrderType::REGULAR_ORDER:
-                        $v['order_type'] = '普通订单';
+                        $value['order_type'] = '普通订单';
                         break;
                     case OrderType::WHOLESALE_ORDER:
-                        $v['order_type'] = '批发单';
+                        $value['order_type'] = '批发单';
                         break;
                     case OrderType::SOCIAL_ORDER:
-                        $v['order_type'] = '网红单';
+                        $value['order_type'] = '网红单';
                         break;
                     case OrderType::REPLACEMENT_ORDER:
-                        $v['order_type'] = '补发单';
+                        $value['order_type'] = '补发单';
                         break;
                     case OrderType::DIFFERENCE_ORDER:
-                        $v['order_type'] = '补差价';
+                        $value['order_type'] = '补差价';
                         break;
                     case OrderType::PAYROLL_ORDER:
-                        $v['order_type'] = '一件代发';
+                        $value['order_type'] = '一件代发';
+                        break;
+                    case OrderType::MANUAL_REISSUE:
+                        $value['order_type'] = '手动补发';
+                        break;
+                    case OrderType::TT_ORDER:
+                        $value['order_type'] = 'TT订单';
                         break;
                     case OrderType::VIP_ORDER:
-                        $v['order_type'] = 'vip订单';
+                        $value['order_type'] = 'vip订单';
                         break;
                     case OrderType::CASH_DELIVERY_ORDER:
-                        $v['order_type'] = '货到付款';
+                        $value['order_type'] = '货到付款';
                         break;
                     case OrderType::CONVENIENCE_ORDER:
-                        $v['order_type'] = '便利店支付';
+                        $value['order_type'] = '便利店支付';
                         break;
                     default:
                         break;
