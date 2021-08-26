@@ -25,6 +25,7 @@ use app\admin\model\saleaftermanage\WorkOrderMeasure;
 use app\admin\model\saleaftermanage\WorkOrderRecept;
 use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\warehouse\StockHouse;
+use app\admin\model\web\WebVipOrder;
 use app\admin\model\zendesk\Zendesk;
 use app\common\controller\Backend;
 use fast\Http;
@@ -2464,13 +2465,51 @@ class Process extends Backend
         $orderitem = new OrderItemOption();
         $list = Db::connect('database.db_nihao')->table('order_items')
             ->field('id,order_id,goods_type')
-            ->where('created_at', '>' , '2021-08-01')
+            ->where('created_at', '>', '2021-08-01')
             ->chunk(10000, function ($row) use ($orderitem) {
                 foreach ($row as $k => $v) {
                     $orderitem->where(['magento_order_id' => $v['order_id'], 'item_id' => $v['id'], 'site' => 3])->update(['goods_type' => $v['goods_type']]);
-                    echo $k ."\n";
+                    echo $k . "\n";
                 }
-        });
+            });
 
+    }
+
+
+    //同步VIP订单
+    public function processVipOrder()
+    {
+        $vip = new WebVipOrder();
+        $list = $vip->where("order_number=''")->select();
+        foreach ($list as $k => $v) {
+            $params = [];
+            if ($v['site'] == 1) {
+                $res = Db::connect('database.db_zeelool')
+                    ->table('oc_vip_order')
+                    ->where(['id' => $v['web_id']])
+                    ->find();
+            } elseif ($v['site'] == 2) {
+                $res = Db::connect('database.db_voogueme')
+                    ->table('oc_vip_order')
+                    ->where(['id' => $v['web_id']])
+                    ->find();
+            }
+
+            $params['order_number'] = $res['order_number'] ?: '';
+            $params['order_amount'] = $res['order_amount'] ?: 0;
+            $params['order_status'] = $res['order_status'] ?: 0;
+            $params['customer_email'] = $res['customer_email'] ?: '';
+            $params['order_type'] = $res['order_type'] ?: 0;
+            $params['paypal_token'] = $res['paypal_token'] ?: '';
+            $params['pay_status'] = $res['pay_status'] ?: 0;
+            $params['is_active_status'] = $res['is_active_status'] ?: 0;
+            $params['start_time'] = strtotime($res['start_time']) > 0 ? strtotime($res['start_time']) + 28800 : 0;
+            $params['end_time'] = strtotime($res['end_time']) > 0 ? strtotime($res['end_time']) + 28800 : 0;
+            $params['updated_at'] = time();
+
+            $params['country_id'] = $res['country_id'] ?: 0;
+            (new WebVipOrder)->where(['id' => $v['id']])->update($params);
+
+        }
     }
 }

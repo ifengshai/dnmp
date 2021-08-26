@@ -179,7 +179,7 @@
                                 <td class="ceshi">
                                     {php}
                                     $label = '';
-                                    if($list[$vo][$vi]['data'] == '0')
+                                    if($list[$vo][$vi]['data'] < 5)
                                     {
                                     $label='reds';
                                     } elseif($list[$vo][$vi]['data'] <= 30 && $list[$vo][$vi]['data']>0)
@@ -214,7 +214,7 @@
                                 <td class="ceshi">
                                     {php}
                                     $label = '';
-                                    if($list[$vo][$vi]['data'] == '0')
+                                    if($list[$vo][$vi]['data'] < 5)
                                     {
                                     $label='reds';
                                     } elseif($list[$vo][$vi]['data'] <= 30 && $list[$vo][$vi]['data']>0)
