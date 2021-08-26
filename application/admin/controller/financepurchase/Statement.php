@@ -621,7 +621,7 @@ class Statement extends Backend
                                                 $arr1['income_amount'] = $costOrderInfo['income_amount'];  //收入金额
                                                 $arr1['action_type'] = 2;  //动作类型：冲减
                                                 $arr1['order_currency_code'] = $costOrderInfo['order_currency_code'];  //币种
-                                                $arr1['is_carry_forward'] = $costOrderInfo['is_carry_forward'];  //是否结转
+                                                $arr1['is_carry_forward'] = $costOrderInfo['is_carry_forward'] ?? 0;  //是否结转
                                                 $arr1['payment_time'] = $costOrderInfo['payment_time'];  //订单支付时间
                                                 $arr1['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                                 $arr1['createtime'] = time();  //创建时间
@@ -639,7 +639,7 @@ class Statement extends Backend
                                                 $arr2['income_amount'] = $costOrderInfo['income_amount'];  //收入金额
                                                 $arr2['action_type'] = 1;  //动作类型：增加
                                                 $arr2['order_currency_code'] = $costOrderInfo['order_currency_code'];  //币种
-                                                $arr2['is_carry_forward'] = $costOrderInfo['is_carry_forward'];  //是否结转
+                                                $arr2['is_carry_forward'] = $costOrderInfo['is_carry_forward'] ?? 0;  //是否结转
                                                 $arr2['payment_time'] = $costOrderInfo['payment_time'];  //订单支付时间
                                                 $arr2['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                                 $arr2['createtime'] = time();  //创建时间
@@ -779,7 +779,7 @@ class Statement extends Backend
                                             $arr1['income_amount'] = $costOrderInfo['income_amount'];  //收入金额
                                             $arr1['action_type'] = 2;  //动作类型：冲减
                                             $arr1['order_currency_code'] = $costOrderInfo['order_currency_code'];  //币种
-                                            $arr1['is_carry_forward'] = $costOrderInfo['is_carry_forward'];  //是否结转
+                                            $arr1['is_carry_forward'] = $costOrderInfo['is_carry_forward'] ?? 0;  //是否结转
                                             $arr1['payment_time'] = $costOrderInfo['payment_time'];  //订单支付时间
                                             $arr1['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                             $arr1['createtime'] = time();  //创建时间
@@ -797,7 +797,7 @@ class Statement extends Backend
                                             $arr2['income_amount'] = $costOrderInfo['income_amount'];  //收入金额
                                             $arr2['action_type'] = 1;  //动作类型：增加
                                             $arr2['order_currency_code'] = $costOrderInfo['order_currency_code'];  //币种
-                                            $arr2['is_carry_forward'] = $costOrderInfo['is_carry_forward'];  //是否结转
+                                            $arr2['is_carry_forward'] = $costOrderInfo['is_carry_forward'] ?? 0;  //是否结转
                                             $arr2['payment_time'] = $costOrderInfo['payment_time'];  //订单支付时间
                                             $arr2['payment_method'] = $costOrderInfo['payment_method'];  //订单支付方式
                                             $arr2['createtime'] = time();  //创建时间
