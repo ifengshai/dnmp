@@ -1372,6 +1372,10 @@ class ItWebDemand extends Backend
                     }
 
                     if ($flag == $num) {
+                        $update['web_designer_working_hour'] = $params['web_designer_working_hour'];
+                        $update['phper_working_hour'] = $params['phper_working_hour'];
+                        $update['app_working_hour'] = $params['app_working_hour'];
+                        $update['test_working_hour'] = $params['test_working_hour'];
                         //如果全部完成，则更新本条目状态
                         $update = [];
                         $update['develop_finish_status'] = 3;
