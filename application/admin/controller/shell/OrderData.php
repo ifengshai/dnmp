@@ -1965,6 +1965,7 @@ class OrderData extends Backend
     {
         $order = new NewOrder();
         $orderitemprocess = new NewOrderItemProcess();
+        $orderitemoption = new NewOrderItemOption();
         //查询Z站所有订单
         $list = $order->where('order_prescription_type', 0)
             ->where('site', 1)
@@ -1985,9 +1986,9 @@ class OrderData extends Backend
                 $type = 2;
 
                 // Zeelool站 1.61 折射率 现片 订单 分配到丹阳仓处理
-                $lens_name = $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->where('order_prescription_type', 2)->column('web_lens_name');
+                $lens_name = $orderitemoption->where('magento_order_id', $value['entity_id'])->where('site', 1)->column('web_lens_name');
                 if (array_reduce($lens_name, function ($carry, $item) {
-                        return strpos($item, '1.61') !== false && $carry;
+                        return (!$item || strpos($item, '1.61') !== false) && $carry;
                     }, true)) {
                     $data['stock_id'] = 2;
                     $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
