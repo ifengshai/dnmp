@@ -1983,6 +1983,15 @@ class OrderData extends Backend
                 $type = 3;
             } elseif (in_array(2, $order_type)) {
                 $type = 2;
+
+                // Zeelool站 1.61 折射率 现片 订单 分配到丹阳仓处理
+                $lens_name = $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->where('order_prescription_type', 2)->column('web_lens_name');
+                if (array_reduce($lens_name, function ($carry, $item) {
+                        return strpos($item, '1.61') !== false && $carry;
+                    }, true)) {
+                    $data['stock_id'] = 2;
+                    $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
+                }
             } else {
                 $type = 1;
                 //如果Z站全为仅镜框 则分到丹阳仓
