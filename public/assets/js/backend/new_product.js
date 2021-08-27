@@ -105,6 +105,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                             operate: false
                         },
                         {field: 'newproductattribute.s3_frame_images', operate: false},
+                        {
+                            field: 'goods_supply', title: __('货源'),
+                            searchList: {1: '自主设计', 2: '采样定做', 3: '线上现货', 4: '线下现货'},
+                        },
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'create_time', title: __('Create_time'), operate: 'RANGE', addclass: 'datetimerange'},
                         {
