@@ -1469,6 +1469,12 @@ class WorkOrderList extends Model
             if ($work['work_platform'] == 3){
                 $res = $this->httpRequest($work['work_platform'], 'api/mj/receive', $postData, 'POST');
                 $work->coupon_str = $res['data']['coupon_id'];
+            }elseif ($work['work_platform'] == 2){
+                $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['data']['coupon_id'];
+            }elseif ($work['work_platform'] == 10){
+                $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['data']['coupon_id'];
             }elseif ($work['work_platform'] == 1){
                 $res = $this->httpRequest($work['work_platform'], 'ios/Customer/receive', $postData, 'POST');
                 $work->coupon_str = $res['data']['coupon_id'];
