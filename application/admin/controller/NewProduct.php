@@ -1829,7 +1829,8 @@ class NewProduct extends Backend
             ->setCellValue("C1", "供应商名称");   //利用setCellValues()填充数据
         $spreadsheet->setActiveSheetIndex(0)->setCellValue("D1", "单价")
             ->setCellValue("E1", "选品状态")
-            ->setCellValue("F1", "商品名称");
+            ->setCellValue("F1", "货源")
+            ->setCellValue("G1", "商品名称");
         $item = new Item();
         foreach ($list as $key => $value) {
             $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['sku']);
@@ -1847,9 +1848,21 @@ class NewProduct extends Backend
             } else {
                 $status = '新建';
             }
+            if ($value['goods_supply'] == 1) {
+                $goodsSupply = '自主设计';
+            } elseif ($value['goods_supply'] == 2) {
+                $goodsSupply = '采样定做';
+            } elseif ($value['goods_supply'] == 3) {
+                $goodsSupply = '线上现货';
+            } elseif ($value['goods_supply'] == 4) {
+                $goodsSupply = '线下现货';
+            } else {
+                $goodsSupply = '';
+            }
             $skuName = $item->where('sku', $value['sku'])->value('name');
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $status);
-            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $skuName);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $goodsSupply);
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $skuName);
         }
 
         //设置宽度
@@ -1858,7 +1871,8 @@ class NewProduct extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(40);
         $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
-        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(40);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(60);
 
         //设置边框
         $border = [
@@ -1876,7 +1890,7 @@ class NewProduct extends Backend
         $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
         $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:E' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->getActiveSheet()->getStyle('A1:F' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
 
         $format = 'xlsx';
