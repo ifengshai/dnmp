@@ -1372,10 +1372,6 @@ class ItWebDemand extends Backend
                     }
 
                     if ($flag == $num) {
-                        $update['web_designer_working_hour'] = $params['web_designer_working_hour'];
-                        $update['phper_working_hour'] = $params['phper_working_hour'];
-                        $update['app_working_hour'] = $params['app_working_hour'];
-                        $update['test_working_hour'] = $params['test_working_hour'];
                         //如果全部完成，则更新本条目状态
                         $update = [];
                         $update['develop_finish_status'] = 3;
@@ -1422,6 +1418,7 @@ class ItWebDemand extends Backend
                         $update['web_designer_expect_time'] = null;
                         $update['web_designer_complexity'] = null;
                     }
+                    $update['web_designer_working_hour'] = $params['web_designer_working_hour'];
                 }
 
                 if ($params['php_status'] == 1) {
@@ -1442,6 +1439,8 @@ class ItWebDemand extends Backend
                         $update['phper_expect_time'] = null;
                         $update['phper_complexity'] = null;
                     }
+
+                    $update['phper_working_hour'] = $params['phper_working_hour'];
                 }
 
                 if ($params['app_status'] == 1) {
@@ -1462,12 +1461,11 @@ class ItWebDemand extends Backend
                         $update['app_expect_time'] = null;
                         $update['app_complexity'] = null;
                     }
+                    $update['app_working_hour'] = $params['app_working_hour'];
                 }
                 $update['status'] = 3;
-                $update['web_designer_working_hour'] = $params['web_designer_working_hour'];
-                $update['phper_working_hour'] = $params['phper_working_hour'];
-                $update['app_working_hour'] = $params['app_working_hour'];
-                $update['test_working_hour'] = $params['test_working_hour'];
+
+
                 $res = $this->model->allowField(true)->save($update, ['id' => $params['id']]);
                 if ($res) {
                     //确认后 钉钉通知
@@ -1644,6 +1642,8 @@ class ItWebDemand extends Backend
 
                     $label = 3;
                 }
+
+                $update['test_working_hour'] = $params['test_working_hour'];
 
                 $res = $this->model->allowField(true)->save($update, ['id' => $params['id']]);
                 if ($res) {
