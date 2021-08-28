@@ -397,6 +397,7 @@ class OrderData extends Backend
                                             $params['country_id'] = $v['country_id'];
                                             $params['customer_email'] = $v['email'];
                                             $params['address'] = $v['address'];
+                                            $params['taxno'] = $v['cpf'];
                                         } else {
                                             $params['country_id'] = $v['country'];
                                         }
