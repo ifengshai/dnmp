@@ -1989,8 +1989,8 @@ class OrderData extends Backend
                 // Zeelool站 1.61 折射率 现片 订单 分配到丹阳仓处理
                 $lens_name = $orderitemoption->where('magento_order_id', $value['entity_id'])->where('site', 1)->column('web_lens_name');
                 if (array_reduce($lens_name, function ($carry, $item) {
-                        return (!$item || strpos($item, '1.61') !== false) && $carry;
-                    }, true)) {
+                    return (!$item || strpos($item, '1.61') !== false) && $carry;
+                }, true)) {
                     $data['stock_id'] = 2;
                     $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
                 }
@@ -2057,37 +2057,40 @@ class OrderData extends Backend
     public function wesee_old_order()
     {
         $site = 5;
-        $list = Db::connect('database.db_wesee_temp')->table('orders')->where('id>1875')->select();
+        $list = Db::connect('database.db_weseeoptical')->table('orders')->where(['id' => ['in', [4199, 4200, 4201, 4202]]])->select();
 
         $order_params = [];
         foreach ($list as $k => $v) {
-            $count = $this->order->where('site=' . $site . ' and entity_id=' . $v['id'])->count();
-            if ($count > 0) {
-                continue;
-            }
             $params = [];
             $params['entity_id'] = $v['id'];
             $params['site'] = $site;
             $params['increment_id'] = $v['order_no'];
             $params['status'] = $v['order_status'] ?: '';
+            $params['base_grand_total'] = $v['base_actual_amount_paid'] ?: 0;
+            $params['grand_total'] = $v['actual_amount_paid'] ?: 0;
             $params['store_id'] = $v['source'];
-            $params['base_grand_total'] = $v['actual_amount_paid'];
+            $params['customer_email'] = $v['email'] ?? '';
             $params['total_qty_ordered'] = $v['goods_quantity'];
             $params['base_currency_code'] = $v['base_currency'];
             $params['order_currency_code'] = $v['now_currency'];
             $params['shipping_method'] = $v['freight_type'];
             $params['shipping_title'] = $v['freight_description'];
-            $params['customer_email'] = $v['email'];
             $params['base_to_order_rate'] = $v['rate'];
             $params['base_shipping_amount'] = $v['freight_price'];
+            $params['base_discount_amount'] = $v['base_discounts_price'];
+            $params['customer_id'] = $v['user_id'] ?: 0;
+            $params['payment_method'] = $v['payment_type'];
             $params['created_at'] = strtotime($v['created_at']) + 28800;
             $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+            $params['last_trans_id'] = $v['payment_order_no'];
             if (isset($v['payment_time'])) {
                 $params['payment_time'] = strtotime($v['payment_time']) + 28800;
             }
 
             //插入订单主表
             $order_id = $this->order->insertGetId($params);
+            //es同步订单数据，插入
+            $this->asyncOrder->runInsert($params, $order_id);
             $order_params[$k]['site'] = $site;
             $order_params[$k]['order_id'] = $order_id;
             $order_params[$k]['entity_id'] = $v['id'];
@@ -2115,7 +2118,10 @@ class OrderData extends Backend
     public function wesee_order_address_data()
     {
         $site = 5;
-        $list = Db::connect('database.db_wesee_temp')->table('orders_addresses')->where('order_id>1875 and order_id<1916')->where('type=1')->select();
+        $list = Db::connect('database.db_weseeoptical')
+            ->table('orders_addresses')
+            ->where(['order_id' => ['in', [4199, 4200, 4201, 4202]]])->where('type=1')
+            ->select();
         $params = [];
         foreach ($list as $k => $v) {
             $params = [];
@@ -2152,14 +2158,46 @@ class OrderData extends Backend
         $list = Db::connect('database.db_wesee_temp')
             ->table('orders_items')->alias('a')
             ->join(['orders_prescriptions' => 'b'], 'a.orders_prescriptions_id=b.id')
-            ->where('order_id>1100 and order_id<1801')->select();
+            ->where(['order_id' => ['in', [4199, 4200, 4201, 4202]]])->select();
         foreach ($list as $k => $v) {
             $options = [];
             //处方解析 不同站不同字段
             $options = $this->wesee_prescription_analysis($v['prescription']);
+            $options['base_row_total'] = $v['original_total_price'];
+            $options['index_price'] = $v['lens_total_price'];
+            $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
+            $options['base_discount_amount'] = $v['base_goods_discounts_price'];
+            $options['single_base_original_price'] = $v['base_goods_price'];
+            $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
             $options['prescription_type'] = $v['name'];
+            $options['item_id'] = $v['id'];
+            $options['site'] = $site;
+            $options['magento_order_id'] = $v['order_id'];
+            $options['sku'] = $this->getTrueSku($v['goods_sku']);
+            $options['qty'] = $v['goods_count'];
+            $options['product_id'] = $v['goods_id'];
+            $options['frame_regural_price'] = $v['goods_original_price'];
+            $options['frame_price'] = $v['goods_price'];
+            $options['frame_color'] = $v['goods_color'];
+            $options['goods_type'] = $v['goods_type'] ?? '';
+            $order_prescription_type = $options['order_prescription_type'];
             unset($options['order_prescription_type']);
-            $this->orderitemoption->where(['item_id' => $v['id'], 'site' => 5, 'magento_order_id' => $v['order_id']])->update($options);
+            unset($options['is_prescription_abnormal']);
+            if ($options) {
+                $options_id = $this->orderitemoption->insertGetId($options);
+                $data = []; //子订单表数据
+                for ($i = 0; $i < $v['goods_count']; $i++) {
+                    $data[$i]['item_id'] = $v['id'];
+                    $data[$i]['magento_order_id'] = $v['order_id'];
+                    $data[$i]['site'] = $site;
+                    $data[$i]['option_id'] = $options_id;
+                    $data[$i]['sku'] = $options['sku'];
+                    $data[$i]['order_prescription_type'] = $order_prescription_type;
+                    $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
+                    $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
+                }
+                $this->orderitemprocess->insertAll($data);
+            }
         }
 
         echo $site . 'ok';
@@ -2176,392 +2214,19 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(1);
-        $this->zeelool_old_order(2);
-        $this->zeelool_old_order(3);
-        $this->zeelool_old_order(10);
-        $this->zeelool_old_order(11);
+        $this->zeelool_old_order(5);
     }
 
     protected function zeelool_old_order($site)
     {
-        if ($site == 1) {
+        if ($site == 5) {
             $entity_id = [
-                1021739,
-                1021740,
-                1021741,
-                1021742,
-                1021743,
-                1021744,
-                1021745,
-                1021746,
-                1021747,
-                1021748,
-                1021749,
-                1021750,
-                1021751,
-                1021752,
-                1021753,
-                1021754,
-                1021755,
-                1021756,
-                1021757,
-                1021758,
-                1021759,
-                1021760,
-                1021761,
-                1021762,
-                1021763,
-                1021764,
-                1021765,
-                1021766,
-                1021767,
-                1021768,
-                1021769,
-                1021770,
-                1021771,
-                1021772,
-                1021773,
-                1021774,
-                1021775,
-                1021776,
-                1021777,
-                1021778,
-                1021779,
-                1021780,
-                1021781,
-                1021782,
-                1021783,
-                1021784,
-                1021785,
-                1021786,
-                1021787,
-                1021788,
-                1021789,
-                1021790,
-                1021791,
-                1021792,
-                1021793,
-                1021794,
-                1021795,
-                1021796,
-                1021797,
-                1021798,
-                1021799,
-                1021800,
-                1021801,
-                1021802,
-                1021803,
-                1021804,
-                1021805,
-                1021806,
-                1021807,
-                1021808,
-                1021809,
-                1021810,
-                1021811,
-                1021812,
-                1021813,
-                1021814,
-                1021815,
-                1021816,
-                1021817,
-                1021818,
-                1021819,
-                1021820,
-                1021821,
-                1021822,
-                1021823,
-                1021824,
-                1021825,
-                1021826,
-                1021827,
-                1021828,
-                1021829,
-                1021830,
-                1021831,
-                1021832,
-                1021833,
-                1021834,
-                1021835,
-                1021836,
-                1021837,
-                1021838,
-                1021839,
-                1021840,
-                1021841,
-                1021842,
-                1021843,
-                1021844,
-                1021845,
-                1021846,
-                1021847,
-                1021848,
-                1021849,
-                1021850,
-                1021851,
-                1021852,
-                1021853,
-                1021854,
-                1021855,
-                1021856,
-                1021857,
-                1021858,
-                1021859,
-                1021860,
-                1021861,
-                1021862,
-                1021863,
-                1021864,
-                1021865,
-                1021866,
-                1021867,
-                1021868,
-                1021869,
-                1021870,
-                1021871,
-                1021872,
-                1021873,
-                1021874,
-                1021875,
-                1021876,
-                1021877,
-                1021878,
-                1021879,
-                1021880,
-                1021881,
-                1021882,
-                1021883,
-                1021884,
-                1021885,
-                1021886,
-                1021887,
-                1021888,
-                1021889,
-                1021890,
-                1021891,
-                1021892,
-                1021893,
-                1021894,
-                1021895,
-                1021896,
-                1021897,
-                1021898,
-                1021899,
-                1021900,
-                1021901,
-                1021902,
-                1021903,
-                1021904,
-                1021905,
-                1021906,
-                1021907,
-                1021908,
-                1021909,
-                1021910,
-                1021911,
-                1021912,
-                1021913,
-                1021914,
-                1021915,
-                1021916,
-                1021917,
-                1021918,
-                1021919,
-                1021920,
-                1021921,
-                1021922,
-                1021923,
-                1021924,
-                1021925,
-                1021926,
-                1021927,
-                1021928,
-                1021929,
-                1021930,
-                1021931,
-                1021932,
-                1021933,
-                1021934,
-                1021935,
-                1021936,
-                1021937,
-                1021938,
-                1021939,
-                1021940,
-                1021941,
-                1021942,
-                1021943,
-                1021944,
-                1021945,
-                1021946,
-                1021947,
-                1021948,
-                1021949,
-                1021950,
-                1021951,
-                1021952,
-                1021953,
-                1021954,
-                1021955,
-                1021956,
-                1021957,
-                1021958,
-                1021959,
-                1021960,
-                1021961,
-                1021962,
-                1021963,
-                1021964,
-                1021965,
-                1021966,
-                1021967,
-                1021968,
+                4199,
+                4200,
+                4201,
+                4202,
             ];
-            $list = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
-        } elseif ($site == 2) {
-            $entity_id = [
-                508413,
-                508414,
-                508415,
-                508416,
-                508417,
-                508418,
-                508419,
-                508420,
-                508421,
-                508422,
-                508423,
-                508424,
-                508425,
-                508426,
-                508427,
-                508428,
-                508429,
-                508430,
-                508431,
-                508432,
-                508433,
-                508434,
-                508435,
-                508436,
-                508437,
-                508438,
-                508439,
-                508440,
-                508441,
-                508442,
-                508443,
-                508444,
-                508445,
-                508446,
-                508447,
-                508448,
-                508449,
-                508450,
-                508451,
-                508452,
-                508453,
-                508454,
-                508455,
-                508456,
-                508457,
-                508458,
-                508459,
-                508460,
-                508461,
-                508462,
-                508463,
-                508464,
-                508465,
-                508466,
-                508467,
-                508468,
-                508469,
-                508470,
-                508471,
-                508472,
-                508473,
-                508474,
-                508475,
-                508476,
-                508477,
-                508478,
-                508479,
-                508480,
-                508481,
-                508482,
-                508483,
-                508484,
-                508485,
-                508486,
-                508487,
-                508488,
-                508489,
-                508490,
-                508491,
-                508492,
-                508493,
-                508494,
-                508495,
-                508496,
-                508497,
-            ];
-            $list = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
-        } elseif ($site == 3) {
-            $entity_id = [
-                86182,
-                86183,
-                86184,
-                86185,
-                86186,
-                86187,
-                86188,
-                86189,
-                86190,
-                86191,
-                86192,
-                86193,
-            ];
-            $list = Db::connect('database.db_nihao')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
-        } elseif ($site == 10) {
-            $entity_id = [
-                19141,
-                19142,
-                19143,
-                19144,
-                19145,
-            ];
-            $list = Db::connect('database.db_zeelool_de')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
-        } elseif ($site == 11) {
-            $entity_id = [
-                11758,
-                11759,
-                11760,
-                11761,
-                11762,
-                11763,
-                11764,
-                11765,
-                11766,
-                11767,
-                11768,
-                11769,
-                11770,
-                11771,
-                11772,
-                11773,
-                11774,
-                11775,
-            ];
-            $list = Db::connect('database.db_zeelool_jp')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
-        }
-
-        if ($entity_id) {
-            $this->order->where(['entity_id' => ['in', $entity_id], 'site' => $site])->delete();
-            $this->orderitemprocess->where(['magento_order_id' => ['in', $entity_id], 'site' => $site])->delete();
-            $this->orderitemoption->where(['magento_order_id' => ['in', $entity_id], 'site' => $site])->delete();
-            $this->orderprocess->where(['entity_id' => ['in', $entity_id], 'site' => $site])->delete();
+            $list = Db::connect('database.db_weseeoptical')->table('orders')->where(['entity_id' => ['in', $entity_id]])->select();
         }
 
         $list = collection($list)->toArray();
