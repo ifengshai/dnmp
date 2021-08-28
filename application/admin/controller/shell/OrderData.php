@@ -2155,7 +2155,7 @@ class OrderData extends Backend
     public function wesee_order_item_data()
     {
         $site = 5;
-        $list = Db::connect('database.db_wesee_temp')
+        $list = Db::connect('database.db_weseeoptical')
             ->table('orders_items')->alias('a')
             ->join(['orders_prescriptions' => 'b'], 'a.orders_prescriptions_id=b.id')
             ->where(['order_id' => ['in', [4199, 4200, 4201, 4202]]])->select();
