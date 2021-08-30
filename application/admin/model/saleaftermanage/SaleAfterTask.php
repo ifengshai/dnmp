@@ -894,7 +894,7 @@ class SaleAfterTask extends Model
                     ->table('discount_coupon_tickets')
                     ->alias('a')
                     ->field('a.code,b.subhead')
-                    ->where(['id' => $v['coupon_code']])
+                    ->where(['a.id' => $v['coupon_code']])
                     ->join(['discount_coupons' =>'b'],'a.discount_coupon_id=b.id')
                     ->find();
                 $result[$k]['coupon_code'] = $couponData['coupon_code'] ?? '';
