@@ -21,6 +21,7 @@ use app\admin\model\order\order\Zeelool;
 use app\admin\model\order\order\ZeeloolDe;
 use app\admin\model\order\order\ZeeloolEs;
 use app\admin\model\order\order\ZeeloolJp;
+use app\admin\model\order\OrderItemOption;
 use app\admin\model\warehouse\StockSku;
 use app\common\controller\Backend;
 use app\enum\Site;
@@ -3364,6 +3365,28 @@ class OrderData extends Backend
                 ->update(['payment_time' => $time]);
             echo $value['order_no'] . ' is ok' . "\n";
             usleep(10000);
+        }
+    }
+
+
+    public function process_wesee_data()
+    {
+        $orderItemOption = new OrderItemOption();
+        $list = $orderItemOption->where(['order_id' => ['in', [1904875, 1904732, 1904439, 1904296]], 'site' => 5])->select();
+        foreach ($list as $k => $v) {
+            $arr = $this->set_processing_type($v);
+            $data = []; //子订单表数据
+            for ($i = 0; $i < $v['qty']; $i++) {
+                $data[$i]['item_id'] = $v['item_id'];
+                $data[$i]['magento_order_id'] = $v['magento_order_id'];
+                $data[$i]['site'] = 5;
+                $data[$i]['option_id'] = $v['id'];
+                $data[$i]['sku'] = $v['sku'];
+                $data[$i]['order_prescription_type'] = $arr['order_prescription_type'];
+                $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
+                $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
+            }
+            $this->orderitemprocess->insertAll($data);
         }
     }
 }
