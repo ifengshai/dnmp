@@ -3373,6 +3373,7 @@ class OrderData extends Backend
     {
         $orderItemOption = new OrderItemOption();
         $list = $orderItemOption->where(['order_id' => ['in', [1904875, 1904732, 1904439, 1904296]], 'site' => 5])->select();
+        $list = collect($list)->toArray();
         foreach ($list as $k => $v) {
             $arr = $this->set_processing_type($v);
             $data = []; //子订单表数据
