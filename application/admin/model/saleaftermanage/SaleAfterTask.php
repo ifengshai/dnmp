@@ -890,7 +890,7 @@ class SaleAfterTask extends Model
                 $result[$k]['additional_information']['paypal_payer_status'] = $paypalLog['result']['status'];
 
                 //查询优惠卷规则和优惠码
-                if (is_int($v['coupon_rule_name'])) {
+                if (is_numeric($v['coupon_rule_name'])) {
                     $couponData = Db::connect($db)
                         ->table('discount_coupon_tickets')
                         ->alias('a')
