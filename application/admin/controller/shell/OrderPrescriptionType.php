@@ -53,7 +53,7 @@ class OrderPrescriptionType extends Command
                 $type = 2;
 
                 // Zeelool站 1.61 折射率 现片 订单 分配到丹阳仓处理
-                $lens_name = $orderitemoption->where('magento_order_id', $value['entity_id'])->where('site', 1)->column('web_lens_name');
+                $lens_name = $orderitemoption->where('magento_order_id', $value['entity_id'])->where('site', 1)->where('prescription_type', '<>', 'Frameonly')->column('web_lens_name');
                 if (array_reduce($lens_name, function ($carry, $item) {
                     return (!$item || strpos($item, '1.61') !== false) && $carry;
                 }, true)) {
