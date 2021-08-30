@@ -6,6 +6,16 @@
     <div id="toolbar" class="toolbar">
         <a href="javascript:;" style="margin-left: 30px;" class="btn btn-success btn-add-batch" title="增加"><i
                 class="fa fa-plus"></i> 增加</a>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">选择收货仓:</label>
+            <div class="col-xs-12 col-sm-3">
+                <select name="stock_id[]" class="form-control" data-rule="required">
+                    <option value="">请选择</option>
+                    <option value="1">郑州仓</option>
+                    <option value="2">丹阳仓</option>
+                </select>
+            </div>
+        </div>
     </div>
     <input type="hidden" name="batch_id[]" class="batch_id" value="{$v.id}">
     <div class='logistics_content'>
@@ -35,6 +45,17 @@
     {else/}
     <div id="toolbar" class="toolbar">
         <a href="javascript:;" style="margin-left: 30px;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">选择收货仓:</label>
+            <div class="col-xs-12 col-sm-3">
+                <select name="stock_id" class="form-control" data-rule="required">
+                    <option value="">请选择</option>
+                    <option value="1">郑州仓</option>
+                    <option value="2">丹阳仓</option>
+                </select>
+            </div>
+        </div>
+
     </div>
 
     <div class='logistics_content'>

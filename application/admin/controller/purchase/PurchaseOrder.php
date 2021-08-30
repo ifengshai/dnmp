@@ -728,6 +728,7 @@ class PurchaseOrder extends Backend
             $logistics_company_no = $params['logistics_company_no'];
             $logistics_number = $params['logistics_number'];
             $logistics_ids = $params['logistics_ids'];
+            $stock_ids = $params['stock_id'];
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -747,6 +748,7 @@ class PurchaseOrder extends Backend
                     $params['purchase_status'] = 6; //待收货
                     $params['logistics_number'] = implode(',', $logistics_number);
                     $params['logistics_company_no'] = implode(',', $logistics_company_no);
+                    $params['receiving_warehouse'] = is_array($stock_ids) ? 0 : $stock_ids;
                     $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids], 'purchase_status' => ['in', [2, 5, 6]]])->save($params);
                     //添加物流汇总表
                     $logistics = new \app\admin\model\LogisticsInfo();
@@ -787,6 +789,7 @@ class PurchaseOrder extends Backend
                                 }
                                 $list['logistics_number'] = $logistics_number[$k][$key];
                                 $list['logistics_company_no'] = $val;
+                                $list['receiving_warehouse'] = $stock_ids[$k];
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k][$key], 'status' => 1])->find();
                                 if (!empty($have_logistics)) {
@@ -849,6 +852,7 @@ class PurchaseOrder extends Backend
                                     $list['type'] = 1;
                                     $list['order_number'] = $v['purchase_number'];
                                     $list['purchase_id'] = $v['id'];
+                                    $list['receiving_warehouse'] = is_array($stock_ids) ? 0 : $stock_ids;
                                     //若物流单号已经签收的话直接更改采购单的状态为已签收
                                     $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k], 'status' => 1])->find();
                                     if (!empty($have_logistics)) {
@@ -911,6 +915,7 @@ class PurchaseOrder extends Backend
                                 }
                                 $list['logistics_number'] = $logistics_number[$k];
                                 $list['logistics_company_no'] = $v;
+                                $list['stock_id'] = is_array($stock_ids) ? 0 : $stock_ids;
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k], 'status' => 1])->find();
                                 if (!empty($have_logistics)) {
