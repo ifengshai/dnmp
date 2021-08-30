@@ -2515,11 +2515,11 @@ class Process extends Backend
 
     public function chageProductEdA()
     {
-        $products = Db::name('fa_zzzz_product')->column('sku',['ED','A']);
+        $products = Db::name('zzzz_product')->column('ED,A','sku');
         $skus = array_keys($products);
         $items = Db::connect('database.db_stock')->table('fa_item')->alias('a')->join('fa_item_attribute b','b.item_id=a.id')->where('a.origin_sku','in',$skus)->field('b.item_id,b.id,a.origin_sku')->select();
         foreach($items as $item) {
-            $value = $skus[$item['origin_sku']];
+            $value = $products[$item['origin_sku']];
             Db::connect('database.db_stock')->table('fa_item_attribute')->where('id',$item['id'])->update([
                 'mirror_width' => $value['A'],
                 'mirror_width_ed' => $value['ED'],
