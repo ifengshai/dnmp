@@ -890,15 +890,18 @@ class SaleAfterTask extends Model
                 $result[$k]['additional_information']['paypal_payer_status'] = $paypalLog['result']['status'];
 
                 //查询优惠卷规则和优惠码
-                $couponData = Db::connect($db)
-                    ->table('discount_coupon_tickets')
-                    ->alias('a')
-                    ->field('a.code,b.subhead')
-                    ->where(['a.id' => $v['coupon_code']])
-                    ->join(['discount_coupons' =>'b'],'a.discount_coupon_id=b.id')
-                    ->find();
-                $result[$k]['coupon_code'] = $couponData['coupon_code'] ?? '';
-                $result[$k]['coupon_rule_name'] = $couponData['subhead'] ?? '';
+                if (is_int($v['coupon_rule_name'])) {
+                    $couponData = Db::connect($db)
+                        ->table('discount_coupon_tickets')
+                        ->alias('a')
+                        ->field('a.code,b.subhead')
+                        ->where(['a.id' => $v['coupon_rule_name']])
+                        ->join(['discount_coupons' =>'b'],'a.discount_coupon_id=b.id')
+                        ->find();
+                    $result[$k]['coupon_code'] = $couponData['coupon_code'] ?? '';
+                    $result[$k]['coupon_rule_name'] = $couponData['subhead'] ?? '';
+                }
+
             } else {
                 //查询交易信息
                 $result[$k]['additional_information'] = Db::connect($db)
