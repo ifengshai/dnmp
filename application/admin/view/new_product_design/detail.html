@@ -64,7 +64,7 @@
         <div class="col-xs-12 col-sm-3">
             <input id="c-frame_bridge" data-rule="required" class="form-control" name="row[frame_height]" type="number" value="{$row->frame_height}"  readonly>
         </div>
-        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽（mm）')}:</label>
+        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽度A（mm）')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="c-weight" data-rule="required" class="form-control" name="row[mirror_width]" type="number" value="{$row->mirror_width}" readonly >
         </div>
@@ -91,10 +91,6 @@
         </div>
     </div>
     <div class="form-group ajax-add">
-        <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽度（A）')}:</label>
-        <div class="col-xs-12 col-sm-3">
-            <input id="mirror_width_a" data-rule="" class="form-control" name="row[mirror_width_a]" type="number" value="{$row->mirror_width_a}" readonly>
-        </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('镜面宽度（ED）')}:</label>
         <div class="col-xs-12 col-sm-3">
             <input id="mirror_width_ed" data-rule="" class="form-control"  name="row[mirror_width_ed]" type="number" value="{$row->mirror_width_ed}" readonly>
