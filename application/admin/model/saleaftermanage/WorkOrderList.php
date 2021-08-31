@@ -625,7 +625,6 @@ class WorkOrderList extends Model
                 $postDatas = serialize($params);
                 Log::write($postDatas);
                 Log::write("补发单创建请求错误结束");
-//                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
                 exception('网站接口提示，错误信息：' . $res['message']);
             }else{
                 if (200 == $status) {
@@ -1465,10 +1464,25 @@ class WorkOrderList extends Model
         $postData = [
             'rule_id' => $work->coupon_id,
         ];
+        $postData['ordernum'] = $work['platform_order'];
         try {
             if ($work['work_platform'] == 3){
-                $postData['ordernum'] = $work['platform_order'];
                 $res = $this->httpRequest($work['work_platform'], 'api/mj/receive', $postData, 'POST');
+                $work->coupon_str = $res['data']['coupon_id'];
+            }elseif ($work['work_platform'] == 2){
+                $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['data']['coupon_id'];
+            }elseif ($work['work_platform'] == 10){
+                $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['data']['coupon_id'];
+            }elseif ($work['work_platform'] == 1){
+                $res = $this->httpRequest($work['work_platform'], 'ios/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['data']['coupon_id'];
+            }elseif ($work['work_platform'] == 15){
+                $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['data']['coupon_id'];
+            }elseif ($work['work_platform'] == 11){
+                $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
                 $work->coupon_str = $res['data']['coupon_id'];
             }else{
                 $res = $this->httpRequest($work['work_platform'], 'magic/promotion/receive', $postData, 'POST');
