@@ -1376,7 +1376,7 @@ class Distribution extends Backend
         $lens_list = $this->_lens_data->column('lens_name', 'lens_number');
         foreach ($list as $key => &$value) {
             //更改镜框最新sku
-            if ($change_sku[$value['item_order_number']] || $value['site'] == 13 || $value['site'] == 14 || $value['site'] == 15) {
+            if ($change_sku[$value['item_order_number']] || $value['site'] == 5 || $value['site'] == 13 || $value['site'] == 14 || $value['site'] == 15) {
                 $value['sku'] = $change_sku[$value['item_order_number']] ?? $value['sku'];
                 $tmp_bridge = $this->getSkuAttr($value['sku'], $value['site']);
                 //$getGlassInfo = $this->httpRequest($value['site'], 'magic/order/getGlassInfo', ['skus' => $value['sku']], 'POST');
