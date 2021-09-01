@@ -713,7 +713,6 @@ class PurchaseOrder extends Backend
             $logistics = new \app\admin\model\LogisticsInfo();
             $logistics_data = $logistics->where('purchase_id', 'in', $ids)->select();
             $logistics_data = collection($logistics_data)->toArray();
-
             $this->view->assign("logistics_data", $logistics_data);
         }
 
@@ -729,6 +728,7 @@ class PurchaseOrder extends Backend
             $logistics_number = $params['logistics_number'];
             $logistics_ids = $params['logistics_ids'];
             $stock_ids = $params['stock_id'];
+
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
@@ -773,6 +773,7 @@ class PurchaseOrder extends Backend
                     }
                     //添加物流单明细表
                     if ($params['batch_id']) {
+                        $i = 0;
                         foreach ($logistics_company_no as $k => $v) {
                             foreach ($v as $key => $val) {
                                 $list = [];
@@ -789,7 +790,7 @@ class PurchaseOrder extends Backend
                                 }
                                 $list['logistics_number'] = $logistics_number[$k][$key];
                                 $list['logistics_company_no'] = $val;
-                                $list['receiving_warehouse'] = $stock_ids[$k];
+                                $list['receiving_warehouse'] = $stock_ids[$i];
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k][$key], 'status' => 1])->find();
                                 if (!empty($have_logistics)) {
@@ -838,6 +839,7 @@ class PurchaseOrder extends Backend
 
 
                             }
+                            $i++;
                         }
                     } else {
                         if (count($ids) > 1) {

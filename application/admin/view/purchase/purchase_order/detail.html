@@ -192,7 +192,18 @@
                     <option value="0" {:$row['is_new_product']==0 ? 'selected' : '' }>否</option>
                 </select>
             </div>
+        {if $row['receiving_warehouse']}
+        <label class="control-label col-xs-12 col-sm-2">所属仓库:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select name="row[receiving_warehouse]" class="form-control" disabled>
+                <option value="">请选择</option>
+                <option value="1" {:$row['receiving_warehouse']==1 ? 'selected' : '' }>郑州仓</option>
+                <option value="2" {:$row['receiving_warehouse']==2 ? 'selected' : '' }>丹阳仓</option>
+            </select>
+        </div>
+        {/if}
     </div>
+
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">采购备注:</label>
         <div class="col-xs-12 col-sm-8">
@@ -394,13 +405,9 @@
             <input class="form-control" name="batch_id[]" value="{$v.id}" readonly type="hidden">
             <div class="list" style="margin-top:20px;">
                 
-                <label class="control-label col-xs-12 col-sm-2" style="width:250px;"><b>第{$v.batch}批 批次ID:{$v.id}</b> 批次预计到货时间：</label>
-                <div class="col-xs-12 col-sm-3" style="margin-bottom: 20px;">
-                    <input id="c-arrival_time" class="form-control datetimepicker arrival_time"
-                        data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="batch_arrival_time[]" readonly type="text"
-                        value="{$v->arrival_time}">
-
-                </div>
+                <label class="control-label col-xs-12 col-sm-2" style="width:150px;"><b>第{$v.batch}批 批次ID:{$v.id}</b> </label>
+                <label class="control-label col-xs-12 col-sm-2" style="width:250px;"><b>预计到货时间：{$v->arrival_time}</b></label>
+                <label class="control-label col-xs-12 col-sm-2" style="width:150px;"><b>所属仓库：{:$v->receiving_warehouse == 2 ? '丹阳仓':'郑州仓'}</b> </label>
                 <!-- <a href="javascript:;" class="btn btn-danger btn-arrival-del" title="删除"><i class="fa fa-trash"></i>
                     删除</a> -->
                 <table id="caigou-table" style="width:80%;">

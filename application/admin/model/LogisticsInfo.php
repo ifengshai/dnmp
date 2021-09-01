@@ -26,6 +26,7 @@ class LogisticsInfo extends Model
      */
     public function addLogisticsInfo($params)
     {
+
         if ($params['id']) {
             return $this->allowField(true)->isUpdate(true, ['id' => $params['id']])->data($params)->save();
         } else {
