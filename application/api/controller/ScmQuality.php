@@ -1419,7 +1419,7 @@ class ScmQuality extends Scm
     {
         $ids = $this->request->request('logistics_id');
         if (!$ids) {
-            $this->error('缺少参数！！');
+            $this->error(__('物流单ID不能为空'), [], 403);
         }
         $row = $this->_logistics_info->get($ids);
         $adminId = $this->auth->id;
