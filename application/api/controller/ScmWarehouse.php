@@ -857,6 +857,7 @@ class ScmWarehouse extends Scm
     public function no_in_stock_list()
     {
         $query = $this->request->request('query');
+        $stock_id = $this->request->request('stock_id');
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
@@ -874,6 +875,9 @@ class ScmWarehouse extends Scm
         if ($start_time && $end_time) {
 
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
+        }
+        if ($stock_id) {
+            $where['c.sign_warehouse'] = $stock_id;
         }
 
         $offset = ($page - 1) * $page_size;
@@ -926,6 +930,7 @@ class ScmWarehouse extends Scm
     {
         $query = $this->request->request('query');
         $status = $this->request->request('status');
+        $stock_id = $this->request->request('stock_id');
         $start_time = $this->request->request('start_time');
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
@@ -955,6 +960,9 @@ class ScmWarehouse extends Scm
         if ($start_time && $end_time) {
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
+        if ($stock_id) {
+            $where['c.sign_warehouse'] = $stock_id;
+        }
 
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
@@ -966,6 +974,7 @@ class ScmWarehouse extends Scm
             ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status,a.type_id')
             ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
             //            ->join(['fa_check_order_item' => 'c'], 'a.check_id=c.check_id', 'left')
+            ->join(['fa_logistics_info' => 'd'], 'd.id=b.logistics_id', 'left')
             ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
