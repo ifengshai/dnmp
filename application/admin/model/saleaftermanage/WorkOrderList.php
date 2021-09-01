@@ -1471,19 +1471,19 @@ class WorkOrderList extends Model
                 $work->coupon_str = $res['data']['coupon_id'];
             }elseif ($work['work_platform'] == 2){
                 $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
-                $work->coupon_str = $res['data']['coupon_id'];
+                $work->coupon_str = $res['coupon_id'];
             }elseif ($work['work_platform'] == 10){
                 $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
-                $work->coupon_str = $res['data']['coupon_id'];
+                $work->coupon_str = $res['coupon_id'];
             }elseif ($work['work_platform'] == 1){
                 $res = $this->httpRequest($work['work_platform'], 'ios/Customer/receive', $postData, 'POST');
-                $work->coupon_str = $res['data']['coupon_id'];
+                $work->coupon_str = $res['coupon_id'];
             }elseif ($work['work_platform'] == 15){
                 $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
-                $work->coupon_str = $res['data']['coupon_id'];
+                $work->coupon_str = $res['coupon_id'];
             }elseif ($work['work_platform'] == 11){
                 $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
-                $work->coupon_str = $res['data']['coupon_id'];
+                $work->coupon_str = $res['coupon_id'];
             }else{
                 $res = $this->httpRequest($work['work_platform'], 'magic/promotion/receive', $postData, 'POST');
                 $work->coupon_str = $res['coupon_code'];
