@@ -91,16 +91,16 @@ class Test01 extends Backend
                 ->where(['a.purchase_status' => ['in', [2, 5, 6, 7, 9, 10]]])
                 ->where(['b.sku' => $value['sku']])
                 ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
-                ->where(['a.createtime' => ['>=', '2019-10-01 00:00:00']])
-                ->where(['a.createtime' => ['<=', '2020-09-30 23:59:59']])
+                ->where(['a.createtime' => ['>=', '2020-07-01 00:00:00']])
+                ->where(['a.createtime' => ['<=', '2021-06-30 23:59:59']])
                 ->select();
 
             $statistics = $this->zeelool
                 ->alias('a')
                 ->field("sum(b.qty_ordered) AS num,sum(base_price) as price,DATE_FORMAT(b.created_at, '%Y-%m') AS time")
                 ->where(['a.status' => ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']]])
-                ->where(['b.created_at' => ['>=', '2019-10-01 00:00:00']])
-                ->where(['b.created_at' => ['<=', '2020-09-30 23:59:59']])
+                ->where(['b.created_at' => ['>=', '2020-07-01 00:00:00']])
+                ->where(['b.created_at' => ['<=', '2021-06-30 23:59:59']])
                 ->where(['b.sku' => $platform[$value['sku']]])
                 ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id', 'LEFT')
                 ->group("time")
@@ -120,8 +120,8 @@ class Test01 extends Backend
                 ->alias('a')
                 ->field("sum(b.qty_ordered) AS num")
                 ->where(['a.status' => ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing']]])
-                ->where(['b.created_at' => ['>=', '2019-10-01 00:00:00']])
-                ->where(['b.created_at' => ['<=', '2020-09-30 23:59:59']])
+                ->where(['b.created_at' => ['>=', '2020-07-01 00:00:00']])
+                ->where(['b.created_at' => ['<=', '2021-06-30 23:59:59']])
                 ->where(['b.product_options' => ['not like', '%frameonly%']])
                 ->where(['b.product_options' => ['not like', '%nonprescription%']])
                 ->where(['b.sku' => $platform[$value['sku']]])
@@ -170,10 +170,10 @@ class Test01 extends Backend
             echo "{$value['sku']}:success\n";
         }
 
-        $export_str = ['SKU', '产品评级', '平均采购价CNY', '材质', '框型', '形状', '颜色', '进价', '平均月销量', '平均售价', '最大月销量', '最大月销量月份', '201910~202009总销量', '19年10月~20年9月总销售额', '配镜率'];
+        $export_str = ['SKU', '产品评级', '平均采购价CNY', '材质', '框型', '形状', '颜色', '进价', '平均月销量', '平均售价', '最大月销量', '最大月销量月份', '202007~202106总销量', '20年7月~21年6月总销售额', '配镜率'];
         $file_title = implode(',', $export_str) . " \n";
         $file = $file_title . $file_content;
-        file_put_contents('/www/wwwroot/mojing/runtime/log/analysis.csv', $file);
+        file_put_contents('/var/wwwroot/mojing/runtime/log/test01.csv', $file);
         exit;
     }
 
