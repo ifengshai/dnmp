@@ -55,8 +55,8 @@
             <div class="col-xs-12 col-sm-3">
                 <select name="stock_id" class="form-control" data-rule="required">
                     <option value="">请选择</option>
-                    <option value="1">郑州仓</option>
-                    <option value="2">丹阳仓</option>
+                    <option value="1" {:$row->receiving_warehouse == 1 ? 'selected':''}>郑州仓</option>
+                    <option value="2" {:$row->receiving_warehouse == 2 ? 'selected':''}>丹阳仓</option>
                 </select>
             </div>
         </div>

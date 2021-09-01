@@ -4,6 +4,7 @@ namespace app\admin\controller\purchase;
 
 use app\admin\controller\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\purchase\PurchaseBatch;
 use app\admin\model\StockLog;
 use app\common\controller\Backend;
 use fast\Excel;
@@ -774,6 +775,7 @@ class PurchaseOrder extends Backend
                     //添加物流单明细表
                     if ($params['batch_id']) {
                         $i = 0;
+                        $batch = new PurchaseBatch();
                         foreach ($logistics_company_no as $k => $v) {
                             foreach ($v as $key => $val) {
                                 $list = [];
@@ -791,6 +793,8 @@ class PurchaseOrder extends Backend
                                 $list['logistics_number'] = $logistics_number[$k][$key];
                                 $list['logistics_company_no'] = $val;
                                 $list['receiving_warehouse'] = $stock_ids[$i];
+
+                                $batch->where(['id' => $k])->update(['receiving_warehouse' => $stock_ids[$i]]);
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k][$key], 'status' => 1])->find();
                                 if (!empty($have_logistics)) {
@@ -837,7 +841,6 @@ class PurchaseOrder extends Backend
                                 }
                                 $logistics->addLogisticsInfo($list);
 
-
                             }
                             $i++;
                         }
@@ -855,6 +858,8 @@ class PurchaseOrder extends Backend
                                     $list['order_number'] = $v['purchase_number'];
                                     $list['purchase_id'] = $v['id'];
                                     $list['receiving_warehouse'] = is_array($stock_ids) ? 0 : $stock_ids;
+
+                                    $this->model->where(['id' => $k])->update(['receiving_warehouse' => is_array($stock_ids) ? 0 : $stock_ids]);
                                     //若物流单号已经签收的话直接更改采购单的状态为已签收
                                     $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k], 'status' => 1])->find();
                                     if (!empty($have_logistics)) {
