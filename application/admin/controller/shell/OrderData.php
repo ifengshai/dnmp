@@ -528,7 +528,7 @@ class OrderData extends Backend
                                         unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     } elseif ($site == Site::NIHAO) {
                                         $options = $this->nihao_prescription_analysis($v['prescription']);
-                                        $options['base_row_total'] = $v['goods_payable'];
+                                        $options['base_row_total'] = $v['base_original_total_price'];
                                         $options['index_price'] = $v['lens_price'];
                                         $options['coating_price'] = $v['coating_price'];
                                         $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
