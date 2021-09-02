@@ -72,7 +72,7 @@ class OrderDataDetailNew extends Backend
             $mapNihao = [];
             if ($filter['time_str']) {
                 $createat = explode(' ', $filter['time_str']);
-                $mapWesee['o.payment_time'] = $mapNihao['o.payment_time'] = $map['o.payment_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+                $mapWesee['o.created_at'] = $mapNihao['o.created_at'] = $map['o.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
             } else {
                 if (isset($filter['time_str'])) {
                     unset($filter['time_str']);
@@ -80,7 +80,7 @@ class OrderDataDetailNew extends Backend
                 }
                 $start = date('Y-m-d', strtotime('-6 day'));
                 $end = date('Y-m-d 23:59:59');
-                $mapWesee['o.payment_time'] = $mapNihao['o.payment_time'] = $map['o.payment_time'] = ['between', [$start, $end]];
+                $mapWesee['o.created_at'] = $mapNihao['o.created_at'] = $map['o.created_at'] = ['between', [$start, $end]];
             }
             if ($filter['order_status']) {
                 if ($filter['order_status'] == 1) {
@@ -745,11 +745,11 @@ class OrderDataDetailNew extends Backend
         }
         if ($time_str) {
             $createat = explode(' ', $time_str);
-            $map['o.payment_time'] = $mapWesee['o.payment_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
+            $map['o.created_at'] = $mapWesee['o.created_at'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3] . ' ' . $createat[4]]];
         } else {
             $start = date('Y-m-d', strtotime('-6 day'));
             $end = date('Y-m-d 23:59:59');
-            $map['o.payment_time'] = $mapWesee['o.payment_time'] = ['between', [$start, $end]];
+            $map['o.created_at'] = $mapWesee['o.created_at'] = ['between', [$start, $end]];
         }
         if ($increment_id) {
             $map['o.increment_id'] = $mapWesee['o.order_no'] = $increment_id;
