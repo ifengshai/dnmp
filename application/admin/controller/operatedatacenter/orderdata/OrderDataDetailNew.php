@@ -176,7 +176,7 @@ class OrderDataDetailNew extends Backend
                         ->where('d.type', 1)
                         ->order($sort, $order)
                         ->limit($offset, $limit)
-                        ->field('o.order_type,o.id as entity_id,o.order_no as increment_id,o.created_at,o.code as coupon_code,o.coupon_id as discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.payer_email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group as group_id')
+                        ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.code as coupon_code,o.coupon_id as discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.payer_email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group as group_id')
                         ->select();
                     $count = $order_model->table('orders')->alias('o')
                         ->join('users c', 'o.user_id=c.id', 'left')
@@ -194,7 +194,7 @@ class OrderDataDetailNew extends Backend
                         ->where('d.type', 1)
                         ->order($sort, $order)
                         ->limit($offset, $limit)
-                        ->field('o.order_type,o.id as entity_id,o.order_no as increment_id,o.created_at,o.discount_code_id as coupon_code,o.discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group_id')
+                        ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.discount_code_id as coupon_code,o.discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group_id')
                         ->select();
                     $count = $order_model->table('orders')->alias('o')
                         ->join('users c', 'o.user_id=c.id', 'left')
@@ -381,8 +381,6 @@ class OrderDataDetailNew extends Backend
                     ->join('customer_entity c', 'o.customer_id=c.entity_id', 'left')
                     ->where($where)
                     ->where($map)
-                    ->where('o.order_type', 1)
-                    ->where(['o.status' => ['in', ['processing', 'complete', 'delivered']]])
                     ->order($sort, $order)
                     ->limit($offset, $limit)
                     ->field('o.entity_id,o.increment_id,o.created_at,o.coupon_rule_name,o.order_type,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount,o.payment_time')
@@ -391,8 +389,6 @@ class OrderDataDetailNew extends Backend
                     ->join('customer_entity c', 'o.customer_id=c.entity_id', 'left')
                     ->where($where)
                     ->where($map)
-                    ->where('o.order_type', 1)
-                    ->where(['o.status' => ['in', ['processing', 'complete', 'delivered']]])
                     ->order($sort, $order)
                     ->limit($offset, $limit)
                     ->field('o.entity_id,o.increment_id,o.created_at,o.coupon_rule_name,o.order_type,o.base_grand_total,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount,o.payment_time')
@@ -407,17 +403,40 @@ class OrderDataDetailNew extends Backend
                     $arr[$i]['base_grand_total'] = round($value['base_grand_total'], 2);
                     $arr[$i]['base_shipping_amount'] = round($value['base_shipping_amount'], 2);
                     switch ($value['order_type']) {
-                        case 1:
-                            $list[$key]['order_type'] = '普通订单';
+                        case OrderType::REGULAR_ORDER:
+                            $arr[$i]['order_type'] = '普通订单';
                             break;
-                        case 2:
-                            $list[$key]['order_type'] = '批发';
+                        case OrderType::WHOLESALE_ORDER:
+                            $arr[$i]['order_type'] = '批发单';
                             break;
-                        case 3:
-                            $list[$key]['order_type'] = '网红';
+                        case OrderType::SOCIAL_ORDER:
+                            $arr[$i]['order_type'] = '网红单';
                             break;
-                        case 4:
-                            $list[$key]['order_type'] = '补发';
+                        case OrderType::REPLACEMENT_ORDER:
+                            $arr[$i]['order_type'] = '补发单';
+                            break;
+                        case OrderType::DIFFERENCE_ORDER:
+                            $arr[$i]['order_type'] = '补差价';
+                            break;
+                        case OrderType::PAYROLL_ORDER:
+                            $arr[$i]['order_type'] = '一件代发';
+                            break;
+                        case OrderType::MANUAL_REISSUE:
+                            $arr[$i]['order_type'] = '手动补发';
+                            break;
+                        case OrderType::TT_ORDER:
+                            $arr[$i]['order_type'] = 'TT订单';
+                            break;
+                        case OrderType::VIP_ORDER:
+                            $arr[$i]['order_type'] = 'vip订单';
+                            break;
+                        case OrderType::CASH_DELIVERY_ORDER:
+                            $arr[$i]['order_type'] = '货到付款';
+                            break;
+                        case OrderType::CONVENIENCE_ORDER:
+                            $arr[$i]['order_type'] = '便利店支付';
+                            break;
+                        default:
                             break;
                     }
                     $order_node = Db::name('order_node')->where('order_id', $value['entity_id'])->where('site', $site)->value('node_type');
@@ -815,8 +834,6 @@ class OrderDataDetailNew extends Backend
                         ->join('order_addresses d', 'd.order_id = o.id')
                         ->where($mapWesee)
                         ->where('d.type', 1)
-                        ->where('o.order_type', 1)
-                        ->where(['o.status' => ['in', ['processing', 'shipped', 'delivered']]])
                         ->limit($start, $pre_count)
                         ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.code as coupon_code,o.coupon_id as discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.payer_email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group as group_id')
                         ->select();
@@ -826,8 +843,6 @@ class OrderDataDetailNew extends Backend
                         ->join('orders_addresses d', 'd.order_id = o.id')
                         ->where($mapWesee)
                         ->where('d.type', 1)
-                        ->where('o.order_type', 1)
-                        ->where(['o.status' => ['in', ['processing', 'complete', 'delivered']]])
                         ->limit($start, $pre_count)
                         ->field('o.id as entity_id,o.order_no as increment_id,o.created_at,o.discount_code_id as coupon_code,o.discount_coupon_id,o.order_type,o.base_original_total_price as base_grand_total,o.base_freight_price as base_shipping_amount,o.status,o.source as store_id,o.freight_type as shipping_method,o.email as customer_email,o.user_id as customer_id,o.base_discounts_price as base_discount_amount,o.payment_time,d.firstname,d.lastname,c.email as register_email,c.created_at as register_time,d.country,d.telephone,o.payment_type as payment_method,c.group_id')
                         ->select();
@@ -836,8 +851,6 @@ class OrderDataDetailNew extends Backend
                 $list = $order_model->alias('o')
                     ->join('customer_entity c', 'o.customer_id=c.entity_id', 'left')
                     ->where($map)
-                    ->where('o.order_type', 1)
-                    ->where(['o.status' => ['in', ['processing', 'complete', 'delivered']]])
                     ->field('o.entity_id,o.increment_id,o.created_at,o.base_grand_total,o.coupon_rule_name,o.order_type,o.base_shipping_amount,o.status,o.store_id,o.coupon_code,o.shipping_method,o.customer_email,o.customer_id,o.base_discount_amount,o.payment_time')
                     ->limit($start, $pre_count)
                     ->select();
@@ -1106,17 +1119,40 @@ class OrderDataDetailNew extends Backend
                 }
                 if (in_array('order_type', $column_name)) {
                     switch ($val['order_type']) {
-                        case 1:
+                        case OrderType::REGULAR_ORDER:
                             $order_type = '普通订单';
                             break;
-                        case 2:
-                            $order_type = '批发';
+                        case OrderType::WHOLESALE_ORDER:
+                            $order_type = '批发单';
                             break;
-                        case 3:
-                            $order_type = '网红';
+                        case OrderType::SOCIAL_ORDER:
+                            $order_type = '网红单';
                             break;
-                        case 4:
-                            $order_type = '补发';
+                        case OrderType::REPLACEMENT_ORDER:
+                            $order_type = '补发单';
+                            break;
+                        case OrderType::DIFFERENCE_ORDER:
+                            $order_type = '补差价';
+                            break;
+                        case OrderType::PAYROLL_ORDER:
+                            $order_type = '一件代发';
+                            break;
+                        case OrderType::MANUAL_REISSUE:
+                            $order_type = '手动补发';
+                            break;
+                        case OrderType::TT_ORDER:
+                            $order_type = 'TT订单';
+                            break;
+                        case OrderType::VIP_ORDER:
+                            $order_type = 'vip订单';
+                            break;
+                        case OrderType::CASH_DELIVERY_ORDER:
+                            $order_type = '货到付款';
+                            break;
+                        case OrderType::CONVENIENCE_ORDER:
+                            $order_type = '便利店支付';
+                            break;
+                        default:
                             break;
                     }
                     $index = array_keys($column_name, 'order_type');
