@@ -205,7 +205,7 @@ class ScmQuality extends Scm
         }
         $stock_warehouse = config('workorder.stock_person')[$this->auth->id];
         if ($stock_warehouse) {
-            $where['c.sign_warehouse'] = $stock_warehouse;
+            $where['d.sign_warehouse'] = $stock_warehouse;
         }else{
             $this->error('没有权限');
         }
