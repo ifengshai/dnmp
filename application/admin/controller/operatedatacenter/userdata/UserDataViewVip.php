@@ -264,7 +264,7 @@ class UserDataViewVip extends Backend
                 ->where($map)
                 ->count();
         }
-        $pre_count = 3000;
+        $pre_count = 100;
         for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
             $start = $i*$pre_count;
             if($order_platform == 3){
@@ -315,10 +315,10 @@ class UserDataViewVip extends Backend
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery','shipped']];
                 $order_where['order_type'] = 1;
                 $order_time_where['payment_time'] = ['between',[strtotime($val['start_time']),strtotime($val['end_time'])]];
-                $tmpRow['vip_order_num'] = $this->order->where($order_where)->where($order_time_where)->count();
+                $tmpRow['vip_order_num'] = $this->order->where($order_where)->where($order_time_where)->count('id');
                 $tmpRow['vip_order_amount'] = $this->order->where($order_where)->where($order_time_where)->sum('base_grand_total');//VIP期间支付金额
                 $order_amount = $this->order->where($order_where)->sum('base_grand_total');  //总订单金额
-                $order_num = $this->order->where($order_where)->count();  //总订单数
+                $order_num = $this->order->where($order_where)->count('id');  //总订单数
                 $tmpRow['avg_order_amount'] = $order_num ? round($order_amount/$order_num,2) : 0;
                 $tmpRow['order_num'] = $order_num;
 
