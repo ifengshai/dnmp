@@ -2515,17 +2515,44 @@ class Process extends Backend
 
     public function chageProductEdA()
     {
-        $products = Db::name('zzzz_product')->column('ED,A','sku');
+        $products = Db::name('zzzz_product')->column('ED,A', 'sku');
         $skus = array_keys($products);
-        $items = Db::connect('database.db_stock')->table('fa_item')->alias('a')->join('fa_item_attribute b','b.item_id=a.id')->where('a.origin_sku','in',$skus)->field('b.item_id,b.id,a.origin_sku')->select();
-        foreach($items as $item) {
+        $items = Db::connect('database.db_stock')->table('fa_item')->alias('a')->join('fa_item_attribute b', 'b.item_id=a.id')->where('a.origin_sku', 'in', $skus)->field('b.item_id,b.id,a.origin_sku')->select();
+        foreach ($items as $item) {
             $value = $products[$item['origin_sku']];
-            Db::connect('database.db_stock')->table('fa_item_attribute')->where('id',$item['id'])->update([
-                'mirror_width' => $value['A'],
+            Db::connect('database.db_stock')->table('fa_item_attribute')->where('id', $item['id'])->update([
+                'mirror_width'    => $value['A'],
                 'mirror_width_ed' => $value['ED'],
             ]);
             echo $item['origin_sku'];
         }
 
+    }
+
+    /**
+     * 处理VIP订单
+     * @author wangpenglei
+     * @date   2021/9/3 14:25
+     */
+    public function process_web_vip()
+    {
+        $webVip = new WebVipOrder();
+        $list = $webVip->where(['pay_status' => ['<>', 'success'], 'site' => 1])->select();
+
+        foreach ($list as $k => $v) {
+            $res = Db::connect('database.db_zeelool')->table('oc_vip_order')->where(['id' => $v['web_id']])->find();
+            $params = [];
+            $params['order_amount'] = $res['order_amount'] ?: 0;
+            $params['order_status'] = $res['order_status'] ?: 0;
+            $params['customer_email'] = $res['customer_email'] ?: '';
+            $params['order_type'] = $res['order_type'] ?: 0;
+            $params['paypal_token'] = $res['paypal_token'] ?: '';
+            $params['pay_status'] = $res['pay_status'] ?: 0;
+            $params['is_active_status'] = $res['is_active_status'] ?: 0;
+            $params['start_time'] = strtotime($res['start_time']) > 0 ? strtotime($res['start_time']) + 28800 : 0;
+            $params['end_time'] = strtotime($res['end_time']) > 0 ? strtotime($res['end_time']) + 28800 : 0;
+            $params['updated_at'] = time();
+            $webVip->where(['id' => $v['id']])->update($params);
+        }
     }
 }

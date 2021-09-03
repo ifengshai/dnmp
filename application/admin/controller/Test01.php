@@ -54,13 +54,13 @@ class Test01 extends Backend
        // $count = 9781;
         //$page = 100;
         for($i = 1;$i<=100;$i++) {
-            $offset = ( $i - 1 ) * 1000;
+            $offset = ( $i - 1 ) * 100;
             $list = $_new_product
                 ->alias('a')
                 ->field('sku,frame_color,frame_texture,shape,frame_shape,price')
                 ->where(['item_status' => 2, 'is_del' => 1, 'sku' => ['in', $sku_arr]])
                 ->join(['fa_new_product_attribute' => 'b'], 'a.id=b.item_id', 'left')
-                ->limit($offset,1000)
+                ->limit($offset,100)
                 ->select();
             $list = collection($list)->toArray();
             echo "list:success{$i}\n";
