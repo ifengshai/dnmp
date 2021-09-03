@@ -56,29 +56,10 @@ class Test01 extends Backend
             ->field('sku,frame_color,frame_texture,shape,frame_shape,price')
             ->where(['item_status' => 2, 'is_del' => 1, 'sku' => ['in', $sku_arr]])
             ->join(['fa_new_product_attribute' => 'b'], 'a.id=b.item_id', 'left')
+            ->limit(10)
             ->select();
         $list = collection($list)->toArray();
         echo "list:success\n";
-
-        /*//从数据库查询需要的数据
-        $spreadsheet = new Spreadsheet();
-
-        //常规方式：利用setCellValue()填充数据
-        $spreadsheet->setActiveSheetIndex(0)
-            ->setCellValue("A1", "SKU")
-            ->setCellValue("B1", "产品评级")
-            ->setCellValue("C1", "材质")
-            ->setCellValue("D1", "框型")
-            ->setCellValue("E1", "形状")
-            ->setCellValue("F1", "颜色")
-            ->setCellValue("G1", "进价")
-            ->setCellValue("H1", "平均月销量")
-            ->setCellValue("I1", "平均售价")
-            ->setCellValue("J1", "最大月销量")
-            ->setCellValue("K1", "最大月销量月份")
-            ->setCellValue("L1", "201910~202009总销量")
-            ->setCellValue("M1", "配镜率")
-        ;   //利用setCellValues()填充数据*/
 
         $frame_texture = [1 => '塑料', 2 => '板材', 3 => 'TR90', 4 => '金属', 5 => '钛', 6 => '尼龙', 7 => '木质', 8 => '混合材质', 9 => '合金', 10 => '其他材质'];
         $frame_shape = [1 => '长方形', 2 => '正方形', 3 => '猫眼', 4 => '圆形', 5 => '飞行款', 6 => '多边形', 7 => '蝴蝶款'];
