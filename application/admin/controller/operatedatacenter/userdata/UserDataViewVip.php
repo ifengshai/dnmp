@@ -212,6 +212,7 @@ class UserDataViewVip extends Backend
     }
     public function export(){
         set_time_limit(0);
+        ini_set('memory_limit', '2048M');
         header ( "Content-type:application/vnd.ms-excel" );
         header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", date('Y-m-d-His',time()) ) . ".csv" );//导出文件名
 
@@ -263,7 +264,7 @@ class UserDataViewVip extends Backend
                 ->where($map)
                 ->count();
         }
-        $pre_count = 5000;
+        $pre_count = 3000;
         for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
             $start = $i*$pre_count;
             if($order_platform == 3){
