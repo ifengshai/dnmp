@@ -193,7 +193,7 @@ class UserDataViewVip extends Backend
             }
             if($order_platform == 3){
                 $web_model->table('vip_orders')->query("set time_zone='+8:00'");
-                $sum_vip_num = $web_model->table('users')->where('is_vip',1)->count();//总VIP会员数
+                $sum_vip_num = $web_model->table('users')->where('group',2)->count();//总VIP会员数
             }else{
                 $web_model->table('oc_vip_order')->query("set time_zone='+8:00'");
                 $sum_vip_num = $web_model->table('customer_entity')->where('is_vip',1)->count();//总VIP会员数
