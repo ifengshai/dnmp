@@ -203,7 +203,12 @@ class ScmQuality extends Scm
         if ($start_time && $end_time) {
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
-
+        $stock_warehouse = config('workorder.stock_person')[$this->auth->id];
+        if ($stock_warehouse) {
+            $where['c.sign_warehouse'] = $stock_warehouse;
+        }else{
+            $this->error('没有权限');
+        }
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
@@ -214,6 +219,7 @@ class ScmQuality extends Scm
             ->field('a.id,a.check_order_number,a.createtime,a.status,c.purchase_number,b.sku,a.create_person,a.logistics_id,a.batch_id,b.remark')
             ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id', 'left')
             ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
+            ->join(['fa_logistics_info' => 'd'], 'a.logistics_id=d.id', 'left')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
