@@ -861,6 +861,10 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
+        $stock_warehouse = config('workorder.stock_person')[$this->auth->id];
+        if (!$stock_warehouse) {
+            $this->error('没有权限');
+        }
 
         empty($page) && $this->error(__('Page can not be empty'), [], 406);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 407);
@@ -874,6 +878,9 @@ class ScmWarehouse extends Scm
         if ($start_time && $end_time) {
 
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
+        }
+        if ($stock_warehouse) {
+            $where['c.sign_warehouse'] = $stock_warehouse;
         }
 
         $offset = ($page - 1) * $page_size;
@@ -930,6 +937,10 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
+        $stock_warehouse = config('workorder.stock_person')[$this->auth->id];
+        if (!$stock_warehouse) {
+            $this->error('没有权限');
+        }
 
         empty($page) && $this->error(__('Page can not be empty'), [], 501);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 502);
@@ -955,6 +966,9 @@ class ScmWarehouse extends Scm
         if ($start_time && $end_time) {
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
+        if ($stock_warehouse) {
+            $where['d.sign_warehouse'] = $stock_warehouse;
+        }
 
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
@@ -966,6 +980,7 @@ class ScmWarehouse extends Scm
             ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status,a.type_id')
             ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
             //            ->join(['fa_check_order_item' => 'c'], 'a.check_id=c.check_id', 'left')
+            ->join(['fa_logistics_info' => 'd'], 'd.id=b.logistics_id', 'left')
             ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
@@ -1449,6 +1464,11 @@ class ScmWarehouse extends Scm
         //根据type值判断是从哪个入口进入的添加入库单 type值为1是从质检入口进入 type值为2是从入库单直接添加 直接添加的需要选择站点
         $type = $this->request->request("type");
         empty($type) && $this->error(__('入口类型不能为空'), [], 513);
+        $stock_warehouse = config('workorder.stock_person')[$this->auth->id];
+        if (!$stock_warehouse) {
+            $this->error('没有权限');
+        }
+
         $info = [];
         //入库单所需数据
         $info['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
@@ -1506,6 +1526,7 @@ class ScmWarehouse extends Scm
         }
 
         $info['in_stock_type'] = $in_stock_type_list;
+        $info['stock_id'] = $stock_warehouse;
 
         $this->success('', ['info' => $info], 200);
     }
@@ -1578,6 +1599,7 @@ class ScmWarehouse extends Scm
         //入库单所需数据
         $info['in_stock_id'] = $_in_stock_info['id'];
         $info['in_stock_number'] = $_in_stock_info['in_stock_number'];
+        $info['stock_id'] = Db::name('logistics_info')->where('id', $check_order_info['logistics_id'])->value('receiving_warehouse');
         $info['location_id'] = $_in_stock_info['area_id'];
         $info['location_area'] = Db::name('warehouse_area')->where('id', $_in_stock_info['area_id'])->value('name');
         $info['location_code_id'] = $_in_stock_info['location_id'];
