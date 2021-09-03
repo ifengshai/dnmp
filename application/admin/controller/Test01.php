@@ -54,7 +54,7 @@ class Test01 extends Backend
        // $count = 9781;
         //$page = 100;
         for($i = 1;$i<=100;$i++) {
-            $offset = ( $i - 1 ) * 1000;
+            $offset = ( $i - 1 ) * 100;
             $list = $_new_product
                 ->alias('a')
                 ->field('sku,frame_color,frame_texture,shape,frame_shape,price')
