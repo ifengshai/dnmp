@@ -314,7 +314,7 @@ class UserDataViewVip extends Backend
                 $order_where['customer_id'] = $order_platform == 3 ? $val['user_id'] : $val['customer_id'];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery','shipped']];
                 $order_where['order_type'] = 1;
-                $order_time_where['payment_time'] = ['between',[strtotime($val['start_time']),strtotime($val['end_time'])]];
+                $order_time_where['payment_time'] = ['between',[$val['start_time'],$val['end_time']]];
                 $tmpRow['vip_order_num'] = $order_model->where($order_where)->where($order_time_where)->count();
                 $tmpRow['vip_order_amount'] = $order_model->where($order_where)->where($order_time_where)->sum('base_grand_total');//VIP期间支付金额
                 $order_amount = $order_model->where($order_where)->sum('base_grand_total');  //总订单金额
