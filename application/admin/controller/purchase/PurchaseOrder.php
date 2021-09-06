@@ -803,7 +803,9 @@ class PurchaseOrder extends Backend
                                     $lists = Db::name('purchase_order_item')->where(['purchase_id' => $row['id']])->select();
                                     $batch_arrival_num = Db::name('purchase_batch_item')->where(['purchase_batch_id' => $k])->value('arrival_num');
                                     $item = new \app\admin\model\itemmanage\Item();
-                                    foreach ($lists as $val) {
+
+                                    //:todo 此扣减方案有Bug 已反馈 未给新的扣减方案
+                                    /*foreach ($lists as $val) {
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'                    => 2,
@@ -827,7 +829,7 @@ class PurchaseOrder extends Backend
                                         //$item->where(['sku' => $val['sku']])->setDec('on_way_stock', $batch_arrival_num);
                                         //减在途加待入库数量
                                         //$item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $batch_arrival_num);
-                                    }
+                                    }*/
                                     $list['status'] = 1;
                                     $list['sign_number'] = $have_logistics['sign_number'];
                                 }
@@ -858,31 +860,32 @@ class PurchaseOrder extends Backend
                                         $this->model->where(['id' => $v['id']])->update(['purchase_status' => $purchase_status]);
                                         //物流单已签收要减少在途增加待入库 这里是录入已经签收的物流单号要进行的操作
                                         $list = Db::name('purchase_order_item')->where(['purchase_id' => $v['id']])->select();
-                                        foreach ($list as $val) {
-                                            //插入日志表
-                                            (new StockLog())->setData([
-                                                'type'                    => 2,
-                                                'site'                    => 0,
-                                                'modular'                 => 10,
-                                                //采购单签收
-                                                'change_type'             => 24,
-                                                'sku'                     => $val['sku'],
-                                                'public_id'               => $v['id'],
-                                                'source'                  => 1,
-                                                'on_way_stock_before'     => ($item->where(['sku' => $val['sku']])->value('on_way_stock')) ?: 0,
-                                                'on_way_stock_change'     => -$val['purchase_num'],
-                                                'wait_instock_num_before' => ($item->where(['sku' => $val['sku']])->value('wait_instock_num')) ?: 0,
-                                                'wait_instock_num_change' => $val['purchase_num'],
-                                                'create_person'           => session('admin.nickname'),
-                                                'create_time'             => time(),
-                                                //关联采购单
-                                                'number_type'             => 7,
-                                            ]);
-                                            //减总的在途库存也就是商品表里的在途库存  :todo 未给扣减方案
-                                            //$item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['purchase_num']);
-                                            //减在途加待入库数量
-                                            //$item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
-                                        }
+                                        //:todo 未给扣减方案
+                                        /* foreach ($list as $val) {
+                                             //插入日志表
+                                             (new StockLog())->setData([
+                                                 'type'                    => 2,
+                                                 'site'                    => 0,
+                                                 'modular'                 => 10,
+                                                 //采购单签收
+                                                 'change_type'             => 24,
+                                                 'sku'                     => $val['sku'],
+                                                 'public_id'               => $v['id'],
+                                                 'source'                  => 1,
+                                                 'on_way_stock_before'     => ($item->where(['sku' => $val['sku']])->value('on_way_stock')) ?: 0,
+                                                 'on_way_stock_change'     => -$val['purchase_num'],
+                                                 'wait_instock_num_before' => ($item->where(['sku' => $val['sku']])->value('wait_instock_num')) ?: 0,
+                                                 'wait_instock_num_change' => $val['purchase_num'],
+                                                 'create_person'           => session('admin.nickname'),
+                                                 'create_time'             => time(),
+                                                 //关联采购单
+                                                 'number_type'             => 7,
+                                             ]);
+                                             //减总的在途库存也就是商品表里的在途库存  :todo 未给扣减方案
+                                             //$item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['purchase_num']);
+                                             //减在途加待入库数量
+                                             //$item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
+                                         }*/
                                         $list['status'] = 1;
                                         $list['sign_number'] = $have_logistics['sign_number'];
                                     }
