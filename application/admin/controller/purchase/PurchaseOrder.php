@@ -802,9 +802,6 @@ class PurchaseOrder extends Backend
                                     //物流单已签收要减少在途增加待入库 这里是录入已经签收的物流单号要进行的操作
                                     $lists = Db::name('purchase_order_item')->where(['purchase_id' => $row['id']])->select();
                                     $batch_arrival_num = Db::name('purchase_batch_item')->where(['purchase_batch_id' => $k])->value('arrival_num');
-                                    //根据采购单id获取补货单id再获取最初提报的比例
-                                    $replenish_id = Db::name('purchase_order')->where('id', $row['id'])->value('replenish_id');
-                                    $item_platform = new ItemPlatformSku();
                                     $item = new \app\admin\model\itemmanage\Item();
                                     foreach ($lists as $val) {
                                         //插入日志表
@@ -826,10 +823,10 @@ class PurchaseOrder extends Backend
                                             //关联采购单
                                             'number_type'             => 7,
                                         ]);
-                                        //减总的在途库存也就是商品表里的在途库存
-                                        $item->where(['sku' => $val['sku']])->setDec('on_way_stock', $batch_arrival_num);
+                                        //减总的在途库存也就是商品表里的在途库存 :todo 此扣减方案有Bug 已反馈 未给新的扣减方案
+                                        //$item->where(['sku' => $val['sku']])->setDec('on_way_stock', $batch_arrival_num);
                                         //减在途加待入库数量
-                                        $item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $batch_arrival_num);
+                                        //$item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $batch_arrival_num);
                                     }
                                     $list['status'] = 1;
                                     $list['sign_number'] = $have_logistics['sign_number'];
@@ -861,17 +858,7 @@ class PurchaseOrder extends Backend
                                         $this->model->where(['id' => $v['id']])->update(['purchase_status' => $purchase_status]);
                                         //物流单已签收要减少在途增加待入库 这里是录入已经签收的物流单号要进行的操作
                                         $list = Db::name('purchase_order_item')->where(['purchase_id' => $v['id']])->select();
-                                        //根据采购单id获取补货单id再获取最初提报的比例
-                                        $replenish_id = Db::name('purchase_order')->where('id', $v['id'])->value('replenish_id');
-                                        $item_platform = new ItemPlatformSku();
-
                                         foreach ($list as $val) {
-                                            //比例
-                                            $rate_arr = Db::name('new_product_mapping')
-                                                ->where(['sku' => $val['sku'], 'replenish_id' => $replenish_id])
-                                                ->field('website_type,rate')
-                                                ->select();
-
                                             //插入日志表
                                             (new StockLog())->setData([
                                                 'type'                    => 2,
@@ -891,10 +878,10 @@ class PurchaseOrder extends Backend
                                                 //关联采购单
                                                 'number_type'             => 7,
                                             ]);
-                                            //减总的在途库存也就是商品表里的在途库存
-                                            $item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['purchase_num']);
+                                            //减总的在途库存也就是商品表里的在途库存  :todo 未给扣减方案
+                                            //$item->where(['sku' => $val['sku']])->setDec('on_way_stock', $val['purchase_num']);
                                             //减在途加待入库数量
-                                            $item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
+                                            //$item->where(['sku' => $val['sku']])->setInc('wait_instock_num', $val['purchase_num']);
                                         }
                                         $list['status'] = 1;
                                         $list['sign_number'] = $have_logistics['sign_number'];
