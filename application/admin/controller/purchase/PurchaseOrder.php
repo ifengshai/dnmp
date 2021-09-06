@@ -725,12 +725,18 @@ class PurchaseOrder extends Backend
         }
         if ($this->request->isPost()) {
             $params = input('post.');
+
             $logistics_company_no = $params['logistics_company_no'];
             $logistics_number = $params['logistics_number'];
             $logistics_ids = $params['logistics_ids'];
             $stock_ids = $params['stock_id'];
 
             if ($params) {
+
+                if (!$params['logistics_number']) {
+                    $this->error(__('物流单号不能为空'));
+                }
+
                 $params = $this->preExcludeFields($params);
                 $result = false;
                 Db::startTrans();
