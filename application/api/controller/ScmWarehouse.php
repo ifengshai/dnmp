@@ -3799,6 +3799,7 @@ class ScmWarehouse extends Scm
             $this->_item_platform_sku->startTrans();
             $this->_stock_transfer_out_order->startTrans();
             $this->_stock_transfer_in_order_item->startTrans();
+            Db::startTrans();
             try {
                 /****************库存逻辑开始**********************/
                 //提交的时候操作库存 以及更新条形码状态为出库
@@ -3917,6 +3918,15 @@ class ScmWarehouse extends Scm
                                             'create_time'       => time(),
                                             'number_type'       => 8,//实体仓调拨单
                                         ]);
+                                        Db::name('stock_transfer_order_item_stock')
+                                            ->insert(
+                                                [
+                                                    'transfer_order_item_id' => $sv['id'],
+                                                    'sku'                    => $sv['sku'],
+                                                    'platform_type'          => $val['platform_type'],
+                                                    'stock'                  => $stockNum,
+                                                ]
+                                            );
                                     } else {
                                         $num = round($sv['real_num'] * abs($val['stock']) / $numNum);
                                         $stockNum -= $num;
@@ -3938,6 +3948,15 @@ class ScmWarehouse extends Scm
                                             'create_time'       => time(),
                                             'number_type'       => 8,//实体仓调拨单
                                         ]);
+                                        Db::name('stock_transfer_order_item_stock')
+                                            ->insert(
+                                                [
+                                                    'transfer_order_item_id' => $sv['id'],
+                                                    'sku'                    => $sv['sku'],
+                                                    'platform_type'          => $val['platform_type'],
+                                                    'stock'                  => $num,
+                                                ]
+                                            );
                                     }
                                 }
                             }
@@ -3968,6 +3987,7 @@ class ScmWarehouse extends Scm
                 $this->_item_platform_sku->commit();
                 $this->_stock_transfer_out_order->commit();
                 $this->_stock_transfer_in_order_item->commit();
+                Db::commit();
             } catch (ValidateException $e) {
                 $this->_product_bar_code_item->rollback();
                 $this->_stock_transfer_order->rollback();
@@ -3975,6 +3995,7 @@ class ScmWarehouse extends Scm
                 $this->_item_platform_sku->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
+                Db::rollback();
                 Log::error('shiticang:' . $e->getMessage() . '-' . $e->getLine());
                 $this->error($e->getMessage(), [], 444);
             } catch (PDOException $e) {
@@ -3984,6 +4005,7 @@ class ScmWarehouse extends Scm
                 $this->_item_platform_sku->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
+                Db::rollback();
                 Log::error('shiticang:' . $e->getMessage() . '-' . $e->getLine());
                 $this->error($e->getMessage(), [], 444);
             } catch (Exception $e) {
@@ -3993,6 +4015,7 @@ class ScmWarehouse extends Scm
                 $this->_item_platform_sku->rollback();
                 $this->_stock_transfer_out_order->rollback();
                 $this->_stock_transfer_in_order_item->rollback();
+                Db::rollback();
                 Log::error('shiticang:' . $e->getMessage() . '-' . $e->getLine());
                 $this->error($e->getMessage(), [], 444);
             }
