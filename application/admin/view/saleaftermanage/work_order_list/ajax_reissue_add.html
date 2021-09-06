@@ -277,7 +277,11 @@
                 </tr>
                 <tr>
                     <td style="text-align: center">AddPrism</td>
+                    {if condition="$vo['prismcheck'] == 'on'"}
+                    <td><input type="checkbox" name="row[item_order_info][{$item_order_number}][change_lens][prismcheck]" style="margin-left: 10px;" value="on" checked></td>
+                    {else /}
                     <td><input type="checkbox" name="row[item_order_info][{$item_order_number}][change_lens][prismcheck]" style="margin-left: 10px;" value="on"></td>
+                    {/if}
                 </tr>
                 <tr>
                     <td style="text-align: center"></td>

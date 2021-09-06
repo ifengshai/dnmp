@@ -326,7 +326,7 @@
                 </tr>
                 <tr style="width: 200px;">
                     <td style="text-align: center"> AddPrism</td>
-                    {if condition="$info[$keys][prismcheck] == 'on'"}
+                    {if condition="$info[$keys]['prismcheck'] == 'on'"}
                     <td><input type="checkbox" name="row[item_order_info][{$item_order_number}][change_lens][prismcheck]" style="margin-left: 10px;" checked></td>
                     {else/}
                     <td><input type="checkbox" name="row[item_order_info][{$item_order_number}][change_lens][prismcheck]" style="margin-left: 10px;"></td>
