@@ -3097,7 +3097,7 @@ class ScmWarehouse extends Scm
             $allPickingIds = Db::name('warehouse_area')->column('id');
 
             $count = $this->_inventory->alias('a')
-                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat], 'b.area_id' => ['in', $allPickingIds]])
+                ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.stock_id' => $stockId, 'a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'b.library_name' => ['in', $vat], 'b.area_id' => ['in', $allPickingIds]])
                 ->count();
             if ($count > 0) {
                 $this->error(__('此数据下对应库位正在盘点,暂无法进行出入库操作'), '', 525);
