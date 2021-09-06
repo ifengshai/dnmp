@@ -3087,6 +3087,7 @@ class ScmWarehouse extends Scm
         if (count(array_filter($item_sku)) < 1) {
             $this->error(__('调拨单子数据集合不能为空！！'), '', 524);
         }
+
         $codes = array_column($item_sku, 'call_out_site');
         $call_in_site_id = array_column($item_sku, 'call_in_site_id');
 

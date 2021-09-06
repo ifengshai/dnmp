@@ -807,11 +807,6 @@ class PurchaseOrder extends Backend
                                     $item_platform = new ItemPlatformSku();
                                     $item = new \app\admin\model\itemmanage\Item();
                                     foreach ($lists as $val) {
-                                        //比例
-                                        $rate_arr = Db::name('new_product_mapping')
-                                            ->where(['sku' => $val['sku'], 'replenish_id' => $replenish_id])
-                                            ->field('website_type,rate')
-                                            ->select();
                                         //插入日志表
                                         (new StockLog())->setData([
                                             'type'                    => 2,
