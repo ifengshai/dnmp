@@ -793,6 +793,9 @@ class SaleAfterTask extends Model
             case 11:
                 $db = 'database.db_zeelool_jp';
                 break;
+            case 15:
+                $db = 'database.db_zeelool_fr';
+                break;
             default:
                 return false;
                 break;
