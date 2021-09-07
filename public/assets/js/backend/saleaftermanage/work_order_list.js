@@ -223,6 +223,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
                         { field: 'payment_time', title: __('订单支付时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
+                        { field: 'customer_return_order', title: __('客户寄回物流单号'), operate: 'like',visible: false },
                         {
                             field: 'buttons',
                             width: "120px",
