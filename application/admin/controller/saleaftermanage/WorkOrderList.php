@@ -129,7 +129,6 @@ class WorkOrderList extends Backend
 
             $step_arr[$k]['recept'] = $recept_arr;
         }
-
         return $step_arr ?: [];
     }
 
