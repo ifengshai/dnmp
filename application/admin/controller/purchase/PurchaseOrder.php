@@ -1002,6 +1002,7 @@ class PurchaseOrder extends Backend
             //查询分批数据
             $batch = new \app\admin\model\purchase\PurchaseBatch();
             $batch_data = $batch->alias('a')
+                ->field('a.id,a.batch,a.receiving_warehouse,b.sku,a.arrival_time,b.arrival_num')
                 ->where('a.purchase_id', $row['id'])
                 ->join(['fa_purchase_batch_item' => 'b'],'a.id=b.purchase_batch_id')
                 ->select();
