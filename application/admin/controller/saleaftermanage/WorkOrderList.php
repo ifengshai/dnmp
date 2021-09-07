@@ -4298,4 +4298,30 @@ EOF;
             return false;
         }
     }
+
+    /**
+     * 根据平台sku获取平台里面的所有关联的spu
+     * @return false|void
+     * @author liushiwei
+     * @date   2021/9/7 17:06
+     */
+    public function getSpuList()
+    {
+        if ($this->request->isAjax()) {
+            //原始sku
+            $sku = input('sku');
+            $platform_type = input('platform_type');
+            if(empty($sku) || empty($platform_type)) {
+                return $this->error('参数错误，请重新尝试', '', 'error', 0);
+            }
+            //求出真实的sku
+            $true_sku = $this->item_platform_sku->getTrueSku($sku,$platform_type);
+            if(!$true_sku){
+                return false;
+            }
+            $info = $this->item->getSpuListBySku($true_sku,$platform_type);
+            $this->success('操作成功！！', '', $info, 0);
+        }
+
+    }
 }

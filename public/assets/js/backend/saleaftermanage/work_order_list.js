@@ -3030,15 +3030,60 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
                         if (!$('.item' + use_flag + '_step19-19').is(':hidden')) {
-                            Str += '<tr>';
-                            Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_sku]"  type="text" value="' + sku + '" readonly style="margin-left:10%;"></td>';
-                            Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
-                            Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]"  type="text" style="margin-left:10%;"></td>';
-                            Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
-                            // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
-                            Str += '</tr>';
-                            $('#change-frame'+ use_flag +' tr:gt(0)').remove();
-                            $("#change-frame"+ use_flag +" tbody").append(Str);
+                            // console.log(use_flag);
+                            // console.log(sku);
+                            // console.log(Config);
+                            // console.log($("#work_platform").val());
+                           let work_platform = $("#work_platform").val();
+                            if(work_platform != 13 ){
+                                Str += '<tr>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_sku]"  type="text" value="' + sku + '" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]"  type="text" style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                Str += '</tr>';
+                                $('#change-frame'+ use_flag +' tr:gt(0)').remove();
+                                $("#change-frame"+ use_flag +" tbody").append(Str);
+                                $('.selectpicker ').selectpicker('refresh');
+                            }else{
+                                Backend.api.ajax({
+                                    url: 'saleaftermanage/work_order_list/getSpuList',
+                                    data: {
+                                        sku: sku,
+                                        platform_type: work_platform
+                                    }
+                                }, function (data, ret) {
+                                    if(ret.code == 1){
+                                        var Strs = '';
+                                        Strs += '<tr>';
+                                        Strs += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_sku]"  type="text" value="' + sku + '" readonly style="margin-left:10%;"></td>';
+                                        Strs += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                        Strs += '<td>';
+                                        Strs += '<select class="form-control selectpicker"  name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]">';
+                                        for(let i=0;i<ret.data.length;i++){
+                                            Strs +='<option value="'+ret.data[i]+'">'+ret.data[i]+'</option>';
+                                        }
+                                        Strs +='</select>';
+                                        Strs +='</td>';
+                                        Strs += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                        Strs += '</tr>';
+                                        $('#change-frame'+ use_flag +' tr:gt(0)').remove();
+                                        $("#change-frame"+ use_flag +" tbody").append(Strs);
+                                        $('.selectpicker ').selectpicker('refresh');
+                                    }else{
+                                        Layer.alert('没有合适的镜框要更换');
+                                    }
+                                });
+                                // Str += '<td>';
+                                // Str += '<select class="form-control selectpicker"  name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]">';
+                                // Str +='<option value="1" {eq name="1" value="$row.order_type"}selected{/eq}>sku1</option>';
+                                // Str +='<option value="1" {eq name="1" value="$row.order_type"}selected{/eq}>sku2</option>';
+                                // Str +='</select>';
+                                // Str +='</td>';
+                            }
+
+
                         }
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
 
@@ -3352,7 +3397,7 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
                         ihtml += '<input type="hidden" id="item'+item_order_sku[i]+'_step'+item_problem_step[problem_id][j].step_id+'-appoint_group" value="'+item_problem_step[problem_id][j].extend_group_id+'">';
                 }
                 ihtml += '</div></div></div>';
-                ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step19-19" style="display:none;"  flag="'+item_order_sku[i]+'"><div class="caigou frame-info item_info"><p style="font-size: 16px;"><b>更换镜框</b></p><div ><table class="caigou-table-sku" id="change-frame'+item_order_sku[i]+'"><tr><th>原SKU</th><th>原数量(+增加)</th><th>新SKU</th><th>新数量(-减少)</th></tr></table></div></div></div>';
+                ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step19-19" style="display:none;"  flag="'+item_order_sku[i]+'"><div class="caigou frame-info item_info"><p style="font-size: 16px;"><b> 更换镜框</b></p><div ><table class="caigou-table-sku" id="change-frame'+item_order_sku[i]+'"><tr><th>原SKU</th><th>原数量(+增加)</th><th>新SKU</th><th>新数量(-减少)</th></tr></table></div></div></div>';
                 ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step20-20" style="display:none;" flag="'+item_order_sku[i]+'"><div class="col-xs-12 col-sm-8" style="width: 100%"><p style="font-size: 16px;"><b>更改镜片</b></p><div id="lens_contents'+item_order_sku[i]+'"></div></div></div>';
                 ihtml += '</div>';
             }
