@@ -800,7 +800,7 @@ class PurchaseOrder extends Backend
                                 $list['logistics_company_no'] = $val;
                                 $list['receiving_warehouse'] = $stock_ids[$k];
 
-                                $batch->where(['id' => $k])->update(['receiving_warehouse' => $stock_ids[$i]]);
+                                $batch->where(['id' => $k])->update(['receiving_warehouse' => $stock_ids[$k]]);
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k][$key], 'status' => 1])->find();
                                 if (!empty($have_logistics)) {
