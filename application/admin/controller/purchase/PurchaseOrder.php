@@ -838,6 +838,9 @@ class PurchaseOrder extends Backend
                                     }*/
                                     $list['status'] = 1;
                                     $list['sign_number'] = $have_logistics['sign_number'];
+                                    $list['sign_person'] = $have_logistics['sign_person'];
+                                    $list['sign_time'] = $have_logistics['sign_time'];
+                                    $list['sign_warehouse'] = $have_logistics['sign_warehouse'];
                                 }
                                 $logistics->addLogisticsInfo($list);
 
@@ -894,6 +897,9 @@ class PurchaseOrder extends Backend
                                          }*/
                                         $list['status'] = 1;
                                         $list['sign_number'] = $have_logistics['sign_number'];
+                                        $list['sign_person'] = $have_logistics['sign_person'];
+                                        $list['sign_time'] = $have_logistics['sign_time'];
+                                        $list['sign_warehouse'] = $have_logistics['sign_warehouse'];
                                     }
                                     $logistics->addLogisticsInfo($list);
                                 }
@@ -956,6 +962,9 @@ class PurchaseOrder extends Backend
                                     }*/
                                     $list['status'] = 1;
                                     $list['sign_number'] = $have_logistics['sign_number'];
+                                    $list['sign_person'] = $have_logistics['sign_person'];
+                                    $list['sign_time'] = $have_logistics['sign_time'];
+                                    $list['sign_warehouse'] = $have_logistics['sign_warehouse'];
                                 }
                                 $logistics->addLogisticsInfo($list);
                             }
