@@ -3,9 +3,10 @@
     {if $batch_data}
     {foreach $batch_data as $v}
     <div>
-        <label class="control-label col-xs-12 col-sm-2" style="width:150px;"><b>第{$v.batch}批 批次ID:{$v.id}</b> </label>
+        <label class="control-label col-xs-12 col-sm-2" style="width:150px;"><b>第{$v.batch}批 批次ID号:{$v.id}</b> </label>
+        <label class="control-label col-xs-12 col-sm-2" style="width:150px;"><b>SKU:{$v->sku}</b> </label>
+        <label class="control-label col-xs-12 col-sm-2" style="width:150px;"><b>到货数量:{$v->arrival_num}</b> </label>
         <label class="control-label col-xs-12 col-sm-2" style="width:250px;"><b>预计到货时间：{$v->arrival_time}</b></label>
-        <label class="control-label col-xs-12 col-sm-2" style="width:150px;"><b>所属仓库：{:$v->receiving_warehouse == 2 ? '丹阳仓':'郑州仓'}</b> </label>
         <br/>
     </div>
     <div id="toolbar" class="toolbar">
@@ -15,7 +16,7 @@
             <label class="control-label col-xs-12 col-sm-2">选择收货仓:</label>
             <div class="col-xs-12 col-sm-3">
                 <select name="stock_id[]" class="form-control" data-rule="required">
-                    <option value="">请选择</option>
+                    <option value="" >请选择</option>
                     <option value="1" {:$v->receiving_warehouse == 1 ? 'selected':''}>郑州仓</option>
                     <option value="2" {:$v->receiving_warehouse == 2 ? 'selected':''}>丹阳仓</option>
                 </select>

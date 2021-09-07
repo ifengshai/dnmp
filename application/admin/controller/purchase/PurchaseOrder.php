@@ -1001,7 +1001,10 @@ class PurchaseOrder extends Backend
         if ($row['is_batch'] == 1) {
             //查询分批数据
             $batch = new \app\admin\model\purchase\PurchaseBatch();
-            $batch_data = $batch->where('purchase_id', $row['id'])->select();
+            $batch_data = $batch->alias('a')
+                ->where('a.purchase_id', $row['id'])
+                ->join(['fa_purchase_batch_item' => 'b'],'a.id=b.purchase_batch_id')
+                ->select();
             $this->view->assign("batch_data", $batch_data);
         }
 
