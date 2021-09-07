@@ -193,7 +193,7 @@
                 </select>
             </div>
         {if $row['receiving_warehouse']}
-        <label class="control-label col-xs-12 col-sm-2">所属仓库:</label>
+        <label class="control-label col-xs-12 col-sm-2">收货仓:</label>
         <div class="col-xs-12 col-sm-3">
             <select name="row[receiving_warehouse]" class="form-control" disabled>
                 <option value="">请选择</option>
@@ -407,7 +407,7 @@
                 
                 <label class="control-label col-xs-12 col-sm-2" style="width:150px;"><b>第{$v.batch}批 批次ID:{$v.id}</b> </label>
                 <label class="control-label col-xs-12 col-sm-2" style="width:250px;"><b>预计到货时间：{$v->arrival_time}</b></label>
-                <label class="control-label col-xs-12 col-sm-2" style="width:150px;"><b>所属仓库：{:$v->receiving_warehouse == 2 ? '丹阳仓':'郑州仓'}</b> </label>
+                <label class="control-label col-xs-12 col-sm-2" style="width:150px;"><b>收货仓：{if $v->receiving_warehouse == 2}丹阳仓{elseif $v->receiving_warehouse == 1}郑州仓{/if}</b> </label>
                 <!-- <a href="javascript:;" class="btn btn-danger btn-arrival-del" title="删除"><i class="fa fa-trash"></i>
                     删除</a> -->
                 <table id="caigou-table" style="width:80%;">
