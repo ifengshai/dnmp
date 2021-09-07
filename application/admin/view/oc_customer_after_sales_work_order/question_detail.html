@@ -70,7 +70,7 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('站点')}:</label>
         <div class="col-xs-12 col-sm-3">
 
-            <input id="c-frame_height" data-rule="required" class="form-control" name="row[site]" type="text" value="zeelool" disabled>
+            <input id="c-frame_height" data-rule="required" class="form-control" name="row[site]" type="text" value="{$row['site']}" disabled>
         </div>
         <label class="control-label col-xs-12 col-sm-2">{:__('订单类型')}:</label>
         <div class="col-xs-12 col-sm-3">
@@ -102,16 +102,27 @@
             <textarea id="c-problem_desc" class="form-control editor" rows="5" name="row[description]" cols="50" disabled readonly>{$row['description']}</textarea>
         </div>
     </div>
-    {if condition="$row['images'] !== null"}
+
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('图片列表')}:</label>
+        {if condition="(!empty($row['pic']))"}
+        <label class="control-label col-xs-12 col-sm-2">{:__('图片')}:</label>
         <div class="col-xs-12 col-sm-8">
-            {volist name="row['images']" id="vo"}
+            {volist name="row['pic']" id="vo"}
             <img src="{$vo}" data-tips-image  alt="" style="width: 15%;height: 90px">
             {/volist}
         </div>
+        {/if}
     </div>
-    {/if}
+    <div class="form-group">
+        {if condition="(!empty($row['file']))"}
+        <label class="control-label col-xs-12 col-sm-2">{:__('附件')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {volist name="row['file']" id="vo"}
+            <a href="{$vo}" target="_blank">{$vo}</a>
+            {/volist}
+        </div>
+        {/if}
+    </div>
 
 
     <div class='caigou ajax-add'>

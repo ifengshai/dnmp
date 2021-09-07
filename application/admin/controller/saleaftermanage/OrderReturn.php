@@ -431,12 +431,13 @@ class OrderReturn extends Backend
         }
 
         $ids = input('param.ids');
+        $increment_id = input('increment_id');
 
         if (!empty($ids)) {
             $row = Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order')->where('id', $ids)->find();
             $this->view->assign("customer_email", $row['email']);
         } else {
-            $row = null;
+            $row = ['increment_id' => $increment_id];
             $this->view->assign("customer_email", $customer_email);
         }
         $this->view->assign("order_platform", $order_platform);
