@@ -3,6 +3,7 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use app\enum\Site;
 use fast\Http;
 use Think\Db;
 use Think\Log;
@@ -26,7 +27,13 @@ class OcCustomerAfterSalesWorkOrder extends Backend
     {
         parent::_initialize();
         $this->model = new \app\common\model\OcCustomerAfterSalesWorkOrder;
+        $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
 
+    }
+
+    protected function getSiteName($site)
+    {
+        return $site == Site::ZEELOOL ? 'zeelool' : 'voogueme';
     }
 
     /**
@@ -50,6 +57,14 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
         //设置过滤方法
         $this->request->filter(['strip_tags']);
+
+        // 站点
+        $magentoplatformarr = $this->magentoplatform->getAuthSite(['zeelool', 'voogueme']);
+        $site = $this->request->get('site');
+        if (!$site || !in_array($site, array_column($magentoplatformarr, 'id'))) {
+            $site = array_column($magentoplatformarr, 'id')[0];
+        }
+
         if ($this->request->isAjax())
         {
             //如果发送的来源是Selectpage，则转发到Selectpage
@@ -59,8 +74,6 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             }
 
             $filter = json_decode($this->request->get('filter'), true);
-
-
 
             //是否有工单
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
@@ -80,6 +93,8 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             unset($filter['site']);
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
 
+            // 切换站点
+            $this->model->switchSite($site);
 
             $total = $this->model
                 ->where($where)
@@ -88,7 +103,6 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 ->count();
 
             $list = $this->model
-
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
@@ -104,7 +118,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             $workorder = new \app\admin\model\saleaftermanage\WorkOrderList();
 
             foreach ($list as $key=>$item){
-                $list[$key]['site'] = 'zeelool';
+                $list[$key]['site'] = $this->getSiteName($site);
                 if ($item['order_type']  ==1){
                     $list[$key]['order_type'] = '普通订单';
                 }elseif ($item['order_type'] ==2){
@@ -141,6 +155,11 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
             return json($result);
         }
+
+        $this->assign('magentoplatformarr', $magentoplatformarr);
+        $this->assign('site', $site);
+        $this->assignconfig('label', $site);
+
         return $this->view->fetch();
     }
 
@@ -148,6 +167,15 @@ class OcCustomerAfterSalesWorkOrder extends Backend
      *问题详情
      */
     public function question_detail($ids = null){
+        $site = $this->request->get('site');
+        $this->model->switchSite($site);
+        $connection = $this->model->getConnection();
+        if ($site == Site::VOOGUEME) {
+            $domain = config('url.voogueme_url');
+        } else {
+            $domain = config('url.zeelool_url');
+        }
+
         if ($_POST){
             $params = $this->request->post("row/a");
             $where['id'] = $params['ids'];
@@ -157,7 +185,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             $save_question = $this->model->isUpdate(true, $where)->save(['status'=>$params['pm_audit_status'],'completed_at'=>date('Y-m-d H:i:s',time()),'handler_name'=>$this->auth->nickname]);
             if ($save_question){
                 //如果更新成功  提交接口
-                $url  =  config('url.zeelool_url').'magic/customer/updateTicket';
+                $url  =  $domain.'magic/customer/updateTicket';
                 $value['ticket_id'] = $params['ids'];
                 $value['status'] = $params['pm_audit_status'];
                 $curl = curl_init();
@@ -175,7 +203,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 if ($content['code'] ==200){
                     $this->success('操作成功');
                 }else{
-                    $this->error('工单信息更新失败');
+                    $this->error('工单信息更新失败:' . json_encode($content, JSON_UNESCAPED_UNICODE));
                 }
             }else{
                 $this->error('操作失败');
@@ -186,11 +214,11 @@ class OcCustomerAfterSalesWorkOrder extends Backend
         if (empty($type)){
             $type =0;
         }
-        $row  = \app\common\model\OcCustomerAfterSalesWorkOrder::get($ids)->toArray();
+        $row = $this->model->where('id', $ids)->find()->toArray();
         if (!empty($row['images'])){
             $photo_href  =explode('|',$row['images']);
             foreach ($photo_href as $key=>$item){
-                $photo_href[$key]= config('url.zeelool_url').'media/'.$item;
+                $photo_href[$key]= $domain.'media/'.$item;
             }
         }else{
             $photo_href = null;
@@ -226,10 +254,11 @@ class OcCustomerAfterSalesWorkOrder extends Backend
 
         }
         $row['email_message'] = $email;
+        $row['site'] = $this->getSiteName($site);
 
         if ($row['status'] ==1 && $type ==0){
-            Db::connect('database.db_zeelool')->table('oc_customer_after_sales_work_order')->where('id',$ids)->update(['status'=>2]);
-            $url  = config('url.zeelool_url').'magic/customer/updateTicket';
+            $connection->table('oc_customer_after_sales_work_order')->where('id',$ids)->update(['status'=>2]);
+            $url  = $domain.'magic/customer/updateTicket';
             $value['ticket_id'] = $ids;
             $value['status'] = 2;
             $curl = curl_init();
@@ -244,12 +273,31 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
             if ($content['code'] !==200){
-                $this->success('工单信息更新失败');
+                $this->success('工单信息更新失败:' . json_encode($content, JSON_UNESCAPED_UNICODE));
             }
+        }
+
+        $fileArray =!empty($row['images']) ? $row['images']:[];
+        $photoHref = [];
+        $fileUrl = [];
+        foreach ($fileArray as $key=>$item){
+            if (in_array(substr($item,strripos($item,".")+1),['jpg','png','jpeg','gif','bmp'])){
+                $photoHref[$key]= $url.$item;
+            }else{
+                $fileUrl[$key] = $url.$item;
+            }
+        }
+        if (!empty($fileArray)){
+            $row['pic'] = $photoHref;
+            $row['file'] = $fileUrl;
+        }else{
+            $row['pic'] = [];
+            $row['file'] = [];
         }
 
         $this->assign('type',$type);
         $this->assign('row',$row);
+        $this->assignconfig('label', $site);
         return $this->view->fetch();
     }
 
@@ -267,11 +315,20 @@ class OcCustomerAfterSalesWorkOrder extends Backend
      * @date   2021/6/7 11:22:14
      */
     public function complaints_detail($ids = null){
-        $model = Db::connect('database.db_zeelool');
-        $row =$model->table('oc_customer_after_sales_work_order')->where('id',$ids)->find();
+        $site = $this->request->get('site');
+        $this->model->switchSite($site);
+        $model = $this->model->getConnection();
+        if ($site == Site::VOOGUEME) {
+            $domain = config('url.voogueme_url');
+        } else {
+            $domain = config('url.zeelool_url');
+        }
+
+        $row = $this->model->where('id', $ids)->find()->toArray();
+//        $row =$model->table('oc_customer_after_sales_work_order')->where('id',$ids)->find();
         if ($row['status'] == 1){
             $model->table('oc_customer_after_sales_work_order')->where('id',$ids)->update(['status'=>2]);
-            $url  = config('url.zeelool_url').'magic/customer/updateTicket';
+            $url  = $domain.'magic/customer/updateTicket';
             $value['ticket_id'] = $ids;
             $value['status'] = 2;
             $curl = curl_init();
@@ -286,13 +343,13 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
             if ($content['code'] !==200){
-                $this->success('信息更新失败,请联系网站');
+                $this->success('信息更新失败,请联系网站:' . json_encode($content, JSON_UNESCAPED_UNICODE));
             }
         }
         if ($this->request->isPost()){
             $params = $this->request->post("row/a");
             $updataQueertion =$model->table('oc_customer_after_sales_work_order')->where('id',$params['id'])->update(['status'=>3,'handler_name'=>$this->auth->nickname,'completed_at'=>date('Y-m-d H:i:s',time())]);
-            $url  = config('url.zeelool_url').'magic/customer/updateTicket';
+            $url  = $domain.'magic/customer/updateTicket';
             $value['ticket_id'] = $ids;
             $value['status'] = 3;
             $curl = curl_init();
@@ -307,7 +364,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
             $content =json_decode(curl_exec($curl),true);
             curl_close($curl);
             if ($content['code'] !==200){
-                $this->success('信息更新失败,请联系网站');
+                $this->success('信息更新失败,请联系网站:' . json_encode($content, JSON_UNESCAPED_UNICODE));
             }
             if ($updataQueertion){
                 $this->success('操作成功','oc_customer_after_sales_work_order/index');
@@ -315,7 +372,7 @@ class OcCustomerAfterSalesWorkOrder extends Backend
                 $this->error('操作失败');
             }
         }
-        $url =config('url.zeelool_url').'/media/';
+        $url =$domain.'/media/';
 
         $fileArray =!empty($row['images']) ? explode('|',$row['images']):[];
         $photoHref = [];
