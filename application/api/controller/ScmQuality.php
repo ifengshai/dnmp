@@ -1431,7 +1431,8 @@ class ScmQuality extends Scm
         $adminId = $this->auth->id;
         $stockPerson = config('workorder.stock_person');
         if (!$stockPerson[$adminId]) {
-            $this->error('获取不到当前仓库人员所属仓库，无法签收，请联系产品','',500);
+            //$this->error('获取不到当前仓库人员所属仓库，无法签收，请联系产品','',500);
+            $stockPerson[$adminId] = 1;
         }
         //相等 没错仓
         if ($row['receiving_warehouse'] == $stockPerson[$adminId]) {
@@ -1457,7 +1458,8 @@ class ScmQuality extends Scm
         $adminId = $this->auth->id;
         $stockPerson = config('workorder.stock_person');
         if (empty($stockPerson[$adminId])) {
-            $this->error('获取不到当前仓库人员所属仓库，无法签收，请联系产品','',500);
+            //$this->error('获取不到当前仓库人员所属仓库，无法签收，请联系产品','',500);
+            $stockPerson[$adminId] = 1;
         }
         $arr = [];
         foreach ($row as $v) {
