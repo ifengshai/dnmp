@@ -20,6 +20,7 @@
                     <option value="2" {:$v->receiving_warehouse == 2 ? 'selected':''}>丹阳仓</option>
                 </select>
             </div>
+            <label class="control-label col-xs-12 col-sm-5" style="color: grey"> 注：请仔细核对物流单收货地与选择仓是否一致</label>
         </div>
     </div>
     <input type="hidden" name="batch_id[]" class="batch_id" value="{$v.id}">
@@ -59,6 +60,8 @@
                     <option value="2" {:$row->receiving_warehouse == 2 ? 'selected':''}>丹阳仓</option>
                 </select>
             </div>
+            <label class="control-label col-xs-12 col-sm-5" style="color: grey"> 注：请仔细核对物流单收货地与选择仓是否一致</label>
+
         </div>
 
     </div>
@@ -82,17 +85,28 @@
             <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
         </div>
         {/foreach}
+        {else/}
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input  class="form-control" name="logistics_company_no[]" value=""  data-rule="required" type="text" placeholder="注意：请输入下方表格对应的物流公司编码">
+            </div>
+            <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input  class="form-control" name="logistics_number[]"  data-rule="required" type="text">
+            </div>
+<!--            <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>-->
+        </div>
         {/if}
     </div>
     {/if}
 
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
+        <label class="control-label col-xs-12 col-sm-2">快递公司对应编码:</label>
         <div class="col-xs-12 col-sm-8" style="line-height: 31px;">
             <a href="/template/kuaidi100.xlsx">下载快递100快递公司标准编码</a>
         </div>
     </div>
-
 
     <div class="form-group layer-footer">
         <label class="control-label col-xs-12 col-sm-2"></label>
@@ -108,11 +122,11 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-logistics_company_no" class="form-control" name="logistics_company_no[]" value="" type="text" placeholder="注意：请输入下方表格对应的物流公司编码">
+            <input  class="form-control" name="logistics_company_no[]" value="" type="text" placeholder="注意：请输入下方表格对应的物流公司编码">
         </div>
         <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
         <div class="col-xs-12 col-sm-3">
-            <input id="c-logistics_number" class="form-control" name="logistics_number[]" type="text">
+            <input  class="form-control" name="logistics_number[]" type="text">
         </div>
         <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>
     </div>
