@@ -4072,14 +4072,25 @@ class ScmWarehouse extends Scm
                                 'create_time'            => time(),
                                 'number_type'            => 8,//实体仓调拨单
                             ]);
-                            //实体仓调拨入库的同时要对虚拟库存进行一定的操作
-                            //查出调出时各站调出的数量 并根据调出数量进行排序（用于遍历数据的时候首先分配到那个站点）
-                            $itemPlatformSku = Db::name('stock_transfer_order_item_stock')->where(['sku' => $sv['sku'], 'transfer_order_item_id' => $sv['id']])->order('stock asc')->field('platform_type,stock')->select();
+                            //需求id：2526 对需求2512之前的老数据无法提交的问题做优化 实体仓调拨单id大于3391的走新流程 小于3391的走老流程
+                            if ($id > 3391){
+                                //实体仓调拨入库的同时要对虚拟库存进行一定的操作
+                                //查出调出时各站调出的数量 并根据调出数量进行排序（用于遍历数据的时候首先分配到那个站点）
+                                $itemPlatformSku = Db::name('stock_transfer_order_item_stock')->where(['sku' => $sv['sku'], 'transfer_order_item_id' => $sv['id']])->order('stock asc')->field('platform_type,stock')->select();
+                                $wholeNum = Db::name('stock_transfer_order_item_stock')
+                                    ->where(['sku' => $sv['sku'], 'transfer_order_item_id' => $sv['id']])
+                                    ->field('stock')
+                                    ->select();
+                            }else{
+                                //实体仓调拨出库的同时要对虚拟库存进行一定的操作
+                                //查出映射表中此sku对应的所有平台sku 并根据当前库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
+                                $itemPlatformSku = $this->_item_platform_sku->where('sku', $sv['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                                $wholeNum = $this->_item_platform_sku
+                                    ->where('sku', $sv['sku'])
+                                    ->field('stock')
+                                    ->select();
+                            }
                             $allNum = count($itemPlatformSku);
-                            $wholeNum = Db::name('stock_transfer_order_item_stock')
-                                ->where(['sku' => $sv['sku'], 'transfer_order_item_id' => $sv['id']])
-                                ->field('stock')
-                                ->select();
                             $numNum = 0;
                             foreach ($wholeNum as $kk => $vv) {
                                 $numNum += abs($vv['stock']);
