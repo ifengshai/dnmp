@@ -2056,7 +2056,7 @@ class WorkOrderList extends Model
             }
             if (1 == $success) {
                 //更改镜框/或镜片子单定制片库位和状态处理（镜框不需要回退，之前处理库存的时候回退过）
-                if (19 == $measure_choose_id || 20 == $measure_choose_id) {
+                if (((19 == $measure_choose_id) && ($work->work_platform!=13)) || 20 == $measure_choose_id) {
                     $item_order_number = $_work_order_measure->where('id', $measure_id)->value('item_order_number');
                     $this->back_frame_and_lens($measure_choose_id, $work_id, $work->platform_order, $item_order_number);
                 }
