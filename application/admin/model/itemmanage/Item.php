@@ -807,8 +807,9 @@ class Item extends Model
         }
         //根据spu获取所有的true sku
         $sku_arr = $this->where(['origin_sku'=>$result])->column('sku');
+        unset($sku_arr[array_search($sku , $sku_arr)]);
         if(is_array($sku_arr) && count($sku_arr)>0){
-            $platform_sku_arr = $this->alias('g')->where('g.sku', 'in', $sku_arr)->where('p.available_stock','gt',0)
+            $platform_sku_arr = $this->alias('g')->where('g.sku', 'in', $sku_arr)
                 ->where('p.platform_type','eq',$platform_type)->join('item_platform_sku p', 'g.sku=p.sku')
                 ->column('p.platform_sku');
 

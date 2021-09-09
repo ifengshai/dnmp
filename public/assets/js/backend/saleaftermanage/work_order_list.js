@@ -3062,6 +3062,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         Strs += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
                                         Strs += '<td>';
                                         Strs += '<select class="form-control selectpicker"  name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]">';
+                                        Strs +='<option value="0">请选择</option>';
                                         for(let i=0;i<ret.data.length;i++){
                                             Strs +='<option value="'+ret.data[i]+'">'+ret.data[i]+'</option>';
                                         }
