@@ -314,7 +314,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var ids = Table.api.selectedids(table);
 
                 var url = 'purchase/purchase_order/logistics?ids=' + ids;
-                Fast.api.open(url, __('录入物流单号'), {area: ['50%', '60%']});
+                Fast.api.open(url, __('录入物流单号'), {area: ['60%', '80%']});
 
                 return false;
             });
