@@ -28,7 +28,7 @@ class LogisticsInfo extends Backend
      * 无需鉴权的方法,但需要登录
      * @var array
      */
-    protected $noNeedRight = ['signin', 'batch_signin'];
+    protected $noNeedRight = ['signin', 'batch_signin', 'is_wrong_sign', 'is_wrong_sign_batch'];
 
     public function _initialize()
     {
