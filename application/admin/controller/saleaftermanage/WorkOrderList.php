@@ -438,7 +438,7 @@ class WorkOrderList extends Backend
                             in_array(3, $measureChooseId)
                             ||
                             $flag
-                        ) && $this->error("不能创建子单工单");
+                        )&&($params['work_platform']!=13) && $this->error("不能创建子单工单");
                     }
 
                     //指定问题类型校验sku下拉框是否勾选
@@ -712,8 +712,7 @@ class WorkOrderList extends Backend
                             }
                             /****************************end*****************************************/
 
-                        } elseif (in_array(19, $item['item_choose'])) {//更改镜框
-                            echo 111;die();
+                        } elseif (in_array(19, $item['item_choose']) &&($params['work_platform'] !=13)) {//更改镜框
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
@@ -3579,7 +3578,6 @@ EOF;
             } else {
                 $stock = $res['stock'];
             }
-
             //判断可用库存
             if ($stock < $v['original_number']) {
                 //判断没库存情况下 是否开启预售 并且预售时间是否满足 并且预售数量是否足够
@@ -4320,7 +4318,12 @@ EOF;
                 return false;
             }
             $info = $this->item->getSpuListBySku($true_sku,$platform_type);
-            $this->success('操作成功！！', '', $info, 0);
+            if(is_array($info) && count($info)>0){
+                $this->success('操作成功！！', '', $info, 0);
+            }else{
+                $this->error('没有符合条件的sku','','error',0);
+            }
+
         }
 
     }

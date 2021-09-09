@@ -2170,7 +2170,12 @@ class WorkOrderList extends Model
         $result = collection($result)->toArray();
         $param = [];
         if (1 == $measuerInfo) { //更改镜架
-            $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result);
+            if($workOrderList['work_platform'] !=13){
+                $info = (new Inventory())->workChangeFrame($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result);
+            }else{
+                $info = (new Inventory())->workChangeFrameWithZeeloolCn($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result);
+            }
+
             $param['action'] = 1;
         } elseif (3 == $measuerInfo) { //取消订单
             $info = (new Inventory())->workCancelOrder($work_id, $workOrderList->work_platform, $workOrderList->platform_order, $result);

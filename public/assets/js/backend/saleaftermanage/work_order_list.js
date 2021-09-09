@@ -3054,6 +3054,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         platform_type: work_platform
                                     }
                                 }, function (data, ret) {
+                                    console.log(ret);
                                     if(ret.code == 1){
                                         var Strs = '';
                                         Strs += '<tr>';
@@ -3083,6 +3084,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 // Str +='</td>';
                             }
 
+
+                        }
+                        if (!$('.item' + use_flag + '_step19-19').is(':hidden')) {
+                                Str += '<tr>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_sku]"  type="text" value="' + sku + '" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]"  type="text" style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                Str += '</tr>';
+                                $('#change-frame'+ use_flag +' tr:gt(0)').remove();
+                                $("#change-frame"+ use_flag +" tbody").append(Str);
+                                $('.selectpicker ').selectpicker('refresh');
 
                         }
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
