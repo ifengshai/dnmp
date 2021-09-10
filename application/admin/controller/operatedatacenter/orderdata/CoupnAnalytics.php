@@ -968,6 +968,8 @@ class CoupnAnalytics extends Backend
      */
     public function export_coupon_list()
     {
+        ini_set('memory_limit', '128M');
+        set_time_limit(0);
         $site = input('order_platform',1);
         switch ($site) {
             case 1:
@@ -1019,7 +1021,7 @@ class CoupnAnalytics extends Backend
                 ->field('name,rule_id,channel')
                 ->count();
         }
-        $limit = 10;
+        $limit = 100;
         $page = ceil($total / $limit);
 
         $headlist = [
