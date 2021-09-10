@@ -764,6 +764,11 @@ class WorkOrderList extends Backend
 //                            !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
 //                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
 //                            !$back_data['result'] && $this->error($back_data['msg']);
+                        } elseif (in_array(19, $item['item_choose']) &&($params['work_platform'] ==13)) {//抖音工单寄回换框
+                            $plat_sku = $item['change_frame']['change_sku'];
+                            if(!$plat_sku){
+                                $this->error("没有选择更换的镜框，无法提交");
+                            }
                         }
 //                        elseif (in_array(20, $item['item_choose'])) {//更改镜片
 //                            //检测之前是否处理过更改镜片措施
@@ -4318,12 +4323,7 @@ EOF;
                 return false;
             }
             $info = $this->item->getSpuListBySku($true_sku,$platform_type);
-            if(is_array($info) && count($info)>0){
-                $this->success('操作成功！！', '', $info, 0);
-            }else{
-                $this->error('没有符合条件的sku','','error',0);
-            }
-
+            $this->success('操作成功！！', '', $info, 0);
         }
 
     }
