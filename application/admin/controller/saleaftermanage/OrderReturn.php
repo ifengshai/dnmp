@@ -1094,58 +1094,32 @@ class OrderReturn extends Backend
         $entity_id = input('entity_id') ?: null;
         $order_platform = input('order_platform') ?: null;
         if (!empty($track_number) && !empty($entity_id) && !empty($order_platform)) {
-            $this->zeelool = new \app\admin\model\order\order\Zeelool;
-            $express = $this->zeelool->getExpressData($order_platform, $entity_id);
-            if ($express) {
-                //缓存一个小时
-                // $express_data = session('order_checkDetail_' . $express['track_number'] . '_' . date('YmdH'));
-                $express_data = Cache::get('orderReturn_get_logistics_info_' . $track_number);
-                if (!$express_data) {
-                    try {
-                        //查询物流信息
-                        //$title = str_replace(' ', '-', $express['title']);
-                        switch ($express['title']) {
-                            case 'DHL (Deprecated)':
-                                $title = 'dhl';
-                                break;
-                            case 'China Post':
-                                $title = 'china-ems';
-                                break;
-                            case 'china-ems':
-                                $title = 'china-ems';
-                                break;
-                            case 'DHL':
-                                $title = 'dhl';
-                                break;
-                            case 'USPS':
-                                $title = 'usps';
-                                break;
-                        }
-
-                        $carrier = $this->getCarrier($title);
-                        $trackingConnector = new TrackingConnector($this->apiKey);
-                        $trackInfo = $trackingConnector->getTrackInfoMulti([
-                            [
-                                'number'  => $track_number,
-                                'carrier' => $carrier['carrierId'],
-                            ],
-                        ]);
-
-                        $express_data = $trackInfo['data']['accepted'][0]['track']['z1'];
-                        Cache::get('orderReturn_get_logistics_info_' . $track_number, $express_data, 3600);
-                    } catch (\Exception $e) {
-                        $this->error($e->getMessage());
-                    }
-                }
-                $this->view->assign("express_data", $express_data);
-                $this->view->assign("title", $express['title']);
-                $this->view->assign("track_number", $track_number);
-            }
-
-            return $this->view->fetch();
-        } else {
-            $this->error('参数错误,请重新尝试');
+           $this->error('缺少参数');
         }
+
+        $express_data = Cache::get('orderReturn_get_logistics_info_' . $track_number);
+        if (!$express_data) {
+            try {
+                $carrier = $this->getCarrier('UPS');
+                $trackingConnector = new TrackingConnector($this->apiKey);
+                $trackInfo = $trackingConnector->getTrackInfoMulti([
+                    [
+                        'number'  => $track_number,
+                        'carrier' => $carrier['carrierId'],
+                    ],
+                ]);
+
+                $express_data = $trackInfo['data']['accepted'][0]['track']['z1'];
+                Cache::get('orderReturn_get_logistics_info_' . $track_number, $express_data, 3600);
+            } catch (\Exception $e) {
+                $this->error($e->getMessage());
+            }
+        }
+        $this->view->assign("express_data", $express_data);
+        $this->view->assign("title", 'UPS');
+        $this->view->assign("track_number", $track_number);
+
+        return $this->view->fetch();
     }
 
     /**
@@ -1179,7 +1153,20 @@ class OrderReturn extends Backend
         } elseif (stripos($title, 'cpc') !== false) {
             $carrierId = 'cpc';
             $title = 'Canada Post';
+        } elseif (stripos($title, 'sua') !== false) {
+            $carrierId = 'sua';
+            $title = 'SUA';
+        } elseif (stripos($title, 'cod') !== false) {
+            $carrierId = 'cod';
+            $title = 'COD';
+        } elseif (stripos($title, 'tnt') !== false) {
+            $carrierId = 'tnt';
+            $title = 'TNT';
+        } else {
+            $carrierId = 'ups';
+            $title = 'UPS';
         }
+
         $carrier = [
             'dhl'       => '100001',
             'chinapost' => '03011',
@@ -1188,6 +1175,10 @@ class OrderReturn extends Backend
             'fedex'     => '100003',
             'usps'      => '21051',
             'yanwen'    => '190012',
+            'sua'       => '190111',
+            'cod'       => '10021',
+            'tnt'       => '100004',
+            'ups'       => '100002',
         ];
         if ($carrierId) {
             return ['title' => $title, 'carrierId' => $carrier[$carrierId]];
