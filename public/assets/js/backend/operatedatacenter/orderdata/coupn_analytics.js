@@ -118,6 +118,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                 $("#sku").val('');
 
             });
+            $('.btn-distribution').click(function(){
+                var order_platform = $("#order_platform").val();
+                window.location.href = Config.moduleurl+'/operatedatacenter/orderdata/coupn_analytics/export_coupon_list/order_platform/' + order_platform;
+            })
         },
         add: function () {
             Controller.api.bindevent();

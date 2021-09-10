@@ -111,6 +111,7 @@ class CoupnAnalytics extends Backend
                 $model->table('sales_flat_order')->query("set time_zone='+8:00'");
             }
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
             if($site == 3 || $site == 5){
                 $total = $salesrule->table('discount_codes')
                     ->where('department', '>', 0)
@@ -951,6 +952,207 @@ class CoupnAnalytics extends Backend
         //获取当前域名
         $request = Request::instance();
         $domain = $request->domain();
+        header('Location: '.$domain.$path.$fileName.'.csv');
+    }
+
+    /**
+     * 导出文件
+     * @throws \think\Exception
+     * @throws \think\db\exception\BindParamException
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @throws \think\exception\PDOException
+     * @author huangbinbin
+     * @date   2021/9/10 15:30
+     */
+    public function export_coupon_list()
+    {
+        $site = input('order_platform',1);
+        switch ($site) {
+            case 1:
+                $model = Db::connect('database.db_zeelool');
+                $salesrule = Db::connect('database.db_zeelool_online');
+                break;
+            case 2:
+                $model = Db::connect('database.db_voogueme');
+                $salesrule = Db::connect('database.db_voogueme_online');
+                break;
+            case 3:
+                $model = Db::connect('database.db_nihao');
+                $salesrule = Db::connect('database.db_nihao_online');
+                break;
+            case 5:
+                $model = Db::connect('database.db_weseeoptical');
+                $salesrule = Db::connect('database.db_weseeoptical_online');
+                break;
+            case 10:
+                $model = Db::connect('database.db_zeelool_de');
+                $salesrule = Db::connect('database.db_zeelool_de_online');
+                break;
+            case 11:
+                $model = Db::connect('database.db_zeelool_jp');
+                $salesrule = Db::connect('database.db_zeelool_jp_online');
+                break;
+            case 14:
+                $model = Db::connect('database.db_voogueme_acc');
+                $salesrule = Db::connect('database.db_voogueme_acc_online');
+                break;
+            case 15:
+                $model = Db::connect('database.db_zeelool_fr');
+                $salesrule = Db::connect('database.db_zeelool_fr');
+                break;
+        }
+        if($site == 3){
+            $model->table('orders')->query("set time_zone='+8:00'");
+        }else{
+            $model->table('sales_flat_order')->query("set time_zone='+8:00'");
+        }
+        if($site == 3 || $site == 5){
+            $total = $salesrule->table('discount_codes')
+                ->where('department', '>', 0)
+                ->field('name,id,department')
+                ->count();
+        }else{
+            $total = $salesrule->table('salesrule')
+                ->where('channel', '>', 0)
+                ->field('name,rule_id,channel')
+                ->count();
+        }
+        $limit = 10;
+        $page = ceil($total / $limit);
+
+        $headlist = [
+            '优惠券id', '优惠券类型', '优惠券名称', '应用订单数量',
+            '订单数量占比',  '订单金额', '订单金额占比'
+        ];
+        $path = "/uploads/";
+        $fileName = '优惠券分析数据-'.date('Y-m-d'). rand(1,10000);
+        $request = Request::instance();
+        $domain = $request->domain();
+        for($i=0;$i< $page;$i++) {
+            $file_content = '';
+            $offset = $i * $limit;
+            if($site == 3 || $site == 5){
+                //所有的优惠券
+                $list = $salesrule->table('discount_codes')
+                    ->where('department', '>', 0)
+                    ->field('name,id,department as channel')
+                    ->limit($offset, $limit)
+                    ->select();
+            }else{
+                //所有的优惠券
+                $list = $salesrule->table('salesrule')
+                    ->where('channel', '>', 0)
+                    ->field('name,rule_id,channel')
+                    ->limit($offset, $limit)
+                    ->select();
+            }
+
+            $list = collection($list)->toArray();
+            //判断订单的某些条件
+            $map['status'] = ['in',
+                [
+                    'free_processing',
+                    'processing',
+                    'complete',
+                    'paypal_reversed',
+                    'payment_review',
+                    'paypal_canceled_reversal',
+                    'delivered',
+                    'delivery',
+                    'shipped'
+                ]
+            ];
+            $map['order_type'] = 1;
+            if($site == 3 || $site == 5){
+                $whole_order = $model->table('orders')
+                    ->where($map)
+                    ->count();
+                $whole_order_price = $model->table('orders')
+                    ->where($map)
+                    ->sum('base_actual_payment');
+            }else{
+                $whole_order = $model->table('sales_flat_order')
+                    ->where($map)
+                    ->count();
+                $whole_order_price = $model->table('sales_flat_order')
+                    ->where($map)
+                    ->sum('base_grand_total');
+            }
+            foreach ($list as $k => $v) {
+                if($site == 3 || $site == 5){
+                    $sql = $model->table('discount_coupon_tickets')
+                        ->where('discount_coupon_id',$v['id'])
+                        ->field('id')
+                        ->buildSql();
+                    $andWhere = [];
+                    if($site == 3){
+                        $andWhere[] = ['exp', Db::raw("coupon_id in " . $sql)];
+                    }else{
+                        $andWhere[] = ['exp', Db::raw("discount_coupon_id in " . $sql)];
+                    }
+                    //应用订单数量，应用订单金额
+                    ['c' => $v['use_order_num'], 's' => $v['use_order_total_price']] = $model->table('orders')
+                        ->where($map)
+                        ->where($andWhere)
+                        ->field('count(*) as c, sum(`base_actual_payment`) as s')
+                        ->find();
+                    //应用订单数量占比
+                    $v['use_order_num_rate'] = $whole_order != 0 ? round($v['use_order_num'] / $whole_order* 100,2)  .'%' : 0;
+                    //应用订单金额占比
+                    $v['use_order_total_price_rate'] = $whole_order_price != 0 ? round($v['use_order_total_price'] / $whole_order_price* 100,2)  .'%' : 0;
+                }else{
+                    $andWhere = "FIND_IN_SET({$v['rule_id']},applied_rule_ids)";
+                    //应用订单数量，应用订单金额
+                    ['c' => $v['use_order_num'], 's' => $v['use_order_total_price']] = $model->table('sales_flat_order')
+                        ->where($map)
+                        ->where($andWhere)
+                        ->field('count(*) as c, sum(`base_grand_total`) as s')
+                        ->find();
+                    //应用订单数量占比
+                    $v['use_order_num_rate'] = $whole_order != 0 ? round($v['use_order_num'] / $whole_order,
+                            4) * 100 .'%' : 0;
+                    //应用订单金额占比
+                    $v['use_order_total_price_rate'] = $whole_order_price != 0 ? round($v['use_order_total_price'] / $whole_order_price,
+                            4) * 100 .'%' : 0;
+                    switch($v['channel']) {
+                        case 1:
+                            $channel = '网站优惠券';
+                            break;
+                        case 2:
+                            $channel = '主页优惠券';
+                            break;
+                        case 3:
+                            $channel = '用户优惠券';
+                            break;
+                        case 4:
+                            $channel = '渠道优惠券';
+                            break;
+                        case 5:
+                            $channel = '客服优惠券';
+                            break;
+                    }
+                    $arr = [
+                        $v['rule_id'],
+                        $channel,
+                        $v['name'],
+                        $v['use_order_num'],
+                        $v['use_order_num_rate'],
+                        $v['use_order_total_price'],
+                        $v['use_order_total_price_rate'],
+                    ];
+                    $file_content = $file_content . implode(',', $arr) . "\n";
+                }
+            }
+            if($i  == 0){
+                $file_title = implode(',', $headlist) . " \n";
+                $file = $file_title . $file_content;
+            }else{
+                $file = $file_content;
+            }
+            file_put_contents('.'.$path.$fileName.'.csv', $file,FILE_APPEND);
+        }
         header('Location: '.$domain.$path.$fileName.'.csv');
     }
 }
