@@ -114,7 +114,7 @@ class LogisticsInfo extends Backend
                     if ($list[$k]['sign_warehouse'] == 2) {
                         $list[$k]['sign_warehouse'] = '丹阳仓';
                     } else {
-                        $list[$k]['sign_warehouse'] = $list[$k]['sign_warehouse'] ?? '/';
+                        $list[$k]['sign_warehouse'] = $list[$k]['sign_warehouse'] ?? '-';
                     }
                 }
                 if ($list[$k]['receiving_warehouse'] == 1) {
@@ -123,11 +123,11 @@ class LogisticsInfo extends Backend
                     if ($list[$k]['receiving_warehouse'] == 2) {
                         $list[$k]['receiving_warehouse'] = '丹阳仓';
                     } else {
-                        $list[$k]['receiving_warehouse'] = $list[$k]['receiving_warehouse'] ?? '/';
+                        $list[$k]['receiving_warehouse'] = $list[$k]['receiving_warehouse'] ?? '-';
                     }
                 }
-                $list[$k]['sign_time'] = $list[$k]['sign_time'] ?? '/';
-                $list[$k]['sign_person'] = empty($list[$k]['sign_person']) ? '/' : $list[$k]['sign_person'];
+                $list[$k]['sign_time'] = $list[$k]['sign_time'] ?? '-';
+                $list[$k]['sign_person'] = empty($list[$k]['sign_person']) ? '-' : $list[$k]['sign_person'];
             }
             $result = ["total" => $total, "rows" => $list];
 
