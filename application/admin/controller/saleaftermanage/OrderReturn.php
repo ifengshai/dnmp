@@ -1093,7 +1093,7 @@ class OrderReturn extends Backend
         $track_number = input('track_number') ?: null;
         $entity_id = input('entity_id') ?: null;
         $order_platform = input('order_platform') ?: null;
-        if (!empty($track_number) && !empty($entity_id) && !empty($order_platform)) {
+        if (empty($track_number) || empty($entity_id) || empty($order_platform)) {
            $this->error('缺少参数');
         }
 
