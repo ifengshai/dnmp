@@ -786,10 +786,17 @@ class WorkOrderList extends Backend
 //                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
 //                            !$back_data['result'] && $this->error($back_data['msg']);
                         } elseif (in_array(19, $item['item_choose']) &&($params['work_platform'] ==13)) {//抖音工单寄回换框
+                            //判断存不存在更换的sku
                             $plat_sku = $item['change_frame']['change_sku'];
                             if(!$plat_sku){
                                 $this->error("没有选择更换的镜框，无法提交");
                             }
+                            //如果不是保存草稿的话需要验证库存是否存在
+                            if($params['work_status']!=1){
+                                $back_data = $this->skuIsStock([$plat_sku], $params['work_platform'], [1], $platform_order);
+                                !$back_data['result'] && $this->error($back_data['msg']);
+                            }
+
                         }
 //                        elseif (in_array(20, $item['item_choose'])) {//更改镜片
 //                            //检测之前是否处理过更改镜片措施
@@ -1753,7 +1760,7 @@ class WorkOrderList extends Backend
                             }
                             /****************************end*****************************************/
 
-                        } elseif (in_array(19, $item['item_choose'])) {//更改镜框
+                        } elseif (in_array(19, $item['item_choose']) &&($params['work_platform'] !=13)) {//更改镜框
                             //检测之前是否处理过更改镜框措施
                             in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
@@ -1805,7 +1812,20 @@ class WorkOrderList extends Backend
                             $item['change_frame']['change_sku'] = trim($item['change_frame']['change_sku']);
                             $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1], $platform_order);
                             !$back_data['result'] && $this->error($back_data['msg']);
-                        } /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
+                        }elseif (in_array(19, $item['item_choose']) &&($params['work_platform'] ==13)) {//抖音工单寄回换框
+                            //判断存不存在更换的sku
+                            $plat_sku = $item['change_frame']['change_sku'];
+                            if(!$plat_sku){
+                                $this->error("没有选择更换的镜框，无法提交");
+                            }
+                            //如果不是保存草稿的话需要验证库存是否存在
+                            if($params['work_status']!=1){
+                                $back_data = $this->skuIsStock([$plat_sku], $params['work_platform'], [1], $platform_order);
+                                !$back_data['result'] && $this->error($back_data['msg']);
+                            }
+
+                        }
+                        /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
                             //检测之前是否处理过更改镜片措施
                             in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
                         }*/
