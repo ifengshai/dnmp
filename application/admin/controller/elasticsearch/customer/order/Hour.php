@@ -227,7 +227,7 @@ class Hour extends BaseElasticsearch
             if ($start == $end && $start == date('Ymd')) {
                 $today = true;
             }
-
+            $today = false;
             $site = $params['order_platform'] ? $params['order_platform'] : 1;
             $time = $start . '-' . $end;
             $cacheStr = 'day_hour_order_quote_' . $site . $time;
@@ -253,7 +253,6 @@ class Hour extends BaseElasticsearch
             } else {
                 $allData = $cacheData;
             }
-
             $str = '';
             foreach ($allData['arr'] as $key => $val) {
                 $num = $key + 1;
