@@ -1417,14 +1417,14 @@ class WorkOrderList extends Backend
                 $stock = $res['stock'];
             }
             //判断库存是否足够
-            /*if ($stock < $num[$k]) {
+            if ($stock < $num[$k]) {
                 // $params = ['sku'=>$sku,'siteType'=>$siteType,'stock'=>$stock,'num'=>$num[$k]];
                 // file_put_contents('/www/wwwroot/mojing/runtime/log/stock.txt',json_encode($params),FILE_APPEND);
                 return ['result' => false, 'msg' => $sku . '库存不足！！当前虚拟仓库存' . $stock . '，所需库存' . $num[$k]];
-            }*/
+            }
 
             //判断此sku是否在第三方平台
-            /*if ($siteType == 13 || $siteType == 14) {
+            if ($siteType == 13 || $siteType == 14) {
                 $res = $this->model->httpRequest($siteType, 'api/mojing/check_sku', ['sku' => $sku, 'platform_order' => $platform_order], 'POST');
                 if (empty($res[$sku])) {
                     return ['result' => false, 'msg' => $sku . '不存在！！'];
@@ -1432,7 +1432,7 @@ class WorkOrderList extends Backend
                 if ($res[$sku] < $num[$k]) {
                     return ['result' => false, 'msg' => $sku . '库存不足！！'];
                 }
-            }*/
+            }
 
         }
 
