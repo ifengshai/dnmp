@@ -402,6 +402,7 @@
     <input type="hidden" name="row[work_type]" value="{$work_type}" />
     <input type='hidden' name="row[work_status]" class="status" value="1">
     <input type="hidden" name="row[payment_time]" id="payment_time" value="{$row.payment_time}" />
+    <input type="hidden" name="warehouse_dispatch_way" id="warehouse_dispatch_way" value="" />
     <!--工单类型，1 客服工单，2 仓库工单-->
     <input type="hidden" name="row[order_pay_currency]" id='order_pay_currency' value="{$row.order_pay_currency}" />
     <input type="hidden" name="row[order_type]" id='order_type' value="{$row.order_type}" />
@@ -754,8 +755,8 @@
         <label class="control-label col-xs-12 col-sm-2">{:__('仓库发件快递方式')}：</label>
         <div class="col-xs-12 col-sm-8">
         <select id="c-warehouse_dispatch_way" class="form-control selectpicker" name="row[warehouse_dispatch_way]">
-            <option value="Standard Shipping" {eq name="$row.shipping_title" value="Standard Shipping"}selected{/eq}>Standard Shipping</option>
-            <option value="Business Express" {eq name="$row.shipping_title" value="Business Express"}selected{/eq}>Business Express</option>
+            <option value="flatrate_flatrate">Standard Shipping</option>
+            <option value="tablerate_bestway">Business Express</option>
         </select>
         </div>
     </div>
