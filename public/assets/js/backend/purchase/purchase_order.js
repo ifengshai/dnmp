@@ -853,11 +853,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var shtml = '<div class="form-group">' +
                     '<label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>' +
                     '<div class="col-xs-12 col-sm-3">' +
-                    '<input id="c-logistics_company_no" class="form-control" name="logistics_company_no[' + batch_id + '][]" value="" type="text" placeholder="注意：请输入下方表格对应的物流公司编码">' +
+                    '<input id="c-logistics_company_no" class="form-control" name="logistics_company_no[' + batch_id + '][]" value="" type="text" placeholder="请输入对应的物流公司编码">' +
                     '</div>' +
                     '<label class="control-label col-xs-12 col-sm-2">物流单号:</label>' +
                     '<div class="col-xs-12 col-sm-3">' +
-                    '<input id="c-logistics_number" class="form-control" name="logistics_number[' + batch_id + '][]" type="text">' +
+                    '<input id="c-logistics_number" class="form-control" name="logistics_number[' + batch_id + '][]" type="text" placeholder="请输入物流单号">' +
                     '</div>' +
                     '<a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>' +
                     '</div>';

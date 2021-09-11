@@ -10,7 +10,7 @@
         <br/>
     </div>
     <div id="toolbar" class="toolbar">
-        <a href="javascript:;" style="margin-left: 30px;margin-bottom: 20px;" class="btn btn-success btn-add-batch" title="增加"><i
+        <a href="javascript:;" style="margin-left: 30px;margin-bottom: 15px;" class="btn btn-success btn-add-batch" title="增加"><i
                 class="fa fa-plus"></i> 增加</a>
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">选择收货仓:</label>
@@ -21,7 +21,7 @@
                     <option value="2" {:$v->receiving_warehouse == 2 ? 'selected':''}>丹阳仓</option>
                 </select>
             </div>
-            <label class="control-label col-xs-12 col-sm-5" style="color: grey"> 注：请仔细核对物流单收货地与收货仓是否一致</label>
+            <span class="col-xs-12 col-sm-5" style="color: grey;margin-left: 110px;line-height: 30px;"> 注：请仔细核对物流单收货地与收货仓是否一致</span>
         </div>
     </div>
     <input type="hidden" name="batch_id[]" class="batch_id" value="{$v.id}">
@@ -50,11 +50,11 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
             <div class="col-xs-12 col-sm-3">
-                <input  class="form-control" name="logistics_company_no[{$v.id}][]" value=""  data-rule="required" type="text" placeholder="请输入对应的物流公司编码">
+                <input  class="form-control" name="logistics_company_no[{$v.id}][]" value=""  type="text" placeholder="请输入对应的物流公司编码">
             </div>
             <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
             <div class="col-xs-12 col-sm-3">
-                <input  class="form-control" name="logistics_number[{$v.id}][]"  data-rule="required" type="text" placeholder="请输入物流单号">
+                <input  class="form-control" name="logistics_number[{$v.id}][]"  type="text" placeholder="请输入物流单号">
             </div>
             <!--            <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>-->
         </div>
@@ -64,7 +64,7 @@
     {/foreach}
     {else/}
     <div id="toolbar" class="toolbar">
-        <a href="javascript:;" style="margin-left: 30px;margin-bottom: 20px;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
+        <a href="javascript:;" style="margin-left: 30px;margin-bottom: 15px;" class="btn btn-success btn-add" title="增加"><i class="fa fa-plus"></i> 增加</a>
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">选择收货仓:</label>
             <div class="col-xs-12 col-sm-3">
@@ -74,7 +74,7 @@
                     <option value="2" {:$row->receiving_warehouse == 2 ? 'selected':''}>丹阳仓</option>
                 </select>
             </div>
-            <label class="control-label col-xs-12 col-sm-5" style="color: grey"> 注：请仔细核对物流单收货地与收货仓是否一致</label>
+            <span class="col-xs-12 col-sm-5" style="color: grey;margin-left: 110px;line-height: 30px;"> 注：请仔细核对物流单收货地与收货仓是否一致</span>
 
         </div>
 
@@ -103,11 +103,11 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
             <div class="col-xs-12 col-sm-3">
-                <input  class="form-control" name="logistics_company_no[]" value=""  data-rule="required" type="text" placeholder="请输入对应的物流公司编码">
+                <input  class="form-control" name="logistics_company_no[]" value=""  type="text" placeholder="请输入对应的物流公司编码">
             </div>
             <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
             <div class="col-xs-12 col-sm-3">
-                <input  class="form-control" name="logistics_number[]"  data-rule="required" placeholder="请输入物流单号" type="text">
+                <input  class="form-control" name="logistics_number[]"  placeholder="请输入物流单号" type="text">
             </div>
 <!--            <a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>-->
         </div>

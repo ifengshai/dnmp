@@ -730,11 +730,13 @@ class PurchaseOrder extends Backend
             $logistics_number = $params['logistics_number'];
             $logistics_ids = $params['logistics_ids'];
             $stock_ids = $params['stock_id'];
-
             if ($params) {
-
-                if (!$params['logistics_number']) {
+                if (empty(array_filter($params['logistics_number']))) {
                     $this->error(__('物流单号不能为空'));
+                }
+
+                if (empty(array_filter($params['logistics_company_no']))) {
+                    $this->error(__('物流公司编码不能为空'));
                 }
 
                 $params = $this->preExcludeFields($params);
@@ -783,6 +785,15 @@ class PurchaseOrder extends Backend
                         $i = 0;
                         $batch = new PurchaseBatch();
                         foreach ($logistics_company_no as $k => $v) {
+
+                            if (empty(array_filter($v))) {
+                                $this->error(__('物流公司编码不能为空'));
+                            }
+
+                            if (empty(array_filter($logistics_number[$k]))) {
+                                $this->error(__('物流单号不能为空'));
+                            }
+
                             foreach ($v as $key => $val) {
                                 $list = [];
                                 if (!$val) {
