@@ -543,7 +543,7 @@ class WorkOrderList extends Backend
                     }
 
                     //校验赠品、补发库存
-                    if (array_intersect([6, 7], $measureChooseId)) {
+                    if (array_intersect([6, 7, 23], $measureChooseId)) {
                         $original_sku = [];
 
 
@@ -568,14 +568,35 @@ class WorkOrderList extends Backend
                         }
 
                         //补发
-                        if (in_array(7, $measureChooseId)) {
-                            !$params['address']['shipping_type'] && $this->error("请选择Shipping Method");
+                        if (in_array(7, $measureChooseId) || in_array(23, $measureChooseId) || in_array(24, $measureChooseId)) {
+                            if (in_array(23, $measureChooseId)) {
+                                !$params['lens_address']['shipping_type'] && $this->error("请选择Shipping Method");
 
-                            $replacement_sku = $params['replacement']['original_sku'];
-                            !$replacement_sku && $this->error("补发sku不能为空");
+                                $replacement_sku = $params['replacement']['lens_original_sku'];
+                                !$replacement_sku && $this->error("补发镜片sku不能为空");
 
-                            $replacement_number = $params['replacement']['original_number'];
-                            !$replacement_number && $this->error("补发数量不能为空");
+                                $replacement_number = $params['replacement']['lens_original_number'];
+                                !$replacement_number && $this->error("补发镜片数量不能为空");
+                            }elseif(in_array(24, $measureChooseId)){
+                                !$params['back_lens_address']['shipping_type'] && $this->error("请选择Shipping Method");
+
+                                $replacement_sku = $params['replacement']['back_lens_original_sku'];
+                                !$replacement_sku && $this->error("补发镜片sku不能为空");
+
+                                $replacement_number = $params['replacement']['lens_original_number'];
+                                !$replacement_number && $this->error("补发镜片数量不能为空");
+                            }else{
+                                !$params['address']['shipping_type'] && $this->error("请选择Shipping Method");
+
+                                $replacement_sku = $params['replacement']['original_sku'];
+                                !$replacement_sku && $this->error("补发sku不能为空");
+
+                                $replacement_number = $params['replacement']['original_number'];
+                                !$replacement_number && $this->error("补发数量不能为空"); 
+                            }
+                            
+
+                            
                             foreach ($replacement_sku as $key => $sku) {
                                 $num = $key + 1;
                                 !$sku && $this->error("第{$num}个补发sku不能为空");
@@ -1316,7 +1337,7 @@ class WorkOrderList extends Backend
         }
 
         //更改镜片、赠品、补发
-        if (in_array($choose_id, [6, 7, 20])) {
+        if (in_array($choose_id, [6, 7, 20,23,24])) {
             $this->model->changeLens($params, $work_id, $choose_id, $measure_id, $item_order_number);
         } elseif (19 == $choose_id) {//更改镜框
             $this->model->changeFrame($params, $work_id, $choose_id, $measure_id, $item_order_number);
@@ -2226,7 +2247,11 @@ class WorkOrderList extends Backend
                 !$res && $this->error('未获取到数据！！');
 
                 //请求接口获取lens_type，coating_type，prescription_type等信息
-                $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions'], 1);
+                $html_type = 1;
+                if ($measure_choose_id == 23) {
+                    $html_type = $measure_choose_id;
+                }
+                $lens = $this->model->getReissueLens($siteType, $res['showPrescriptions'], $html_type);
 
                 //判断是否是新建或跟单处理
                 if ($work_id && $measure_choose_id) {
@@ -2276,11 +2301,16 @@ class WorkOrderList extends Backend
         if (request()->isAjax()) {
             $incrementId = input('increment_id');
             $siteType = input('site_type');
+            $change_type = input('order_type');
+            if ($change_type == 24) {
+                $change_type = 11;
+            }else{
+                $change_type = 2;
+            }
             $item_order_number = input('item_order_number', '');
             try {
                 //获取地址、处方等信息
                 $res = $this->model->getAddress($incrementId, $item_order_number);
-
                 //获取更改镜片最新处方信息
                 $_work_order_change_sku = new WorkOrderChangeSku();
                 $change_lens = $_work_order_change_sku
@@ -2288,7 +2318,7 @@ class WorkOrderList extends Backend
                     ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,prescription_option')
                     ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                     ->where([
-                        'a.change_type'       => 2,
+                        'a.change_type'       => $change_type,
                         'a.item_order_number' => $item_order_number,
                         'b.operation_type'    => 1,
                     ])
@@ -2339,7 +2369,98 @@ class WorkOrderList extends Backend
                         $res['prescriptions'][0]['sku'] = $change_sku;
                     }
                 }
-                $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], 2, $item_order_number);
+                $lens = $this->model->getReissueLens($siteType, $res['prescriptions'], $change_type, $item_order_number);
+            } catch (\Exception $e) {
+                $this->error($e->getMessage());
+            }
+            if ($res) {
+                $this->success('操作成功！！', '', ['address' => $res, 'lens' => $lens]);
+            } else {
+                $this->error('未获取到数据！！');
+            }
+        }
+        $this->error('404 not found');
+    }
+
+    /**
+     * 获取寄回换片的数据
+     * @throws Exception
+     */
+    public function ajaxGetBackChangeLens()
+    {
+        if (request()->isAjax()) {
+            $incrementId = input('increment_id');
+            $siteType = input('site_type');
+            $change_type = input('change_type');
+            if ($change_type == 24) {
+                $change_type = 11;
+            }else{
+                $change_type = 2;
+            }
+            $item_order_number = input('item_order_number', '');
+            try {
+                //获取地址、处方等信息
+                $res = $this->model->getAddress($incrementId, $item_order_number);
+
+                //获取更改镜片最新处方信息
+                $_work_order_change_sku = new WorkOrderChangeSku();
+                $change_lens = $_work_order_change_sku
+                    ->alias('a')
+                    ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,prescription_option')
+                    ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                    ->where([
+                        'a.change_type'       => $change_type,
+                        'a.item_order_number' => $item_order_number,
+                        'b.operation_type'    => 1,
+                    ])
+                    ->order('a.id', 'desc')
+                    ->find();
+                $change_lens = collection([$change_lens])->toArray();
+                if ($change_lens[0]) {//之前更改过处方，获取最新的处方
+                    $prescription_option = unserialize($change_lens[0]['prescription_option']);
+                    //替换处方信息
+                    $res['prescriptions'][0]['prescription_type'] = $prescription_option['prescription_type'];
+                    $res['prescriptions'][0]['index_id'] = $prescription_option['lens_id'];
+                    $res['prescriptions'][0]['index_type'] = $prescription_option['lens_type'];
+                    $res['prescriptions'][0]['coating_id'] = $prescription_option['coating_id'];
+                    $res['prescriptions'][0]['color_id'] = $prescription_option['color_id'];
+                    $res['prescriptions'][0]['od_sph'] = $change_lens[0]['od_sph'];
+                    $res['prescriptions'][0]['os_sph'] = $change_lens[0]['os_sph'];
+                    $res['prescriptions'][0]['od_cyl'] = $change_lens[0]['od_cyl'];
+                    $res['prescriptions'][0]['os_cyl'] = $change_lens[0]['os_cyl'];
+                    $res['prescriptions'][0]['od_axis'] = $change_lens[0]['od_axis'];
+                    $res['prescriptions'][0]['os_axis'] = $change_lens[0]['os_axis'];
+                    if (!empty($change_lens[0]['pd_r']) && empty($change_lens[0]['pd_l'])) {
+                        $res['prescriptions'][0]['pd'] = $change_lens[0]['pd_r'];
+                    }
+                    $res['prescriptions'][0]['pd_l'] = $change_lens[0]['pd_l'];
+                    $res['prescriptions'][0]['pd_r'] = $change_lens[0]['pd_r'];
+                    $res['prescriptions'][0]['os_add'] = $change_lens[0]['os_add'];
+                    $res['prescriptions'][0]['od_add'] = $change_lens[0]['od_add'];
+                    $res['prescriptions'][0]['od_pv'] = $change_lens[0]['od_pv'];
+                    $res['prescriptions'][0]['os_pv'] = $change_lens[0]['os_pv'];
+                    $res['prescriptions'][0]['od_pv_r'] = $change_lens[0]['od_pv_r'];
+                    $res['prescriptions'][0]['os_pv_r'] = $change_lens[0]['os_pv_r'];
+                    $res['prescriptions'][0]['od_bd'] = $change_lens[0]['od_bd'];
+                    $res['prescriptions'][0]['os_bd'] = $change_lens[0]['os_bd'];
+                    $res['prescriptions'][0]['od_bd_r'] = $change_lens[0]['od_bd_r'];
+                    $res['prescriptions'][0]['os_bd_r'] = $change_lens[0]['os_bd_r'];
+                    //获取更改镜框最新信息
+                    $change_sku = $_work_order_change_sku
+                        ->alias('a')
+                        ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                        ->where([
+                            'a.change_type'       => 1,
+                            'a.item_order_number' => $item_order_number,
+                            'b.operation_type'    => 1,
+                        ])
+                        ->order('a.id', 'desc')
+                        ->value('a.change_sku');
+                    if ($change_sku) {
+                        $res['prescriptions'][0]['sku'] = $change_sku;
+                    }
+                }
+                $lens = $this->model->getReissueLens($change_type, $res['prescriptions'], 2, $item_order_number);
             } catch (\Exception $e) {
                 $this->error($e->getMessage());
             }
@@ -2719,6 +2840,9 @@ class WorkOrderList extends Backend
             !$work_id && $this->error('工单不存在，请重新选择', '', 'error', 0);
 
             //获取工单sku相关变动数据
+            if ($change_type == 24) {
+                $change_type = 11;
+            }
             $result = WorkOrderChangeSku::getOrderChangeSku($work_id, $order_type, $order_number, $change_type, $item_order_number);
             if ($result) {
                 $result = collection($result)->toArray();
@@ -2726,7 +2850,6 @@ class WorkOrderList extends Backend
                 foreach ($result as $key => $val) {
                     $result[$key]['prescription_options'] = unserialize($val['prescription_option']);
                 }
-
                 $user_info_option = unserialize($result[0]['userinfo_option']);
                 if (!empty($user_info_option)) {
                     $arr['userinfo_option'] = $user_info_option;
@@ -2735,7 +2858,7 @@ class WorkOrderList extends Backend
             }
 
             //编辑镜片信息html代码
-            if (in_array($change_type, [2, 4, 5])) {
+            if (in_array($change_type, [2, 4, 5,10,11])) {
                 $res = $this->model->getAddress($order_number, $item_order_number);
                 if (2 == $change_type) { //更改镜片
                     $type = 2;
@@ -2746,6 +2869,12 @@ class WorkOrderList extends Backend
                 } elseif (5 == $change_type) { //补发
                     $type = 1;
                     $showPrescriptions = $res['showPrescriptions'];
+                }elseif (10 == $change_type) { //补发镜片
+                    $type = 23;
+                    $showPrescriptions = $res['showPrescriptions'];
+                }elseif (11 == $change_type) { //寄回换片
+                    $type = 11;
+                    $showPrescriptions = $res['prescriptions'];
                 }
                 $lens = $this->model->getEditReissueLens($order_type, $showPrescriptions, $type, !empty($arr) ? $result : [], $operate_type, $item_order_number);
                 $lensForm = $this->model->getReissueLens($order_type, $showPrescriptions, $type, $item_order_number);
@@ -2753,6 +2882,14 @@ class WorkOrderList extends Backend
                 if ($res) {
                     $back_data = ['lens' => $lens, 'lensform' => $lensForm];
                     if (5 == $change_type) {
+                        $back_data['address'] = $res;
+                        $back_data['arr'] = $user_info_option;
+                    }
+                    if (10 == $change_type) {
+                        $back_data['address'] = $res;
+                        $back_data['arr'] = $user_info_option;
+                    }
+                    if (11 == $change_type) {
                         $back_data['address'] = $res;
                         $back_data['arr'] = $user_info_option;
                     }
