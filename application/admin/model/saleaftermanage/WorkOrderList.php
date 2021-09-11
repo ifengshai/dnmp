@@ -528,7 +528,7 @@ class WorkOrderList extends Model
             'type',
             'item_order_number',
         ];
-        if (1 == $type) {
+        if (1 == $type || 23 == $type) {
             foreach ($showPrescriptions as $key => $val) {
                 $prescriptions .= "<option value='{$key}'>{$val}</option>";
             }

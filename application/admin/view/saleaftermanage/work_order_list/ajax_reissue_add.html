@@ -142,7 +142,7 @@
 </div>
 {elseif condition="$type eq 23"}
 <div style="width: 100%;float: left;" >
-    <div class="step7_function2 prescription_type_step" style="margin-top:10px;">
+    <div class="step23_function2 prescription_type_step" style="margin-top:10px;">
         <div class="step7_function2_child">
             <label class="control-label col-xs-12 col-sm-3">SKU:</label>
             <div class="col-xs-12 col-sm-8">
@@ -159,7 +159,7 @@
         <div class="step7_function2_child">
             <label class="control-label col-xs-12 col-sm-3">Original RX:</label>
             <div class="col-xs-12 col-sm-8">
-                <select id="prescription_select" class="form-control selectpicker" title="请选择">
+                <select id="prescription_select_lens" class="form-control selectpicker" title="请选择">
                     {$prescriptions}
                 </select>
             </div>
@@ -177,12 +177,12 @@
 
     </div>
 
-    <div class="step1_function3"  style="margin-top:10px;">
+    <div class="step1_function3_lens"  style="margin-top:10px;">
         <div class="panel-body">
             <div class="step1_function3_child">
                 <label class="control-label col-xs-12 col-sm-3">Color:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select id="color_type" class="form-control selectpicker" name="row[replacement][lens_color_id][]"  title="请选择">
+                    <select id="lens_color_type" class="form-control selectpicker" name="row[replacement][lens_color_id][]"  title="请选择">
                         <option value="0">请选择</option>
                             {foreach name="colorList" item="val"}
                             <option value='{$val["lens_id"]}'>{$val["lens_data_name"]}</option>
@@ -193,7 +193,7 @@
             <div class="step1_function3_child">
                 <label class="control-label col-xs-12 col-sm-3">Lens:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select id="lens_type" class="form-control selectpicker" name="row[replacement][lens_lens_type][]"  title="请选择">
+                    <select id="lens_lens_type" class="form-control selectpicker" name="row[replacement][lens_lens_type][]"  title="请选择">
                         <option value="0">请选择</option>
                     </select>
                 </div>
@@ -493,7 +493,7 @@
                     <select id="color_type" class="form-control selectpicker" name="row[item_order_info][{$item_order_number}][back_change_lens][color_id]"  title="请选择">
                         <option value="0">请选择</option>
                         {foreach name="colorList" item="val"}
-                        <option value='{$val["lens_id"]}' {$val["lens_id"] == $vo['color_id'] ? 'selected' : ''}>{$val["lens_data_name"]}</option>
+                        <option>{$val["lens_data_name"]}</option>
                         {/foreach}
                     </select>
                 </div>
@@ -504,7 +504,7 @@
                     <select  id="lens_type" class="form-control selectpicker" name="row[item_order_info][{$item_order_number}][back_change_lens][lens_type]"  title="请选择">
                         <option value="0">请选择</option>
                                 {foreach name="prescription[$vo['prescription_type']]" item="val"}
-                                <option value='{$val["lens_id"]}' {$val["lens_id"] == $vo['index_id'] ? 'selected' : ''}>{$val['lens_data_name']}</option>
+                                <option>{$val['lens_data_name']}</option>
                                 {/foreach}
                     </select>
                 </div>
@@ -516,7 +516,7 @@
                             name="row[item_order_info][{$item_order_number}][back_change_lens][coating_type]" title="请选择">
                         <option value="0">请选择</option>
                             {foreach name="coating_type" item="val"}
-                            <option value='{$val["coating_id"]}' {$val["coating_id"] == $vo['coating_id'] ? 'selected' : ''}>{$val["coating_name"]}</option>
+                            <option>{$val["coating_name"]}</option>
                             {/foreach}
                     </select>
                 </div>
@@ -533,46 +533,46 @@
                 </tr>
                 <tr>
                     <td style="text-align: center">Right(OD)</td>
-                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_sph]" type="text" value="{$vo['od_sph']}">
+                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_sph]" type="text" >
                     </td>
-                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_cyl]" type="text" value="{$vo['od_cyl']}">
+                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_cyl]" type="text" >
                     </td>
-                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_axis]" type="text"
-                               value="{$vo['od_axis']}"></td>
+                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_axis]" type="text">
+                    </td>
                     <td>
                         {if condition="!empty($vo['od_add'])"}
-                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_add]" type="text" value="{$vo['od_add']}">
+                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_add]" type="text" >
                         {else /}
-                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_add]" type="text" value="{$vo['total_add']}">
+                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_add]" type="text" >
                         {/if}
                     </td>
                     <td>
                         {if condition="!empty($vo['pd_l']) && !empty($vo['pd_r'])"}
-                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_r]" type="text" value="{$vo['pd_r']}">
+                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_r]" type="text" >
                         {else /}
-                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_r]" type="text" value="{$vo['pd']}">
+                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_r]" type="text" >
                         {/if}
                     </td>
                 </tr>
                 <tr>
                     <td style="text-align: center">Left(OS)</td>
-                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_sph]" type="text" value="{$vo['os_sph']}">
+                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_sph]" type="text" >
                     </td>
-                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_cyl]" type="text" value="{$vo['os_cyl']}">
+                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_cyl]" type="text" >
                     </td>
                     <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_axis]" type="text"
                                value="{$vo['os_axis']}"></td>
                     <td>
                         {if condition="!empty($vo['os_add'])"}
-                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_add]" type="text" value="{$vo['os_add']}">
+                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_add]" type="text" >
                         {else /}
-                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_add]" type="text" value="{$vo['os_add']}">
+                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_add]" type="text" >
                         {/if}
 
                     </td>
                     <td>
                         {if condition="!empty($vo['pd_l']) && !empty($vo['pd_r'])"}
-                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_l]" type="text" value="{$vo['pd_l']}">
+                        <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_l]" type="text" >
                         {else /}
                         <input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_l]" type="text" value="">
                         {/if}
@@ -588,9 +588,9 @@
                 </tr>
                 <tr>
                     <td style="text-align: center">Right(OD)</td>
-                    <td><input class="form-control" type="text" name="row[item_order_info][{$item_order_number}][back_change_lens][od_pv]" value="{$vo['od_pv']}">
+                    <td><input class="form-control" type="text" name="row[item_order_info][{$item_order_number}][back_change_lens][od_pv]" >
                     </td>
-                    <td><input class="form-control" type="text" name="row[item_order_info][{$item_order_number}][back_change_lens][od_bd]" value="{$vo['od_bd']}">
+                    <td><input class="form-control" type="text" name="row[item_order_info][{$item_order_number}][back_change_lens][od_bd]" >
                     </td>
                     <td><input class="form-control" type="text" name="row[item_order_info][{$item_order_number}][back_change_lens][od_pv_r]"
                                value="{$vo['od_pv_r']}"></td>
@@ -599,9 +599,9 @@
                 </tr>
                 <tr>
                     <td style="text-align: center">Left(OS)</td>
-                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_pv]" type="text" value="{$vo['os_pv']}">
+                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_pv]" type="text" >
                     </td>
-                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_bd]" type="text" value="{$vo['os_bd']}">
+                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_bd]" type="text" >
                     </td>
                     <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_pv_r]" type="text"
                                value="{$vo['os_pv_r']}"></td>
