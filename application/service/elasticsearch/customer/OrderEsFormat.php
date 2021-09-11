@@ -416,9 +416,9 @@ class OrderEsFormat extends BaseEsFormatData
             if (strlen($finalList['hour']) == 1) {
                 $formatHour = '0' . $finalList['hour'];
             }
-            if(!isset($hourSaleFormat[$formatHour])) {
-                continue;
-            }
+//            if(!isset($hourSaleFormat[$formatHour])) {
+//                continue;
+//            }
             $arr[$key]['hour_created'] = $finalList['hour_created'];
             $hourOrderData = $hourSaleFormat[$formatHour];
 
