@@ -406,9 +406,9 @@ class OrderEsFormat extends BaseEsFormatData
             }
 
             $formatHour = $finalList['hour'];
-            if($today) {
-                if($formatHour > date('H')) continue;
-            }
+//            if($today) {
+//                if($formatHour > date('H')) continue;
+//            }
 
             if (strlen($finalList['hour']) == 1) {
                 $formatHour = '0' . $finalList['hour'];
