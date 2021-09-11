@@ -470,6 +470,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 //读取是谁添加的配置console.log(Config.work_type);
                 $('.step_type').attr('checked', false);
                 $('.step_type').parent().hide();
+                $('.step24_lens_back').hide();
                 $('#appoint_group_users').html('');//切换问题类型时清空承接人
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
                 $('.measure').hide();
@@ -1205,6 +1206,81 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 if (prescription.hasOwnProperty("od_pv")) {
                     prescription_div.find('input[name="row[replacement][os_bd_r][]"]').val(prescription.os_bd_r);
+                }
+
+                $('.selectpicker ').selectpicker('refresh');
+            })
+            
+            //补发镜片处方选择填充
+            $(document).on('change', '#prescription_select_lens', function () {
+                var val = $(this).val();
+                //var is_new_version = $('#is_new_version').val();
+                var prescription = prescriptions[val];
+                console.log(prescription);
+                var prescription_div = $(this).parents('.step23_function2').next('.step1_function3_lens');
+                prescription_div.find('input').val('');
+                prescription_div.find('input[name="row[replacement][lens_od_sph][]"]').val(prescription.od_sph);
+                prescription_div.find('input[name="row[replacement][lens_os_sph][]"]').val(prescription.os_sph);
+                prescription_div.find('input[name="row[replacement][lens_os_cyl][]"]').val(prescription.os_cyl);
+                prescription_div.find('input[name="row[replacement][lens_od_cyl][]"]').val(prescription.od_cyl);
+                prescription_div.find('input[name="row[replacement][lens_od_axis][]"]').val(prescription.od_axis);
+                prescription_div.find('input[name="row[replacement][lens_os_axis][]"]').val(prescription.os_axis);
+
+                //$(this).parents('.step23_function2').val('')
+                $(this).parents('.step23_function2').find('select[name="row[replacement][lens_recipe_type][]"]').val(prescription.prescription_type);
+                $(this).parents('.step23_function2').find('select[name="row[replacement][lens_recipe_type][]"]').change();
+                prescription_div.find('select[name="row[replacement][lens_coating_type][]"]').val(prescription.coating_id);
+
+
+                //判断是否是彩色镜片
+                if (prescription.color_id) {
+                    prescription_div.find('#lens_color_type').val(prescription.color_id);
+                    //if(is_new_version == 0){
+                        prescription_div.find('#lens_color_type').change();
+                    //}
+                }
+                prescription_div.find('#lens_lens_type').val(prescription.index_id);
+
+                //add，pd添加
+                if (prescription.hasOwnProperty("total_add")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_add][]"]').val(prescription.total_add);
+                    //prescription_div.find('input[name="row[replacement][lens_os_add][]"]').attr('disabled',true);
+                } else {
+                    prescription_div.find('input[name="row[replacement][lens_od_add][]"]').val(prescription.od_add);
+                    prescription_div.find('input[name="row[replacement][lens_os_add][]"]').val(prescription.os_add);
+                }
+
+                if (prescription.pd == '' || prescription.pd == 0) {
+                    prescription_div.find('input[name="row[replacement][lens_pd_r][]"]').val(prescription.pd_r);
+                    prescription_div.find('input[name="row[replacement][lens_pd_l][]"]').val(prescription.pd_l);
+                }else{
+                    prescription_div.find('input[name="row[replacement][lens_pd_r][]"]').val(prescription.pd);
+                    //prescription_div.find('input[name="row[replacement][lens_pd_l][]"]').attr('disabled',true);
+                }
+                //
+                if (prescription.hasOwnProperty("od_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_pv][]"]').val(prescription.od_pv);
+                }
+                if (prescription.hasOwnProperty("od_bd")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_bd][]"]').val(prescription.od_bd);
+                }
+                if (prescription.hasOwnProperty("od_pv_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_pv_r][]"]').val(prescription.od_pv_r);
+                }
+                if (prescription.hasOwnProperty("od_bd_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_bd_r][]"]').val(prescription.od_bd_r);
+                }
+                if (prescription.hasOwnProperty("os_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_pv][]"]').val(prescription.os_pv);
+                }
+                if (prescription.hasOwnProperty("os_bd")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_bd][]"]').val(prescription.os_bd);
+                }
+                if (prescription.hasOwnProperty("os_pv_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_pv_r][]"]').val(prescription.os_pv_r);
+                }
+                if (prescription.hasOwnProperty("od_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_bd_r][]"]').val(prescription.os_bd_r);
                 }
 
                 $('.selectpicker ').selectpicker('refresh');
@@ -2000,6 +2076,80 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     $('.selectpicker ').selectpicker('refresh');
                 }
+            })
+            //补发镜片处方选择填充
+            $(document).on('change', '#prescription_select_lens', function () {
+                var val = $(this).val();
+                //var is_new_version = $('#is_new_version').val();
+                var prescription = prescriptions[val];
+                console.log(prescription);
+                var prescription_div = $(this).parents('.step23_function2').next('.step1_function3_lens');
+                prescription_div.find('input').val('');
+                prescription_div.find('input[name="row[replacement][lens_od_sph][]"]').val(prescription.od_sph);
+                prescription_div.find('input[name="row[replacement][lens_os_sph][]"]').val(prescription.os_sph);
+                prescription_div.find('input[name="row[replacement][lens_os_cyl][]"]').val(prescription.os_cyl);
+                prescription_div.find('input[name="row[replacement][lens_od_cyl][]"]').val(prescription.od_cyl);
+                prescription_div.find('input[name="row[replacement][lens_od_axis][]"]').val(prescription.od_axis);
+                prescription_div.find('input[name="row[replacement][lens_os_axis][]"]').val(prescription.os_axis);
+
+                //$(this).parents('.step23_function2').val('')
+                $(this).parents('.step23_function2').find('select[name="row[replacement][lens_recipe_type][]"]').val(prescription.prescription_type);
+                $(this).parents('.step23_function2').find('select[name="row[replacement][lens_recipe_type][]"]').change();
+                prescription_div.find('select[name="row[replacement][lens_coating_type][]"]').val(prescription.coating_id);
+
+
+                //判断是否是彩色镜片
+                if (prescription.color_id) {
+                    prescription_div.find('#lens_color_type').val(prescription.color_id);
+                    //if(is_new_version == 0){
+                        prescription_div.find('#lens_color_type').change();
+                    //}
+                }
+                prescription_div.find('#lens_lens_type').val(prescription.index_id);
+
+                //add，pd添加
+                if (prescription.hasOwnProperty("total_add")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_add][]"]').val(prescription.total_add);
+                    //prescription_div.find('input[name="row[replacement][lens_os_add][]"]').attr('disabled',true);
+                } else {
+                    prescription_div.find('input[name="row[replacement][lens_od_add][]"]').val(prescription.od_add);
+                    prescription_div.find('input[name="row[replacement][lens_os_add][]"]').val(prescription.os_add);
+                }
+
+                if (prescription.pd == '' || prescription.pd == 0) {
+                    prescription_div.find('input[name="row[replacement][lens_pd_r][]"]').val(prescription.pd_r);
+                    prescription_div.find('input[name="row[replacement][lens_pd_l][]"]').val(prescription.pd_l);
+                }else{
+                    prescription_div.find('input[name="row[replacement][lens_pd_r][]"]').val(prescription.pd);
+                    //prescription_div.find('input[name="row[replacement][lens_pd_l][]"]').attr('disabled',true);
+                }
+                //
+                if (prescription.hasOwnProperty("od_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_pv][]"]').val(prescription.od_pv);
+                }
+                if (prescription.hasOwnProperty("od_bd")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_bd][]"]').val(prescription.od_bd);
+                }
+                if (prescription.hasOwnProperty("od_pv_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_pv_r][]"]').val(prescription.od_pv_r);
+                }
+                if (prescription.hasOwnProperty("od_bd_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_bd_r][]"]').val(prescription.od_bd_r);
+                }
+                if (prescription.hasOwnProperty("os_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_pv][]"]').val(prescription.os_pv);
+                }
+                if (prescription.hasOwnProperty("os_bd")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_bd][]"]').val(prescription.os_bd);
+                }
+                if (prescription.hasOwnProperty("os_pv_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_pv_r][]"]').val(prescription.os_pv_r);
+                }
+                if (prescription.hasOwnProperty("od_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_bd_r][]"]').val(prescription.os_bd_r);
+                }
+
+                $('.selectpicker ').selectpicker('refresh');
             })
             $(document).on('click', '.btn-add-box-edit', function () {
                 if (is_add == 1) {
