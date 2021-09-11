@@ -129,7 +129,6 @@ class WorkOrderList extends Backend
 
             $step_arr[$k]['recept'] = $recept_arr;
         }
-
         return $step_arr ?: [];
     }
 
@@ -439,7 +438,7 @@ class WorkOrderList extends Backend
                             in_array(3, $measureChooseId)
                             ||
                             $flag
-                        ) && $this->error("不能创建子单工单");
+                        )&&($params['work_platform']!=13) && $this->error("不能创建子单工单");
                     }
 
                     //指定问题类型校验sku下拉框是否勾选
@@ -734,7 +733,7 @@ class WorkOrderList extends Backend
                             }
                             /****************************end*****************************************/
 
-                        } elseif (in_array(19, $item['item_choose'])) {//更改镜框
+                        } elseif (in_array(19, $item['item_choose']) &&($params['work_platform'] !=13)) {//更改镜框
                             /*****************限制如果有盘点单未结束不能操作配货完成*******************/
                             //拣货区盘点时不能操作
                             //查询条形码库区库位
@@ -786,6 +785,11 @@ class WorkOrderList extends Backend
 //                            !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
 //                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1]);
 //                            !$back_data['result'] && $this->error($back_data['msg']);
+                        } elseif (in_array(19, $item['item_choose']) &&($params['work_platform'] ==13)) {//抖音工单寄回换框
+                            $plat_sku = $item['change_frame']['change_sku'];
+                            if(!$plat_sku){
+                                $this->error("没有选择更换的镜框，无法提交");
+                            }
                         }
 //                        elseif (in_array(20, $item['item_choose'])) {//更改镜片
 //                            //检测之前是否处理过更改镜片措施
@@ -3716,7 +3720,6 @@ EOF;
             } else {
                 $stock = $res['stock'];
             }
-
             //判断可用库存
             if ($stock < $v['original_number']) {
                 //判断没库存情况下 是否开启预售 并且预售时间是否满足 并且预售数量是否足够
@@ -4434,5 +4437,31 @@ EOF;
         } else {
             return false;
         }
+    }
+
+    /**
+     * 根据平台sku获取平台里面的所有关联的spu
+     * @return false|void
+     * @author liushiwei
+     * @date   2021/9/7 17:06
+     */
+    public function getSpuList()
+    {
+        if ($this->request->isAjax()) {
+            //原始sku
+            $sku = input('sku');
+            $platform_type = input('platform_type');
+            if(empty($sku) || empty($platform_type)) {
+                return $this->error('参数错误，请重新尝试', '', 'error', 0);
+            }
+            //求出真实的sku
+            $true_sku = $this->item_platform_sku->getTrueSku($sku,$platform_type);
+            if(!$true_sku){
+                return false;
+            }
+            $info = $this->item->getSpuListBySku($true_sku,$platform_type);
+            $this->success('操作成功！！', '', $info, 0);
+        }
+
     }
 }
