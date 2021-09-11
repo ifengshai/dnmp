@@ -41,7 +41,8 @@ class BaseElasticsearch extends Backend
         'payment_review',
         'paypal_canceled_reversal',
         'delivered',
-        'delivery'
+        'delivery',
+        'shipped'
     ];
 
     public function __construct(Request $request = null)
