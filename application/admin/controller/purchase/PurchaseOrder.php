@@ -707,7 +707,7 @@ class PurchaseOrder extends Backend
                 $this->error(__('No Results were found'), url('index'));
             }
 
-            if (!in_array($row['purchase_status'], [2, 5, 6, 7, 9])) {
+            if (!in_array($row['purchase_status'], [2, 5, 6])) {
                 $this->error(__('此状态不能录入物流单号'), url('index'));
             }
 
