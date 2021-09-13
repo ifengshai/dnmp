@@ -787,19 +787,16 @@ class PurchaseOrder extends Backend
                         $batch = new PurchaseBatch();
                         foreach ($logistics_company_no as $k => $v) {
 
-                            if (empty(array_filter($v))) {
-                                $this->error(__('物流公司编码不能为空'));
-                            }
-
-                            if (empty(array_filter($logistics_number[$k]))) {
-                                $this->error(__('物流单号不能为空'));
-                            }
-
                             foreach ($v as $key => $val) {
                                 $list = [];
-                                if (!$val) {
-                                    continue;
+                                if (empty($val)) {
+                                    $this->error(__('物流公司编码不能为空'));
                                 }
+
+                                if (empty($logistics_number[$k][$key])) {
+                                    $this->error(__('物流单号不能为空'));
+                                }
+
                                 if ($logistics_ids[$k][$key]) {
                                     $list['id'] = $logistics_ids[$k][$key];
                                 } else {
