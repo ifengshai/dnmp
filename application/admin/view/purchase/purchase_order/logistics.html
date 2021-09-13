@@ -33,12 +33,12 @@
             <input type="hidden" name="logistics_ids[{$v.id}][]" class="logistics_ids" value="{$val.id}"/>
             <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
             <div class="col-xs-12 col-sm-3">
-                <input  class="form-control" name="logistics_company_no[{$v.id}][]" value="{$val.logistics_company_no}"
+                <input  class="form-control" name="logistics_company_no[{$v.id}][]" {:$val.status == 1 ? 'readonly' : ''} value="{$val.logistics_company_no}"
                     type="text" placeholder="请输入对应的物流公司编码">
             </div>
             <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
             <div class="col-xs-12 col-sm-3">
-                <input class="form-control" name="logistics_number[{$v.id}][]" type="text" placeholder="请输入物流单号" value="{$val.logistics_number}">
+                <input class="form-control" name="logistics_number[{$v.id}][]" type="text" {:$val.status == 1 ? 'readonly' : ''} placeholder="请输入物流单号" value="{$val.logistics_number}">
 
 
             </div>
@@ -87,12 +87,12 @@
             <input type="hidden" name="logistics_ids[]" class="logistics_ids" value="{$val.id}"/>
             <label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>
             <div class="col-xs-12 col-sm-3">
-                <input id="c-logistics_company_no" class="form-control" name="logistics_company_no[]" value="{$val.logistics_company_no}"
+                <input id="c-logistics_company_no" class="form-control" name="logistics_company_no[]" {:$val.status == 1 ? 'readonly' : ''} value="{$val.logistics_company_no}"
                     type="text" placeholder="请输入对应的物流公司编码">
             </div>
             <label class="control-label col-xs-12 col-sm-2">物流单号:</label>
             <div class="col-xs-12 col-sm-3">
-                <input id="c-logistics_number" class="form-control" name="logistics_number[]" type="text" placeholder="请输入物流单号" value="{$val.logistics_number}">
+                <input id="c-logistics_number" class="form-control" name="logistics_number[]" {:$val.status == 1 ? 'readonly' : ''} type="text" placeholder="请输入物流单号" value="{$val.logistics_number}">
 
 
             </div>

@@ -28,7 +28,7 @@ class LogisticsInfo extends Model
     {
 
         if ($params['id']) {
-            return $this->allowField(true)->isUpdate(true, ['id' => $params['id'], 'status' => 0])->data($params)->save();
+            return $this->allowField(true)->where(['id' => $params['id'], 'status' => 0])->update($params);
         } else {
             $params['createtime'] = date('Y-m-d H:i:s', time());
             $params['create_person'] = session('admin.nickname');
