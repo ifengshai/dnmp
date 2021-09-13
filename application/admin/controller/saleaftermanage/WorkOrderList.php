@@ -382,7 +382,11 @@ class WorkOrderList extends Backend
                     $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.add' : $name) : $this->modelValidate;
                     $this->model->validateFailException(true)->validate($validate);
                 }
-
+                $customer_return_order = trim($params['customer_return_order']);
+                if(!empty($customer_return_order)){
+                    $ismerach = preg_match('/^[a-zA-Z0-9]+$/u',$customer_return_order);
+                    !$ismerach && $this->error("客户寄回物流单号只能是数字或字母组合");
+                }
                 $platform_order = trim($params['platform_order']);//订单号
                 $measureChooseId = $params['measure_choose_id'] ? array_unique(array_filter($params['measure_choose_id'])) : [];//措施ID数组
                 $work_type = $params['work_type'];//工单类型：1客服 2仓库
@@ -1486,7 +1490,11 @@ class WorkOrderList extends Backend
                     $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
                     $this->model->validateFailException(true)->validate($validate);
                 }
-
+                $customer_return_order = trim($params['customer_return_order']);
+                if(!empty($customer_return_order)){
+                    $ismerach = preg_match('/^[a-zA-Z0-9]+$/u',$customer_return_order);
+                    !$ismerach && $this->error("客户寄回物流单号只能是数字或字母组合");
+                }
                 $platform_order = trim($params['platform_order']);//订单号
                 $measure_choose_id = $params['measure_choose_id'] ? array_unique(array_filter($params['measure_choose_id'])) : [];//措施ID数组
                 $work_type = $params['work_type'];//工单类型：1客服 2仓库
