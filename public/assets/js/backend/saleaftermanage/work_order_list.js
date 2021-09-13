@@ -3017,7 +3017,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                     }
                                     $('#back_lens_c-email').val(email);
                                     $('#back_lens_c-telephone').val(real_address.telephone);
-                                    $('#back_lens_c-customer_return_order').val(real_address.customer_return_order);
                                     $('#back_lens_c-country').val(real_address.country_id);
                                     $('#back_lens_c-country').change();
                                     $('#back_lens_c-region').val(real_address.region_id);
@@ -3047,7 +3046,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                             $('#back_lens_c-email').val(data.address.email);
                                             $('#back_lens_c-telephone').val(data.address.telephone);
                                             $('#back_lens_c-country').val(data.address.country_id);
-                                            $('#back_lens_c-customer_return_order').val(data.customer_return_order);
                                             $('#back_lens_c-country').change();
                                             $('#back_lens_c-region').val(data.address.region_id);
                                             $('#back_lens_c-region1').val(data.address.region);
