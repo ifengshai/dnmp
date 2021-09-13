@@ -3886,6 +3886,7 @@ function changeOrderAddress(){
 function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
         if($('#step3').prop('checked')) return false;
         $('#z-order_sku').html('');
+        $('.step24_lens_back').hide();
         $('#section_item_content').show();
         $('#section_item_content').html('');
         $("#item_input-hidden").html("");
@@ -3915,7 +3916,6 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
             var step_item = Config.workOrderConfigValue.step;
             var item_checkbox = '';
             var order_item_numbers = item_order_sku.join(',');
-
             $('#div_item_content').show();
             var ihtml = '';
             for (var i in item_order_sku) {
