@@ -2097,7 +2097,7 @@ class Inventory extends Backend
                             'number_type'               => 2,
                             'order_number'              => $v['item_order_number'],
                             'public_id'                 => $work_id,
-                            'stock_before'              => $change_item_info['stock_before'],
+                            'stock_before'              => $change_item_info['stock'],
                             'stock_change'              => -$change_number,
                             'available_stock_before'    => $change_item_info['available_stock'],
                             'available_stock_change'    => -$change_number,
