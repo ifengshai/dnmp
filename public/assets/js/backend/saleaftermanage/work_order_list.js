@@ -513,7 +513,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     //循环列出对应的措施
                     for(var j=0;j<choose_problem_step.length;j++){
-                        //console.log(choose_problem_step[j].step_id);
                         $('#step' + choose_problem_step[j].step_id).parent().show();
                         $('#step' + choose_problem_step[j].step_id + '-is_check').val(choose_problem_step[j].is_check);
                         $('#step' + choose_problem_step[j].step_id + '-is_auto_complete').val(choose_problem_step[j].is_auto_complete);
@@ -549,6 +548,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     });
                     for (var m = 0; m < checkID.length; m++) {
                         var node = $('.step' + checkID[m]);
+                        console.log(checkID[m]);
+                        //如果选择更换快递方式
+
                         if (node.is(':hidden')) {
                             node.show();
                         } else {
@@ -609,6 +611,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                         checkID[i] = $(this).val();
                         var id = $(this).val();
+                        if(id == 26){
+                            let warehouse_dispatch_way = $('#warehouse_dispatch_way').val();
+                            $("#c-warehouse_dispatch_way option").each(function(){
+                                if($(this).val() == warehouse_dispatch_way){
+                                    $(this).attr("selected",true);
+                                }else{
+                                    $(this).attr("selected",false);
+                                }
+                            })
+                            $('.selectpicker ').selectpicker('refresh');
+                        }else{
+                            $("#c-warehouse_dispatch_way option").each(function(){
+                                if($(this).val() == 'flatrate_flatrate'){
+                                    $(this).attr("selected",true);
+                                }else{
+                                    $(this).attr("selected",false);
+                                }
+                            })
+                            $('.selectpicker ').selectpicker('refresh');
+                        }
+
                         //获取承接组
                          appoint_group += $('#step' + id + '-appoint_group').val() + ',';
                          var group_id = $('#step' + id + '-appoint_group').val();
@@ -4036,6 +4059,13 @@ function platform_order(){
             $('#order_type').val(data.order_type);
             $('#c-order_type').val(data.order_type);
             //$('#is_new_version').val(data.is_new_version);
+            //追加物流方式
+            $('#warehouse_dispatch_way').val(data.shipping_method);
+            // $("#c-warehouse_dispatch_way option").each(function(){
+            //     if($(this).text() == data.shipping_title){
+            //         $(this).attr("selected",true);
+            //     }
+            // })
             var shtml = '';
             for (var i in data.sku_list) {
                 shtml += '<option value="' + i +'/'+data.sku_list[i]+ '">' + i + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + data.sku_list[i] + '</option>';
