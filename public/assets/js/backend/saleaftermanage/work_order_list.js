@@ -3666,6 +3666,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('#address_select_lens_back').html(address);
                                 $('.selectpicker ').selectpicker('refresh');
                             });
+                        }else if(!$('.item' + use_flag + '_step27-27').is(':hidden')){
+                            $('#c-customer_return_order').show();
                         }else{
                             $('.step24_lens_back').hide();
                         }
