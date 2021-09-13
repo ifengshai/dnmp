@@ -2357,7 +2357,7 @@ class Process extends Backend
             $num = $this->orderitemprocess->alias('a')->where($map)
                 ->join(['fa_order' => 'b'], 'a.order_id = b.id')
                 ->count(1);
-            $item->where('id',$v['id'])->update(['stock' => $num]);
+            Db::table('fa_zz_temp1')->where('id',$v['id'])->update(['stock' => $num]);
         }
     }
 }
