@@ -707,7 +707,7 @@ class PurchaseOrder extends Backend
                 $this->error(__('No Results were found'), url('index'));
             }
 
-            if (!in_array($row['purchase_status'], [2, 5, 6])) {
+            if (!in_array($row['purchase_status'], [2, 5, 6, 9])) {
                 $this->error(__('此状态不能录入物流单号'), url('index'));
             }
 
@@ -804,12 +804,17 @@ class PurchaseOrder extends Backend
                                 $batch->where(['id' => $k])->update(['receiving_warehouse' => $stock_ids[$k]]);
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k][$key], 'status' => 1])->find();
+                                if ($have_logistics && $list['id']) {
+                                    $this->error(__('物流单号：' . $logistics_number[$k][$key] . '已签收'));
+                                }
+
+
                                 if (!empty($have_logistics)) {
                                     $this->model->where(['id' => $row['id']])->update(['purchase_status' => $purchase_status]);
                                     //物流单已签收要减少在途增加待入库 这里是录入已经签收的物流单号要进行的操作
-                                    $lists = Db::name('purchase_order_item')->where(['purchase_id' => $row['id']])->select();
+                                    /*$lists = Db::name('purchase_order_item')->where(['purchase_id' => $row['id']])->select();
                                     $batch_arrival_num = Db::name('purchase_batch_item')->where(['purchase_batch_id' => $k])->value('arrival_num');
-                                    $item = new \app\admin\model\itemmanage\Item();
+                                    $item = new \app\admin\model\itemmanage\Item();*/
 
                                     //:todo 此扣减方案有Bug 已反馈 未给新的扣减方案
                                     /*foreach ($lists as $val) {
@@ -844,7 +849,6 @@ class PurchaseOrder extends Backend
                                     $list['sign_warehouse'] = $have_logistics['sign_warehouse'];
                                 }
                                 $logistics->addLogisticsInfo($list);
-
                             }
                             $i++;
                         }
@@ -870,10 +874,15 @@ class PurchaseOrder extends Backend
                                     $this->model->where(['id' => $k])->update(['receiving_warehouse' => is_array($stock_ids) ? 0 : $stock_ids]);
                                     //若物流单号已经签收的话直接更改采购单的状态为已签收
                                     $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k], 'status' => 1])->find();
+
+                                    if ($have_logistics && $list['id']) {
+                                        $this->error(__('物流单号：' . $logistics_number[$k] . '已签收'));
+                                    }
+
                                     if (!empty($have_logistics)) {
                                         $this->model->where(['id' => $v['id']])->update(['purchase_status' => $purchase_status]);
                                         //物流单已签收要减少在途增加待入库 这里是录入已经签收的物流单号要进行的操作
-                                        $list = Db::name('purchase_order_item')->where(['purchase_id' => $v['id']])->select();
+//                                        $list = Db::name('purchase_order_item')->where(['purchase_id' => $v['id']])->select();
                                         //:todo 未给扣减方案
                                         /* foreach ($list as $val) {
                                              //插入日志表
@@ -931,6 +940,11 @@ class PurchaseOrder extends Backend
                                 $list['receiving_warehouse'] = is_array($stock_ids) ? 0 : $stock_ids;
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k], 'status' => 1])->find();
+
+                                if ($have_logistics && $list['id']) {
+                                    $this->error(__('物流单号：' . $logistics_number[$k] . '已签收'));
+                                }
+
                                 if (!empty($have_logistics)) {
                                     $this->model->where(['id' => $row['id']])->update(['purchase_status' => $purchase_status]);
                                     //物流单已签收要减少在途增加待入库 这里是录入已经签收的物流单号要进行的操作
@@ -1022,7 +1036,7 @@ class PurchaseOrder extends Backend
             $batch_data = $batch->alias('a')
                 ->field('a.id,a.batch,a.receiving_warehouse,b.sku,a.arrival_time,b.arrival_num')
                 ->where('a.purchase_id', $row['id'])
-                ->join(['fa_purchase_batch_item' => 'b'],'a.id=b.purchase_batch_id')
+                ->join(['fa_purchase_batch_item' => 'b'], 'a.id=b.purchase_batch_id')
                 ->select();
             $this->view->assign("batch_data", $batch_data);
         }
