@@ -383,6 +383,8 @@ class WorkOrderList extends Backend
                     $this->model->validateFailException(true)->validate($validate);
                 }
                 $customer_return_order = trim($params['customer_return_order']);
+                var_dump($customer_return_order);
+                exit;
                 if(!empty($customer_return_order)){
                     var_dump($customer_return_order);
                     $ismerach = preg_match('/^[a-zA-Z0-9]+$/u',$customer_return_order);
