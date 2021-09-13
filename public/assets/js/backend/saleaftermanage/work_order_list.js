@@ -2777,6 +2777,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $("#change-frame"+ i +" tbody").append(Str);
                             }
                             //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                            if($.inArray(27,item_order_info[i].item_choose) != -1){
+                                $('.item'+i+'_step27-27').show();
+                                $('.step27').show();
+                                console.log(item_order_info);
+                                var Str = "";
+                                Str += '<tr>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][original_sku]"  type="text" value="' + item_order_info[i].change_frame.original_sku + '" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][change_sku]"  type="text" value="' + item_order_info[i].change_frame.change_sku + '" style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                Str += '</tr>';
+                                $('#back-change-frame'+ i +' tr:gt(0)').remove();
+                                $("#back-change-frame"+ i +" tbody").append(Str);
+                            }
                         }
 
                     }
@@ -3514,11 +3529,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#recept_item_person_id').val(item_appoint_users.join(','));
 
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
-                        if (!$('.item' + use_flag + '_step19-19').is(':hidden')) {
-                            // console.log(use_flag);
-                            // console.log(sku);
-                            // console.log(Config);
-                            // console.log($("#work_platform").val());
+                        if (!$('.item' + use_flag + '_step27-27').is(':hidden')) {
+                            var node  = $('.step27');
+                            if(node.is(':hidden')){
+                                node.show();
+                            }
                            let work_platform = $("#work_platform").val();
                             if(work_platform != 13 ){
                                 Str += '<tr>';
@@ -3528,8 +3543,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
                                 // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
                                 Str += '</tr>';
-                                $('#change-frame'+ use_flag +' tr:gt(0)').remove();
-                                $("#change-frame"+ use_flag +" tbody").append(Str);
+                                $('#back-change-frame'+ use_flag +' tr:gt(0)').remove();
+                                $("#back-change-frame"+ use_flag +" tbody").append(Str);
                                 $('.selectpicker ').selectpicker('refresh');
                             }else{
                                 Backend.api.ajax({
@@ -3555,8 +3570,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                         Strs +='</td>';
                                         Strs += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
                                         Strs += '</tr>';
-                                        $('#change-frame'+ use_flag +' tr:gt(0)').remove();
-                                        $("#change-frame"+ use_flag +" tbody").append(Strs);
+                                        $('#back-change-frame'+ use_flag +' tr:gt(0)').remove();
+                                        $("#back-change-frame"+ use_flag +" tbody").append(Strs);
                                         $('.selectpicker ').selectpicker('refresh');
                                     }else{
                                         Layer.alert('没有合适的镜框要更换');
@@ -3571,6 +3586,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             }
 
 
+                        }else{
+                             $('.step27').hide();
                         }
                         if (!$('.item' + use_flag + '_step19-19').is(':hidden')) {
                                 Str += '<tr>';
@@ -3647,6 +3664,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('#address_select_lens_back').html(address);
                                 $('.selectpicker ').selectpicker('refresh');
                             });
+                        }else if(!$('.item' + use_flag + '_step27-27').is(':hidden')){
+                            $('#c-customer_return_order').show();
                         }else{
                             $('.step24_lens_back').hide();
                         }
@@ -3944,6 +3963,7 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
                 }
                 ihtml += '</div></div></div>';
                 ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step19-19" style="display:none;"  flag="'+item_order_sku[i]+'"><div class="caigou frame-info item_info"><p style="font-size: 16px;"><b> 更换镜框</b></p><div ><table class="caigou-table-sku" id="change-frame'+item_order_sku[i]+'"><tr><th>原SKU</th><th>原数量(+增加)</th><th>新SKU</th><th>新数量(-减少)</th></tr></table></div></div></div>';
+                ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step27-27" style="display:none;"  flag="'+item_order_sku[i]+'"><div class="caigou frame-info item_info"><p style="font-size: 16px;"><b> 更换镜框</b></p><div ><table class="caigou-table-sku" id="back-change-frame'+item_order_sku[i]+'"><tr><th>原SKU</th><th>原数量(+增加)</th><th>新SKU</th><th>新数量(-减少)</th></tr></table></div></div></div>';
                 ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step20-20" style="display:none;" flag="'+item_order_sku[i]+'"><div class="col-xs-12 col-sm-8" style="width: 100%"><p style="font-size: 16px;"><b>更改镜片</b></p><div id="lens_contents'+item_order_sku[i]+'"></div></div></div>';
                 ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step24-24" style="display:none;" flag="'+item_order_sku[i]+'"><div class="col-xs-12 col-sm-8" style="width: 100%"><p style="font-size: 16px;"><b>寄回换片</b></p><div id="back_lens_contents'+item_order_sku[i]+'"></div></div></div>';
                 ihtml += '</div>';

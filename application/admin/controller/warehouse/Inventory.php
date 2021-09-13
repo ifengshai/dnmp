@@ -2066,7 +2066,7 @@ class Inventory extends Backend
                 $warehouse_change_sku = $warehouse_change_info['sku'];
                 //新sku商品表相关库存
                 $change_item_info = $_item
-                    ->field('occupy_stock,available_stock,distribution_occupy_stock')
+                    ->field('stock,occupy_stock,available_stock,distribution_occupy_stock')
                     ->where(['sku'=>$warehouse_change_sku])
                     ->find()
                 ;
@@ -2076,6 +2076,7 @@ class Inventory extends Backend
                         //减少可用库存,增加占用库存
                         $_item
                             ->where(['sku' => $warehouse_change_sku])
+                            ->dec('stock',$change_number)
                             ->dec('available_stock', $change_number)
                             ->inc('occupy_stock', $change_number)
                             ->update();
@@ -2096,6 +2097,8 @@ class Inventory extends Backend
                             'number_type'               => 2,
                             'order_number'              => $v['item_order_number'],
                             'public_id'                 => $work_id,
+                            'stock_before'              => $change_item_info['stock_before'],
+                            'stock_change'              => -$change_number,
                             'available_stock_before'    => $change_item_info['available_stock'],
                             'available_stock_change'    => -$change_number,
                             'occupy_stock_before'       => $change_item_info['occupy_stock'],
