@@ -1436,9 +1436,6 @@ class WorkOrderList extends Backend
                 if (empty($res[$sku])) {
                     return ['result' => false, 'msg' => $sku . '不存在！！'];
                 }
-                if ($res[$sku] < $num[$k]) {
-                    return ['result' => false, 'msg' => $sku . '库存不足！！'];
-                }
             }
 
         }
