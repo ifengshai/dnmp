@@ -3954,6 +3954,7 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
             $('#order_item_numbers').val(order_item_numbers);
         } else{
             $('#section_item_content').hide();
+            $('.step24_lens_back').hide();
         }      
 }
 
