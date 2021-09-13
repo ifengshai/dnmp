@@ -1121,7 +1121,7 @@ class WorkOrderList extends Model
     public function changeFrame($params, $work_id, $measure_choose_id, $measure_id, $item_order_number)
     {
         $work = $this->find($work_id);
-        if ($work && 19 == $measure_choose_id) {
+        if ($work && (in_array($measure_choose_id,[19,27]))) {
             $change_frame = $params['item_order_info'][$item_order_number]['change_frame'];
             empty($change_frame) && exception("请完善更改镜框信息！！");
 
