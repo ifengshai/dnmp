@@ -707,7 +707,7 @@ class PurchaseOrder extends Backend
                 $this->error(__('No Results were found'), url('index'));
             }
 
-            if (!in_array($row['purchase_status'], [2, 5, 6, 9])) {
+            if (!in_array($row['purchase_status'], [2, 5, 6, 7, 9])) {
                 $this->error(__('此状态不能录入物流单号'), url('index'));
             }
 
@@ -751,7 +751,7 @@ class PurchaseOrder extends Backend
                     $params['logistics_number'] = is_array($logistics_number) ? implode(',', $logistics_number) : $logistics_number;
                     $params['logistics_company_no'] = is_array($logistics_company_no) ? implode(',', $logistics_company_no) : $logistics_company_no;
                     $params['receiving_warehouse'] = is_array($stock_ids) ? 0 : $stock_ids;
-                    $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids], 'purchase_status' => ['in', [2, 5, 6]]])->save($params);
+                    $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids], 'purchase_status' => ['in', [2, 5, 6, 7, 9]]])->save($params);
                     //添加物流汇总表
                     $logistics = new \app\admin\model\LogisticsInfo();
                     if (count($logistics_number) == count($logistics_number, 1)) {
