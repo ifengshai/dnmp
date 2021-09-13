@@ -1480,7 +1480,7 @@ class WorkOrderList extends Model
                             $postData['is_lens_retransmission'] = 0;
                         }
                         $postData['old_increment_id'] = self::where(['id' => $work_id])->value('platform_order');
-                        $postData['remark'] = self::where(['id' => $work_id])->value('problem_type_content');
+                        $postData['remark'] = self::where(['id' => $work_id])->value('problem_description');
                     }
                     if ($siteType == 3){
                         $pathinfo = 'api/mj/createOrder';

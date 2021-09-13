@@ -193,7 +193,7 @@
             <div class="step1_function3_child">
                 <label class="control-label col-xs-12 col-sm-3">Lens:</label>
                 <div class="col-xs-12 col-sm-8">
-                    <select id="lens_lens_type" class="form-control selectpicker" name="row[replacement][lens_lens_type][]"  title="请选择">
+                    <select id="lens_type" class="form-control selectpicker" name="row[replacement][lens_lens_type][]"  title="请选择">
                         <option value="0">请选择</option>
                     </select>
                 </div>
@@ -477,7 +477,7 @@
             <div class="col-xs-12 col-sm-8">
                 <select class="form-control selectpicker prescription_type" name="row[item_order_info][{$item_order_number}][back_change_lens][recipe_type]"  title="请选择" flag ="change_lens_recipe_type">
                     {foreach name="prescription" item="val" key="key"}
-                    <option value='{$key}' {$key == $vo['prescription_type'] ? 'selected' : ''}>{$key}</option>
+                    <option value='{$key}' >{$key}</option>
                     {/foreach}
                 </select>
             </div>
@@ -603,10 +603,10 @@
                     </td>
                     <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_bd]" type="text" >
                     </td>
-                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_pv_r]" type="text"
-                               value="{$vo['os_pv_r']}"></td>
-                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_bd_r]" type="text"
-                               value="{$vo['os_bd_r']}"></td>
+                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_pv_r]" type="text">
+                    </td>
+                    <td><input class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_bd_r]" type="text">
+                    </td>
                 </tr>
                 </tbody>
             </table>
