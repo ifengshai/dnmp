@@ -384,6 +384,7 @@ class WorkOrderList extends Backend
                 }
                 $customer_return_order = trim($params['customer_return_order']);
                 if(!empty($customer_return_order)){
+                    var_dump($customer_return_order);
                     $ismerach = preg_match('/^[a-zA-Z0-9]+$/u',$customer_return_order);
                     !$ismerach && $this->error("客户寄回物流单号只能是数字或字母组合");
                 }
