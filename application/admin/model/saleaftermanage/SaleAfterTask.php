@@ -917,6 +917,7 @@ class SaleAfterTask extends Model
                 $address = Db::connect($db)->table('order_addresses')
                     ->where(['order_id' => $v['entity_id']])
                     ->field('type as address_type,telephone,postcode,street,city,region,country_id,firstname,lastname')
+                    ->order('address_type desc')
                     ->select();
             } else {
                 $address = Db::connect($db)->table('sales_flat_order_address')
