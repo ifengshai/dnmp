@@ -732,14 +732,6 @@ class PurchaseOrder extends Backend
             $stock_ids = $params['stock_id'];
             if ($params) {
 
-                if (empty(array_filter($params['logistics_company_no']))) {
-                    $this->error(__('物流公司编码不能为空'));
-                }
-
-                if (empty(array_filter($params['logistics_number']))) {
-                    $this->error(__('物流单号不能为空'));
-                }
-
                 $params = $this->preExcludeFields($params);
                 $result = false;
                 Db::startTrans();
@@ -861,8 +853,12 @@ class PurchaseOrder extends Backend
                             foreach ($row as $k => $v) {
                                 foreach ($logistics_company_no as $key => $val) {
                                     $list = [];
-                                    if (!$val) {
-                                        continue;
+                                    if (empty($val)) {
+                                        $this->error(__('物流公司编码不能为空'));
+                                    }
+
+                                    if (empty($logistics_number[$key])) {
+                                        $this->error(__('物流单号不能为空'));
                                     }
                                     $list['logistics_number'] = $logistics_number[$key];
                                     $list['logistics_company_no'] = $val;
@@ -915,8 +911,12 @@ class PurchaseOrder extends Backend
                             }
                         } else {
                             foreach ($logistics_company_no as $k => $v) {
-                                if (!$v) {
-                                    continue;
+                                if (empty($v)) {
+                                    $this->error(__('物流公司编码不能为空'));
+                                }
+
+                                if (empty($logistics_number[$k])) {
+                                    $this->error(__('物流单号不能为空'));
                                 }
                                 $list = [];
                                 if ($logistics_ids[$k]) {
