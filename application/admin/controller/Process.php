@@ -2340,4 +2340,24 @@ class Process extends Backend
 
         });
     }
+
+    /**
+     * sku销量
+     * @author wangpenglei
+     * @date   2021/9/13 14:59
+     */
+    public function sku_sales_num()
+    {
+        $list = Db::table('fa_zz_temp1')->select();
+        $item = new ItemPlatformSku();
+        foreach ($list as $k => $v) {
+            $skus = $item->where(['sku' => $v['sku']])->column('platform_sku');
+            $map['a.sku'] = ['in', array_filter($skus)];
+            $map['b.status'] = ['in', ['processing', 'complete', 'delivered', 'delivery']];
+            $num = $this->orderitemprocess->alias('a')->where($map)
+                ->join(['fa_order' => 'b'], 'a.order_id = b.id')
+                ->count(1);
+            Db::table('fa_zz_temp1')->where('id',$v['id'])->update(['stock' => $num]);
+        }
+    }
 }
