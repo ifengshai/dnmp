@@ -804,11 +804,6 @@ class PurchaseOrder extends Backend
                                 $batch->where(['id' => $k])->update(['receiving_warehouse' => $stock_ids[$k]]);
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k][$key], 'status' => 1])->find();
-                                if ($have_logistics && $list['id']) {
-                                    $this->error(__('物流单号：' . $logistics_number[$k][$key] . '已签收'));
-                                }
-
-
                                 if (!empty($have_logistics)) {
                                     $this->model->where(['id' => $row['id']])->update(['purchase_status' => $purchase_status]);
                                     //物流单已签收要减少在途增加待入库 这里是录入已经签收的物流单号要进行的操作
@@ -875,10 +870,6 @@ class PurchaseOrder extends Backend
                                     //若物流单号已经签收的话直接更改采购单的状态为已签收
                                     $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k], 'status' => 1])->find();
 
-                                    if ($have_logistics && $list['id']) {
-                                        $this->error(__('物流单号：' . $logistics_number[$k] . '已签收'));
-                                    }
-
                                     if (!empty($have_logistics)) {
                                         $this->model->where(['id' => $v['id']])->update(['purchase_status' => $purchase_status]);
                                         //物流单已签收要减少在途增加待入库 这里是录入已经签收的物流单号要进行的操作
@@ -940,10 +931,6 @@ class PurchaseOrder extends Backend
                                 $list['receiving_warehouse'] = is_array($stock_ids) ? 0 : $stock_ids;
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k], 'status' => 1])->find();
-
-                                if ($have_logistics && $list['id']) {
-                                    $this->error(__('物流单号：' . $logistics_number[$k] . '已签收'));
-                                }
 
                                 if (!empty($have_logistics)) {
                                     $this->model->where(['id' => $row['id']])->update(['purchase_status' => $purchase_status]);
