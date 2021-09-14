@@ -1894,7 +1894,7 @@ class PurchaseOrder extends Backend
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
-                ->with(['purchaseorder', 'supplier'])
+                ->with(['purchaseorder', 'supplier', 'logisticsInfo'])
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
