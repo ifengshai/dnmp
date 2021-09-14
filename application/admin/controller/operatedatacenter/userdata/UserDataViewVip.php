@@ -193,7 +193,7 @@ class UserDataViewVip extends Backend
             }
             if($order_platform == 3){
                 $web_model->table('vip_orders')->query("set time_zone='+8:00'");
-                $sum_vip_num = $web_model->table('users')->where('is_vip',1)->count();//总VIP会员数
+                $sum_vip_num = $web_model->table('users')->where('group',2)->count();//总VIP会员数
             }else{
                 $web_model->table('oc_vip_order')->query("set time_zone='+8:00'");
                 $sum_vip_num = $web_model->table('customer_entity')->where('is_vip',1)->count();//总VIP会员数
@@ -212,6 +212,7 @@ class UserDataViewVip extends Backend
     }
     public function export(){
         set_time_limit(0);
+        ini_set('memory_limit', '2048M');
         header ( "Content-type:application/vnd.ms-excel" );
         header ( "Content-Disposition:filename=" . iconv ( "UTF-8", "GB18030", date('Y-m-d-His',time()) ) . ".csv" );//导出文件名
 
@@ -263,7 +264,7 @@ class UserDataViewVip extends Backend
                 ->where($map)
                 ->count();
         }
-        $pre_count = 5000;
+        $pre_count = 100;
         for ($i=0;$i<intval($total_export_count/$pre_count)+1;$i++){
             $start = $i*$pre_count;
             if($order_platform == 3){
@@ -313,11 +314,18 @@ class UserDataViewVip extends Backend
                 $order_where['customer_id'] = $order_platform == 3 ? $val['user_id'] : $val['customer_id'];
                 $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered','delivery','shipped']];
                 $order_where['order_type'] = 1;
-                $order_time_where['payment_time'] = ['between',[strtotime($val['start_time']),strtotime($val['end_time'])]];
-                $tmpRow['vip_order_num'] = $this->order->where($order_where)->where($order_time_where)->count();
-                $tmpRow['vip_order_amount'] = $this->order->where($order_where)->where($order_time_where)->sum('base_grand_total');//VIP期间支付金额
-                $order_amount = $this->order->where($order_where)->sum('base_grand_total');  //总订单金额
-                $order_num = $this->order->where($order_where)->count();  //总订单数
+                if($order_platform == 3) {
+                    $model = $this->order;
+                    $order_time_where['payment_time'] = ['between',[strtotime($val['start_time']),strtotime($val['end_time'])]];
+                }else{
+                    $model = $order_model;
+                    $order_time_where['payment_time'] = ['between',[$val['start_time'],$val['end_time']]];
+                }
+
+                $tmpRow['vip_order_num'] = $model->where($order_where)->where($order_time_where)->count();
+                $tmpRow['vip_order_amount'] = $model->where($order_where)->where($order_time_where)->sum('base_grand_total');//VIP期间支付金额
+                $order_amount = $model->where($order_where)->sum('base_grand_total');  //总订单金额
+                $order_num = $model->where($order_where)->count();  //总订单数
                 $tmpRow['avg_order_amount'] = $order_num ? round($order_amount/$order_num,2) : 0;
                 $tmpRow['order_num'] = $order_num;
 

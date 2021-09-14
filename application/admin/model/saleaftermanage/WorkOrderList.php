@@ -456,7 +456,7 @@ class WorkOrderList extends Model
             $where['a.item_order_number'] = $item_order_number;
         }
 
-        $prescription_field = 'a.sku,a.name,b.prescription_type,b.index_type,b.index_id,b.coating_id,b.color_id,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.os_add,b.od_add,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r';
+        $prescription_field = 'a.sku,a.name,b.prescription_type,b.index_type,b.index_id,b.coating_id,b.color_id,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.os_add,b.od_add,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.prismcheck';
         $_order_item_process = new NewOrderItemProcess();
         $prescriptions = $_order_item_process
             ->alias('a')
@@ -625,7 +625,6 @@ class WorkOrderList extends Model
                 $postDatas = serialize($params);
                 Log::write($postDatas);
                 Log::write("补发单创建请求错误结束");
-//                file_put_contents('/www/wwwroot/mojing/runtime/log/a.txt',json_encode($params),FILE_APPEND);
                 exception('网站接口提示，错误信息：' . $res['message']);
             }else{
                 if (200 == $status) {
@@ -906,6 +905,7 @@ class WorkOrderList extends Model
                         'os_bd'                   => $changeLens['os_bd'] ?? '',
                         'os_pv_r'                 => $changeLens['os_pv_r'] ?? '',
                         'os_bd_r'                 => $changeLens['os_bd_r'] ?? '',
+                        'prismcheck'              => $changeLens['prismcheck'] ?? '',
                         'measure_id'              => $measure_id,
                         'create_person'           => $admin_id,
                         'update_time'             => $time,
@@ -1006,6 +1006,7 @@ class WorkOrderList extends Model
                             'os_bd'               => $changeLens['os_bd'][$key] ?? '',
                             'os_pv_r'             => $changeLens['os_pv_r'][$key] ?? '',
                             'os_bd_r'             => $changeLens['os_bd_r'][$key] ?? '',
+                            'prismcheck'          => $changeLens['prismcheck'][$key] ?? '',
                             'measure_id'          => $measure_id,
                             'create_person'       => $admin_id,
                             'update_time'         => $time,
@@ -1465,11 +1466,26 @@ class WorkOrderList extends Model
         $postData = [
             'rule_id' => $work->coupon_id,
         ];
+        $postData['ordernum'] = $work['platform_order'];
         try {
             if ($work['work_platform'] == 3){
-                $postData['ordernum'] = $work['platform_order'];
                 $res = $this->httpRequest($work['work_platform'], 'api/mj/receive', $postData, 'POST');
                 $work->coupon_str = $res['data']['coupon_id'];
+            }elseif ($work['work_platform'] == 2){
+                $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['coupon_id'];
+            }elseif ($work['work_platform'] == 10){
+                $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['coupon_id'];
+            }elseif ($work['work_platform'] == 1){
+                $res = $this->httpRequest($work['work_platform'], 'ios/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['coupon_id'];
+            }elseif ($work['work_platform'] == 15){
+                $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['coupon_id'];
+            }elseif ($work['work_platform'] == 11){
+                $res = $this->httpRequest($work['work_platform'], 'rest/Customer/receive', $postData, 'POST');
+                $work->coupon_str = $res['coupon_id'];
             }else{
                 $res = $this->httpRequest($work['work_platform'], 'magic/promotion/receive', $postData, 'POST');
                 $work->coupon_str = $res['coupon_code'];

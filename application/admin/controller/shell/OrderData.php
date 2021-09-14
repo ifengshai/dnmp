@@ -157,7 +157,7 @@ class OrderData extends Backend
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
                         //对该条message进行处理，比如用户数据同步， 记录日志
-                        echo $payload['database'] . '-' . $payload['type'] . '-' . $payload['table'];
+                        echo $payload['database'].'-'.$payload['type'].'-'.$payload['table'];
 
                         if ($payload) {
                             //根据库名判断站点
@@ -528,7 +528,7 @@ class OrderData extends Backend
                                         unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     } elseif ($site == Site::NIHAO) {
                                         $options = $this->nihao_prescription_analysis($v['prescription']);
-                                        $options['base_row_total'] = $v['goods_payable'];
+                                        $options['base_row_total'] = $v['base_goods_total_price'];
                                         $options['index_price'] = $v['lens_price'];
                                         $options['coating_price'] = $v['coating_price'];
                                         $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
@@ -863,7 +863,7 @@ class OrderData extends Backend
             $first = rtrim($temp_arr[0], 'S');
             $first = rtrim($first, 'R');
             $second = $temp_arr[1];
-            $sku = $first . '-' . $second;
+            $sku = $first.'-'.$second;
         }
 
         return $sku;
@@ -1082,8 +1082,8 @@ class OrderData extends Backend
         //镜片颜色
         $options['index_color'] = $options_params['lens_color'];
         $options['index_id'] = $options_params['lens_id'];
-        $options['web_lens_name'] = $options_params['lens_data_name'] . ' ' . $options_params['lens_type'];
-        $options['web_lens_name'] = isset($options_params['tint_color']) ? $options['web_lens_name'] . '-' . $options_params['tint_color'] : $options['web_lens_name'];
+        $options['web_lens_name'] = $options_params['lens_data_name'].' '.$options_params['lens_type'];
+        $options['web_lens_name'] = isset($options_params['tint_color']) ? $options['web_lens_name'].'-'.$options_params['tint_color'] : $options['web_lens_name'];
 
         //处方类型
         $options['prescription_type'] = $options_params['prescription_type'] ?: '';
@@ -1632,7 +1632,7 @@ class OrderData extends Backend
 
     /**
      *
-     * @param array $params
+     * @param  array  $params
      *
      * @return array
      * @throws DataNotFoundException
@@ -1651,20 +1651,25 @@ class OrderData extends Backend
         $arr['order_prescription_type'] = 0;
 
         //斜视值大于1 默认为定制片
-        if ($params['od_pv'] >= 1 || $params['os_pv'] >= 1 || $params['od_pv_r'] >= 1 || $params['os_pv_r'] >= 1) {
+        if (($params['prismcheck'] == 'on') && ($params['od_pv'] > 0 || $params['os_pv'] > 0 || $params['od_pv_r'] > 0 || $params['os_pv_r'] > 0)) {
             $arr['order_prescription_type'] = 3;
 
             return $arr;
         }
+//        if ($params['od_pv'] >= 1 || $params['os_pv'] >= 1 || $params['od_pv_r'] >= 1 || $params['os_pv_r'] >= 1) {
+//            $arr['order_prescription_type'] = 3;
+//
+//            return $arr;
+//        }
 
         //仅镜框
         if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
             $arr['order_prescription_type'] = 1;
         } else {
-            $od_sph = (float)urldecode($params['od_sph']);
-            $os_sph = (float)urldecode($params['os_sph']);
-            $od_cyl = (float)urldecode($params['od_cyl']);
-            $os_cyl = (float)urldecode($params['os_cyl']);
+            $od_sph = (float) urldecode($params['od_sph']);
+            $os_sph = (float) urldecode($params['os_sph']);
+            $od_cyl = (float) urldecode($params['od_cyl']);
+            $os_cyl = (float) urldecode($params['os_cyl']);
             //判断是否为现片，其余为定制
             $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
             $tempArr = [];
@@ -1678,10 +1683,10 @@ class OrderData extends Backend
                     $v['cyl_start'] = $v['cyl_end'];
                 }
 
-                $v['sph_start'] = (float)$v['sph_start'];
-                $v['sph_end'] = (float)$v['sph_end'];
-                $v['cyl_start'] = (float)$v['cyl_start'];
-                $v['cyl_end'] = (float)$v['cyl_end'];
+                $v['sph_start'] = (float) $v['sph_start'];
+                $v['sph_end'] = (float) $v['sph_end'];
+                $v['cyl_start'] = (float) $v['cyl_start'];
+                $v['cyl_end'] = (float) $v['cyl_end'];
 
                 if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
                     $tempArr['od'] = 1;
@@ -1707,7 +1712,7 @@ class OrderData extends Backend
     /**
      * 判断处方是否异常
      *
-     * @param array $params
+     * @param  array  $params
      *
      * @author wpl
      * @date   2021/4/23 9:31
@@ -1715,10 +1720,10 @@ class OrderData extends Backend
     protected function is_prescription_abnormal(array $params = []): array
     {
         $list = [];
-        $od_sph = (float)urldecode($params['od_sph']);
-        $os_sph = (float)urldecode($params['os_sph']);
-        $od_cyl = (float)urldecode($params['od_cyl']);
-        $os_cyl = (float)urldecode($params['os_cyl']);
+        $od_sph = (float) urldecode($params['od_sph']);
+        $os_sph = (float) urldecode($params['os_sph']);
+        $od_cyl = (float) urldecode($params['od_cyl']);
+        $os_cyl = (float) urldecode($params['os_cyl']);
         //截取镜片编码第一位
         $str = substr($params['lens_number'], 0, 1);
 
@@ -1789,12 +1794,12 @@ class OrderData extends Backend
                 $item_params[$key]['id'] = $val['id'];
                 $str = '';
                 if ($key < 9) {
-                    $str = '0' . ($key + 1);
+                    $str = '0'.($key + 1);
                 } else {
                     $str = $key + 1;
                 }
 
-                $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
+                $item_params[$key]['item_order_number'] = $res->increment_id.'-'.$str;
                 $item_params[$key]['order_id'] = $res->id ?: 0;
             }
             //更新数据
@@ -1802,7 +1807,7 @@ class OrderData extends Backend
                 $this->orderitemprocess->saveAll($item_params);
             }
 
-            echo $v['id'] . "\n";
+            echo $v['id']."\n";
             usleep(10000);
         }
 
@@ -1828,7 +1833,7 @@ class OrderData extends Backend
             $order_id = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->value('id');
             $params[$k]['id'] = $v['id'];
             $params[$k]['order_id'] = $order_id ?: 0;
-            echo $v['id'] . "\n";
+            echo $v['id']."\n";
         }
         //更新数据
         if ($params) {
@@ -1926,7 +1931,7 @@ class OrderData extends Backend
 
             if (!$id) {
                 $params = [];
-                $params['wave_order_number'] = 'BC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+                $params['wave_order_number'] = 'BC'.date('YmdHis').rand(100, 999).rand(100, 999);
                 $params['type'] = $type;
                 $params['wave_time_type'] = $wave_time_type;
                 $params['stock_id'] = $stockId;
@@ -1988,7 +1993,7 @@ class OrderData extends Backend
                 $type = 2;
 
                 // Zeelool站 1.61 折射率 现片 订单 分配到丹阳仓处理
-                $lens_name = $orderitemoption->where('magento_order_id', $value['entity_id'])->where('site', 1)->column('web_lens_name');
+                $lens_name = $orderitemoption->where('magento_order_id', $value['entity_id'])->where('site', 1)->where('prescription_type', '<>', 'Frameonly')->where('prescription_type', '<>', '')->column('web_lens_name');
                 if (array_reduce($lens_name, function ($carry, $item) {
                     return (!$item || strpos($item, '1.61') !== false) && $carry;
                 }, true)) {
@@ -2005,7 +2010,7 @@ class OrderData extends Backend
             $data['order_prescription_type'] = $type;
             $data['updated_at'] = time();
             $order->where('id', $value['id'])->update($data);
-            echo $value['id'] . ' is ok' . "\n";
+            echo $value['id'].' is ok'."\n";
             usleep(100000);
         }
     }
@@ -2097,7 +2102,7 @@ class OrderData extends Backend
             $order_params[$k]['entity_id'] = $v['id'];
             $order_params[$k]['increment_id'] = $v['order_no'];
 
-            echo $v['entity_id'] . "\n";
+            echo $v['entity_id']."\n";
             usleep(10000);
         }
         //插入订单处理表
@@ -2141,7 +2146,7 @@ class OrderData extends Backend
                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update($params);
             }
         }
-        echo $site . 'ok';
+        echo $site.'ok';
     }
 
 
@@ -2201,7 +2206,7 @@ class OrderData extends Backend
             }
         }
 
-        echo $site . 'ok';
+        echo $site.'ok';
     }
 
 
@@ -2281,7 +2286,7 @@ class OrderData extends Backend
             $order_params[$k]['order_id'] = $order_id;
             $order_params[$k]['entity_id'] = $v['entity_id'];
             $order_params[$k]['increment_id'] = $v['increment_id'];
-            echo $v['increment_id'] . "\n";
+            echo $v['increment_id']."\n";
             usleep(10000);
         }
         //插入订单处理表
@@ -2751,7 +2756,7 @@ class OrderData extends Backend
      */
     protected function order_payment_data($site)
     {
-        $list = $this->order->where('last_trans_id is null and site = ' . $site)->limit(4000)->select();
+        $list = $this->order->where('last_trans_id is null and site = '.$site)->limit(4000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
@@ -2781,7 +2786,7 @@ class OrderData extends Backend
                 $params[$k]['payment_method'] = $res[$v['entity_id']]['method'];
             }
             $this->order->saveAll($params);
-            echo $site . 'ok';
+            echo $site.'ok';
         }
     }
 
@@ -3058,7 +3063,7 @@ class OrderData extends Backend
 
 
         foreach ($list as $k => $v) {
-            $count = $this->orderitemprocess->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
+            $count = $this->orderitemprocess->where('site='.$site.' and item_id='.$v['item_id'])->count();
             if ($count > 0) {
                 continue;
             }
@@ -3116,7 +3121,7 @@ class OrderData extends Backend
                 }
                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['updated_at' => time() + 28800]);
             }
-            echo $v['item_id'] . "\n";
+            echo $v['item_id']."\n";
             usleep(10000);
         }
         echo "ok";
@@ -3142,7 +3147,7 @@ class OrderData extends Backend
      */
     protected function order_data($site)
     {
-        $list = $this->order->field('id,entity_id')->where('base_discount_amount is null and site = ' . $site)->limit(4000)->select();
+        $list = $this->order->field('id,entity_id')->where('base_discount_amount is null and site = '.$site)->limit(4000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
@@ -3170,7 +3175,7 @@ class OrderData extends Backend
         }
         $this->order->saveAll($params);
         usleep(100000);
-        echo $site . 'ok';
+        echo $site.'ok';
     }
 
 
@@ -3212,7 +3217,7 @@ class OrderData extends Backend
             }
             $params[$k]['id'] = $v['id'];
             $params[$k]['product_id'] = $product_id;
-            echo $k . "\n";
+            echo $k."\n";
         }
         $this->orderitemoption->saveAll($params);
         echo 'ok';
@@ -3242,14 +3247,14 @@ class OrderData extends Backend
 
     protected function order_item_data_shell_temp($site)
     {
-        $list = $this->orderitemoption->where('site=' . $site . ' and lens_number = 22304000')->limit(3000)->select();
+        $list = $this->orderitemoption->where('site='.$site.' and lens_number = 22304000')->limit(3000)->select();
         $list = collection($list)->toArray();
         $option_params = [];
         foreach ($list as $k => $v) {
             //处方解析 不同站不同字段
             $result = $this->set_processing_type($v);
             $this->orderitemprocess->where(['site' => $v['site'], 'item_id' => $v['item_id'], 'order_id' => $v['order_id']])->update(['order_prescription_type' => $result['order_prescription_type']]);
-            echo $v['item_id'] . "\n";
+            echo $v['item_id']."\n";
             usleep(10000);
         }
 
@@ -3299,7 +3304,7 @@ class OrderData extends Backend
             $params['single_base_discount_amount'] = $item_data[$v['item_id']]['qty_ordered'] > 0 ? round($item_data[$v['item_id']]['base_discount_amount'] / $item_data[$v['item_id']]['qty_ordered'], 4) : 0;
             $orderItemOption->where(['id' => $v['id']])->update($params);
 
-            echo $v['id'] . "\n";
+            echo $v['id']."\n";
             usleep(10000);
         }
         echo "ok";
@@ -3315,7 +3320,7 @@ class OrderData extends Backend
      */
     protected function order_address_data($site)
     {
-        $list = $this->order->where('firstname is null and site = ' . $site)->limit(3000)->select();
+        $list = $this->order->where('firstname is null and site = '.$site)->limit(3000)->select();
         $list = collection($list)->toArray();
         $entity_id = array_column($list, 'entity_id');
         if ($site == 1) {
@@ -3348,7 +3353,7 @@ class OrderData extends Backend
             // $params[$k]['telephone'] = $res[$v['entity_id']]['telephone'];
         }
         $this->order->saveAll($params);
-        echo $site . 'ok';
+        echo $site.'ok';
     }
 
     public function batch_payment_time()
@@ -3363,7 +3368,7 @@ class OrderData extends Backend
                 ->where('site', 5)
                 ->where('increment_id', $value['order_no'])
                 ->update(['payment_time' => $time]);
-            echo $value['order_no'] . ' is ok' . "\n";
+            echo $value['order_no'].' is ok'."\n";
             usleep(10000);
         }
     }

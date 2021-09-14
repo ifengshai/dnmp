@@ -5,7 +5,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             // 初始化表格参数配置
             Table.api.init({
                 extend: {
-                    index_url: 'oc_customer_after_sales_work_order/index' + location.search,
+                    index_url: 'oc_customer_after_sales_work_order/index' + location.search + '&site=' + Config.label,
                     add_url: 'oc_customer_after_sales_work_order/add',
                     edit_url: 'oc_customer_after_sales_work_order/edit',
                     del_url: 'oc_customer_after_sales_work_order/del',
@@ -87,7 +87,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     extend: 'data-area = \'["80%","80%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: Config.moduleurl + '/oc_customer_after_sales_work_order/question_detail',
+                                    url: function (row) {
+                                        return Config.moduleurl + '/oc_customer_after_sales_work_order/question_detail?site=' + Config.label + '&ids=' + row.id;
+                                    },
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -107,7 +109,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     extend: 'data-area = \'["80%","80%"]\'',
                                     classname: 'btn btn-xs btn-primary btn-dialog',
                                     icon: 'fa fa-list',
-                                    url: Config.moduleurl + '/oc_customer_after_sales_work_order/complaints_detail',
+                                    url: function (row) {
+                                        return Config.moduleurl + '/oc_customer_after_sales_work_order/complaints_detail?site=' + Config.label + '&ids=' + row.id;
+                                    },
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
                                     },
@@ -128,7 +132,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     classname: 'btn btn-xs btn-warning btn-addtabs',
                                     icon: 'fa fa-pencil',
 
-                                    url: Config.moduleurl + '/saleaftermanage/order_return/search',
+                                    url: function (row) {
+                                        return Config.moduleurl + '/saleaftermanage/order_return/search?order_platform=' + Config.label + '&email=' + row.email + '&increment_id=' + row.increment_id;
+                                    },
 
                                     callback: function (data) {
                                         Layer.alert("接收到回传数据：" + JSON.stringify(data), { title: "回传数据" });
@@ -151,6 +157,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             // 为表格绑定事件
             Table.api.bindevent(table);
+
+            //选项卡切换
+            $('.panel-heading a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var value = $(this).data("value");
+                var options = table.bootstrapTable('getOptions');
+                options.pageNumber = 1;
+                var queryParams = options.queryParams;
+                options.queryParams = function (params) {
+                    params = queryParams(params);
+                    params.site = value;
+                    var op = params.op ? JSON.parse(params.op) : {};
+                    params.op = JSON.stringify(op);
+                    return params;
+                };
+                table.bootstrapTable('refresh', {});
+                Config.label = value
+            });
         },
         add: function () {
             Controller.api.bindevent();
@@ -168,15 +191,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 var type = $(this).val();
                 if (type == 'Submitted') {
                     $('#pm_audit_status').val(1);
-                    $("#demand_edit").attr('action', 'oc_customer_after_sales_work_order/question_detail');
+                    $("#demand_edit").attr('action', 'oc_customer_after_sales_work_order/question_detail?site=' + Config.label);
                 }
                 if (type == 'Processing') {
                     $('#pm_audit_status').val(2);
-                    $("#demand_edit").attr('action', 'oc_customer_after_sales_work_order/question_detail');
+                    $("#demand_edit").attr('action', 'oc_customer_after_sales_work_order/question_detail?site=' + Config.label);
                 }
                 if (type == 'Completed') {
                     $('#pm_audit_status').val(3);
-                    $("#demand_edit").attr('action', 'oc_customer_after_sales_work_order/question_detail');
+                    $("#demand_edit").attr('action', 'oc_customer_after_sales_work_order/question_detail?site=' + Config.label);
                 }
                 $("#demand_edit").submit();
             });
@@ -206,7 +229,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 gettitle: {
                     //格式为：方法名+空格+DOM元素
                     'click .btn-gettitle': function (e, value, row, index) {
-                        Backend.api.open('oc_customer_after_sales_work_order/question_detail/type/1/ids/' + row.id, __('问题查看'), { area: ['70%', '70%'] });
+                        Backend.api.open('oc_customer_after_sales_work_order/question_detail/type/1/ids/' + row.id + '?site=' + Config.label, __('问题查看'), { area: ['70%', '70%'] });
                     }
                 },
             }

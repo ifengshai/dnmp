@@ -105,15 +105,18 @@
                     <td><input class="form-control" name="row[replacement][pd_l][]" placeholder="单pd填写到上边即可" type="text" value="">
                     </td>
                 </tr>
-
-                <tr>
+                <tr style="width: 200px;">
+                    <td style="text-align: center">AddPrism</td>
+                    <td><input type="checkbox" id="replacement_prismcheck" name="row[replacement][prismcheck][]" style="margin-left: 10px;" value="on" checked></td>
+                </tr>
+                <tr class="replacement_prism_isshow">
                     <td style="text-align: center"></td>
                     <td style="text-align: center">Prism Horizontal</td>
                     <td style="text-align: center">Base Direction</td>
                     <td style="text-align: center">Prism Vertical</td>
                     <td style="text-align: center">Base Direction</td>
                 </tr>
-                <tr>
+                <tr class="replacement_prism_isshow">
                     <td style="text-align: center">Right(OD)</td>
                     <td><input class="form-control" type="text" name="row[replacement][od_pv][]" value="">
                     </td>
@@ -124,7 +127,7 @@
                     <td><input class="form-control" type="text" name="row[replacement][od_bd_r][]"
                                value=""></td>
                 </tr>
-                <tr>
+                <tr class="replacement_prism_isshow">
                     <td style="text-align: center">Left(OS)</td>
                     <td><input class="form-control" name="row[replacement][os_pv][]" type="text" value="">
                     </td>
@@ -272,15 +275,22 @@
                         {/if}
                     </td>
                 </tr>
-
                 <tr>
+                    <td style="text-align: center">AddPrism</td>
+                    {if condition="$vo['prismcheck'] == 'on'"}
+                    <td><input type="checkbox" id="change_lens_prismcheck" name="row[item_order_info][{$item_order_number}][change_lens][prismcheck]" style="margin-left: 10px;" value="on" checked></td>
+                    {else /}
+                    <td><input type="checkbox" id="change_lens_prismcheck" name="row[item_order_info][{$item_order_number}][change_lens][prismcheck]" style="margin-left: 10px;" value="on"></td>
+                    {/if}
+                </tr>
+                <tr class="change_lens_prism_isshow" {if condition="$vo['prismcheck'] != 'on'"}style="display:none"{/if}>
                     <td style="text-align: center"></td>
                     <td style="text-align: center">Prism Horizontal</td>
                     <td style="text-align: center">Base Direction</td>
                     <td style="text-align: center">Prism Vertical</td>
                     <td style="text-align: center">Base Direction</td>
                 </tr>
-                <tr>
+                <tr class="change_lens_prism_isshow" {if condition="$vo['prismcheck'] != 'on'"}style="display:none"{/if}>
                     <td style="text-align: center">Right(OD)</td>
                     <td><input class="form-control" type="text" name="row[item_order_info][{$item_order_number}][change_lens][od_pv]" value="{$vo['od_pv']}">
                     </td>
@@ -291,7 +301,7 @@
                     <td><input class="form-control" type="text" name="row[item_order_info][{$item_order_number}][change_lens][od_bd_r]"
                                value="{$vo['od_bd_r']}"></td>
                 </tr>
-                <tr>
+                <tr class="change_lens_prism_isshow" {if condition="$vo['prismcheck'] != 'on'"}style="display:none"{/if}>
                     <td style="text-align: center">Left(OS)</td>
                     <td><input class="form-control" name="row[item_order_info][{$item_order_number}][change_lens][os_pv]" type="text" value="{$vo['os_pv']}">
                     </td>
@@ -407,15 +417,18 @@
                     <td><input class="form-control" name="row[gift][pd_l][]" placeholder="单pd填写到上边即可" type="text" value="">
                     </td>
                 </tr>
-
                 <tr>
+                    <td style="text-align: center">AddPrism</td>
+                    <td><input type="checkbox" id="gift_prismcheck" name="row[gift][prismcheck][]" style="margin-left: 10px;" value="on" checked></td>
+                </tr>
+                <tr class="gift_prism_isshow">
                     <td style="text-align: center"></td>
                     <td style="text-align: center">Prism Horizontal</td>
                     <td style="text-align: center">Base Direction</td>
                     <td style="text-align: center">Prism Vertical</td>
                     <td style="text-align: center">Base Direction</td>
                 </tr>
-                <tr>
+                <tr class="gift_prism_isshow">
                     <td style="text-align: center">Right(OD)</td>
                     <td><input class="form-control" type="text" name="row[gift][od_pv][]" value="">
                     </td>
@@ -426,7 +439,7 @@
                     <td><input class="form-control" type="text" name="row[gift][od_bd_r][]"
                                value=""></td>
                 </tr>
-                <tr>
+                <tr class="gift_prism_isshow">
                     <td style="text-align: center">Left(OS)</td>
                     <td><input class="form-control" name="row[gift][os_pv][]" type="text" value="">
                     </td>

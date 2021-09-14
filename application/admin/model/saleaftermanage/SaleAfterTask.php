@@ -793,6 +793,9 @@ class SaleAfterTask extends Model
             case 11:
                 $db = 'database.db_zeelool_jp';
                 break;
+            case 15:
+                $db = 'database.db_zeelool_fr';
+                break;
             default:
                 return false;
                 break;
@@ -888,6 +891,19 @@ class SaleAfterTask extends Model
                 $result[$k]['additional_information']['paypal_payer_id'] = $paypalLog['result']['id'];
                 $result[$k]['additional_information']['paypal_payment_status'] = $paypalLog['result']['status'];
                 $result[$k]['additional_information']['paypal_payer_status'] = $paypalLog['result']['status'];
+
+                //查询优惠卷规则和优惠码
+                if (is_numeric($v['coupon_rule_name'])) {
+                    $couponData = Db::connect($db)
+                        ->table('discount_coupon_tickets')
+                        ->alias('a')
+                        ->field('a.code,b.subhead')
+                        ->where(['a.id' => $v['coupon_rule_name']])
+                        ->join(['discount_coupons' =>'b'],'a.discount_coupon_id=b.id')
+                        ->find();
+                    $result[$k]['coupon_code'] = $couponData['subhead'] ?? '';
+                    $result[$k]['coupon_rule_name'] = $couponData['code'] ?? '';
+                }
 
             } else {
                 //查询交易信息
