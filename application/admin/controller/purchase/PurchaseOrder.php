@@ -714,7 +714,15 @@ class PurchaseOrder extends Backend
             $logistics = new \app\admin\model\LogisticsInfo();
             $logistics_data = $logistics->where('purchase_id', 'in', $ids)->select();
             $logistics_data = collection($logistics_data)->toArray();
+            $is_sign = 0;
+            foreach ($logistics_data as $k => $v) {
+                if ($v['status'] == 1) {
+                    $is_sign = 1;
+                }
+            }
+
             $this->view->assign("logistics_data", $logistics_data);
+            $this->view->assign("is_sign", $is_sign);
         }
 
         $adminIds = $this->getDataLimitAdminIds();
@@ -762,8 +770,9 @@ class PurchaseOrder extends Backend
                             return array_merge($result, array_values($value));
                         }, []);
                     }
-                    $have_logistics = $logistics->whereIn('logistics_number', $result)->where('status', 1)->count();
-                    $count_result = count($result);
+                    $have_logistics = $logistics->whereIn('logistics_number', $result)->where('status', 1)->group('logistics_number')->count();
+
+                    $count_result = is_array($result) ? count(array_unique($result)) : 0;
                     if ($have_logistics == 0) {
                         $purchase_status = 6;
                     } else {
@@ -773,6 +782,7 @@ class PurchaseOrder extends Backend
                             $purchase_status = 9;
                         }
                     }
+
                     //添加物流单明细表
                     if ($params['batch_id']) {
                         $i = 0;

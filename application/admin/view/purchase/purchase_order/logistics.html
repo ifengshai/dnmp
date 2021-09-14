@@ -15,7 +15,11 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">选择收货仓:</label>
             <div class="col-xs-12 col-sm-3">
-                <select name="stock_id[{$v.id}]" class="form-control" data-rule="required">
+                {if $is_sign == 1}
+                <input type="hidden" name="stock_id[{$v.id}]" value="{$v->receiving_warehouse}">
+                {/if}
+
+                <select name="stock_id[{$v.id}]" class="form-control"  data-rule="required" {:$is_sign == 1 ? 'disabled':''}>
                     <option value="" >请选择</option>
                     <option value="1" {:$v->receiving_warehouse == 1 ? 'selected':''}>郑州仓</option>
                     <option value="2" {:$v->receiving_warehouse == 2 ? 'selected':''}>丹阳仓</option>
@@ -68,7 +72,12 @@
         <div class="form-group">
             <label class="control-label col-xs-12 col-sm-2">选择收货仓:</label>
             <div class="col-xs-12 col-sm-3">
-                <select name="stock_id" class="form-control" data-rule="required">
+
+
+                {if $is_sign == 1}
+                <input type="hidden" name="stock_id" value="{$row->receiving_warehouse}">
+                {/if}
+                <select name="stock_id" class="form-control" data-rule="required" {:$is_sign == 1 ? 'disabled':''}>
                     <option value="">请选择</option>
                     <option value="1" {:$row->receiving_warehouse == 1 ? 'selected':''}>郑州仓</option>
                     <option value="2" {:$row->receiving_warehouse == 2 ? 'selected':''}>丹阳仓</option>
