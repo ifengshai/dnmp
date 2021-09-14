@@ -203,7 +203,12 @@ class ScmQuality extends Scm
         if ($start_time && $end_time) {
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
-
+        $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?? 1;
+        if ($stock_warehouse) {
+            $where['d.sign_warehouse'] = $stock_warehouse;
+        }else{
+            $this->error('没有权限');
+        }
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
@@ -214,6 +219,7 @@ class ScmQuality extends Scm
             ->field('a.id,a.check_order_number,a.createtime,a.status,c.purchase_number,b.sku,a.create_person,a.logistics_id,a.batch_id,b.remark')
             ->join(['fa_check_order_item' => 'b'], 'a.id=b.check_id', 'left')
             ->join(['fa_purchase_order' => 'c'], 'a.purchase_id=c.id')
+            ->join(['fa_logistics_info' => 'd'], 'a.logistics_id=d.id', 'left')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
@@ -1048,7 +1054,7 @@ class ScmQuality extends Scm
             ->join(['fa_purchase_order' => 'b'], 'a.purchase_id=b.id')
             ->where($where)
             ->where('a.type', 1)//采购单类型
-            ->field('a.id,a.logistics_number,a.sign_number,a.createtime,a.sign_time,a.status,purchase_id,a.type,a.is_check_order,a.batch_id,b.is_new_product')
+            ->field('a.id,a.logistics_number,a.sign_number,a.createtime,a.sign_time,a.status,purchase_id,a.type,a.is_check_order,a.batch_id,b.is_new_product,a.receiving_warehouse,a.sign_warehouse,a.sign_person')
             ->order('b.is_new_product desc,a.createtime desc,id')
             ->limit($offset, $limit)
             ->select();
@@ -1108,8 +1114,11 @@ class ScmQuality extends Scm
         $this->_purchase_order->startTrans();
         $this->_item_platform_sku->startTrans();
         try {
+            $adminId = $this->auth->id;
+            $stockPerson = config('workorder.stock_person');
             $logistics_save = [
                 'sign_person' => $this->auth->nickname,
+                'sign_warehouse' => $stockPerson[$adminId] ?? 1,
                 'sign_time'   => date('Y-m-d H:i:s'),
                 'status'      => 1,
                 'sign_number' => $sign_number,
@@ -1271,8 +1280,11 @@ class ScmQuality extends Scm
         try {
             foreach ($logistics_ids as $k => $v) {
                 $row = $this->_logistics_info->get($v);
+                $adminId = $this->auth->id;
+                $stockPerson = config('workorder.stock_person');
                 $logistics_save = [
                     'sign_person' => $this->auth->nickname,
+                    'sign_warehouse' => $stockPerson[$adminId] ?? 1,
                     'sign_time'   => date('Y-m-d H:i:s'),
                     'status'      => 1,
                     'sign_number' => $sign_number,
@@ -1402,5 +1414,64 @@ class ScmQuality extends Scm
         }
 
         $this->success('签收成功', [], 200);
+    }
+
+    /**
+     * 单个物流单号是否错仓签收
+     * @author jianghaohui
+     * @date   2021/9/1 14:13:59
+     */
+    public function is_wrong_sign()
+    {
+        $ids = $this->request->request('logistics_id');
+        if (!$ids) {
+            $this->error(__('物流单ID不能为空'), [], 403);
+        }
+        $row = $this->_logistics_info->get($ids);
+        $adminId = $this->auth->id;
+        $stockPerson = config('workorder.stock_person');
+        if (!$stockPerson[$adminId]) {
+            //$this->error('获取不到当前仓库人员所属仓库，无法签收，请联系产品','',500);
+            $stockPerson[$adminId] = 1;
+        }
+        //相等 没错仓
+        if ($row['receiving_warehouse'] == $stockPerson[$adminId]) {
+            $this->success('', '', 200);
+        } else {
+            $this->error('收货仓与签收仓不一致，确定签收吗？', '',201);
+        }
+    }
+
+    /**
+     * 多个物流单号是否错仓签收
+     * @author jianghaohui
+     * @date   2021/9/1 14:14:12
+     */
+    public function is_wrong_sign_batch()
+    {
+        $ids = $this->request->request('logistics_ids');
+        empty($ids) && $this->error(__('物流单ID不能为空'), [], 403);
+
+        $ids = explode(',', $ids);
+
+        $row = $this->_logistics_info->where('id', 'in', $ids)->select();
+        $adminId = $this->auth->id;
+        $stockPerson = config('workorder.stock_person');
+        if (empty($stockPerson[$adminId])) {
+            //$this->error('获取不到当前仓库人员所属仓库，无法签收，请联系产品','',500);
+            $stockPerson[$adminId] = 1;
+        }
+        $arr = [];
+        foreach ($row as $v) {
+            if ($v['receiving_warehouse'] !== $stockPerson[$adminId]) {
+                array_push($arr, $v['logistics_number']);
+            }
+        }
+        if (empty($arr)) {
+            //物流单号没有错仓签收的
+            $this->success('', '', 200);
+        } else {
+            $this->error('物流单号'.implode(",", $arr).'收货仓与签收仓不一致，确定签收吗？', '',201);
+        }
     }
 }
