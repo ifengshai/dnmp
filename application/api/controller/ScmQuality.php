@@ -203,7 +203,7 @@ class ScmQuality extends Scm
         if ($start_time && $end_time) {
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
-        $stock_warehouse = config('workorder.stock_person')[$this->auth->id];
+        $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?? 1;
         if ($stock_warehouse) {
             $where['d.sign_warehouse'] = $stock_warehouse;
         }else{
@@ -1118,7 +1118,7 @@ class ScmQuality extends Scm
             $stockPerson = config('workorder.stock_person');
             $logistics_save = [
                 'sign_person' => $this->auth->nickname,
-                'sign_warehouse' => $stockPerson[$adminId],
+                'sign_warehouse' => $stockPerson[$adminId] ?? 1,
                 'sign_time'   => date('Y-m-d H:i:s'),
                 'status'      => 1,
                 'sign_number' => $sign_number,
@@ -1284,7 +1284,7 @@ class ScmQuality extends Scm
                 $stockPerson = config('workorder.stock_person');
                 $logistics_save = [
                     'sign_person' => $this->auth->nickname,
-                    'sign_warehouse' => $stockPerson[$adminId],
+                    'sign_warehouse' => $stockPerson[$adminId] ?? 1,
                     'sign_time'   => date('Y-m-d H:i:s'),
                     'status'      => 1,
                     'sign_number' => $sign_number,

@@ -218,7 +218,7 @@ class LogisticsInfo extends Backend
             $adminId = session('admin.id');
             $stockPerson = config('workorder.stock_person');
             $params['sign_person'] = session('admin.nickname');
-            $params['sign_warehouse'] = $stockPerson[$adminId];
+            $params['sign_warehouse'] = $stockPerson[$adminId] ?? 1;
             $params['sign_time'] = date('Y-m-d H:i:s');
             $params['status'] = 1;
             $res = $this->model->save($params, ['id' => $ids]);
