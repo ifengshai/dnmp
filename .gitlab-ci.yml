@@ -7,7 +7,7 @@ jobTest_env:
     - cd /opt/code/mojing
     - sudo git pull origin test
   tags:
-    - test-mojing-lan-runner
+    - online-test-node01-runner
   only:
     - test
 jobMaster_env:

@@ -793,6 +793,9 @@ class SaleAfterTask extends Model
             case 11:
                 $db = 'database.db_zeelool_jp';
                 break;
+            case 15:
+                $db = 'database.db_zeelool_fr';
+                break;
             default:
                 return false;
                 break;
@@ -805,10 +808,10 @@ class SaleAfterTask extends Model
 
         //根据订单号搜索
         if ($increment_id) {
-            $customer_email = $order->where('site', $order_platform)->where('increment_id', $increment_id)->value('customer_email');
+            $customer_email = $order->where('site', $order_platform)->where('increment_id','like', '%' . $increment_id . '%')->value('customer_email');
             //如果输入的是vip订单号
             if (!$customer_email && $order_platform < 3) {
-                $customer_email = $vip->where('order_number', $increment_id)->value('customer_email');
+                $customer_email = $vip->where('order_number', '%' . $increment_id . '%')->value('customer_email');
             }
         }
 
@@ -820,7 +823,7 @@ class SaleAfterTask extends Model
 
         //根据客户电话搜索
         if ($customer_phone) {
-            $customer_email = $order->where('site', $order_platform)->where('telephone', $customer_phone)
+            $customer_email = $order->where('site', $order_platform)->where('telephone','%' . $customer_phone . '%')
                 ->value('customer_email');
         }
 
@@ -914,6 +917,7 @@ class SaleAfterTask extends Model
                 $address = Db::connect($db)->table('order_addresses')
                     ->where(['order_id' => $v['entity_id']])
                     ->field('type as address_type,telephone,postcode,street,city,region,country_id,firstname,lastname')
+                    ->order('address_type desc')
                     ->select();
             } else {
                 $address = Db::connect($db)->table('sales_flat_order_address')
