@@ -349,7 +349,7 @@ class SaleAfterTask extends Model
         }
         if ($order_platform == 3) {
             $_new_order = new NewOrder();
-            $result = $_new_order->where('customer_email', 'like', "%{$email}%")->field('customer_email')->group('customer_email')->limit(10)->select();
+            $result = $_new_order->where('site', $order_platform)->where('customer_email', 'like', "%{$email}%")->field('customer_email')->group('customer_email')->limit(10)->select();
         }else{
             $result = Db::connect($db)->table('sales_flat_order')->where('customer_email', 'like', "%{$email}%")->field('customer_email')->group('customer_email')->limit(10)->select();
         }
@@ -400,7 +400,7 @@ class SaleAfterTask extends Model
         $map[] = ['exp', Db::raw("replace(telephone,'-','') like '%{$customer_phone}%'")];
         if ($order_platform == 3) {
             $_new_order = new NewOrder();
-            $result = $_new_order->where($map)->field('telephone')->limit(10)->select();
+            $result = $_new_order->where('site', $order_platform)->where($map)->field('telephone')->limit(10)->select();
         }else{
             $result = Db::connect($db)->table('sales_flat_order_address')->where($map)->field('telephone')->limit(10)->select();
         }
@@ -452,7 +452,7 @@ class SaleAfterTask extends Model
         }
         if ($order_platform) {
             $_new_order = new NewOrder();
-            $result = $_new_order->where('customer_firstname', 'like', "%{$customer_name}%")->whereOr('customer_lastname', 'like', "%{$customer_name}%")->field('customer_firstname,customer_lastname')->limit(10)->select();
+            $result = $_new_order->where('site', $order_platform)->where('customer_firstname', 'like', "%{$customer_name}%")->whereOr('customer_lastname', 'like', "%{$customer_name}%")->field('customer_firstname,customer_lastname')->limit(10)->select();
         }else{
             $result = Db::connect($db)->table('sales_flat_order')->where('customer_firstname', 'like', "%{$customer_name}%")->whereOr('customer_lastname', 'like', "%{$customer_name}%")->field('customer_firstname,customer_lastname')->limit(10)->select();
         }
@@ -504,7 +504,7 @@ class SaleAfterTask extends Model
         }
         if ($order_platform == 3) {
             $_new_order = new NewOrderProcess();
-            $result = $_new_order->where('track_number', 'like', "%{$track_number}%")->field('track_number')->limit(10)->select();
+            $result = $_new_order->where('site', $order_platform)->where('track_number', 'like', "%{$track_number}%")->field('track_number')->limit(10)->select();
         }else{
             $result = Db::connect($db)->table('sales_flat_shipment_track')->where('track_number', 'like', "%{$track_number}%")->field('track_number')->limit(10)->select();
         }
@@ -555,7 +555,7 @@ class SaleAfterTask extends Model
         }
         if ($order_platform == 3) {
             $_new_order = new NewOrder();
-            $result = $_new_order->where('last_trans_id', 'like', "%{$transaction_id}%")->field('last_trans_id')->limit(10)->select();
+            $result = $_new_order->where('site', $order_platform)->where('last_trans_id', 'like', "%{$transaction_id}%")->field('last_trans_id')->limit(10)->select();
         }else{
             $result = Db::connect($db)->table('sales_flat_order_payment')->where('last_trans_id', 'like', "%{$transaction_id}%")->field('last_trans_id')->limit(10)->select();
         }
