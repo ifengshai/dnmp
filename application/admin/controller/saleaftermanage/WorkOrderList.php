@@ -58,7 +58,7 @@ class WorkOrderList extends Backend
      * @var \app\admin\model\saleaftermanage\WorkOrderList
      */
     protected $model = null;
-    protected $noNeedLogin = ['batch_export_xls_array', 'batch_export_xls_array_copy'];
+    protected $noNeedLogin = ['batch_export_xls_array', 'batch_export_xls_array_copy','getSpuList'];
 
     public function _initialize()
     {
