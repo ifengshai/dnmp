@@ -3665,6 +3665,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $('.selectpicker ').selectpicker('refresh');
                             });
                         }else if(!$('.item' + use_flag + '_step27-27').is(':hidden')){
+
+                            $('.step24_lens_back').hide();
                             $('#c-customer_return_order').show();
                         }else{
                             $('.step24_lens_back').hide();
@@ -3904,6 +3906,7 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
         if($('#step3').prop('checked')) return false;
         $('#z-order_sku').html('');
         $('.step24_lens_back').hide();
+        $('.step27').hide();
         $('#section_item_content').show();
         $('#section_item_content').html('');
         $("#item_input-hidden").html("");
