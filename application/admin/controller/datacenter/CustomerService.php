@@ -224,6 +224,7 @@ class CustomerService extends Backend
         $positive_effect_num = $this->zendeskTasks->positive_effect_num(1);
         //获取表格内容
         $customer_data = $this->get_worknum_table(1);
+
         $this->view->assign(compact('deal_num', 'no_up_to_day', 'positive_effect_num', 'customer_data'));
         return $this->view->fetch();
     }
@@ -253,6 +254,10 @@ class CustomerService extends Backend
         $map['due_id'] = ['neq',0];
         $map['is_admin'] = 1;
         $all_service_ids = $this->zendeskComments->where($map)->column('due_id');
+        //求出用户是否是vip组
+        $all_zendesk_admin = Db::name('zendesk_admin')->column('group','admin_id');
+//        var_dump($all_zendesk_admin);
+//        exit;
         $all_service = array_unique($all_service_ids);
         foreach ($all_service as $item=>$value){
             $admin = Db::name('admin')->where('id',$value)->field('nickname,group_id')->find();
@@ -267,6 +272,15 @@ class CustomerService extends Backend
                 $data[$i]['group_name'] = 'B组';
             } else {
                 $data[$i]['group_name'] = '';
+            }
+            //求出这个客服是否是vip客服
+            $data[$i]['is_vip'] = $all_zendesk_admin[$value];
+            if($data[$i]['is_vip']){ //如果是vip客服
+                //vip客服的评价数量以及好评率
+                $data[$i]['one']['estimate'] = $this->zendeskComments->dealnum_estimate($platform,$time_str1,$value,1);
+            }else{
+                //普通客服的评价数量以及好评率
+                $data[$i]['one']['estimate'] = $this->zendeskComments->dealnum_estimate($platform,$time_str1,$value,0);
             }
             $data[$i]['time'] = $time_time;
             //时间
