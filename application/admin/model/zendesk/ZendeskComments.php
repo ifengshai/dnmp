@@ -56,36 +56,115 @@ class ZendeskComments extends Model
     }
 
     /**计算客服评价数量以及好评率
-     * @param $platform
-     * @param $time_str1
-     * @param $value
-     * @param  int  $is_vip
-     *
+     * @param $platform 平台
+     * @param $time_str1 筛选时间
+     * @param $all_service 所有的客服人员
      * @author liushiwei
      * @date   2021/9/15 10:26
      */
-    public function dealnum_estimate($platform,$time_str ='',$admin_id=0,$is_vip=1)
+    public function dealnum_estimate($platform,$time_str ='',$all_service)
     {
+        //平台
         if($platform){
-            $where['c.platform'] = $platform;
+            $where['type'] = $platform;
         }
-        $where['c.due_id'] = ['neq',0];
+        //筛选时间
         if($time_str){
             $createat = explode(' ', $time_str);
-            $where['c.zendesk_update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
+            $where['zendesk_update_time'] = ['between', [$createat[0] . ' ' . $createat[1], $createat[3]  . ' ' . $createat[4]]];
         }else{
             $start = date('Y-m-d', strtotime('-6 day'));
             $end   = date('Y-m-d 23:59:59');
-            $where['c.zendesk_update_time'] = ['between', [$start,$end]];
+            $where['zendesk_update_time'] = ['between', [$start,$end]];
         }
+        //关闭状态
+        $where['status'] = 5;
+        $where['rating_type'] = ['gt',0];
+        //先求出所有的邮件
+        $result = Db::name('zendesk')->where($where)->field('id,type,email,assign_id,rating_type')->select();
+        $arr = [];
+        //所有客服人员的好评数量以及好评率默认都是0
+        foreach($all_service as $value){
+            $arr[$value]['estimate'] = 0; //评价数量
+            $arr[$value]['goods_estimate_num'] = 0; //好评数量
+            $arr[$value]['goods_estimate_rate'] = 0; //好评率
+        }
+        if(!$result){
+            return $arr;
+        }
+        switch ($platform) {
+            case 1:
+                $webModel = Db::connect('database.db_zeelool');
+                break;
+            case 2:
+                $webModel = Db::connect('database.db_voogueme');
+                break;
+            case 3:
+                $webModel = Db::connect('database.db_nihao');
+                break;
+        }
+        //求出所有的vip客服
+        $vip_customer_service = Db::name('zendesk_admin')->where(['group'=>1])->column('admin_id');
+        foreach($result as $k =>$v){
+            if($platform != 3){
+                $group = $webModel->table('customer_entity')->where('email', $v['email'])->value('group_id');
+                if($group!=4){
+                    $is_vip_email = 0; //不是vip邮件
+                }else{
+                    $is_vip_email = 1; //是vip邮件
+                }
+            }else{
+                $group = $webModel->table('users')->where('email', $v['email'])->value('group');
+                if($group!=2){
+                    $is_vip_email = 0;
+                }else{
+                    $is_vip_email = 1;
+                }
+            }
+            //如果是vip邮件
+            if($is_vip_email == 1){
+                //如果第一承接人存在的话，承接人就是当前客服
+                if($v['assign_id']){
+                    if($v['rating_type']>0){
+                        $arr[$v['assign_id']]['estimate'] +=1;
+                    }
+                    if($v['rating_type'] == 1){
+                        $arr[$v['assign_id']]['goods_estimate_num']+=1;
+                    }
+                }else{ //如果第一承接人是空的话,处理人中vip客服处理时间最早的客服是当前客服
+                    $where_comment['is_admin'] = 1;
+                    $where_comment['is_public'] = ['neq',2];
+                    $where_comment['channel'] = ['neq','voice'];
+                    $where_comment['zid'] = $v['id'];
+                    $where_comment['due_id'] = ['in',$vip_customer_service];
+                    $handle_comment_reult = $this->where($where_comment)->field('id,due_id')->order('id')->find();
+                    if($handle_comment_reult){
+                        $arr[$handle_comment_reult['due_id']]['estimate'] +=1;
+                        if($v['rating_type'] == 1){
+                            $arr[$v['assign_id']]['goods_estimate_num']+=1;
+                        }
+
+                    }
+                }
+
+
+            }else{
+
+            }
+
+        }
+
+
+
+
         if($admin_id){
-            $where['c.due_id'] = $admin_id;
+            $where['c.assign_id'] = $admin_id;
         }
         $where['c.is_admin'] = 1;
         $where['c.is_public'] = ['neq',2];
         $where['z.channel'] = ['neq','voice'];
         //关闭状态的
-        $where['c.status'] = 5;
+
 
         $count = $this->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
         return $count;
