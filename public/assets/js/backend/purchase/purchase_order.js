@@ -314,7 +314,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var ids = Table.api.selectedids(table);
 
                 var url = 'purchase/purchase_order/logistics?ids=' + ids;
-                Fast.api.open(url, __('录入物流单号'), {area: ['50%', '60%']});
+                Fast.api.open(url, __('录入物流单号'), {area: ['60%', '80%']});
 
                 return false;
             });
@@ -853,11 +853,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                 var shtml = '<div class="form-group">' +
                     '<label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>' +
                     '<div class="col-xs-12 col-sm-3">' +
-                    '<input id="c-logistics_company_no" class="form-control" name="logistics_company_no[' + batch_id + '][]" value="" type="text" placeholder="注意：请输入下方表格对应的物流公司编码">' +
+                    '<input id="c-logistics_company_no" class="form-control" name="logistics_company_no[' + batch_id + '][]" value="" type="text" placeholder="请输入对应的物流公司编码">' +
                     '</div>' +
                     '<label class="control-label col-xs-12 col-sm-2">物流单号:</label>' +
                     '<div class="col-xs-12 col-sm-3">' +
-                    '<input id="c-logistics_number" class="form-control" name="logistics_number[' + batch_id + '][]" type="text">' +
+                    '<input id="c-logistics_number" class="form-control" name="logistics_number[' + batch_id + '][]" type="text" placeholder="请输入物流单号">' +
                     '</div>' +
                     '<a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>' +
                     '</div>';
@@ -1050,6 +1050,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             formatter: Controller.api.formatter.getClear,
                             operate: false
                         },
+                        {
+                            field: 'logistics_info.sign_warehouse',
+                            title: __('签收仓'),
+                            formatter: Controller.api.formatter.warehouse_pattern
+                        },
                         {field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange'},
                         {field: 'create_person', title: __('Create_person')},
                         {field: 'sku', title: __('sku'), operate: 'like', visible: false},
@@ -1139,6 +1144,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             //批量生成退销单
             $(document).on('click', '.btn-matching', function () {
+
+                var warehouse = $.map(table.bootstrapTable('getSelections'), function (row) {
+                    return row.logistics_info.sign_warehouse;
+                });
+                var supplier = $.map(table.bootstrapTable('getSelections'), function (row) {
+                    console.log(row)
+                    return row.supplier.id;
+                });
+                if (new Set(warehouse).size > 1 || new Set(supplier).size > 1) {
+                    Layer.alert("同一供应商且同一签收仓才可批量生成退销单，请重试");
+                    return;
+                }
+
                 var ids = Table.api.selectedids(table);
 
                 Backend.api.open('warehouse/check/add_return_order/ids/' + ids, '批量生成退销单', {area: ["60%", "60%"]});
@@ -1339,6 +1357,15 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         str = '工厂';
                     } else if (value == 2) {
                         str = '贸易';
+                    }
+                    return str;
+                },
+                warehouse_pattern: function (value, row, index) {
+                    var str = '';
+                    if (value == 1) {
+                        str = '郑州仓';
+                    } else if (value == 2) {
+                        str = '丹阳仓';
                     }
                     return str;
                 },

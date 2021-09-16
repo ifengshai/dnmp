@@ -1459,6 +1459,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             
             //子单措施选择联动
 
+            //斜视值复选框选择联动
+            $(document).on('click', '#replacement_prismcheck', function () {
+                var is_prismcheck = $('#replacement_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.replacement_prism_isshow').show(200);
+                }else{
+                    $('.replacement_prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#change_lens_prismcheck', function () {
+                var is_prismcheck = $('#change_lens_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.change_lens_prism_isshow').show(200);
+                }else{
+                    $('.change_lens_prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#gift_prismcheck', function () {
+                var is_prismcheck = $('#gift_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.gift_prism_isshow').show(200);
+                }else{
+                    $('.gift_prism_isshow').hide(200);
+                }
+            })
+
 
         },
         edit: function () {
@@ -2165,6 +2191,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             });
             console.log(Config.order_item);
 
+            //斜视值复选框选择联动
+            $(document).on('click', '#replacement_prismcheck', function () {
+                var is_prismcheck = $('#replacement_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.replacement_prism_isshow').show(200);
+                }else{
+                    $('.replacement_prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#change_lens_prismcheck', function () {
+                var is_prismcheck = $('#change_lens_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.change_lens_prism_isshow').show(200);
+                }else{
+                    $('.change_lens_prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#gift_prismcheck', function () {
+                var is_prismcheck = $('#gift_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.gift_prism_isshow').show(200);
+                }else{
+                    $('.gift_prism_isshow').hide(200);
+                }
+            })
+
         },
         detail: function () {
             Controller.api.bindevent();
@@ -2180,7 +2232,47 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
             });
 
             $("#section_item_content").find("input").attr("disabled","disabled");
-
+            //斜视值复选框选择联动
+            $(document).on('click', '#replacement_prismcheck', function () {
+                var is_prismcheck = $('#replacement_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.replacement_prism_isshow').show(200);
+                }else{
+                    $('.replacement_prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#change_lens_prismcheck', function () {
+                var is_prismcheck = $('#change_lens_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.change_lens_prism_isshow').show(200);
+                }else{
+                    $('.change_lens_prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#gift_prismcheck', function () {
+                var is_prismcheck = $('#gift_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.gift_prism_isshow').show(200);
+                }else{
+                    $('.gift_prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#change_lens_prismcheck', function () {
+                var is_prismcheck = $('#prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.prism_isshow').show(200);
+                }else{
+                    $('.prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#gift_prismcheck', function () {
+                var is_prismcheck = $('#prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.prism_isshow').show(200);
+                }else{
+                    $('.prism_isshow').hide(200);
+                }
+            })
         },
         //处理任务
         process: function () {
@@ -2192,6 +2284,32 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 if(id == 13){
                     changeOrderAddress();
+                }
+            })
+
+            //斜视值复选框选择联动
+            $(document).on('click', '#replacement_prismcheck', function () {
+                var is_prismcheck = $('#replacement_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.replacement_prism_isshow').show(200);
+                }else{
+                    $('.replacement_prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#change_lens_prismcheck', function () {
+                var is_prismcheck = $('#change_lens_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.change_lens_prism_isshow').show(200);
+                }else{
+                    $('.change_lens_prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#gift_prismcheck', function () {
+                var is_prismcheck = $('#gift_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.gift_prism_isshow').show(200);
+                }else{
+                    $('.gift_prism_isshow').hide(200);
                 }
             })
         },
@@ -2323,6 +2441,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 $(document).on('click', '.btn-del-lens', function () {
                     $(this).parent().parent().remove();
                 });
+                
+                //斜视值复选框选择联动
+                $(document).on('click', '#replacement_prismcheck', function () {
+                    var is_prismcheck = $('#replacement_prismcheck').is(':checked');
+                    if (is_prismcheck) {
+                        $('.replacement_prism_isshow').show(200);
+                    }else{
+                        $('.replacement_prism_isshow').hide(200);
+                    }
+                })
+                $(document).on('click', '#change_lens_prismcheck', function () {
+                var is_prismcheck = $('#change_lens_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.change_lens_prism_isshow').show(200);
+                }else{
+                    $('.change_lens_prism_isshow').hide(200);
+                }
+            })
+            $(document).on('click', '#gift_prismcheck', function () {
+                var is_prismcheck = $('#gift_prismcheck').is(':checked');
+                if (is_prismcheck) {
+                    $('.gift_prism_isshow').show(200);
+                }else{
+                    $('.gift_prism_isshow').hide(200);
+                }
+            })
+
                 //保存草稿
                 $('.btn-warning').click(function () {
                     if ($('#section_item_content').is(':hidden')) {

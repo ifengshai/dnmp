@@ -44,6 +44,12 @@ class Check extends Model
         return $this->belongsTo('app\admin\model\saleaftermanage\OrderReturn', 'order_return_id')->setEagerlyType(0)->joinType('left');
     }
 
+    //关联模型
+    public function logisticsInfo()
+    {
+        return $this->belongsTo('app\admin\model\LogisticsInfo', 'logistics_id')->setEagerlyType(0)->joinType('left');
+    }
+
     public function checkItem()
     {
         return $this->hasMany('CheckItem', 'check_id');

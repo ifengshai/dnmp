@@ -456,7 +456,7 @@ class WorkOrderList extends Model
             $where['a.item_order_number'] = $item_order_number;
         }
 
-        $prescription_field = 'a.sku,a.name,b.prescription_type,b.index_type,b.index_id,b.coating_id,b.color_id,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.os_add,b.od_add,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r';
+        $prescription_field = 'a.sku,a.name,b.prescription_type,b.index_type,b.index_id,b.coating_id,b.color_id,b.od_sph,b.os_sph,b.od_cyl,b.os_cyl,b.od_axis,b.os_axis,b.pd_l,b.pd_r,b.pd,b.os_add,b.od_add,b.od_pv,b.os_pv,b.od_pv_r,b.os_pv_r,b.od_bd,b.os_bd,b.od_bd_r,b.os_bd_r,b.prismcheck';
         $_order_item_process = new NewOrderItemProcess();
         $prescriptions = $_order_item_process
             ->alias('a')
@@ -912,6 +912,7 @@ class WorkOrderList extends Model
                         'os_bd'                   => $changeLens['os_bd'] ?? '',
                         'os_pv_r'                 => $changeLens['os_pv_r'] ?? '',
                         'os_bd_r'                 => $changeLens['os_bd_r'] ?? '',
+                        'prismcheck'              => $changeLens['prismcheck'] ?? '',
                         'measure_id'              => $measure_id,
                         'create_person'           => $admin_id,
                         'update_time'             => $time,
@@ -1003,6 +1004,7 @@ class WorkOrderList extends Model
                             $prescriptionOption['lens_number'] = $lensId;
                             $prescriptionOption['lens_name'] = $lens_info['lens_name'];
                         }
+
                         if (23 == $measure_choose_id) {
                             $data = [
                                 'email'               => $params['lens_address']['email'],

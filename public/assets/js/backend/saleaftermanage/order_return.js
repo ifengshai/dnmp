@@ -758,7 +758,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'custom-css',
                     Toastr.error('缺少参数');
                     return false;
                 }
-                Backend.api.open('saleaftermanage/order_return/get_logistics_info/?track_number=' + track_number + '&entity_id=' + entity_id + '&order_platform=' + order_platform, '查询物流信息', { area: ["60%", "60%"] });
+                Backend.api.open('saleaftermanage/order_return/get_logistics_info/?track_number=' + track_number + '&entity_id=' + entity_id + '&order_platform=' + order_platform, '查询物流信息', { area: ["32%", "700px"] });
             });
 
 

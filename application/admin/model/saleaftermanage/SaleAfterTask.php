@@ -4,6 +4,7 @@ namespace app\admin\model\saleaftermanage;
 
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\order\order\NewOrderProcess;
 use app\admin\model\web\WebUsers;
 use app\admin\model\web\WebVipOrder;
 use app\enum\OrderType;
@@ -302,11 +303,12 @@ class SaleAfterTask extends Model
      * @return array
      * @author lzh
      */
-    public function getLikeOrderNew($increment_id)
+    public function getLikeOrderNew($order_platform, $increment_id)
     {
         $_new_order = new NewOrder();
         $result = $_new_order
             ->where('increment_id', 'like', "%{$increment_id}%")
+            ->where('site', $order_platform)
             ->limit(10)
             ->column('increment_id');
 
@@ -345,7 +347,13 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
-        $result = Db::connect($db)->table('sales_flat_order')->where('customer_email', 'like', "%{$email}%")->field('customer_email')->group('customer_email')->limit(10)->select();
+        if ($order_platform == 3) {
+            $_new_order = new NewOrder();
+            $result = $_new_order->where('site', $order_platform)->where('customer_email', 'like', "%{$email}%")->field('customer_email')->group('customer_email')->limit(10)->select();
+        }else{
+            $result = Db::connect($db)->table('sales_flat_order')->where('customer_email', 'like', "%{$email}%")->field('customer_email')->group('customer_email')->limit(10)->select();
+        }
+        
         if (!$result) {
             return false;
         }
@@ -390,7 +398,13 @@ class SaleAfterTask extends Model
                 break;
         }
         $map[] = ['exp', Db::raw("replace(telephone,'-','') like '%{$customer_phone}%'")];
-        $result = Db::connect($db)->table('sales_flat_order_address')->where($map)->field('telephone')->limit(10)->select();
+        if ($order_platform == 3) {
+            $_new_order = new NewOrder();
+            $result = $_new_order->where('site', $order_platform)->where($map)->field('telephone')->limit(10)->select();
+        }else{
+            $result = Db::connect($db)->table('sales_flat_order_address')->where($map)->field('telephone')->limit(10)->select();
+        }
+        
         if (!$result) {
             return false;
         }
@@ -436,7 +450,13 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
-        $result = Db::connect($db)->table('sales_flat_order')->where('customer_firstname', 'like', "%{$customer_name}%")->whereOr('customer_lastname', 'like', "%{$customer_name}%")->field('customer_firstname,customer_lastname')->limit(10)->select();
+        if ($order_platform) {
+            $_new_order = new NewOrder();
+            $result = $_new_order->where('site', $order_platform)->where('customer_firstname', 'like', "%{$customer_name}%")->whereOr('customer_lastname', 'like', "%{$customer_name}%")->field('customer_firstname,customer_lastname')->limit(10)->select();
+        }else{
+            $result = Db::connect($db)->table('sales_flat_order')->where('customer_firstname', 'like', "%{$customer_name}%")->whereOr('customer_lastname', 'like', "%{$customer_name}%")->field('customer_firstname,customer_lastname')->limit(10)->select();
+        }
+        
         if (!$result) {
             return false;
         }
@@ -482,7 +502,12 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
-        $result = Db::connect($db)->table('sales_flat_shipment_track')->where('track_number', 'like', "%{$track_number}%")->field('track_number')->limit(10)->select();
+        if ($order_platform == 3) {
+            $_new_order = new NewOrderProcess();
+            $result = $_new_order->where('site', $order_platform)->where('track_number', 'like', "%{$track_number}%")->field('track_number')->limit(10)->select();
+        }else{
+            $result = Db::connect($db)->table('sales_flat_shipment_track')->where('track_number', 'like', "%{$track_number}%")->field('track_number')->limit(10)->select();
+        }
         if (!$result) {
             return false;
         }
@@ -528,7 +553,12 @@ class SaleAfterTask extends Model
                 return false;
                 break;
         }
-        $result = Db::connect($db)->table('sales_flat_order_payment')->where('last_trans_id', 'like', "%{$transaction_id}%")->field('last_trans_id')->limit(10)->select();
+        if ($order_platform == 3) {
+            $_new_order = new NewOrder();
+            $result = $_new_order->where('site', $order_platform)->where('last_trans_id', 'like', "%{$transaction_id}%")->field('last_trans_id')->limit(10)->select();
+        }else{
+            $result = Db::connect($db)->table('sales_flat_order_payment')->where('last_trans_id', 'like', "%{$transaction_id}%")->field('last_trans_id')->limit(10)->select();
+        }
         if (!$result) {
             return false;
         }
@@ -808,10 +838,10 @@ class SaleAfterTask extends Model
 
         //根据订单号搜索
         if ($increment_id) {
-            $customer_email = $order->where('site', $order_platform)->where('increment_id', $increment_id)->value('customer_email');
+            $customer_email = $order->where('site', $order_platform)->where('increment_id','like', '%' . $increment_id . '%')->value('customer_email');
             //如果输入的是vip订单号
             if (!$customer_email && $order_platform < 3) {
-                $customer_email = $vip->where('order_number', $increment_id)->value('customer_email');
+                $customer_email = $vip->where('order_number','like', '%' . $increment_id . '%')->value('customer_email');
             }
         }
 
@@ -823,7 +853,7 @@ class SaleAfterTask extends Model
 
         //根据客户电话搜索
         if ($customer_phone) {
-            $customer_email = $order->where('site', $order_platform)->where('telephone', $customer_phone)
+            $customer_email = $order->where('site', $order_platform)->where('telephone','like','%' . $customer_phone . '%')
                 ->value('customer_email');
         }
 
@@ -917,6 +947,7 @@ class SaleAfterTask extends Model
                 $address = Db::connect($db)->table('order_addresses')
                     ->where(['order_id' => $v['entity_id']])
                     ->field('type as address_type,telephone,postcode,street,city,region,country_id,firstname,lastname')
+                    ->order('address_type desc')
                     ->select();
             } else {
                 $address = Db::connect($db)->table('sales_flat_order_address')

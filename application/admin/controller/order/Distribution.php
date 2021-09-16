@@ -56,6 +56,7 @@ class Distribution extends Backend
         'batch_export_xls_copy',
         'batch_export_xls_account',
         'export_distribution_log',
+        'importLog'
     ];
     protected $noNeedLogin = ['batch_export_xls_copy'];
     /**
@@ -1387,7 +1388,7 @@ class Distribution extends Backend
                     $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
                 }
 
-                if ( $value['site'] == 3) {
+                if ($value['site'] == 3) {
                     $tmp_bridge['lens_width'] = $value['lens_width'];
                     $tmp_bridge['lens_height'] = $value['lens_height'];
                     $tmp_bridge['bridge'] = $value['bridge'];
@@ -1553,7 +1554,6 @@ class Distribution extends Backend
                 if ($v['prismcheck'] == 'on') {
                     $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat), isset($v['od_pv']) ? $v['od_pv'] : ''); //Prism
                     $spreadsheet->getActiveSheet()->setCellValue("T" . ($cat + 1), isset($v['os_pv']) ? $v['os_pv'] : ''); //Prism
-
                     $spreadsheet->getActiveSheet()->setCellValue("U" . ($cat), isset($v['od_bd']) ? $v['od_bd'] : ''); //Direct
                     $spreadsheet->getActiveSheet()->setCellValue("U" . ($cat + 1), isset($v['os_bd']) ? $v['os_bd'] : ''); //Direct
 
@@ -1665,20 +1665,233 @@ class Distribution extends Backend
         $writer->save('php://output');
     }
 
+    /**
+     * 导出上个节点操作记录
+     * @author wangpenglei
+     * @date   2021/9/10 13:43
+     */
+    public function importLog()
+    {
+        //根据传的标签切换状态
+        $label = $this->request->get('label', 0);
+        $ids = input('ids');
+        $map = [];
+        if ($ids) {
+            $map['a.id'] = ['in', $ids];
+            $where = [];
+        } else {
+            $wave_order_id = input('wave_order_id');
+            //普通状态剔除跟单数据
+            if (!in_array($label, [0, 8])) {
+                if (7 == $label) {
+                    $map['a.status'] = [['>', 6], ['<', 9]];
+                } else {
+                    $map['a.status'] = $label;
+                }
+                $map['a.temporary_house_id|a.abnormal_house_id'] = 0;
+            }
+
+            $filter = json_decode($this->request->get('filter'), true);
+
+            if ($filter['abnormal'] || $filter['stock_house_num']) {
+                if ($filter['abnormal']) {
+                    $abnormal_where['type'] = $filter['abnormal'][0];
+                    if (8 == $label) {
+                        $abnormal_where['status'] = 1;
+                    }
+
+                    $item_process_id = $this->_distribution_abnormal
+                        ->where($abnormal_where)
+                        ->column('item_process_id');
+                    $map['a.id'] = ['in', $item_process_id];
+                }
+
+                //筛选库位号
+                if ($filter['stock_house_num']) {
+                    $stock_house_where['coding'] = ['like', $filter['stock_house_num'] . '%'];
+                    if (8 == $label) {
+                        $stock_house_where['type'] = ['>', 2];
+                    } else {
+                        $stock_house_where['type'] = 2;
+                    }
+                    $stock_house_id = $this->_stock_house
+                        ->where($stock_house_where)
+                        ->column('id');
+                    $map['a.temporary_house_id|a.abnormal_house_id'] = ['in', $stock_house_id];
+                }
+                unset($filter['abnormal']);
+                unset($filter['stock_house_num']);
+                unset($filter['is_task']);
+            }
+
+            if ($filter['created_at']) {
+                $time = explode(' - ', $filter['created_at']);
+
+                $map['b.created_at'] = ['between', [strtotime($time[0]), strtotime($time[1])]];
+                unset($filter['created_at']);
+            }
+            if ($filter['site']) {
+                $map['a.site'] = ['in', $filter['site']];
+                unset($filter['site']);
+            }
+            //加工类型
+            if ($filter['order_prescription_type']) {
+                $map['a.order_prescription_type'] = ['in', $filter['order_prescription_type']];
+                unset($filter['order_prescription_type']);
+            }
+            //订单类型
+            if ($filter['order_type']) {
+                $map['b.order_type'] = ['in', $filter['order_type']];
+                unset($filter['order_type']);
+            }
+
+            //筛选站点
+            if ($filter['stock_id']) {
+                $map['a.stock_id'] = $filter['stock_id'];
+                unset($filter['stock_id']);
+            }
+
+            if ($filter['b.payment_time']) {
+                $payment_time = explode(' - ', $filter['b.payment_time']);
+                $map['b.payment_time'] = ['between', [strtotime($payment_time[0]), strtotime($payment_time[1])]];
+                unset($filter['b.payment_time']);
+            }
+            if ($filter['distribution_status']) {
+                $map['a.distribution_status'] = ['in', $filter['distribution_status']];
+                unset($filter['distribution_status']);
+            }
+            if ($filter['status']) {
+                $map['b.status'] = ['in', $filter['status']];
+                unset($filter['status']);
+            }
+
+            if ($filter['increment_id']) {
+                $map['b.increment_id'] = ['in', $filter['increment_id']];
+                unset($filter['increment_id']);
+            }
+
+            if ($filter['sku']) {
+                $map['a.sku'] = ['like', '%' . $filter['sku'] . '%'];
+                unset($filter['sku']);
+            }
+            $this->request->get(['filter' => json_encode($filter)]);
+
+            [$where] = $this->buildparams();
+
+            if ($wave_order_id) {
+                $map['a.wave_order_id'] = $wave_order_id;
+            }
+        }
+
+        $headList = [
+            '订单号',
+            '站点',
+            '子单号',
+            '子单号状态',
+            '上个操作完成时间',
+            '订单状态',
+            '订单创建时间',
+        ];
+        $path = '/uploads/order/';
+        $fileName = '订单操作时间' . time();
+        $count = $this->model
+            ->alias('a')
+            ->field('a.id as aid,a.item_order_number,b.increment_id,b.status,b.site,a.distribution_status,b.created_at')
+            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+            ->where($where)
+            ->where($map)
+            ->count();
+
+        //站点列表
+        $siteList = [
+            1  => 'Zeelool',
+            2  => 'Voogueme',
+            3  => 'Nihao',
+            4  => 'Meeloog',
+            5  => 'Wesee',
+            8  => 'Amazon',
+            9  => 'Zeelool_es',
+            10 => 'Zeelool_de',
+            11 => 'Zeelool_jp',
+            12 => 'Voogmechic',
+            13 => 'Zeelool_cn',
+            14 => 'Alibaba',
+            15 => 'Zeelool_fr',
+        ];
+
+        //子单号状态
+        $distributionStatusList = [
+            1 => '待打印标签',
+            2 => '待配货',
+            3 => '待配镜片',
+            4 => '待加工',
+            5 => '待印logo',
+            6 => '待成品质检',
+            7 => '待合单',
+            8 => '合单中',
+            9 => '合单完成',
+        ];
+
+        for ($i = 0; $i < ceil($count / 50000); $i++) {
+            $list = $this->model
+                ->alias('a')
+                ->field('a.id as aid,a.item_order_number,b.increment_id,b.status,b.site,a.distribution_status,b.created_at')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->where($where)
+                ->where($map)
+                ->page($i + 1, 50000)
+                ->order('b.created_at desc')
+                ->select();
+
+            $list = collection($list)->toArray();
+
+            $ids = array_column($list, 'aid');
+            $distributionLog = Db::table('fa_distribution_log')
+                ->where(['item_process_id' => ['in', $ids]])
+                ->column('create_time', 'item_process_id');
+
+            $data = [];
+            foreach ($list as $key => &$value) {
+                $data[$key]['increment_id'] = $value['increment_id'];//订单号
+                $data[$key]['site'] = $siteList[$value['site']];//站点
+                $data[$key]['item_order_number'] = $value['item_order_number'];//子单号
+                $data[$key]['distribution_status'] = $distributionStatusList[$value['distribution_status']];//子单状态
+                $data[$key]['distribution_time'] = $distributionLog[$value['aid']] ? date('Y-m-d H:i:s', $distributionLog[$value['aid']]) : '';//最新节点操作时间
+                $data[$key]['status'] = $value['status'];//订单状态
+                if (empty($value['created_at'])) {
+                    $value['created_at'] = '暂无';
+                } else {
+                    $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
+                }
+                $data[$key]['created_at'] = $value['created_at'];//订单创建时间
+            }
+
+            if ($i > 0) {
+                $headList = [];
+            }
+            Excel::writeCsv($data, $headList, $path . $fileName);
+        }
+        //获取当前域名
+        $request = Request::instance();
+        $domain = $request->domain();
+        header('Location: ' . $domain . $path . $fileName . '.csv');
+        die;
+    }
+
     public function batch_export_xls_new()
     {
         set_time_limit(0);
         ini_set('memory_limit', '1048M');
-        $start = input('start','2021-05-31');
-        $end = input('end','2021-06-01');
-        $type = input('type','');
+        $start = input('start', '2021-05-31');
+        $end = input('end', '2021-06-01');
+        $type = input('type', '');
         $where = [];
-        if($type) {
+        if ($type) {
             $where['c.prescription_type'] = $type;
         }
         //获取所有spu对应的
-        $spu = Db::connect('database.db_stock')->table('fa_item')->column('origin_sku','sku');
-        $spuEd = Db::name('zz_temp3')->where("1=1")->column('a,ed','sku');
+        $spu = Db::connect('database.db_stock')->table('fa_item')->column('origin_sku', 'sku');
+        $spuEd = Db::name('zz_temp3')->where("1=1")->column('a,ed', 'sku');
 
         $startTime = strtotime($start);
         $endTime = strtotime($end);
@@ -1689,8 +1902,8 @@ class Distribution extends Backend
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->join(['fa_order_item_option' => 'c'], 'a.option_id=c.id')
             ->join(['fa_order_process' => 'd'], 'a.order_id=d.order_id')
-            ->where('b.status','in',['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery','shipped'])
-            ->where('b.payment_time','between',[$startTime,$endTime])
+            ->where('b.status', 'in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery', 'shipped'])
+            ->where('b.payment_time', 'between', [$startTime, $endTime])
             ->where($where)
             ->select();
         $list = collection($list)->toArray();
@@ -1806,7 +2019,7 @@ class Distribution extends Backend
                     $tmp_bridge = $this->get_frame_lens_width_height_bridge($value['product_id'], $value['site']);
                 }
 
-                if ( $value['site'] == 3) {
+                if ($value['site'] == 3) {
                     $tmp_bridge['lens_width'] = $value['lens_width'];
                     $tmp_bridge['lens_height'] = $value['lens_height'];
                     $tmp_bridge['bridge'] = $value['bridge'];
@@ -1938,70 +2151,69 @@ class Distribution extends Backend
                 $v['os_add'] = urldecode($v['os_add']);
                 $v['od_add'] = urldecode($v['od_add']);
 
-                $getSpu = $spu[substr($v['sku'],1)] ?: $spu[$v['sku']];
+                $getSpu = $spu[substr($v['sku'], 1)] ?: $spu[$v['sku']];
                 $ed = isset($spuEd[$getSpu]) ? $spuEd[$getSpu]['ed'] : 0;
                 $a = isset($spuEd[$getSpu]) ? $spuEd[$getSpu]['a'] : 0;
                 $dbl = $v['bridge'];
-                if($v['pdcheck'] == 'on') {
-                    $pdr =  bcmul($v['pd_r'],2);
-                    $pdl =  bcmul($v['pd_l'],2);
-                    $edRd = bcsub(floor(bcadd(bcadd(bcmul($ed,2),3),$dbl,4)), ceil($pdr),0);
-                    $edLd = bcsub(floor(bcadd(bcadd(bcmul($ed,2),3),$dbl,4)),ceil($pdl),0);
-                    $ARd = bcsub(floor(bcadd(bcadd(bcmul($a,2),3),$dbl,4)), ceil($pdr),0);
-                    $ALd = bcsub(floor(bcadd(bcadd(bcmul($a,2),3),$dbl,4)), ceil($pdl),0);
+                if ($v['pdcheck'] == 'on') {
+                    $pdr = bcmul($v['pd_r'], 2);
+                    $pdl = bcmul($v['pd_l'], 2);
+                    $edRd = bcsub(floor(bcadd(bcadd(bcmul($ed, 2), 3), $dbl, 4)), ceil($pdr), 0);
+                    $edLd = bcsub(floor(bcadd(bcadd(bcmul($ed, 2), 3), $dbl, 4)), ceil($pdl), 0);
+                    $ARd = bcsub(floor(bcadd(bcadd(bcmul($a, 2), 3), $dbl, 4)), ceil($pdr), 0);
+                    $ALd = bcsub(floor(bcadd(bcadd(bcmul($a, 2), 3), $dbl, 4)), ceil($pdl), 0);
 
-                }else{
-                    $edLd = $edRd = bcsub(floor(bcadd(bcadd(bcmul($ed,2),3),$dbl,4)), ceil($v['pd']),0);
-                    $ARd = $ALd = bcsub(floor(bcadd(bcadd(bcmul($a,2),3),$dbl,4)) , ceil($v['pd']),0);
+                } else {
+                    $edLd = $edRd = bcsub(floor(bcadd(bcadd(bcmul($ed, 2), 3), $dbl, 4)), ceil($v['pd']), 0);
+                    $ARd = $ALd = bcsub(floor(bcadd(bcadd(bcmul($a, 2), 3), $dbl, 4)), ceil($v['pd']), 0);
                 }
                 $edRLable = $aRLable = $edLable = $aLable = '';
-                if((float)$v['od_sph'] > 0) {
-                    if($edRd > 65 || $edLd > 65) {
+                if ((float)$v['od_sph'] > 0) {
+                    if ($edRd > 65 || $edLd > 65) {
                         $edRLable = '定制片';
-                    }else{
+                    } else {
                         $edRLable = '现片';
                     }
-                    if($ARd> 65 || $ALd > 65) {
+                    if ($ARd > 65 || $ALd > 65) {
                         $aRLable = '定制片';
-                    }else{
+                    } else {
                         $aRLable = '现片';
                     }
-                }else{
-                    if($edRd > 70 || $edLd > 70) {
+                } else {
+                    if ($edRd > 70 || $edLd > 70) {
                         $edRLable = '定制片';
-                    }else{
+                    } else {
                         $edRLable = '现片';
                     }
-                    if($ARd> 70 || $ALd > 70) {
+                    if ($ARd > 70 || $ALd > 70) {
                         $aRLable = '定制片';
-                    }else{
+                    } else {
                         $aRLable = '现片';
                     }
                 }
-                if((float)$v['os_sph'] > 0) {
-                    if($edRd > 65 || $edLd > 65) {
+                if ((float)$v['os_sph'] > 0) {
+                    if ($edRd > 65 || $edLd > 65) {
                         $edLable = '定制片';
-                    }else{
+                    } else {
                         $edLable = '现片';
                     }
-                    if($ARd> 65 || $ALd > 65) {
+                    if ($ARd > 65 || $ALd > 65) {
                         $aLable = '定制片';
-                    }else{
+                    } else {
                         $aLable = '现片';
                     }
-                }else{
-                    if($edRd > 70 || $edLd > 70) {
+                } else {
+                    if ($edRd > 70 || $edLd > 70) {
                         $edLable = '定制片';
-                    }else{
+                    } else {
                         $edLable = '现片';
                     }
-                    if($ARd> 70 || $ALd > 70) {
+                    if ($ARd > 70 || $ALd > 70) {
                         $aLable = '定制片';
-                    }else{
+                    } else {
                         $aLable = '现片';
                     }
                 }
-
 
 
                 if ($v['os_add'] && $v['od_add'] && (float)($v['os_add']) * 1 != 0 && (float)($v['od_add']) * 1 != 0) {
@@ -2064,7 +2276,6 @@ class Distribution extends Backend
                 $spreadsheet->getActiveSheet()->mergeCells("S" . ($cat) . ":S" . ($cat + 1));
                 $spreadsheet->getActiveSheet()->mergeCells("V" . ($cat) . ":V" . ($cat + 1));
                 $spreadsheet->getActiveSheet()->mergeCells("Y" . ($cat) . ":Y" . ($cat + 1));
-
 
 
             }
@@ -2143,6 +2354,7 @@ class Distribution extends Backend
      *
      * @params string $platFormSku
      * @params int $site
+     *
      * @author wangpenglei
      * @date   2021/7/30 9:21
      */

@@ -11,6 +11,7 @@ namespace app\service\elasticsearch\customer;
 
 use app\enum\Store;
 use app\service\elasticsearch\BaseEsFormatData;
+use think\Cache;
 
 class OrderEsFormat extends BaseEsFormatData
 {
@@ -398,6 +399,8 @@ class OrderEsFormat extends BaseEsFormatData
         $allSession = $allCreateCartToOrderNum = $allUpdateCartToOrderNum = $createCartToOrderNum = $updateCartToOrderNum = 0;
         $arr = $allCartCreateIds = $allCartUpdateIds = $allOrderDataIds = [];
 
+        Cache::set('day_hour_order_quote_test01', serialize($finalLists));
+
         foreach ($finalLists as $key => $finalList) {
             foreach ($gaData as $gaKey => $gaValue) {
                 if ((int)$finalList['hour'] == (int)substr($gaValue['ga:dateHour'], 8)) {
@@ -413,9 +416,9 @@ class OrderEsFormat extends BaseEsFormatData
             if (strlen($finalList['hour']) == 1) {
                 $formatHour = '0' . $finalList['hour'];
             }
-            if(!isset($hourSaleFormat[$formatHour])) {
-                continue;
-            }
+//            if(!isset($hourSaleFormat[$formatHour])) {
+//                continue;
+//            }
             $arr[$key]['hour_created'] = $finalList['hour_created'];
             $hourOrderData = $hourSaleFormat[$formatHour];
 
@@ -453,6 +456,7 @@ class OrderEsFormat extends BaseEsFormatData
             $allSession += $arr[$key]['sessions'];
         }
 
+        Cache::set('day_hour_order_quote_test02', serialize($arr));
         //总订单数
         $allOrderCount = $orderData['sumOrder']['value'];
 

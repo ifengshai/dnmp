@@ -2411,7 +2411,7 @@ class WorkOrderList extends Backend
                 $_work_order_change_sku = new WorkOrderChangeSku();
                 $change_lens = $_work_order_change_sku
                     ->alias('a')
-                    ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,prescription_option')
+                    ->field('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.prismcheck,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type,prescription_option')
                     ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
                     ->where([
                         'a.change_type'       => $change_type,
@@ -2450,6 +2450,7 @@ class WorkOrderList extends Backend
                     $res['prescriptions'][0]['os_bd'] = $change_lens[0]['os_bd'];
                     $res['prescriptions'][0]['od_bd_r'] = $change_lens[0]['od_bd_r'];
                     $res['prescriptions'][0]['os_bd_r'] = $change_lens[0]['os_bd_r'];
+                    $res['prescriptions'][0]['prismcheck'] = $change_lens[0]['prismcheck'];
                     //获取更改镜框最新信息
                     $change_sku = $_work_order_change_sku
                         ->alias('a')

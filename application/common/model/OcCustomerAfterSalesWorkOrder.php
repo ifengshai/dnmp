@@ -2,6 +2,7 @@
 
 namespace app\common\model;
 
+use app\enum\Site;
 use think\Model;
 
 
@@ -33,12 +34,21 @@ class OcCustomerAfterSalesWorkOrder extends Model
         return $this->hasMany('Zendesk','email');
     }
 
-
-
-
-
-
-
+    /**
+     * 切换站点
+     */
+    public function switchSite($site)
+    {
+        switch ($site) {
+            case Site::VOOGUEME:
+                $connection = 'database.db_voogueme';
+                break;
+            case Site::ZEELOOL:
+            default:
+                $connection = 'database.db_zeelool';
+        }
+        return $this->connect($connection);
+    }
 
 
 }

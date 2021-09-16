@@ -665,6 +665,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                             if (item) {
 
                                 if ($('.supplier.selectpicker option').length > 1) {
+                                    $('.supplier').selectpicker('refresh');
                                     $(".supplier").selectpicker('val', item[0].supplier_id);//默认选中
                                 }
 
