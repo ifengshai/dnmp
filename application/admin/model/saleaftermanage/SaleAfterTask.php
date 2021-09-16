@@ -855,6 +855,7 @@ class SaleAfterTask extends Model
         if ($customer_phone) {
             $customer_email = $order->where('site', $order_platform)->where('telephone','%' . $customer_phone . '%')
                 ->value('customer_email');
+            echo   $order->getLastSql();die;
         }
 
         //根据物流单号搜索
