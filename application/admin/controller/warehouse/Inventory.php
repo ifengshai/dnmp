@@ -86,7 +86,7 @@ class Inventory extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model->alias('inventory')
                 // ->with(['Inventoryitemtwo'])
                 ->where($where)
@@ -133,7 +133,7 @@ class Inventory extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
 
             //查询临时表数据
             $temp = new \app\admin\model\warehouse\TempProduct;
@@ -178,7 +178,7 @@ class Inventory extends Backend
                 return $this->selectpage();
             }
             $this->model = new \app\admin\model\warehouse\TempProduct;
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->order($sort, $order)
@@ -414,7 +414,7 @@ class Inventory extends Backend
                 return $this->selectpage();
             }
             $map['inventory_id'] = input('inventory_id');
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($map)
@@ -544,7 +544,7 @@ class Inventory extends Backend
             }
             $this->model = new \app\admin\model\warehouse\InventoryItem;
             $map['inventory_id'] = input('inventory_id');
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($map)
@@ -1004,7 +1004,7 @@ class Inventory extends Backend
             }
             $this->model = new \app\admin\model\warehouse\InventoryItem;
             $map['inventory_id'] = input('inventory_id');
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($map)
@@ -1037,7 +1037,7 @@ class Inventory extends Backend
     public function batch_export_xls()
     {
         set_time_limit(0);
-        list($where) = $this->buildparams();
+        [$where] = $this->buildparams();
         //查询SKU库存
         $item = new \app\admin\model\itemmanage\Item();
         $map['is_del'] = 1;
@@ -2016,7 +2016,130 @@ class Inventory extends Backend
 
         return true;
     }
+    /**
+     * 抖音更改镜片流程
+     * @param $work_id
+     * @param $order_platform
+     * @param $increment_id
+     * @param $change_row
+     *
+     * @return bool
+     * @throws PDOException
+     * @author liushiwei
+     * @date   2021/9/8 16:00
+     */
+    public function workChangeFrameWithZeeloolCn($work_id, $order_platform, $increment_id, $change_row)
+    {
+        if (!$work_id || !$order_platform || !$increment_id || !$change_row) return false;
 
+        $_item = new Item();
+        $_platform_sku = new ItemPlatformSku();
+        $_stock_log = new StockLog();
+        $_new_order_item_process = new NewOrderItemProcess();
+
+        //开启事务
+        $_item->startTrans();
+        $_platform_sku->startTrans();
+        $_stock_log->startTrans();
+        $_new_order_item_process->startTrans();
+        try {
+            $stock_data = [];
+            foreach ($change_row as $v) {
+                //原sku
+                $arr = explode('-', trim($v['original_sku']));
+                $original_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['original_sku']);
+
+                //新sku
+                $arr = explode('-', trim($v['change_sku']));
+                $change_sku = 2 < count($arr) ? $arr[0] . '-' . $arr[1] : trim($v['change_sku']);
+                //新sku数量
+                $change_number = $v['change_number'] ?: 1;
+
+                //原sku或新sku不存在则忽略
+                if (!$original_sku || !$change_sku) continue;
+                //新sku对应的仓库sku、库存
+                $warehouse_change_info = $_platform_sku
+                    ->field('sku,stock')
+                    ->where(['platform_sku'=>$change_sku,'platform_type'=>$order_platform])
+                    ->find()
+                ;
+                $warehouse_change_sku = $warehouse_change_info['sku'];
+                //新sku商品表相关库存
+                $change_item_info = $_item
+                    ->field('stock,occupy_stock,available_stock,distribution_occupy_stock')
+                    ->where(['sku'=>$warehouse_change_sku])
+                    ->find()
+                ;
+
+                    //新sku减少可用库存、虚拟仓库存,增加占用库存
+                    if ($warehouse_change_sku && $change_number) {
+                        //减少可用库存,增加占用库存
+                        $_item
+                            ->where(['sku' => $warehouse_change_sku])
+                            ->dec('stock',$change_number)
+                            ->dec('available_stock', $change_number)
+                            ->update();
+
+                        //扣减对应站点虚拟库存
+                        $_platform_sku
+                            ->where(['sku' => $warehouse_change_sku, 'platform_type' => $order_platform])
+                            ->setDec('stock', $change_number);
+
+                        //记录库存日志
+                        $stock_data[] = [
+                            'type'                      => 2,
+                            'site'                      => $order_platform,
+                            'modular'                   => 6,
+                            'change_type'               => 10,
+                            'source'                    => 1,
+                            'sku'                       => $warehouse_change_sku,
+                            'number_type'               => 2,
+                            'order_number'              => $v['item_order_number'],
+                            'public_id'                 => $work_id,
+                            'stock_before'              => $change_item_info['stock'],
+                            'stock_change'              => -$change_number,
+                            'available_stock_before'    => $change_item_info['available_stock'],
+                            'available_stock_change'    => -$change_number,
+                            'fictitious_before'         => $warehouse_change_info['stock'],
+                            'fictitious_change'         => -$change_number,
+                            'create_person'             => session('admin.nickname'),
+                            'create_time'               => time()
+                        ];
+                    }
+            }
+
+            //库存日志
+            if ($stock_data) {
+                $_stock_log->allowField(true)->saveAll($stock_data);
+            }
+
+            //提交
+            $_item->commit();
+            $_platform_sku->commit();
+            $_stock_log->commit();
+            $_new_order_item_process->commit();
+        } catch (ValidateException $e) {
+            $_item->rollback();
+            $_platform_sku->rollback();
+            $_stock_log->rollback();
+            $_new_order_item_process->rollback();
+            $this->error($e->getMessage());
+        } catch (PDOException $e) {
+            $_item->rollback();
+            $_platform_sku->rollback();
+            $_stock_log->rollback();
+            $_new_order_item_process->rollback();
+            $this->error($e->getMessage());
+        } catch (Exception $e) {
+            $_item->rollback();
+            $_platform_sku->rollback();
+            $_stock_log->rollback();
+            $_new_order_item_process->rollback();
+            $this->error($e->getMessage());
+        }
+
+        return true;
+    }
     /***lsw
      * 取消订单的逻辑-弃用
      * @param id 协同任务ID

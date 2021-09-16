@@ -169,8 +169,173 @@
             </table>
         </div>
     </div>
+</div>
+{/foreach}
+{/notempty}
+{elseif condition="$type eq 23"}
+{notempty name="info"}
+{foreach $info as $vo}
+<div style="width: 100%;float: left;">
+    <div class="step7_function2 prescription_type_step" style="margin-top:10px;">
+        <div class="step7_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">SKU:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_original_sku][]" type="text" value="{$vo.original_sku}">
 
-   
+            </div>
+        </div>
+        <div class="step7_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">QTY:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_original_number][]" type="text" value="{$vo.original_number}">
+            </div>
+        </div>
+        <div class="step7_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">Original RX:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select {$operate_type ? 'disabled': '' } id="lens_prescription_select" class="form-control selectpicker" title="请选择">
+                    {$prescriptions}
+                </select>
+            </div>
+        </div>
+        <div class="step7_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select {$operate_type ? 'disabled': '' } class="form-control selectpicker prescription_type" name="row[replacement][lens_recipe_type][]"  title="请选择">
+                    {foreach name="prescription" item="val" key="key"}
+                        {if condition="$vo.recipe_type == $key"}
+                        <option value='{$key}' selected >{$key}</option>
+                        {else/}
+                        <option value='{$key}'>{$key}</option>
+                        {/if}
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="step1_function3"  style="margin-top:10px;">
+        <div class="panel-body">
+            <div class="step1_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Color:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select {$operate_type ? 'disabled': '' } id="lens_color_type" class="form-control selectpicker" name="row[replacement][lens_color_id][]"  title="请选择">
+                        <option value="0">请选择</option>
+
+
+                            {foreach name="colorList" item="val"}
+                            {if condition="$vo.prescription_options.color_id eq $val.lens_id"}
+                            <option value='{$val["lens_id"]}' selected>{$val["lens_data_name"]}</option>
+                            {else/}
+                            <option value='{$val["lens_id"]}'>{$val["lens_data_name"]}</option>
+                            {/if}
+                            {/foreach}
+
+                    </select>
+                </div>
+            </div>
+            <div class="step1_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select {$operate_type ? 'disabled': '' } id="lens_lens_type" class="form-control selectpicker" name="row[replacement][lens_lens_type][]"  title="请选择">
+                        <option value="0">请选择</option>
+                        {if condition="!empty($vo.prescription_options.lens_name)"}
+                        <option value="{$vo.prescription_options.lens_id}" selected>{$vo.prescription_options.lens_name}</option>
+                        {else/}
+                        <option value="{$vo.prescription_options.lens_id}">{$vo.prescription_options.lens_name}</option>
+                        {/if}
+                    </select>
+                </div>
+            </div>
+            <div class="step1_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select {$operate_type ? 'disabled': '' } id="lens_c-coating_type" class="form-control selectpicker"
+                            name="row[replacement][lens_coating_type][]"  title="请选择">
+                        <option value="0">请选择</option>
+                        
+                            {foreach name="coating_type" item="val"}
+                            {if condition="$vo.prescription_options.coating_id eq $val.coating_id"}
+                            <option value='{$val["coating_id"]}' selected>{$val["coating_name"]}</option>
+                            {else/}
+                            <option value='{$val["coating_id"]}'>{$val["coating_name"]}</option>
+                            {/if}
+                            {/foreach}
+
+                    </select>
+                </div>
+            </div>
+
+            <table>
+                <tbody>
+                <tr>
+                    <td style="text-align: center">value</td>
+                    <td style="text-align: center">SPH</td>
+                    <td style="text-align: center">CYL</td>
+                    <td style="text-align: center">AXI</td>
+                    <td style="text-align: center">ADD</td>
+                    <td style="text-align: center">PD</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Right(OD)</td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_od_sph][]" type="text" value="{$vo.od_sph}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_od_cyl][]" type="text" value="{$vo.od_cyl}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_od_axis][]" type="text" value="{$vo.od_axis}"></td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_od_add][]" type="text" value="{$vo.od_add}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_pd_r][]" type="text" value="{$vo.pd_r}">
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Left(OS)</td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_os_sph][]" type="text" value="{$vo.os_sph}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_os_cyl][]" type="text" value="{$vo.os_cyl}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_os_axis][]" type="text"
+                               value="{$vo.os_axis}"></td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_os_add][]" type="text" value="{$vo.os_add}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_pd_l][]" type="text" value="{$vo.pd_l}">
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="text-align: center"></td>
+                    <td style="text-align: center">Prism Horizontal</td>
+                    <td style="text-align: center">Base Direction</td>
+                    <td style="text-align: center">Prism Vertical</td>
+                    <td style="text-align: center">Base Direction</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Right(OD)</td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" type="text" name="row[replacement][lens_od_pv][]" value="{$vo.od_pv}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" type="text" name="row[replacement][lens_od_bd][]" value="{$vo.od_bd}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" type="text" name="row[replacement][lens_od_pv_r][]"
+                               value="{$vo.od_pv_r}"></td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" type="text" name="row[replacement][lens_od_bd_r][]"
+                               value="{$vo.od_bd_r}"></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Left(OS)</td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_os_pv][]" type="text" value="{$vo.os_pv}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_os_bd][]" type="text" value="{$vo.os_bd}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_os_pv_r][]" type="text"
+                               value="{$vo.os_pv_r}"></td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[replacement][lens_os_bd_r][]" type="text"
+                               value="{$vo.os_bd_r}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {/foreach}
 {/notempty}
@@ -367,6 +532,192 @@
     </div>
 </div>
 {/foreach}
+{elseif condition="$type eq 11" /}
+{foreach name="$showPrescriptions" item="vo" key="keys"}
+<div style="width: 100%;float: left;">
+    <div class="step1_function2 prescription_type_step" style="width: 24%;margin-right: 20px;">
+        <div class="step1_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">SKU:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][original_sku]" readonly="true" type="text" value="{$vo['sku']}">
+            </div>
+        </div>
+
+        <div class="step1_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">Name:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][original_name]" readonly="true" type="text" value="{$vo['name']}">
+            </div>
+        </div>
+        <div class="step1_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">QTY:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][original_number]" readonly="true" type="text" value="{$vo['qty_ordered']}">
+            </div>
+        </div>
+
+        <div class="step1_function2_child">
+            <label class="control-label col-xs-12 col-sm-3">prescription_type:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select {$operate_type ? 'disabled': '' } class="form-control selectpicker prescription_type" name="row[item_order_info][{$item_order_number}][back_change_lens][recipe_type]"  title="请选择" flag ="change_lens_recipe_type">
+                    {foreach name="prescription" item="val" key="key"}
+                    <option value='{$key}' {$key == $info[$keys]['recipe_type'] ? 'selected' : ''}>{$key}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="step7_function3">
+        <div class="panel-body">
+            <div class="step7_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Color:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select {$operate_type ? 'disabled': '' } id="color_type" class="form-control selectpicker" name="row[item_order_info][{$item_order_number}][back_change_lens][color_id]"  title="请选择">
+                        <option value="0">请选择</option>
+
+                        {foreach name="colorList" item="val"}
+                        <option value='{$val["lens_id"]}' {$val["lens_id"] == $info[$keys]['prescription_options']['color_id'] ? 'selected' : ''}>{$val["lens_data_name"]}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+            <div class="step7_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select {$operate_type ? 'disabled': '' }  id="lens_type" class="form-control selectpicker" name="row[item_order_info][{$item_order_number}][back_change_lens][lens_type]"  title="请选择">
+                    <option value="0">请选择</option>
+                    {if condition="!empty($info[$keys]['prescription_options']['lens_name'])"}
+                    <option value="{$info[$keys]['prescription_options']['lens_id']}" selected>{$info[$keys]['prescription_options']['lens_name']}</option>
+                    {/if}
+                    
+
+                            {if condition="$vo['color_id']"}
+                                {foreach name="lensColorList" item="val"}
+                                <!-- {if condition="!empty($info[$keys]['prescription_options']['lens_name'])"}
+                                <option value="{$info[$keys]['prescription_options']['lens_id']}" selected>{$info[$keys]['prescription_options']['lens_name']}</option>
+                                {/if} -->
+                                <option value='{$val["lens_id"]}' {$val["lens_id"] == $info[$keys]['prescription_options']['lens_id'] ? 'selected' : ''}>{$val['lens_data_name']}</option>
+                                {/foreach}
+                            {else /}
+                                {foreach name="prescription[$vo['prescription_type']]" item="val"}
+                                <!-- {if condition="!empty($info[$keys]['prescription_options']['lens_name'])"}
+                                <option value="{$info[$keys]['prescription_options']['lens_id']}" selected>{$info[$keys]['prescription_options']['lens_name']}</option>
+                                {/if} -->
+                                <option value='{$val["lens_id"]}' {$val["lens_id"] == $info[$keys]['prescription_options']['lens_id'] ? 'selected' : ''}>{$val['lens_data_name']}</option>
+                                {/foreach}
+                            {/if}
+                    </select>
+                </div>
+            </div>
+            <div class="step7_function3_child">
+                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select {$operate_type ? 'disabled': '' } id="c-coating_type" class="form-control selectpicker"
+                            name="row[item_order_info][{$item_order_number}][back_change_lens][coating_type]" title="请选择">
+                        <option value="0">请选择</option>
+
+                        {foreach name="coating_type" item="val"}
+                        <option value='{$val["coating_id"]}' {$val["coating_id"] == $info[$keys]['prescription_options']['coating_id'] ? 'selected' : ''}>{$val["coating_name"]}</option>
+                        {/foreach}
+
+                    </select>
+                </div>
+            </div>
+            <table>
+                <tbody>
+                <tr>
+                    <td style="text-align: center">value</td>
+                    <td style="text-align: center">SPH</td>
+                    <td style="text-align: center">CYL</td>
+                    <td style="text-align: center">AXI</td>
+                    <td style="text-align: center">ADD</td>
+                    <td style="text-align: center">PD</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Right(OD)</td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_sph]" type="text" value="{$info[$keys]['od_sph']}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_cyl]" type="text" value="{$info[$keys]['od_cyl']}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_axis]" type="text"
+                               value="{$info[$keys]['od_axis']}"></td>
+                    <td>
+                        {if condition="!empty($info[$keys]['od_add'])"}
+                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_add]" type="text" value="{$info[$keys]['od_add']}">
+                        {else /}
+                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][od_add]" type="text" value="{$info[$keys]['total_add']}">
+                        {/if}
+                    </td>
+                    <td>
+                        {if condition="!empty($info[$keys]['pd_r'])"}
+                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_r]" type="text" value="{$info[$keys]['pd_r']}">
+                        {else /}
+                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_r]" type="text" value="{$info[$keys]['pd_r']}">
+                        {/if}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Left(OS)</td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_sph]" type="text" value="{$info[$keys]['os_sph']}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_cyl]" type="text" value="{$info[$keys]['os_cyl']}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_axis]" type="text"
+                               value="{$info[$keys]['os_axis']}"></td>
+                    <td>
+                        {if condition="!empty($info[$keys]['os_add'])"}
+                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_add]" type="text" value="{$info[$keys]['os_add']}">
+                        {else /}
+                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_add]" type="text" value="{$info[$keys]['os_add']}">
+                        {/if}
+
+                    </td>
+                    <td>
+                        {if condition="!empty($info[$keys]['pd_l'])"}
+                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_l]" type="text" value="{$info[$keys]['pd_l']}">
+                        {else /}
+                        <input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][pd_l]" type="text" value="{$info[$keys]['pd_l']}">
+                        {/if}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="text-align: center"></td>
+                    <td style="text-align: center">Prism Horizontal</td>
+                    <td style="text-align: center">Base Direction</td>
+                    <td style="text-align: center">Prism Vertical</td>
+                    <td style="text-align: center">Base Direction</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Right(OD)</td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" type="text" name="row[item_order_info][{$item_order_number}][back_change_lens][od_pv]" value="{$info[$keys]['od_pv']}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" type="text" name="row[item_order_info][{$item_order_number}][back_change_lens][od_bd]" value="{$info[$keys]['od_bd']}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" type="text" name="row[item_order_info][{$item_order_number}][back_change_lens][od_pv_r]"
+                               value="{$info[$keys]['od_pv_r']}"></td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" type="text" name="row[item_order_info][{$item_order_number}][back_change_lens][od_bd_r]"
+                               value="{$info[$keys]['od_bd_r']}"></td>
+                </tr>
+                <tr>
+                    <td style="text-align: center">Left(OS)</td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_pv]" type="text" value="{$info[$keys]['os_pv']}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_bd]" type="text" value="{$info[$keys]['os_bd']}">
+                    </td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_pv_r]" type="text"
+                               value="{$info[$keys]['os_pv_r']}"></td>
+                    <td><input {$operate_type ? 'disabled': '' } class="form-control" name="row[item_order_info][{$item_order_number}][back_change_lens][os_bd_r]" type="text"
+                               value="{$info[$keys]['os_bd_r']}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{/foreach}
 {else /}
 {notempty name="info"}
 {foreach $info as $vo}
@@ -526,8 +877,6 @@
             </table>
         </div>
     </div>
-
-    
 </div>
 {/foreach}
 {/notempty}
