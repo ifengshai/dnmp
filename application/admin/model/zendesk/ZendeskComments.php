@@ -121,6 +121,11 @@ class ZendeskComments extends Model
                     $is_vip_email = 1;
                 }
             }
+            $where_comment['is_admin'] = 1;
+            $where_comment['is_public'] = ['neq',2];
+            $where_comment['zid'] = $v['id'];
+            $where_comment['due_id'] = ['in',$vip_customer_service];
+            $where_comment['due_id'] = ['gt',0];
             //如果是vip邮件
             if($is_vip_email == 1){
                 //如果第一承接人存在的话，承接人就是当前客服
@@ -132,42 +137,55 @@ class ZendeskComments extends Model
                         $arr[$v['assign_id']]['goods_estimate_num']+=1;
                     }
                 }else{ //如果第一承接人是空的话,处理人中vip客服处理时间最早的客服是当前客服
-                    $where_comment['is_admin'] = 1;
-                    $where_comment['is_public'] = ['neq',2];
-                    $where_comment['channel'] = ['neq','voice'];
-                    $where_comment['zid'] = $v['id'];
-                    $where_comment['due_id'] = ['in',$vip_customer_service];
-                    $handle_comment_reult = $this->where($where_comment)->field('id,due_id')->order('id')->find();
-                    if($handle_comment_reult){
-                        $arr[$handle_comment_reult['due_id']]['estimate'] +=1;
+                    $handle_comment_result = $this->where($where_comment)->field('id,due_id')->order('id')->find();
+                    if($handle_comment_result){
+                        $arr[$handle_comment_result['due_id']]['estimate'] +=1;
                         if($v['rating_type'] == 1){
-                            $arr[$v['assign_id']]['goods_estimate_num']+=1;
+                            $arr[$handle_comment_result['due_id']]['goods_estimate_num']+=1;
                         }
 
                     }
                 }
 
 
-            }else{
-
+            }else{ //非vip邮件且邮件处理人不包含vip客服时，统计：邮件第一承接人是当前客服
+                $vip_comment_result = $this->where($where_comment)->field('id,due_id')->order('id')->find();
+                //dump($vip_comment_result);
+                if(!$vip_comment_result && !empty($v['assign_id'])){
+                        $arr[$v['assign_id']]['estimate'] +=1;
+                    if($v['rating_type'] == 1){
+                        $arr[$v['assign_id']]['goods_estimate_num']+=1;
+                    }
+                }elseif (!$vip_comment_result && empty($v['assign_id'])){
+                    //非vip邮件第一承接人为空且邮件处理人不包含vip客服时，处理人中非vip客服处理时间最早的客服是当前客服
+                    $general_comment['is_admin'] = 1;
+                    $general_comment['is_public'] = ['neq',2];
+                    $general_comment['zid'] = $v['id'];
+                    $general_comment['due_id'] = ['not in',$vip_customer_service];
+                    $general_comment['due_id'] =['gt',0];
+                    $general_comment_result = $this->where($general_comment)->field('id,due_id')->order('id')->find();
+                    if($general_comment_result){
+                        $arr[$general_comment_result['due_id']]['estimate'] +=1;
+                        if($v['rating_type'] == 1){
+                            $arr[$general_comment_result['due_id']]['goods_estimate_num'] +=1;
+                        }
+                    }
+                }
             }
 
         }
+        $final_arr = [];
+        foreach($arr as $key=> $val){
+            $final_arr[$key]['estimate'] = $val['estimate'];
+            $final_arr[$key]['goods_estimate_num'] = $val['goods_estimate_num'];
+            if($val['estimate']>0){
+                $final_arr[$key]['goods_estimate_rate'] = round($val['goods_estimate_num']*100/$val['estimate'],2);
+            }else{
+                $final_arr[$key]['goods_estimate_rate'] = 0;
+            }
 
-
-
-
-        if($admin_id){
-            $where['c.assign_id'] = $admin_id;
         }
-        $where['c.is_admin'] = 1;
-        $where['c.is_public'] = ['neq',2];
-        $where['z.channel'] = ['neq','voice'];
-        //关闭状态的
-
-
-        $count = $this->alias('c')->join('fa_zendesk z','c.zid=z.id')->where($where)->count();
-        return $count;
+        return $final_arr;
     }
 
     

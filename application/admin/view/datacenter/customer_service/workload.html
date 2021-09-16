@@ -234,7 +234,7 @@ table.altrowstable tr:nth-child(even){
                  <th style="text-align: center; vertical-align: middle;">日期</th>
                  <th style="text-align: center; vertical-align: middle;">处理量</th>
                  <th style="text-align: center; vertical-align: middle;">未达标天数</th>
-                 <th style="text-align: center; vertical-align: middle;">邮件好评数</th>
+                 <th style="text-align: center; vertical-align: middle;">邮件评价数</th>
                  <th style="text-align: center; vertical-align: middle;">邮件满意度</th>
                  <th style="text-align: center; vertical-align: middle;">操作</th>
              </tr>
@@ -266,10 +266,26 @@ table.altrowstable tr:nth-child(even){
                         <li>{$vo.two.no_up_to_day}</li>
                     </ul>
                 </td>
+                  <td id='goods_estimate_num' style="text-align: center; vertical-align: middle;">
+                      <ul class="customer_table">
+                          <li>{$vo.one.estimate}</li>
+                          <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
+                          <li>{$vo.two.estimate}</li>
+                      </ul>
+                  </td>
+                  <td id='goods_estimate_rate' style="text-align: center; vertical-align: middle;">
+                      <ul class="customer_table">
+                          <li>{$vo.one.goods_estimate_rate}%</li>
+                          <hr style="height:1px;border:none;border-top:1px solid #c1bebe;" />
+                          <li>{$vo.two.goods_estimate_rate}%</li>
+                      </ul>
+                  </td>
                   {else/}
                   <td id='today_order_num' style="text-align: center; vertical-align: middle;">{$vo.one.time}</td>
                   <td id='today_order_success' style="text-align: center; vertical-align: middle;">{$vo.one.deal_num}</td>
                   <td id='today_unit_price' style="text-align: center; vertical-align: middle;">{$vo.one.no_up_to_day}</td>
+                  <td id='goods_estimate_num' style="text-align: center; vertical-align: middle;">{$vo.one.estimate}</td>
+                  <td id='goods_estimate_rate' style="text-align: center; vertical-align: middle;">{$vo.one.goods_estimate_rate}%</td>
                   {/if}
                   <td class="click_look" data-id="{$vo.admin_id}" data-value="{$vo.time}">点击查看</td>
               </tr>
