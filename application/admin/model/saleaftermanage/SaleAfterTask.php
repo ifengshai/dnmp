@@ -841,7 +841,7 @@ class SaleAfterTask extends Model
             $customer_email = $order->where('site', $order_platform)->where('increment_id','like', '%' . $increment_id . '%')->value('customer_email');
             //如果输入的是vip订单号
             if (!$customer_email && $order_platform < 3) {
-                $customer_email = $vip->where('order_number', '%' . $increment_id . '%')->value('customer_email');
+                $customer_email = $vip->where('order_number','like', '%' . $increment_id . '%')->value('customer_email');
             }
         }
 
@@ -853,7 +853,7 @@ class SaleAfterTask extends Model
 
         //根据客户电话搜索
         if ($customer_phone) {
-            $customer_email = $order->where('site', $order_platform)->where('telephone','%' . $customer_phone . '%')
+            $customer_email = $order->where('site', $order_platform)->where('telephone','like','%' . $customer_phone . '%')
                 ->value('customer_email');
         }
 
