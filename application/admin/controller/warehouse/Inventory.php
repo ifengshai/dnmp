@@ -2078,7 +2078,6 @@ class Inventory extends Backend
                             ->where(['sku' => $warehouse_change_sku])
                             ->dec('stock',$change_number)
                             ->dec('available_stock', $change_number)
-                            ->inc('occupy_stock', $change_number)
                             ->update();
 
                         //扣减对应站点虚拟库存
@@ -2097,12 +2096,10 @@ class Inventory extends Backend
                             'number_type'               => 2,
                             'order_number'              => $v['item_order_number'],
                             'public_id'                 => $work_id,
-                            'stock_before'              => $change_item_info['stock_before'],
+                            'stock_before'              => $change_item_info['stock'],
                             'stock_change'              => -$change_number,
                             'available_stock_before'    => $change_item_info['available_stock'],
                             'available_stock_change'    => -$change_number,
-                            'occupy_stock_before'       => $change_item_info['occupy_stock'],
-                            'occupy_stock_change'       => $change_number,
                             'fictitious_before'         => $warehouse_change_info['stock'],
                             'fictitious_change'         => -$change_number,
                             'create_person'             => session('admin.nickname'),

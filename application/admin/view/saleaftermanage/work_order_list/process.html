@@ -691,7 +691,11 @@
             <!-- 赠品条形码 -->
             <div style="margin-left: 53px;padding-top: 200px;">
                     {if condition="$gift_status == 1"}
+                    {if condition="$change_name ==1"}
                     <p style="width: 15%;">{:__('赠品条形码')}：</p>
+                    {else/}
+                    <p style="width: 15%;">{:__('寄回换框条形码')}：</p>
+                     {/if}
                        <table class="caigou-table-sku"  style="background-color: white;">
                         <tr style="height: 30px;">
                             <th>序号</th>

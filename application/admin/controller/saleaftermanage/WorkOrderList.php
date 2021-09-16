@@ -58,7 +58,7 @@ class WorkOrderList extends Backend
      * @var \app\admin\model\saleaftermanage\WorkOrderList
      */
     protected $model = null;
-    protected $noNeedLogin = ['batch_export_xls_array', 'batch_export_xls_array_copy'];
+    protected $noNeedLogin = ['batch_export_xls_array', 'batch_export_xls_array_copy','getSpuList'];
 
     public function _initialize()
     {
@@ -1437,7 +1437,7 @@ class WorkOrderList extends Backend
             //判断此sku是否在第三方平台
             if ($siteType == 13 || $siteType == 14) {
                 $res = $this->model->httpRequest($siteType, 'api/mojing/check_sku', ['sku' => $sku, 'platform_order' => $platform_order], 'POST');
-                if (empty($res[$sku])) {
+                if (!isset($res[$sku])) {
                     return ['result' => false, 'msg' => $sku . '不存在！！'];
                 }
             }
@@ -2787,11 +2787,19 @@ class WorkOrderList extends Backend
         //处理
         if (3 == $operateType) {
             //查询赠品sku
+
             $gift_status = 0;
             $gift_sku = $this->order_change->field('id,change_sku,change_number')->where(['work_id' => $ids, 'change_type' => 4])->select();
+            if($row->work_platform ==13 && empty($gift_sku)){
+                $gift_sku = $this->order_change->field('id,change_sku,change_number')->where(['work_id' => $ids, 'change_type' => 1])->select();
+                $this->view->assign('change_name',2);
+            }else{
+                $this->view->assign('change_name',1);
+            }
             if (!empty($gift_sku)) {
                 $gift_status = 1;
             }
+
             $this->view->assign('gift_status', $gift_status);
             $this->view->assign('gift_sku', $gift_sku);
 
@@ -3077,6 +3085,41 @@ class WorkOrderList extends Backend
                                     }
                                     if ($bar_code_info['sku'] != $platform_info_sku) {
                                         $this->error("序号为" . $i . "的sku(" . $change_sku . ")，条形码所绑定的sku与赠品sku不一致");
+                                    }
+                                }
+                            }
+                        }
+                    }elseif (27 == $measure_choose_id && 1 == $params['success']){
+                        $barcode = $params['barcode'];
+                        $product_bar_code_item = new ProductBarCodeItem();
+                        $work_order_change_sku = new WorkOrderChangeSku();
+                        $item_platform_sku = new ItemPlatformSku();
+                        $gift_sku = $work_order_change_sku->field('id,change_sku,change_number')->where(['work_id' => $receptInfo['work_id'], 'change_type' => 1])->select();
+                        if (!empty($gift_sku)) {
+                            $gift_sku = collection($gift_sku)->toArray();
+                            foreach ($gift_sku as $key => $value) {
+                                for ($i = 1; $i <= $value['change_number']; $i++) {
+                                    $change_sku = $value['change_sku'];
+                                    if (empty($barcode[$value['change_sku'] . '_' . $i])) {
+                                        $this->error("序号为" . $i . "的sku(" . $value['change_sku'] . ")，条形码不能为空");
+                                    }
+                                    //仓库sku
+                                    $platform_info = $item_platform_sku
+                                        ->field('sku,stock')
+                                        ->where(['platform_sku' => $value['change_sku'], 'platform_type' => $row['work_platform']])
+                                        ->find();
+                                    if ($platform_info['sku']) {
+                                        $platform_info_sku = $platform_info['sku'];
+                                    }
+                                    $bar_code_info = $product_bar_code_item->where(['code' => $barcode[$change_sku . '_' . $i]])->find();
+                                    if (empty($bar_code_info)) {
+                                        $this->error("序号为" . $i . "的，寄回换框条形码不存在");
+                                    }
+                                    if ($bar_code_info['library_status'] == 2) {
+                                        $this->error("序号为" . $i . "的sku(" . $change_sku . ")，在库状态为否");
+                                    }
+                                    if ($bar_code_info['sku'] != $platform_info_sku) {
+                                        $this->error("序号为" . $i . "的sku(" . $change_sku . ")，条形码所绑定的sku与寄回换框sku不一致");
                                     }
                                 }
                             }
