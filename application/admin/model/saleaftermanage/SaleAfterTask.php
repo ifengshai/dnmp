@@ -870,7 +870,7 @@ class SaleAfterTask extends Model
         if ($transaction_id) {
             $customer_email = $order->where('site', $order_platform)->where('last_trans_id', $transaction_id)->value('customer_email');
         }
-
+echo $customer_email;die;
         if (empty($customer_email)) {
             return [];
         }
