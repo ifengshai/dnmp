@@ -137,7 +137,7 @@ class ZendeskComments extends Model
                         $arr[$v['assign_id']]['goods_estimate_num']+=1;
                     }
                 }else{ //如果第一承接人是空的话,处理人中vip客服处理时间最早的客服是当前客服
-                    $handle_comment_result = $this->where($where_comment)->field('id,due_id')->order('id')->find();
+                    $handle_comment_result = $this->where($where_comment)->field('id,due_id')->order('create_time')->find();
                     if($handle_comment_result){
                         $arr[$handle_comment_result['due_id']]['estimate'] +=1;
                         if($v['rating_type'] == 1){
@@ -149,7 +149,7 @@ class ZendeskComments extends Model
 
 
             }else{ //非vip邮件且邮件处理人不包含vip客服时，统计：邮件第一承接人是当前客服
-                $vip_comment_result = $this->where($where_comment)->field('id,due_id')->order('id')->find();
+                $vip_comment_result = $this->where($where_comment)->field('id,due_id')->order('create_time')->find();
                 //dump($vip_comment_result);
                 if(!$vip_comment_result && !empty($v['assign_id'])){
                         $arr[$v['assign_id']]['estimate'] +=1;
@@ -163,7 +163,7 @@ class ZendeskComments extends Model
                     $general_comment['zid'] = $v['id'];
                     $general_comment['due_id'] = ['not in',$vip_customer_service];
                     $general_comment['due_id'] =['gt',0];
-                    $general_comment_result = $this->where($general_comment)->field('id,due_id')->order('id')->find();
+                    $general_comment_result = $this->where($general_comment)->field('id,due_id')->order('create_time')->find();
                     if($general_comment_result){
                         $arr[$general_comment_result['due_id']]['estimate'] +=1;
                         if($v['rating_type'] == 1){
