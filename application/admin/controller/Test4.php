@@ -4154,7 +4154,7 @@ class Test4 extends Controller
         $all = count($skus);
         $count = 0;
         foreach ($skus as $sku) {
-            echo $count++ / $all . PHP_EOL;
+            echo $count++ . '/' . $all . PHP_EOL;
             $items[$sku] = [
                 'sku' => $sku,
                 '0' => 0,
