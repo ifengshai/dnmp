@@ -224,6 +224,7 @@ class CustomerService extends Backend
         $positive_effect_num = $this->zendeskTasks->positive_effect_num(1);
         //获取表格内容
         $customer_data = $this->get_worknum_table(1);
+
         $this->view->assign(compact('deal_num', 'no_up_to_day', 'positive_effect_num', 'customer_data'));
         return $this->view->fetch();
     }
@@ -254,6 +255,10 @@ class CustomerService extends Backend
         $map['is_admin'] = 1;
         $all_service_ids = $this->zendeskComments->where($map)->column('due_id');
         $all_service = array_unique($all_service_ids);
+        $all_one_estimate = $this->zendeskComments->dealnum_estimate($platform,$time_str1,$all_service);
+        if($time_str2){
+            $all_two_estimate = $this->zendeskComments->dealnum_estimate($platform,$time_str2,$all_service);
+        }
         foreach ($all_service as $item=>$value){
             $admin = Db::name('admin')->where('id',$value)->field('nickname,group_id')->find();
             $data[$i]['admin_id'] = $value;
@@ -275,6 +280,10 @@ class CustomerService extends Backend
             $data[$i]['one']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str1, $admin['group_id'], $value);
             //未达标天数
             $data[$i]['one']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str1, $admin['group_id'], $value);
+            //好评数量
+            $data[$i]['one']['estimate'] = $all_one_estimate[$value]['estimate'];
+            //满意度
+            $data[$i]['one']['goods_estimate_rate'] = $all_one_estimate[$value]['goods_estimate_rate'];
             if ($time_str2) {
                 $createat2 = explode(' ', $time_str2);
                 $two_time = $createat2[0] . ' - ' . $createat2[3];
@@ -284,6 +293,10 @@ class CustomerService extends Backend
                 $data[$i]['two']['deal_num'] = $this->zendeskComments->dealnum_statistical($platform, $time_str2, $admin['group_id'], $value);
                 //对比未达标天数
                 $data[$i]['two']['no_up_to_day'] = $this->zendeskTasks->not_up_to_standard_day($platform, $time_str2, $admin['group_id'], $value);
+                //好评数量
+                $data[$i]['two']['estimate'] = $all_two_estimate[$value]['estimate'];
+                //满意度
+                $data[$i]['two']['goods_estimate_rate'] = $all_two_estimate[$value]['goods_estimate_rate'];
             }
             $i++;
         }
@@ -476,13 +489,14 @@ class CustomerService extends Backend
             //获取表格中的时间
             $customer_data = $this->get_worknum_table($platform,$time_str,$contrast_time_str,$group_id);
             if($customer_data){
-                $str = '<thead><tr><th style="text-align: center; vertical-align: middle;">姓名</th><th style="text-align: center; vertical-align: middle;">分组</th><th style="text-align: center; vertical-align: middle;">日期</th><th style="text-align: center; vertical-align: middle;">处理量</th><th style="text-align: center; vertical-align: middle;">未达标天数</th><th style="text-align: center; vertical-align: middle;">操作</th></tr></thead>';
+                $str = '<thead><tr><th style="text-align: center; vertical-align: middle;">姓名</th><th style="text-align: center; vertical-align: middle;">分组</th><th style="text-align: center; vertical-align: middle;">日期</th><th style="text-align: center; vertical-align: middle;">处理量</th><th style="text-align: center; vertical-align: middle;">未达标天数</th><th style="text-align: center; vertical-align: middle;">邮件评价数</th><th style="text-align: center; vertical-align: middle;">邮件满意度</th><th style="text-align: center; vertical-align: middle;">操作</th></tr></thead>';
                 foreach ($customer_data as $item=>$value){
                     $str .= '<tr><td style="text-align: center; vertical-align: middle;">'.$value['name'].'</td><td id="today_sales_money" style="text-align: center; vertical-align: middle;">'.$value['group_name'].'</td>';
                     if($value['two']){
-                        $str .= '<td id="today_order_num" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['time'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['time'].'</li></ul></td><td id="today_order_success" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['deal_num'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['deal_num'].'</li></ul></td><td id="today_unit_price" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['no_up_to_day'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['no_up_to_day'].'</li></ul></td>';
+                        $str .= '<td id="today_order_num" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['time'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['time'].'</li></ul></td><td id="today_order_success" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['deal_num'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['deal_num'].'</li></ul></td><td id="today_unit_price" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['no_up_to_day'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['no_up_to_day'].'</li></ul></td>
+<td id="goods_estimate_num" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['estimate'].'</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['estimate'].'</li></ul></td><td id="goods_estimate_rate" style="text-align: center; vertical-align: middle;"><ul class="customer_table"><li>'.$value['one']['goods_estimate_rate'].'%</li><hr style="height:1px;border:none;border-top:1px solid #c1bebe;" /><li>'.$value['two']['goods_estimate_rate'].'%</li></ul></td>';
                     }else{
-                        $str .= '<td id="today_order_num" style="text-align: center; vertical-align: middle;">'.$value['one']['time'].'</td><td id="today_order_success" style="text-align: center; vertical-align: middle;">'.$value['one']['deal_num'].'</td><td id="today_unit_price" style="text-align: center; vertical-align: middle;">'.$value['one']['no_up_to_day'].'</td>';
+                        $str .= '<td id="today_order_num" style="text-align: center; vertical-align: middle;">'.$value['one']['time'].'</td><td id="today_order_success" style="text-align: center; vertical-align: middle;">'.$value['one']['deal_num'].'</td><td id="today_unit_price" style="text-align: center; vertical-align: middle;">'.$value['one']['no_up_to_day'].'</td><td id="goods_estimate_num" style="text-align: center; vertical-align: middle;">'.$value['one']['estimate'].'</td><td id="goods_estimate_rate" style="text-align: center; vertical-align: middle;">'.$value['one']['goods_estimate_rate'].'%</td>';
                     }
                     $str .= '<td class="click_look" data-id="'.$value['admin_id'].'" data-value="'.$value['time'].'">点击查看</td></tr>';
                 }
