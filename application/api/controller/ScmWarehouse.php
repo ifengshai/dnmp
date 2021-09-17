@@ -1843,7 +1843,7 @@ class ScmWarehouse extends Scm
                             $item_platform_sku = $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->find();
                             //sku没有同步meeloog站 无法添加虚拟库存 必须先同步
                             if (empty($item_platform_sku)) {
-                                throw new Exception('sku：' . $v['sku'] . '没有同步meeloog站，请先同步');
+                                throw new Exception('sku：' . $v['sku'] . '没有同步vicmoo站，请先同步');
                             }
                             $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => 4])->setInc('stock', $v['in_stock_num']);
 
