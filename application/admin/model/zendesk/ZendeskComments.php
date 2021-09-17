@@ -92,21 +92,22 @@ class ZendeskComments extends Model
         if(!$result){
             return $arr;
         }
-        switch ($platform) {
-            case 1:
-                $webModel = Db::connect('database.db_zeelool');
-                break;
-            case 2:
-                $webModel = Db::connect('database.db_voogueme');
-                break;
-            case 3:
-                $webModel = Db::connect('database.db_nihao');
-                break;
-        }
+
         //求出所有的vip客服
         $vip_customer_service = Db::name('zendesk_admin')->where(['group'=>1])->column('admin_id');
         foreach($result as $k =>$v){
-            if($platform != 3){
+            switch ($v['type']) {
+                case 1:
+                    $webModel = Db::connect('database.db_zeelool');
+                    break;
+                case 2:
+                    $webModel = Db::connect('database.db_voogueme');
+                    break;
+                case 3:
+                    $webModel = Db::connect('database.db_nihao');
+                    break;
+            }
+            if($v['type'] != 3){
                 $group = $webModel->table('customer_entity')->where('email', $v['email'])->value('group_id');
                 if($group!=4){
                     $is_vip_email = 0; //不是vip邮件
