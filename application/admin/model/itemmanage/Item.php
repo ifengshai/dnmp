@@ -788,4 +788,35 @@ class Item extends Model
     {
         return $this->alias('a')->where('b.frame_texture', 2)->join(['fa_item_attribute' => 'b'], 'a.id=b.item_id')->column('sku');
     }
+
+    /**
+     * 根据真实sku获取对应的spu信息
+     * @param $sku
+     *
+     * @author liushiwei
+     * @date   2021/9/7 15:38
+     */
+    public function getSpuListBySku($sku,$platform_type)
+    {
+        $where['is_del'] = 1;
+        $where['sku']  = $sku;
+        //获取spu
+        $result = $this->where($where)->value('origin_sku');
+        if(!$result){
+            return false;
+        }
+        //根据spu获取所有的true sku
+        $sku_arr = $this->where(['origin_sku'=>$result])->column('sku');
+        unset($sku_arr[array_search($sku , $sku_arr)]);
+        if(is_array($sku_arr) && count($sku_arr)>0){
+            $platform_sku_arr = $this->alias('g')->where('g.sku', 'in', $sku_arr)
+                ->where('g.is_open','eq',1)
+                ->where('p.platform_type','eq',$platform_type)->join('item_platform_sku p', 'g.sku=p.sku')
+                ->column('p.platform_sku');
+
+        }else{
+            $platform_sku_arr = false;
+        }
+        return $platform_sku_arr;
+    }
 }

@@ -103,6 +103,16 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">签收仓:</label>
+        <div class="col-xs-12 col-sm-3">
+            <select class="form-control is_error" disabled>
+                <option value="">请选择</option>
+                <option value="1" {:$row['logisticsInfo']['sign_warehouse']==1 ? 'selected' : '' }>郑州仓</option>
+                <option value="2" {:$row['logisticsInfo']['sign_warehouse']==2 ? 'selected' : '' }>丹阳仓</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">采购单备注:</label>
         <div class="col-xs-12 col-sm-3">
             <textarea class="form-control " rows="5" value = "{$purchase_data['purchase_remark']}" readonly cols="50">{$purchase_data['purchase_remark']}</textarea>

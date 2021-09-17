@@ -783,7 +783,7 @@ class OrderReturn extends Backend
         if ($this->request->isAjax()) {
             $orderType = $request->post('orderType');
             $order_number = $request->post('order_number');
-            $result = (new SaleAfterTask())->getLikeOrder($orderType, $order_number);
+            $result = (new SaleAfterTask())->getLikeOrderNew($orderType, $order_number);
             if (!$result) {
                 return $this->error('订单不存在，请重新尝试');
             }

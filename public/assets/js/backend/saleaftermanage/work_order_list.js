@@ -223,6 +223,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         { field: 'check_time', title: __('Check_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
                         { field: 'complete_time', title: __('Complete_time'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
                         { field: 'payment_time', title: __('订单支付时间'), operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime, visible: false },
+                        { field: 'customer_return_order', title: __('客户寄回物流单号'), operate: 'like',visible: false },
                         {
                             field: 'buttons',
                             width: "120px",
@@ -469,6 +470,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 //读取是谁添加的配置console.log(Config.work_type);
                 $('.step_type').attr('checked', false);
                 $('.step_type').parent().hide();
+                $('.step24_lens_back').hide();
                 $('#appoint_group_users').html('');//切换问题类型时清空承接人
                 $('#recept_person').val('');//切换问题类型时清空隐藏域承接人
                 $('.measure').hide();
@@ -511,7 +513,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     //循环列出对应的措施
                     for(var j=0;j<choose_problem_step.length;j++){
-                        //console.log(choose_problem_step[j].step_id);
                         $('#step' + choose_problem_step[j].step_id).parent().show();
                         $('#step' + choose_problem_step[j].step_id + '-is_check').val(choose_problem_step[j].is_check);
                         $('#step' + choose_problem_step[j].step_id + '-is_auto_complete').val(choose_problem_step[j].is_auto_complete);
@@ -547,6 +548,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     });
                     for (var m = 0; m < checkID.length; m++) {
                         var node = $('.step' + checkID[m]);
+                        console.log(checkID[m]);
+                        //如果选择更换快递方式
+
                         if (node.is(':hidden')) {
                             node.show();
                         } else {
@@ -607,6 +611,27 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $("input[name='row[measure_choose_id][]']:checked").each(function (i) {
                         checkID[i] = $(this).val();
                         var id = $(this).val();
+                        if(id == 26){
+                            let warehouse_dispatch_way = $('#warehouse_dispatch_way').val();
+                            $("#c-warehouse_dispatch_way option").each(function(){
+                                if($(this).val() == warehouse_dispatch_way){
+                                    $(this).attr("selected",true);
+                                }else{
+                                    $(this).attr("selected",false);
+                                }
+                            })
+                            $('.selectpicker ').selectpicker('refresh');
+                        }else{
+                            $("#c-warehouse_dispatch_way option").each(function(){
+                                if($(this).val() == 'flatrate_flatrate'){
+                                    $(this).attr("selected",true);
+                                }else{
+                                    $(this).attr("selected",false);
+                                }
+                            })
+                            $('.selectpicker ').selectpicker('refresh');
+                        }
+
                         //获取承接组
                          appoint_group += $('#step' + id + '-appoint_group').val() + ',';
                          var group_id = $('#step' + id + '-appoint_group').val();
@@ -913,14 +938,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     var site_type = $('#work_platform').val();
                     //var is_new_version = $('#is_new_version').val();
                     //补发
-                    if (value == 7 && check === true) {
+                    if ((value == 7 || value == 23) && check === true) {
                         //获取补发的信息
                         Backend.api.ajax({
                             url: 'saleaftermanage/work_order_list/ajaxGetAddress',
                             data: {
                                 increment_id: increment_id,
                                 site_type: site_type,
-                                measure_choose_id: '7',
+                                measure_choose_id: value,
                                 work_id: ''
                                 //is_new_version: is_new_version
                             }
@@ -932,60 +957,116 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             var data = json.address;
                             var lens = json.lens;
                             prescriptions = data.prescriptions;
-                            $('#supplement-order').html(lens.html);
+                            if (value == 7) {
+                                $('#supplement-order').html(lens.html);
+                            }else{
+                                $('#supplement-order-lens').html(lens.html);
+                            }
+                            
                             var order_pay_currency = $('#order_pay_currency').val();
                             //修改地址
                             var address = '';
                             /*for (var i = 0; i < data.address.length; i++) {
                                 if (i == 0) {*/
-                                    address += '<option value = "0" selected>shipping</option>';
-                                    //补发地址自动填充第一个
-                                    $('#c-firstname').val(data.address.firstname);
-                                    $('#c-lastname').val(data.address.lastname);
-                                    var email = data.address.email;
-                                    if (email == null) {
-                                        email = $('#customer_email').val();
-                                    }
-                                    $('#c-email').val(email);
-                                    $('#c-telephone').val(data.address.telephone);
-                                    $('#c-country').val(data.address.country_id);
-                                    $('#c-country').change();
-                                    if(data.address.region_id == '8888' || !data.address.region_id){
-                                        $('#c-region').val(0);
+                                    if (value == 23) {
+                                        address += '<option value = "0" selected>shipping</option>';
+                                        //补发地址自动填充第一个
+                                        $('#lens_c-firstname').val(data.address.firstname);
+                                        $('#lens_c-lastname').val(data.address.lastname);
+                                        var email = data.address.email;
+                                        if (email == null) {
+                                            email = $('#customer_email').val();
+                                        }
+                                        $('#lens_c-email').val(email);
+                                        $('#lens_c-telephone').val(data.address.telephone);
+                                        $('#lens_c-country').val(data.address.country_id);
+                                        $('#lens_c-country').change();
+                                        if(data.address.region_id == '8888' || !data.address.region_id){
+                                            $('#lens_c-region').val(0);
+                                        }else{
+                                            $('#lens_c-region').val(data.address.region_id);
+                                        }
+                                        $('#lens_c-region1').val(data.address.region);
+                                        $('#lens_c-city').val(data.address.city);
+                                        $('#lens_c-area').val(data.address.area);
+                                        $('#lens_c-street').val(data.address.street);
+                                        $('#lens_c-postcode').val(data.address.postcode);
+                                        $('#lens_c-taxno').val(data.address.taxno);
+                                        $('#lens_c-currency_code').val(order_pay_currency);
                                     }else{
-                                        $('#c-region').val(data.address.region_id);
+                                        address += '<option value = "0" selected>shipping</option>';
+                                        //补发地址自动填充第一个
+                                        $('#c-firstname').val(data.address.firstname);
+                                        $('#c-lastname').val(data.address.lastname);
+                                        var email = data.address.email;
+                                        if (email == null) {
+                                            email = $('#customer_email').val();
+                                        }
+                                        $('#c-email').val(email);
+                                        $('#c-telephone').val(data.address.telephone);
+                                        $('#c-country').val(data.address.country_id);
+                                        $('#c-country').change();
+                                        if(data.address.region_id == '8888' || !data.address.region_id){
+                                            $('#c-region').val(0);
+                                        }else{
+                                            $('#c-region').val(data.address.region_id);
+                                        }
+                                        $('#c-region1').val(data.address.region);
+                                        $('#c-city').val(data.address.city);
+                                        $('#c-area').val(data.address.area);
+                                        $('#c-street').val(data.address.street);
+                                        $('#c-postcode').val(data.address.postcode);
+                                        $('#c-taxno').val(data.address.taxno);
+                                        $('#c-currency_code').val(order_pay_currency);
                                     }
-                                    $('#c-region1').val(data.address.region);
-                                    $('#c-city').val(data.address.city);
-                                    $('#c-area').val(data.address.area);
-                                    $('#c-street').val(data.address.street);
-                                    $('#c-postcode').val(data.address.postcode);
-                                    $('#c-taxno').val(data.address.taxno);
-                                    $('#c-currency_code').val(order_pay_currency);
+                                    
                                 /*} else {
                                     address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                 }
 
                             }*/
-                            $('#address_select').html(address);
-                            //选择地址切换地址
-                            $('#address_select').change(function () {
-                                var address_id = $(this).val();
-                                var address = data.address[address_id];
-                                $('#c-firstname').val(address.firstname);
-                                $('#c-lastname').val(address.lastname);
-                                $('#c-email').val(address.email);
-                                $('#c-telephone').val(address.telephone);
-                                $('#c-country').val(address.country_id);
-                                $('#c-country').change();
-                                $('#c-region').val(address.region_id);
-                                $('#c-region1').val(address.region);
-                                $('#c-city').val(address.city);
-                                $('#c-area').val(address.area);
-                                $('#c-street').val(address.street);
-                                $('#c-postcode').val(address.postcode);
-                                $('#c-taxno').val(address.taxno);
-                            })
+                            if (value == 23) {
+                                $('#address_select_lens').html(address);
+                                //选择地址切换地址
+                                $('#address_select_lens').change(function () {
+                                    var address_id = $(this).val();
+                                    var address = data.address[address_id];
+                                    $('#lens_c-firstname').val(address.firstname);
+                                    $('#lens_c-lastname').val(address.lastname);
+                                    $('#lens_c-email').val(address.email);
+                                    $('#lens_c-telephone').val(address.telephone);
+                                    $('#lens_c-country').val(address.country_id);
+                                    $('#lens_c-country').change();
+                                    $('#lens_c-region').val(address.region_id);
+                                    $('#lens_c-region1').val(address.region);
+                                    $('#lens_c-city').val(address.city);
+                                    $('#lens_c-area').val(address.area);
+                                    $('#lens_c-street').val(address.street);
+                                    $('#lens_c-postcode').val(address.postcode);
+                                    $('#lens_c-taxno').val(address.taxno);
+                                }) 
+                            }else{
+                               $('#address_select').html(address);
+                                //选择地址切换地址
+                                $('#address_select').change(function () {
+                                    var address_id = $(this).val();
+                                    var address = data.address[address_id];
+                                    $('#c-firstname').val(address.firstname);
+                                    $('#c-lastname').val(address.lastname);
+                                    $('#c-email').val(address.email);
+                                    $('#c-telephone').val(address.telephone);
+                                    $('#c-country').val(address.country_id);
+                                    $('#c-country').change();
+                                    $('#c-region').val(address.region_id);
+                                    $('#c-region1').val(address.region);
+                                    $('#c-city').val(address.city);
+                                    $('#c-area').val(address.area);
+                                    $('#c-street').val(address.street);
+                                    $('#c-postcode').val(address.postcode);
+                                    $('#c-taxno').val(address.taxno);
+                                }) 
+                            }
+                            
 
                             //追加
                             lens_click_data = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del" style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
@@ -995,16 +1076,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     }
                     //更加镜架的更改
                     var question = $('input[name="row[problem_type_id]"]:checked').val();
-                    if ((Config.work_type == 1 && value == 12  && check === true) || (Config.work_type == 2 && value == 12  && check === true)) {
+                    if ((Config.work_type == 1 && (value == 12 || value == 24)  && check === true) || (Config.work_type == 2 && (value == 12 || value == 24)  && check === true)) {
                         Backend.api.ajax({
                             url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
                             data: {
                                 increment_id: increment_id,
                                 site_type: site_type,
+                                change_type: value,
                                 //is_new_version: is_new_version
                             }
                         }, function (data, ret) {
-                            $('#lens_contents').html(data.html);
+                            if (value == 24) {
+                                $('#back_lens_contents').html(data.lens.html);
+                            }else{
+                               $('#lens_contents').html(data.lens.html); 
+                            }
+                            
                             $('.selectpicker ').selectpicker('refresh');
                         });
                     }
@@ -1119,6 +1206,81 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 }
                 if (prescription.hasOwnProperty("od_pv")) {
                     prescription_div.find('input[name="row[replacement][os_bd_r][]"]').val(prescription.os_bd_r);
+                }
+
+                $('.selectpicker ').selectpicker('refresh');
+            })
+            
+            //补发镜片处方选择填充
+            $(document).on('change', '#prescription_select_lens', function () {
+                var val = $(this).val();
+                //var is_new_version = $('#is_new_version').val();
+                var prescription = prescriptions[val];
+                console.log(prescription);
+                var prescription_div = $(this).parents('.step23_function2').next('.step1_function3_lens');
+                prescription_div.find('input').val('');
+                prescription_div.find('input[name="row[replacement][lens_od_sph][]"]').val(prescription.od_sph);
+                prescription_div.find('input[name="row[replacement][lens_os_sph][]"]').val(prescription.os_sph);
+                prescription_div.find('input[name="row[replacement][lens_os_cyl][]"]').val(prescription.os_cyl);
+                prescription_div.find('input[name="row[replacement][lens_od_cyl][]"]').val(prescription.od_cyl);
+                prescription_div.find('input[name="row[replacement][lens_od_axis][]"]').val(prescription.od_axis);
+                prescription_div.find('input[name="row[replacement][lens_os_axis][]"]').val(prescription.os_axis);
+
+                //$(this).parents('.step23_function2').val('')
+                $(this).parents('.step23_function2').find('select[name="row[replacement][lens_recipe_type][]"]').val(prescription.prescription_type);
+                $(this).parents('.step23_function2').find('select[name="row[replacement][lens_recipe_type][]"]').change();
+                prescription_div.find('select[name="row[replacement][lens_coating_type][]"]').val(prescription.coating_id);
+
+
+                //判断是否是彩色镜片
+                if (prescription.color_id) {
+                    prescription_div.find('#lens_color_type').val(prescription.color_id);
+                    //if(is_new_version == 0){
+                        prescription_div.find('#lens_color_type').change();
+                    //}
+                }
+                prescription_div.find('#lens_lens_type').val(prescription.index_id);
+
+                //add，pd添加
+                if (prescription.hasOwnProperty("total_add")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_add][]"]').val(prescription.total_add);
+                    //prescription_div.find('input[name="row[replacement][lens_os_add][]"]').attr('disabled',true);
+                } else {
+                    prescription_div.find('input[name="row[replacement][lens_od_add][]"]').val(prescription.od_add);
+                    prescription_div.find('input[name="row[replacement][lens_os_add][]"]').val(prescription.os_add);
+                }
+
+                if (prescription.pd == '' || prescription.pd == 0) {
+                    prescription_div.find('input[name="row[replacement][lens_pd_r][]"]').val(prescription.pd_r);
+                    prescription_div.find('input[name="row[replacement][lens_pd_l][]"]').val(prescription.pd_l);
+                }else{
+                    prescription_div.find('input[name="row[replacement][lens_pd_r][]"]').val(prescription.pd);
+                    //prescription_div.find('input[name="row[replacement][lens_pd_l][]"]').attr('disabled',true);
+                }
+                //
+                if (prescription.hasOwnProperty("od_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_pv][]"]').val(prescription.od_pv);
+                }
+                if (prescription.hasOwnProperty("od_bd")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_bd][]"]').val(prescription.od_bd);
+                }
+                if (prescription.hasOwnProperty("od_pv_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_pv_r][]"]').val(prescription.od_pv_r);
+                }
+                if (prescription.hasOwnProperty("od_bd_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_bd_r][]"]').val(prescription.od_bd_r);
+                }
+                if (prescription.hasOwnProperty("os_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_pv][]"]').val(prescription.os_pv);
+                }
+                if (prescription.hasOwnProperty("os_bd")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_bd][]"]').val(prescription.os_bd);
+                }
+                if (prescription.hasOwnProperty("os_pv_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_pv_r][]"]').val(prescription.os_pv_r);
+                }
+                if (prescription.hasOwnProperty("od_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_bd_r][]"]').val(prescription.os_bd_r);
                 }
 
                 $('.selectpicker ').selectpicker('refresh');
@@ -1284,6 +1446,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                 if (!$('.step6').is(':hidden')) {
                     changeOrder(work_id, 4);
                 }
+                //判断补发镜片的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
+                if (!$('.step23').is(':hidden')) {
+                    changeOrder(work_id, 10);
+                }
+                //判断补发镜片的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 end
 
                 //生成已选中子单折叠框
                 itemSelectpicker(2);
@@ -1673,14 +1840,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     if (increment_id) {
                         var site_type = $('#work_platform').val();
                         //补发
-                        if (value == 7 && check === true) {
+                        if ((value == 7 || value == 23) && check === true) {
                             //获取补发的信息
                             Backend.api.ajax({
                                 url: 'saleaftermanage/work_order_list/ajaxGetAddress',
                                 data: {
                                     increment_id: increment_id,
                                     site_type: site_type,
-                                    measure_choose_id: '7'
+                                    measure_choose_id: value
                                     //is_new_version: is_new_version
                                 }
                             }, function (json, ret) {
@@ -1697,58 +1864,113 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 var address = '';
                                 /*for (var i = 0; i < data.address.length; i++) {
                                     if (i == 0) {*/
-                                        address += '<option value = "0" selected>shipping</option>';
-                                        //补发地址自动填充第一个
-                                        $('#c-firstname').val(data.address.firstname);
-                                        $('#c-lastname').val(data.address.lastname);
-                                        var email = data.address.email;
-                                        if (email == null) {
-                                            email = $('#customer_email').val();
-                                        }
-                                        $('#c-email').val(email);
-                                        $('#c-telephone').val(data.address.telephone);
-                                        $('#c-country').val(data.address.country_id);
-                                        $('#c-country').change();
-                                        if(data.address.region_id == '8888' || !data.address.region_id){
-                                            $('#c-region').val(0);
+                                        if (value == 23) {
+                                            address += '<option value = "0" selected>shipping</option>';
+                                            //补发地址自动填充第一个
+                                            $('#lens_c-firstname').val(data.address.firstname);
+                                            $('#lens_c-lastname').val(data.address.lastname);
+                                            var email = data.address.email;
+                                            if (email == null) {
+                                                email = $('#customer_email').val();
+                                            }
+                                            $('#lens_c-email').val(email);
+                                            $('#lens_c-telephone').val(data.address.telephone);
+                                            $('#lens_c-country').val(data.address.country_id);
+                                            $('#lens_c-country').change();
+                                            if(data.address.region_id == '8888' || !data.address.region_id){
+                                                $('#lens_c-region').val(0);
+                                            }else{
+                                                $('#lens_c-region').val(data.address.region_id);
+                                            }
+                                            $('#lens_c-region1').val(data.address.region);
+                                            $('#lens_c-city').val(data.address.city);
+                                            $('#lens_c-area').val(data.address.area);
+                                            $('#lens_c-street').val(data.address.street);
+                                            $('#lens_c-postcode').val(data.address.postcode);
+                                            $('#lens_c-taxno').val(data.address.taxno);
+                                            $('#lens_c-currency_code').val(order_pay_currency);
                                         }else{
-                                            $('#c-region').val(data.address.region_id);
+                                            address += '<option value = "0" selected>shipping</option>';
+                                            //补发地址自动填充第一个
+                                            $('#c-firstname').val(data.address.firstname);
+                                            $('#c-lastname').val(data.address.lastname);
+                                            var email = data.address.email;
+                                            if (email == null) {
+                                                email = $('#customer_email').val();
+                                            }
+                                            $('#c-email').val(email);
+                                            $('#c-telephone').val(data.address.telephone);
+                                            $('#c-country').val(data.address.country_id);
+                                            $('#c-country').change();
+                                            if(data.address.region_id == '8888' || !data.address.region_id){
+                                                $('#c-region').val(0);
+                                            }else{
+                                                $('#c-region').val(data.address.region_id);
+                                            }
+                                            $('#c-region1').val(data.address.region);
+                                            $('#c-city').val(data.address.city);
+                                            $('#c-area').val(data.address.area);
+                                            $('#c-street').val(data.address.street);
+                                            $('#c-postcode').val(data.address.postcode);
+                                            $('#c-taxno').val(data.address.taxno);
+                                            $('#c-currency_code').val(order_pay_currency);
                                         }
-                                        $('#c-region1').val(data.address.region);
-                                        $('#c-city').val(data.address.city);
-                                        $('#c-area').val(data.address.area);
-                                        $('#c-street').val(data.address.street);
-                                        $('#c-postcode').val(data.address.postcode);
-                                        $('#c-taxno').val(data.address.taxno);
-                                        $('#c-currency_code').val(order_pay_currency);
+                                        
                                     /*} else {
                                         address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
                                     }
 
                                 }*/
-                                $('#address_select').html(address);
-                                //选择地址切换地址
-                                $('#address_select').change(function () {
-                                    var address_id = $(this).val();
-                                    var address = data.address[address_id];
-                                    $('#c-firstname').val(address.firstname);
-                                    $('#c-lastname').val(address.lastname);
-                                    var email = address.email;
-                                    if (email == null) {
-                                        email = $('#customer_email').val();
-                                    }
-                                    $('#c-email').val(email);
-                                    $('#c-telephone').val(address.telephone);
-                                    $('#c-country').val(address.country_id);
-                                    $('#c-country').change();
-                                    $('#c-region').val(address.region_id);
-                                    $('#c-region1').val(address.region);
-                                    $('#c-city').val(address.city);
-                                    $('#c-area').val(address.area);
-                                    $('#c-street').val(address.street);
-                                    $('#c-postcode').val(address.postcode);
-                                    $('#c-taxno').val(address.taxno);
-                                })
+                                if (value == 23) {
+                                    $('#address_select_lens').html(address);
+                                    //选择地址切换地址
+                                    $('#address_select_lens').change(function () {
+                                        var address_id = $(this).val();
+                                        var address = data.address[address_id];
+                                        $('#lens_c-firstname').val(address.firstname);
+                                        $('#lens_c-lastname').val(address.lastname);
+                                        var email = address.email;
+                                        if (email == null) {
+                                            email = $('#customer_email').val();
+                                        }
+                                        $('#lens_c-email').val(email);
+                                        $('#lens_c-telephone').val(address.telephone);
+                                        $('#lens_c-country').val(address.country_id);
+                                        $('#lens_c-country').change();
+                                        $('#lens_c-region').val(address.region_id);
+                                        $('#lens_c-region1').val(address.region);
+                                        $('#lens_c-city').val(address.city);
+                                        $('#lens_c-area').val(address.area);
+                                        $('#lens_c-street').val(address.street);
+                                        $('#lens_c-postcode').val(address.postcode);
+                                        $('#lens_c-taxno').val(address.taxno);
+                                    })
+                                }else{
+                                    $('#address_select').html(address);
+                                    //选择地址切换地址
+                                    $('#address_select').change(function () {
+                                        var address_id = $(this).val();
+                                        var address = data.address[address_id];
+                                        $('#c-firstname').val(address.firstname);
+                                        $('#c-lastname').val(address.lastname);
+                                        var email = address.email;
+                                        if (email == null) {
+                                            email = $('#customer_email').val();
+                                        }
+                                        $('#c-email').val(email);
+                                        $('#c-telephone').val(address.telephone);
+                                        $('#c-country').val(address.country_id);
+                                        $('#c-country').change();
+                                        $('#c-region').val(address.region_id);
+                                        $('#c-region1').val(address.region);
+                                        $('#c-city').val(address.city);
+                                        $('#c-area').val(address.area);
+                                        $('#c-street').val(address.street);
+                                        $('#c-postcode').val(address.postcode);
+                                        $('#c-taxno').val(address.taxno);
+                                    })
+                                }
+                                
 
                                 //追加
                                 lens_click_data_add_edit = '<div class="margin-top:10px;">' + lens.html + '<div class="form-group-child4_del" style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
@@ -1758,16 +1980,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         }
                         //更加镜架的更改
                         var question = $('input[name="row[problem_type_id]"]:checked').val();
-                        if ((Config.work_type == 1 && value == 12  && check === true) || (Config.work_type == 2 && value == 12  && check === true)) {
+                        if ((Config.work_type == 1 && (value == 12 || value == 24)  && check === true) || (Config.work_type == 2 && (value == 12 || value == 24)  && check === true)) {
                             Backend.api.ajax({
                                 url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
                                 data: {
                                     increment_id: increment_id,
                                     site_type: site_type,
+                                    change_type: value,
                                     //is_new_version: is_new_version
                                 }
                             }, function (data, ret) {
-                                $('#lens_contents').html(data.html);
+                                if (value == 24) {
+                                    $('#back_lens_contents').html(data.lens.html);
+                                }else{
+                                   $('#lens_contents').html(data.lens.html); 
+                                }
+                                
                                 $('.selectpicker ').selectpicker('refresh');
                             });
                         }
@@ -1874,6 +2102,80 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
 
                     $('.selectpicker ').selectpicker('refresh');
                 }
+            })
+            //补发镜片处方选择填充
+            $(document).on('change', '#prescription_select_lens', function () {
+                var val = $(this).val();
+                //var is_new_version = $('#is_new_version').val();
+                var prescription = prescriptions[val];
+                console.log(prescription);
+                var prescription_div = $(this).parents('.step23_function2').next('.step1_function3_lens');
+                prescription_div.find('input').val('');
+                prescription_div.find('input[name="row[replacement][lens_od_sph][]"]').val(prescription.od_sph);
+                prescription_div.find('input[name="row[replacement][lens_os_sph][]"]').val(prescription.os_sph);
+                prescription_div.find('input[name="row[replacement][lens_os_cyl][]"]').val(prescription.os_cyl);
+                prescription_div.find('input[name="row[replacement][lens_od_cyl][]"]').val(prescription.od_cyl);
+                prescription_div.find('input[name="row[replacement][lens_od_axis][]"]').val(prescription.od_axis);
+                prescription_div.find('input[name="row[replacement][lens_os_axis][]"]').val(prescription.os_axis);
+
+                //$(this).parents('.step23_function2').val('')
+                $(this).parents('.step23_function2').find('select[name="row[replacement][lens_recipe_type][]"]').val(prescription.prescription_type);
+                $(this).parents('.step23_function2').find('select[name="row[replacement][lens_recipe_type][]"]').change();
+                prescription_div.find('select[name="row[replacement][lens_coating_type][]"]').val(prescription.coating_id);
+
+
+                //判断是否是彩色镜片
+                if (prescription.color_id) {
+                    prescription_div.find('#lens_color_type').val(prescription.color_id);
+                    //if(is_new_version == 0){
+                        prescription_div.find('#lens_color_type').change();
+                    //}
+                }
+                prescription_div.find('#lens_lens_type').val(prescription.index_id);
+
+                //add，pd添加
+                if (prescription.hasOwnProperty("total_add")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_add][]"]').val(prescription.total_add);
+                    //prescription_div.find('input[name="row[replacement][lens_os_add][]"]').attr('disabled',true);
+                } else {
+                    prescription_div.find('input[name="row[replacement][lens_od_add][]"]').val(prescription.od_add);
+                    prescription_div.find('input[name="row[replacement][lens_os_add][]"]').val(prescription.os_add);
+                }
+
+                if (prescription.pd == '' || prescription.pd == 0) {
+                    prescription_div.find('input[name="row[replacement][lens_pd_r][]"]').val(prescription.pd_r);
+                    prescription_div.find('input[name="row[replacement][lens_pd_l][]"]').val(prescription.pd_l);
+                }else{
+                    prescription_div.find('input[name="row[replacement][lens_pd_r][]"]').val(prescription.pd);
+                    //prescription_div.find('input[name="row[replacement][lens_pd_l][]"]').attr('disabled',true);
+                }
+                //
+                if (prescription.hasOwnProperty("od_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_pv][]"]').val(prescription.od_pv);
+                }
+                if (prescription.hasOwnProperty("od_bd")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_bd][]"]').val(prescription.od_bd);
+                }
+                if (prescription.hasOwnProperty("od_pv_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_pv_r][]"]').val(prescription.od_pv_r);
+                }
+                if (prescription.hasOwnProperty("od_bd_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_od_bd_r][]"]').val(prescription.od_bd_r);
+                }
+                if (prescription.hasOwnProperty("os_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_pv][]"]').val(prescription.os_pv);
+                }
+                if (prescription.hasOwnProperty("os_bd")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_bd][]"]').val(prescription.os_bd);
+                }
+                if (prescription.hasOwnProperty("os_pv_r")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_pv_r][]"]').val(prescription.os_pv_r);
+                }
+                if (prescription.hasOwnProperty("od_pv")) {
+                    prescription_div.find('input[name="row[replacement][lens_os_bd_r][]"]').val(prescription.os_bd_r);
+                }
+
+                $('.selectpicker ').selectpicker('refresh');
             })
             $(document).on('click', '.btn-add-box-edit', function () {
                 if (is_add == 1) {
@@ -2579,6 +2881,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             changeOrder(work_id, 4);
                         }
                         //判断赠品信息的状态，如果显示的话把数据带出来，如果隐藏的话则不显示赠品数据 end
+                        //判断补发镜片的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 start
+                        if (!$('.step23').is(':hidden')) {
+                            changeOrder(work_id, 10);
+                        }
+                        //判断补发镜片的状态，如果显示的话把数据带出来，如果隐藏则不显示补发数据 end
                     }
                     //如果子单号item_order_info存在带出子单措施的数据
                     if (Config.item_order_info && !(Config.work_type == 2 && Config.work_status == 1)) {
@@ -2592,6 +2899,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                             if ($.inArray(20,item_order_info[i].item_choose) != -1) {
                                 $('.item'+i+'_step20-20').show();
                                 changeOrder(work_id, 2, i);
+                            }
+                            //判断更改镜片的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                            //判断更改镜片的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                            if ($.inArray(24,item_order_info[i].item_choose) != -1) {
+                                $('.item'+i+'_step24-24').show();
+                                changeOrder(work_id, 24, i);
                             }
                             //判断更改镜片的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
                             //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
@@ -2609,6 +2922,21 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 $("#change-frame"+ i +" tbody").append(Str);
                             }
                             //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
+                            if($.inArray(27,item_order_info[i].item_choose) != -1){
+                                $('.item'+i+'_step27-27').show();
+                                $('.step27').show();
+                                console.log(item_order_info);
+                                var Str = "";
+                                Str += '<tr>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][original_sku]"  type="text" value="' + item_order_info[i].change_frame.original_sku + '" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][change_sku]"  type="text" value="' + item_order_info[i].change_frame.change_sku + '" style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ i +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                Str += '</tr>';
+                                $('#back-change-frame'+ i +' tr:gt(0)').remove();
+                                $("#back-change-frame"+ i +" tbody").append(Str);
+                            }
                         }
 
                     }
@@ -2727,6 +3055,179 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 //追加
                                 gift_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
                                 $('.selectpicker ').selectpicker('refresh');
+                            }else if (10 == change_type) {
+                                //读取的订单地址信息
+                                var data = json.address;
+                                //读取的订单镜片信息
+                                var lens = json.lens;
+                                //读取的存入数据库的地址
+                                var real_address = json.arr;
+                                prescriptions = data.prescriptions;
+                                $('#supplement-order-lens').html(lens.html);
+                                var order_pay_currency = $('#order_pay_currency').val();
+                                //修改地址
+                                var address = '';
+                                if (real_address) {
+                                    $('#lens_c-firstname').val(real_address.firstname);
+                                    $('#lens_c-lastname').val(real_address.lastname);
+                                    var email = real_address.email;
+                                    if (email == null) {
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#lens_c-email').val(email);
+                                    $('#lens_c-telephone').val(real_address.telephone);
+                                    $('#lens_c-country').val(real_address.country_id);
+                                    $('#lens_c-country').change();
+                                    $('#lens_c-region').val(real_address.region_id);
+                                    $('#lens_c-region1').val(real_address.region);
+                                    $('#lens_c-city').val(real_address.city);
+                                    $('#lens_c-area').val(real_address.area);
+                                    $('#lens_c-street').val(real_address.street);
+                                    $('#lens_c-postcode').val(real_address.postcode);
+                                    $('#lens_c-taxno').val(real_address.taxno);
+                                    $('#lens_c-currency_code').val(order_pay_currency);
+                                    $('#lens_shipping_type').val(real_address.shipping_type);
+                                    $('#lens_pay_method').val(real_address.pay_method);
+                                    /*for (var i = 0; i < data.address.length; i++) {
+                                        if (i == real_address.address_type) {*/
+                                            address += '<option value="0" selected>shipping</option>';
+                                        /*} else {
+                                            address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                        }
+                                    }*/
+                                } else {
+                                    /*for (var i = 0; i < data.address.length; i++) {
+                                        if (i == 0) {*/
+                                            address += '<option value="0" selected>shipping</option>';
+                                            //补发地址自动填充第一个
+                                            $('#lens_c-firstname').val(data.address.firstname);
+                                            $('#lens_c-lastname').val(data.address.lastname);
+                                            $('#lens_c-email').val(data.address.email);
+                                            $('#lens_c-telephone').val(data.address.telephone);
+                                            $('#lens_c-country').val(data.address.country_id);
+                                            $('#lens_c-country').change();
+                                            $('#lens_c-region').val(data.address.region_id);
+                                            $('#lens_c-region1').val(data.address.region);
+                                            $('#lens_c-city').val(data.address.city);
+                                            $('#lens_c-area').val(data.address.area);
+                                            $('#lens_c-street').val(data.address.street);
+                                            $('#lens_c-postcode').val(data.address.postcode);
+                                            $('#lens_c-taxno').val(data.address.taxno);
+                                            $('#lens_c-currency_code').val(order_pay_currency);
+                                        /*} else {
+                                            address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                        }
+
+                                    }*/
+                                }
+                                $('#address_select_lens').html(address);
+                                //选择地址切换地址
+                                $('#address_select_lens').change(function () {
+                                    var address_id = $(this).val();
+                                    var address = data.address[address_id];
+                                    $('#lens_c-firstname').val(address.firstname);
+                                    $('#lens_c-lastname').val(address.lastname);
+                                    $('#lens_c-email').val(address.email);
+                                    $('#lens_c-telephone').val(address.telephone);
+                                    $('#lens_c-country').val(address.country_id);
+                                    $('#lens_c-country').change();
+                                    $('#lens_c-region').val(address.region_id);
+                                    $('#lens_c-region1').val(address.region);
+                                    $('#lens_c-city').val(address.city);
+                                    $('#lens_c-area').val(address.area);
+                                    $('#lens_c-street').val(address.street);
+                                    $('#lens_c-postcode').val(address.postcode);
+                                    $('#lens_c-taxno').val(address.taxno);
+                                })
+
+                                //追加
+                                lens_click_data_edit = '<div class="margin-top:10px;">' + json.lensform.html + '<div class="form-group-child4_del" style="width: 96%;padding-right: 0px;"><a href="javascript:;" style="width: 50%;" class="btn btn-danger btn-del-lens" title="删除"><i class="fa fa-trash"></i>删除</a></div></div>';
+
+                                $('.selectpicker ').selectpicker('refresh');
+                                //Controller.api.bindevent();            
+                            }else if (24 == change_type) {
+                                //读取的订单地址信息
+                                var data = json.address;
+                                console.log(data)
+                                //读取的存入数据库的地址
+                                var real_address = json.arr;
+                                console.log(real_address)
+                                var address = '';
+                                if (real_address) {
+                                    $('#back_lens_c-firstname').val(real_address.firstname);
+                                    $('#back_lens_c-lastname').val(real_address.lastname);
+                                    var email = real_address.email;
+                                    if (email == null) {
+                                        email = $('#customer_email').val();
+                                    }
+                                    $('#back_lens_c-email').val(email);
+                                    $('#back_lens_c-telephone').val(real_address.telephone);
+                                    $('#back_lens_c-country').val(real_address.country_id);
+                                    $('#back_lens_c-country').change();
+                                    $('#back_lens_c-region').val(real_address.region_id);
+                                    $('#back_lens_c-region1').val(real_address.region);
+                                    $('#back_lens_c-city').val(real_address.city);
+                                    $('#back_lens_c-area').val(real_address.area);
+                                    $('#back_lens_c-street').val(real_address.street);
+                                    $('#back_lens_c-postcode').val(real_address.postcode);
+                                    $('#back_lens_c-taxno').val(real_address.taxno);
+                                    $('#back_lens_c-currency_code').val(order_pay_currency);
+                                    $('#back_lens_shipping_type').val(real_address.shipping_type);
+                                    $('#back_lens_pay_method').val(real_address.pay_method);
+                                    /*for (var i = 0; i < data.address.length; i++) {
+                                        if (i == real_address.address_type) {*/
+                                            address += '<option value="0" selected>shipping</option>';
+                                        /*} else {
+                                            address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                        }
+                                    }*/
+                                } else {
+                                    /*for (var i = 0; i < data.address.length; i++) {
+                                        if (i == 0) {*/
+                                            address += '<option value="0" selected>shipping</option>';
+                                            //补发地址自动填充第一个
+                                            $('#back_lens_c-firstname').val(data.address.firstname);
+                                            $('#back_lens_c-lastname').val(data.address.lastname);
+                                            $('#back_lens_c-email').val(data.address.email);
+                                            $('#back_lens_c-telephone').val(data.address.telephone);
+                                            $('#back_lens_c-country').val(data.address.country_id);
+                                            $('#back_lens_c-country').change();
+                                            $('#back_lens_c-region').val(data.address.region_id);
+                                            $('#back_lens_c-region1').val(data.address.region);
+                                            $('#back_lens_c-city').val(data.address.city);
+                                            $('#back_lens_c-area').val(data.address.area);
+                                            $('#back_lens_c-street').val(data.address.street);
+                                            $('#back_lens_c-postcode').val(data.address.postcode);
+                                            $('#back_lens_c-taxno').val(data.address.taxno);
+                                            $('#back_lens_c-currency_code').val(order_pay_currency);
+                                        /*} else {
+                                            address += '<option value="' + i + '">' + data.address[i].address_type + '</option>';
+                                        }
+
+                                    }*/
+                                }
+                                $('#address_select_lens_back').html(address);
+                                //选择地址切换地址
+                                $('#address_select_lens_back').change(function () {
+                                    var address_id = $(this).val();
+                                    var address = data.address[address_id];
+                                    $('#back_lens_c-firstname').val(address.firstname);
+                                    $('#back_lens_c-lastname').val(address.lastname);
+                                    $('#back_lens_c-email').val(address.email);
+                                    $('#back_lens_c-telephone').val(address.telephone);
+                                    $('#back_lens_c-country').val(address.country_id);
+                                    $('#back_lens_c-country').change();
+                                    $('#back_lens_c-region').val(address.region_id);
+                                    $('#back_lens_c-region1').val(address.region);
+                                    $('#back_lens_c-city').val(address.city);
+                                    $('#back_lens_c-area').val(address.area);
+                                    $('#back_lens_c-street').val(address.street);
+                                    $('#back_lens_c-postcode').val(address.postcode);
+                                    $('#back_lens_c-taxno').val(address.taxno);
+                                })
+                                $('#back_lens_contents'+item_order_number).html(json.lens.html);
+                                $('.step24_lens_back').show();
+                                $('.selectpicker').selectpicker('refresh');
                             }
                         }, function (data, ret) {
                             //失败的回调
@@ -2884,7 +3385,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                     $('.selectpicker ').selectpicker('refresh');
                 });
                 //根据prescription_type获取lens_type
-                $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"],select[flag ="change_lens_recipe_type"]', function () {
+                $(document).on('change', 'select[name="row[replacement][recipe_type][]"],select[name="row[replacement][lens_recipe_type][]"],select[name="row[change_lens][recipe_type][]"],select[name="row[gift][recipe_type][]"],select[flag ="change_lens_recipe_type"]', function () {
                     var sitetype = $('#work_platform').val();
                     var prescription_type = $(this).val();
                     //var is_new_version = $('#is_new_version').val();
@@ -3173,16 +3674,78 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                         $('#recept_item_person_id').val(item_appoint_users.join(','));
 
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 start
+                        if (!$('.item' + use_flag + '_step27-27').is(':hidden')) {
+                            var node  = $('.step27');
+                            if(node.is(':hidden')){
+                                node.show();
+                            }
+                           let work_platform = $("#work_platform").val();
+                            if(work_platform != 13 ){
+                                Str += '<tr>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_sku]"  type="text" value="' + sku + '" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]"  type="text" style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                Str += '</tr>';
+                                $('#back-change-frame'+ use_flag +' tr:gt(0)').remove();
+                                $("#back-change-frame"+ use_flag +" tbody").append(Str);
+                                $('.selectpicker ').selectpicker('refresh');
+                            }else{
+                                Backend.api.ajax({
+                                    url: 'saleaftermanage/work_order_list/getSpuList',
+                                    data: {
+                                        sku: sku,
+                                        platform_type: work_platform
+                                    }
+                                }, function (data, ret) {
+                                    console.log(ret);
+                                    if(ret.code == 1){
+                                        var Strs = '';
+                                        Strs += '<tr>';
+                                        Strs += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_sku]"  type="text" value="' + sku + '" readonly style="margin-left:10%;"></td>';
+                                        Strs += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                        Strs += '<td>';
+                                        Strs += '<select class="form-control selectpicker"  name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]">';
+                                        Strs +='<option value="0">请选择</option>';
+                                        for(let i=0;i<ret.data.length;i++){
+                                            Strs +='<option value="'+ret.data[i]+'">'+ret.data[i]+'</option>';
+                                        }
+                                        Strs +='</select>';
+                                        Strs +='</td>';
+                                        Strs += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                        Strs += '</tr>';
+                                        $('#back-change-frame'+ use_flag +' tr:gt(0)').remove();
+                                        $("#back-change-frame"+ use_flag +" tbody").append(Strs);
+                                        $('.selectpicker ').selectpicker('refresh');
+                                    }else{
+                                        Layer.alert('没有合适的镜框要更换');
+                                    }
+                                });
+                                // Str += '<td>';
+                                // Str += '<select class="form-control selectpicker"  name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]">';
+                                // Str +='<option value="1" {eq name="1" value="$row.order_type"}selected{/eq}>sku1</option>';
+                                // Str +='<option value="1" {eq name="1" value="$row.order_type"}selected{/eq}>sku2</option>';
+                                // Str +='</select>';
+                                // Str +='</td>';
+                            }
+
+
+                        }else{
+                             $('.step27').hide();
+                        }
                         if (!$('.item' + use_flag + '_step19-19').is(':hidden')) {
-                            Str += '<tr>';
-                            Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_sku]"  type="text" value="' + sku + '" readonly style="margin-left:10%;"></td>';
-                            Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
-                            Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]"  type="text" style="margin-left:10%;"></td>';
-                            Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
-                            // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
-                            Str += '</tr>';
-                            $('#change-frame'+ use_flag +' tr:gt(0)').remove();
-                            $("#change-frame"+ use_flag +" tbody").append(Str);
+                                Str += '<tr>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_sku]"  type="text" value="' + sku + '" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][original_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_sku]"  type="text" style="margin-left:10%;"></td>';
+                                Str += '<td><input  class="form-control" name="row[item_order_info]['+ use_flag +'][change_frame][change_number]"  type="text" value="1" readonly style="margin-left:10%;"></td>';
+                                // Str +='<td><a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a></td>';
+                                Str += '</tr>';
+                                $('#change-frame'+ use_flag +' tr:gt(0)').remove();
+                                $("#change-frame"+ use_flag +" tbody").append(Str);
+                                $('.selectpicker ').selectpicker('refresh');
+
                         }
                         //判断更换镜框的状态，如果显示的话把原数据带出来，如果隐藏则不显示原数据 end
 
@@ -3196,12 +3759,62 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'jqui', 'form'], function ($,
                                 data: {
                                     increment_id: increment_id,
                                     site_type: site_type,
-                                    item_order_number:use_flag
+                                    item_order_number:use_flag,
+                                    order_type:2
                                 }
                             }, function (data, ret) {
-                                $('#lens_contents'+use_flag).html(data.html);
+                                $('#lens_contents'+use_flag).html(data.lens.html);
                                 $('.selectpicker ').selectpicker('refresh');
                             });
+                        }
+                        if (!$('.item' + use_flag + '_step24-24').is(':hidden')) {
+                            Backend.api.ajax({
+                                url: 'saleaftermanage/work_order_list/ajaxGetChangeLens',
+                                data: {
+                                    increment_id: increment_id,
+                                    site_type: site_type,
+                                    item_order_number:use_flag,
+                                    order_type:24
+                                }
+                            }, function (data, ret) {
+                                $('#back_lens_contents'+use_flag).html(data.lens.html);
+                                var address = '';
+                                var order_pay_currency = $('#order_pay_currency').val();
+                                console.log(data);
+                                address += '<option value = "0" selected>shipping</option>';
+                                        //寄回换片地址填充
+                                        $('#back_lens_c-firstname').val(data.address.address.firstname);
+                                        $('#back_lens_c-lastname').val(data.address.address.lastname);
+                                        var email = data.address.address.email;
+                                        if (email == null) {
+                                            email = $('#customer_email').val();
+                                        }
+                                        $('#back_lens_c-email').val(email);
+                                        $('#back_lens_c-telephone').val(data.address.address.telephone);
+                                        $('#back_lens_c-country').val(data.address.address.country_id);
+                                        $('#back_lens_c-country').change();
+                                        if(data.address.address.region_id == '8888' || !data.address.address.region_id){
+                                            $('#back_lens_c-region').val(0);
+                                        }else{
+                                            $('#back_lens_c-region').val(data.address.address.region_id);
+                                        }
+                                        $('#back_lens_c-region1').val(data.address.address.region);
+                                        $('#back_lens_c-city').val(data.address.address.city);
+                                        $('#back_lens_c-area').val(data.address.address.area);
+                                        $('#back_lens_c-street').val(data.address.address.street);
+                                        $('#back_lens_c-postcode').val(data.address.address.postcode);
+                                        $('#back_lens_c-taxno').val(data.address.address.taxno);
+                                        $('#back_lens_c-currency_code').val(order_pay_currency);
+                                $('.step24_lens_back').show();
+                                $('#address_select_lens_back').html(address);
+                                $('.selectpicker ').selectpicker('refresh');
+                            });
+                        }else if(!$('.item' + use_flag + '_step27-27').is(':hidden')){
+
+                            $('.step24_lens_back').hide();
+                            $('#c-customer_return_order').show();
+                        }else{
+                            $('.step24_lens_back').hide();
                         }
                         //判断更换处方的状态，如果显示的话把数据带出来，如果隐藏则不显示镜架数据 end
                     }
@@ -3437,6 +4050,8 @@ function changeOrderAddress(){
 function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
         if($('#step3').prop('checked')) return false;
         $('#z-order_sku').html('');
+        $('.step24_lens_back').hide();
+        $('.step27').hide();
         $('#section_item_content').show();
         $('#section_item_content').html('');
         $("#item_input-hidden").html("");
@@ -3466,7 +4081,6 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
             var step_item = Config.workOrderConfigValue.step;
             var item_checkbox = '';
             var order_item_numbers = item_order_sku.join(',');
-
             $('#div_item_content').show();
             var ihtml = '';
             for (var i in item_order_sku) {
@@ -3496,8 +4110,10 @@ function itemSelectpicker (type = 1,flag = null,item_order_info = '') {
                         ihtml += '<input type="hidden" id="item'+item_order_sku[i]+'_step'+item_problem_step[problem_id][j].step_id+'-appoint_group" value="'+item_problem_step[problem_id][j].extend_group_id+'">';
                 }
                 ihtml += '</div></div></div>';
-                ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step19-19" style="display:none;"  flag="'+item_order_sku[i]+'"><div class="caigou frame-info item_info"><p style="font-size: 16px;"><b>更换镜框</b></p><div ><table class="caigou-table-sku" id="change-frame'+item_order_sku[i]+'"><tr><th>原SKU</th><th>原数量(+增加)</th><th>新SKU</th><th>新数量(-减少)</th></tr></table></div></div></div>';
+                ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step19-19" style="display:none;"  flag="'+item_order_sku[i]+'"><div class="caigou frame-info item_info"><p style="font-size: 16px;"><b> 更换镜框</b></p><div ><table class="caigou-table-sku" id="change-frame'+item_order_sku[i]+'"><tr><th>原SKU</th><th>原数量(+增加)</th><th>新SKU</th><th>新数量(-减少)</th></tr></table></div></div></div>';
+                ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step27-27" style="display:none;"  flag="'+item_order_sku[i]+'"><div class="caigou frame-info item_info"><p style="font-size: 16px;"><b> 更换镜框</b></p><div ><table class="caigou-table-sku" id="back-change-frame'+item_order_sku[i]+'"><tr><th>原SKU</th><th>原数量(+增加)</th><th>新SKU</th><th>新数量(-减少)</th></tr></table></div></div></div>';
                 ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step20-20" style="display:none;" flag="'+item_order_sku[i]+'"><div class="col-xs-12 col-sm-8" style="width: 100%"><p style="font-size: 16px;"><b>更改镜片</b></p><div id="lens_contents'+item_order_sku[i]+'"></div></div></div>';
+                ihtml += '<div class="form-group-child4 measure_item'+item_order_sku[i]+' item'+item_order_sku[i]+'_step24-24" style="display:none;" flag="'+item_order_sku[i]+'"><div class="col-xs-12 col-sm-8" style="width: 100%"><p style="font-size: 16px;"><b>寄回换片</b></p><div id="back_lens_contents'+item_order_sku[i]+'"></div></div></div>';
                 ihtml += '</div>';
             }
             $('#section_item_content').append(ihtml);
@@ -3609,6 +4225,13 @@ function platform_order(){
             $('#order_type').val(data.order_type);
             $('#c-order_type').val(data.order_type);
             //$('#is_new_version').val(data.is_new_version);
+            //追加物流方式
+            $('#warehouse_dispatch_way').val(data.shipping_method);
+            // $("#c-warehouse_dispatch_way option").each(function(){
+            //     if($(this).text() == data.shipping_title){
+            //         $(this).attr("selected",true);
+            //     }
+            // })
             var shtml = '';
             for (var i in data.sku_list) {
                 shtml += '<option value="' + i +'/'+data.sku_list[i]+ '">' + i + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp' + data.sku_list[i] + '</option>';

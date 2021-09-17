@@ -1784,22 +1784,23 @@ class ScmDistribution extends Scm
         //主单表有合单库位ID，查询主单商品总数，与子单合单入库计算数量对比
         //获取订单购买总数，计算过滤掉取消状态的子单
         $total_qty_ordered = $this->_new_order_item_process
-            ->where(['order_id' => $item_process_info['order_id'], 'distribution_status' => ['neq', 0]])
+            ->where(['order_id' => $item_process_info['order_id'], 'distribution_status' => ['not in', [0, 8, 9]]])
             ->count();
-        $count = $this->_new_order_item_process
-            ->where(['distribution_status' => ['in', [0, 8]], 'order_id' => $item_process_info['order_id']])
-            ->count();
+//        $count = $this->_new_order_item_process
+//            ->where(['distribution_status' => ['in', [0, 8]], 'order_id' => $item_process_info['order_id']])
+//            ->count();
 
         $info['order_id'] = $item_process_info['order_id']; //合单确认放入合单架提交 接口返回自带主订单号
 
-        if ($total_qty_ordered > $count + 1) {
-            //不是最后一个子单
-            $num = '';
-            $next = 1; //是否有下一个子单 1有，0没有
-        } else {
+        //判断当前未合单的子单个数 如果等于1 则是最后一个子单
+        if ($total_qty_ordered == 1) {
             //最后一个子单
             $num = '最后一个';
             $next = 0; //是否有下一个子单 1有，0没有
+        } else {
+            //不是最后一个子单
+            $num = '';
+            $next = 1; //是否有下一个子单 1有，0没有
         }
         if ($order_process_info['store_house_id']) {
             //存在合单库位ID，获取合单库位号ID存入
@@ -2726,10 +2727,10 @@ class ScmDistribution extends Scm
         $sku = $this->request->request('sku');
         empty($sku) && $this->error(__('sku不能为空'), '', 403);
         $item_sku = $this->_item
-            ->where('sku','like','%'.$sku.'%')
-            ->where('is_open',1)
+            ->where('sku', 'like', '%' . $sku . '%')
+            ->where('is_open', 1)
             ->column('sku');
-        empty($item_sku) && $this->error(__('sku不存在'),'', 403);
+        empty($item_sku) && $this->error(__('sku不存在'), '', 403);
         $this->success('成功', ['skus' => $item_sku], 200);
     }
 }
