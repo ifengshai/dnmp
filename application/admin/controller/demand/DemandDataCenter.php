@@ -186,6 +186,8 @@ GROUP BY
                 $allDemandData[$k]['site_type'] = 'voogmechic';
             }  elseif ($v['site'] == 15) {
                 $allDemandData[$k]['site_type'] = 'ZeeloolFr';
+            } elseif ($v['site'] == 66) {
+                $allDemandData[$k]['site_type'] = '网红管理工具';
             } else {
                 $allDemandData[$k]['site_type'] = "";
             }
