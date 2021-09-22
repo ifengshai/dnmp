@@ -67,7 +67,7 @@ class DemandDataCenter extends Backend
             ->where('status', 'normal')
             ->field('nickname,id')
             ->select();*/
-        $php_group_ids=array(['id'=>'192','niname'=>'卢志恒'],
+        $php_users=array(['id'=>'192','niname'=>'卢志恒'],
             ['id'=>'227','niname'=>'刘松巍'],
             ['id'=>'229','niname'=>'周正辉'],
             ['id'=>'335','niname'=>'吴钢剑'],
@@ -199,10 +199,6 @@ GROUP BY
         $webData = $this->statisticsWeb($web_users, $start_time, $end_time);
         $demandtUser = array_merge($phpData, $appData, $webData);
 
-        dump($phpData);
-        dump($allDemandData);
-        dump($demandtUser);
-        dump($testData);
         //执行个人统计数据
 
         $this->view->assign('demand_data', $allDemandData);
