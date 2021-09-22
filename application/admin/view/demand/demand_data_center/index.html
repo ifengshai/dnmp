@@ -147,76 +147,79 @@
 
             </div>
 
-            <div style="width: 100%;float: left;">
-                <div class="row item_info" style="background:#f5f5f5;float: left;margin-left: 50px;">
-                    <div class="col-xs-6 col-md-4">
-                        <div>
-                            <table id="caigou-table" class="handle_table1" style="width: 650px;">
-                                <tr>
-                                    <td colspan="7" style="font-size: 16px;font-weight:1000">toC组工作成果统计</td>
-                                </tr>
-                                <tr>
-                                    <td>责任人</td>
-                                    <td>工时</td>
-                                    <td>任务数量</td>
-                                    <td>逾期数量
-                                        <span tabindex="0" data-bs-toggle="tooltip" title="开发完成时间大于开发计划时间">
+
+            </div>
+
+        </div>
+    <div style="width: 100%;float: left;">
+        <div class="row item_info" style="background:#f5f5f5;float: left;margin-left: 50px;">
+            <div class="col-xs-6 col-md-4">
+                <div>
+                    <table id="caigou-table" class="handle_table1" style="width: 650px;">
+                        <tr>
+                            <td colspan="7" style="font-size: 16px;font-weight:1000">toC组工作成果统计</td>
+                        </tr>
+                        <tr>
+                            <td>责任人</td>
+                            <td>工时</td>
+                            <td>任务数量</td>
+                            <td>逾期数量
+                                <span tabindex="0" data-bs-toggle="tooltip" title="开发完成时间大于开发计划时间">
                                     <img src="/wenhao.jpg" alt="" class="wenhao-class">
                                 </span>
-                                    </td>
-                                    <td>bug数量</td>
-                                    <td>需求数量</td>
-                                </tr>
-                                {foreach $demand_user_data as $k => $v}
-                                <tr>
-                                    <td>{$v.nickname}</td>
-                                    <td>{$v.woring?:0}</td>
-                                    <td>{$v.demand?:0}</td>
-                                    <td>{$v.outCount?:0}</td>
-                                    <td>{$v.bugCount?:0}</td>
-                                    <td>{$v.demandCount?:0}</td>
-                                </tr>
-                                {/foreach}
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="row item_info" style="background:#f5f5f5;float: left;margin-left: 150px;">
-                    <div class="col-xs-6 col-md-4">
-                        <div>
-                            <table id="caigou-table2" class="handle_table1" style="width: 650px;">
-                                <tr>
-                                    <td colspan="6" style="font-size: 16px;font-weight:1000">测试组工作成果统计</td>
-                                </tr>
-                                <tr>
-                                    <td>责任人</td>
-                                    <td>工时</td>
-                                    <td>任务数量</td>
-                                    <td>逾期数量
-                                        <span tabindex="0" data-bs-toggle="tooltip" title="测试完成时间大于期望时间">
-                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
-                                </span>
-                                    </td>
-                                </tr>
-                                {foreach $demand_test_data as $k => $v}
-                                <tr>
-                                    <td>{$v.nickname}</td>
-                                    <td>{$v.woring?:0}</td>
-                                    <td>{$v.demand?:0}</td>
-                                    <td>{$v.outCount?:0}</td>
-                                </tr>
-                                {/foreach}
-
-                            </table>
-                        </div>
-                    </div>
-
+                            </td>
+                            <td>bug数量</td>
+                            <td>需求数量</td>
+                        </tr>
+                        {foreach $demand_user_data as $k => $v}
+                        <tr>
+                            <td>{$v.nickname}</td>
+                            <td>{$v.woring?:0}</td>
+                            <td>{$v.demand?:0}</td>
+                            <td>{$v.outCount?:0}</td>
+                            <td>{$v.bugCount?:0}</td>
+                            <td>{$v.demandCount?:0}</td>
+                        </tr>
+                        {/foreach}
+                    </table>
                 </div>
             </div>
+
+        </div>
+
+        <div class="row item_info" style="background:#f5f5f5;float: left;margin-left: 150px;">
+            <div class="col-xs-6 col-md-4">
+                <div>
+                    <table id="caigou-table2" class="handle_table1" style="width: 650px;">
+                        <tr>
+                            <td colspan="6" style="font-size: 16px;font-weight:1000">测试组工作成果统计</td>
+                        </tr>
+                        <tr>
+                            <td>责任人</td>
+                            <td>工时</td>
+                            <td>任务数量</td>
+                            <td>逾期数量
+                                <span tabindex="0" data-bs-toggle="tooltip" title="测试完成时间大于期望时间">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span>
+                            </td>
+                        </tr>
+                        {foreach $demand_test_data as $k => $v}
+                        <tr>
+                            <td>{$v.nickname}</td>
+                            <td>{$v.woring?:0}</td>
+                            <td>{$v.demand?:0}</td>
+                            <td>{$v.outCount?:0}</td>
+                        </tr>
+                        {/foreach}
+
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
+
 </div>
 
 
