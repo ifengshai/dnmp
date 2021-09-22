@@ -99,7 +99,11 @@
                         <tr>
                             <td>站点</td>
                             <td>数量</td>
-                            <td>逾期数量</td>
+                            <td>逾期数量
+                                <span tabindex="0" data-bs-toggle="tooltip" title="上线时间大于期望时间">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span>
+                            </td>
                             <td>BUG数量</td>
                             <td>维护需求</td>
                             <td>优化需求</td>
@@ -110,7 +114,11 @@
                             <td>前端数量</td>
                             <td>测试数量</td>
                             <td>APP数量</td>
-                            <td>大于3天数</td>
+                            <td>大于3天数
+                                <span tabindex="0" data-bs-toggle="tooltip" title="上线时间-产品时间>3">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span>
+                            </td>
                         </tr>
                         {foreach $demand_data as $k => $v}
                         <tr>
@@ -147,7 +155,11 @@
                                     <td>责任人</td>
                                     <td>工时</td>
                                     <td>任务数量</td>
-                                    <td>逾期数量</td>
+                                    <td>逾期数量
+                                        <span tabindex="0" data-bs-toggle="tooltip" title="开发完成时间大于开发计划时间">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span>
+                                    </td>
                                     <td>bug数量</td>
                                     <td>需求数量</td>
                                 </tr>
@@ -178,7 +190,11 @@
                                     <td>责任人</td>
                                     <td>工时</td>
                                     <td>任务数量</td>
-                                    <td>逾期数量</td>
+                                    <td>逾期数量
+                                        <span tabindex="0" data-bs-toggle="tooltip" title="测试完成时间大于期望时间">
+                                    <img src="/wenhao.jpg" alt="" class="wenhao-class">
+                                </span>
+                                    </td>
                                 </tr>
                                 {foreach $demand_test_data as $k => $v}
                                 <tr>
