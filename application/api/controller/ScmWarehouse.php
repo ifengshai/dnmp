@@ -4096,6 +4096,14 @@ class ScmWarehouse extends Scm
                                     ->where(['sku' => $sv['sku'], 'transfer_order_item_id' => $sv['id']])
                                     ->field('stock')
                                     ->select();
+                                //没有查到之前存的比例 按照当前sku库存数量分配
+                                if (empty($itemPlatformSku)){
+                                    $itemPlatformSku = $this->_item_platform_sku->where('sku', $sv['sku'])->order('stock asc')->field('platform_type,stock')->select();
+                                    $wholeNum = $this->_item_platform_sku
+                                        ->where('sku', $sv['sku'])
+                                        ->field('stock')
+                                        ->select();
+                                }
                             }else{
                                 //实体仓调拨出库的同时要对虚拟库存进行一定的操作
                                 //查出映射表中此sku对应的所有平台sku 并根据当前库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
