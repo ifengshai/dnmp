@@ -207,6 +207,7 @@ GROUP BY
         $this->view->assign('demand_data', $allDemandData);
         $this->view->assign('demand_user_data', $demandtUser);
         $this->view->assign('demand_test_data', $testData);
+        $this->view->assign('created_at',$date);
         //测试统计数据
         return $this->view->fetch();
     }
