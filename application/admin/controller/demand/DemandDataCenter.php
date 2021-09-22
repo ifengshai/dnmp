@@ -67,15 +67,15 @@ class DemandDataCenter extends Backend
             ->where('status', 'normal')
             ->field('nickname,id')
             ->select();*/
-        $php_users=array(['id'=>'192','niname'=>'卢志恒'],
-            ['id'=>'227','niname'=>'刘松巍'],
-            ['id'=>'229','niname'=>'周正辉'],
-            ['id'=>'335','niname'=>'吴钢剑'],
-            ['id'=>'350','niname'=>'张靖威'],
-            ['id'=>'442','niname'=>'吴晓碟'],
-            ['id'=>'184','niname'=>'樊志刚'],
-            ['id'=>'352','niname'=>'戈杨华'],
-            ['id'=>'204','niname'=>'王恒刚'],
+        $php_users=array(['id'=>'192','nickname'=>'卢志恒'],
+            ['id'=>'227','nickname'=>'刘松巍'],
+            ['id'=>'229','nickname'=>'周正辉'],
+            ['id'=>'335','nickname'=>'吴钢剑'],
+            ['id'=>'350','nickname'=>'张靖威'],
+            ['id'=>'442','nickname'=>'吴晓碟'],
+            ['id'=>'184','nickname'=>'樊志刚'],
+            ['id'=>'352','nickname'=>'戈杨华'],
+            ['id'=>'204','nickname'=>'王恒刚'],
         );
 
         $web_group_ids = $authgroup->getChildrenIds(config('demand.web_group_id'));
@@ -89,13 +89,13 @@ class DemandDataCenter extends Backend
             ->where('status', 'normal')
             ->field('nickname,id')
             ->select();*/
-        $web_users=array(['id'=>'309','niname'=>'王逢超'],
-            ['id'=>'393','niname'=>'王鹏辉'],
-            ['id'=>'515','niname'=>'赵一帆'],
-            ['id'=>'534','niname'=>'刘格优'],
-            ['id'=>'558','niname'=>'关亚可'],
-            ['id'=>'580','niname'=>'王亚飞'],
-            ['id'=>'603','niname'=>'郑博文']
+        $web_users=array(['id'=>'309','nickname'=>'王逢超'],
+            ['id'=>'393','nickname'=>'王鹏辉'],
+            ['id'=>'515','nickname'=>'赵一帆'],
+            ['id'=>'534','nickname'=>'刘格优'],
+            ['id'=>'558','nickname'=>'关亚可'],
+            ['id'=>'580','nickname'=>'王亚飞'],
+            ['id'=>'603','nickname'=>'郑博文']
         );
 
         //获取app组长&组员
@@ -110,9 +110,9 @@ class DemandDataCenter extends Backend
             ->where('status', 'normal')
             ->field('nickname,id')
             ->select();*/
-        $app_users=array(['id'=>'194','niname'=>'杨志豪'],
-            ['id'=>'340','niname'=>'张俊鹏'],
-            ['id'=>'525','niname'=>'李亚峰'],
+        $app_users=array(['id'=>'194','nickname'=>'杨志豪'],
+            ['id'=>'340','nickname'=>'张俊鹏'],
+            ['id'=>'525','nickname'=>'李亚峰'],
         );
 
         //获取test组长&组员
@@ -128,18 +128,18 @@ class DemandDataCenter extends Backend
             ->field('nickname,id')
             ->select();*/
 
-        $test_users=array(['id'=>'280','niname'=>'刘超'],
-            ['id'=>'242','niname'=>'张鹏'],
-            ['id'=>'195','niname'=>'马红亚'],
-            ['id'=>'200','niname'=>'陈亚蒙'],
-            ['id'=>'454','niname'=>'王蕾'],
-            ['id'=>'541','niname'=>'周丹丹']
+        $test_users=array(['id'=>'280','nickname'=>'刘超'],
+            ['id'=>'242','nickname'=>'张鹏'],
+            ['id'=>'195','nickname'=>'马红亚'],
+            ['id'=>'200','nickname'=>'陈亚蒙'],
+            ['id'=>'454','nickname'=>'王蕾'],
+            ['id'=>'541','nickname'=>'周丹丹']
         );
         $sql = "SELECT
 	site ,
 	count(1) as 'allcont',
 	sum(all_finish_time> node_time) as 'outSum',
-	sum(type = 1) AS 'tpye1',
+	sum(type = 1) AS 'type1',
 	sum(type = 2) AS 'type2',
     sum(type = 3) AS 'type3',
     sum(type = 4) AS 'type4',
@@ -190,6 +190,7 @@ GROUP BY
                 $allDemandData[$k]['site_type'] = "";
             }
 
+
         }
 
         $phpData = $this->statisticsphper($php_users, $start_time, $end_time);
@@ -227,7 +228,7 @@ from fa_it_web_demand where phper_user_id like '%$userId%' and create_time > '$s
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $v['nickname'] = $user['nickname']."|".$userId;
+                $v['nickname'] = $user['nickname'];
                 array_push($array, $v);
             }
         }
@@ -253,7 +254,7 @@ from fa_it_web_demand where app_user_id like '%$userId%' and create_time > '$sta
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $v['nickname'] = $user['nickname']."|".$userId;
+                $v['nickname'] = $user['nickname'];
                 array_push($array, $v);
             }
         }
@@ -279,7 +280,7 @@ from fa_it_web_demand where test_user_id like '%$userId%' and create_time > '$st
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $v['nickname'] = $user['nickname']."|".$userId;
+                $v['nickname'] = $user['nickname'];
                 array_push($array, $v);
             }
         }
@@ -305,7 +306,7 @@ from fa_it_web_demand where web_designer_user_id like '%$userId%' and create_tim
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $v['nickname'] = $user['nickname']."|".$userId;
+                $v['nickname'] = $user['nickname'];
                 array_push($array, $v);
             }
         }

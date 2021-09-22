@@ -115,19 +115,19 @@
                         {foreach $demand_data as $k => $v}
                         <tr>
                             <td>{$v.site_type}</td>
-                            <td>{$v.allcont}</td>
-                            <td>{$v.outSum}</td>
-                            <td>{$v.type1}</td>
-                            <td>{$v.type2}</td>
-                            <td>{$v.type3}</td>
-                            <td>{$v.type4}</td>
-                            <td>{$v.type5}</td>
-                            <td>{$v.demandSum}</td>
-                            <td>{$v.phper}</td>
-                            <td>{$v.weber}</td>
-                            <td>{$v.tester}</td>
-                            <td>{$v.apper}</td>
-                            <td>{$v.confirm}</td>
+                            <td>{$v.allcont?:0}</td>
+                            <td>{$v.outSum?:0}</td>
+                            <td>{$v.type1?:0}</td>
+                            <td>{$v.type2?:0}</td>
+                            <td>{$v.type3?:0}</td>
+                            <td>{$v.type4?:0}</td>
+                            <td>{$v.type5?:0}</td>
+                            <td>{$v.demandSum?:0}</td>
+                            <td>{$v.phper?:0}</td>
+                            <td>{$v.weber?:0}</td>
+                            <td>{$v.tester?:0}</td>
+                            <td>{$v.apper?:0}</td>
+                            <td>{$v.confirm?:0}</td>
                         </tr>
                         {/foreach}
                     </table>
@@ -154,11 +154,11 @@
                                 {foreach $demand_user_data as $k => $v}
                                 <tr>
                                     <td>{$v.nickname}</td>
-                                    <td>{$v.woring}</td>
-                                    <td>{$v.demand}</td>
-                                    <td>{$v.outCount}</td>
-                                    <td>{$v.bugCount}</td>
-                                    <td>{$v.demandCount}</td>
+                                    <td>{$v.woring?:0}</td>
+                                    <td>{$v.demand?:0}</td>
+                                    <td>{$v.outCount?:0}</td>
+                                    <td>{$v.bugCount?:0}</td>
+                                    <td>{$v.demandCount?:0}</td>
                                 </tr>
                                 {/foreach}
                             </table>
@@ -183,9 +183,9 @@
                                 {foreach $demand_test_data as $k => $v}
                                 <tr>
                                     <td>{$v.nickname}</td>
-                                    <td>{$v.woring}</td>
-                                    <td>{$v.demand}</td>
-                                    <td>{$v.outCount}</td>
+                                    <td>{$v.woring?:0}</td>
+                                    <td>{$v.demand?:0}</td>
+                                    <td>{$v.outCount?:0}</td>
                                 </tr>
                                 {/foreach}
 
