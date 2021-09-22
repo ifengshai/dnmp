@@ -59,56 +59,82 @@ class DemandDataCenter extends Backend
         $php_group_ids = $authgroup->getChildrenIds(config('demand.php_group_id'));
         $p_id[] = config('demand.php_group_id');
         $php_group_ids = array_merge($php_group_ids, $p_id);
-        $php_users = Db::name("auth_group_access")
+       /* $php_users = Db::name("auth_group_access")
             ->alias("aga")
             ->join("admin a", "aga.uid=a.id")
             ->field("a.*")
             ->whereIn("aga.group_id", $php_group_ids)
             ->where('status', 'normal')
             ->field('nickname,id')
-            ->select();
+            ->select();*/
+        $php_users=array(['id'=>'192','niname'=>'卢志恒'],
+            ['id'=>'227','niname'=>'刘松巍'],
+            ['id'=>'229','niname'=>'周正辉'],
+            ['id'=>'335','niname'=>'吴钢剑'],
+            ['id'=>'350','niname'=>'张靖威'],
+            ['id'=>'442','niname'=>'吴晓碟'],
+            ['id'=>'184','niname'=>'樊志刚'],
+            ['id'=>'352','niname'=>'戈杨华'],
+            ['id'=>'204','niname'=>'王恒刚'],
+        );
 
         $web_group_ids = $authgroup->getChildrenIds(config('demand.web_group_id'));
         $w_id[] = config('demand.web_group_id');
         $web_group_ids = array_merge($web_group_ids, $w_id);
-        $web_users = Db::name("auth_group_access")
+       /* $web_users = Db::name("auth_group_access")
             ->alias("aga")
             ->join("admin a", "aga.uid=a.id")
             ->field("a.*")
             ->whereIn("aga.group_id", $web_group_ids)
             ->where('status', 'normal')
             ->field('nickname,id')
-            ->select();
-        $web_group_ids=array(['id'=>'192','niname'=>'卢志恒'],
-            ['id'=>'','niname'=>''],
-            ['id'=>'','niname'=>'']);
+            ->select();*/
+        $web_users=array(['id'=>'309','niname'=>'王逢超'],
+            ['id'=>'393','niname'=>'王鹏辉'],
+            ['id'=>'515','niname'=>'赵一帆'],
+            ['id'=>'534','niname'=>'刘格优'],
+            ['id'=>'558','niname'=>'关亚可'],
+            ['id'=>'580','niname'=>'王亚飞'],
+            ['id'=>'603','niname'=>'郑博文']
+        );
 
         //获取app组长&组员
         $app_group_ids = $authgroup->getChildrenIds(config('demand.app_group_id'));
         $a_id[] = config('demand.app_group_id');
         $app_group_ids = array_merge($app_group_ids, $a_id);
-        $app_users = Db::name("auth_group_access")
+        /*$app_users = Db::name("auth_group_access")
             ->alias("aga")
             ->join("admin a", "aga.uid=a.id")
             ->field("a.*")
             ->whereIn("aga.group_id", $app_group_ids)
             ->where('status', 'normal')
             ->field('nickname,id')
-            ->select();
+            ->select();*/
+        $app_users=array(['id'=>'194','niname'=>'杨志豪'],
+            ['id'=>'340','niname'=>'张俊鹏'],
+            ['id'=>'525','niname'=>'李亚峰'],
+        );
 
         //获取test组长&组员
         $test_group_ids = $authgroup->getChildrenIds(config('demand.test_group_id'));
         $t_id[] = config('demand.test_group_id');
         $test_group_ids = array_merge($test_group_ids, $t_id);
-        $test_users = Db::name("auth_group_access")
+        /*$test_users = Db::name("auth_group_access")
             ->alias("aga")
             ->join("admin a", "aga.uid=a.id")
             ->field("a.*")
             ->whereIn("aga.group_id", $test_group_ids)
             ->where('status', 'normal')
             ->field('nickname,id')
-            ->select();
+            ->select();*/
 
+        $test_users=array(['id'=>'280','niname'=>'刘超'],
+            ['id'=>'242','niname'=>'张鹏'],
+            ['id'=>'195','niname'=>'马红亚'],
+            ['id'=>'200','niname'=>'陈亚蒙'],
+            ['id'=>'454','niname'=>'王蕾'],
+            ['id'=>'541','niname'=>'周丹丹']
+        );
         $sql = "SELECT
 	site ,
 	count(1) as 'allcont',
@@ -173,10 +199,6 @@ GROUP BY
         $webData = $this->statisticsWeb($web_users, $start_time, $end_time);
         $demandtUser = array_merge($phpData, $appData, $webData);
 
-        dump($phpData);
-        dump($allDemandData);
-        dump($demandtUser);
-        dump($testData);
         //执行个人统计数据
 
         $this->view->assign('demand_data', $allDemandData);
