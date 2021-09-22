@@ -65,7 +65,8 @@ class DemandDataCenter extends Backend
             ->field("a.*")
             ->whereIn("aga.group_id", $php_group_ids)
             ->where('status', 'normal')
-            ->column('nickname', 'id');
+            ->field('nickname,id')
+            ->select();
 
         $web_group_ids = $authgroup->getChildrenIds(config('demand.web_group_id'));
         $w_id[] = config('demand.web_group_id');
@@ -76,7 +77,9 @@ class DemandDataCenter extends Backend
             ->field("a.*")
             ->whereIn("aga.group_id", $web_group_ids)
             ->where('status', 'normal')
-            ->column('nickname', 'id');
+            ->field('nickname,id')
+            ->select();
+        dump($web_users);
 
         //获取app组长&组员
         $app_group_ids = $authgroup->getChildrenIds(config('demand.app_group_id'));
@@ -88,7 +91,8 @@ class DemandDataCenter extends Backend
             ->field("a.*")
             ->whereIn("aga.group_id", $app_group_ids)
             ->where('status', 'normal')
-            ->column('nickname', 'id');
+            ->field('nickname,id')
+            ->select();
 
         //获取test组长&组员
         $test_group_ids = $authgroup->getChildrenIds(config('demand.test_group_id'));
@@ -100,7 +104,8 @@ class DemandDataCenter extends Backend
             ->field("a.*")
             ->whereIn("aga.group_id", $test_group_ids)
             ->where('status', 'normal')
-            ->column('nickname', 'id');
+            ->field('nickname,id')
+            ->select();
 
         $sql = "SELECT
 	site ,
