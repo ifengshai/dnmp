@@ -1,0 +1,208 @@
+<style>
+    .content {
+        max-width: 100%;
+    }
+</style>
+<style type="text/css">
+    table.altrowstable {
+        margin: 0 auto;
+        width: 100%;
+        font-family: verdana, arial, sans-serif;
+        font-size: 11px;
+        color: #333333;
+        border-width: 1px;
+        border-color: #247692;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table.altrowstable th {
+        border-width: 1px;
+        padding: 8px;
+        font-size: 14px;
+        border-style: solid;
+        border-color: #d2d6de;
+    }
+
+    table.altrowstable td {
+        border-width: 1px;
+        padding: 8px;
+        text-align: center;
+        font-size: 12px;
+        border-style: solid;
+        border-color: #ddd;
+    }
+
+    table.altrowstable tr:nth-child(odd) {
+        background: #E9F1F4;
+        background: #F5F5F5;
+    }
+
+    table.altrowstable tr:nth-child(even) {
+        background: #fff;
+        background: #eee;
+    }
+
+    .btn-div {
+        font-size: 14px;
+        line-height: 50px;
+        background: inherit;
+        background-color: rgba(255, 255, 255, 1);
+        border: none;
+        border-radius: 4px;
+        box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.349019607843137);
+        border-width: 0px;
+        font-family: 'Arial Negreta', 'Arial';
+        font-weight: 700;
+        font-style: normal;
+        margin-right: 20px;
+        width: 200px;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <form id="form1" class="form-commonsearch form-horizontal" action="{:url('index')}"
+                          role="form1" method="post">
+                        <div style="border-radius:2px;margin-bottom:10px;background:#f5f5f5;padding:20px;">
+                            <div class="row">
+                                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-4"><label for="create_time"
+                                                                                                    class="control-label col-xs-4">创建时间</label>
+                                    <div class="col-xs-8"><input type="hidden" class="form-control operate"
+                                                                 name="create_time-operate" data-name="create_time"
+                                                                 value="RANGE"
+                                                                 readonly=""><input type="text" autocomplete="off"
+                                                                                    class="form-control datetimerange"
+                                                                                    name="create_time"
+                                                                                    placeholder="创建时间" id="create_time"
+                                                                                    value="{$created_at}"
+                                                                                    data-index="14"></div>
+                                </div>
+                                <div class="form-group col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                    <div class="col-sm-8 col-xs-offset-4"><input type="submit" class="btn btn-success"
+                                                                                 value="提交">
+                                        <input type="reset"
+                                               class="btn btn-default reset" value="重置"></div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-xs-12 col-sm-6 col-md-3">
+
+                            </div>
+                        </div>
+                    </form>
+                    <table id="caigou-table" class="handle_table1" style="width: 100%;">
+                        <tr>
+                            <td>站点</td>
+                            <td>数量</td>
+                            <td>逾期数量</td>
+                            <td>BUG数量</td>
+                            <td>维护需求</td>
+                            <td>优化需求</td>
+                            <td>新功能</td>
+                            <td>开发需求</td>
+                            <td>需求数量</td>
+                            <td>后端数量</td>
+                            <td>前端数量</td>
+                            <td>测试数量</td>
+                            <td>APP数量</td>
+                            <td>大于3天数</td>
+                        </tr>
+                        {foreach $demand_data as $k => $v}
+                        <tr>
+                            <td>{$v.site_type}</td>
+                            <td>{$v.allcont}</td>
+                            <td>{$v.outSum}</td>
+                            <td>{$v.type1}</td>
+                            <td>{$v.type2}</td>
+                            <td>{$v.type3}</td>
+                            <td>{$v.type4}</td>
+                            <td>{$v.type5}</td>
+                            <td>{$v.demandSum}</td>
+                            <td>{$v.phper}</td>
+                            <td>{$v.weber}</td>
+                            <td>{$v.tester}</td>
+                            <td>{$v.apper}</td>
+                            <td>{$v.confirm}</td>
+                        </tr>
+                        {/foreach}
+                    </table>
+                </div>
+
+            </div>
+
+            <div style="width: 100%;float: left;">
+                <div class="row item_info" style="background:#f5f5f5;float: left;margin-left: 50px;">
+                    <div class="col-xs-6 col-md-4">
+                        <div>
+                            <table id="caigou-table" class="handle_table1" style="width: 650px;">
+                                <tr>
+                                    <td colspan="7" style="font-size: 16px;font-weight:1000">toC组工作成果统计</td>
+                                </tr>
+                                <tr>
+                                    <td>责任人</td>
+                                    <td>工时</td>
+                                    <td>任务数量</td>
+                                    <td>逾期数量</td>
+                                    <td>bug数量</td>
+                                    <td>需求数量</td>
+                                </tr>
+                                {foreach $demand_user_data as $k => $v}
+                                <tr>
+                                    <td>{$v.nickname}</td>
+                                    <td>{$v.woring}</td>
+                                    <td>{$v.demand}</td>
+                                    <td>{$v.outCount}</td>
+                                    <td>{$v.bugCount}</td>
+                                    <td>{$v.demandCount}</td>
+                                </tr>
+                                {/foreach}
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row item_info" style="background:#f5f5f5;float: left;margin-left: 150px;">
+                    <div class="col-xs-6 col-md-4">
+                        <div>
+                            <table id="caigou-table2" class="handle_table1" style="width: 650px;">
+                                <tr>
+                                    <td colspan="6" style="font-size: 16px;font-weight:1000">测试组工作成果统计</td>
+                                </tr>
+                                <tr>
+                                    <td>责任人</td>
+                                    <td>工时</td>
+                                    <td>任务数量</td>
+                                    <td>逾期数量</td>
+                                </tr>
+                                {foreach $demand_test_data as $k => $v}
+                                <tr>
+                                    <td>{$v.nickname}</td>
+                                    <td>{$v.woring}</td>
+                                    <td>{$v.demand}</td>
+                                    <td>{$v.outCount}</td>
+                                </tr>
+                                {/foreach}
+
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="panel panel-default panel-intro">
+
+</div>
+
+
+
