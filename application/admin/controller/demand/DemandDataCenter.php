@@ -205,7 +205,7 @@ from fa_it_web_demand where phper_user_id like '%$userId%' and create_time > '$s
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $v['nickname'] = $user['nickname'];
+                $v['nickname'] = $user['nickname']."|".$userId;
                 array_push($array, $v);
             }
         }
@@ -231,7 +231,7 @@ from fa_it_web_demand where app_user_id like '%$userId%' and create_time > '$sta
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $v['nickname'] = $user['nickname'];
+                $v['nickname'] = $user['nickname']."|".$userId;
                 array_push($array, $v);
             }
         }
@@ -257,7 +257,7 @@ from fa_it_web_demand where test_user_id like '%$userId%' and create_time > '$st
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $v['nickname'] = $user['nickname'];
+                $v['nickname'] = $user['nickname']."|".$userId;
                 array_push($array, $v);
             }
         }
@@ -283,7 +283,7 @@ from fa_it_web_demand where web_designer_user_id like '%$userId%' and create_tim
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $v['nickname'] = $user['nickname'];
+                $v['nickname'] = $user['nickname']."|".$userId;
                 array_push($array, $v);
             }
         }
