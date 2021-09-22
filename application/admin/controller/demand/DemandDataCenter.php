@@ -79,7 +79,9 @@ class DemandDataCenter extends Backend
             ->where('status', 'normal')
             ->field('nickname,id')
             ->select();
-        dump($web_users);
+        $web_group_ids=array(['id'=>'192','niname'=>'卢志恒'],
+            ['id'=>'','niname'=>''],
+            ['id'=>'','niname'=>'']);
 
         //获取app组长&组员
         $app_group_ids = $authgroup->getChildrenIds(config('demand.app_group_id'));
@@ -203,9 +205,9 @@ from fa_it_web_demand where phper_user_id like '%$userId%' and create_time > '$s
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $oneUser[$k]['nickname'] = $user['nickname'];
+                $v['nickname'] = $user['nickname'];
+                array_push($array, $v);
             }
-            array_push($array, $oneUser);
         }
         return $array;
 
@@ -229,10 +231,9 @@ from fa_it_web_demand where app_user_id like '%$userId%' and create_time > '$sta
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $oneUser[$k]['nickname'] = $user['nickname'];
+                $v['nickname'] = $user['nickname'];
+                array_push($array, $v);
             }
-
-            array_push($array, $oneUser);
         }
         return $array;
 
@@ -256,10 +257,9 @@ from fa_it_web_demand where test_user_id like '%$userId%' and create_time > '$st
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $oneUser[$k]['nickname'] = $user['nickname'];
+                $v['nickname'] = $user['nickname'];
+                array_push($array, $v);
             }
-
-            array_push($array, $oneUser);
         }
         return $array;
 
@@ -283,10 +283,9 @@ from fa_it_web_demand where web_designer_user_id like '%$userId%' and create_tim
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
-                $oneUser[$k]['nickname'] = $user['nickname'];
+                $v['nickname'] = $user['nickname'];
+                array_push($array, $v);
             }
-
-            array_push($array, $oneUser);
         }
         return $array;
 
