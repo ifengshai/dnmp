@@ -22,6 +22,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj', 'custom
                     [
                         { field: 'platformsku', title: __('平台SKU'), operate: false },
                         { field: 'sku', title: __('SKU'), operate: false },
+                        {field: 'pimg', title: __('Pimg'), formatter: Table.api.formatter.image, events: Table.api.events.img},
                         { field: 'shelves_date', title: __('上架时间'), operate: false },
                         { field: 'type_name', title: __('分类'), operate: false },
                         { field: 'available_stock', title: __('虚拟仓库存'), sortable: true,operate: false },
