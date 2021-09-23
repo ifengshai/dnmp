@@ -88,6 +88,7 @@ class GoodsSalesNum extends Backend
                 $result[$i]['image'] = Db::name('new_product')
                     ->alias('a')
                     ->join(['fa_new_product_attribute' => 'b'], 'a.id=b.item_id', 'left')
+                    ->where('a.sku',$skus[trim($k)]['sku'])
                     ->value('frame_images');
                 //上架时间
                 $shelvesTime = Db::name('sku_shelves_time')
