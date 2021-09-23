@@ -85,6 +85,10 @@ class GoodsSalesNum extends Backend
             foreach ($list as $k => $v) {
                 $result[$i]['platformsku'] = $k;
                 $result[$i]['sku'] = $skus[trim($k)]['sku'];
+                $result[$i]['image'] = Db::name('new_product')
+                    ->alias('a')
+                    ->join(['fa_new_product_attribute' => 'b'], 'a.id=b.item_id', 'left')
+                    ->value('frame_images');
                 //上架时间
                 $shelvesTime = Db::name('sku_shelves_time')
                     ->where(['site'=>$params['site'],'platform_sku'=>$k])
