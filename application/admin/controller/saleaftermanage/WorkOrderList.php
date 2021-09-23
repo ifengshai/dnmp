@@ -3519,7 +3519,7 @@ EOF;
             ->order('a.id', 'desc')
             ->group('a.item_order_number')
             ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type', 'a.item_order_number');
-
+        $flag = 0;
         if (empty($change_lens)) {
             $change_lens = $this->order_change
             ->alias('a')
@@ -3532,6 +3532,28 @@ EOF;
             ->order('a.id', 'desc')
             ->group('a.item_order_number')
             ->column('a.od_sph,a.od_cyl,a.od_axis,a.od_add,a.pd_r,a.od_pv,a.od_bd,a.od_pv_r,a.od_bd_r,a.os_sph,a.os_cyl,a.os_axis,a.os_add,a.pd_l,a.os_pv,a.os_bd,a.os_pv_r,a.os_bd_r,a.lens_number,a.recipe_type as prescription_type', 'a.item_order_number');
+            $flag = 1;
+        }
+        if (empty($change_lens)) {
+            $work_id = $this->order_change
+            ->alias('a')
+            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+            ->where([
+                'a.change_type'    => 10,
+                'a.work_id'        => ['in', $ids],
+                'b.operation_type' => 1,
+            ])
+            ->order('a.id', 'desc')
+            ->value('b.work_id');
+            $replacement_order = $this->model->where(['id' => $work_id])->value('replacement_order');
+            
+            $new_order_model = new NewOrder();
+            $order_id = $new_order_model->where('increment_id',$replacement_order)->value('id');
+            if ($order_id) {
+                $new_order_item_process_model = new NewOrderItemProcess();
+                $item_order_numbers_back_lens = $new_order_item_process_model->where('order_id',$order_id)->column('item_order_number');
+            }
+            $flag = 1;
         }
         if ($change_lens) {
             foreach ($change_lens as $key => $val) {
@@ -3547,6 +3569,9 @@ EOF;
 
         //获取子单号集合
         $item_order_numbers = array_unique(array_merge(array_keys($change_sku), array_keys($change_lens)));
+        if ($item_order_numbers_back_lens && !$item_order_numbers) {
+            $item_order_numbers = $item_order_numbers_back_lens;
+        }
         !$item_order_numbers && $this->error('未找到更换镜片或更改镜框的数据');
 
         //获取子订单列表
@@ -3626,7 +3651,11 @@ EOF;
             }
 
             //获取镜片名称
+            $problem_description = $this->model->where(['id' => $work_id])->value('problem_description');
             $v['lens_name'] = $lens_list[$v['lens_number']] ?: '';
+            if ($flag) {
+                $v['lens_name'] = $problem_description;
+            }
 
             $data[] = $v;
         }
