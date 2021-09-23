@@ -676,11 +676,17 @@ class OrderData extends Backend
 
                                         $this->orderitemprocess->insertAll($data);
 
-                                        //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                        if (($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3) && in_array($site, [1, 2, 3])) {
-                                            $order_lens_type[$site][$v['order_id']] = 3;
-                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
-                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                        // zeelool、meloog、voogueme 分仓
+                                        if (in_array($site, [1, 2, 3])) {
+                                            //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
+                                            if ($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3) {
+                                                $order_lens_type[$site][$v['order_id']] = 3;
+                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                            } elseif ($site == 1) {
+                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                            }
                                         }
                                     }
                                 }
@@ -737,9 +743,14 @@ class OrderData extends Backend
                                         ]);
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                        if ($order_prescription_type == 3 && in_array($site, [1, 2, 3])) {
-                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
-                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                        if (in_array($site, [1, 2, 3])) {
+                                            if ($order_prescription_type == 3) {
+                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                            } elseif ($site == 1) {
+                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                            }
                                         }
                                     }
                                 }
@@ -1860,7 +1871,7 @@ class OrderData extends Backend
      */
     public function create_wave_order()
     {
-        $this->setOrderPrescriptionType();
+//        $this->setOrderPrescriptionType();
         /**
          *
          * 生成规则
@@ -1969,6 +1980,7 @@ class OrderData extends Backend
      * Z站仅镜架 分丹阳仓
      * @author wangpenglei
      * @date   2021/8/3 10:53
+     * @deprecated 需求 #2576
      */
     protected function setOrderPrescriptionType()
     {
