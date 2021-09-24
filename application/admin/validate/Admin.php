@@ -15,6 +15,7 @@ class Admin extends Validate
         'nickname' => 'require',
         'password' => 'require|min:6|max:50',
         'email'    => 'require|email|unique:admin,email',
+        'warehouse_id'    => 'require',
     ];
 
     /**

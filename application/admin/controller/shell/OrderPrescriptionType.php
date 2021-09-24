@@ -49,24 +49,17 @@ class OrderPrescriptionType extends Command
             $data = [];
             if (in_array(3, $order_type)) {
                 $type = 3;
+                $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
             } elseif (in_array(2, $order_type)) {
                 $type = 2;
-
-                // Zeelool站 1.61 折射率 现片 订单 分配到丹阳仓处理
-                $lens_name = $orderitemoption->where('magento_order_id', $value['entity_id'])->where('site', 1)->where('prescription_type', '<>', 'Frameonly')->where('prescription_type', '<>', '')->column('web_lens_name');
-                if (array_reduce($lens_name, function ($carry, $item) {
-                    return (!$item || strpos($item, '1.61') !== false) && $carry;
-                }, true)) {
-                    $data['stock_id'] = 2;
-                    $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
-                }
+                $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
             } else {
                 $type = 1;
-                //如果Z站全为仅镜框 则分到丹阳仓
-                $data['stock_id'] = 2;
                 $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
             }
 
+            // z站全部订单分配到丹阳仓
+            $data['stock_id'] = 2;
             $data['order_prescription_type'] = $type;
             $data['updated_at'] = time();
             $order->where('id', $value['id'])->update($data);

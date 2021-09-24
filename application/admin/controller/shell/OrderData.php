@@ -676,11 +676,17 @@ class OrderData extends Backend
 
                                         $this->orderitemprocess->insertAll($data);
 
-                                        //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                        if (($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3) && in_array($site, [1, 2, 3])) {
-                                            $order_lens_type[$site][$v['order_id']] = 3;
-                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
-                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                        // zeelool、meloog、voogueme 分仓
+                                        if (in_array($site, [1, 2, 3])) {
+                                            //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
+                                            if ($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3) {
+                                                $order_lens_type[$site][$v['order_id']] = 3;
+                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                            } elseif ($site == 1) {
+                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                            }
                                         }
                                     }
                                 }
@@ -737,9 +743,14 @@ class OrderData extends Backend
                                         ]);
 
                                         //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                        if ($order_prescription_type == 3 && in_array($site, [1, 2, 3])) {
-                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
-                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                        if (in_array($site, [1, 2, 3])) {
+                                            if ($order_prescription_type == 3) {
+                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                            } elseif ($site == 1) {
+                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                            }
                                         }
                                     }
                                 }
@@ -1991,24 +2002,17 @@ class OrderData extends Backend
             $data = [];
             if (in_array(3, $order_type)) {
                 $type = 3;
+                $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
             } elseif (in_array(2, $order_type)) {
                 $type = 2;
-
-                // Zeelool站 1.61 折射率 现片 订单 分配到丹阳仓处理
-                $lens_name = $orderitemoption->where('magento_order_id', $value['entity_id'])->where('site', 1)->where('prescription_type', '<>', 'Frameonly')->where('prescription_type', '<>', '')->column('web_lens_name');
-                if (array_reduce($lens_name, function ($carry, $item) {
-                    return (!$item || strpos($item, '1.61') !== false) && $carry;
-                }, true)) {
-                    $data['stock_id'] = 2;
-                    $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
-                }
+                $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
             } else {
                 $type = 1;
-                //如果Z站全为仅镜框 则分到丹阳仓
-                $data['stock_id'] = 2;
                 $orderitemprocess->where('magento_order_id', $value['entity_id'])->where('site', 1)->update(['stock_id' => 2, 'wave_order_id' => 0]);
             }
 
+            //Z站全分到丹阳仓
+            $data['stock_id'] = 2;
             $data['order_prescription_type'] = $type;
             $data['updated_at'] = time();
             $order->where('id', $value['id'])->update($data);

@@ -1791,12 +1791,13 @@ class Distribution extends Backend
             '上个操作完成时间',
             '订单状态',
             '订单创建时间',
+            '加工类型'
         ];
         $path = '/uploads/order/';
         $fileName = '订单操作时间' . time();
         $count = $this->model
             ->alias('a')
-            ->field('a.id as aid,a.item_order_number,b.increment_id,b.status,b.site,a.distribution_status,b.created_at')
+            ->field('a.id as aid,a.item_order_number,b.increment_id,b.status,b.site,a.distribution_status,b.created_at,a.order_prescription_type')
             ->join(['fa_order' => 'b'], 'a.order_id=b.id')
             ->where($where)
             ->where($map)
@@ -1835,7 +1836,7 @@ class Distribution extends Backend
         for ($i = 0; $i < ceil($count / 50000); $i++) {
             $list = $this->model
                 ->alias('a')
-                ->field('a.id as aid,a.item_order_number,b.increment_id,b.status,b.site,a.distribution_status,b.created_at')
+                ->field('a.id as aid,a.item_order_number,b.increment_id,b.status,b.site,a.distribution_status,b.created_at,a.order_prescription_type')
                 ->join(['fa_order' => 'b'], 'a.order_id=b.id')
                 ->where($where)
                 ->where($map)
@@ -1864,6 +1865,18 @@ class Distribution extends Backend
                     $value['created_at'] = date('Y-m-d H:i:s', $value['created_at']);
                 }
                 $data[$key]['created_at'] = $value['created_at'];//订单创建时间
+                //加工类型
+                switch($value['order_prescription_type']) {
+                    case 1:
+                        $data[$key]['type'] = '仅镜架';
+                        break;
+                    case 2:
+                        $data[$key]['type'] = '现货处方镜';
+                        break;
+                    case 3:
+                        $data[$key]['type'] = '定制处方镜';
+                        break;
+                }
             }
 
             if ($i > 0) {
