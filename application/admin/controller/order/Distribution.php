@@ -3696,6 +3696,7 @@ class Distribution extends Backend
             13 => '核实地址',
             14 => '物流退件',
             15 => '客户退件',
+            18 => '客户取消订单'
         ];
 
         if ($this->request->isAjax()) {
