@@ -2,6 +2,7 @@
 
 namespace app\admin\controller\warehouse;
 
+use app\admin\model\Admin;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\StockLog;
 use app\common\controller\Backend;
@@ -151,7 +152,8 @@ class LogisticsInfo extends Backend
         }
         $row = $this->model->get($ids);
         $adminId = session('admin.id');
-        $stockPerson = config('workorder.stock_person');
+        //$stockPerson = config('workorder.stock_person');
+        $stockPerson = Admin::where('status','normal')->column('warehouse_id','id');
         if (!$stockPerson[$adminId]) {
             //$this->error('获取不到当前仓库人员所属仓库，无法签收，请联系产品');
             $stockPerson[$adminId] = 1;
@@ -172,7 +174,8 @@ class LogisticsInfo extends Backend
         }
         $row = $this->model->where('id', 'in', $ids)->select();
         $adminId = session('admin.id');
-        $stockPerson = config('workorder.stock_person');
+        //$stockPerson = config('workorder.stock_person');
+        $stockPerson = Admin::where('status','normal')->column('warehouse_id','id');
         if (empty($stockPerson[$adminId])) {
             //$this->error('获取不到当前仓库人员所属仓库，无法签收，请联系产品');
             $stockPerson[$adminId] = 1;
@@ -216,7 +219,8 @@ class LogisticsInfo extends Backend
 
         if ($this->request->isAjax()) {
             $adminId = session('admin.id');
-            $stockPerson = config('workorder.stock_person');
+            //$stockPerson = config('workorder.stock_person');
+            $stockPerson = Admin::where('status','normal')->column('warehouse_id','id');
             $params['sign_person'] = session('admin.nickname');
             $params['sign_warehouse'] = $stockPerson[$adminId] ?? 1;
             $params['sign_time'] = date('Y-m-d H:i:s');
@@ -492,7 +496,8 @@ class LogisticsInfo extends Backend
         }
         if ($this->request->isAjax()) {
             $adminId = session('admin.id');
-            $stockPerson = config('workorder.stock_person');
+            //$stockPerson = config('workorder.stock_person');
+            $stockPerson = Admin::where('status','normal')->column('warehouse_id','id');
             $params['sign_person'] = session('admin.nickname');
             $params['sign_warehouse'] = $stockPerson[$adminId] ?? 1;
             $params['sign_time'] = date('Y-m-d H:i:s');
