@@ -4418,13 +4418,23 @@ class Test4 extends Controller
         $twoData = $this->old_user_data($site,$startDateTwo,$endDateTwo);
         $threeData = $this->old_user_data($site,$startDateThree,$endDateThree);
         $fourData  = $this->old_user_data($site,$startDateFour,$endDateFour);
-        dump('当月新客数',$newUser);
-        dump('第2-13月时间',$startDateTwo,$endDateTwo);
-        dump('第2-25月时间',$startDateTwo,$endDateThree);
-        dump('第2-37月时间',$startDateTwo,$endDateFour);
-        dump('第2-13月复购数',$twoData);
-        dump('第2-25月复购数',$threeData);
-        dump('第2-37月复购数',$fourData);
+        dump('当月新客数');
+        dump($newUser);
+        dump('第2-13月时间');
+        dump($startDateTwo);
+        dump($endDateTwo);
+        dump('第2-25月时间');
+        dump($startDateTwo);
+        dump($endDateThree);
+        dump('第2-37月时间');
+        dump($startDateTwo);
+        dump($endDateFour);
+        dump('第2-13月复购数');
+        dump($twoData);
+        dump('第2-25月复购数');
+        dump($threeData);
+        dump('第2-37月复购数');
+        dump($fourData);
         die;
     }
     public function old_user_data($site,$startDate1,$endDate1)
