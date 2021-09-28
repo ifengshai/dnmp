@@ -4311,12 +4311,13 @@ class Test4 extends Controller
 
     public function export_user_data()
     {
+        $site = input('site');
         $startDate1 = input('start');
         $endDate1 = input('end');
         $startTime1 = strtotime($startDate1);
         $endTime1 = strtotime($endDate1);
         $this->order = new NewOrder();
-        $where['site'] = 1;
+        $where['site'] = $site;
         $where['order_type'] = 1;
         $where['status'] = [
             'in',
