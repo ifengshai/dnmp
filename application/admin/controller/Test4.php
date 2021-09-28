@@ -4,6 +4,7 @@ namespace app\admin\controller;
 
 use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\purchase\SampleWorkorder;
 use app\admin\model\purchase\SampleWorkorderItem;
@@ -2040,7 +2041,7 @@ class Test4 extends Controller
 
     public function getSalesnum($site, $date)
     {
-        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->order = new NewOrder();
         $this->productGrade = new \app\admin\model\ProductGrade();
         $this->itemplatformsku = new \app\admin\model\itemmanage\ItemPlatformSku;
         //所选时间段内有销量的平台sku
@@ -2649,7 +2650,7 @@ class Test4 extends Controller
     //及时率中订单数
     public function order_num()
     {
-        $order = new \app\admin\model\order\order\NewOrder();
+        $order = new NewOrder();
         $this->process = new \app\admin\model\order\order\NewOrderProcess;
         $date_time = $order->query("SELECT FROM_UNIXTIME(created_at, '%Y-%m-%d') AS date_time FROM `fa_order` where payment_time between 1515520244 and 1612375200 GROUP BY FROM_UNIXTIME(created_at, '%Y-%m-%d') order by FROM_UNIXTIME(created_at, '%Y-%m-%d') asc");
         //查询时间
@@ -2744,7 +2745,7 @@ class Test4 extends Controller
             $stock_info = Db::name('datacenter_supply_month')->where('day_date', $start)->field('id,avg_stock')->find();
             $map['create_time'] = ['between', [$startday . ' 00:00:00', $endday . ' 23:59:59']];
             $where['payment_time'] = ['between', [strtotime($startday . ' 00:00:00'), strtotime($endday . ' 23:59:59')]];
-            $order = new \app\admin\model\order\order\NewOrder();
+            $order = new NewOrder();
             if ($stock_info['id']) {
                 //上个月总的采购数量（副数）
                 $purchase_num = Db::name('warehouse_data')->where($map)->sum('all_purchase_num');
@@ -4257,7 +4258,7 @@ class Test4 extends Controller
     //跑你好站 08-06-08-09的品类数据
     public function goods_type_day_center1($plat, $goods_type,$time)
     {
-        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->order = new NewOrder();
         $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
         $start = $time;
         $seven_days = $start . ' 00:00:00 - ' . $start . ' 23:59:59';
@@ -4306,5 +4307,60 @@ class Test4 extends Controller
         } else {
             echo 'nihao站配饰不ok';
         }
+    }
+
+    public function export_user_data()
+    {
+        $startDate1 = input('start');
+        $endDate1 = input('end');
+        $startTime1 = strtotime($startDate1);
+        $endTime1 = strtotime($endDate1);
+        $this->order = new NewOrder();
+        $where['site'] = 1;
+        $where['order_type'] = 1;
+        $where['status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered',
+            ]
+        ];
+
+
+        $where2['payment_time'] = ['<', $startTime1];
+        $oldAllUser = $this->order
+            ->where($where)
+            ->where($where2)
+            ->field('customer_email')
+            ->group('customer_email')
+            ->column('customer_email');
+        $where1['payment_time'] = ['between', [$startTime1, $endTime1]];
+        $timeUser = $this->order
+            ->where($where)
+            ->where($where1)
+            ->field('customer_email')
+            ->group('customer_email')
+            ->column('customer_email');
+
+
+
+        $newUser = array_diff($timeUser, $oldAllUser);
+        dump('新客数');
+        dump(count($newUser));
+        dump('下单客户数');
+        dump(count($timeUser));
+        dump('-------------------------------------------');
+        dump($newUser);
+        dump('-------------------------------------------');
+        dump($timeUser);
+        dump('-------------------------------------------');
+        dump($oldAllUser);
+
+        die;
     }
 }
