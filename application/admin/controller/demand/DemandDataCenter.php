@@ -70,7 +70,7 @@ class DemandDataCenter extends Backend
             ->select();*/
         $php_users=array(['id'=>'192','nickname'=>'卢志恒'],
             ['id'=>'227','nickname'=>'刘松巍'],
-            ['id'=>'229','nickname'=>'周正辉'],
+            ['id'=>'229','nickname'=>'周正晖'],
             ['id'=>'335','nickname'=>'吴钢剑'],
             ['id'=>'350','nickname'=>'张靖威'],
             ['id'=>'442','nickname'=>'吴晓碟'],
@@ -156,7 +156,6 @@ FROM
 WHERE
 	create_time > '$start_time'
 AND create_time < '$end_time'
-AND `demand_type` = 1
 and is_del=1
 GROUP BY
 	site";
@@ -230,7 +229,7 @@ count(1) as 'demand',
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
-from fa_it_web_demand where phper_user_id like '%$userId%' and is_del=1 AND `demand_type` = 1 and create_time > '$start_time'
+from fa_it_web_demand where phper_user_id like '%$userId%' and is_del=1  and create_time > '$start_time'
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
@@ -256,7 +255,7 @@ count(1) as 'demand',
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
-from fa_it_web_demand where app_user_id like '%$userId%' and is_del=1 AND `demand_type` = 1 and create_time > '$start_time'
+from fa_it_web_demand where app_user_id like '%$userId%' and is_del=1  and create_time > '$start_time'
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
@@ -282,7 +281,7 @@ count(1) as 'demand',
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
-from fa_it_web_demand where test_user_id like '%$userId%' and is_del=1 AND `demand_type` = 1 and create_time > '$start_time'
+from fa_it_web_demand where test_user_id like '%$userId%' and is_del=1  and create_time > '$start_time'
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
@@ -308,7 +307,7 @@ count(1) as 'demand',
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
-from fa_it_web_demand where web_designer_user_id like '%$userId%' and is_del=1  AND `demand_type` = 1 and create_time > '$start_time'
+from fa_it_web_demand where web_designer_user_id like '%$userId%' and is_del=1   and create_time > '$start_time'
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
@@ -347,6 +346,9 @@ AND create_time < '$end_time'";
                 $admin = new \app\admin\model\Admin();
                 $smap['nickname'] = ['like', '%' . trim($filter['task_user_name']) . '%'];
                 $id = $admin->where($smap)->value('id');
+                if (empty($id)){
+                    $this->error('查无此人,请输入正确名称');
+                }
                 //前端负责人id 后端负责人id 测试负责人id
                 $task_map = "FIND_IN_SET({$id},web_designer_user_id)  or FIND_IN_SET({$id},phper_user_id)  or FIND_IN_SET({$id}, test_user_id)";
                 unset($filter['task_user_name']);
@@ -358,18 +360,16 @@ AND create_time < '$end_time'";
             } else  { //开发任务
                 $mapLabel="all_finish_time> node_time and create_time > '$start_time' AND create_time < '$end_time' ";
             }
-//           dump($mapLabel);
 
             unset($filter['label']);
             unset($filter['create_time']);
-            $map['demand_type'] = 1; //默认任务列表
+//            $map['demand_type'] = 1; //默认任务列表
             $this->request->get(['filter' => json_encode($filter)]);
 
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->where($where)
                 ->where($mapLabel)
-                ->where($map)
                 ->where($task_map)
                 ->order($sort, $order)
                 ->count();
@@ -377,7 +377,6 @@ AND create_time < '$end_time'";
             $list = $this->model
                 ->where($where)
                 ->where($mapLabel)
-                ->where($map)
                 ->where($task_map)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
