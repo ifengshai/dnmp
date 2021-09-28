@@ -1587,6 +1587,8 @@ class ItWebDemand extends Backend
                     $update['test_group'] = $params['test_group'];
                     $update['test_status'] = 2;
                     $update['test_confirm_time'] = date('Y-m-d H:i', time());
+                    $update['test_working_hour'] = $params['test_working_hour'];
+
                 }
 
                 if ($params['type'] == 'tongguo') {
@@ -1647,7 +1649,6 @@ class ItWebDemand extends Backend
                     $label = 3;
                 }
 
-                $update['test_working_hour'] = $params['test_working_hour'];
 
                 $res = $this->model->allowField(true)->save($update, ['id' => $params['id']]);
                 if ($res) {
