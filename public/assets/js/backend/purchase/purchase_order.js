@@ -850,7 +850,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
 
             $(document).on('click', '.btn-add-batch', function () {
                 var batch_id = $(this).parent().next('.batch_id').val();
-                var shtml = '<div class="form-group">' +
+                var shtml =
+                    '<div class="logistics_div">' +
+                    '<div class="form-group">\n' +
+                    '<label class="control-label col-xs-12 col-sm-2">选择收货仓:</label>\n' +
+                    '<div class="col-xs-12 col-sm-3">\n' +
+                    '<select name="stock_id[' + batch_id + '][]" class="form-control"  data-rule="required">\n' +
+                    '<option value="" >请选择</option>\n' +
+                    '<option value="1">郑州仓</option>\n' +
+                    '<option value="2">丹阳仓</option>\n' +
+                    '</select>\n' +
+                    '</div>\n' +
+                    '<span class="col-xs-12 col-sm-5" style="color: grey;margin-left: 110px;line-height: 30px;"> 注：请仔细核对物流单收货地与收货仓是否一致</span>\n' +
+                    '</div>' +
+                    '<div class="form-group">' +
                     '<label class="control-label col-xs-12 col-sm-2">物流公司编码:</label>' +
                     '<div class="col-xs-12 col-sm-3">' +
                     '<input id="c-logistics_company_no" class="form-control" name="logistics_company_no[' + batch_id + '][]" value="" type="text" placeholder="请输入对应的物流公司编码">' +
@@ -860,7 +873,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                     '<input id="c-logistics_number" class="form-control" name="logistics_number[' + batch_id + '][]" type="text" placeholder="请输入物流单号">' +
                     '</div>' +
                     '<a href="javascript:;" class="btn btn-danger btn-del" title="删除"><i class="fa fa-trash"></i>删除</a>' +
-                    '</div>';
+                    '</div>'+
+                    '<div';
                 $(this).parent().next().next().append(shtml);
             })
 
@@ -880,14 +894,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                                 url: Config.moduleurl + '/purchase/purchase_order/deleteLogisticsItem',
                                 data: {id: id}
                             }, function (data, ret) {
-                                _this.parent().remove();
+                                _this.parent().parent().remove();
                                 Layer.closeAll();
                             });
                         }
                     );
 
                 } else {
-                    $(this).parent().remove();
+                    $(this).parent().parent().remove();
                 }
             })
 

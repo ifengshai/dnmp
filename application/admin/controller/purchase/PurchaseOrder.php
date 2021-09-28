@@ -7,6 +7,7 @@ use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\purchase\PurchaseBatch;
 use app\admin\model\StockLog;
 use app\common\controller\Backend;
+use app\enum\PlatformType;
 use fast\Excel;
 use think\Db;
 use think\Exception;
@@ -701,6 +702,23 @@ class PurchaseOrder extends Backend
                     $this->error(__('此状态不能录入物流单号'), url('index'));
                 }
             }
+
+            $purchase_num = $this->purchase_order_item
+                ->where(['purchase_id' => ['in', $ids]])
+                ->sum('purchase_num');
+
+            $replenishIds = array_filter(array_column($row, 'replenish_id'));
+            if (!empty($replenishIds)) {
+                $replenishes = Db::table('fa_new_product_mapping')->where(['replenish_id' => ['in', $replenishIds]])->group('website_type')->field('sum(replenish_num) as replenish_num,website_type')->select();
+                if ($replenishes) {
+                    $replenishesNum = array_sum(array_column($replenishes, 'replenish_num'));
+                    foreach ($replenishes as $key => $replenish) {
+                        $replenishes[$key]['site'] = PlatformType::getNameById($replenish['website_type']);
+                        $replenishes[$key]['ratio'] = sprintf("%.1f%%", $replenishesNum > 0 ? $replenish['replenish_num'] / $replenishesNum * 100 : 0);
+                    }
+                    $this->view->assign("replenishes", $replenishes);
+                }
+            }
         } else {
             $row = $this->model->get($ids);
             if (!$row) {
@@ -718,6 +736,22 @@ class PurchaseOrder extends Backend
             foreach ($logistics_data as $k => $v) {
                 if ($v['status'] == 1) {
                     $is_sign = 1;
+                }
+            }
+
+            $purchase_num = $this->purchase_order_item
+                ->where(['purchase_id' => ['in', $ids]])
+                ->sum('purchase_num');
+
+            if (!empty($row['replenish_id'])) {
+                $replenishes = Db::table('fa_new_product_mapping')->where('replenish_id', $row['replenish_id'])->group('website_type')->field('sum(replenish_num) as replenish_num,website_type')->select();
+                if ($replenishes) {
+                    $replenishesNum = array_sum(array_column($replenishes, 'replenish_num'));
+                    foreach ($replenishes as $key => $replenish) {
+                        $replenishes[$key]['site'] = PlatformType::getNameById($replenish['website_type']);
+                        $replenishes[$key]['ratio'] = sprintf("%.1f%%", $replenishesNum > 0 ? $replenish['replenish_num'] / $replenishesNum * 100 : 0);
+                    }
+                    $this->view->assign("replenishes", $replenishes);
                 }
             }
 
@@ -798,6 +832,9 @@ class PurchaseOrder extends Backend
                                 if (empty($logistics_number[$k][$key])) {
                                     $this->error(__('物流单号不能为空'));
                                 }
+                                if (empty($stock_ids[$k][$key])) {
+                                    $this->error(__('签收仓不能为空'));
+                                }
 
                                 if ($logistics_ids[$k][$key]) {
                                     $list['id'] = $logistics_ids[$k][$key];
@@ -809,9 +846,9 @@ class PurchaseOrder extends Backend
                                 }
                                 $list['logistics_number'] = $logistics_number[$k][$key];
                                 $list['logistics_company_no'] = $val;
-                                $list['receiving_warehouse'] = $stock_ids[$k];
+                                $list['receiving_warehouse'] = $stock_ids[$k][$key];
 
-                                $batch->where(['id' => $k])->update(['receiving_warehouse' => $stock_ids[$k]]);
+                                $batch->where(['id' => $k])->update(['receiving_warehouse' => $stock_ids[$k][$key]]);
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k][$key], 'status' => 1])->find();
                                 if (!empty($have_logistics)) {
@@ -869,14 +906,17 @@ class PurchaseOrder extends Backend
                                     if (empty($logistics_number[$key])) {
                                         $this->error(__('物流单号不能为空'));
                                     }
+                                    if (empty($stock_ids[$key])) {
+                                        $this->error(__('收货仓不能为空'));
+                                    }
                                     $list['logistics_number'] = $logistics_number[$key];
                                     $list['logistics_company_no'] = $val;
                                     $list['type'] = 1;
                                     $list['order_number'] = $v['purchase_number'];
                                     $list['purchase_id'] = $v['id'];
-                                    $list['receiving_warehouse'] = is_array($stock_ids) ? 0 : $stock_ids;
+                                    $list['receiving_warehouse'] = $stock_ids[$key];
 
-                                    $this->model->where(['id' => $k])->update(['receiving_warehouse' => is_array($stock_ids) ? 0 : $stock_ids]);
+                                    $this->model->where(['id' => $k])->update(['receiving_warehouse' => $stock_ids[$key]]);
                                     //若物流单号已经签收的话直接更改采购单的状态为已签收
                                     $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k], 'status' => 1])->find();
 
@@ -928,6 +968,10 @@ class PurchaseOrder extends Backend
                                 if (empty($logistics_number[$k])) {
                                     $this->error(__('物流单号不能为空'));
                                 }
+
+                                if (empty($stock_ids[$k])) {
+                                    $this->error(__('收货仓不能为空'));
+                                }
                                 $list = [];
                                 if ($logistics_ids[$k]) {
                                     $list['id'] = $logistics_ids[$k];
@@ -938,7 +982,7 @@ class PurchaseOrder extends Backend
                                 }
                                 $list['logistics_number'] = $logistics_number[$k];
                                 $list['logistics_company_no'] = $v;
-                                $list['receiving_warehouse'] = is_array($stock_ids) ? 0 : $stock_ids;
+                                $list['receiving_warehouse'] = $stock_ids[$k];
                                 //若物流单号已经签收的话直接更改采购单的状态为已签收
                                 $have_logistics = $logistics->where(['logistics_number' => $logistics_number[$k], 'status' => 1])->find();
 
@@ -1026,6 +1070,7 @@ class PurchaseOrder extends Backend
             $this->error(__('Parameter %s can not be empty', ''));
         }
         $this->view->assign("row", $row);
+        $this->view->assign("purchase_num", $purchase_num);
         //判断是否为分批到货
         if ($row['is_batch'] == 1) {
             //查询分批数据
