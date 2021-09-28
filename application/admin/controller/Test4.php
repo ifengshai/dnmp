@@ -4364,4 +4364,109 @@ class Test4 extends Controller
 
         die;
     }
+    /**
+     * 当月
+     * @author liushiwei
+     * @date   2021/9/28 17:42
+     */
+    public function export_user_data_two()
+    {
+        $site = input('site');
+        $startDate1 = input('start');
+        $endDate1 = input('end');
+        $startTime1 = strtotime($startDate1);
+        $endTime1 = strtotime($endDate1);
+        $startDateTwo = $startDateThree = $startDateFour =  strtotime("$startTime1+1 month");
+        $endDateTwo = strtotime("$startDateTwo+1 year");
+        $endDateThree = strtotime("$startDateTwo+2 year");
+        $endDateFour  = strtotime("$startDateTwo+3 year");
+        $this->order = new NewOrder();
+        $where['site'] = $site;
+        $where['order_type'] = 1;
+        $where['status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered',
+            ]
+        ];
+
+
+        $where2['payment_time'] = ['<', $startTime1];
+        $oldAllUser = $this->order
+            ->where($where)
+            ->where($where2)
+            ->field('customer_email')
+            ->group('customer_email')
+            ->column('customer_email');
+        $where1['payment_time'] = ['between', [$startTime1, $endTime1]];
+        $timeUser = $this->order
+            ->where($where)
+            ->where($where1)
+            ->field('customer_email')
+            ->group('customer_email')
+            ->column('customer_email');
+
+
+
+        $newUser = array_diff($timeUser, $oldAllUser);
+        $twoData = $this->old_user_data($site,$startDateTwo,$endDateTwo);
+        $threeData = $this->old_user_data($site,$startDateThree,$endDateThree);
+        $fourData  = $this->old_user_data($site,$startDateFour,$endDateFour);
+        dump('当月新客数',$newUser);
+        dump('第2-13月时间',$startDateTwo,$endDateTwo);
+        dump('第2-25月时间',$startDateTwo,$endDateThree);
+        dump('第2-37月时间',$startDateTwo,$endDateFour);
+        dump('第2-13月复购数',$twoData);
+        dump('第2-25月复购数',$threeData);
+        dump('第2-37月复购数',$fourData);
+        die;
+    }
+    public function old_user_data($site,$startDate1,$endDate1)
+    {
+
+        $startTime1 = strtotime($startDate1);
+        $endTime1 = strtotime($endDate1);
+        $this->order = new NewOrder();
+        $where['site'] = $site;
+        $where['order_type'] = 1;
+        $where['status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered',
+            ]
+        ];
+
+
+        $where2['payment_time'] = ['<', $startTime1];
+        $oldAllUser = $this->order
+            ->where($where)
+            ->where($where2)
+            ->field('customer_email')
+            ->group('customer_email')
+            ->column('customer_email');
+        $where1['payment_time'] = ['between', [$startTime1, $endTime1]];
+        $timeUser = $this->order
+            ->where($where)
+            ->where($where1)
+            ->field('customer_email')
+            ->group('customer_email')
+            ->column('customer_email');
+
+
+
+        $newUser = array_diff($timeUser, $oldAllUser);
+        return count($timeUser)-count($newUser);
+    }
 }
