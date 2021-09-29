@@ -4373,6 +4373,7 @@ class Test4 extends Controller
      */
     public function export_user_data_two()
     {
+        set_time_limit(0);
         $site = input('site');
         $startDate1 = input('start');
         $endDate1 = input('end');
@@ -4444,7 +4445,7 @@ class Test4 extends Controller
     }
     public function old_user_data($site,$startDate1,$endDate1)
     {
-
+        set_time_limit(0);
         $this->order = new NewOrder();
         $where['site'] = $site;
         $where['order_type'] = 1;
