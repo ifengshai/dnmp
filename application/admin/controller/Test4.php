@@ -4443,8 +4443,6 @@ class Test4 extends Controller
     public function old_user_data($site,$startDate1,$endDate1)
     {
 
-        $startTime1 = strtotime($startDate1);
-        $endTime1 = strtotime($endDate1);
         $this->order = new NewOrder();
         $where['site'] = $site;
         $where['order_type'] = 1;
@@ -4462,14 +4460,14 @@ class Test4 extends Controller
         ];
 
 
-        $where2['payment_time'] = ['<', $startTime1];
+        $where2['payment_time'] = ['<', $startDate1];
         $oldAllUser = $this->order
             ->where($where)
             ->where($where2)
             ->field('customer_email')
             ->group('customer_email')
             ->column('customer_email');
-        $where1['payment_time'] = ['between', [$startTime1, $endTime1]];
+        $where1['payment_time'] = ['between', [$startDate1, $endDate1]];
         $timeUser = $this->order
             ->where($where)
             ->where($where1)
