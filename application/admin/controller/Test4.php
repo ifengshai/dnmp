@@ -4480,6 +4480,6 @@ class Test4 extends Controller
 
 
         $newUser = array_diff($timeUser, $oldAllUser);
-        return count($timeUser)-count( );
+        return count($timeUser)-count($newUser);
     }
 }
