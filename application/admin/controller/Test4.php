@@ -4311,6 +4311,8 @@ class Test4 extends Controller
 
     public function export_user_data()
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
         $site = input('site');
         $startDate1 = input('start');
         $endDate1 = input('end');
@@ -4356,11 +4358,11 @@ class Test4 extends Controller
         dump('下单客户数');
         dump(count($timeUser));
         dump('-------------------------------------------');
-        dump($newUser);
-        dump('-------------------------------------------');
-        dump($timeUser);
-        dump('-------------------------------------------');
-        dump($oldAllUser);
+//        dump($newUser);
+//        dump('-------------------------------------------');
+//        dump($timeUser);
+//        dump('-------------------------------------------');
+//        dump($oldAllUser);
 
         die;
     }
