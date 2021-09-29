@@ -4357,6 +4357,8 @@ class Test4 extends Controller
         dump(count($newUser));
         dump('下单客户数');
         dump(count($timeUser));
+        dump('老客数');
+        dump(count($timeUser) - count($newUser));
         dump('-------------------------------------------');
 //        dump($newUser);
 //        dump('-------------------------------------------');
