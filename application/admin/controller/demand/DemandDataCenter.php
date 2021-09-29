@@ -226,6 +226,7 @@ count(1) as 'demand',
 	sum(
 		phper_expect_time < phper_finish_time
 	) as 'outCount',
+	sum(if( phper_expect_time < phper_finish_time,TIMESTAMPDIFF(HOUR, phper_expect_time, phper_finish_time),0)) as 'outHour',
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
@@ -252,6 +253,7 @@ count(1) as 'demand',
 	sum(
 		app_finish_time > app_expect_time
 	) as 'outCount',
+	sum(if( app_expect_time < app_finish_time,TIMESTAMPDIFF(HOUR, app_expect_time, app_finish_time),0)) as 'outHour',
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
@@ -278,6 +280,7 @@ count(1) as 'demand',
 	sum(
 		node_time < test_finish_time
 	) as 'outCount',
+		sum(if( node_time < test_finish_time,TIMESTAMPDIFF(HOUR, node_time, test_finish_time),0)) as 'outHour',
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
@@ -304,6 +307,8 @@ count(1) as 'demand',
 	sum(
 		web_designer_expect_time < web_designer_finish_time
 	) as 'outCount',
+			sum(if( web_designer_expect_time < web_designer_finish_time,TIMESTAMPDIFF(HOUR, web_designer_expect_time, web_designer_finish_time),0)) as 'outHour',
+
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 

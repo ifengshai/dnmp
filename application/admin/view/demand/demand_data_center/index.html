@@ -259,6 +259,7 @@
                                     <img src="/wenhao.jpg" alt="" class="wenhao-class">
                                 </span>
                             </td>
+                            <td>逾期时长(h)</td>
                             <td>bug数量</td>
                             <td>需求数量</td>
                         </tr>
@@ -268,6 +269,7 @@
                             <td>{$v.woring?:0}</td>
                             <td>{$v.demand?:0}</td>
                             <td>{$v.outCount?:0}</td>
+                            <td>{$v.outHour?:0}</td>
                             <td>{$v.bugCount?:0}</td>
                             <td>{$v.demandCount?:0}</td>
                         </tr>
@@ -294,6 +296,7 @@
                                     <img src="/wenhao.jpg" alt="" class="wenhao-class">
                                 </span>
                             </td>
+                            <td>逾期时长(h)</td>
                         </tr>
                         {foreach $demand_test_data as $k => $v}
                         <tr>
@@ -301,6 +304,7 @@
                             <td>{$v.woring?:0}</td>
                             <td>{$v.demand?:0}</td>
                             <td>{$v.outCount?:0}</td>
+                            <td>{$v.outHour?:0}</td>
                         </tr>
                         {/foreach}
 
