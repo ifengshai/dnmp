@@ -4376,10 +4376,13 @@ class Test4 extends Controller
         $endDate1 = input('end');
         $startTime1 = strtotime($startDate1);
         $endTime1 = strtotime($endDate1);
-        $startDateTwo = $startDateThree = $startDateFour =  strtotime("$startTime1+1 month");
-        $endDateTwo = strtotime("$startDateTwo+1 year");
-        $endDateThree = strtotime("$startDateTwo+2 year");
-        $endDateFour  = strtotime("$startDateTwo+3 year");
+        $useEndDate = date('Y-m-d H:i:s',strtotime("$startDate1+1 month"));
+        //往后三年的开始时间
+        $startDateTwo = $startDateThree = $startDateFour =  strtotime("$startDate1+1 month");
+        //第一年的结束时间
+        $endDateTwo = strtotime("$useEndDate+1 year");
+        $endDateThree = strtotime("$useEndDate+2 year");
+        $endDateFour  = strtotime("$useEndDate+3 year");
         $this->order = new NewOrder();
         $where['site'] = $site;
         $where['order_type'] = 1;
@@ -4419,7 +4422,7 @@ class Test4 extends Controller
         $threeData = $this->old_user_data($site,$startDateThree,$endDateThree);
         $fourData  = $this->old_user_data($site,$startDateFour,$endDateFour);
         dump('当月新客数');
-        dump($newUser);
+        dump(count($newUser));
         dump('第2-13月时间');
         dump($startDateTwo);
         dump($endDateTwo);
@@ -4477,6 +4480,6 @@ class Test4 extends Controller
 
 
         $newUser = array_diff($timeUser, $oldAllUser);
-        return count($timeUser)-count($newUser);
+        return count($timeUser)-count( );
     }
 }
