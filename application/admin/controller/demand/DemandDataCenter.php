@@ -21,7 +21,7 @@ class DemandDataCenter extends Backend
      */
     protected $model = null;
     protected $noNeedRight = [
-        'del', 'distribution', 'test_handle', 'detail', 'demand_review', 'del', 'edit', 'rdc_demand_pass'
+        'del', 'distribution', 'test_handle', 'detail', 'demand_review', 'del', 'edit', 'rdc_demand_pass','confirm_list'
     ];  //解决创建人无删除权限问题 暂定
 
     public function _initialize()
