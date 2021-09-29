@@ -769,9 +769,9 @@ class PurchaseOrder extends Backend
             $params = input('post.');
 
             $logistics_company_no = $params['logistics_company_no'];
-            $logistics_number = $params['logistics_number'];
-            $logistics_ids = $params['logistics_ids'];
-            $stock_ids = $params['stock_id'];
+            $logistics_number = $params['logistics_number'] ?: [];
+            $logistics_ids = $params['logistics_ids'] ?: [];
+            $stock_ids = $params['stock_id'] ?: [];
             if ($params) {
 
                 $params = $this->preExcludeFields($params);
@@ -792,7 +792,7 @@ class PurchaseOrder extends Backend
                     $params['purchase_status'] = 6; //待收货
                     $params['logistics_number'] = is_array($logistics_number) ? implode(',', $logistics_number) : $logistics_number;
                     $params['logistics_company_no'] = is_array($logistics_company_no) ? implode(',', $logistics_company_no) : $logistics_company_no;
-                    $params['receiving_warehouse'] = is_array($stock_ids) ? 0 : $stock_ids;
+                    $params['receiving_warehouse'] = 0;
                     $result = $this->model->allowField(true)->isUpdate(true, ['id' => ['in', $ids], 'purchase_status' => ['in', [2, 5, 6, 7, 9]]])->save($params);
                     //添加物流汇总表
                     $logistics = new \app\admin\model\LogisticsInfo();
