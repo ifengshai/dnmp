@@ -291,4 +291,21 @@ class Test6 extends Backend
     {
         echo 111;
     }
+
+    /**
+     * 更新入库单仓库
+     * @author liushiwei
+     * @date   2021/9/29 18:32
+     */
+    public function updateStockWarehouse()
+    {
+        $info = Db::name('in_stock')
+            ->alias('s')->join('fa_check_order c','c.id=s.check_id')
+            ->join('fa_logistics_info l','c.logistics_id=l.id')->field('s.warehouse_id,s.id,l.sign_warehouse')->select();
+        foreach ($info as $val){
+            Db::name('in_stock')->where(['id'=>$val['id']])->update(['warehouse_id'=>$val['sign_warehouse']]);
+        }
+        echo 'ok';
+    }
+    
 }
