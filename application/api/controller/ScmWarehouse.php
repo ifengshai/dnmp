@@ -861,7 +861,8 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
-        $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
+        $stock_warehouse = $this->auth->warehouse_id;
+        //$stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
 
         empty($page) && $this->error(__('Page can not be empty'), [], 406);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 407);
@@ -934,8 +935,8 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
-        $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
-
+       // $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
+        $stock_warehouse = $this->auth->warehouse_id;
         empty($page) && $this->error(__('Page can not be empty'), [], 501);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 502);
 
@@ -1459,8 +1460,8 @@ class ScmWarehouse extends Scm
         //根据type值判断是从哪个入口进入的添加入库单 type值为1是从质检入口进入 type值为2是从入库单直接添加 直接添加的需要选择站点
         $type = $this->request->request("type");
         empty($type) && $this->error(__('入口类型不能为空'), [], 513);
-        $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
-
+        //$stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
+        $stock_warehouse = $this->auth->warehouse_id;
         $info = [];
         //入库单所需数据
         $info['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
