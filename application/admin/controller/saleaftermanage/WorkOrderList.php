@@ -3660,6 +3660,9 @@ EOF;
             $problem_description = $this->model->where(['id' => $work_id])->value('problem_description');
             if (empty($problem_description)) {
                 $problem_description = $this->model->where(['id' => $v['work_id']])->value('problem_description');
+                $increment_id = $this->model->where(['id' => $v['work_id']])->value('platform_order');
+                $v['lens_name'] = $problem_description;
+                $v['increment_id'] = $increment_id;
             }
             $v['lens_name'] = $lens_list[$v['lens_number']] ?: '';
             if ($flag) {
