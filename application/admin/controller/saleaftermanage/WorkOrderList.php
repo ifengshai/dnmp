@@ -4000,7 +4000,6 @@ EOF;
             ->where($addWhere)
             ->select();
         $list = collection($list)->toArray();
-
         //根据平台sku求出商品sku
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
         $_new_order_item_process = new NewOrderItemProcess();
@@ -4368,12 +4367,12 @@ EOF;
         $this->request->get(['filter' => json_encode($filter)]);
         [$where] = $this->buildparams();
 
-        $list = $worklist
-            ->where($where)
-            ->where($map)
-            ->where($addWhere)
-            ->select();
-        $list = collection($list)->toArray();
+//        $list = $worklist
+//            ->where($where)
+//            ->where($map)
+//            ->where($addWhere)
+//            ->select();
+//        $list = collection($list)->toArray();
 
         //根据平台sku求出商品sku
         $itemPlatFormSku = new \app\admin\model\itemmanage\ItemPlatformSku();
@@ -4444,7 +4443,7 @@ EOF;
             ->setCellValue("AK1", "补发订单号")
             ->setCellValue("AL1", "商品子单号SKU");;
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
-        $pre_count = 500;
+        $pre_count = 200;
         $total_export_count = $worklist
             ->where($where)
             ->where($map)
@@ -4458,9 +4457,7 @@ EOF;
                 ->where($addWhere)
                 ->limit($start,$pre_count)
                 ->select();
-            echo '<pre>';
-            var_dump($list);
-            exit;
+            $list = collection($list)->toArray();
             $arr = array_column($list, 'id');
             //求出所有的措施
             $info = $this->step->fetchMeasureRecord($arr);
