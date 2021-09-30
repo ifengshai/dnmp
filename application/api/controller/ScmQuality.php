@@ -203,7 +203,8 @@ class ScmQuality extends Scm
         if ($start_time && $end_time) {
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
-        $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?? 1;
+        //$stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?? 1;
+        $stock_warehouse = $this->auth->warehouse_id;
         if ($stock_warehouse) {
             $where['d.sign_warehouse'] = $stock_warehouse;
         }else{
@@ -223,6 +224,8 @@ class ScmQuality extends Scm
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
             ->select();
+        var_dump($where);
+        exit;
         $list = collection($list)->toArray();
 
         $status = [0 => '新建', 1 => '待审核', 2 => '已审核', 3 => '已拒绝', 4 => '已取消'];
