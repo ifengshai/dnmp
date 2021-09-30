@@ -1265,6 +1265,7 @@ class ScmWarehouse extends Scm
                 //存在平台id 代表把当前入库单的sku分给这个平台 首先做判断 判断入库单的sku是否都有此平台对应的映射关系
                 $params['create_person'] = $this->auth->nickname;
                 $params['createtime'] = date('Y-m-d H:i:s', time());
+                $params['warehouse_id'] = $this->auth->warehouse_id;
                 if ($platform_id) {
                     $params['platform_id'] = $platform_id;
 

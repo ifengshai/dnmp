@@ -88,7 +88,7 @@ class Instock extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['checkorder', 'instocktype'])
                 ->where($where)
@@ -155,6 +155,7 @@ class Instock extends Backend
                         }
                         $params['create_person'] = session('admin.nickname');
                         $params['createtime'] = date('Y-m-d H:i:s', time());
+                        $params['warehouse_id'] = session('admin.warehouse_id');
                         $result = $this->model->allowField(true)->save($params);
 
                         //添加入库信息
@@ -178,6 +179,7 @@ class Instock extends Backend
                     } else {
                         $params['create_person'] = session('admin.nickname');
                         $params['createtime'] = date('Y-m-d H:i:s', time());
+                        $params['warehouse_id'] = session('admin.warehouse_id');
                         $result = $this->model->allowField(true)->save($params);
 
                         //添加入库信息
@@ -1108,7 +1110,7 @@ class Instock extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['checkorder', 'instocktype'])
                 ->where(['instock.status' => 2, 'type_id' => 1])
@@ -1223,7 +1225,7 @@ class Instock extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
-        list($where) = $this->buildparams();
+        [$where] = $this->buildparams();
 
         $list = $this->model->alias('a')
             ->field('in_stock_number,sku,in_stock_num,createtime,create_person')
@@ -1601,4 +1603,90 @@ class Instock extends Backend
 
         $writer->save('php://output');
     }
+    public function import_new()
+    {
+        $file = $this->request->request('file');
+        if (!$file) {
+            $this->error(__('Parameter %s can not be empty', 'file'));
+        }
+        $filePath = ROOT_PATH . DS . 'public' . DS . $file;
+        if (!is_file($filePath)) {
+            $this->error(__('No results were found'));
+        }
+        //实例化reader
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        if (!in_array($ext, ['csv', 'xls', 'xlsx'])) {
+            $this->error(__('Unknown data format'));
+        }
+        if ($ext === 'csv') {
+            $file = fopen($filePath, 'r');
+            $filePath = tempnam(sys_get_temp_dir(), 'import_csv');
+            $fp = fopen($filePath, "w");
+            $n = 0;
+            while ($line = fgets($file)) {
+                $line = rtrim($line, "\n\r\0");
+                $encoding = mb_detect_encoding($line, ['utf-8', 'gbk', 'latin1', 'big5']);
+                if ($encoding != 'utf-8') {
+                    $line = mb_convert_encoding($line, 'utf-8', $encoding);
+                }
+                if ($n == 0 || preg_match('/^".*"$/', $line)) {
+                    fwrite($fp, $line . "\n");
+                } else {
+                    fwrite($fp, '"' . str_replace(['"', ','], ['""', '","'], $line) . "\"\n");
+                }
+                $n++;
+            }
+            fclose($file) || fclose($fp);
+
+            $reader = new Csv();
+        } elseif ($ext === 'xls') {
+            $reader = new Xls();
+        } else {
+            $reader = new Xlsx();
+        }
+
+        //导入文件首行类型,默认是注释,如果需要使用字段名称请使用name
+        //$importHeadType = isset($this->importHeadType) ? $this->importHeadType : 'comment';
+        //模板文件列名
+        $listName = ['订单号', '差额', 'SKU', '货币'];
+        try {
+            if (!$PHPExcel = $reader->load($filePath)) {
+                $this->error(__('Unknown data format'));
+            }
+            $currentSheet = $PHPExcel->getSheet(0);  //读取文件中的第一个工作表
+            $allColumn = $currentSheet->getHighestDataColumn(); //取得最大的列号
+            $allRow = $currentSheet->getHighestRow(); //取得一共有多少行
+            $maxColumnNumber = Coordinate::columnIndexFromString($allColumn);
+
+            $fields = [];
+            for ($currentRow = 1; $currentRow <= 1; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $fields[] = $val;
+                }
+            }
+
+            //模板文件不正确
+//            if ($listName !== $fields) {
+//                throw new Exception("模板文件不正确！！");
+//            }
+
+            $data = [];
+            for ($currentRow = 2; $currentRow <= $allRow; $currentRow++) {
+                for ($currentColumn = 1; $currentColumn <= $maxColumnNumber; $currentColumn++) {
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn, $currentRow)->getValue();
+                    $data[$currentRow - 2][$currentColumn - 1] = is_null($val) ? '' : $val;
+                }
+            }
+        } catch (Exception $exception) {
+            $this->error($exception->getMessage());
+        }
+        foreach ($data as $k => $v) {
+            $in_stock_number = $v[1];
+            $warehouse_id = $v[8] == '郑州' ? 1 : 2;
+            Db::name('in_stock')->where(['in_stock_number'=>$in_stock_number])->save(['warehouse_id'=>$warehouse_id]);
+        }
+        echo 'ok';
+    }
+
 }
