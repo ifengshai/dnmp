@@ -3572,7 +3572,7 @@ EOF;
         if ($item_order_numbers_back_lens && !$item_order_numbers) {
             $item_order_numbers = $item_order_numbers_back_lens;
         }
-        !$item_order_numbers && $this->error('未找到更换镜片或更改镜框的数据');
+        //!$item_order_numbers && $this->error('未找到更换镜片或更改镜框的数据');
 
         //获取子订单列表
         $_new_order_item_process = new NewOrderItemProcess();
@@ -3606,6 +3606,12 @@ EOF;
         $lens_list = $_lens_data->column('lens_name', 'lens_number');
 
         $data = [];
+        if (!$list) {
+            $ids = explode(',', $ids);
+            foreach ($ids as $key => $value) {
+                $list[] = ['item_order_number'=>'111111111','created_at'=>time(),'work_id'=>$value];
+            }
+        }
         foreach ($list as $k => $v) {
             //更改镜框最新sku
             if ($change_sku[$v['item_order_number']]) {
@@ -3652,6 +3658,9 @@ EOF;
 
             //获取镜片名称
             $problem_description = $this->model->where(['id' => $work_id])->value('problem_description');
+            if (empty($problem_description)) {
+                $problem_description = $this->model->where(['id' => $v['work_id']])->value('problem_description');
+            }
             $v['lens_name'] = $lens_list[$v['lens_number']] ?: '';
             if ($flag) {
                 $v['lens_name'] = $problem_description;
