@@ -1987,8 +1987,13 @@ class ScmWarehouse extends Scm
                         $purchase_data['stock_status'] = $stock_status;
                         $this->_purchase_order->where(['id' => $check_res['purchase_id']])->update($purchase_data);
                     }
-                    //如果为退货单 修改退货单状态为入库
+                    //如果为退货单 修改退货单状态为入库,写入仓库
                     if ($check_res['order_return_id']) {
+                        $warehouse_id = $this->auth->warehouse_id;
+                        $this->_product_bar_code_item
+                            ->allowField(true)
+                            ->isUpdate(true, ['in_stock_id' => $in_stock_id])
+                            ->save(['stock_id' => $warehouse_id]);
                         $this->_order_return->where(['id' => $check_res['order_return_id']])->update(['in_stock_status' => 1]);
                     }
 
