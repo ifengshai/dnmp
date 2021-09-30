@@ -962,20 +962,29 @@ class ScmWarehouse extends Scm
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
         if ($stock_warehouse) {
-            $where['d.sign_warehouse'] = $stock_warehouse;
+            $where['a.warehouse_id'] = $stock_warehouse;
         }
 
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
         //获取入库单列表数据
+//        $list = $this->_in_stock
+//            ->alias('a')
+//            ->where($where)
+//            ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status,a.type_id')
+//            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
+//            ->join(['fa_logistics_info' => 'd'], 'd.id=b.logistics_id', 'left')
+//            ->group('a.id')
+//            ->order('a.createtime', 'desc')
+//            ->limit($offset, $limit)
+//            ->select();
         $list = $this->_in_stock
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status,a.type_id')
-            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
-            //            ->join(['fa_check_order_item' => 'c'], 'a.check_id=c.check_id', 'left')
-            ->join(['fa_logistics_info' => 'd'], 'd.id=b.logistics_id', 'left')
+            ->field('a.id,a.check_id,a.in_stock_number,a.createtime,a.status,a.type_id')
+//            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
+//            ->join(['fa_logistics_info' => 'd'], 'd.id=b.logistics_id', 'left')
             ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
