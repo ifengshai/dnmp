@@ -3948,7 +3948,7 @@ EOF;
      * @DateTime 2020-09-26 10:51:10
      * @return void
      */
-    public function batch_export_xls_bak()
+    public function batch_export_xls()
     {
         set_time_limit(0);
         ini_set('memory_limit', '4096M');
@@ -4321,7 +4321,7 @@ EOF;
      * @author liushiwei
      * @date   2021/9/30 13:56
      */
-    public function batch_export_xls()
+    public function batch_export_xls_bak()
     {
         set_time_limit(0);
         ini_set('memory_limit', '4096M');
