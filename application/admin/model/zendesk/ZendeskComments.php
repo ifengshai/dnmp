@@ -123,21 +123,21 @@ class ZendeskComments extends Model
                 }
             }
             $where_comment['is_admin'] = 1;
-            $where_comment['is_public'] = ['neq',2];
+            //$where_comment['is_public'] = ['neq',2];
             $where_comment['zid'] = $v['id'];
             $where_comment['due_id'] = ['in',$vip_customer_service];
             $where_comment['due_id'] = ['gt',0];
             //如果是vip邮件
             if($is_vip_email == 1){
-                //如果第一承接人存在的话，承接人就是当前客服
-                if($v['assign_id']){
+                //如果第一承接人存在并且是vip客服，承接人就是当前客服
+                if(($v['assign_id']) && in_array($v['assign_id'],$vip_customer_service)){
                     if($v['rating_type']>0){
                         $arr[$v['assign_id']]['estimate'] +=1;
                     }
                     if($v['rating_type'] == 1){
                         $arr[$v['assign_id']]['goods_estimate_num']+=1;
                     }
-                }else{ //如果第一承接人是空的话,处理人中vip客服处理时间最早的客服是当前客服
+                }elseif(empty($v['assign_id'])){ //如果第一承接人是空的话,处理人中vip客服处理时间最早的客服是当前客服
                     $handle_comment_result = $this->where($where_comment)->field('id,due_id')->order('create_time')->find();
                     if($handle_comment_result){
                         $arr[$handle_comment_result['due_id']]['estimate'] +=1;
@@ -152,15 +152,14 @@ class ZendeskComments extends Model
             }else{ //非vip邮件且邮件处理人不包含vip客服时，统计：邮件第一承接人是当前客服
                 $vip_comment_result = $this->where($where_comment)->field('id,due_id')->order('create_time')->find();
                 //dump($vip_comment_result);
-                if(!$vip_comment_result && !empty($v['assign_id'])){
+                if(!$vip_comment_result && !empty($v['assign_id'])){ //处理人不包含vip客服，存在第一承接人统计邮件第一承接人
                         $arr[$v['assign_id']]['estimate'] +=1;
                     if($v['rating_type'] == 1){
                         $arr[$v['assign_id']]['goods_estimate_num']+=1;
                     }
-                }elseif (!$vip_comment_result && empty($v['assign_id'])){
-                    //非vip邮件第一承接人为空且邮件处理人不包含vip客服时，处理人中非vip客服处理时间最早的客服是当前客服
+                }elseif(!$vip_comment_result && empty($v['assign_id'])){ //处理人不包含vip客服，不存在第一承接人统计最早处理邮件的客服
                     $general_comment['is_admin'] = 1;
-                    $general_comment['is_public'] = ['neq',2];
+                    //$general_comment['is_public'] = ['neq',2];
                     $general_comment['zid'] = $v['id'];
                     $general_comment['due_id'] = ['not in',$vip_customer_service];
                     $general_comment['due_id'] =['gt',0];
@@ -171,6 +170,12 @@ class ZendeskComments extends Model
                             $arr[$general_comment_result['due_id']]['goods_estimate_num'] +=1;
                         }
                     }
+
+                }elseif ($vip_comment_result){ //处理人是否包含vip客服，如果包含的话是第一个处理本邮件的vip客服
+                        $arr[$vip_comment_result['due_id']]['estimate'] +=1;
+                        if($v['rating_type'] == 1){
+                            $arr[$vip_comment_result['due_id']]['goods_estimate_num'] +=1;
+                        }
                 }
             }
 

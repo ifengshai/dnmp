@@ -88,7 +88,7 @@ class Instock extends Backend
                 $this->request->get(['filter' => json_encode($filter)]);
             }
 
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['checkorder', 'instocktype'])
                 ->where($where)
@@ -155,6 +155,7 @@ class Instock extends Backend
                         }
                         $params['create_person'] = session('admin.nickname');
                         $params['createtime'] = date('Y-m-d H:i:s', time());
+                        $params['warehouse_id'] = session('admin.warehouse_id');
                         $result = $this->model->allowField(true)->save($params);
 
                         //添加入库信息
@@ -178,6 +179,7 @@ class Instock extends Backend
                     } else {
                         $params['create_person'] = session('admin.nickname');
                         $params['createtime'] = date('Y-m-d H:i:s', time());
+                        $params['warehouse_id'] = session('admin.warehouse_id');
                         $result = $this->model->allowField(true)->save($params);
 
                         //添加入库信息
@@ -1108,7 +1110,7 @@ class Instock extends Backend
             if ($this->request->request('keyField')) {
                 return $this->selectpage();
             }
-            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
                 ->with(['checkorder', 'instocktype'])
                 ->where(['instock.status' => 2, 'type_id' => 1])
@@ -1223,7 +1225,7 @@ class Instock extends Backend
             $this->request->get(['filter' => json_encode($filter)]);
         }
 
-        list($where) = $this->buildparams();
+        [$where] = $this->buildparams();
 
         $list = $this->model->alias('a')
             ->field('in_stock_number,sku,in_stock_num,createtime,create_person')

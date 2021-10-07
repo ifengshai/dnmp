@@ -861,7 +861,8 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
-        $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
+        $stock_warehouse = $this->auth->warehouse_id;
+        //$stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
 
         empty($page) && $this->error(__('Page can not be empty'), [], 406);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 407);
@@ -934,8 +935,8 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
-        $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
-
+       // $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
+        $stock_warehouse = $this->auth->warehouse_id;
         empty($page) && $this->error(__('Page can not be empty'), [], 501);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 502);
 
@@ -961,20 +962,29 @@ class ScmWarehouse extends Scm
             $where['a.createtime'] = ['between', [$start_time, $end_time]];
         }
         if ($stock_warehouse) {
-            $where['d.sign_warehouse'] = $stock_warehouse;
+            $where['a.warehouse_id'] = $stock_warehouse;
         }
 
         $offset = ($page - 1) * $page_size;
         $limit = $page_size;
 
         //获取入库单列表数据
+//        $list = $this->_in_stock
+//            ->alias('a')
+//            ->where($where)
+//            ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status,a.type_id')
+//            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
+//            ->join(['fa_logistics_info' => 'd'], 'd.id=b.logistics_id', 'left')
+//            ->group('a.id')
+//            ->order('a.createtime', 'desc')
+//            ->limit($offset, $limit)
+//            ->select();
         $list = $this->_in_stock
             ->alias('a')
             ->where($where)
-            ->field('a.id,a.check_id,a.in_stock_number,b.check_order_number,a.createtime,a.status,a.type_id')
-            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
-            //            ->join(['fa_check_order_item' => 'c'], 'a.check_id=c.check_id', 'left')
-            ->join(['fa_logistics_info' => 'd'], 'd.id=b.logistics_id', 'left')
+            ->field('a.id,a.check_id,a.in_stock_number,a.createtime,a.status,a.type_id')
+//            ->join(['fa_check_order' => 'b'], 'a.check_id=b.id', 'left')
+//            ->join(['fa_logistics_info' => 'd'], 'd.id=b.logistics_id', 'left')
             ->group('a.id')
             ->order('a.createtime', 'desc')
             ->limit($offset, $limit)
@@ -1265,6 +1275,7 @@ class ScmWarehouse extends Scm
                 //存在平台id 代表把当前入库单的sku分给这个平台 首先做判断 判断入库单的sku是否都有此平台对应的映射关系
                 $params['create_person'] = $this->auth->nickname;
                 $params['createtime'] = date('Y-m-d H:i:s', time());
+                $params['warehouse_id'] = $this->auth->warehouse_id;
                 if ($platform_id) {
                     $params['platform_id'] = $platform_id;
 
@@ -1458,8 +1469,8 @@ class ScmWarehouse extends Scm
         //根据type值判断是从哪个入口进入的添加入库单 type值为1是从质检入口进入 type值为2是从入库单直接添加 直接添加的需要选择站点
         $type = $this->request->request("type");
         empty($type) && $this->error(__('入口类型不能为空'), [], 513);
-        $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
-
+        //$stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
+        $stock_warehouse = $this->auth->warehouse_id;
         $info = [];
         //入库单所需数据
         $info['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
@@ -1704,7 +1715,6 @@ class ScmWarehouse extends Scm
             ->where(['a.id' => $in_stock_id])
             ->select();
         $list = collection($list)->toArray();
-
         //查询存在产品库的sku
         $skus = array_column($list, 'sku');
         $skus = $this->_item->where(['sku' => ['in', $skus]])->column('sku');
@@ -1976,7 +1986,7 @@ class ScmWarehouse extends Scm
                         $purchase_data['stock_status'] = $stock_status;
                         $this->_purchase_order->where(['id' => $check_res['purchase_id']])->update($purchase_data);
                     }
-                    //如果为退货单 修改退货单状态为入库
+                    //如果为退货单 修改退货单状态为入库,写入仓库
                     if ($check_res['order_return_id']) {
                         $this->_order_return->where(['id' => $check_res['order_return_id']])->update(['in_stock_status' => 1]);
                     }
@@ -1988,7 +1998,14 @@ class ScmWarehouse extends Scm
                 if (count($error_num) > 0) {
                     throw new Exception('入库失败！！请检查SKU');
                 }
-
+                //如果退货入库
+                if($row['type_id']==3){
+                    $warehouse_id = $this->auth->warehouse_id;
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['in_stock_id' => $in_stock_id])
+                        ->save(['stock_id' => $warehouse_id]);
+                }
                 //条形码入库时间
                 $this->_product_bar_code_item
                     ->allowField(true)

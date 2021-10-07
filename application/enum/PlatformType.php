@@ -72,4 +72,38 @@ class PlatformType
     //zeelool_fr
     const ZEELOOL_FR = 'zeelool_fr';
 
+    public static function getNameById($id)
+    {
+        switch ($id) {
+            case self::ZEELOOL_PLAT:
+                return self::ZEELOOL;
+            case self::VOOGUEME_PLAT:
+                return self::VOOGUEME;
+            case self::NIHAO_PLAT:
+                return self::NIHAO;
+            case self::MEELOOG_PLAT:
+                return self::MEELOOG;
+            case self::WESEE_PLAT:
+                return self::WESEE;
+            case self::AMAZON_PLAT:
+                return self::AMAZON;
+            case self::ZEELOOL_ES_PLAT:
+                return self::ZEELOOL_ES;
+            case self::ZEELOOL_DE_PLAT:
+                return self::ZEELOOL_DE;
+            case self::ZEELOOL_JP_PLAT:
+                return self::ZEELOOL_JP;
+            case self::VOOGMECHIC_PLAT:
+                return self::VOOGMECHIC;
+            case self::ZEELOOL_CN_PLAT:
+                return self::ZEELOOL_CN;
+            case self::ALIBABA_PLAT:
+                return self::ALIBABA;
+            case self::ZEELOOL_FR_PLAT:
+                return self::ZEELOOL_FR;
+            default:
+                return 'Unknown';
+        }
+    }
+
 }

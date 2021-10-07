@@ -4,6 +4,7 @@ namespace app\admin\controller\demand;
 
 use app\admin\model\AuthGroup;
 use app\common\controller\Backend;
+use app\common\model\Auth;
 use think\Db;
 
 /**
@@ -20,7 +21,7 @@ class DemandDataCenter extends Backend
      */
     protected $model = null;
     protected $noNeedRight = [
-        'del', 'distribution', 'test_handle', 'detail', 'demand_review', 'del', 'edit', 'rdc_demand_pass'
+        'del', 'distribution', 'test_handle', 'detail', 'demand_review', 'del', 'edit', 'rdc_demand_pass','confirm_list'
     ];  //解决创建人无删除权限问题 暂定
 
     public function _initialize()
@@ -69,7 +70,7 @@ class DemandDataCenter extends Backend
             ->select();*/
         $php_users=array(['id'=>'192','nickname'=>'卢志恒'],
             ['id'=>'227','nickname'=>'刘松巍'],
-            ['id'=>'229','nickname'=>'周正辉'],
+            ['id'=>'229','nickname'=>'周正晖'],
             ['id'=>'335','nickname'=>'吴钢剑'],
             ['id'=>'350','nickname'=>'张靖威'],
             ['id'=>'442','nickname'=>'吴晓碟'],
@@ -155,6 +156,7 @@ FROM
 WHERE
 	create_time > '$start_time'
 AND create_time < '$end_time'
+and is_del=1
 GROUP BY
 	site";
         //各站点数据
@@ -224,10 +226,11 @@ count(1) as 'demand',
 	sum(
 		phper_expect_time < phper_finish_time
 	) as 'outCount',
+	sum(if( phper_expect_time < phper_finish_time,TIMESTAMPDIFF(HOUR, phper_expect_time, phper_finish_time),0)) as 'outHour',
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
-from fa_it_web_demand where phper_user_id like '%$userId%' and create_time > '$start_time'
+from fa_it_web_demand where phper_user_id like '%$userId%' and is_del=1  and create_time > '$start_time'
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
@@ -250,10 +253,11 @@ count(1) as 'demand',
 	sum(
 		app_finish_time > app_expect_time
 	) as 'outCount',
+	sum(if( app_expect_time < app_finish_time,TIMESTAMPDIFF(HOUR, app_expect_time, app_finish_time),0)) as 'outHour',
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
-from fa_it_web_demand where app_user_id like '%$userId%' and create_time > '$start_time'
+from fa_it_web_demand where app_user_id like '%$userId%' and is_del=1  and create_time > '$start_time'
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
@@ -276,10 +280,11 @@ count(1) as 'demand',
 	sum(
 		node_time < test_finish_time
 	) as 'outCount',
+		sum(if( node_time < test_finish_time,TIMESTAMPDIFF(HOUR, node_time, test_finish_time),0)) as 'outHour',
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
-from fa_it_web_demand where test_user_id like '%$userId%' and create_time > '$start_time'
+from fa_it_web_demand where test_user_id like '%$userId%' and is_del=1  and create_time > '$start_time'
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
@@ -302,10 +307,12 @@ count(1) as 'demand',
 	sum(
 		web_designer_expect_time < web_designer_finish_time
 	) as 'outCount',
+			sum(if( web_designer_expect_time < web_designer_finish_time,TIMESTAMPDIFF(HOUR, web_designer_expect_time, web_designer_finish_time),0)) as 'outHour',
+
 	sum(type = 1) AS 'bugCount',
 	sum(type !=1) AS 'demandCount'
 
-from fa_it_web_demand where web_designer_user_id like '%$userId%' and create_time > '$start_time'
+from fa_it_web_demand where web_designer_user_id like '%$userId%' and is_del=1   and create_time > '$start_time'
 AND create_time < '$end_time'";
             $oneUser = $this->model->query($sql);
             foreach ($oneUser as $k => $v) {
@@ -315,6 +322,158 @@ AND create_time < '$end_time'";
         }
         return $array;
 
+    }
+
+    /**
+     * 大于三天需求
+     * @author fanzhigang
+     * @date   2021/9/22 20:24
+     */
+    public function confirm_list(){
+
+        //设置过滤方法
+        $this->request->filter(['strip_tags']);
+        if ($this->request->isAjax()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+
+            $filter = json_decode($this->request->get('filter'), true);
+            //筛选开发进度
+
+
+            $time = explode(' - ', $filter['create_time']);
+            $start_time = date('Y-m-d  H:i:s', strtotime($time[0]));
+            $end_time = date('Y-m-d  H:i:s', strtotime($time[1]));
+            //筛选任务人
+            if ($filter['task_user_name']) {
+                $admin = new \app\admin\model\Admin();
+                $smap['nickname'] = ['like', '%' . trim($filter['task_user_name']) . '%'];
+                $id = $admin->where($smap)->value('id');
+                if (empty($id)){
+                    $this->error('查无此人,请输入正确名称');
+                }
+                //前端负责人id 后端负责人id 测试负责人id
+                $task_map = "FIND_IN_SET({$id},web_designer_user_id)  or FIND_IN_SET({$id},phper_user_id)  or FIND_IN_SET({$id}, test_user_id)";
+                unset($filter['task_user_name']);
+                unset($smap['nickname']);
+            }
+
+           if ($filter['label'] == 2) { //BUG任务
+               $mapLabel="TIMESTAMPDIFF(DAY,pm_audit_status_time,all_finish_time)>3 and create_time > '$start_time' AND create_time < '$end_time' ";
+            } else  { //开发任务
+                $mapLabel="all_finish_time> node_time and create_time > '$start_time' AND create_time < '$end_time' ";
+            }
+
+            unset($filter['label']);
+            unset($filter['create_time']);
+//            $map['demand_type'] = 1; //默认任务列表
+            $this->request->get(['filter' => json_encode($filter)]);
+
+            [$where, $sort, $order, $offset, $limit] = $this->buildparams();
+            $total = $this->model
+                ->where($where)
+                ->where($mapLabel)
+                ->where($task_map)
+                ->order($sort, $order)
+                ->count();
+//            dump($this->model->getLastSql());
+            $list = $this->model
+                ->where($where)
+                ->where($mapLabel)
+                ->where($task_map)
+                ->order($sort, $order)
+                ->limit($offset, $limit)
+                ->select();
+//            dump($this->model->getLastSql());
+//            die();
+
+            $list = collection($list)->toArray();
+            //检查有没有权限
+            $permissions['demand_pm_status'] = $this->auth->check('demand/it_web_demand/pm_status'); //产品确认权限
+            $permissions['demand_add'] = $this->auth->check('demand/it_web_demand/add'); //新增权限
+            $permissions['demand_del'] = $this->auth->check('demand/it_web_demand/del'); //删除权限
+            $permissions['demand_distribution'] = $this->auth->check('demand/it_web_demand/distribution'); //开发响应
+            $permissions['demand_test_handle'] = $this->auth->check('demand/it_web_demand/test_handle'); //测试响应
+
+            foreach ($list as $k => $v) {
+                $user_detail = $this->auth->getUserInfo($list[$k]['entry_user_id']);
+                $list[$k]['entry_user_name'] = $user_detail['nickname']; //取提出人
+                $list[$k]['detail'] = ''; //前台调用详情字段使用，并无实际意义
+
+                $list[$k]['create_time'] = date('m-d H:i', strtotime($v['create_time']));
+                $list[$k]['develop_finish_time'] = $v['develop_finish_time'] ? date('m-d H:i', strtotime($v['develop_finish_time'])) : '';
+                $list[$k]['test_finish_time'] = $v['test_finish_time'] ? date('m-d H:i', strtotime($v['test_finish_time'])) : '';
+                $list[$k]['all_finish_time'] = $v['all_finish_time'] ? date('m-d H:i', strtotime($v['all_finish_time'])) : '';
+//                $list[$k]['node_time'] = $v['node_time'] ? $v['node_time'] . 'Day' : '-'; //预计时间
+                $list[$k]['node_time'] = $v['node_time'] ? $v['node_time'] : '-'; //预计时间
+                //检查权限
+                $list[$k]['demand_pm_status'] = $permissions['demand_pm_status']; //产品确认权限
+                $list[$k]['demand_add'] = $permissions['demand_add']; //新增权限
+                $list[$k]['demand_del'] = $permissions['demand_del']; //删除权限
+                $list[$k]['demand_distribution'] = $permissions['demand_distribution']; //开发响应
+                $list[$k]['demand_test_handle'] = $permissions['demand_test_handle']; //测试响应
+
+                //获取各组负责人
+                $list[$k]['web_designer_user_name'] = '';
+                if ($v['web_designer_user_id']) {
+                    //获取php组长&组员
+                    $web_userid_arr = explode(',', $v['web_designer_user_id']);
+                    $web_users = Db::name("admin")
+                        ->whereIn("id", $web_userid_arr)
+                        ->column('nickname', 'id');
+                    $list[$k]['web_designer_user_name'] = $web_users;
+                }
+
+                $list[$k]['php_user_name'] = '';
+                if ($v['phper_user_id']) {
+                    //获取php组长&组员
+                    $php_userid_arr = explode(',', $v['phper_user_id']);
+                    $php_users = Db::name("admin")
+                        ->whereIn("id", $php_userid_arr)
+                        ->column('nickname', 'id');
+                    $list[$k]['php_user_name'] = $php_users;
+                }
+
+                $list[$k]['app_user_name'] = '';
+                if ($v['app_user_id']) {
+                    //获取php组长&组员
+                    $app_userid_arr = explode(',', $v['app_user_id']);
+                    $app_users = Db::name("admin")
+                        ->whereIn("id", $app_userid_arr)
+                        ->column('nickname', 'id');
+                    $list[$k]['app_user_name'] = $app_users;
+                }
+
+                $list[$k]['test_user_name'] = '';
+                if ($v['test_user_id']) {
+                    //获取php组长&组员
+                    $test_userid_arr = explode(',', $v['test_user_id']);
+                    $test_users = Db::name("admin")
+                        ->whereIn("id", $test_userid_arr)
+                        ->column('nickname', 'id');
+                    $list[$k]['test_user_name'] = $test_users;
+                }
+            }
+            $result = ["total" => $total, "rows" => $list];
+
+            return json($result);
+        }
+
+        //限制各主管没有添加权限
+        $authUserIds = Auth::getGroupUserId(config('demand.php_group_id')) ?: [];
+        $testAuthUserIds = Auth::getGroupUserId(config('demand.test_group_id')) ?: [];
+        $webAuthUserIds = Auth::getGroupUserId(config('demand.web_group_id')) ?: [];
+        $appAuthUserIds = Auth::getGroupUserId(config('demand.app_group_id')) ?: [];
+        $userIds = array_merge($authUserIds, $testAuthUserIds, $webAuthUserIds, $appAuthUserIds);
+        if (in_array(session('admin.id'), $userIds)) {
+            $this->assign('auth_label', 0);
+        } else {
+            $this->assign('auth_label', 1);
+        }
+
+        return $this->view->fetch();
     }
 
 }
