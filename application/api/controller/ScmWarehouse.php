@@ -1715,7 +1715,6 @@ class ScmWarehouse extends Scm
             ->where(['a.id' => $in_stock_id])
             ->select();
         $list = collection($list)->toArray();
-
         //查询存在产品库的sku
         $skus = array_column($list, 'sku');
         $skus = $this->_item->where(['sku' => ['in', $skus]])->column('sku');
@@ -1987,7 +1986,7 @@ class ScmWarehouse extends Scm
                         $purchase_data['stock_status'] = $stock_status;
                         $this->_purchase_order->where(['id' => $check_res['purchase_id']])->update($purchase_data);
                     }
-                    //如果为退货单 修改退货单状态为入库
+                    //如果为退货单 修改退货单状态为入库,写入仓库
                     if ($check_res['order_return_id']) {
                         $this->_order_return->where(['id' => $check_res['order_return_id']])->update(['in_stock_status' => 1]);
                     }
@@ -1999,7 +1998,14 @@ class ScmWarehouse extends Scm
                 if (count($error_num) > 0) {
                     throw new Exception('入库失败！！请检查SKU');
                 }
-
+                //如果退货入库
+                if($row['type_id']==3){
+                    $warehouse_id = $this->auth->warehouse_id;
+                    $this->_product_bar_code_item
+                        ->allowField(true)
+                        ->isUpdate(true, ['in_stock_id' => $in_stock_id])
+                        ->save(['stock_id' => $warehouse_id]);
+                }
                 //条形码入库时间
                 $this->_product_bar_code_item
                     ->allowField(true)
