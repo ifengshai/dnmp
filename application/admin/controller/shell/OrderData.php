@@ -686,6 +686,9 @@ class OrderData extends Backend
                                             } elseif ($site == 1) {
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                                 $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                            }elseif ($site == 2 && $order_prescription_type != 1){ //v站仅镜架订单留在郑州
+                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                             }
                                         }
                                     }
@@ -748,6 +751,9 @@ class OrderData extends Backend
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
                                                 $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                             } elseif ($site == 1) {
+                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                            }elseif ($site == 2 && $order_prescription_type != 1){ //v站仅镜架订单留在郑州
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                                 $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                             }
