@@ -2309,7 +2309,13 @@ class Crontab extends Backend
             'in',
             ['processing', 'complete', 'delivered', 'delivery', 'shipped'],
         ];
+        $mapjp['created_at'] = $date['created_at'] = $update['updated_at'] = ['between', [$stime, $etime]];
+        $mapjp['status'] = [
+            'in',
+            ['processing', 'complete', 'delivered', 'delivery', 'shipped'],
+        ];
         $map['order_type'] = 1;
+        $mapjp['order_type'] = ['in', [1, 10]];
 
         //zeelool
         $zeelool_count = $order->where('site',1)->where($map)->count(1);
@@ -2503,8 +2509,9 @@ class Crontab extends Backend
 
 
         //zeelool jp
-        $zeelool_jp_count = $order->where('site',11)->where($map)->count(1);
-        $zeelool_jp_total = $order->where('site',11)->where($map)->sum('base_grand_total');
+
+        $zeelool_jp_count = $order->where('site',11)->where($mapjp)->count(1);
+        $zeelool_jp_total = $order->where('site',11)->where($mapjp)->sum('base_grand_total');
         //zeelool_jp客单价
         if ($zeelool_jp_count > 0) {
             $zeelool_jp_unit_price = round(($zeelool_jp_total / $zeelool_jp_count), 2);
