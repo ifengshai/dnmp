@@ -4424,20 +4424,11 @@ class Test4 extends Controller
 
 
         $newUser = array_diff($timeUser, $oldAllUser);
-        $twoData = $this->old_user_data($site,$startDateTwo,$endDateTwo);
-        $threeData = $this->old_user_data($site,$startDateThree,$endDateThree);
-        $fourData  = $this->old_user_data($site,$startDateFour,$endDateFour);
+        $twoData = $this->old_user_data($site,$startDateTwo,$endDateTwo,$newUser);
+        $threeData = $this->old_user_data($site,$startDateThree,$endDateThree,$newUser);
+        $fourData  = $this->old_user_data($site,$startDateFour,$endDateFour,$newUser);
         dump('当月新客数');
         dump(count($newUser));
-        dump('第2-13月时间');
-        dump($startDateTwo);
-        dump($endDateTwo);
-        dump('第2-25月时间');
-        dump($startDateTwo);
-        dump($endDateThree);
-        dump('第2-37月时间');
-        dump($startDateTwo);
-        dump($endDateFour);
         dump('第2-13月复购数');
         dump($twoData);
         dump('第2-25月复购数');
@@ -4446,7 +4437,36 @@ class Test4 extends Controller
         dump($fourData);
         die;
     }
-    public function old_user_data($site,$startDate1,$endDate1)
+    public function old_user_data($site,$startDate1,$endDate1,$oldUsers)
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '4096M');
+        $this->order = new NewOrder();
+        $where['site'] = $site;
+        $where['order_type'] = 1;
+        $where['status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered',
+            ]
+        ];
+        $where2['payment_time'] = ['between', [$startDate1, $endDate1]];
+        $oldAllUser = $this->order
+            ->where($where)
+            ->where($where2)
+            ->field('customer_email')
+            ->group('customer_email')
+            ->column('customer_email');
+        $info = array_intersect(array_map('strtolower',$oldAllUser),array_map('strtolower',$oldUsers));
+        return count($info);
+    }
+    public function old_user_data_bak2($site,$startDate1,$endDate1,$oldUsers)
     {
         set_time_limit(0);
         ini_set('memory_limit', '2048M');
@@ -4465,8 +4485,39 @@ class Test4 extends Controller
                 'delivered',
             ]
         ];
+        $where['customer_email'] = ['in',$oldUsers];
+        $where2['payment_time'] = ['between', [$startDate1, $endDate1]];
+        $oldAllUser = $this->order
+            ->where($where)
+            ->where($where2)
+            ->field('customer_email')
+            ->group('customer_email')
+            ->column('customer_email');
+        //$info = array_intersect($oldAllUser,$oldUsers);
+        //dump($info);
+        //dump($oldAllUser);
+        return count($oldAllUser);
+    }
 
-
+    public function old_user_data_bak($site,$startDate1,$endDate1,$oldUsers)
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $this->order = new NewOrder();
+        $where['site'] = $site;
+        $where['order_type'] = 1;
+        $where['status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered',
+            ]
+        ];
         $where2['payment_time'] = ['<', $startDate1];
         $oldAllUser = $this->order
             ->where($where)
@@ -4485,6 +4536,8 @@ class Test4 extends Controller
 
 
         $newUser = array_diff($timeUser, $oldAllUser);
+//        dump(count($timeUser));
+//        dump(count($newUser));
         return count($timeUser)-count($newUser);
     }
 }
