@@ -331,7 +331,9 @@ class Test01 extends Backend
 
     public function export_v_data()
     {
-        $sku_list = Db::name('datacenter_sku_import_test')->where('id', '>=', 1)->where('id', '<=', 99)->select();
+        //$sku_list = Db::name('datacenter_sku_import_test')->where('id', '>=', 1)->where('id', '<=', 99)->select();
+        $item_platform = new ItemPlatformSku();
+        $sku_list = $item_platform->field('sku')->where('platform_type', 2)->select();
         // dump($sku_list);die;
         foreach ($sku_list as $k => $v) {
             //站点
@@ -342,7 +344,7 @@ class Test01 extends Backend
             $same_where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $same_where['site'] = ['=', $order_platform];
             $sku = $v['sku'];
-            $item_platform = new ItemPlatformSku();
+            //$item_platform = new ItemPlatformSku();
             $sku = $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') ? $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') : $sku;
             $model = Db::connect('database.db_voogueme');
             $coatiing_price['b.coatiing_price'] = ['=', 0];
@@ -526,7 +528,8 @@ class Test01 extends Backend
 
     public function export_n_data()
     {
-        $sku_list = Db::name('fa_item_platform_sku')->where('platform_type', 2)->select();
+        $item_platform = new ItemPlatformSku();
+        $sku_list = $item_platform->field('sku')->where('platform_type', 2)->select();
         foreach ($sku_list as $k => $v) {
             //站点
             $order_platform = 2;
