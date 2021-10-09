@@ -4231,6 +4231,7 @@ class Crontab extends Backend
      */
     public function warehouse_data()
     {
+        try {
         $dataConfig = new \app\admin\model\DataConfig();
         //当月总单量
         $orderStatistics = new \app\admin\model\OrderStatistics();
@@ -4342,6 +4343,10 @@ class Crontab extends Backend
         $dataConfig->where('key', 'overtimeOrder')->update($data);
 
         echo "ok";
+        } catch (\Exception $e) {
+            echo $e->getMessage() . PHP_EOL . $e->getTraceAsString();
+            throw $e;
+        }
     }
 
     /**
