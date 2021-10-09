@@ -6,6 +6,7 @@ use app\common\controller\Backend;
 use Mpdf\Mpdf;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use think\Db;
+use think\Model;
 
 class SettleOrder extends Backend
 {
@@ -85,6 +86,15 @@ class SettleOrder extends Backend
         $statement = $this->statement->where('id',$ids)->find();
         $supply = $this->supplier->where('id',$statement['supplier_id'])->field('supplier_name,recipient_name,opening_bank,bank_account,currency,period')->find();
         $items = $this->statementitem->where('statement_id',$ids)->select();
+        foreach ($items as $k=>$v){
+            $sku = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_id'])->value('sku');
+            //查询商品分类
+            $item = new \app\admin\model\itemmanage\Item();
+            $itemcategory = new \app\admin\model\itemmanage\ItemCategory();
+            $res = $item->where(['sku' => $sku])->find();
+            $category_name = $itemcategory->getCategoryName($res['category_id']);
+            $items[$k]['category'] =$category_name;
+        }
         $this->view->assign(compact('statement', 'supply', 'items'));
         return $this->view->fetch();
     }
@@ -127,6 +137,15 @@ class SettleOrder extends Backend
         $statement = $this->statement->where('id',$ids)->find();
         $supply = $this->supplier->where('id',$statement['supplier_id'])->field('supplier_name,recipient_name,opening_bank,bank_account,currency,period')->find();
         $items = $this->statementitem->where('statement_id',$ids)->select();
+        foreach ($items as $k=>$v){
+            $sku = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_id'])->value('sku');
+            //查询商品分类
+            $item = new \app\admin\model\itemmanage\Item();
+            $itemcategory = new \app\admin\model\itemmanage\ItemCategory();
+            $res = $item->where(['sku' => $sku])->find();
+            $category_name = $itemcategory->getCategoryName($res['category_id']);
+            $items[$k]['category'] =$category_name;
+        }
         $this->view->assign(compact('statement', 'supply', 'items'));
         /***********end***************/
 

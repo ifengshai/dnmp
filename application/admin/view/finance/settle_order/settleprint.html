@@ -100,6 +100,7 @@
                                     <th>ID</th>
                                     <th>采购单号</th>
                                     <th>采购单名称</th>
+                                    <th>商品分类</th>
                                     <th>付款类型</th>
                                     <th>采购批次</th>
                                     <th>预付金额</th>
@@ -119,6 +120,7 @@
                                     <th>{$item.id}</th>
                                     <th>{$item.purchase_number}</th>
                                     <th>{$item.purchase_name}</th>
+                                    <th>{$item.category}</th>
                                     <th>{if $statement.pay_type == 1}预付款{elseif $statement.pay_type == 2}全款预付{else/}尾款{/if}</th>
                                     <th>{$item.purchase_batch}</th>
                                     <th>{$item.before_total}</th>
