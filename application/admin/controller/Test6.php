@@ -308,8 +308,4 @@ class Test6 extends Backend
         echo 'ok';
     }
 
-    public function test_out_of_package()
-    {
-        var_dump($this->nihao->undeliveredOrder([]));
-    }
 }
