@@ -4540,4 +4540,9 @@ class Test4 extends Controller
 //        dump(count($newUser));
         return count($timeUser)-count($newUser);
     }
+
+    public function test_out_of_package()
+    {
+        var_dump($this->nihao->undeliveredOrder([]));
+    }
 }
