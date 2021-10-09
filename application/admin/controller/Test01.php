@@ -331,7 +331,9 @@ class Test01 extends Backend
 
     public function export_v_data()
     {
-        $sku_list = Db::name('datacenter_sku_import_test')->where('id', '>=', 1)->where('id', '<=', 99)->select();
+        //$sku_list = Db::name('datacenter_sku_import_test')->where('id', '>=', 1)->where('id', '<=', 99)->select();
+        $item_platform = new ItemPlatformSku();
+        $sku_list = $item_platform->field('sku')->where('platform_type', 2)->select();
         // dump($sku_list);die;
         foreach ($sku_list as $k => $v) {
             //站点
@@ -342,7 +344,7 @@ class Test01 extends Backend
             $same_where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $same_where['site'] = ['=', $order_platform];
             $sku = $v['sku'];
-            $item_platform = new ItemPlatformSku();
+            //$item_platform = new ItemPlatformSku();
             $sku = $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') ? $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') : $sku;
             $model = Db::connect('database.db_voogueme');
             $coatiing_price['b.coatiing_price'] = ['=', 0];
@@ -526,12 +528,13 @@ class Test01 extends Backend
 
     public function export_n_data()
     {
-        $sku_list = Db::name('datacenter_sku_import_test')->where('id', '>=', 100)->where('id', '<=', 199)->select();
+        $item_platform = new ItemPlatformSku();
+        $sku_list = $item_platform->field('sku')->where('platform_type', 2)->select();
         foreach ($sku_list as $k => $v) {
             //站点
-            $order_platform = 3;
+            $order_platform = 2;
             //时间
-            $time_str = '2020-11-21 00:00:00 - 2020-12-20 23:59:59';
+            $time_str = '2020-07-01 00:00:00 - 2021-06-31 23:59:59';
             $createat = explode(' ', $time_str);
             $same_where['day_date'] = ['between', [$createat[0], $createat[3]]];
             $same_where['site'] = ['=', $order_platform];
@@ -539,7 +542,7 @@ class Test01 extends Backend
             $item_platform = new ItemPlatformSku();
             $sku = $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') ? $item_platform->where('sku', $sku)->where('platform_type', $order_platform)->value('platform_sku') : $sku;
 
-            $model = Db::connect('database.db_nihao');
+            $model = Db::connect('database.db_voogueme');
             $coatiing_price = [];
 
             $model->table('sales_flat_order')->query("set time_zone='+8:00'");
