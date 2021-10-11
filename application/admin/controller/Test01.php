@@ -337,7 +337,8 @@ class Test01 extends Backend
 
     public function export_v_data()
     {
-        $sku_list = Db::name('datacenter_sku_import_new')->select();
+        $page = input('page',1);
+        $sku_list = Db::name('datacenter_sku_import_new')->limit(($page-1)*100,100)->select();
         // dump($sku_list);die;
         foreach ($sku_list as $k => $v) {
             //站点
