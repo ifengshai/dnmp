@@ -709,7 +709,15 @@ class PurchaseOrder extends Backend
 
             $replenishIds = array_filter(array_column($row, 'replenish_id'));
             if (!empty($replenishIds)) {
-                $replenishes = Db::table('fa_new_product_mapping')->where(['replenish_id' => ['in', $replenishIds]])->group('website_type')->field('sum(replenish_num) as replenish_num,website_type')->select();
+                $skus = $this->purchase_order_item
+                    ->where(['purchase_id' => ['in', $ids]])
+                    ->column('sku');
+                $replenishes = Db::table('fa_new_product_mapping')
+                    ->where(['replenish_id' => ['in', $replenishIds]])
+                    ->where(['sku' => ['in', $skus]])
+                    ->group('website_type')
+                    ->field('sum(replenish_num) as replenish_num,website_type')
+                    ->select();
                 if ($replenishes) {
                     $replenishesNum = array_sum(array_column($replenishes, 'replenish_num'));
                     foreach ($replenishes as $key => $replenish) {
@@ -744,7 +752,15 @@ class PurchaseOrder extends Backend
                 ->sum('purchase_num');
 
             if (!empty($row['replenish_id'])) {
-                $replenishes = Db::table('fa_new_product_mapping')->where('replenish_id', $row['replenish_id'])->group('website_type')->field('sum(replenish_num) as replenish_num,website_type')->select();
+                $skus = $this->purchase_order_item
+                    ->where(['purchase_id' => ['in', $ids]])
+                    ->column('sku');
+                $replenishes = Db::table('fa_new_product_mapping')
+                    ->where('replenish_id', $row['replenish_id'])
+                    ->where(['sku' => ['in', $skus]])
+                    ->group('website_type')
+                    ->field('sum(replenish_num) as replenish_num,website_type')
+                    ->select();
                 if ($replenishes) {
                     $replenishesNum = array_sum(array_column($replenishes, 'replenish_num'));
                     foreach ($replenishes as $key => $replenish) {
