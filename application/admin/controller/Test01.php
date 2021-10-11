@@ -155,9 +155,14 @@ class Test01 extends Backend
                 echo "{$value['sku']}:success\n";
             }
 
-            $export_str = ['SKU', '产品评级', '平均采购价CNY', '材质', '框型', '形状', '颜色', '进价', '平均月销量', '平均售价', '最大月销量', '最大月销量月份', '202007~202106总销量', '20年7月~21年6月总销售额', '配镜率'];
-            $file_title = implode(',', $export_str) . " \n";
-            $file = $file_title . $file_content;
+            if($i == 1) {
+                $export_str = ['SKU', '产品评级', '平均采购价CNY', '材质', '框型', '形状', '颜色', '进价', '平均月销量', '平均售价', '最大月销量', '最大月销量月份', '202007~202106总销量', '20年7月~21年6月总销售额', '配镜率'];
+                $file_title = implode(',', $export_str) . " \n";
+                $file = $file_title . $file_content;
+            }else{
+                $file = $file_content;
+            }
+
             file_put_contents('/var/www/mojing/runtime/log/test01.csv', $file,FILE_APPEND);
         }
         exit;
