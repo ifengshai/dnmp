@@ -214,7 +214,7 @@ class Test01 extends Backend
                     ->where(['b.sku' => $value['sku']])
                     ->join(['fa_purchase_order_item' => 'b'], 'a.id=b.purchase_id')
                     ->where(['a.createtime' => ['>=', '2020-07-01 00:00:00']])
-                    ->where(['a.createtime' => ['<=', '2021-08-31 23:59:59']])
+                    ->where(['a.createtime' => ['<=', '2021-06-30 23:59:59']])
                     ->select();
 
                 $statistics = $this->voogueme
@@ -222,7 +222,7 @@ class Test01 extends Backend
                     ->field("sum(b.qty_ordered) AS num,sum(base_price) as price,DATE_FORMAT(b.created_at, '%Y-%m') AS time")
                     ->where(['a.status' => ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','delivered']]])
                     ->where(['b.created_at' => ['>=', '2020-07-01 00:00:00']])
-                    ->where(['b.created_at' => ['<=', '2021-08-31 23:59:59']])
+                    ->where(['b.created_at' => ['<=', '2021-06-30 23:59:59']])
                     ->where(['b.sku' => $platform[$value['sku']]])
                     ->join(['sales_flat_order_item' => 'b'], 'a.entity_id=b.order_id', 'LEFT')
                     ->group("time")
@@ -243,7 +243,7 @@ class Test01 extends Backend
                     ->field("sum(b.qty_ordered) AS num")
                     ->where(['a.status' => ['in', ['processing', 'complete', 'creditcard_proccessing', 'free_processing','delivered']]])
                     ->where(['b.created_at' => ['>=', '2020-07-01 00:00:00']])
-                    ->where(['b.created_at' => ['<=', '2021-08-31 23:59:59']])
+                    ->where(['b.created_at' => ['<=', '2021-06-30 23:59:59']])
                     ->where(['b.product_options' => ['not like', '%frameonly%']])
                     ->where(['b.product_options' => ['not like', '%nonprescription%']])
                     ->where(['b.sku' => $platform[$value['sku']]])
