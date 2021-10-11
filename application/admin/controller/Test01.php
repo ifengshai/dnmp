@@ -53,21 +53,14 @@ class Test01 extends Backend
         $_new_product = new \app\admin\model\NewProduct();
        // $count = 9781;
         //$page = 100;
-        echo $list = $_new_product
-            ->alias('a')
-            ->field('sku,frame_color,frame_texture,shape,frame_shape,price')
-            ->where(['item_status' => 2, 'is_del' => 1, 'sku' => ['in', $sku_arr]])
-            ->join(['fa_new_product_attribute' => 'b'], 'a.id=b.item_id', 'left')
-            ->count();
-        die;
-        for($i = 1;$i<=100;$i++) {
-            $offset = ( $i - 1 ) * 100;
+        for($i = 1;$i<=51;$i++) {
+            $offset = ( $i - 1 ) * 200;
             $list = $_new_product
                 ->alias('a')
                 ->field('sku,frame_color,frame_texture,shape,frame_shape,price')
                 ->where(['item_status' => 2, 'is_del' => 1, 'sku' => ['in', $sku_arr]])
                 ->join(['fa_new_product_attribute' => 'b'], 'a.id=b.item_id', 'left')
-                ->limit($offset,100)
+                ->limit($offset,200)
                 ->select();
             $list = collection($list)->toArray();
             echo "list:success{$i}\n";
@@ -337,8 +330,7 @@ class Test01 extends Backend
 
     public function export_v_data()
     {
-        $page = input('page',1);
-        $sku_list = Db::name('datacenter_sku_import_new')->limit(($page-1)*100,100)->select();
+        $sku_list = Db::name('datacenter_sku_import_new')->select();
         // dump($sku_list);die;
         foreach ($sku_list as $k => $v) {
             //站点
