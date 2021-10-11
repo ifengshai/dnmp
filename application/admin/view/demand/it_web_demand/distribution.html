@@ -61,7 +61,7 @@
                 <label class="">前端</label>
             </div>
             <div class="input_item">
-                <label class="input_tiem_label">需求响应1：</label>
+                <label class="input_tiem_label">需求响应：</label>
                 <span class="input_tiem_span">
                     {if $row['test_status'] == 1}
                         {:Form::select('row[web_designer_group]', $status, $row['web_designer_group'], ['class'=>'selectpicker select_input web_group_status','title'=>'请选择'])}
@@ -102,12 +102,12 @@
             <div class="input_item web_html" style="{if $row['web_designer_group'] != 1}display:none;{/if}">
                 <label class="input_tiem_label">预计工日：</label>
                 <span class="input_tiem_span">
-                     {if $row['test_status'] == 1}
-                         <select name="row[test_status]" class="select_input" data-rule="required">
+                     {if $row['web_designer_working_hour'] == 1}
+                         <select name="row[web_designer_working_hour]" class="select_input" data-rule="required">
                               {else}
-                             <select name="row[test_status]" class="select_input" data-rule="required">
+                             <select name="row[web_designer_working_hour]" class="select_input" data-rule="required">
                              {/if}
-                            <option value="">请选择</option>
+                            <option value="0">请选择</option>
                             <option value="0.1" {$row['web_designer_working_hour'] == '0.1' ? 'selected' : '' }>0.1天</option>
                                  <option value="0.2" {$row['web_designer_working_hour'] == '0.2' ? 'selected' : '' }>0.2天</option>
                                  <option value="0.5" {$row['web_designer_working_hour'] == '0.5' ? 'selected' : '' }>0.5天</option>
@@ -203,7 +203,7 @@
                 <label class="">后端</label>
             </div>
             <div class="input_item">
-                <label class="input_tiem_label">需求响应2：</label>
+                <label class="input_tiem_label">需求响应：</label>
                 <span class="input_tiem_span">
                     {if $row['test_status'] == 1}
                         {:Form::select('row[phper_group]', $status, $row['phper_group'], ['class'=>'selectpicker select_input php_group_status','title'=>'请选择'])}
@@ -242,7 +242,7 @@
                               {else}
                              <select name="row[phper_working_hour]" class="select_input"  data-rule="required">
                              {/if}
-                            <option value="">请选择</option>
+                            <option value="0">请选择</option>
                             <option value="0.1" {$row['phper_working_hour'] == '0.1' ? 'selected' : '' }>0.1天</option>
                                  <option value="0.2" {$row['phper_working_hour'] == '0.2' ? 'selected' : '' }>0.2天</option>
                                  <option value="0.5" {$row['phper_working_hour'] == '0.5' ? 'selected' : '' }>0.5天</option>
@@ -332,7 +332,7 @@
                     <label class="">APP</label>
                 </div>
                 <div class="input_item">
-                    <label class="input_tiem_label">需求响应3：</label>
+                    <label class="input_tiem_label">需求响应：</label>
                     <span class="input_tiem_span">
                         {if $row['test_status'] == 1}
                             {:Form::select('row[app_group]', $status, $row['app_group'], ['class'=>'selectpicker select_input app_group_status', 'title'=>'请选择'])}
@@ -372,7 +372,7 @@
                               {else}
                              <select name="row[app_working_hour]" class="select_input" data-rule="required">
                              {/if}
-                            <option value="">请选择</option>
+                            <option value="0">请选择</option>
                             <option value="0.1" {$row['app_working_hour'] == '0.1' ? 'selected' : '' }>0.1天</option>
                              <option value="0.2" {$row['app_working_hour'] == '0.2' ? 'selected' : '' }>0.2天</option>
                              <option value="0.5" {$row['app_working_hour'] == '0.5' ? 'selected' : '' }>0.5天</option>
