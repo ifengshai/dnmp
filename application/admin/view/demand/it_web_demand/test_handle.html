@@ -66,7 +66,15 @@
             <div class="input_item">
                 <label class="input_tiem_label">预计工时：</label>
                 <span class="input_tiem_span">
-                       <input type="text" id="test_working_hour" required name="row[test_working_hour]" style="width: 65%;height: 35px" value="{$row['test_working_hour']}">
+                         <select name="row[test_working_hour]" class="form-control" data-rule="required">
+                            <option value="">请选择</option>
+                            <option value="0.1" {$row['test_working_hour'] == '0.1' ? 'selected' : '' }>0.1天</option>
+                                 <option value="0.2" {$row['test_working_hour'] == '0.2' ? 'selected' : '' }>0.2天</option>
+                                 <option value="0.5" {$row['test_working_hour'] == '0.5' ? 'selected' : '' }>0.5天</option>
+                                 <option value="1" {$row['test_working_hour'] == '1' ? 'selected' : '' }>1天</option>
+                                 <option value="2" {$row['test_working_hour'] == '2' ? 'selected' : '' }>2天</option>
+                                 <option value="5" {$row['test_working_hour'] == '5' ? 'selected' : '' }>5天</option>
+                        </select>
                 </span>
             </div>
             <div class="item_button1">

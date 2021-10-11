@@ -102,11 +102,19 @@
             <div class="input_item web_html" style="{if $row['web_designer_group'] != 1}display:none;{/if}">
                 <label class="input_tiem_label">预计工时：</label>
                 <span class="input_tiem_span">
-                    {if $row['test_status'] == 1}
-                       <input type="text" id="web_designer_working_hour" required name="row[web_designer_working_hour]" style="width: 65%;height: 35px" value="{$row['web_designer_working_hour']}">
-                    {else}
-                        <input type="text" id="web_designer_working_hour" required name="row[web_designer_working_hour]" style="width: 65%;height: 35px" value="{$row['web_designer_working_hour']}" disabled>
-                    {/if}
+                     {if $row['test_status'] == 1}
+                         <select name="row[test_status]" class="form-control" data-rule="required">
+                              {else}
+                             <select name="row[test_status]" class="form-control" disabled data-rule="required">
+                             {/if}
+                            <option value="">请选择</option>
+                            <option value="0.1" {$row['test_status'] == '0.1' ? 'selected' : '' }>0.1天</option>
+                                 <option value="0.2" {$row['test_status'] == '0.2' ? 'selected' : '' }>0.2天</option>
+                                 <option value="0.5" {$row['test_status'] == '0.5' ? 'selected' : '' }>0.5天</option>
+                                 <option value="1" {$row['test_status'] == '1' ? 'selected' : '' }>1天</option>
+                                 <option value="2" {$row['test_status'] == '2' ? 'selected' : '' }>2天</option>
+                                 <option value="5" {$row['test_status'] == '5' ? 'selected' : '' }>5天</option>
+                        </select>
                 </span>
             </div>
             <div class="input_item web_htmls">
@@ -228,11 +236,20 @@
             <div class="input_item php_html" style="{if $row['phper_group'] != 1}display:none;{/if}">
                 <label class="input_tiem_label">预计工时：</label>
                 <span class="input_tiem_span">
-                    {if $row['test_status'] == 1}
-                       <input type="text" id="phper_working_hour" required name="row[phper_working_hour]" style="width: 65%;height: 35px" value="{$row['phper_working_hour']}">
-                    {else}
-                        <input type="text" id="phper_working_hour" required name="row[phper_working_hour]" style="width: 65%;height: 35px" value="{$row['phper_working_hour']}" disabled>
-                    {/if}
+
+                     {if $row['phper_working_hour'] == 1}
+                         <select name="row[phper_working_hour]" class="form-control" data-rule="required">
+                              {else}
+                             <select name="row[phper_working_hour]" class="form-control" disabled data-rule="required">
+                             {/if}
+                            <option value="">请选择</option>
+                            <option value="0.1" {$row['phper_working_hour'] == '0.1' ? 'selected' : '' }>0.1天</option>
+                                 <option value="0.2" {$row['phper_working_hour'] == '0.2' ? 'selected' : '' }>0.2天</option>
+                                 <option value="0.5" {$row['phper_working_hour'] == '0.5' ? 'selected' : '' }>0.5天</option>
+                                 <option value="1" {$row['phper_working_hour'] == '1' ? 'selected' : '' }>1天</option>
+                                 <option value="2" {$row['phper_working_hour'] == '2' ? 'selected' : '' }>2天</option>
+                                 <option value="5" {$row['phper_working_hour'] == '5' ? 'selected' : '' }>5天</option>
+                        </select>
                 </span>
             </div>
             <div class="input_item php_htmls">
@@ -350,11 +367,19 @@
                 <div class="input_item app_html" style="{if $row['app_group'] != 1}display:none;{/if}">
                     <label class="input_tiem_label">预计工时：</label>
                     <span class="input_tiem_span">
-                    {if $row['test_status'] == 1}
-                       <input type="text" id="app_working_hour" required name="row[app_working_hour]" style="width: 65%;height: 35px" value="{$row['app_working_hour']}">
-                    {else}
-                        <input type="text" id="app_working_hour" required name="row[app_working_hour]" style="width: 65%;height: 35px" value="{$row['app_working_hour']}" disabled>
-                    {/if}
+                        {if $row['app_working_status'] == 1}
+                         <select name="row[app_working_hour]" class="form-control" data-rule="required">
+                              {else}
+                             <select name="row[app_working_hour]" class="form-control" disabled data-rule="required">
+                             {/if}
+                            <option value="">请选择</option>
+                            <option value="0.1" {$row['app_working_hour'] == '0.1' ? 'selected' : '' }>0.1天</option>
+                             <option value="0.2" {$row['app_working_hour'] == '0.2' ? 'selected' : '' }>0.2天</option>
+                             <option value="0.5" {$row['app_working_hour'] == '0.5' ? 'selected' : '' }>0.5天</option>
+                             <option value="1" {$row['app_working_hour'] == '1' ? 'selected' : '' }>1天</option>
+                             <option value="2" {$row['app_working_hour'] == '2' ? 'selected' : '' }>2天</option>
+                             <option value="5" {$row['app_working_hour'] == '5' ? 'selected' : '' }>5天</option>
+                        </select>
                 </span>
                 </div>
                 <div class="input_item app_htmls">
