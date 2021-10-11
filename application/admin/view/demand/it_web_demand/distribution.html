@@ -103,9 +103,9 @@
                 <label class="input_tiem_label">预计工时：</label>
                 <span class="input_tiem_span">
                      {if $row['test_status'] == 1}
-                         <select name="row[test_status]" class="form-control" data-rule="required">
+                         <select name="row[test_status]" class="select_input" data-rule="required">
                               {else}
-                             <select name="row[test_status]" class="form-control" disabled data-rule="required">
+                             <select name="row[test_status]" class="select_input" disabled data-rule="required">
                              {/if}
                             <option value="">请选择</option>
                             <option value="0.1" {$row['test_status'] == '0.1' ? 'selected' : '' }>0.1天</option>
@@ -238,9 +238,9 @@
                 <span class="input_tiem_span">
 
                      {if $row['phper_working_hour'] == 1}
-                         <select name="row[phper_working_hour]" class="form-control" data-rule="required">
+                         <select name="row[phper_working_hour]" class="select_input" data-rule="required">
                               {else}
-                             <select name="row[phper_working_hour]" class="form-control" disabled data-rule="required">
+                             <select name="row[phper_working_hour]" class="select_input" disabled data-rule="required">
                              {/if}
                             <option value="">请选择</option>
                             <option value="0.1" {$row['phper_working_hour'] == '0.1' ? 'selected' : '' }>0.1天</option>
@@ -368,9 +368,9 @@
                     <label class="input_tiem_label">预计工时：</label>
                     <span class="input_tiem_span">
                         {if $row['app_working_status'] == 1}
-                         <select name="row[app_working_hour]" class="form-control" data-rule="required">
+                         <select name="row[app_working_hour]" class="select_input" data-rule="required">
                               {else}
-                             <select name="row[app_working_hour]" class="form-control" disabled data-rule="required">
+                             <select name="row[app_working_hour]" class="select_input" disabled data-rule="required">
                              {/if}
                             <option value="">请选择</option>
                             <option value="0.1" {$row['app_working_hour'] == '0.1' ? 'selected' : '' }>0.1天</option>
