@@ -53,6 +53,13 @@ class Test01 extends Backend
         $_new_product = new \app\admin\model\NewProduct();
        // $count = 9781;
         //$page = 100;
+        echo $list = $_new_product
+            ->alias('a')
+            ->field('sku,frame_color,frame_texture,shape,frame_shape,price')
+            ->where(['item_status' => 2, 'is_del' => 1, 'sku' => ['in', $sku_arr]])
+            ->join(['fa_new_product_attribute' => 'b'], 'a.id=b.item_id', 'left')
+            ->count();
+        die;
         for($i = 1;$i<=100;$i++) {
             $offset = ( $i - 1 ) * 100;
             $list = $_new_product
@@ -253,7 +260,6 @@ class Test01 extends Backend
         $sev_where1['updated_at'] = ['between', [$seven_start, $seven_end]];
         dump(Db::connect('database.db_zeelool')->table('customer_entity')->where($sev_where1)->count());
         dump(Db::connect('database.db_zeelool')->getLastSql());
-
     }
 
     public function test201()
