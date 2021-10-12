@@ -861,7 +861,7 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
-        $stock_warehouse = $this->auth->warehouse_id;
+        $stock_warehouse = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
         //$stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
 
         empty($page) && $this->error(__('Page can not be empty'), [], 406);
@@ -936,7 +936,7 @@ class ScmWarehouse extends Scm
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
        // $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
-        $stock_warehouse = $this->auth->warehouse_id;
+        $stock_warehouse = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
         empty($page) && $this->error(__('Page can not be empty'), [], 501);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 502);
 
@@ -1275,7 +1275,7 @@ class ScmWarehouse extends Scm
                 //存在平台id 代表把当前入库单的sku分给这个平台 首先做判断 判断入库单的sku是否都有此平台对应的映射关系
                 $params['create_person'] = $this->auth->nickname;
                 $params['createtime'] = date('Y-m-d H:i:s', time());
-                $params['warehouse_id'] = $this->auth->warehouse_id;
+                $params['warehouse_id'] = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
                 if ($platform_id) {
                     $params['platform_id'] = $platform_id;
 
@@ -1470,7 +1470,7 @@ class ScmWarehouse extends Scm
         $type = $this->request->request("type");
         empty($type) && $this->error(__('入口类型不能为空'), [], 513);
         //$stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
-        $stock_warehouse = $this->auth->warehouse_id;
+        $stock_warehouse = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
         $info = [];
         //入库单所需数据
         $info['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
@@ -2000,7 +2000,7 @@ class ScmWarehouse extends Scm
                 }
                 //如果退货入库
                 if($row['type_id']==3){
-                    $warehouse_id = $this->auth->warehouse_id;
+                    $warehouse_id = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
                     $this->_product_bar_code_item
                         ->allowField(true)
                         ->isUpdate(true, ['in_stock_id' => $in_stock_id])
