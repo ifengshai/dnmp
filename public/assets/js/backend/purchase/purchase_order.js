@@ -1067,7 +1067,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                         {
                             field: 'logistics_info.sign_warehouse',
                             title: __('签收仓'),
-                            formatter: Controller.api.formatter.warehouse_pattern
+                            custom: {1: 'blue', 2: 'danger', 3: 'orange', 4: 'red'},
+                            searchList: {1: '郑州仓', 2: '丹阳仓'},
+                            formatter: Table.api.formatter.status
                         },
                         {field: 'createtime', title: __('Createtime'), operate: 'RANGE', addclass: 'datetimerange'},
                         {field: 'create_person', title: __('Create_person')},
