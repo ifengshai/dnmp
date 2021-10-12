@@ -1470,7 +1470,7 @@ class ScmWarehouse extends Scm
         $type = $this->request->request("type");
         empty($type) && $this->error(__('入口类型不能为空'), [], 513);
         //$stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
-        $stock_warehouse = $this->auth->warehouse_id;
+        $stock_warehouse = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
         $info = [];
         //入库单所需数据
         $info['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
