@@ -1390,7 +1390,7 @@ class ScmWarehouse extends Scm
                             $this->_product_bar_code_item
                                 ->allowField(true)
                                 ->isUpdate(true, ['code' => ['in', $where_code]])
-                                ->save(['in_stock_id' => $this->_in_stock->id, 'location_code' => $warehouse_area['coding'], 'location_code_id' => $warehouse_area_id, 'location_id' => $area['id'], 'warehouse_id' =>  Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id')]); //绑定条形码与库位号//绑定条形码与库区id
+                                ->save(['in_stock_id' => $this->_in_stock->id, 'location_code' => $warehouse_area['coding'], 'location_code_id' => $warehouse_area_id, 'location_id' => $area['id'], 'stock_id' =>  Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id')]); //绑定条形码与库位号//绑定条形码与库区id
                         }
 
                         //批量添加
