@@ -50,7 +50,7 @@ class Check extends Model
         return $this->belongsTo('app\admin\model\LogisticsInfo', 'logistics_id')->setEagerlyType(0)->joinType('left');
     }
     //关联模型
-    public function logistics_info()
+    public function logistics()
     {
         return $this->belongsTo('app\admin\model\LogisticsInfo', 'logistics_id')->setEagerlyType(0)->joinType('left');
     }

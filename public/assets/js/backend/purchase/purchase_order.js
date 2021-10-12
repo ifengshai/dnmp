@@ -1065,7 +1065,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             operate: false
                         },
                         {
-                            field: 'logistics_info.sign_warehouse',
+                            field: 'logistics.sign_warehouse',
                             title: __('签收仓'),
                             custom: {1: 'blue', 2: 'danger', 3: 'orange', 4: 'red'},
                             searchList: {1: '郑州仓', 2: '丹阳仓'},
