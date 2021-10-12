@@ -861,7 +861,7 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
-        $stock_warehouse = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
+        $stock_warehouse = Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id');
         //$stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
 
         empty($page) && $this->error(__('Page can not be empty'), [], 406);
@@ -935,8 +935,8 @@ class ScmWarehouse extends Scm
         $end_time = $this->request->request('end_time');
         $page = $this->request->request('page');
         $page_size = $this->request->request('page_size');
-       // $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
-        $stock_warehouse = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
+        // $stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
+        $stock_warehouse = Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id');
         empty($page) && $this->error(__('Page can not be empty'), [], 501);
         empty($page_size) && $this->error(__('Page size can not be empty'), [], 502);
 
@@ -1226,6 +1226,7 @@ class ScmWarehouse extends Scm
                                 $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                                 $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
                                 $save_code_data['library_status'] = 1; //在库状态
+                                $save_code_data['stock_id'] = Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id'); //仓库id
                                 $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                             }
                         } else {
@@ -1234,6 +1235,7 @@ class ScmWarehouse extends Scm
                             $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                             $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
                             $save_code_data['library_status'] = 1; //在库状态
+                            $save_code_data['stock_id'] = Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id'); //仓库id
                             $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
                         }
                     }
@@ -1275,7 +1277,7 @@ class ScmWarehouse extends Scm
                 //存在平台id 代表把当前入库单的sku分给这个平台 首先做判断 判断入库单的sku是否都有此平台对应的映射关系
                 $params['create_person'] = $this->auth->nickname;
                 $params['createtime'] = date('Y-m-d H:i:s', time());
-                $params['warehouse_id'] = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
+                $params['warehouse_id'] = Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id');
                 if ($platform_id) {
                     $params['platform_id'] = $platform_id;
 
@@ -1322,6 +1324,7 @@ class ScmWarehouse extends Scm
                                     $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                                     $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
                                     $save_code_data['library_status'] = 1; //在库状态为1
+                                    $save_code_data['stock_id'] = Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id'); //仓库id
                                     $this->_product_bar_code_item->where(['code' => $key])->update($save_code_data);
                                 }
                             } else {
@@ -1330,6 +1333,7 @@ class ScmWarehouse extends Scm
                                 $save_code_data['location_code_id'] = $warehouse_area_id; //绑定条形码与库位号
                                 $save_code_data['location_id'] = $area['id']; //绑定条形码与库区id
                                 $save_code_data['library_status'] = 1; //在库状态
+                                $save_code_data['stock_id'] = Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id'); //仓库id
                                 $this->_product_bar_code_item->allowField(true)->isUpdate(true, ['code' => ['in', $where_code]])->save($save_code_data);
                             }
                         }
@@ -1386,7 +1390,7 @@ class ScmWarehouse extends Scm
                             $this->_product_bar_code_item
                                 ->allowField(true)
                                 ->isUpdate(true, ['code' => ['in', $where_code]])
-                                ->save(['in_stock_id' => $this->_in_stock->id, 'location_code' => $warehouse_area['coding'], 'location_code_id' => $warehouse_area_id, 'location_id' => $area['id']]); //绑定条形码与库位号//绑定条形码与库区id
+                                ->save(['in_stock_id' => $this->_in_stock->id, 'location_code' => $warehouse_area['coding'], 'location_code_id' => $warehouse_area_id, 'location_id' => $area['id'], 'warehouse_id' =>  Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id')]); //绑定条形码与库位号//绑定条形码与库区id
                         }
 
                         //批量添加
@@ -1470,7 +1474,7 @@ class ScmWarehouse extends Scm
         $type = $this->request->request("type");
         empty($type) && $this->error(__('入口类型不能为空'), [], 513);
         //$stock_warehouse = config('workorder.stock_person')[$this->auth->id] ?: 1;
-        $stock_warehouse = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
+        $stock_warehouse = Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id');
         $info = [];
         //入库单所需数据
         $info['in_stock_number'] = 'IN' . date('YmdHis') . rand(100, 999) . rand(100, 999);
@@ -1999,8 +2003,8 @@ class ScmWarehouse extends Scm
                     throw new Exception('入库失败！！请检查SKU');
                 }
                 //如果退货入库
-                if($row['type_id']==3){
-                    $warehouse_id = Db::name('admin')->where('id',$this->auth->id)->value('warehouse_id');
+                if ($row['type_id'] == 3) {
+                    $warehouse_id = Db::name('admin')->where('id', $this->auth->id)->value('warehouse_id');
                     $this->_product_bar_code_item
                         ->allowField(true)
                         ->isUpdate(true, ['in_stock_id' => $in_stock_id])
@@ -4105,7 +4109,7 @@ class ScmWarehouse extends Scm
                                 'number_type'            => 8,//实体仓调拨单
                             ]);
                             //需求id：2526 对需求2512之前的老数据无法提交的问题做优化 实体仓调拨单id大于3391的走新流程 小于3391的走老流程
-                            if ($id > 3391){
+                            if ($id > 3391) {
                                 //实体仓调拨入库的同时要对虚拟库存进行一定的操作
                                 //查出调出时各站调出的数量 并根据调出数量进行排序（用于遍历数据的时候首先分配到那个站点）
                                 $itemPlatformSku = Db::name('stock_transfer_order_item_stock')->where(['sku' => $sv['sku'], 'transfer_order_item_id' => $sv['id']])->order('stock asc')->field('platform_type,stock')->select();
@@ -4114,14 +4118,14 @@ class ScmWarehouse extends Scm
                                     ->field('stock')
                                     ->select();
                                 //没有查到之前存的比例 按照当前sku库存数量分配
-                                if (empty($itemPlatformSku)){
+                                if (empty($itemPlatformSku)) {
                                     $itemPlatformSku = $this->_item_platform_sku->where('sku', $sv['sku'])->order('stock asc')->field('platform_type,stock')->select();
                                     $wholeNum = $this->_item_platform_sku
                                         ->where('sku', $sv['sku'])
                                         ->field('stock')
                                         ->select();
                                 }
-                            }else{
+                            } else {
                                 //实体仓调拨出库的同时要对虚拟库存进行一定的操作
                                 //查出映射表中此sku对应的所有平台sku 并根据当前库存数量进行排序（用于遍历数据的时候首先分配到那个站点）
                                 $itemPlatformSku = $this->_item_platform_sku->where('sku', $sv['sku'])->order('stock asc')->field('platform_type,stock')->select();
