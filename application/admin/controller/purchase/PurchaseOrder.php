@@ -1949,13 +1949,13 @@ class PurchaseOrder extends Backend
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
 
             $total = $this->model
-                ->with(['purchaseorder', 'supplier'])
+                ->with(['purchaseorder', 'supplier', 'logistics'])
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)
                 ->count();
             $list = $this->model
-                ->with(['purchaseorder', 'supplier', 'logisticsInfo'])
+                ->with(['purchaseorder', 'supplier', 'logistics'])
                 ->where($where)
                 ->where($map)
                 ->order($sort, $order)

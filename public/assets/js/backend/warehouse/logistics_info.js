@@ -43,12 +43,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             searchList: {1: '已签收', 0: '未签收'},
                             formatter: Table.api.formatter.status
                         },
-
                         {
-                            field: 'receiving_warehouse', title: __('收货仓')
+                            field: 'receiving_warehouse',
+                            title: __('收货仓'),
+                            custom: {1: 'blue', 2: 'danger', 3: 'orange', 4: 'red'},
+                            searchList: {1: '郑州仓', 2: '丹阳仓'},
+                            formatter: Table.api.formatter.status
                         },
                         {
-                            field: 'sign_warehouse', title: __('签收仓')
+                            field: 'sign_warehouse',
+                            title: __('签收仓'),
+                            custom: {1: 'blue', 2: 'danger', 3: 'orange', 4: 'red'},
+                            searchList: {1: '郑州仓', 2: '丹阳仓'},
+                            formatter: Table.api.formatter.status
                         },
                         {
                             field: 'sign_time', title: __('签收时间'), operate: 'RANGE', addclass: 'datetimerange'
