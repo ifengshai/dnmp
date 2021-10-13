@@ -1417,6 +1417,9 @@ class ItWebDemand extends Backend
                         if (!$params['web_designer_complexity']) {
                             $this->error('预期难度必选');
                         }
+                        if(!$params['web_designer_working_hour']){
+                            $this->error('预计工日必选');
+                        }
                         $update['web_designer_complexity'] = $params['web_designer_complexity'];
                     } else {
                         $update['web_designer_expect_time'] = null;
@@ -1437,6 +1440,9 @@ class ItWebDemand extends Backend
                         $update['phper_expect_time'] = $params['phper_expect_time'] . ' 22:00:00';
                         if (!$params['phper_complexity']) {
                             $this->error('预期难度必选');
+                        }
+                        if(!$params['phper_working_hour']){
+                            $this->error('预计工日必选');
                         }
                         $update['phper_complexity'] = $params['phper_complexity'];
                     } else {
@@ -1459,6 +1465,9 @@ class ItWebDemand extends Backend
                         $update['app_expect_time'] = $params['app_expect_time'] . ' 22:00:00';
                         if (!$params['app_complexity']) {
                             $this->error('预期难度必选');
+                        }
+                        if(!$params['app_working_hour']){
+                            $this->error('预计工日必选');
                         }
                         $update['app_complexity'] = $params['app_complexity'];
                     } else {
