@@ -587,7 +587,7 @@ class Instock extends Backend
                                     if ($val['website_type'] == 2) {
                                         if ($sku_platform->stock == 0  && $stock_num > 0) {
                                             $value['sku'] = $sku_platform->platform_sku;
-                                            $url  =  config('url.voogueme_url') . 'magic/product/productArrival';
+                                            $url  =  config('url.voogueme_url') . 'rest/product/productArrival';
                                             $this->submission_post($url, $value);
                                         }
                                     }
@@ -629,7 +629,7 @@ class Instock extends Backend
                                     if ($val['website_type'] == 2) {
                                         if ($sku_platform['stock'] == 0  && $num > 0) {
                                             $value['sku'] = $sku_platform['platform_sku'];
-                                            $url  =  config('url.voogueme_url') . 'magic/product/productArrival';
+                                            $url  =  config('url.voogueme_url') . 'rest/product/productArrival';
                                             $this->submission_post($url, $value);
                                         }
                                     }
