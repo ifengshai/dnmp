@@ -37,8 +37,8 @@
 
     <div class="step1_function3"  style="margin-top:10px;">
         <div class="panel-body">
-            <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Color:</label>
+            <div class="step1_function3_child" style="width: 200px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Color:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select id="color_type" class="form-control selectpicker" name="row[replacement][color_id][]"  title="请选择">
                         <option value="0">请选择</option>
@@ -48,16 +48,16 @@
                     </select>
                 </div>
             </div>
-            <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <select id="lens_type" class="form-control selectpicker" name="row[replacement][lens_type][]"  title="请选择">
+            <div class="step1_function3_child" style="width: 460px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Lens:</label>
+                <div class="col-xs-12 col-sm-8" style="width: 390px;">
+                    <select id="lens_type"  class="form-control selectpicker" name="row[replacement][lens_type][]"  title="请选择">
                         <option value="0">请选择</option>
                     </select>
                 </div>
             </div>
-            <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
+            <div class="step1_function3_child" style="width: 295px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Coating:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select id="c-coating_type" class="form-control selectpicker"
                             name="row[replacement][coating_type][]"  title="请选择">
@@ -182,8 +182,8 @@
 
     <div class="step1_function3_lens"  style="margin-top:10px;">
         <div class="panel-body">
-            <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Color:</label>
+            <div class="step1_function3_child" style="width: 200px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Color:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select id="lens_color_type" class="form-control selectpicker" name="row[replacement][lens_color_id][]"  title="请选择">
                         <option value="0">请选择</option>
@@ -193,16 +193,16 @@
                     </select>
                 </div>
             </div>
-            <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <select id="lens_type" class="form-control selectpicker" name="row[replacement][lens_lens_type][]"  title="请选择">
+            <div class="step1_function3_child" style="width: 460px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Lens:</label>
+                <div class="col-xs-12 col-sm-8" style="width: 390px;">
+                    <select id="lens_type"  class="form-control selectpicker" name="row[replacement][lens_lens_type][]"  title="请选择">
                         <option value="0">请选择</option>
                     </select>
                 </div>
             </div>
-            <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
+            <div class="step1_function3_child" style="width: 295px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Coating:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select id="c-coating_type" class="form-control selectpicker"
                             name="row[replacement][lens_coating_type][]"  title="请选择">
@@ -324,9 +324,9 @@
 
     <div class="step7_function3">
         <div class="panel-body">
-            <div class="step7_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Color:</label>
-                <div class="col-xs-12 col-sm-8">
+            <div class="step7_function3_child" style="width: 200px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Color:</label>
+                <div class="col-xs-12 col-sm-8" >
                     <select id="color_type" class="form-control selectpicker" name="row[item_order_info][{$item_order_number}][change_lens][color_id]"  title="请选择">
                         <option value="0">请选择</option>
                         {foreach name="colorList" item="val"}
@@ -335,10 +335,10 @@
                     </select>
                 </div>
             </div>
-            <div class="step7_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <select  id="lens_type" class="form-control selectpicker" name="row[item_order_info][{$item_order_number}][change_lens][lens_type]"  title="请选择">
+            <div class="step7_function3_child" style="width: 460px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Lens:</label>
+                <div class="col-xs-12 col-sm-8" style="width: 390px;">
+                    <select  id="lens_type"  class="form-control selectpicker" name="row[item_order_info][{$item_order_number}][change_lens][lens_type]"  title="请选择">
                         <option value="0">请选择</option>
                                 {foreach name="prescription[$vo['prescription_type']]" item="val"}
                                 <option value='{$val["lens_id"]}' {$val["lens_id"] == $vo['index_id'] ? 'selected' : ''}>{$val['lens_data_name']}</option>
@@ -346,8 +346,8 @@
                     </select>
                 </div>
             </div>
-            <div class="step7_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
+            <div class="step7_function3_child" style="width: 295px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Coating:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select id="c-coating_type" class="form-control selectpicker"
                             name="row[item_order_info][{$item_order_number}][change_lens][coating_type]" title="请选择">
@@ -497,8 +497,8 @@
 
     <div class="step7_function3">
         <div class="panel-body">
-            <div class="step7_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Color:</label>
+            <div class="step7_function3_child" style="width: 200px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Color:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select id="color_type" class="form-control selectpicker" name="row[item_order_info][{$item_order_number}][back_change_lens][color_id]"  title="请选择">
                         <option value="0">请选择</option>
@@ -508,10 +508,10 @@
                     </select>
                 </div>
             </div>
-            <div class="step7_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <select  id="lens_type" class="form-control selectpicker" name="row[item_order_info][{$item_order_number}][back_change_lens][lens_type]"  title="请选择">
+            <div class="step7_function3_child" style="width: 460px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Lens:</label>
+                <div class="col-xs-12 col-sm-8" style="width: 390px;">
+                    <select  id="lens_type"  class="form-control selectpicker" name="row[item_order_info][{$item_order_number}][back_change_lens][lens_type]"  title="请选择">
                         <option value="0">请选择</option>
                                 {foreach name="prescription[$vo['prescription_type']]" item="val"}
                                 <option>{$val['lens_data_name']}</option>
@@ -519,8 +519,8 @@
                     </select>
                 </div>
             </div>
-            <div class="step7_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
+            <div class="step7_function3_child" style="width: 295px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Coating:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select id="c-coating_type" class="form-control selectpicker"
                             name="row[item_order_info][{$item_order_number}][back_change_lens][coating_type]" title="请选择">
@@ -656,8 +656,8 @@
 
     <div class="step1_function3"  style="margin-top:10px;">
         <div class="panel-body">
-            <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Color:</label>
+            <div class="step1_function3_child" style="width: 200px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Color:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select id="color_type" class="form-control selectpicker" name="row[gift][color_id][]"  title="请选择">
                         <option value="0">请选择</option>
@@ -667,16 +667,16 @@
                     </select>
                 </div>
             </div>
-            <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Lens:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <select id="lens_type" class="form-control selectpicker" name="row[gift][lens_type][]"  title="请选择">
+            <div class="step1_function3_child" style="width: 460px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Lens:</label>
+                <div class="col-xs-12 col-sm-8" style="width: 390px;">
+                    <select id="lens_type"  class="form-control selectpicker" name="row[gift][lens_type][]"  title="请选择">
                         <option value="0">请选择</option>
                     </select>
                 </div>
             </div>
-            <div class="step1_function3_child">
-                <label class="control-label col-xs-12 col-sm-3">Coating:</label>
+            <div class="step1_function3_child" style="width: 295px;">
+                <label class="control-label col-xs-12 col-sm-3" style="width: 50px;">Coating:</label>
                 <div class="col-xs-12 col-sm-8">
                     <select id="c-coating_type" class="form-control selectpicker"
                             name="row[gift][coating_type][]"  title="请选择">
