@@ -1386,8 +1386,9 @@ class Test01 extends Backend
                     $arr = array_column($valu, 'title');
                     $info[] = '['.$title.']:('.implode(',', $arr).')';
                 }
-                $rules = implode(';', $info);str_replace("&nbsp;"," ",$value['name']);
-                $exp_data[] = ['id'=>$value['id'],'pid'=>$value['pid'],'name'=>$value['name'],'rules'=>$rules];
+                $rules = implode(';', $info);
+                $name = str_replace("&nbsp;"," ",$value['name']);
+                $exp_data[] = ['id'=>$value['id'],'pid'=>$value['pid'],'name'=>$name,'rules'=>$rules];
             
         }
 
