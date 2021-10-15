@@ -1322,6 +1322,7 @@ class Test01 extends Backend
      * @date   2021/10/15 10:15:44
      */
     public function roleExport(){
+        $page = input('page',0);
         $AuthGroupmodel = model('AuthGroup');
         $AuthRulemodel = model('AuthRule');
 
@@ -1344,6 +1345,8 @@ class Test01 extends Backend
             $groupName[$v['id']] = $v['name'];
         }
 
+        
+
         $list = AuthGroup::all(array_keys($groupName));
         $list = collection($list)->toArray();
         $groupList = [];
@@ -1357,13 +1360,17 @@ class Test01 extends Backend
                 $list[] = $groupList[$k];
             }
         }
+
         $exp_data = [];
+        $count = count($list);//总条数
+        $start=($page-1)*10;//偏移量，当前页-1乘以每页显示条数
+        $list = array_slice($list,$start,10);
 
         foreach ($list as $key => $value) {
                 if ($value['rules']) {
                 $ruleList = collection($AuthRulemodel->field('title,pid')->order('weigh', 'desc')->order('id', 'asc')->select())->toArray();
                 }else{
-                    $ruleList = collection($AuthRulemodel->field('title,pid')->order('weigh', 'desc')->order('id', 'asc')->where('id','in',)->select())->toArray();
+                    $ruleList = collection($AuthRulemodel->field('title,pid')->order('weigh', 'desc')->order('id', 'asc')->where('id','in',$value['rules'])->select())->toArray();
                 }
                 
                 $data = [];
@@ -1379,7 +1386,7 @@ class Test01 extends Backend
                     $arr = array_column($valu, 'title');
                     $info[] = '['.$title.']:('.implode(',', $arr).')';
                 }
-                $rules = implode(';', $info);
+                $rules = implode(';', $info);str_replace("&nbsp;"," ",$value['name']);
                 $exp_data[] = ['id'=>$value['id'],'pid'=>$value['pid'],'name'=>$value['name'],'rules'=>$rules];
             
         }
