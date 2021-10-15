@@ -1360,7 +1360,6 @@ class Test01 extends Backend
         $exp_data = [];
 
         foreach ($list as $key => $value) {
-            if ($key == 0) {
                 if ($value['rules']) {
                 $ruleList = collection($AuthRulemodel->field('title,pid')->order('weigh', 'desc')->order('id', 'asc')->select())->toArray();
                 }else{
@@ -1368,25 +1367,23 @@ class Test01 extends Backend
                 }
                 
                 $data = [];
-                foreach ($ruleList as $key => $value) {
-                    if ($value['pid']!= 0) {
-                        $data[$value['pid']][] = $value;
+                foreach ($ruleList as $ke => $valu) {
+                    if ($valu['pid']!= 0) {
+                        $data[$valu['pid']][] = $valu;
                     }
                     
                 }
                 $info = [];
-                foreach ($data as $key => $value) {
-                    $title = $AuthRulemodel->where('id',$key)->value('title');
-                    $arr = array_column($value, 'title');
+                foreach ($data as $k => $valu) {
+                    $title = $AuthRulemodel->where('id',$k)->value('title');
+                    $arr = array_column($valu, 'title');
                     $info[] = '['.$title.']:('.implode(',', $arr).')';
                 }
                 $rules = implode(';', $info);
                 $exp_data[] = ['id'=>$value['id'],'pid'=>$value['pid'],'name'=>$value['name'],'rules'=>$rules];
-            }
             
         }
 
-        //print_r($exp_data);die;
         $headlist = ['id', '父级', '名称', '权限'];
         //从数据库查询需要的数据
         $spreadsheet = new Spreadsheet();
