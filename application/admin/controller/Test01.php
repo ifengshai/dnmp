@@ -7,7 +7,9 @@ use app\admin\model\order\order\NewOrderItemProcess;
 use app\common\controller\Backend;
 use fast\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use app\admin\model\AuthGroup;
 use think\Db;
+use fast\Tree;
 
 class Test01 extends Backend
 {
@@ -1312,5 +1314,82 @@ class Test01 extends Backend
         $file = $file_title . $file_content;
         file_put_contents('/var/www/mojing/runtime/log/finance2.csv', $file);
         exit;
+    }
+
+    /**
+     * 角色权限导出
+     * @author gyh
+     * @date   2021/10/15 10:15:44
+     */
+    public function roleExport(){
+        $AuthGroupmodel = model('AuthGroup');
+        $AuthRulemodel = model('AuthRule');
+
+        $childrenGroupIds = $this->auth->getChildrenGroupIds(true);
+
+        $groupList = collection(AuthGroup::where('id', 'in', $childrenGroupIds)->select())->toArray();
+
+        Tree::instance()->init($groupList);
+        $result = [];
+        if ($this->auth->isSuperAdmin()) {
+            $result = Tree::instance()->getTreeList(Tree::instance()->getTreeArray(0));
+        } else {
+            $groups = $this->auth->getGroups();
+            foreach ($groups as $m => $n) {
+                $result = array_merge($result, Tree::instance()->getTreeList(Tree::instance()->getTreeArray($n['pid'])));
+            }
+        }
+        $groupName = [];
+        foreach ($result as $k => $v) {
+            $groupName[$v['id']] = $v['name'];
+        }
+
+        $list = AuthGroup::all(array_keys($groupName));
+        $list = collection($list)->toArray();
+        $groupList = [];
+        foreach ($list as $k => $v) {
+            $groupList[$v['id']] = $v;
+        }
+        $list = [];
+        foreach ($groupName as $k => $v) {
+            if (isset($groupList[$k])) {
+                $groupList[$k]['name'] = $v;
+                $list[] = $groupList[$k];
+            }
+        }
+        $exp_data = [];
+
+        foreach ($list as $key => $value) {
+            if ($key == 0) {
+                if ($value['rules']) {
+                $ruleList = collection($AuthRulemodel->field('title,pid')->order('weigh', 'desc')->order('id', 'asc')->select())->toArray();
+                }else{
+                    $ruleList = collection($AuthRulemodel->field('title,pid')->order('weigh', 'desc')->order('id', 'asc')->where('id','in',)->select())->toArray();
+                }
+                
+                $data = [];
+                foreach ($ruleList as $key => $value) {
+                    if ($value['pid']!= 0) {
+                        $data[$value['pid']][] = $value;
+                    }
+                    
+                }
+                $info = [];
+                foreach ($data as $key => $value) {
+                    $title = $AuthRulemodel->where('id',$key)->value('title');
+                    $arr = array_column($value, 'title');
+                    $info[] = '['.$title.']:('.implode(',', $arr).')';
+                }
+                $rules = implode(';', $info);
+                $exp_data[] = ['id'=>$value['id'],'pid'=>$value['pid'],'name'=>$value['name'],'rules'=>$rules];
+            }
+            
+        }
+
+        //print_r($exp_data);die;
+        $headlist = ['id', '父级', '名称', '权限'];
+        $path = "/uploads/ship_uploads/";
+        $fileName = '角色权限导出';
+        Excel::writeCsv($exp_data, $headlist, $path . $fileName);
     }
 }
