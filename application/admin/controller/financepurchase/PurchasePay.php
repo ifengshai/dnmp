@@ -125,12 +125,14 @@ class PurchasePay extends Backend
                     $list[$k]['purchase_num'] = '';
                     $list[$k]['purchase_name'] = '';
                     $list[$k]['purchase_number'] = '';
+                    $list[$k]['purchase_price'] = '';
                 } else {
                     $purchaseData = Db::name('purchase_order')->where(['id' => $v['purchase_id']])->find();
                     $list[$k]['1688_number'] = $purchaseData['1688_number'];
                     $list[$k]['purchase_num'] = Db::name('purchase_order_item')->where(['purchase_id' => $v['purchase_id']])->value('purchase_num');
                     $list[$k]['purchase_name'] = $purchaseData['purchase_name'];
                     $list[$k]['purchase_number'] = $purchaseData['purchase_number'];
+                    $list[$k]['purchase_price'] = Db::name('purchase_order_item')->where(['purchase_id' => $v['purchase_id']])->value('purchase_price');
                 }
             }
             $result = ["total" => $total, "rows" => $list];
