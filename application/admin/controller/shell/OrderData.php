@@ -683,10 +683,7 @@ class OrderData extends Backend
                                                 $order_lens_type[$site][$v['order_id']] = 3;
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
                                                 $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                            } elseif ($site == 1) {
-                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                            }elseif ($site == 2 && $order_prescription_type != 1){ //v站仅镜架订单留在郑州
+                                            } elseif (in_array($site, [1, 2])) {
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                                 $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                             }
@@ -750,10 +747,7 @@ class OrderData extends Backend
                                             if ($order_prescription_type == 3) {
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
                                                 $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                            } elseif ($site == 1) {
-                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                            }elseif ($site == 2 && $order_prescription_type != 1){ //v站仅镜架订单留在郑州
+                                            } elseif (in_array($site, [1, 2])) {
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                                 $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                             }
