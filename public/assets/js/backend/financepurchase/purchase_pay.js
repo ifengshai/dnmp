@@ -31,6 +31,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: '1688_number', title: __('1688单号'), operate: 'LIKE'},
                         {field: 'purchase_name', title: __('采购品名'), operate: false},
                         {field: 'purchase_num', title: __('采购数量'), operate: false},
+                        {field: 'purchase_price', title: __('采购单价'), operate: false},
                         {
                             field: 'pay_type', title: __('付款类型'), custom: { 0: 'success', 1: 'yellow', 2: 'blue', 3: 'danger'},
                             searchList: {1: '预付款', 2: '全款预付', 3: '尾款'},
