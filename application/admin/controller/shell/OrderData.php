@@ -676,17 +676,16 @@ class OrderData extends Backend
 
                                         $this->orderitemprocess->insertAll($data);
 
-                                        // zeelool、meloog、voogueme 分仓
-                                        if (in_array($site, [1, 2, 3])) {
+                                        // z、v、m、zeelool-es、zeelool-de、zeelool-jp、zeelool-fr 送到丹阳
+                                        if (in_array($site, [1, 2, 3, 9, 10, 11, 15])) {
                                             //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                             if ($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3) {
                                                 $order_lens_type[$site][$v['order_id']] = 3;
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
-                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                            } elseif (in_array($site, [1, 2])) {
+                                            } else {
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                             }
+                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                         }
                                     }
                                 }
@@ -742,15 +741,15 @@ class OrderData extends Backend
                                             'is_prescription_abnormal' => $is_prescription_abnormal,
                                         ]);
 
-                                        //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                        if (in_array($site, [1, 2, 3])) {
+                                        // z、v、m、zeelool-es、zeelool-de、zeelool-jp、zeelool-fr 送到丹阳
+                                        if (in_array($site, [1, 2, 3, 9, 10, 11, 15])) {
+                                            //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                             if ($order_prescription_type == 3) {
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
-                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                            } elseif (in_array($site, [1, 2])) {
+                                            } else {
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                                $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                             }
+                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                         }
                                     }
                                 }
