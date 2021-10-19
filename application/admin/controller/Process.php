@@ -2360,4 +2360,22 @@ class Process extends Backend
             Db::table('fa_zz_temp1')->where('id',$v['id'])->update(['stock' => $num]);
         }
     }
+
+    /**
+     * 处理库位顺序
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @author liushiwei
+     * @date   2021/10/18 11:39
+     */
+    public function process_store_sort_new()
+    {
+        $list = db('zz_temp3')->select();
+        $storehouse = new \app\admin\model\warehouse\StockHouse();
+        foreach ($list as $k => $v) {
+            $storehouse->where(['type' => 1, 'stock_id' => 2, 'area_id' => 6,'shelf_number'=>$v['shelf_number'], 'coding' => $v['coding']])->update(['picking_sort' => $v['sort']]);
+        }
+        echo 'ok';
+    }
 }
