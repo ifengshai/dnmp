@@ -109,55 +109,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                     name: 'signin',
                                     text: __('签收'),
                                     title: __('签收'),
-                                    classname: 'btn btn-xs btn-success btn-ajax',
-                                    url: 'warehouse/logistics_info/is_wrong_sign',
+                                    classname: 'btn btn-xs btn-success btn-dialog',
+                                    url: 'warehouse/logistics_info/signin',
                                     // confirm: '确定要签收吗',
-                                    success: function (data, ret) {
-                                        if ((ret.msg) == 1) {
-                                            //询问框
-                                            layer.confirm('收货仓与签收仓不一致，确定签收吗？', {
-                                                btn: ['确定', '取消']
-                                            }, function () {
-                                                $.ajax({
-                                                    type: "POST",
-                                                    url: Config.moduleurl + '/warehouse/logistics_info/signin',
-                                                    data: {id: ret.data},
-                                                    success: function (data) {
-                                                        layer.msg(data.msg);
-                                                        $(".btn-refresh").trigger("click");
-                                                    },
-                                                    error: function (data, ret) {
-                                                        Layer.alert(ret.msg);
-                                                        return false;
-                                                    },
-                                                });
-                                            });
-                                        } else {
-                                            //询问框
-                                            layer.confirm('确定要签收吗？', {
-                                                btn: ['确定', '取消']
-                                            }, function () {
-                                                $.ajax({
-                                                    type: "POST",
-                                                    url: Config.moduleurl + '/warehouse/logistics_info/signin',
-                                                    data: {id: ret.data},
-                                                    success: function (data) {
-                                                        layer.msg(data.msg);
-                                                        $(".btn-refresh").trigger("click");
-                                                    },
-                                                    error: function (data, ret) {
-                                                        Layer.alert(ret.msg);
-                                                        return false;
-                                                    },
-                                                });
-                                            });
-                                        }
-                                    },
-                                    error: function (data, ret) {
-                                        Layer.alert(ret.msg);
-                                        return false;
-                                    },
                                     callback: function (data) {
+                                        Layer.alert("接收到回传数据：" + JSON.stringify(data), {title: "回传数据"});
                                     },
                                     visible: function (row) {
                                         if (row.status == 0 && row.type == 1) {
@@ -247,10 +203,79 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
         edit: function () {
             Controller.api.bindevent();
         },
+        signin: function () {
+            var table = $("#table");
+            //提交按钮
+                $('#btn-signin').click(function () {
+                    var flag = $('#flag').val();
+                    var sign_number = $('#sign_number').val();
+                    var sign_count = $('#sign_count').val();
+                    var id = $('#id').val();
+                    if ((flag) == 1) {
+                        //询问框
+                        layer.confirm('收货仓与签收仓不一致，确定签收吗？', {
+                            btn: ['确定', '取消']
+                        }, function () {
+                            $.ajax({
+                                type: "POST",
+                                url: Config.moduleurl + '/warehouse/logistics_info/signin',
+                                data: {
+                                    'id': id,
+                                    'sign_number': sign_number,
+                                    'sign_count': sign_count
+                                },
+                                success: function (data) {
+                                    //layer.msg(data.msg);
+                                    layer.msg(data.msg, {icon:1,time:1000}, function(){
+                                        var index = parent.layer.getFrameIndex(window.name);
+                                        parent.location.reload(); //刷新父页面
+                                        parent.layer.close(index);
+                                        });
+
+                                },
+                                error: function (data, ret) {
+                                    Layer.alert(ret.msg);
+                                    return false;
+                                },
+                            });
+                        });
+                    } else {
+                        //询问框
+                        layer.confirm('确定要签收吗？', {
+                            btn: ['确定', '取消']
+                        }, function () {
+                            $.ajax({
+                                type: "POST",
+                                url: Config.moduleurl + '/warehouse/logistics_info/signin',
+                                data: {
+                                    'id': id,
+                                    'sign_number': sign_number,
+                                    'sign_count': sign_count
+                                },
+                                success: function (data) {
+                                    //layer.msg(data.msg);
+                                    layer.msg(data.msg, {icon:1,time:1000}, function(){
+                                        var index = parent.layer.getFrameIndex(window.name);
+                                        parent.location.reload(); //刷新父页面
+                                        parent.layer.close(index);
+                                    });
+
+                                },
+                                error: function (data, ret) {
+                                    Layer.alert(ret.msg);
+                                    return false;
+                                },
+                            });
+                        });
+                    }
+                })
+            Controller.api.bindevent();
+        },
         api: {
             bindevent: function () {
                 Form.api.bindevent($("form[role=form]"));
             }
+
         }
     };
     return Controller;
