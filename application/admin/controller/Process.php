@@ -2374,7 +2374,7 @@ class Process extends Backend
         $list = db('zz_temp3')->select();
         $storehouse = new \app\admin\model\warehouse\StockHouse();
         foreach ($list as $k => $v) {
-            $storehouse->where(['type' => 1, 'stock_id' => 2, 'area_id' => 7,'shelf_number'=>$v['shelf_number'], 'coding' => $v['coding']])->update(['picking_sort' => $v['sort']]);
+            $storehouse->where(['type' => 1, 'stock_id' => 2, 'area_id' => 6,'shelf_number'=>$v['shelf_number'], 'coding' => $v['coding']])->update(['picking_sort' => $v['sort']]);
         }
         echo 'ok';
     }
