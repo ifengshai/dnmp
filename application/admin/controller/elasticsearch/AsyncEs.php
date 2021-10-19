@@ -32,7 +32,7 @@ class AsyncEs extends BaseElasticsearch
     public function asyncOrder()
     {
         Debug::remark('begin');
-        NewOrder::chunk(3000, function ($newOrder) {
+        NewOrder::where('created_at', '>', strtotime('2021-09-01 00:00:00'))->chunk(3000, function ($newOrder) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
@@ -164,8 +164,6 @@ class AsyncEs extends BaseElasticsearch
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
                 }, $value);
-                dump($value);
-                die;
                 $mergeData = strtotime($value['created_at']);
                 $insertData = [
                     'entity_id'        => $value['entity_id'],
@@ -334,7 +332,7 @@ class AsyncEs extends BaseElasticsearch
     public function syncCart()
     {
         WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
-            ->where('created_at', '>', strtotime('2021-08-11 00:00:00'))
+            ->where('created_at', '>', strtotime('2021-09-01 00:00:00'))
             ->chunk(10000, function ($carts) {
                 array_map(function ($value) {
                     $value = array_map(function ($v) {
