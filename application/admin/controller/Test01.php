@@ -7,7 +7,9 @@ use app\admin\model\order\order\NewOrderItemProcess;
 use app\common\controller\Backend;
 use fast\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use app\admin\model\AuthGroup;
 use think\Db;
+use fast\Tree;
 
 class Test01 extends Backend
 {
@@ -1312,5 +1314,283 @@ class Test01 extends Backend
         $file = $file_title . $file_content;
         file_put_contents('/var/www/mojing/runtime/log/finance2.csv', $file);
         exit;
+    }
+
+    /**
+     * 角色权限导出
+     * @author gyh
+     * @date   2021/10/15 10:15:44
+     */
+    public function roleExport(){
+        $page = input('page',0);
+        $AuthGroupmodel = model('AuthGroup');
+        $AuthRulemodel = model('AuthRule');
+
+        $childrenGroupIds = $this->auth->getChildrenGroupIds(true);
+
+        $groupList = collection(AuthGroup::where('id', 'in', $childrenGroupIds)->select())->toArray();
+
+        Tree::instance()->init($groupList);
+        $result = [];
+        if ($this->auth->isSuperAdmin()) {
+            $result = Tree::instance()->getTreeList(Tree::instance()->getTreeArray(0));
+        } else {
+            $groups = $this->auth->getGroups();
+            foreach ($groups as $m => $n) {
+                $result = array_merge($result, Tree::instance()->getTreeList(Tree::instance()->getTreeArray($n['pid'])));
+            }
+        }
+        $groupName = [];
+        foreach ($result as $k => $v) {
+            $groupName[$v['id']] = $v['name'];
+        }
+
+        
+
+        $list = AuthGroup::all(array_keys($groupName));
+        $list = collection($list)->toArray();
+        $groupList = [];
+        foreach ($list as $k => $v) {
+            $groupList[$v['id']] = $v;
+        }
+        $list = [];
+        foreach ($groupName as $k => $v) {
+            if (isset($groupList[$k])) {
+                $groupList[$k]['name'] = $v;
+                $list[] = $groupList[$k];
+            }
+        }
+
+        $exp_data = [];
+        $count = count($list);//总条数
+        $start=($page-1)*10;//偏移量，当前页-1乘以每页显示条数
+        $list = array_slice($list,$start,10);
+
+        foreach ($list as $key => $value) {
+                if ($value['rules']) {
+                $ruleList = collection($AuthRulemodel->field('title,pid')->order('weigh', 'desc')->order('id', 'asc')->select())->toArray();
+                }else{
+                    $ruleList = collection($AuthRulemodel->field('title,pid')->order('weigh', 'desc')->order('id', 'asc')->where('id','in',$value['rules'])->select())->toArray();
+                }
+                
+                $data = [];
+                foreach ($ruleList as $ke => $valu) {
+                    if ($valu['pid']!= 0) {
+                        $data[$valu['pid']][] = $valu;
+                    }
+                    
+                }
+                $info = [];
+                foreach ($data as $k => $val) {
+                    $title = $AuthRulemodel->where('id',$k)->value('title');
+                    $arr = array_column($val, 'title');
+                    $info[] = '['.$title.']:('.implode(',', $arr).')';
+                }
+                $rules = implode(';', $info);
+                $name = str_replace("&nbsp;"," ",$value['name']);
+                $exp_data[] = ['id'=>$value['id'],'pid'=>$value['pid'],'name'=>$name,'rules'=>$rules];
+            
+        }
+
+        $headlist = ['id', '父级', '名称', '权限'];
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->setActiveSheetIndex(0);
+        $spreadsheet->getActiveSheet()->setCellValue("A1", "id");
+        $spreadsheet->getActiveSheet()->setCellValue("B1", "父级");
+        $spreadsheet->getActiveSheet()->setCellValue("C1", "名称");
+        $spreadsheet->getActiveSheet()->setCellValue("D1", "权限");
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(60);
+
+        $spreadsheet->setActiveSheetIndex(0);
+        $num = 0;
+        foreach ($exp_data as $k => $v) {
+            $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['id']);
+            $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['pid']);
+            $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['name']);
+            $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['rules']);
+            $num += 1;
+        }
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = '角色权限导出';
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+    }
+
+    /**
+     * 账号权限导出
+     * @author gyh
+     * @date   2021/10/15 10:15:44
+     */
+    public function userroleExport(){
+        $page = input('page',0);
+        $count = input('count',10);
+        $usermodel = model('Admin');
+        $start = ($page-1)*$count;//偏移量，当前页-1乘以每页显示条数
+        $user = collection($usermodel->field('id,username,nickname')->limit($start,$count)->select())->toArray();
+        foreach ($user as $key => $value) {
+            $group = Db::name('auth_group_access')->field('b.rules,b.name')->join(['fa_auth_group' => 'b'], 'group_id=b.id', 'left')->where('uid', $value['id'])->select();
+            $rulesarr = array_column($group, 'rules');
+            $name = array_column($group, 'name');
+            $user[$key]['group_text'] = implode(',', $name);
+            $rules = implode(',', $rulesarr);
+            $arr = explode(',', $rules);
+            if (in_array('*', $rulesarr)) {
+                $user[$key]['rules'] = '*';
+            }else{
+                $user[$key]['rules'] = implode(',', array_unique($arr));
+            }
+        }
+
+        $AuthRulemodel = model('AuthRule');
+        foreach ($user as $key => $value) {
+            if ($value['rules'] == '*') {
+                $rules = '*';
+            }else{
+               if ($value['rules']) {
+                $ruleList = collection($AuthRulemodel->field('title,pid')->order('weigh', 'desc')->order('id', 'asc')->select())->toArray();
+                }else{
+                    $ruleList = collection($AuthRulemodel->field('title,pid')->order('weigh', 'desc')->order('id', 'asc')->where('id','in',$value['rules'])->select())->toArray();
+                }
+                
+                $data = [];
+                foreach ($ruleList as $ke => $valu) {
+                    if ($valu['pid']!= 0) {
+                        $data[$valu['pid']][] = $valu;
+                    }
+                    
+                }
+                $info = [];
+                foreach ($data as $k => $val) {
+                    $title = $AuthRulemodel->where('id',$k)->value('title');
+                    $arr = array_column($val, 'title');
+                    $info[] = '['.$title.']:('.implode(',', $arr).')';
+                }
+                $rules = implode(';', $info); 
+            }
+                
+                $exp_data[] = ['id'=>$value['id'],'username'=>$value['username'],'nickname'=>$value['nickname'],'name'=>$value['group_text'],'rules'=>$rules];
+            
+        }
+
+        $headlist = ['id', '用户名', '昵称', '角色', '权限'];
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->setActiveSheetIndex(0);
+        $spreadsheet->getActiveSheet()->setCellValue("A1", "id");
+        $spreadsheet->getActiveSheet()->setCellValue("B1", "用户名");
+        $spreadsheet->getActiveSheet()->setCellValue("C1", "昵称");
+        $spreadsheet->getActiveSheet()->setCellValue("D1", "角色");
+        $spreadsheet->getActiveSheet()->setCellValue("E1", "权限");
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(12);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(60);
+
+        $spreadsheet->setActiveSheetIndex(0);
+        $num = 0;
+        foreach ($exp_data as $k => $v) {
+            $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['id']);
+            $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['username']);
+            $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['nickname']);
+            $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['name']);
+            $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['rules']);
+            $num += 1;
+        }
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = '角色权限导出';
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+    }
+
+    public function return_department_name($department_id,$name = ''){   
+        $departmentmodel = model('Department');   
+        $pid = $departmentmodel->where(['department_id'=>$department_id])->value('pid');
+        
+        if(!$pid){
+            return $name;
+        } 
+        
+        if($pid == 1){
+            
+            if($name == null){
+                $name = $departmentmodel->where(['department_id'=>$department_id])->value('name');
+            }else{
+                $name = $departmentmodel->where(['department_id'=>$department_id])->value('name').'-'.$name;
+            }
+            return $name;   
+        }else{
+            
+            if($name == null){
+                $name = $departmentmodel->where(['department_id'=>$department_id])->value('name');
+            }else{
+                $name = $departmentmodel->where(['department_id'=>$department_id])->value('name').'-'.$name;
+            }
+            $f_department_id = $departmentmodel->where(['id'=>$pid])->value('department_id');
+            return self::return_department_name($f_department_id,$name);
+        }
+        
     }
 }

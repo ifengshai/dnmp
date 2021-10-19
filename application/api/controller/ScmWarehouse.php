@@ -1784,7 +1784,13 @@ class ScmWarehouse extends Scm
                                             $this->submission_post($url, $value);
                                         }
                                     }
-
+                                    if ($val['website_type'] == 2) {
+                                        if ($sku_platform['stock'] == 0 && $stock_num > 0) {
+                                            $value['sku'] = $sku_platform['platform_sku'];
+                                            $url = config('url.voogueme_url') . 'rest/product/productArrival';
+                                            $this->submission_post($url, $value);
+                                        }
+                                    }
                                     //增加站点虚拟仓库存
                                     $this->_item_platform_sku->where(['sku' => $v['sku'], 'platform_type' => $val['website_type']])->setInc('stock', $stock_num);
                                     //入库的时候减少待入库数量
@@ -1817,6 +1823,13 @@ class ScmWarehouse extends Scm
                                         if ($sku_platform['stock'] == 0 && $num > 0) {
                                             $value['sku'] = $sku_platform['platform_sku'];
                                             $url = config('url.zeelool_url') . 'magic/product/productArrival';
+                                            $this->submission_post($url, $value);
+                                        }
+                                    }
+                                    if ($val['website_type'] == 2) {
+                                        if ($sku_platform['stock'] == 0 && $num > 0) {
+                                            $value['sku'] = $sku_platform['platform_sku'];
+                                            $url = config('url.voogueme_url') . 'rest/product/productArrival';
                                             $this->submission_post($url, $value);
                                         }
                                     }

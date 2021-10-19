@@ -1162,7 +1162,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
             $(document).on('click', '.btn-matching', function () {
 
                 var warehouse = $.map(table.bootstrapTable('getSelections'), function (row) {
-                    return row.logistics_info.sign_warehouse;
+                    return row.logistics.sign_warehouse;
                 });
                 var supplier = $.map(table.bootstrapTable('getSelections'), function (row) {
                     console.log(row)
