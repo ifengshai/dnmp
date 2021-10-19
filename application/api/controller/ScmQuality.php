@@ -1105,7 +1105,7 @@ class ScmQuality extends Scm
         $sign_number = $this->request->request('sign_number');
         empty($sign_number) && $this->error(__('签收编号不能为空'), [], 403);
         $sign_count = $this->request->request('sign_count');
-        empty($sign_count) && $this->error(__('签收数量不能为空'), [], 403);
+        empty($sign_count) && $this->error(__('到货数量不能为空'), [], 403);
 
         //检测质检单状态
         $row = $this->_logistics_info->get($logistics_id);
@@ -1269,7 +1269,7 @@ class ScmQuality extends Scm
         $sign_number = $this->request->request('sign_number');
         empty($sign_number) && $this->error(__('签收编号不能为空'), [], 403);
         $sign_count = $this->request->request('sign_count');
-        empty($sign_count) && $this->error(__('签收数量不能为空'), [], 403);
+        empty($sign_count) && $this->error(__('到货数量不能为空'), [], 403);
 
         $logistics_ids = explode(',', $logistics_ids);
         //检测物流单状态 未签收才能操作
