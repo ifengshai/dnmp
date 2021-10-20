@@ -74,6 +74,25 @@
                 value="{:date('Y-m-d H:i')}">
         </div>
     </div>
+    <div class="form-group phper_class">
+        <label class="control-label col-xs-12 col-sm-2">预计工日</label>
+        <div class="col-xs-12 col-sm-8">
+
+                     {if $row['phper_working_hour'] == 1}
+                         <select name="row[phper_working_hour]" class="form-control" data-rule="required">
+                              {else}
+                             <select name="row[phper_working_hour]" class="form-control"  data-rule="required">
+                             {/if}
+                            <option value="0">请选择</option>
+                            <option value="0.1" {$row['phper_working_hour'] == '0.1' ? 'selected' : '' }>0.1天</option>
+                                 <option value="0.2" {$row['phper_working_hour'] == '0.2' ? 'selected' : '' }>0.2天</option>
+                                 <option value="0.5" {$row['phper_working_hour'] == '0.5' ? 'selected' : '' }>0.5天</option>
+                                 <option value="1" {$row['phper_working_hour'] == '1' ? 'selected' : '' }>1天</option>
+                                 <option value="2" {$row['phper_working_hour'] == '2' ? 'selected' : '' }>2天</option>
+                                 <option value="5" {$row['phper_working_hour'] == '5' ? 'selected' : '' }>5天</option>
+                        </select>
+                </div>
+    </div>
 
     <div class="form-group phper_class">
         <label class="control-label col-xs-12 col-sm-2">{:__('负责人')}</label>
