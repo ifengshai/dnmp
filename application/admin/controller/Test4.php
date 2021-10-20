@@ -574,6 +574,79 @@ class Test4 extends Controller
         }
     }
 
+
+    //运营数据中心--德语站
+    public function zeelool_de_operate_data_center_xiufu()
+    {
+        $model = Db::connect('database.db_zeelool_de');
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        $model->table('oc_vip_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+
+        //查询时间
+        $date_time = $this->zeeloolde->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2021-10-01' and '2021-10-19' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
+        foreach ($date_time as $val) {
+            $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site', 10)->value('id');
+            $arr = [];
+            //订单数
+            $order_where = [];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+            $arr['order_num'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->count();
+            //销售额
+            $arr['sales_total_money'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->sum('base_grand_total');
+            //邮费
+            $arr['shipping_total_money'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->sum('base_shipping_amount');
+            //客单价
+            $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+            //中位数
+            $sales_total_money = $this->zeeloolde->where($order_where)->where('order_type', 1)->column('base_grand_total');
+            $arr['order_total_midnum'] = $this->median($sales_total_money);
+            //标准差
+            $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+            //补发订单数
+            $arr['replacement_order_num'] = $this->zeeloolde->where($order_where)->where('order_type', 4)->count();
+            //补发销售额
+            $arr['replacement_order_total'] = $this->zeeloolde->where($order_where)->where('order_type', 4)->sum('base_grand_total');
+            //网红订单数
+            $arr['online_celebrity_order_num'] = $this->zeeloolde->where($order_where)->where('order_type', 3)->count();
+            //补发销售额
+            $arr['online_celebrity_order_total'] = $this->zeeloolde->where($order_where)->where('order_type', 3)->sum('base_grand_total');
+            //会话
+            $arr['sessions'] = $this->google_session(10, $val['date_time']);
+            //新建购物车数量
+            $cart_where1 = [];
+            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['new_cart_num'] = $model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total', 'gt', 0)->count();
+            //更新购物车数量
+            $cart_where2 = [];
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['update_cart_num'] = $model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
+            //新增加购率
+            $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+            //更新加购率
+            $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+            //新增购物车转化率
+            $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
+            //更新购物车转化率
+            $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
+            if (!$is_exist) {
+                $arr['site'] = 10;
+                $arr['day_date'] = $val['date_time'];
+                //插入数据
+                Db::name('datacenter_day')->insert($arr);
+                echo $val['date_time'] .' ok'. "\n";
+                usleep(100000);
+            } else{
+                //更新数据
+//                Db::name('datacenter_day')->where('id',$is_exist)->update($arr);
+                echo $val['date_time'] .' is ok'. "\n";
+                usleep(100000);
+            }
+        }
+        dump($arr);
+    }
+
     //运营数据中心--日本站
     public function zeelool_jp_operate_data_center()
     {
