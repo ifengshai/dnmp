@@ -229,7 +229,6 @@ class Distribution extends Backend
                     unset($filter['b.payment_time']);
                 }
             }
-
             //默认展示订单状态
             if ($filter) {
                 if ($filter['status']) {
@@ -241,8 +240,10 @@ class Distribution extends Backend
                 }
                 unset($filter['status']);
             } else {
-                $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
-                unset($filter['status']);
+                if($label != 8){
+                    $map['b.status'] = ['in', ['processing', 'paypal_reversed', 'paypal_canceled_reversal']];
+                    unset($filter['status']);
+                }
             }
 
             //审单通过时间
