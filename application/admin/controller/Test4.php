@@ -638,13 +638,14 @@ class Test4 extends Controller
                 echo $val['date_time'] .' ok'. "\n";
                 usleep(100000);
             } else{
+                dump($arr);
                 //更新数据
 //                Db::name('datacenter_day')->where('id',$is_exist)->update($arr);
                 echo $val['date_time'] .' is ok'. "\n";
                 usleep(100000);
             }
         }
-        dump($arr);
+
     }
 
     //运营数据中心--日本站
