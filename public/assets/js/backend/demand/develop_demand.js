@@ -159,6 +159,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                         },
                         {
+                            field: 'phper_working_hour',
+                            title: __('预计工时'),
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
+
+                        },
+                        {
                             field: 'finish_time',
                             title: __('Finish_time'),
                             operate: 'RANGE',
@@ -841,6 +848,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             field: 'estimated_time',
                             title: __('Estimated_time'),
                             operate: false,
+                            addclass: 'datetimerange',
+
+                        },
+                        {
+                            field: 'phper_working_hour',
+                            title: __('预计工时'),
+                            operate: 'RANGE',
                             addclass: 'datetimerange',
 
                         },

@@ -850,6 +850,9 @@ class DevelopDemand extends Backend
             ->column('nickname','uid');
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            if (!$params['phper_working_hour']) {
+                $this->error('预计工日必选');
+            }
             if ($params) {
                 $params = $this->preExcludeFields($params);
                 $result = false;
