@@ -360,6 +360,28 @@ class AsyncEs extends BaseElasticsearch
     }
 
     /**
+     *
+     * @author huangbinbin
+     * @date   2021/10/20 11:35
+     */
+    public function asyncDatacenterDayUpdate()
+    {
+        DatacenterDay::where('day_date', 'in', ['2021-10-04','2021-10-10'])->where('site',2)->chunk(10000, function ($newOrder) {
+             array_map(function ($value) {
+                $value = array_map(function ($v) {
+                    return $v === null ? 0 : $v;
+                }, $value);
+
+                $mergeData = strtotime($value['day_date']) + 8 * 3600;
+
+                $data = $this->formatDate($value, $mergeData);
+                $this->updateEsById('mojing_datacenterday', $data);
+            }, collection($newOrder)->toArray());
+        });
+
+    }
+
+    /**
      * 同步M更新购物车
      *
      * @author fangke
