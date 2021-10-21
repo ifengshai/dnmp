@@ -4648,12 +4648,7 @@ class Test4 extends Controller
             $date[$k]['rate'] = $date[$k]['zongfushu'] > 0 ? round($date[$k]['chufangjing']/$date[$k]['zongfushu'],2) : 0;
             $order_where['status'] = [
                 'in',
-                [
-                    'processing',
-                    'complete',
-                    'delivered',
-                    'delivery',
-                ],
+                ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
             ];
             $order_where['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
             //销售额
@@ -4664,17 +4659,9 @@ class Test4 extends Controller
             $where['order_type'] = 1;
             $where['status'] = [
                 'in',
-                [
-                    'free_processing',
-                    'processing',
-                    'complete',
-                    'paypal_reversed',
-                    'payment_review',
-                    'paypal_canceled_reversal',
-                    'delivered',
-                ]
+                ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
             ];
-            $where1['payment_time'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
+            $where1['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
             $timeUser = $order
                 ->where($where)
                 ->where($where1)
