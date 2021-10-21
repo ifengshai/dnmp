@@ -4678,13 +4678,13 @@ class Test4 extends Controller
                 ->field('customer_email')
                 ->group('customer_email')
                 ->column('customer_email');
-            $date[$k]['users'] = $timeUser;
+            $date[$k]['users'] = count($timeUser);
             $date[$k]['users_per'] = round((((int)$date[$k]['sales_total_money'])/(int)count($timeUser)),2);
         }
 
         dump($date);die;
     }
-    public function getRecentMonth($recent = 21, $time = 1636971061) {
+    public function getRecentMonth($recent = 22, $time = 1636971061) {
         !$time && $time = time();
         $list = [];
         for ($i = $recent; $i > 0; --$i) {
