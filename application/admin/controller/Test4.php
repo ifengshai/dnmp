@@ -4642,8 +4642,8 @@ class Test4 extends Controller
                 ->join(['fa_order_item_process' => 'c'], 'c.order_id=b.id')
                 ->group('c.order_prescription_type')
                 ->select();
-            $date[$k]['chufangjing'] = $list[2] + $list[3];
-            $date[$k]['zongfushu'] = $list[1] + $list[2]+ $list[3];
+            $date[$k]['chufangjing'] = $list[1]['num'] + $list[2]['num'];
+            $date[$k]['zongfushu'] = $list[1]['num'] + $list[2]['num']+ $list[0]['num'];
             $date[$k]['rate'] = $date[$k]['zongfushu'] > 0 ?round($date[$k]['chufangjing']/$date[$k]['zongfushu'],4) : 0;
             $order_where['status'] = [
                 'in',
