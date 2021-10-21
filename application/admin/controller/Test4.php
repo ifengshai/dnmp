@@ -4642,7 +4642,6 @@ class Test4 extends Controller
             $date[$k]['zongfushu'] = $order
                 ->alias('a')
                 ->where($map)
-                ->join(['fa_order_item_process' => 'c'], 'c.order_id=a.id')
                 ->sum('a.total_qty_ordered');
             $date[$k]['rate'] = $date[$k]['zongfushu'] > 0 ? round($date[$k]['chufangjing']/$date[$k]['zongfushu'],2) : 0;
             $order_where['status'] = [
