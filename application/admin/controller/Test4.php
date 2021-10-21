@@ -4650,26 +4650,32 @@ class Test4 extends Controller
                 'in',
                 ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
             ];
-            $order_where['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
-            //销售额
-            $date[$k]['sales_total_money'] = $order
-                ->where($order_where)
-                ->where('order_type', 1)
-                ->sum('base_grand_total');
-            $where['order_type'] = 1;
-            $where['status'] = [
-                'in',
-                ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
-            ];
-            $where1['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
-            $timeUser = $order
-                ->where($where)
-                ->where($where1)
-                ->field('customer_email')
-                ->group('customer_email')
-                ->column('customer_email');
-            $date[$k]['users'] = count($timeUser);
-            $date[$k]['users_per'] = round((((int)$date[$k]['sales_total_money'])/(int)count($timeUser)),2);
+            $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
+            foreach ($siteArr as $sk=>$sv){
+                $order_where['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
+                $order_where['site'] = ['=', $sk];
+                //销售额
+                $date[$k][$sv]['sales_total_money'] = $order
+                    ->where($order_where)
+                    ->where('order_type', 1)
+                    ->sum('base_grand_total');
+                $where['order_type'] = 1;
+                $where['site'] = $sk;
+                $where['status'] = [
+                    'in',
+                    ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
+                ];
+                $where1['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
+                $timeUser = $order
+                    ->where($where)
+                    ->where($where1)
+                    ->field('customer_email')
+                    ->group('customer_email')
+                    ->column('customer_email');
+                $date[$k][$sv]['users'] = count($timeUser);
+                $date[$k][$sv]['users_per'] = round((((int)$date[$k]['sales_total_money'])/(int)count($timeUser)),2);
+            }
+
         }
 
         dump($date);die;
