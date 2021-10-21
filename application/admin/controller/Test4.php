@@ -4625,24 +4625,26 @@ class Test4 extends Controller
         set_time_limit(0);
         ini_set('memory_limit', '2048M');
         $date = $this->getRecentMonth();
-        $neworderprocess = new \app\admin\model\order\order\NewOrderProcess();
+        $neworderprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         $order = new NewOrder();
         foreach ($date as $k=>$v){
             //统计处方镜
-            $map['a.created_at'] = ['between', [strtotime($v[0]),strtotime($v[1])]];
+            $map['a.created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
             //过滤补差价单
             $map['a.order_type'] = ['<>', 5];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
-            $date[$k]['chufangjing'] = $order
-                ->alias('a')
+            $date[$k]['chufangjing'] = $neworderprocess
+                ->alias('b')
+                ->join(['fa_order' => 'a'], 'b.order_id=a.id')
+                ->where('b.order_prescription_type','in',[2,3])
                 ->where($map)
-                ->join(['fa_order_item_process' => 'c'], 'c.order_id=a.id')
-                ->where('c.order_prescription_type','in',[2,3])
-                ->sum('a.total_qty_ordered');
-            $date[$k]['zongfushu'] = $order
-                ->alias('a')
+                ->count();
+            $date[$k]['zongfushu'] = $neworderprocess
+                ->alias('b')
+                ->join(['fa_order' => 'a'], 'b.order_id=a.id')
+                ->where('b.order_prescription_type','in',[1,2,3])
                 ->where($map)
-                ->sum('a.total_qty_ordered');
+                ->count();
             $date[$k]['rate'] = $date[$k]['zongfushu'] > 0 ? round($date[$k]['chufangjing']/$date[$k]['zongfushu'],2) : 0;
             $order_where['status'] = [
                 'in',
@@ -4653,7 +4655,7 @@ class Test4 extends Controller
                     'delivery',
                 ],
             ];
-            $order_where['created_at'] = ['between', [strtotime($v[0]),strtotime($v[1])]];
+            $order_where['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
             //销售额
             $date[$k]['sales_total_money'] = $order
                 ->where($order_where)
@@ -4672,7 +4674,7 @@ class Test4 extends Controller
                     'delivered',
                 ]
             ];
-            $where1['payment_time'] = ['between', [strtotime($v[0]),strtotime($v[1])]];
+            $where1['payment_time'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
             $timeUser = $order
                 ->where($where)
                 ->where($where1)
