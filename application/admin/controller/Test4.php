@@ -584,7 +584,7 @@ class Test4 extends Controller
         $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
 
         //查询时间
-        $date_time = $this->zeeloolde->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2021-10-01' and '2021-10-19' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
+        $date_time = $this->zeeloolde->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2021-10-01' and '2021-10-20' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
         foreach ($date_time as $val) {
             $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site', 10)->value('id');
             $arr = [];
@@ -4618,5 +4618,79 @@ class Test4 extends Controller
     public function test_out_of_package()
     {
         var_dump($this->nihao->undeliveredOrder([]));
+    }
+
+    public function export_data_warehouse()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $date = $this->getRecentMonth();
+        $neworderprocess = new \app\admin\model\order\order\NewOrderProcess();
+        $order = new NewOrder();
+        foreach ($date as $k=>$v){
+            //统计处方镜
+            $map['b.created_at'] = ['between', [strtotime($v[0]),strtotime($v[1])]];
+            $map['a.check_status'] = 0;
+            //过滤补差价单
+            $map['b.order_type'] = ['<>', 5];
+            $map['b.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+            $list = $neworderprocess
+                ->alias('a')
+                ->where($map)
+                ->field('c.order_prescription_type,count(1) as num')
+                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                ->join(['fa_order_item_process' => 'c'], 'c.order_id=b.id')
+                ->group('c.order_prescription_type')
+                ->select();
+            $date[$k]['rate'] = round(($list[2] + $list[3])/($list[1] + $list[2]+ $list[3]),2);
+            $order_where['status'] = [
+                'in',
+                [
+                    'processing',
+                    'complete',
+                    'delivered',
+                    'delivery',
+                ],
+            ];
+            $order_where['created_at'] = ['between', [strtotime($v[0]),strtotime($v[1])]];
+            //销售额
+            $date[$k]['rate']['sales_total_money'] = $order
+                ->where($order_where)
+                ->where('order_type', 1)
+                ->sum('base_grand_total');
+            $where['order_type'] = 1;
+            $where['status'] = [
+                'in',
+                [
+                    'free_processing',
+                    'processing',
+                    'complete',
+                    'paypal_reversed',
+                    'payment_review',
+                    'paypal_canceled_reversal',
+                    'delivered',
+                ]
+            ];
+            $where1['payment_time'] = ['between', [strtotime($v[0]),strtotime($v[1])]];
+            $timeUser = $order
+                ->where($where)
+                ->where($where1)
+                ->field('customer_email')
+                ->group('customer_email')
+                ->column('customer_email');
+            $date[$k]['rate']['users'] = $timeUser;
+            $date[$k]['rate']['users_per'] = round($date[$k]['rate']['sales_total_money']/$timeUser,2);
+        }
+
+        dump($date);die;
+    }
+    public function getRecentMonth($recent = 21, $time = 1636971061) {
+        !$time && $time = time();
+        $list = [];
+        for ($i = $recent; $i > 0; --$i) {
+            $t = strtotime("-$i month", $time);
+            $list[] = explode('/', date('Y-m-01', $t) . '/' . date('Y-m-', $t) . date('t', $t));
+        }
+        return $list;
     }
 }
