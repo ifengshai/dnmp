@@ -4679,7 +4679,7 @@ class Test4 extends Controller
                 ->group('customer_email')
                 ->column('customer_email');
             $date[$k]['users'] = $timeUser;
-            $date[$k]['users_per'] = round((((int)$date[$k]['sales_total_money'])/(int)$timeUser),2);
+            $date[$k]['users_per'] = round((((int)$date[$k]['sales_total_money'])/(int)count($timeUser)),2);
         }
 
         dump($date);die;
