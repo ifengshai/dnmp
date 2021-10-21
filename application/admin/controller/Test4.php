@@ -4629,22 +4629,22 @@ class Test4 extends Controller
         $order = new NewOrder();
         foreach ($date as $k=>$v){
             //统计处方镜
-            $map['b.created_at'] = ['between', [strtotime($v[0]),strtotime($v[1])]];
-            $map['a.check_status'] = 0;
+            $map['a.created_at'] = ['between', [strtotime($v[0]),strtotime($v[1])]];
             //过滤补差价单
-            $map['b.order_type'] = ['<>', 5];
-            $map['b.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
-            $list = $neworderprocess
+            $map['a.order_type'] = ['<>', 5];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+            $date[$k]['chufangjing'] = $order
                 ->alias('a')
                 ->where($map)
-                ->field('c.order_prescription_type,count(1) as num')
-                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-                ->join(['fa_order_item_process' => 'c'], 'c.order_id=b.id')
-                ->group('c.order_prescription_type')
-                ->select();
-            $date[$k]['chufangjing'] = $list[1]['num'] + $list[2]['num'];
-            $date[$k]['zongfushu'] = $list[1]['num'] + $list[2]['num']+ $list[0]['num'];
-            $date[$k]['rate'] = $date[$k]['zongfushu'] > 0 ?round($date[$k]['chufangjing']/$date[$k]['zongfushu'],4) : 0;
+                ->join(['fa_order_item_process' => 'c'], 'c.order_id=a.id')
+                ->where('c.order_prescription_type','in',[2,3])
+                ->sum('a.total_qty_ordered');
+            $date[$k]['zongfushu'] = $order
+                ->alias('a')
+                ->where($map)
+                ->join(['fa_order_item_process' => 'c'], 'c.order_id=a.id')
+                ->sum('a.total_qty_ordered');
+            $date[$k]['rate'] = $date[$k]['zongfushu'] > 0 ? round($date[$k]['chufangjing']/$date[$k]['zongfushu'],2) : 0;
             $order_where['status'] = [
                 'in',
                 [
