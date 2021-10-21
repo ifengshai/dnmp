@@ -38,13 +38,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-ta
                             searchList: { 1: '工厂',2:'贸易'},
                             formatter: Table.api.formatter.status
                         },
-                        {
-                            field: 'warehouse',
-                            title: __('收货仓'),
-                            custom: { 1:'yellow',2:'blue'},
-                            searchList: { 1: '郑州',2:'丹阳'},
-                            formatter: Table.api.formatter.status
-                        },
                         { field: 'return_type', title: __('Return_type'),
                             custom: { 1: 'success', 2: 'success', 3: 'success', 4: 'success' },
                             searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货', 4: '仅退货' },
