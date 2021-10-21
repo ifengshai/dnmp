@@ -4642,7 +4642,7 @@ class Test4 extends Controller
                 ->join(['fa_order_item_process' => 'c'], 'c.order_id=b.id')
                 ->group('c.order_prescription_type')
                 ->select();
-            $date[$k]['rate'] = round(($list[2] + $list[3])/($list[1] + $list[2]+ $list[3]),2);
+            $date[$k]['rate'] = ($list[1] + $list[2]+ $list[3]) > 0 ?round(($list[2] + $list[3])/($list[1] + $list[2]+ $list[3]),2) : 0;
             $order_where['status'] = [
                 'in',
                 [
@@ -4654,7 +4654,7 @@ class Test4 extends Controller
             ];
             $order_where['created_at'] = ['between', [strtotime($v[0]),strtotime($v[1])]];
             //销售额
-            $date[$k]['rate']['sales_total_money'] = $order
+            $date[$k]['sales_total_money'] = $order
                 ->where($order_where)
                 ->where('order_type', 1)
                 ->sum('base_grand_total');
@@ -4678,8 +4678,8 @@ class Test4 extends Controller
                 ->field('customer_email')
                 ->group('customer_email')
                 ->column('customer_email');
-            $date[$k]['rate']['users'] = $timeUser;
-            $date[$k]['rate']['users_per'] = round($date[$k]['rate']['sales_total_money']/$timeUser,2);
+            $date[$k]['users'] = $timeUser;
+            $date[$k]['users_per'] = round((((int)$date[$k]['sales_total_money'])/(int)$timeUser),2);
         }
 
         dump($date);die;
