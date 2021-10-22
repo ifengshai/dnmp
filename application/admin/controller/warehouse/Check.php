@@ -773,6 +773,7 @@ class Check extends Backend
                 $params['createtime'] = date('Y-m-d H:i:s', time());
                 $result = $return_model->allowField(true)->isUpdate(false)->data($params)->save();
 
+                $stock_id = Db::name('logistics_info')->where('purchase_id',$k)->value('sign_warehouse');
                 $i = 0;
                 $info = [];
                 $return_money = 0;
@@ -800,7 +801,7 @@ class Check extends Backend
                         $check_ids = implode(',', array_unique($check_id_params));
                     }
                     //填充退货金额  采购总金额
-                    $return_model->allowField(true)->isUpdate(true, ['id' => $return_model->id])->save(['return_money' => $return_money, 'purchase_total' => $purchase_total, 'check_ids' => $check_ids]);
+                    $return_model->allowField(true)->isUpdate(true, ['id' => $return_model->id])->save(['return_money' => $return_money, 'purchase_total' => $purchase_total, 'check_ids' => $check_ids, 'stock_id' => $stock_id]);
                 }
             }
 

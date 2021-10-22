@@ -6,6 +6,7 @@ use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\purchase\PurchaseReturn;
 use app\admin\model\purchase\SampleWorkorder;
 use app\admin\model\purchase\SampleWorkorderItem;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
@@ -4688,5 +4689,16 @@ class Test4 extends Controller
             $list[] = explode('/', date('Y-m-01', $t) . '/' . date('Y-m-', $t) . date('t', $t));
         }
         return $list;
+    }
+
+    public function run_purchase_order_return()
+    {
+        $model = new PurchaseReturn();
+        $list = Db::name('purchase_return')->field('purchase_id,id')->select();
+        foreach ($list as $k=>$v){
+            $list[$k]['stock_id'] = Db::name('logistics_info')->where('purchase_id',$v['purchase_id'])->value('sign_warehouse');
+            unset($list[$k]['purchase_id']);
+        }
+        $model->saveAll($list);
     }
 }
