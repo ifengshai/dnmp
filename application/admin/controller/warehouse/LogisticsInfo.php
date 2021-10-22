@@ -210,6 +210,7 @@ class LogisticsInfo extends Backend
         if ($this->request->isPost()) {
             $ids = input('id');
             $sign_number = input('sign_number');
+            empty($sign_number) && $this->error('签收编号不能为空');
             $sign_count = input('sign_count');
             $item_platform = new ItemPlatformSku();
             $row = $this->model->get($ids);
