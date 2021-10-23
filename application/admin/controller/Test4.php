@@ -4681,7 +4681,73 @@ class Test4 extends Controller
 
         dump($date);die;
     }
-    public function getRecentMonth($recent = 22, $time = 1636971061) {
+
+    public function export_data_warehouse_glass()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $date = $this->getRecentMonth();
+        $neworderprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        foreach ($date as $k=>$v) {
+            //统计处方镜
+            $map['a.created_at'] = ['between', [strtotime($v[0] . '00:00:00'), strtotime($v[1] . '23:59:59')]];
+            //过滤补差价单
+            $map['a.order_type'] = ['<>', 5];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
+            $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
+            $siteData = [];
+            foreach ($siteArr as $sk=>$sv){
+                $siteData[$v[0]][$sk] = $neworderprocess
+                    ->alias('b')
+                    ->join(['fa_order' => 'a'], 'b.order_id=a.id')
+                    ->join(['fa_order_item_option' => 'c'], 'b.option_id=c.id')
+                    ->where('b.order_prescription_type', '=', 2)
+                    ->where($map)
+                    ->where('a.site',$sk)
+                    ->field('a.id,b.item_order_number,c.qty,c.lens_number')
+                    ->select();
+                $siteData[$v[0]][$sk] = collection($siteData[$v[0]][$sk])->toArray();
+                $siteData[$v[0]][$sk] = array_column($siteData[$v[0]][$sk],'lens_number');
+                $siteData[$v[0]][$sk] = array_count_values($siteData[$v[0]][$sk]);
+            }
+            $allData[$v[0]] =$siteData;
+        }
+        dump($allData);die;
+    }
+
+    public function export_data_warehouse_glass_2()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $date = $this->getRecentMonth();
+        $neworderprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        foreach ($date as $k=>$v) {
+            //统计处方镜
+            $map['a.created_at'] = ['between', [strtotime($v[0] . '00:00:00'), strtotime($v[1] . '23:59:59')]];
+            //过滤补差价单
+            $map['a.order_type'] = ['<>', 5];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
+            $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
+            $siteData = [];
+            foreach ($siteArr as $sk=>$sv){
+                $siteData[$v[0]][$sk] = $neworderprocess
+                    ->alias('b')
+                    ->join(['fa_order' => 'a'], 'b.order_id=a.id')
+                    ->join(['fa_order_item_option' => 'c'], 'b.option_id=c.id')
+                    ->where('b.order_prescription_type', '=', 3)
+                    ->where($map)
+                    ->where('a.site',$sk)
+                    ->field('a.id,b.item_order_number,c.qty,c.lens_number')
+                    ->select();
+                $siteData[$v[0]][$sk] = collection($siteData[$v[0]][$sk])->toArray();
+                $siteData[$v[0]][$sk] = array_column($siteData[$v[0]][$sk],'lens_number');
+                $siteData[$v[0]][$sk] = array_count_values($siteData[$v[0]][$sk]);
+            }
+            $allData[$v[0]] =$siteData;
+        }
+        dump($allData);die;
+    }
+    public function getRecentMonth($recent = 5, $time = 1636971061) {
         !$time && $time = time();
         $list = [];
         for ($i = $recent; $i > 0; --$i) {
