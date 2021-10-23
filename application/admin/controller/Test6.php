@@ -2,6 +2,8 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\zendesk\Zendesk;
+use app\admin\model\zendesk\ZendeskTasks;
 use app\common\controller\Backend;
 use FacebookAds\Api;
 use FacebookAds\Object\Campaign;
@@ -308,4 +310,25 @@ class Test6 extends Backend
         echo 'ok';
     }
 
+    public static function shellEmailDistribution()
+    {
+        $now_date = date('Y-m-d H:i:s');
+        $limit_date = date('Y-m-d 16:00:00');
+        $agents = Db::name('zendesk_admin')
+            ->alias('z')->join(['fa_admin' => 'a'],'z.admin_id=a.id')
+            ->field('z.*,a.userid')
+            ->where('a.status', '<>', 'hidden')
+            ->where('z.count', '<>',0)
+            ->select();
+        //查询该用户今天是否休息
+        $userlist_arr = array_filter(array_column($agents, 'userid'));
+        $userlist_str = implode(',', $userlist_arr);
+        $time = strtotime(date('Y-m-d 0:0:0', time()));
+        //通过接口获取休息人员名单
+        $ding = new \app\api\controller\Ding;
+        $restuser_arr = $ding->getRestList($userlist_str, $time);
+        dump($restuser_arr);
+        exit;
+
+    }
 }
