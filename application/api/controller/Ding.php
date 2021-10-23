@@ -316,6 +316,19 @@ class Ding extends Controller
         }
         return $rest_list;
     }
+    public function getRestListBak($userlist_str, $time)
+    {
+        //listByUsers中的第一个参数为开发者李想的钉钉id,如果后期有问题及时更改
+        $user = $this->app->attendance->listByUsers('1965280658937204', $userlist_str, $time . '000', $time . '000');
+        $userlist = $user['result'];
+        $rest_list = array();
+        foreach ($userlist as $item) {
+            if ($item['is_rest'] == 'Y') {
+                $rest_list[] = Db::name('admin')->where('userid', $item['userid'])->value('id');
+            }
+        }
+        return $rest_list;
+    }
     /**
      * 注册事件回调
      * @return [type] [description]
