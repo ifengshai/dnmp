@@ -26,6 +26,13 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         { checkbox: true },
                         { field: 'id', title: __('Id') },
                         { field: 'return_number', title: __('Return_number'), operate: 'like' },
+                        {
+                            field: 'stock_id',
+                            title: __('收货仓'),
+                            custom: { 1:'yellow',2:'blue'},
+                            searchList: { 1: '郑州',2:'丹阳'},
+                            formatter: Table.api.formatter.status
+                        },
                         { field: 'purchaseorder.purchase_number', title: __('Purchase_id'), operate: 'like' },
                         { field: 'supplier.supplier_name', title: __('Supplier_id'), operate: 'like' },
                         { field: 'return_type', title: __('Return_type'), custom: { 1: 'success', 2: 'success', 3: 'success', 4: 'success' }, searchList: { 1: '仅退款', 2: '退货退款', 3: '调换货', 4: '仅退货' }, formatter: Table.api.formatter.status },

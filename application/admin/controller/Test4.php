@@ -6,6 +6,7 @@ use app\admin\model\itemmanage\Item;
 use app\admin\model\itemmanage\ItemPlatformSku;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\purchase\PurchaseReturn;
 use app\admin\model\purchase\SampleWorkorder;
 use app\admin\model\purchase\SampleWorkorderItem;
 use app\admin\model\saleaftermanage\WorkOrderChangeSku;
@@ -572,6 +573,80 @@ class Test4 extends Controller
                 usleep(100000);
             }
         }
+    }
+
+
+    //运营数据中心--德语站
+    public function zeelool_de_operate_data_center_xiufu()
+    {
+        $model = Db::connect('database.db_zeelool_de');
+        $model->table('customer_entity')->query("set time_zone='+8:00'");
+        $model->table('oc_vip_order')->query("set time_zone='+8:00'");
+        $model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+
+        //查询时间
+        $date_time = $this->zeeloolde->query("SELECT DATE_FORMAT(payment_time, '%Y-%m-%d') AS date_time FROM `sales_flat_order` where payment_time between '2021-10-01' and '2021-10-20' GROUP BY DATE_FORMAT(payment_time, '%Y%m%d') order by DATE_FORMAT(payment_time, '%Y%m%d') asc");
+        foreach ($date_time as $val) {
+            $is_exist = Db::name('datacenter_day')->where('day_date', $val['date_time'])->where('site', 10)->value('id');
+            $arr = [];
+            //订单数
+            $order_where = [];
+            $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $order_where['status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+            $arr['order_num'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->count();
+            //销售额
+            $arr['sales_total_money'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->sum('base_grand_total');
+            //邮费
+            $arr['shipping_total_money'] = $this->zeeloolde->where($order_where)->where('order_type', 1)->sum('base_shipping_amount');
+            //客单价
+            $arr['order_unit_price'] = $arr['order_num'] ? round($arr['sales_total_money'] / $arr['order_num'], 2) : 0;
+            //中位数
+            $sales_total_money = $this->zeeloolde->where($order_where)->where('order_type', 1)->column('base_grand_total');
+            $arr['order_total_midnum'] = $this->median($sales_total_money);
+            //标准差
+            $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+            //补发订单数
+            $arr['replacement_order_num'] = $this->zeeloolde->where($order_where)->where('order_type', 4)->count();
+            //补发销售额
+            $arr['replacement_order_total'] = $this->zeeloolde->where($order_where)->where('order_type', 4)->sum('base_grand_total');
+            //网红订单数
+            $arr['online_celebrity_order_num'] = $this->zeeloolde->where($order_where)->where('order_type', 3)->count();
+            //补发销售额
+            $arr['online_celebrity_order_total'] = $this->zeeloolde->where($order_where)->where('order_type', 3)->sum('base_grand_total');
+            //会话
+            $arr['sessions'] = $this->google_session(10, $val['date_time']);
+            //新建购物车数量
+            $cart_where1 = [];
+            $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['new_cart_num'] = $model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total', 'gt', 0)->count();
+            //更新购物车数量
+            $cart_where2 = [];
+            $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $val['date_time'] . "'")];
+            $arr['update_cart_num'] = $model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total', 'gt', 0)->count();
+            //新增加购率
+            $arr['add_cart_rate'] = $arr['sessions'] ? round($arr['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+            //更新加购率
+            $arr['update_add_cart_rate'] = $arr['sessions'] ? round($arr['update_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+            //新增购物车转化率
+            $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
+            //更新购物车转化率
+            $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100, 2) : 0;
+            if (!$is_exist) {
+                $arr['site'] = 10;
+                $arr['day_date'] = $val['date_time'];
+                //插入数据
+                Db::name('datacenter_day')->insert($arr);
+                echo $val['date_time'] .' ok'. "\n";
+                usleep(100000);
+            } else{
+                dump($arr);
+                //更新数据
+//                Db::name('datacenter_day')->where('id',$is_exist)->update($arr);
+                echo $val['date_time'] .' is ok'. "\n";
+                usleep(100000);
+            }
+        }
+
     }
 
     //运营数据中心--日本站
@@ -4544,5 +4619,193 @@ class Test4 extends Controller
     public function test_out_of_package()
     {
         var_dump($this->nihao->undeliveredOrder([]));
+    }
+
+    public function export_data_warehouse()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $date = $this->getRecentMonth();
+        $neworderprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $order = new NewOrder();
+        foreach ($date as $k=>$v){
+            //统计处方镜
+            $map['a.created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
+            //过滤补差价单
+            $map['a.order_type'] = ['<>', 5];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+            $date[$k]['chufangjing'] = $neworderprocess
+                ->alias('b')
+                ->join(['fa_order' => 'a'], 'b.order_id=a.id')
+                ->where('b.order_prescription_type','in',[2,3])
+                ->where($map)
+                ->count();
+            $date[$k]['zongfushu'] = $neworderprocess
+                ->alias('b')
+                ->join(['fa_order' => 'a'], 'b.order_id=a.id')
+                ->where('b.order_prescription_type','in',[1,2,3])
+                ->where($map)
+                ->count();
+            $date[$k]['rate'] = $date[$k]['zongfushu'] > 0 ? round($date[$k]['chufangjing']/$date[$k]['zongfushu'],2) : 0;
+            $order_where['status'] = [
+                'in',
+                ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
+            ];
+
+            $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
+            foreach ($siteArr as $sk=>$sv){
+                $order_where['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
+                $order_where['site'] = ['=', $sk];
+                //销售额
+                $date[$k][$sv]['sales_total_money'] = $order
+                    ->where($order_where)
+                    ->where('order_type', 1)
+                    ->sum('base_grand_total');
+                $where['order_type'] = 1;
+                $where['site'] = ['=', $sk];
+                $where['status'] = [
+                    'in',
+                    ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
+                ];
+                $where1['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
+                $timeUser = $order
+                    ->where($where)
+                    ->where($where1)
+                    ->field('customer_email')
+                    ->group('customer_email')
+                    ->column('customer_email');
+                $date[$k][$sv]['users'] = count($timeUser);
+                $date[$k][$sv]['users_per'] = count($timeUser)>0 ? round((((int)$date[$k][$sv]['sales_total_money'])/(int)count($timeUser)),2) : 0;
+            }
+        }
+
+        dump($date);die;
+    }
+
+    public function export_data_warehouse_glass()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $date = $this->getRecentMonth();
+        $neworderprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        foreach ($date as $k=>$v) {
+            //统计处方镜
+            $map['a.created_at'] = ['between', [strtotime($v[0] . '00:00:00'), strtotime($v[1] . '23:59:59')]];
+            //过滤补差价单
+            $map['a.order_type'] = ['<>', 5];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
+            $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
+            $siteData = [];
+            foreach ($siteArr as $sk=>$sv){
+                $siteData[$v[0]][$sk] = $neworderprocess
+                    ->alias('b')
+                    ->join(['fa_order' => 'a'], 'b.order_id=a.id')
+                    ->join(['fa_order_item_option' => 'c'], 'b.option_id=c.id')
+                    ->where('b.order_prescription_type', '=', 2)
+                    ->where($map)
+                    ->where('a.site',$sk)
+                    ->field('a.id,b.item_order_number,c.qty,c.lens_number')
+                    ->select();
+                $siteData[$v[0]][$sk] = collection($siteData[$v[0]][$sk])->toArray();
+                $siteData[$v[0]][$sk] = array_column($siteData[$v[0]][$sk],'lens_number');
+                $siteData[$v[0]][$sk] = array_count_values($siteData[$v[0]][$sk]);
+            }
+            $allData[$v[0]] =$siteData;
+            echo $v[0].'完成';
+        }
+        file_put_contents('/var/www/mojing/runtime/log/glass.json', json_encode($allData));
+    }
+
+    public function export_data_warehouse_glass_2()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $date = $this->getRecentMonth();
+        $neworderprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        foreach ($date as $k=>$v) {
+            //统计处方镜
+            $map['a.created_at'] = ['between', [strtotime($v . '00:00:00'), strtotime($v[1] . '23:59:59')]];
+            //过滤补差价单
+            $map['a.order_type'] = ['<>', 5];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
+            $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
+            $siteData = [];
+            foreach ($siteArr as $sk=>$sv){
+                $siteData[$v[0]][$sk] = $neworderprocess
+                    ->alias('b')
+                    ->join(['fa_order' => 'a'], 'b.order_id=a.id')
+                    ->join(['fa_order_item_option' => 'c'], 'b.option_id=c.id')
+                    ->where('b.order_prescription_type', '=', 3)
+                    ->where($map)
+                    ->where('a.site',$sk)
+                    ->field('a.id,b.item_order_number,c.qty,c.lens_number')
+                    ->select();
+                $siteData[$v[0]][$sk] = collection($siteData[$v[0]][$sk])->toArray();
+                $siteData[$v[0]][$sk] = array_column($siteData[$v[0]][$sk],'lens_number');
+                $siteData[$v[0]][$sk] = array_count_values($siteData[$v[0]][$sk]);
+            }
+            $allData[$v[0]] =$siteData;
+            echo $v[0].'完成';
+        }
+        file_put_contents('/var/www/mojing/runtime/log/glass2.json', json_encode($allData));
+    }
+    public function export_data_warehouse2()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $date = $this->getRecentMonth();
+        $neworderprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $order = new NewOrder();
+        foreach ($date as $k=>$v){
+            $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
+            foreach ($siteArr as $sk=>$sv){
+                $order_where['status'] = [
+                    'in',
+                    ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
+                ];
+                $order_where['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
+                $order_where['site'] = ['=', $sk];
+                //销售额
+                $date[$k][$sv]['sales_total_money'] = $order
+                    ->where($order_where)
+                    ->where('order_type', 1)
+                    ->sum('base_grand_total');
+                $where['order_type'] = 1;
+                $where['site'] = ['=', $sk];
+                $where['status'] = [
+                    'in',
+                    ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
+                ];
+                $where1['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
+                $timeUser = $order
+                    ->where($where)
+                    ->where($where1)
+                    ->count();
+                $date[$k][$sv]['users'] = $timeUser;
+                $date[$k][$sv]['users_per'] = $timeUser>0 ? round((((int)$date[$k][$sv]['sales_total_money'])/(int)$timeUser),2) : 0;
+            }
+        }
+
+        dump($date);die;
+    }
+    public function getRecentMonth($recent = 22, $time = 1636971061) {
+        !$time && $time = time();
+        $list = [];
+        for ($i = $recent; $i > 0; --$i) {
+            $t = strtotime("-$i month", $time);
+            $list[] = explode('/', date('Y-m-01', $t) . '/' . date('Y-m-', $t) . date('t', $t));
+        }
+        return $list;
+    }
+
+    public function run_purchase_order_return()
+    {
+        $model = new PurchaseReturn();
+        $list = Db::name('purchase_return')->field('purchase_id,id')->select();
+        foreach ($list as $k=>$v){
+            $list[$k]['stock_id'] = Db::name('logistics_info')->where('purchase_id',$v['purchase_id'])->value('sign_warehouse');
+            unset($list[$k]['purchase_id']);
+        }
+        $model->saveAll($list);
     }
 }
