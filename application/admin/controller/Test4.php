@@ -4747,7 +4747,42 @@ class Test4 extends Controller
         }
         dump($allData);die;
     }
-    public function getRecentMonth($recent = 5, $time = 1636971061) {
+    public function export_data_warehouse2()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $date = $this->getRecentMonth();
+        $neworderprocess = new \app\admin\model\order\order\NewOrderItemProcess();
+        $order = new NewOrder();
+        foreach ($date as $k=>$v){
+            $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
+            foreach ($siteArr as $sk=>$sv){
+                $order_where['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
+                $order_where['site'] = ['=', $sk];
+                //销售额
+                $date[$k][$sv]['sales_total_money'] = $order
+                    ->where($order_where)
+                    ->where('order_type', 1)
+                    ->sum('base_grand_total');
+                $where['order_type'] = 1;
+                $where['site'] = ['=', $sk];
+                $where['status'] = [
+                    'in',
+                    ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
+                ];
+                $where1['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
+                $timeUser = $order
+                    ->where($where)
+                    ->where($where1)
+                    ->count();
+                $date[$k][$sv]['users'] = $timeUser;
+                $date[$k][$sv]['users_per'] = $timeUser>0 ? round((((int)$date[$k][$sv]['sales_total_money'])/(int)$timeUser),2) : 0;
+            }
+        }
+
+        dump($date);die;
+    }
+    public function getRecentMonth($recent = 22, $time = 1636971061) {
         !$time && $time = time();
         $list = [];
         for ($i = $recent; $i > 0; --$i) {
