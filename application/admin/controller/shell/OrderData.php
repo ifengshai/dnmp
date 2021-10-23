@@ -2125,7 +2125,7 @@ class OrderData extends Backend
         $site = 3;
         $list = Db::connect('database.db_nihao_online')
             ->table('order_addresses')
-            ->where(['order_id' => ['in', [91239]]])->where('type=1')
+            ->where(['order_id' => ['in', [91239]]])
             ->select();
         $params = [];
         foreach ($list as $k => $v) {
