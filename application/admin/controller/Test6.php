@@ -326,7 +326,7 @@ class Test6 extends Backend
         $time = strtotime(date('Y-m-d 0:0:0', time()));
         //通过接口获取休息人员名单
         $ding = new \app\api\controller\Ding;
-        $restuser_arr = $ding->getRestList($userlist_str, $time);
+        $restuser_arr = $ding->getRestListBak($userlist_str, $time);
         dump($restuser_arr);
         exit;
 
