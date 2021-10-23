@@ -4759,6 +4759,10 @@ class Test4 extends Controller
         foreach ($date as $k=>$v){
             $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
             foreach ($siteArr as $sk=>$sv){
+                $order_where['status'] = [
+                    'in',
+                    ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']
+                ];
                 $order_where['created_at'] = ['between', [strtotime($v[0].'00:00:00'),strtotime($v[1].'23:59:59')]];
                 $order_where['site'] = ['=', $sk];
                 //销售额
