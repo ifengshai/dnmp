@@ -2028,6 +2028,196 @@ class OrderData extends Backend
     }
     ########################################end##############################################
 
+    /**
+     * 重构m站主表
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 09:37:37 
+     *
+     * @param     [type] $site
+     *
+     * @return void
+     */
+    public function nihao_meeloog_order()
+    {
+        $site = 3;
+        $list = Db::connect('database.db_nihao_online')->table('orders')->where(['id' => ['in', [91239]]])->select();
 
+        $order_params = [];
+        foreach ($list as $k => $v) {
+            $params = [];
+            $params['entity_id'] = $v['id'];
+            $params['site'] = $site;
+            $params['increment_id'] = $v['order_no'];
+            $params['status'] = $v['status'] == 'shipped' ? 'complete' : $v['status'];
+            $params['base_grand_total'] = $v['base_actual_payment'] ?: 0;
+            $params['grand_total'] = $v['actual_payment'] ?: 0;
+            $store_id = 0;
+            if ($v['source'] == 'pc') {
+                $store_id = 1;
+            } elseif ($v['source'] == 'wap') {
+                $store_id = 2;
+            } elseif ($v['source'] == 'android') {
+                $store_id = 3;
+            } elseif ($v['source'] == 'ios') {
+                $store_id = 4;
+            }
+            $params['store_id'] = $store_id;
+            $params['customer_email'] = $v['email'] ?? '';
+            $params['total_qty_ordered'] = $v['goods_quantity'];
+            $params['base_currency_code'] = $v['base_currency'];
+            $params['order_currency_code'] = $v['now_currency'];
+            $params['coupon_code'] = $v['code'];
+            $params['coupon_rule_name'] = $v['coupon_id'];
+            if ($v['order_type'] == 2) {
+                $order_type = 3;
+            } elseif ($v['order_type'] == 3) {
+                $order_type = 4;
+            } else {
+                $order_type = $v['order_type'];
+            }
+            $params['order_type'] = $order_type;
+            $params['shipping_method'] = $v['freight_type'];
+            $params['shipping_title'] = $v['freight_description'];
+            $params['base_to_order_rate'] = $v['rate'];
+            $params['base_shipping_amount'] = $v['freight_price'];
+            $params['base_discount_amount'] = $v['base_discounts_price'];
+            $params['customer_id'] = $v['user_id'] ?: 0;
+            $params['payment_method'] = $v['payment_type'];
+            $params['created_at'] = strtotime($v['created_at']) + 28800;
+            $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+            $params['last_trans_id'] = $v['payment_order_no'];
+            if (isset($v['payment_time'])) {
+                $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+            }
+
+            //插入订单主表
+            $order_id = $this->order->insertGetId($params);
+            //es同步订单数据，插入
+            $this->asyncOrder->runInsert($params, $order_id);
+            $order_params[$k]['site'] = $site;
+            $order_params[$k]['order_id'] = $order_id;
+            $order_params[$k]['entity_id'] = $v['id'];
+            $order_params[$k]['increment_id'] = $v['order_no'];
+
+            echo $v['entity_id'] . "\n";
+            usleep(10000);
+        }
+        //插入订单处理表
+        if ($order_params) {
+            $this->orderprocess->saveAll($order_params);
+        }
+        echo "ok";
+    }
+
+
+    /**
+     * 重构m站主表地址处理
+     *
+     * @Description
+     * @return void
+     * @since  2020/11/02 18:31:12
+     * @author wpl
+     */
+    public function nihao_meeloog_order_address_data()
+    {
+        $site = 3;
+        $list = Db::connect('database.db_nihao_online')
+            ->table('order_addresses')
+            ->where(['order_id' => ['in', [91239]]])->where('type=1')
+            ->select();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $params = [];
+            if ($v['type'] == 1) {
+                $params['country_id'] = $v['country_id'];
+                $params['customer_email'] = $v['email'];
+                $params['address'] = $v['address'];
+                $params['taxno'] = $v['cpf'];
+                $params['region'] = $v['region'];
+                $params['city'] = $v['city'];
+                $params['street'] = $v['street'];
+                $params['postcode'] = $v['postcode'];
+                $params['telephone'] = $v['telephone'];
+                $params['customer_firstname'] = $v['firstname'];
+                $params['customer_lastname'] = $v['lastname'];
+                $params['firstname'] = $v['firstname'];
+                $params['lastname'] = $v['lastname'];
+                $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update($params);
+            }
+        }
+        echo $site . 'ok';
+    }
+
+
+    /**
+     * 重构m站主表地址处理
+     *
+     * @Description
+     * @return void
+     * @since  2020/11/02 18:31:12
+     * @author wpl
+     */
+    public function nihao_meeloog_order_item_data()
+    {
+        $site = 3;
+        $list = Db::connect('database.db_nihao_online')
+            ->table('order_items')
+            ->where(['order_id' => ['in', [91239]]])->select();
+        foreach ($list as $k => $v) {
+            $options = [];
+            //处方解析 不同站不同字段
+            $options = $this->nihao_prescription_analysis($v['prescription']);
+            $options['base_row_total'] = $v['base_goods_total_price'];
+            $options['name'] = $v['goods_name'];
+            $options['index_price'] = $v['lens_price'];
+            $options['coating_price'] = $v['coating_price'];
+            $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
+            $options['base_discount_amount'] = $v['base_goods_discounts_price'];
+            $options['single_base_original_price'] = $v['base_goods_price'];
+            $options['lens_height'] = $v['lens_height'];
+            $options['lens_width'] = $v['lens_width'];
+            $options['bridge'] = $v['bridge'];
+            //镜片价格
+            $options['lens_price'] = $v['lens_price'] ?? 0;
+            //商品总价
+            $options['total'] = $v['goods_total_price'] ?? 0;
+            $options['item_id'] = $v['id'];
+            $options['site'] = $site;
+            $options['magento_order_id'] = $v['order_id'];
+            $options['sku'] = $this->getTrueSku($v['goods_sku']);
+            $options['qty'] = $v['goods_count'];
+            $options['product_id'] = $v['goods_id'];
+            $options['frame_regural_price'] = $v['goods_original_price'];
+            $options['frame_price'] = $v['goods_price'];
+            $options['frame_color'] = $v['goods_color'];
+            $options['goods_type'] = $v['goods_type'] ?? '';
+            $order_prescription_type = $options['order_prescription_type'];
+            unset($options['order_prescription_type']);
+            unset($options['is_prescription_abnormal']);
+            if ($options) {
+                $options_id = $this->orderitemoption->insertGetId($options);
+                $data = []; //子订单表数据
+                for ($i = 0; $i < $v['goods_count']; $i++) {
+                    $data[$i]['item_id'] = $v['id'];
+                    $data[$i]['magento_order_id'] = $v['order_id'];
+                    $data[$i]['site'] = $site;
+                    $data[$i]['option_id'] = $options_id;
+                    $data[$i]['sku'] = $options['sku'];
+                    $data[$i]['order_prescription_type'] = $order_prescription_type;
+                    $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
+                    $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
+                }
+                $this->orderitemprocess->insertAll($data);
+                $this->orderitemprocess->where(['item_id' => $v['id'], 'site' => $site])->update(['stock_id' => 2]);
+
+                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+            }
+        }
+
+        echo $site . 'ok';
+    }
 
 }
