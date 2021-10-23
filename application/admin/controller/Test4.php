@@ -4711,8 +4711,9 @@ class Test4 extends Controller
                 $siteData[$v[0]][$sk] = array_count_values($siteData[$v[0]][$sk]);
             }
             $allData[$v[0]] =$siteData;
+            echo $v[0].'完成';
         }
-        dump($allData);die;
+        file_put_contents('/var/www/mojing/runtime/log/glass.json', json_encode($allData));
     }
 
     public function export_data_warehouse_glass_2()
@@ -4723,7 +4724,7 @@ class Test4 extends Controller
         $neworderprocess = new \app\admin\model\order\order\NewOrderItemProcess();
         foreach ($date as $k=>$v) {
             //统计处方镜
-            $map['a.created_at'] = ['between', [strtotime($v[0] . '00:00:00'), strtotime($v[1] . '23:59:59')]];
+            $map['a.created_at'] = ['between', [strtotime($v . '00:00:00'), strtotime($v[1] . '23:59:59')]];
             //过滤补差价单
             $map['a.order_type'] = ['<>', 5];
             $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
@@ -4744,8 +4745,9 @@ class Test4 extends Controller
                 $siteData[$v[0]][$sk] = array_count_values($siteData[$v[0]][$sk]);
             }
             $allData[$v[0]] =$siteData;
+            echo $v[0].'完成';
         }
-        dump($allData);die;
+        file_put_contents('/var/www/mojing/runtime/log/glass2.json', json_encode($allData));
     }
     public function export_data_warehouse2()
     {
