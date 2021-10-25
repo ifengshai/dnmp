@@ -996,4 +996,10 @@ class Ding extends Controller
         }
         return false;
     }
+    public function getbymobile($mobile)
+    {
+        //listByUsers中的第一个参数为开发者李想的钉钉id,如果后期有问题及时更改
+        $user = $this->app->user->getbymobile($mobile);
+        dump($user);
+    }
 }
