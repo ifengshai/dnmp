@@ -1372,4 +1372,29 @@ class Notice extends Controller
         }
         echo 'ok';
     }
+
+    /**
+     * 获取请假状态
+     * @author liushiwei
+     * @date   2021/10/25 17:48
+     */
+    public function getStatus()
+    {
+        $agents = Db::name('zendesk_admin')
+            ->alias('z')->join(['fa_admin' => 'a'],'z.admin_id=a.id')
+            ->field('z.*,a.userid')
+            ->where('a.status', '<>', 'hidden')
+            ->select();
+        $userlist_arr = array_filter(array_column($agents, 'userid'));
+        $userlist_str = implode(',', $userlist_arr);
+        $time = strtotime(date('Y-m-d 0:0:0', time()));
+        $params['userid_list'] = $userlist_str;
+        $params['start_time']  = $time*1000;
+        $params['end_time']    = ($time+86400)*1000;
+        dump($params['start_time']);
+        dump($params['end_time']);
+        $ding = new \app\api\controller\Ding;
+        $restuser_arr = $ding->getleavestatus($params);
+
+    }
 }
