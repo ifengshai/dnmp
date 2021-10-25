@@ -175,4 +175,46 @@ class ZendeskAdmin extends Backend
             }
         }
     }
+    public function start_work($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_work')->select();
+            foreach ($row as $v) {
+                if ($v['is_work'] != 2) {
+                    $this->error('只有休息状态才能操作！！');
+                }
+            }
+            $data['is_work'] = 1;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('修改成功');
+            } else {
+                $this->error('修改失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
+    public function end_work($ids = null)
+    {
+        if ($this->request->isAjax()) {
+            $map['id'] = ['in', $ids];
+            $row = $this->model->where($map)->field('id,is_work')->select();
+            foreach ($row as $v) {
+                if ($v['is_work'] != 1) {
+                    $this->error('只有休息状态才能操作！！');
+                }
+            }
+            $data['is_work'] = 2;
+            $res = $this->model->allowField(true)->isUpdate(true, $map)->save($data);
+            if ($res !== false) {
+                $this->success('修改成功');
+            } else {
+                $this->error('修改失败');
+            }
+        } else {
+            $this->error('404 Not found');
+        }
+    }
 }
