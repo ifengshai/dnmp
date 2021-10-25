@@ -1368,7 +1368,7 @@ class Notice extends Controller
         //如果有休息的人员则更新状态为休息人员
         if(count($restuser_arr)>0){
             $where['admin_id'] = ['in',$restuser_arr];
-            Db::name('zendesk_admin')->where($where)->save(['is_work'=>2]);
+            Db::name('zendesk_admin')->where($where)->update(['is_work'=>2]);
         }
     }
 }
