@@ -327,7 +327,7 @@ class Ding extends Controller
      */
     public function getleavestatus($param)
     {
-        $user = $this->app->status($param);
+        $user = $this->app->attendance->status($param);
         dump($user);
     }
     public function getRestListBak($userlist_str, $time)
