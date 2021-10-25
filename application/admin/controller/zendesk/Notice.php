@@ -1391,6 +1391,8 @@ class Notice extends Controller
         $params['userid_list'] = $userlist_str;
         $params['start_time']  = $time*1000;
         $params['end_time']    = ($time+86400)*1000;
+        $params['offset']      = 0;
+        $params['size']        = 10;
         dump($params['start_time']);
         dump($params['end_time']);
         $ding = new \app\api\controller\Ding;
