@@ -519,7 +519,6 @@ class Zendesk extends Model
                 //通过接口获取休息人员名单
                 $ding = new \app\api\controller\Ding;
                 $restuser_arr = $ding->getRestList($userlist_str, $time);
-                file_put_contents('/var/www/mojing/runtime/log/restuser_arr.log', serialize($restuser_arr) . "\r\n", FILE_APPEND);
                 foreach ($agents as $agent) {
                     if (!in_array($agent['admin_id'], $restuser_arr)) {
                         ZendeskTasks::create([
