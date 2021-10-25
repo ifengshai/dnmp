@@ -143,6 +143,7 @@ class TrackReg extends Backend
             $order_ids = [];
             foreach ($order_group as $key => $val) {
                 $aa = $trackingConnector->registerMulti($val);
+                dump($aa);
 
                 //请求接口更改物流表状态
                 $order_ids = implode(',', array_column($val, 'order_id'));
@@ -263,6 +264,9 @@ class TrackReg extends Backend
             $carrierId = 'tnt';
             $title = 'TNT';
         } elseif (stripos($title, 'ups') !== false) {
+            $carrierId = 'ups';
+            $title = 'UPS';
+        } elseif (stripos($title, 'EUB') !== false) {
             $carrierId = 'ups';
             $title = 'UPS';
         }
