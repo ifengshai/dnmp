@@ -1370,5 +1370,6 @@ class Notice extends Controller
             $where['admin_id'] = ['in',$restuser_arr];
             Db::name('zendesk_admin')->where($where)->update(['is_work'=>2]);
         }
+        echo 'ok';
     }
 }
