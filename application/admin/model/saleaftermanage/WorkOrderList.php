@@ -1474,7 +1474,7 @@ class WorkOrderList extends Model
                     $pathinfo = 'magic/order/createOrder';
                     $platform_order = self::where(['id' => $work_id])->value('platform_order');
                     $whereNum['platform_order'] = $platform_order;
-                    $whereNum['replacement_order'] = ['neq','not null'];
+                    $whereNum['replacement_order'] = ['neq',''];
                     $postData['current_replacement_order_num'] = self::where($whereNum)->count();
                     if ($siteType == 13 || $siteType == 14) {
                         $pathinfo = 'api/mojing/reissue_order';//第三方平台补发接口
@@ -1489,8 +1489,6 @@ class WorkOrderList extends Model
                         $postData['old_increment_id'] = $platform_order;
                         $postData['remark'] = self::where(['id' => $work_id])->value('problem_description');
                     }
-                    dump($postData);
-                    exit;
                     if ($siteType == 3){
                         $pathinfo = 'api/mj/createOrder';
                     }
