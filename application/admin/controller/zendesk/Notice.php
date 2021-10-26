@@ -1361,7 +1361,7 @@ class Notice extends Controller
             ->select();
         $userlist_arr = array_filter(array_column($agents, 'userid'));
         $userlist_str = implode(',', $userlist_arr);
-        $time = strtotime(date('Y-m-d 0:0:0', time()));
+        $time = strtotime(date('Y-m-d 0:0:0', strtotime("+1 day")));
         //通过接口获取休息人员名单
         $ding = new \app\api\controller\Ding;
         $restuser_arr = $ding->getRestList($userlist_str, $time);
@@ -1371,32 +1371,5 @@ class Notice extends Controller
             Db::name('zendesk_admin')->where($where)->update(['is_work'=>2]);
         }
         echo 'ok';
-    }
-
-    /**
-     * 获取请假状态
-     * @author liushiwei
-     * @date   2021/10/25 17:48
-     */
-    public function getStatus()
-    {
-        $agents = Db::name('zendesk_admin')
-            ->alias('z')->join(['fa_admin' => 'a'],'z.admin_id=a.id')
-            ->field('z.*,a.userid')
-            ->where('a.status', '<>', 'hidden')
-            ->select();
-        $userlist_arr = array_filter(array_column($agents, 'userid'));
-        $userlist_str = implode(',', $userlist_arr);
-        $time = strtotime(date('Y-m-d 0:0:0', time()));
-        $params['userid_list'] = $userlist_str;
-        $params['start_time']  = $time*1000;
-        $params['end_time']    = ($time+86400)*1000;
-        $params['offset']      = 0;
-        $params['size']        = 10;
-        dump($params['start_time']);
-        dump($params['end_time']);
-        $ding = new \app\api\controller\Ding;
-        $restuser_arr = $ding->getleavestatus($params);
-
     }
 }
