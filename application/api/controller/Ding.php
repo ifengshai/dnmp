@@ -316,6 +316,20 @@ class Ding extends Controller
         }
         return $rest_list;
     }
+
+    /**
+     * 指定用户在指定时间段内的请假状态
+     * @param $userlist_str
+     * @param $time
+     *
+     * @author liushiwei
+     * @date   2021/10/25 17:42
+     */
+    public function getleavestatus($param)
+    {
+        $user = $this->app->attendance->status($param);
+        dump($user);
+    }
     public function getRestListBak($userlist_str, $time)
     {
         //listByUsers中的第一个参数为开发者李想的钉钉id,如果后期有问题及时更改
@@ -995,5 +1009,26 @@ class Ding extends Controller
             );
         }
         return false;
+    }
+    /**
+     * 通过手机号获取用户信息
+     * @param $mobile
+     *
+     * @author liushiwei
+     * @date   2021/10/25 17:38
+     */
+    public function getbymobile($mobile)
+    {
+        //listByUsers中的第一个参数为开发者李想的钉钉id,如果后期有问题及时更改
+        $user = $this->app->user->getUserIdByPhone($mobile);
+        if($user['errcode'] == 0){
+            $userInfo = $this->app->user->get($user['userid']);
+            dump($user);
+            dump($user['userid']);
+            dump($userInfo);
+        }else{
+            dump('error');
+        }
+
     }
 }

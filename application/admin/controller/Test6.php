@@ -309,4 +309,16 @@ class Test6 extends Backend
         }
         echo 'ok';
     }
+
+    /**
+     * 根据用户手机号获取用户userid
+     * @author liushiwei
+     * @date   2021/10/25 16:59
+     */
+    public function getUserId()
+    {
+        $mobile = '15737150715';
+        $ding = new \app\api\controller\Ding;
+        $info = $ding->getbymobile($mobile);
+    }
 }
