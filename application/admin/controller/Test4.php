@@ -4822,10 +4822,9 @@ class Test4 extends Controller
                 $siteData2[$k]['code'] = $k;
                 $siteData2[$k]['num'] = $v;
             }
-
+        dump(array_values($siteData2));die;
         $header = ['站点','编码','数量'];
         $filename = '站点'.$siteArr[$site].$date.'数据';
-        dump(array_values($siteData2));
         Excel::writeCsv(array_values($siteData2), $header, $filename,true);
     }
     public function export_data_warehouse2()
