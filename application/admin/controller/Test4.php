@@ -4764,20 +4764,29 @@ class Test4 extends Controller
         //过滤补差价单
         $map['a.order_type'] = ['<>', 5];
         $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
-        $siteData = $neworderprocess
-            ->alias('b')
-            ->join(['fa_order' => 'a'], 'b.order_id=a.id')
-            ->join(['fa_order_item_option' => 'c'], 'b.option_id=c.id')
-            ->where('b.order_prescription_type', '=', 3)
-            ->where($map)
-            ->where('a.site',$site)
-            ->field('a.id,b.item_order_number,c.qty,c.lens_number')
-            ->select();
-        $siteData = collection($siteData)->toArray();
-        dump($siteData);
-        $siteData1 = array_column($siteData,'lens_number');
-        $siteData2 = array_count_values($siteData1);
-        dump($siteData2);die;
+        $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
+        foreach ($siteArr as $sk=>$sv){
+            $siteData = $neworderprocess
+                ->alias('b')
+                ->join(['fa_order' => 'a'], 'b.order_id=a.id')
+                ->join(['fa_order_item_option' => 'c'], 'b.option_id=c.id')
+                ->where('b.order_prescription_type', '=', 3)
+                ->where($map)
+                ->where('a.site',$sk)
+                ->field('a.id,b.item_order_number,c.qty,c.lens_number')
+                ->select();
+            $siteData = collection($siteData)->toArray();
+            $siteData1 = array_column($siteData,'lens_number');
+            $siteData2 = array_count_values($siteData1);
+            foreach ($siteData2 as $k=>$v){
+                $siteData2[$k]['plat'] = $sk;
+                $siteData2[$k]['code'] = $k;
+                $siteData2[$k]['num'] = $v;
+            }
+        }
+        $header = ['站点','编码','数量'];
+        $filename = '站点'.$siteArr[$site].$date.'数据';
+        Excel::writeCsv(array_values($siteData2), $header, $filename,true);
     }
     public function export_data_warehouse2()
     {
