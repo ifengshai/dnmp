@@ -4778,16 +4778,18 @@ class Test4 extends Controller
             $siteData = collection($siteData)->toArray();
             $siteData1 = array_column($siteData,'lens_number');
             $siteData2 = array_count_values($siteData1);
+            $kkk = 0;
             foreach ($siteData2 as $k=>$v){
-                $siteData2[$k]['plat'] = $sk;
-                $siteData2[$k]['code'] = $k;
-                $siteData2[$k]['num'] = $v;
+                $siteData2[$kkk]['plat'] = $site;
+                $siteData2[$kkk]['code'] = $k;
+                $siteData2[$kkk]['num'] = $v;
+                $kkk +=1;
             }
             $header = ['站点','编码','数量'];
             $path = '/uploads/';
             $filename = '站点'.$siteArr[$sk].$date.'数据';
-            dump(array_values($siteData2));
-            Excel::writeCsv(array_values($siteData2),$header,$path.$filename);
+            dump($siteData2);
+            Excel::writeCsv($siteData2,$header,$path.$filename);
             //获取当前域名
             $request = Request::instance();
             $domain = $request->domain();
@@ -4824,17 +4826,18 @@ class Test4 extends Controller
             $siteData = collection($siteData)->toArray();
             $siteData1 = array_column($siteData,'lens_number');
             $siteData2 = array_count_values($siteData1);
+            $kkk = 0;
             foreach ($siteData2 as $k=>$v){
-                $siteData2[$k]['plat'] = $site;
-                $siteData2[$k]['code'] = $k;
-                $siteData2[$k]['num'] = $v;
+                $siteData2[$kkk]['plat'] = $site;
+                $siteData2[$kkk]['code'] = $k;
+                $siteData2[$kkk]['num'] = $v;
+                $kkk +=1;
             }
-        dump(array_values($siteData2));
         $path = '/uploads/';
         $filename = '站点'.$siteArr[$site].$date.'数据';
-        dump(array_values($siteData2));
+        dump($siteData2);
         $header = ['站点','编码','数量'];
-        Excel::writeCsv(array_values($siteData2),$header,$path.$filename);
+        Excel::writeCsv($siteData2,$header,$path.$filename);
         //获取当前域名
         $request = Request::instance();
         $domain = $request->domain();
