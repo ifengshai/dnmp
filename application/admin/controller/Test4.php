@@ -4785,7 +4785,7 @@ class Test4 extends Controller
                     $kkk +=1;
                 }
                 $header = ['站点','编码','数量'];
-                $path = '/uploads/lensdata';
+                $path = '/uploads/lensdata/';
                 $filename = '站点'.$siteArr[$sk].$dv[0].'数据';
                 dump($siteData2);
                 dump($siteData3);
