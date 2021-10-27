@@ -297,7 +297,6 @@ class OrderData extends Backend
                                         $params['grand_total'] = $v['actual_amount_paid'] ?: 0;
                                         $params['store_id'] = $v['source'];
                                         $params['customer_email'] = $v['email'] ?? '';
-                                        $params['is_print_logo'] = $v['is_print_logo'] ?? 0;
                                     }
                                     $params['total_qty_ordered'] = $v['goods_quantity'];
                                     $params['base_currency_code'] = $v['base_currency'];
@@ -366,7 +365,6 @@ class OrderData extends Backend
                                         $params['grand_total'] = $v['actual_amount_paid'] ?: 0;
                                         $params['store_id'] = $v['source'];
                                         $params['customer_email'] = $v['email'] ?? '';
-                                        $params['is_print_logo'] = $v['is_print_logo'] ?? 0;
                                     }
 
 
@@ -527,6 +525,7 @@ class OrderData extends Backend
                                         $options['single_base_original_price'] = $v['base_goods_price'];
                                         $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
                                         $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
+                                        $options['is_print_logo'] = $this->set_wesee_is_print_logo($v['order_id']);
                                         unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     } elseif ($site == Site::NIHAO) {
                                         $options = $this->nihao_prescription_analysis($v['prescription']);
@@ -602,6 +601,7 @@ class OrderData extends Backend
                                     if ($site == 5) {
                                         $options = $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                         $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
+                                        $options['is_print_logo'] = $this->set_wesee_is_print_logo($v['order_id']);
                                         unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     } elseif ($site == Site::NIHAO) {
                                         $options = $this->nihao_prescription_analysis($v['prescription']);
@@ -2222,4 +2222,20 @@ class OrderData extends Backend
         echo $site . 'ok';
     }
 
+    /**
+     * 是否加印logo
+     *
+     * @param $orderId
+     * @return int
+     * @throws \think\Exception
+     * @author baochenghuan
+     * @date   2021/10/27 14:46
+     */
+    public function set_wesee_is_print_logo($orderId)
+    {
+        return Db::connect('database.db_weseeoptical')
+            ->table('orders')
+            ->where(['id' => $orderId])
+            ->value('is_print_logo') ?: 0;
+    }
 }
