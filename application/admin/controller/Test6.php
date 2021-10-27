@@ -321,4 +321,63 @@ class Test6 extends Backend
         $ding = new \app\api\controller\Ding;
         $info = $ding->getbymobile($mobile);
     }
+
+    /**
+     * 批量创建采购单
+     * @author liushiwei
+     * @date   2021/10/27 10:11
+     */
+    public function createPurchaseOrder()
+    {
+        $list = Db::name('zz_purchase')
+            ->alias('temp')
+            ->join('fa_purchase_order op','temp.purchase_number_temp=op.purchase_number')
+            ->join('fa_purchase_order_item item','temp.purchase_number_temp=item.purchase_order_number')
+            ->select();
+        if(!$list){
+            return false;
+        }
+        $this->purchase_order = new \app\admin\model\purchase\PurchaseOrder;
+        $this->purchase_order_item = new \app\admin\model\purchase\PurchaseOrderItem;
+        foreach($list as $v){
+            $data =$item_data= [];
+            $data['purchase_number'] = $purchase_order = 'PO' . date('YmdHis') . rand(100, 999) . rand(100, 999);
+            $data['1688_number'] = $v['1688_number'];
+            $data['purchase_name'] = $v['purchase_name'];
+            $data['factory_type'] = $v['factory_type'];
+            $data['purchase_type'] = $v['purchase_type'];
+            $data['is_sample'] = 0; //是否是留样采购单 0 不留样
+            $data['type'] = $v['type']; //是否大货现货
+            $data['is_new_product'] = $v['is_new_product'];
+            $data['pay_type'] = $v['pay_type'];
+            $data['pay_rate'] = $v['pay_rate'];
+            $data['arrival_time'] = $v['arrival_time'];
+            $data['purchase_remark'] = $v['purchase_remark'];
+            $data['contract_id'] = $v['contract_id'];
+            $data['delivery_address'] = $v['delivery_address'];
+            $data['delivery_time'] = $v['delivery_time'];
+            $data['supplier_id'] = $v['supplier_id'];
+            $data['supplier_type'] = $v['supplier_type'];
+            $data['supplier_address'] = $v['supplier_address'];
+            $data['product_total']    = $v['product_total'];
+            $data['purchase_freight']    = $v['purchase_freight'];
+            $data['purchase_total']    = $v['purchase_total'];
+            $data['settlement_method'] = $v['settlement_method'];
+            $data['create_person']    = $v['create_person'];
+            $data['createtime']    = $v['createtime'];
+            $result = $this->purchase_order->allowField(true)->save($data);
+            if ($result !== false) {
+                $item_data['sku'] = $v['sku'];
+                $item_data['supplier_sku'] = $v['supplier_sku'];
+                $item_data['product_name'] = $v['product_name'];
+                $item_data['purchase_num'] = $v['purchase_num_temp'] - $v['checked_num_temp'];
+                $item_data['purchase_price'] = $v['purchase_price_temp'];
+                $item_data['purchase_total'] = $v['purchase_price_temp'] * ($v['purchase_num_temp'] - $v['checked_num_temp']);
+                $item_data['purchase_id'] = $this->model->id;
+                $item_data['replenish_list_id'] = $v['replenish_list_id'];
+                $item_data['purchase_order_number'] = $purchase_order;
+                $this->purchase_order_item->allowField(true)->save($item_data);
+            }
+        }
+    }
 }
