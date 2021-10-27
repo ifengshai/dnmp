@@ -297,6 +297,7 @@ class OrderData extends Backend
                                         $params['grand_total'] = $v['actual_amount_paid'] ?: 0;
                                         $params['store_id'] = $v['source'];
                                         $params['customer_email'] = $v['email'] ?? '';
+                                        $params['is_print_logo'] = $v['is_print_logo'] ?? 0;
                                     }
                                     $params['total_qty_ordered'] = $v['goods_quantity'];
                                     $params['base_currency_code'] = $v['base_currency'];
@@ -365,6 +366,7 @@ class OrderData extends Backend
                                         $params['grand_total'] = $v['actual_amount_paid'] ?: 0;
                                         $params['store_id'] = $v['source'];
                                         $params['customer_email'] = $v['email'] ?? '';
+                                        $params['is_print_logo'] = $v['is_print_logo'] ?? 0;
                                     }
 
 
