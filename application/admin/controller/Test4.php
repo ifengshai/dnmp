@@ -4755,44 +4755,45 @@ class Test4 extends Controller
         set_time_limit(0);
         ini_set('memory_limit', '2048M');
         $neworderprocess = new \app\admin\model\order\order\NewOrderItemProcess();
-        $date = input('date');
-        $site = input('site');
-        $month_start = strtotime($date);//指定月份月初时间戳
-        $month_end = mktime(23, 59, 59, date('m', strtotime($date))+1, 00);
-        //统计处方镜
-        $map['a.created_at'] = ['between', [$month_start, $month_end]];
-        //过滤补差价单
-        $map['a.order_type'] = ['<>', 5];
-        $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
-        $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
-        foreach ($siteArr as $sk=>$sv){
-            $siteData = $neworderprocess
-                ->alias('b')
-                ->join(['fa_order' => 'a'], 'b.order_id=a.id')
-                ->join(['fa_order_item_option' => 'c'], 'b.option_id=c.id')
-                ->where('b.order_prescription_type', '=', 3)
-                ->where($map)
-                ->where('a.site',$sk)
-                ->field('a.id,b.item_order_number,c.qty,c.lens_number')
-                ->select();
-            $siteData = collection($siteData)->toArray();
-            $siteData1 = array_column($siteData,'lens_number');
-            $siteData2 = array_count_values($siteData1);
-            $kkk = 0;
-            $siteData3 = [];
-            foreach ($siteData2 as $k=>$v){
-                $siteData3[$kkk]['plat'] = $sk;
-                $siteData3[$kkk]['code'] = $k;
-                $siteData3[$kkk]['num'] = $v;
-                $kkk +=1;
+        $date = $this->getRecentMonth();
+        foreach ($date as $k=>$dv) {
+            //统计处方镜
+            $map['a.created_at'] = ['between', [strtotime($dv[0] . '00:00:00'), strtotime($dv[1] . '23:59:59')]];
+            //过滤补差价单
+            $map['a.order_type'] = ['<>', 5];
+            $map['a.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal', 'delivered', 'delivery']];
+            $siteArr = [1=>'z',2=>'v',3=>'m',10=>'de',11=>'jp'];
+            foreach ($siteArr as $sk=>$sv){
+                $siteData = $neworderprocess
+                    ->alias('b')
+                    ->join(['fa_order' => 'a'], 'b.order_id=a.id')
+                    ->join(['fa_order_item_option' => 'c'], 'b.option_id=c.id')
+                    ->where('b.order_prescription_type', '=', 3)
+                    ->where($map)
+                    ->where('a.site',$sk)
+                    ->field('a.id,b.item_order_number,c.qty,c.lens_number')
+                    ->select();
+                $siteData = collection($siteData)->toArray();
+                $siteData1 = array_column($siteData,'lens_number');
+                $siteData2 = array_count_values($siteData1);
+                $kkk = 0;
+                $siteData3 = [];
+                foreach ($siteData2 as $k=>$v){
+                    $siteData3[$kkk]['plat'] = $sk;
+                    $siteData3[$kkk]['code'] = $k;
+                    $siteData3[$kkk]['num'] = $v;
+                    $kkk +=1;
+                }
+                $header = ['站点','编码','数量'];
+                $path = '/uploads/lensdata';
+                $filename = '站点'.$siteArr[$sk].$dv[0].'数据';
+                dump($siteData2);
+                dump($siteData3);
+                Excel::writeCsv($siteData3,$header,$path.$filename);
+                echo $dv[0].'完成';
             }
-            $header = ['站点','编码','数量'];
-            $path = '/uploads/';
-            $filename = '站点'.$siteArr[$sk].$date.'数据';
-            dump($siteData2);
-            dump($siteData3);
-            Excel::writeCsv($siteData3,$header,$path.$filename);
         }
+
 
     }
 
