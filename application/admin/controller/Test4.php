@@ -4792,11 +4792,6 @@ class Test4 extends Controller
             dump($siteData2);
             dump($siteData3);
             Excel::writeCsv($siteData3,$header,$path.$filename);
-            //获取当前域名
-            $request = Request::instance();
-            $domain = $request->domain();
-            header('Location: '.$domain.$path.$filename.'.csv');
-            die;
         }
 
     }
