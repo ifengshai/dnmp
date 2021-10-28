@@ -4140,8 +4140,9 @@ class Crontab extends Backend
         //三个站待处理订单
         $zeeloolNum = $this->zeelool->getPendingOrderNum();
         $vooguemeNum = $this->voogueme->getPendingOrderNum();
-        $nihaoNum = $this->nihao->getPendingOrderNum();
-        $allPendingOrderNum = $zeeloolNum + $vooguemeNum + $nihaoNum;
+//        $nihaoNum = $this->nihao->getPendingOrderNum();
+//        $allPendingOrderNum = $zeeloolNum + $vooguemeNum + $nihaoNum;
+        $allPendingOrderNum = $zeeloolNum + $vooguemeNum;
         $data['value'] = $allPendingOrderNum;
         $data['updatetime'] = date('Y-m-d H:i:s', time());
         $dataConfig->where('key', 'allPendingOrderNum')->update($data);
@@ -4462,31 +4463,34 @@ class Crontab extends Backend
         //打印标签
         $zeeloolPrintLabelNum = $this->zeelool->printLabelNum($time);
         $vooguemePrintLabelNum = $this->voogueme->printLabelNum($time);
-        $nihaoPrintLabelNum = $this->nihao->printLabelNum($time);
-        $data['print_label_num'] = ($zeeloolPrintLabelNum + $vooguemePrintLabelNum + $nihaoPrintLabelNum) ?? 0;
+        //$nihaoPrintLabelNum = $this->nihao->printLabelNum($time);
+        //$data['print_label_num'] = ($zeeloolPrintLabelNum + $vooguemePrintLabelNum + $nihaoPrintLabelNum) ?? 0;
+        $data['print_label_num'] = ($zeeloolPrintLabelNum + $vooguemePrintLabelNum) ?? 0;
         //配镜架
         $zeeloolFrameNum = $this->zeelool->frameNum($time);
         $vooguemeFrameNum = $this->voogueme->frameNum($time);
-        $nihaoFrameNum = $this->nihao->frameNum($time);
-        $data['frame_num'] = ($zeeloolFrameNum + $vooguemeFrameNum + $nihaoFrameNum) ?? 0;
-
+        //$nihaoFrameNum = $this->nihao->frameNum($time);
+        //$data['frame_num'] = ($zeeloolFrameNum + $vooguemeFrameNum + $nihaoFrameNum) ?? 0;
+        $data['frame_num'] = ($zeeloolFrameNum + $vooguemeFrameNum) ?? 0;
         //配镜片
         $zeeloolLensNum = $this->zeelool->lensNum($time);
         $vooguemeLensNum = $this->voogueme->lensNum($time);
-        $nihaoLensNum = $this->nihao->lensNum($time);
-        $data['lens_num'] = ($zeeloolLensNum + $vooguemeLensNum + $nihaoLensNum) ?? 0;
+//        $nihaoLensNum = $this->nihao->lensNum($time);
+//        $data['lens_num'] = ($zeeloolLensNum + $vooguemeLensNum + $nihaoLensNum) ?? 0;
+        $data['lens_num'] = ($zeeloolLensNum + $vooguemeLensNum) ?? 0;
 
         //加工
         $zeeloolfactoryNum = $this->zeelool->factoryNum($time);
         $vooguemefactoryNum = $this->voogueme->factoryNum($time);
-        $nihaofactoryNum = $this->nihao->factoryNum($time);
-        $data['machining_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
-
+        //$nihaofactoryNum = $this->nihao->factoryNum($time);
+        //$data['machining_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
+        $data['machining_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum ) ?? 0;
         //成品质检
         $zeeloolfactoryNum = $this->zeelool->checkNum($time);
         $vooguemefactoryNum = $this->voogueme->checkNum($time);
-        $nihaofactoryNum = $this->nihao->checkNum($time);
-        $data['quality_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
+//        $nihaofactoryNum = $this->nihao->checkNum($time);
+//        $data['quality_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum + $nihaofactoryNum) ?? 0;
+        $data['quality_num'] = ($zeeloolfactoryNum + $vooguemefactoryNum) ?? 0;
 
         $data['create_time'] = date('Y-m-d H:i:s', time());
         $data['create_date'] = date('Y-m-d');
