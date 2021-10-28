@@ -2209,7 +2209,7 @@ class WorkOrderList extends Model
 
                     $dataWorkOrder['work_status'] = 6;
                     $dataWorkOrder['complete_time'] = date('Y-m-d H:i:s');
-
+                    
                     //检测是否标记异常，有则修改为已处理
                     $res = $this->handle_abnormal($work);
                     if (!$res['result']) {
@@ -2223,6 +2223,9 @@ class WorkOrderList extends Model
                 }
             } else {
                 $dataWorkOrder['work_status'] = 5;
+            }
+            if (2 == $measure_choose_id) {
+                $dataWorkOrder['refund_time'] = date('Y-m-d H:i:s');
             }
             $this->where(['id' => $work_id])->update($dataWorkOrder);
 
