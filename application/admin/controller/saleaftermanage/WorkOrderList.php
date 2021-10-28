@@ -4094,7 +4094,10 @@ EOF;
             ->setCellValue("AI1", "工单回复备注")
             ->setCellValue("AJ1", "订单支付时间")
             ->setCellValue("AK1", "补发订单号")
-            ->setCellValue("AL1", "商品子单号SKU");;
+            ->setCellValue("AL1", "商品子单号SKU")
+            ->setCellValue("AM1", "退款措施完成时间")
+            ;
+
         $spreadsheet->setActiveSheetIndex(0)->setTitle('工单数据');
         foreach ($list as $key => $value) {
             if ($value['after_user_id']) {
@@ -4218,9 +4221,11 @@ EOF;
             }
             //措施
             if ($info['step'] && array_key_exists($value['id'], $info['step'])) {
-                $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), $info['step'][$value['id']] . $info['detail'][$value['id']] . $value['result']);
+                $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), $info['step'][$value['id']] . $info['detail'][$value['id']].$value['result']);
+                $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), $value['refund_time']);
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("AH" . ($key * 1 + 2), '');
+                $spreadsheet->getActiveSheet()->setCellValue("AM" . ($key * 1 + 2), '');
             }
 
             if ($noteInfo && array_key_exists($value['id'], $noteInfo)) {
@@ -4275,6 +4280,7 @@ EOF;
         $spreadsheet->getActiveSheet()->getColumnDimension('AJ')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AK')->setWidth(20);
         $spreadsheet->getActiveSheet()->getColumnDimension('AL')->setWidth(100);
+        $spreadsheet->getActiveSheet()->getColumnDimension('AM')->setWidth(20);
 
         //设置边框
         $border = [
