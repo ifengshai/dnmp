@@ -3973,14 +3973,14 @@ class Crontab extends Backend
         //当月销售总数
         $zeeloolSkuNum = $this->zeelool->getOrderSkuNum();
         $vooguemeSkuNum = $this->voogueme->getOrderSkuNum();
-        $nihaoSkuNum = $this->nihao->getOrderSkuNum();
-        $salesNum = $zeeloolSkuNum + $vooguemeSkuNum + $nihaoSkuNum;
+        //$nihaoSkuNum = $this->nihao->getOrderSkuNum();
+        $salesNum = $zeeloolSkuNum + $vooguemeSkuNum;
 
         //当月销售总成本
         $zeeloolSalesCost = $this->zeelool->getOrderSalesCost();
         $vooguemeSalesCost = $this->voogueme->getOrderSalesCost();
-        $nihaoSalesCost = $this->nihao->getOrderSalesCost();
-        $salesCost = $zeeloolSalesCost + $vooguemeSalesCost + $nihaoSalesCost;
+        //$nihaoSalesCost = $this->nihao->getOrderSalesCost();
+        $salesCost = $zeeloolSalesCost + $vooguemeSalesCost;
 
 
         //当月到货总数
