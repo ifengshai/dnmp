@@ -333,7 +333,6 @@ class Test6 extends Backend
             ->alias('temp')
             ->join('fa_purchase_order op','temp.purchase_number_temp=op.purchase_number')
             ->join('fa_purchase_order_item item','temp.purchase_number_temp=item.purchase_order_number')
-            ->limit(1)
             ->select();
         if(!$list){
             return false;
@@ -349,7 +348,7 @@ class Test6 extends Backend
             $data['purchase_type'] = $v['purchase_type'];
             $data['is_sample'] = 0; //是否是留样采购单 0 不留样
             $data['type'] = $v['type']; //是否大货现货
-            $data['is_new_product'] = $v['is_new_product'];
+            $data['is_new_product'] = 0;
             $data['pay_type'] = 3;
             $data['pay_rate'] = $v['pay_rate'];
             $data['arrival_time'] = $v['arrival_time'];
@@ -371,9 +370,9 @@ class Test6 extends Backend
             $data['logistics_company_no'] = 'ECZJ';
             $data['logistics_company_name'] = 'ECZJ';
             $data['create_person']    = $v['create_person'];
-            $data['createtime']    = $v['createtime'];
+            $data['createtime']    = date('Y-m-d H:i:s');
             $data['is_add_logistics'] = 1;
-            $data['receiving_warehouse'] = $v['receiving_warehouse'];
+            $data['receiving_warehouse'] = $v['receiving_warehouse'] ?:2;
             $result = $this->purchase_order->allowField(true)->isUpdate(false)->data($data,true)->save();
             if ($result !== false) {
                 $item_data['sku'] = $v['sku'];
