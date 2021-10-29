@@ -333,6 +333,7 @@ class Test6 extends Backend
             ->alias('temp')
             ->join('fa_purchase_order op','temp.purchase_number_temp=op.purchase_number')
             ->join('fa_purchase_order_item item','temp.purchase_number_temp=item.purchase_order_number')
+            ->limit(1)
             ->select();
         if(!$list){
             return false;
@@ -349,7 +350,7 @@ class Test6 extends Backend
             $data['is_sample'] = 0; //是否是留样采购单 0 不留样
             $data['type'] = $v['type']; //是否大货现货
             $data['is_new_product'] = $v['is_new_product'];
-            $data['pay_type'] = $v['pay_type'];
+            $data['pay_type'] = 3;
             $data['pay_rate'] = $v['pay_rate'];
             $data['arrival_time'] = $v['arrival_time'];
             $data['purchase_remark'] = $v['purchase_remark'];
@@ -359,13 +360,21 @@ class Test6 extends Backend
             $data['supplier_id'] = $v['supplier_id'];
             $data['supplier_type'] = $v['supplier_type'];
             $data['supplier_address'] = $v['supplier_address'];
-            $data['product_total']    = $v['product_total'];
-            $data['purchase_freight']    = $v['purchase_freight'];
-            $data['purchase_total']    = $v['purchase_total'];
-            $data['settlement_method'] = $v['settlement_method'];
+            $data['product_total']    = $v['purchase_price_temp'] * ($v['purchase_num_temp'] - $v['checked_num_temp']);
+            $data['purchase_freight']    = 0;
+            $data['purchase_total']    = $v['purchase_price_temp'] * ($v['purchase_num_temp'] - $v['checked_num_temp']);
+            $data['settlement_method'] = 2;
+            $data['deposit_ratio']    = $v['deposit_ratio'];
+            $data['deposit_amount']   = $v['deposit_amount'];
+            $data['final_amount']     = $v['final_amount'];
+            $data['logistics_number'] = $v['temp_logistics_number'];
+            $data['logistics_company_no'] = 'ECZJ';
+            $data['logistics_company_name'] = 'ECZJ';
             $data['create_person']    = $v['create_person'];
             $data['createtime']    = $v['createtime'];
-            $result = $this->purchase_order->allowField(true)->save($data);
+            $data['is_add_logistics'] = 1;
+            $data['receiving_warehouse'] = $v['receiving_warehouse'];
+            $result = $this->purchase_order->allowField(true)->isUpdate(false)->data($data,true)->save();
             if ($result !== false) {
                 $item_data['sku'] = $v['sku'];
                 $item_data['supplier_sku'] = $v['supplier_sku'];
@@ -373,10 +382,11 @@ class Test6 extends Backend
                 $item_data['purchase_num'] = $v['purchase_num_temp'] - $v['checked_num_temp'];
                 $item_data['purchase_price'] = $v['purchase_price_temp'];
                 $item_data['purchase_total'] = $v['purchase_price_temp'] * ($v['purchase_num_temp'] - $v['checked_num_temp']);
-                $item_data['purchase_id'] = $this->model->id;
+                $item_data['purchase_id'] = $this->purchase_order->id;
                 $item_data['replenish_list_id'] = $v['replenish_list_id'];
                 $item_data['purchase_order_number'] = $purchase_order;
-                $this->purchase_order_item->allowField(true)->save($item_data);
+                $this->purchase_order_item->allowField(true)->isUpdate(false)->data($item_data,true)->save();
+                echo 'ok</br>';
             }
         }
     }
