@@ -333,7 +333,6 @@ class Test6 extends Backend
             ->alias('temp')
             ->join('fa_purchase_order op','temp.purchase_number_temp=op.purchase_number')
             ->join('fa_purchase_order_item item','temp.purchase_number_temp=item.purchase_order_number')
-            ->limit(1)
             ->select();
         if(!$list){
             return false;
