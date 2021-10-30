@@ -1345,4 +1345,31 @@ class Notice extends Controller
         }
 
     }
+
+    /**
+     *
+     * 更新客服上班状态每天0点执行
+     * @author liushiwei
+     * @date   2021/10/25 11:37
+     */
+    public function update_customer_working()
+    {
+        $agents = Db::name('zendesk_admin')
+            ->alias('z')->join(['fa_admin' => 'a'],'z.admin_id=a.id')
+            ->field('z.*,a.userid')
+            ->where('a.status', '<>', 'hidden')
+            ->select();
+        $userlist_arr = array_filter(array_column($agents, 'userid'));
+        $userlist_str = implode(',', $userlist_arr);
+        $time = strtotime(date('Y-m-d 0:0:0', strtotime("+1 day")));
+        //通过接口获取休息人员名单
+        $ding = new \app\api\controller\Ding;
+        $restuser_arr = $ding->getRestList($userlist_str, $time);
+        //如果有休息的人员则更新状态为休息人员
+        if(count($restuser_arr)>0){
+            $where['admin_id'] = ['in',$restuser_arr];
+            Db::name('zendesk_admin')->where($where)->update(['is_work'=>2]);
+        }
+        echo 'ok';
+    }
 }

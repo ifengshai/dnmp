@@ -525,6 +525,7 @@ class OrderData extends Backend
                                         $options['single_base_original_price'] = $v['base_goods_price'];
                                         $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
                                         $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
+                                        $options['is_print_logo'] = $this->set_wesee_is_print_logo($v['order_id']);
                                         unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     } elseif ($site == Site::NIHAO) {
                                         $options = $this->nihao_prescription_analysis($v['prescription']);
@@ -600,6 +601,7 @@ class OrderData extends Backend
                                     if ($site == 5) {
                                         $options = $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                         $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
+                                        $options['is_print_logo'] = $this->set_wesee_is_print_logo($v['order_id']);
                                         unset($orders_prescriptions_params[$v['orders_prescriptions_id']]);
                                     } elseif ($site == Site::NIHAO) {
                                         $options = $this->nihao_prescription_analysis($v['prescription']);
@@ -684,7 +686,7 @@ class OrderData extends Backend
                                         $this->orderitemprocess->insertAll($data);
 
                                         // z、v、m、zeelool-es、zeelool-de、zeelool-jp、zeelool-fr 送到丹阳
-                                        if (in_array($site, [1, 2, 9, 10, 11, 15])) {
+                                        if (in_array($site, [1, 2, 5, 8, 9, 10, 11, 15])) {
                                             //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                             if ($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3) {
                                                 $order_lens_type[$site][$v['order_id']] = 3;
@@ -749,7 +751,7 @@ class OrderData extends Backend
                                         ]);
 
                                         // z、v、m、zeelool-es、zeelool-de、zeelool-jp、zeelool-fr 送到丹阳
-                                        if (in_array($site, [1, 2, 9, 10, 11, 15])) {
+                                        if (in_array($site, [1, 2, 5, 8, 9, 10, 11, 15])) {
                                             //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                             if ($order_prescription_type == 3) {
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
@@ -2220,4 +2222,20 @@ class OrderData extends Backend
         echo $site . 'ok';
     }
 
+    /**
+     * 是否加印logo
+     *
+     * @param $orderId
+     * @return int
+     * @throws \think\Exception
+     * @author baochenghuan
+     * @date   2021/10/27 14:46
+     */
+    public function set_wesee_is_print_logo($orderId)
+    {
+        return Db::connect('database.db_weseeoptical')
+            ->table('orders')
+            ->where(['id' => $orderId])
+            ->value('is_print_logo') ?: 0;
+    }
 }

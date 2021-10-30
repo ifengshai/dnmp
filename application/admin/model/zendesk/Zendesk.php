@@ -495,6 +495,16 @@ class Zendesk extends Model
 
         echo "ok";
     }
+
+    /**
+     * 原来的邮件分配逻辑
+     * @throws Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @author liushiwei
+     * @date   2021/10/25 11:50
+     */
     public static function shellEmailDistribution()
     {
         $now_date = date('Y-m-d H:i:s');
@@ -566,7 +576,7 @@ class Zendesk extends Model
             ->join('fa_admin a','z.assign_id=a.id','left')
             ->join('fa_zendesk_admin za','z.assign_id = za.admin_id','left')
             ->where('z.id',$ticket->id)
-            ->field('z.assign_id,z.id,a.status,za.count,za.group')
+            ->field('z.assign_id,z.id,a.status,za.count,za.group,za.is_work')
             ->find();
         //第二承接人信息
         $nextAssignInfo = Db::name('zendesk')
@@ -574,7 +584,7 @@ class Zendesk extends Model
             ->join('fa_admin a','z.assign_id_next=a.id','left')
             ->join('fa_zendesk_admin za','z.assign_id_next = za.admin_id','left')
             ->where('z.id',$ticket->id)
-            ->field('z.assign_id_next,z.id,a.status,za.count,za.group')
+            ->field('z.assign_id_next,z.id,a.status,za.count,za.group,za.is_work')
             ->find();
         Zendesk::distribute($ticket,$firstAssignInfo,$nextAssignInfo,$isVip);
     }
@@ -673,7 +683,7 @@ class Zendesk extends Model
                             //判断第二承接人是否为vip组
                             if($nextAssignInfo['group'] == $group){
                                 //第二承接人在职，判断第二承接人是否上班并任务是否分满
-                                if($nextAssignInfo['count'] != 0){
+                                if(($nextAssignInfo['is_work'] != 2) && ($nextAssignInfo['count']>0)){
                                     //第二承接人上班，判断任务是否分满
                                     if($nextAssignTask['surplus_count'] > 0){
                                         //未分满，将该邮件分配给第二承接人，并将第一承接人修改为该承接人，第二承接人置空
@@ -816,7 +826,7 @@ class Zendesk extends Model
                     //第一承接人没有离职，判断第一承接人是否是VIP组成员
                     if($firstAssignInfo['group'] == $group){
                         //第一承接人是VIP组成员，判断第一承接人是否上班
-                        if($firstAssignInfo['count'] != 0){
+                        if(($firstAssignInfo['is_work'] != 2) && ($firstAssignInfo['count']>0)){
                             //第一承接人上班，判断是否任务分配满
                             if($firstAssignTask['surplus_count'] > 0){
                                 //任务未分配满，将任务分配给第一承接人
@@ -869,7 +879,7 @@ class Zendesk extends Model
                                         //判断第二承接人是否为vip组
                                         if($nextAssignInfo['group'] == $group){
                                             //第二承接人在职，判断第二承接人是否上班并任务是否分满
-                                            if($nextAssignInfo['count'] != 0){
+                                            if(($nextAssignInfo['is_work'] != 2) && ($nextAssignInfo['count']>0)){
                                                 //第二承接人上班，判断任务是否分满
                                                 if($nextAssignTask['surplus_count'] > 0){
                                                     //未分满，将该邮件分配给第二承接人，并将第一承接人修改为该承接人，第二承接人置空
@@ -1038,7 +1048,7 @@ class Zendesk extends Model
                                     //判断第二承接人是否为vip组
                                     if($nextAssignInfo['group'] == $group){
                                         //第二承接人在职，判断第二承接人是否上班并任务是否分满
-                                        if($nextAssignInfo['count'] != 0){
+                                        if(($nextAssignInfo['is_work'] != 2) && ($nextAssignInfo['count']>0)){
                                             //第二承接人上班，判断任务是否分满
                                             if($nextAssignTask['surplus_count'] > 0){
                                                 //未分满，将该邮件分配给第二承接人，并将第一承接人修改为该承接人，第二承接人置空
@@ -1208,7 +1218,7 @@ class Zendesk extends Model
                                 //判断第二承接人是否为vip组
                                 if($nextAssignInfo['group'] == $group){
                                     //第二承接人在职，判断第二承接人是否上班并任务是否分满
-                                    if($nextAssignInfo['count'] != 0){
+                                    if(($nextAssignInfo['is_work'] != 2) && ($nextAssignInfo['count']>0)){
                                         //第二承接人上班，判断任务是否分满
                                         if($nextAssignTask['surplus_count'] > 0){
                                             //未分满，将该邮件分配给第二承接人，并将第一承接人修改为该承接人，第二承接人置空
@@ -1386,7 +1396,7 @@ class Zendesk extends Model
                         //判断第二承接人是否为vip组
                         if($nextAssignInfo['group'] == $group){
                             //第二承接人在职，判断第二承接人是否上班并任务是否分满
-                            if($nextAssignInfo['count'] != 0){
+                            if(($nextAssignInfo['is_work'] != 2) && ($nextAssignInfo['count']>0)){
                                 //第二承接人上班，判断任务是否分满
                                 if($nextAssignTask['surplus_count'] > 0){
                                     //未分满，将该邮件分配给第二承接人，并将第一承接人修改为该承接人，第二承接人置空
