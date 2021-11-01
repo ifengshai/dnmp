@@ -279,7 +279,6 @@ class Zendesk extends Backend
                     if (!$author_id) {
                         throw new Exception('请将用户先绑定zendesk的账号', 10001);
                     }
-                    //发送邮件的参数
                     $createData = [
                         'comment' => [
                             'author_id' => $author_id,
@@ -289,6 +288,8 @@ class Zendesk extends Backend
                         'assignee_id' => $assignee_id,
                         'submitter_id' => $assignee_id
                     ];
+                    //发送邮件的参数
+
                     if (!$params['subject']) {
                         throw new Exception('邮件标题不能为空', 10001);
                     }
@@ -391,28 +392,57 @@ class Zendesk extends Backend
                     $userInfo = (new Notice(request(), ['type' => $siteName]))->findUserById($res['requester_id']);
                     $rawSubject = $subject = $params['subject'];
                     //写入主表
-                    $zendesk = \app\admin\model\zendesk\Zendesk::create([
-                        'ticket_id' => $res['ticket_id'],
-                        'type' => $type,
-                        'channel' => 'web',
-                        'email' => $userInfo->email,
-                        'username' => $userInfo->name,
-                        'user_id' => $res['requester_id'],
-                        'to_email' => '',
-                        'priority' => $params['priority'],
-                        'status' => $params['status'],
-                        'tags' => join(',', $zendeskTags),
-                        'subject' => $subject,
-                        'raw_subject' => $rawSubject,
-                        'assignee_id' => $assignee_id,
-                        'assign_id' => $admin_id,
-                        'due_id' => $admin_id,
-                        'assign_time' => date('Y-m-d H:i:s', time()),
-                        'email_cc' => $params['email_cc'],
-                        'zendesk_update_time' => date('Y-m-d H:i:s', time()),
-                        'is_urgency' => $params['is_urgency'] ?? 0,
-                        'is_difficult' => $params['is_difficult'] ?? 0,
-                    ]);
+                    //判断是否发送人是否是跟单客服
+                    $whereContidion['uid'] = $admin_id;
+                    $whereContidion['group_id'] = ['in',[125,126]];
+                    $isDocumentaryCustomer = Db::name('auth_group_access')->where($whereContidion)->value('uid');
+                    if($isDocumentaryCustomer){ //如果是跟单客服则不存承接人
+                        $zendesk = \app\admin\model\zendesk\Zendesk::create([
+                            'ticket_id' => $res['ticket_id'],
+                            'type' => $type,
+                            'channel' => 'web',
+                            'email' => $userInfo->email,
+                            'username' => $userInfo->name,
+                            'user_id' => $res['requester_id'],
+                            'to_email' => '',
+                            'priority' => $params['priority'],
+                            'status' => $params['status'],
+                            'tags' => join(',', $zendeskTags),
+                            'subject' => $subject,
+                            'raw_subject' => $rawSubject,
+                            'assignee_id' => $assignee_id,
+                            'due_id' => $admin_id,
+                            'assign_time' => date('Y-m-d H:i:s', time()),
+                            'email_cc' => $params['email_cc'],
+                            'zendesk_update_time' => date('Y-m-d H:i:s', time()),
+                            'is_urgency' => $params['is_urgency'] ?? 0,
+                            'is_difficult' => $params['is_difficult'] ?? 0,
+                        ]);
+                    }else{
+                        $zendesk = \app\admin\model\zendesk\Zendesk::create([
+                            'ticket_id' => $res['ticket_id'],
+                            'type' => $type,
+                            'channel' => 'web',
+                            'email' => $userInfo->email,
+                            'username' => $userInfo->name,
+                            'user_id' => $res['requester_id'],
+                            'to_email' => '',
+                            'priority' => $params['priority'],
+                            'status' => $params['status'],
+                            'tags' => join(',', $zendeskTags),
+                            'subject' => $subject,
+                            'raw_subject' => $rawSubject,
+                            'assignee_id' => $assignee_id,
+                            'assign_id' => $admin_id,
+                            'due_id' => $admin_id,
+                            'assign_time' => date('Y-m-d H:i:s', time()),
+                            'email_cc' => $params['email_cc'],
+                            'zendesk_update_time' => date('Y-m-d H:i:s', time()),
+                            'is_urgency' => $params['is_urgency'] ?? 0,
+                            'is_difficult' => $params['is_difficult'] ?? 0,
+                        ]);
+                    }
+
                     $zid = $zendesk->id;
                     //评论表添加内容,有body时添加评论，修改状态等不添加
                     if ($params['content']) {
