@@ -400,6 +400,7 @@ class Test6 extends Backend
         $where['distribution_status'] = 1;
         $where['o.status'] = 'processing';
         $where['m.site'] = ['neq',12];
+        $where['o.created_at'] = ['between', [strtotime('-3 month'), time()]];
         $result = Db::connect('database.db_mojing_order')->table('fa_order_item_process')
             ->alias('m')
             ->join('fa_order o','o.id=m.order_id')
@@ -407,10 +408,15 @@ class Test6 extends Backend
             ->field('m.*')
             ->select();
         if(!$result){
-            return false;
+            return '无数据';
         }
+//        foreach ($result as $v){
+//            Db::connect('database.db_mojing_order')->table('fa_order_item_process')->where(['id'=>$v['id']])->update(['stock_id'=>2]);
+//            Db::connect('database.db_mojing_order')->table('fa_order')->where(['id'=>$v['order_id']])->update(['stock_id'=>2]);
+//
+//        }
         echo '<pre>';
-        dump($result);
+        dump(count($result));
 
     }
 }
