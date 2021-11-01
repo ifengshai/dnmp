@@ -410,11 +410,11 @@ class Test6 extends Backend
         if(!$result){
             return '无数据';
         }
-//        foreach ($result as $v){
-//            Db::connect('database.db_mojing_order')->table('fa_order_item_process')->where(['id'=>$v['id']])->update(['stock_id'=>2]);
-//            Db::connect('database.db_mojing_order')->table('fa_order')->where(['id'=>$v['order_id']])->update(['stock_id'=>2]);
-//
-//        }
+        foreach ($result as $v){
+            Db::connect('database.db_mojing_order')->table('fa_order_item_process')->where(['id'=>$v['id']])->update(['stock_id'=>2]);
+            Db::connect('database.db_mojing_order')->table('fa_order')->where(['id'=>$v['order_id']])->update(['stock_id'=>2]);
+
+        }
         echo '<pre>';
         dump(count($result));
 
