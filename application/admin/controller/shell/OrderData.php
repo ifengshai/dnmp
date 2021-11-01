@@ -574,7 +574,7 @@ class OrderData extends Backend
                                         $this->orderitemprocess->insertAll($data);
 
                                         // m站订单分到丹阳
-                                        if ($site == Site::NIHAO) {
+                                        if ($site == Site::NIHAO || $site == Site::WESEEOPTICAL) {
                                             $this->orderitemprocess->where(['item_id' => $v['id'], 'site' => $site])->update(['stock_id' => 2]);
 
                                             $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
