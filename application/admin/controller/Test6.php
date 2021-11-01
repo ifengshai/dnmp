@@ -2,6 +2,11 @@
 
 namespace app\admin\controller;
 
+use app\admin\model\DistributionAbnormal;
+use app\admin\model\order\order\LensData;
+use app\admin\model\order\order\NewOrder;
+use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\warehouse\StockHouse;
 use app\admin\model\zendesk\Zendesk;
 use app\admin\model\zendesk\ZendeskTasks;
 use app\common\controller\Backend;
@@ -388,5 +393,30 @@ class Test6 extends Backend
                 echo 'ok</br>';
             }
         }
+    }
+    public function updateStock()
+    {
+        $where['m.stock_id'] = 1;
+        $where['distribution_status'] = 1;
+        $where['o.status'] = 'processing';
+        $where['m.site'] = ['neq',12];
+        $where['o.created_at'] = ['between', [strtotime('-3 month'), time()]];
+        $result = Db::connect('database.db_mojing_order')->table('fa_order_item_process')
+            ->alias('m')
+            ->join('fa_order o','o.id=m.order_id')
+            ->where($where)
+            ->field('m.*')
+            ->select();
+        if(!$result){
+            return '无数据';
+        }
+//        foreach ($result as $v){
+//            Db::connect('database.db_mojing_order')->table('fa_order_item_process')->where(['id'=>$v['id']])->update(['stock_id'=>2]);
+//            Db::connect('database.db_mojing_order')->table('fa_order')->where(['id'=>$v['order_id']])->update(['stock_id'=>2]);
+//
+//        }
+        echo '<pre>';
+        dump(count($result));
+
     }
 }
