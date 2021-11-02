@@ -211,6 +211,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'upload'], function (
                                     10: 'Zeelool_de',
                                     11: 'Zeelool_jp',
                                     12: 'voogmechic',
+                                    13: 'Zeelool_cn',
+                                    14: 'alibaba',
+                                    15: 'Zeelool_fr'
                                 }, operate: 'IN',
                                 formatter: Table.api.formatter.status
                             },
