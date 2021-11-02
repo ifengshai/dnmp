@@ -129,6 +129,7 @@ class CoupnAnalytics extends Backend
                     ->where($map2)
                     ->limit($offset, $limit)
                     ->select();
+                    echo $salesrule->getLastSql();
             }else{
                 $total = $salesrule->table('salesrule')
                     ->where('channel', '>', 0)
