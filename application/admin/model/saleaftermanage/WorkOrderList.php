@@ -1323,7 +1323,7 @@ class WorkOrderList extends Model
                 $address = unserialize($changeSku['userinfo_option']);
                 $prescriptions = unserialize($changeSku['prescription_option']);
                 $postDataCommon = [
-                    //'ordernum'      => $changeSku['increment_id'],
+                    'order_no'      => $changeSku['increment_id'],
                     'currency_code' => $address['currency_code'],
                     'country'       => $address['country_id'],
                     'shipping_type' => $address['shipping_type'],
