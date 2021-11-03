@@ -2249,7 +2249,7 @@ class OrderData extends Backend
      */
     public function process_order_data_address_temp()
     {
-        $this->order_address_data_shell(1);
+        $this->order_address_data_shell(2);
 //        $this->order_address_data_shell(2);
 //        $this->order_address_data_shell(3);
 //        $this->order_address_data_shell(10);
@@ -2271,7 +2271,7 @@ class OrderData extends Backend
 
         } elseif ($site == 2) {
             $entity_id = [
-
+                601711
             ];
             $list = Db::connect('database.db_voogueme')
                 ->table('sales_flat_order_address')
@@ -2335,7 +2335,7 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(1);
+        $this->zeelool_old_order(2);
     }
 
     protected function zeelool_old_order($site)
@@ -2348,11 +2348,11 @@ class OrderData extends Backend
                 4202,
             ];
             $list = Db::connect('database.db_weseeoptical')->table('orders')->where(['entity_id' => ['in', $entity_id]])->select();
-        }elseif($site == 1) {
+        }elseif($site == 1 || $site == 2) {
         $entity_id = [
             601711
         ];
-            $list = Db::connect('database.db_zeelool')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
+            $list = Db::connect('database.db_voogueme')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
         }
 
 
