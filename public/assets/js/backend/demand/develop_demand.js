@@ -161,8 +161,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'phper_working_hour',
                             title: __('预计工时'),
-                            operate: 'RANGE',
-                            addclass: 'datetimerange',
+                            operate: 'like',
 
                         },
                         {
@@ -854,8 +853,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'phper_working_hour',
                             title: __('预计工时'),
-                            operate: 'RANGE',
-                            addclass: 'datetimerange',
+                            operate: 'like',
 
                         },
                         {

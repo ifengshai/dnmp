@@ -6,6 +6,7 @@ use app\common\controller\Api;
 use app\common\library\Ems;
 use app\common\library\Sms;
 use fast\Random;
+use think\Db;
 use think\Validate;
 
 /**
@@ -13,7 +14,7 @@ use think\Validate;
  */
 class User extends Api
 {
-    protected $noNeedLogin = ['login', 'mobilelogin', 'register', 'resetpwd', 'changeemail', 'changemobile', 'third'];
+    protected $noNeedLogin = ['login', 'mobilelogin', 'register', 'resetpwd', 'changeemail', 'changemobile', 'third','fetchReplacementOrder'];
     protected $noNeedRight = '*';
 
     public function _initialize()
@@ -310,5 +311,28 @@ class User extends Api
         } else {
             $this->error($this->auth->getError());
         }
+    }
+    /**
+     * 根据平台获取补发单号
+     * @author liushiwei
+     * @date   2021/11/2 9:34
+     */
+    public function fetchReplacementOrder()
+    {
+        $site = input('site');
+        if(!$site){
+            $this->error(__('缺少平台参数'), [], 400);
+        }
+        $where['work_platform'] = $site;
+        $where['replacement_order'] = ['neq',''];
+        $result = Db::name('work_order_list')->where($where)->field('platform_order,replacement_order')->select();
+        if(!$result){
+            $this->error(__('数据不存在'), [], 400);
+        }
+        $arr = [];
+        foreach($result as $v){
+            $arr[$v['replacement_order']] = $v['platform_order'];
+        }
+        $this->success('成功', $arr, 200);
     }
 }
