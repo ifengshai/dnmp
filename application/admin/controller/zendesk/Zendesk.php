@@ -2077,7 +2077,7 @@ DOC;
                 $value['group_name'] = $groupName;
             }else{
                 //查询该用户的组别
-                $group = $webModel->table('users')
+                $group = $webModel->table('customer_entity')
                     ->where('email', $value['email'])
                     ->value('group_id');
                 switch ($group) {
