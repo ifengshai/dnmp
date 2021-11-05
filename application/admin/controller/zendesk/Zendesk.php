@@ -1869,7 +1869,7 @@ DOC;
     {
 
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
         $ids = input('ids');
 
         $map = [];
@@ -2024,15 +2024,15 @@ DOC;
             switch ($value['type']) {
                 case 1:
                     $value['site_type'] = 'Zeelool';
-                    $webModel = Db::connect('database.db_zeelool');
+                    //$webModel = Db::connect('database.db_zeelool');
                     break;
                 case 2:
                     $value['site_type'] = 'Voogueme';
-                    $webModel = Db::connect('database.db_voogueme');
+                    //$webModel = Db::connect('database.db_voogueme');
                     break;
                 case 3:
                     $value['site_type'] = 'Meeloog';
-                    $webModel = Db::connect('database.db_nihao');
+                    //$webModel = Db::connect('database.db_nihao');
                     break;
                 case 4:
                     $value['site_type'] = 'Vicmoo';
@@ -2058,9 +2058,9 @@ DOC;
             }
             if($value['type'] == 3){
                 //查询该用户的组别
-                $group = $webModel->table('users')
+                $group = Db::name('web_users')
                     ->where('email', $value['email'])
-                    ->value('group');
+                    ->value('group_id');
                 switch ($group) {
                     case 1:
                         $groupName = '普通';
@@ -2075,7 +2075,7 @@ DOC;
                 $value['group_name'] = $groupName;
             }else{
                 //查询该用户的组别
-                $group = $webModel->table('customer_entity')
+                $group = Db::name('web_users')
                     ->where('email', $value['email'])
                     ->value('group_id');
                 switch ($group) {
