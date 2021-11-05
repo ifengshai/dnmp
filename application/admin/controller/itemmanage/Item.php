@@ -980,6 +980,7 @@ class Item extends Backend
                     $v['douyin_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 13])->value('stock');
                     $v['alibaba_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 14])->value('stock');
                     $v['zeelool_fr_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 15])->value('stock');
+                    $v['voogueme_uk_stock'] = $itemPlatform->where(['sku' => $v['sku'], 'platform_type' => 16])->value('stock');
                 }
                 unset($v);
             } else {

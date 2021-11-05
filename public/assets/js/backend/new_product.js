@@ -79,6 +79,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'fast', 'boot
                                 13: 'zeelool_cn',
                                 14: 'alibaba',
                                 15: 'zeelool_fr',
+                                16: 'voogueme-uk',
                             },
                             formatter: Table.api.formatter.status
                         },

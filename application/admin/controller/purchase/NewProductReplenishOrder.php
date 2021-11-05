@@ -607,6 +607,9 @@ class NewProductReplenishOrder extends Backend
                         case PlatformType::ZEELOOL_FR_PLAT:
                             $websiteType[$sk] = 'Zeelool_fr';
                             break;
+                        case 16:
+                            $websiteType[$sk] = 'Voogueme_uk';
+                            break;
                     }
                 }
                 $websiteType == implode(',',$websiteType);

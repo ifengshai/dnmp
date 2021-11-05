@@ -420,6 +420,7 @@ class ScmWarehouse extends Scm
             ['id' => 13, 'title' => 'zeelool_cn'],
             ['id' => 14, 'title' => 'alibaba'],
             ['id' => 15, 'title' => 'zeelool_fr'],
+            ['id' => 16, 'title' => 'voogueme_uk'],
         ];
 
         $this->success('', ['type_list' => $typeList, 'site_list' => $siteList, 'info' => $info], 200);

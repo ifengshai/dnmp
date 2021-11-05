@@ -92,6 +92,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                     11: 'ZeeloolJp',
                                     12: 'voogmechic',
                                     15: 'ZeeloolFr',
+                                    16: 'VooguemeUk',
                                     66: '网红管理系统',
                                 },
                                 custom: {
@@ -453,6 +454,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'nkeditor', 'upload']
                                     11: 'ZeeloolJp',
                                     12: 'voogmechic',
                                     15: 'ZeeloolFr',
+                                    16: 'VooguemeUk',
                                     66: '网红管理系统'
                                 },
                                 custom: {

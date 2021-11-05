@@ -218,4 +218,7 @@ class Dashboard extends Backend
     public function zeelool_fr()
     {
     }
+    public function voogueme_uk()
+    {
+    }
 }
