@@ -7,6 +7,7 @@
 namespace app\admin\controller\shell;
 
 use app\admin\controller\elasticsearch\async\AsyncDatacenterDay;
+use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\OrderNode;
@@ -4710,6 +4711,64 @@ class TrackReg extends Backend
 //        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
         echo $date_time . "\n";
         echo date("Y-m-d H:i:s") . "\n";
+        usleep(100000);
+    }
+
+    public function getGaDataTemp()
+    {
+        $site = 10;
+        $timeStart = input('timeStart');
+        $timeEnd = input('timeEnd');
+        $date_time = $timeStart;
+        $date_time_behind = $timeEnd;
+        $lastData = Db::name('datacenter_day')
+            ->where('day_date', $date_time_behind)
+            ->where('site', $site)
+            ->field('new_cart_num,order_num')
+            ->find();
+        $data = Db::name('datacenter_day')->where([
+            'day_date' => $date_time,
+            'site'     => $site,
+        ])->field('order_num,new_cart_num,update_cart_num,active_user_num')->find();
+
+        //活跃用户数
+        $arr['active_user_num'] = $this->google_active_user($site, $date_time);
+        //会话
+        $arr['sessions'] = $this->google_session($site, $date_time);
+        //前天的ga会话数
+        $date_time_behind_sessions_z = $this->google_session($site, $date_time_behind);
+        //会话转化率
+        $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        //新增加购率
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($data['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        //更新加购率
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($data['update_cart_num'] / $arr['sessions'] * 100,
+            2) : 0;
+        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
+        //着陆页数据
+        $arr['landing_num'] = $zeelool_data->google_landing($site, $date_time);
+        //产品详情页
+        $arr['detail_num'] = $zeelool_data->google_target13($site, $date_time);
+        //加购
+        $arr['cart_num'] = $zeelool_data->google_target1($site, $date_time);
+        //交易次数
+        $arr['complete_num'] = $zeelool_data->google_target_end($site, $date_time);
+        Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => $site])->update($arr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time, 'site' => $site];
+        //(new AsyncDatacenterDay())->runUpdate($updateData);
+
+        //更新前天的会话数 防止ga数据误差
+        $lastArr['sessions'] = $date_time_behind_sessions_z;
+        $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num'] / $lastArr['sessions']) * 100, 2) : 0;
+        $lastArr['session_rate'] = $lastArr['sessions'] ? round(($lastData['order_num'] / $lastArr['sessions']) * 100, 2) : 0;
+        Db::name('datacenter_day')->where([
+            'day_date' => $date_time_behind,
+            'site'     => $site,
+        ])->update($lastArr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time_behind, 'site' => $site];
+        //(new AsyncDatacenterDay())->runUpdate($updateData);
         usleep(100000);
     }
 }
