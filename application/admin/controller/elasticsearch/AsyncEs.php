@@ -145,7 +145,7 @@ class AsyncEs extends BaseElasticsearch
 
                 return $this->formatDate($value, $mergeData);
             }, collection($newOrder)->toArray());
-            $this->esService->addMutilToEs('mojing_datacenterday', $data);
+            dump($this->esService->addMutilToEs('mojing_datacenterday', $data));
         });
 
     }
