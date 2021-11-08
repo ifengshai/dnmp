@@ -54,6 +54,7 @@ class Logistics
     public function fire(Job $job, $data)
     {
         try {
+            tp_log('队列消费信息:' . $data, '17track');
             $isJobDone = $this->doTrackReturn($data);
             if ($isJobDone) {
                 //如果任务执行成功， 记得删除任务
