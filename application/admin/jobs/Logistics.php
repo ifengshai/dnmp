@@ -79,6 +79,7 @@ class Logistics
         //妥投给magento接口
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
+            Log::write("输出订单号fa_shipment".$track_arr['data']['number']);
             if (empty($order_node)) {
                 $count = Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $track_arr['data']['number'])->where('is_del', 1)->count();
                 Log::write("输出订单号fa_shipment".$track_arr['data']['number']);
