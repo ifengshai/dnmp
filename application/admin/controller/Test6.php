@@ -428,7 +428,9 @@ class Test6 extends Backend
      * @date   2021/11/9 14:08
      */
     public function intime_data(){
-        $start_time = 1630425600;
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $start_time = 1627747200;
         $end_time = 1636387199;
         $this->order = new \app\admin\model\order\order\NewOrder();
         $date_time = $this->order->query("SELECT FROM_UNIXTIME(payment_time, '%Y-%m') AS date_time FROM `fa_order` where payment_time between ".$start_time." and ".$end_time." GROUP BY FROM_UNIXTIME(payment_time, '%Y-%m') order by FROM_UNIXTIME(payment_time, '%Y-%m') asc");
@@ -457,4 +459,5 @@ class Test6 extends Backend
         $arr['send_rate'] = $arr['order_num'] ? round($arr['send_num']/$arr['order_num']*100,2) : 0;
         return $arr;
     }
+    
 }
