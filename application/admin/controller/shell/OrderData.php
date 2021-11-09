@@ -686,7 +686,7 @@ class OrderData extends Backend
                                         $this->orderitemprocess->insertAll($data);
 
                                         // z、v、m、zeelool-es、zeelool-de、zeelool-jp、zeelool-fr 送到丹阳
-                                        if (in_array($site, [1, 2, 5, 8, 9, 10, 11,14, 15, 13])) {
+                                        //if (in_array($site, [1, 2, 5, 8, 9, 10, 11,14, 15, 13])) {
                                             //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                             if ($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3) {
                                                 $order_lens_type[$site][$v['order_id']] = 3;
@@ -695,7 +695,7 @@ class OrderData extends Backend
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                             }
                                             $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                        }
+                                       // }
                                     }
                                 }
 
@@ -751,7 +751,7 @@ class OrderData extends Backend
                                         ]);
 
                                         // z、v、m、zeelool-es、zeelool-de、zeelool-jp、zeelool-fr 送到丹阳
-                                        if (in_array($site, [1, 2, 5, 8, 9, 10, 11,14, 15, 13])) {
+                                       // if (in_array($site, [1, 2, 5, 8, 9, 10, 11,14, 15, 13])) {
                                             //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
                                             if ($order_prescription_type == 3) {
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
@@ -759,7 +759,7 @@ class OrderData extends Backend
                                                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
                                             }
                                             $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                        }
+                                      //  }
                                     }
                                 }
                             }
