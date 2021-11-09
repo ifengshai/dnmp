@@ -434,32 +434,9 @@ class Test6 extends Backend
         $date_time = $this->order->query("SELECT FROM_UNIXTIME(payment_time, '%Y-%m') AS date_time FROM `fa_order` where payment_time between ".$start_time." and ".$end_time." GROUP BY FROM_UNIXTIME(payment_time, '%Y-%m') order by FROM_UNIXTIME(payment_time, '%Y-%m') asc");
         //查询时间
         foreach ($date_time as $val) {
-            //$is_exist = Db::name('datacenter_month_order')->where('day_date', $val['date_time'])->value('id');
             $info = $this->getIntimeOrder($val['date_time']);
-            //$info = $this->getIntimeOrder($val);
+            dump($val['date_time']);
             dump($info);
-//            if (!$is_exist) {
-//                //插入数据
-//                $arr = [];
-//                $arr['day_date'] = $val['date_time'];
-//                $arr['order_num'] = $info['order_num'];
-//                $arr['intime_rate'] = $info['intime_rate'];
-//                $arr['send_num'] = $info1['send_num'];
-//                $arr['logistics_rate'] = $info1['logistics_rate'];
-//                Db::name('datacenter_month_order')->insert($arr);
-//                echo $val['date_time'].' is ok'."\n";
-//                usleep(10000);
-//            }else{
-//                $arr = [];
-//                //更新数据
-//                $arr['order_num'] = $info['order_num'];
-//                $arr['intime_rate'] = $info['intime_rate'];
-//                $arr['send_num'] = $info1['send_num'];
-//                $arr['logistics_rate'] = $info1['logistics_rate'];
-//                Db::name('datacenter_month_order')->where('day_date',$val['date_time'])->update($arr);
-//                echo $val['date_time'].' update is ok'."\n";
-//                usleep(10000);
-//            }
         }
     }
     public function getIntimeOrder($date)
@@ -477,6 +454,7 @@ class Test6 extends Backend
         $this->process = new \app\admin\model\order\order\NewOrderProcess;
         $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.complete_time-o.payment_time)/3600 AS total')->where($where)->group('p.order_id')->buildSql();
         $arr['send_num'] = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 48, 1, 0) ) AS a');
+        $arr['send_rate'] = $arr['order_num'] ? round($arr['send_num']/$arr['order_num']*100,2) : 0;
         return $arr;
     }
 }
