@@ -6,6 +6,7 @@ use app\admin\model\DistributionAbnormal;
 use app\admin\model\order\order\LensData;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\order\order\NewOrderItemProcess;
+use app\admin\model\saleaftermanage\WorkOrderList;
 use app\admin\model\warehouse\StockHouse;
 use app\admin\model\zendesk\Zendesk;
 use app\admin\model\zendesk\ZendeskTasks;
@@ -26,6 +27,10 @@ class Test6 extends Backend
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
         $this->nihao = new \app\admin\model\order\order\Nihao();
+        $this->order = new \app\admin\model\order\order\NewOrder();
+        $this->ordernode = new \app\admin\model\OrderNode();
+        $this->work  = new \app\admin\model\saleaftermanage\WorkOrderList();
+        $this->process = new \app\admin\model\order\order\NewOrderProcess;
     }
     
     public function test()
@@ -436,7 +441,7 @@ class Test6 extends Backend
         $date_time = $this->order->query("SELECT FROM_UNIXTIME(payment_time, '%Y-%m') AS date_time FROM `fa_order` where payment_time between ".$start_time." and ".$end_time." GROUP BY FROM_UNIXTIME(payment_time, '%Y-%m') order by FROM_UNIXTIME(payment_time, '%Y-%m') asc");
         //查询时间
         foreach ($date_time as $val) {
-            $info = $this->getIntimeOrder($val['date_time']);
+            $info = $this->getIntimeOrderTwo($val['date_time']);
             dump($val['date_time']);
             dump($info);
         }
@@ -456,6 +461,28 @@ class Test6 extends Backend
         $this->process = new \app\admin\model\order\order\NewOrderProcess;
         $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.complete_time-o.payment_time)/3600 AS total')->where($where)->group('p.order_id')->buildSql();
         $arr['send_num'] = $this->process->table([$sql1=>'t2'])->value('sum( IF ( total <= 48, 1, 0) ) AS a');
+        $arr['send_rate'] = $arr['order_num'] ? round($arr['send_num']/$arr['order_num']*100,2) : 0;
+        return $arr;
+    }
+    public function getIntimeOrderTwo($date)
+    {
+        $arr = [];
+        //订单数
+        $start = strtotime($date);
+        $firstdaystr = date("Y-m-01",$start);
+        $end = strtotime(date("Y-m-d 23:59:59",strtotime("$firstdaystr +1 month -1 day")));
+        $where['o.payment_time'] = ['between',[$start,$end]];
+        $where['o.status'] = ['in', ['free_processing', 'processing', 'complete', 'paypal_reversed', 'payment_review', 'paypal_canceled_reversal','delivered','delivery']];
+        //求出所有的工单中订单
+        $work_order_list = $this->work->column('platform_order');
+        //当月所有的订单
+        $arr_order_list = $this->order->alias('o')->where($where)->column('increment_id');
+        $result_list = array_diff($arr_order_list,$work_order_list);
+        $arr['order_num'] = count($result_list);
+
+        $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('p.increment_id,(p.complete_time-o.payment_time)/3600 AS total')->where($where)->group('p.order_id')->buildSql();
+        $arr_send_list = $this->process->table([$sql1=>'t2'])->column("IF ( total <= 48,increment_id,'')");
+        $arr['send_num']  = count(array_diff(array_filter($arr_send_list),$work_order_list));
         $arr['send_rate'] = $arr['order_num'] ? round($arr['send_num']/$arr['order_num']*100,2) : 0;
         return $arr;
     }
