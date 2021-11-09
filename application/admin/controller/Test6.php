@@ -480,8 +480,8 @@ class Test6 extends Backend
         $result_list = array_diff($arr_order_list,$work_order_list);
         $arr['order_num'] = count($result_list);
 
-        $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('(p.complete_time-o.payment_time)/3600 AS total')->where($where)->group('p.order_id')->buildSql();
-        $arr_send_list = $this->process->table([$sql1=>'t2'])->column("IF ( total <= 48, p.increment_id,'')");
+        $sql1 = $this->process->alias('p')->join('fa_order o','p.increment_id = o.increment_id')->field('p.increment_id,(p.complete_time-o.payment_time)/3600 AS total')->where($where)->group('p.order_id')->buildSql();
+        $arr_send_list = $this->process->table([$sql1=>'t2'])->column("IF ( total <= 48,increment_id,'')");
         $arr['send_num']  = count(array_diff(array_filter($arr_send_list),$work_order_list));
         $arr['send_rate'] = $arr['order_num'] ? round($arr['send_num']/$arr['order_num']*100,2) : 0;
         return $arr;
