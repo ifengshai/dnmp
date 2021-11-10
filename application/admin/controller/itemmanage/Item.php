@@ -2518,7 +2518,7 @@ class Item extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['price']);
             $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['purchase_price']);
             if ($value['category_id']) {
-                $value['category_name'] = $categoryArr[$v['category_id']];
+                $value['category_name'] = $categoryArr[$value['category_id']];
                 $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['category_name']);
             } else {
                 $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), '暂无分类');
