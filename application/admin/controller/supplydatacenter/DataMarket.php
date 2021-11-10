@@ -22,6 +22,7 @@ class DataMarket extends Backend
         parent::_initialize();
         $this->magentoplatform = new \app\admin\model\platformmanage\MagentoPlatform();
         $this->model = new \app\admin\model\itemmanage\Item;
+        $this->logisticsInfo = new \app\admin\model\LogisticsInfo;
         $this->skuSalesNum = new \app\admin\model\SkuSalesNum();
         $this->outstock = new \app\admin\model\warehouse\Outstock;
         $this->instock = new \app\admin\model\warehouse\Instock;
@@ -216,8 +217,13 @@ class DataMarket extends Backend
         //在途库存单价
         $arr['onway_stock_price'] = $arr['onway_stock_num'] ? round($arr['onway_stock_amount'] / $arr['onway_stock_num'],
             2) : 0;
-        //待入库数量
+        //理论待入库数量
         $arr['wait_stock_num'] = $this->model->where($where)->sum('wait_instock_num');
+        //实际待入库数量
+        $whereReal['type'] = 1;
+        $whereReal['status'] =1;
+        $whereReal['is_check_order'] = 0;
+        $arr['real_wait_stock_num'] = $this->logisticsInfo->where($whereReal)->sum('sign_count');
         //待入库金额
         $arr['wait_stock_amount'] = $this->model->where($where)->sum('wait_instock_num*purchase_price');
         Cache::set('Supplydatacenter_datamarket' . md5(serialize('stock_overview')), $arr, 7200);
