@@ -2830,25 +2830,19 @@ class OrderData extends Backend
     public function updateOrderItemProcess()
     {
         $entity_id = [
-            609970,
-            609971,
-            609972,
-            609973,
-            609974,
-            609975,
-            609976,
-            609977,
-            609978,
-            609979,
-            609980,
-            609981,
-            609982,
+            1236654,
+            1236655,
+            1236656,
+            1236657,
+            1236658,
+            1236659,
+            1236660,
         ];
         $where['entity_id'] = ['in',$entity_id];
-        $where['site'] = 2;
+        $where['site'] = 1;
         $list = $this->order->where($where)->field('id,entity_id,increment_id')->select();
         foreach ($list as $val){
-            $order_item = $this->orderitemprocess->where(['magento_order_id'=>$val['entity_id'],'site'=>2])->field('id,order_id,item_order_number')->select();
+            $order_item = $this->orderitemprocess->where(['magento_order_id'=>$val['entity_id'],'site'=>1])->field('id,order_id,item_order_number')->select();
             if($order_item){
                 foreach ($order_item as $v){
                     $this->orderitemprocess->where(['id'=>$v['id']])->update(['order_id'=>$val['id'],'item_order_number'=>$val['increment_id'].$v['item_order_number']]);
