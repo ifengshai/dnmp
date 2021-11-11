@@ -2849,12 +2849,10 @@ class OrderData extends Backend
         $where['site'] = 2;
         $list = $this->order->where($where)->field('id,entity_id,increment_id')->select();
         foreach ($list as $val){
-            $order_item = $this->orderitemprocess->where('magento_order_id',$val['entity_id'])->field('id,order_id,item_order_number')->select();
+            $order_item = $this->orderitemprocess->where(['magento_order_id'=>$val['entity_id'],'site'=>2])->field('id,order_id,item_order_number')->select();
             if($order_item){
                 foreach ($order_item as $v){
-                    echo $val['increment_id'].$v['item_order_number'];
-                    echo '<br>';
-                    //$this->orderitemprocess->where(['id'=>$v['id']])->update(['order_id'=>$val['id'],'item_order_number'=>$val['increment_id'].$v['item_order_number']]);
+                    $this->orderitemprocess->where(['id'=>$v['id']])->update(['order_id'=>$val['id'],'item_order_number'=>$val['increment_id'].$v['item_order_number']]);
                 }
             }
         }
@@ -2938,7 +2936,7 @@ class OrderData extends Backend
         $where['site'] = 1;
         $list = $this->order->where($where)->field('id,entity_id,increment_id')->select();
         foreach ($list as $val){
-            $order_item = $this->orderitemprocess->where('magento_order_id',$val['entity_id'])->field('id,order_id,item_order_number')->select();
+            $order_item = $this->orderitemprocess->where(['magento_order_id'=>$val['entity_id'],'site'=>1])->field('id,order_id,item_order_number')->select();
             if($order_item){
                 foreach ($order_item as $v){
                     $arr = explode('-',$v['item_order_number']);
