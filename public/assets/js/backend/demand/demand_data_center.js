@@ -87,7 +87,7 @@ define(['jquery', 'bootstrap', 'backend', 'addtabs', 'table','form','echartsobj'
                                     12: 'voogmechic',
                                     15: 'ZeeloolFr',
                                     66: '网红管理系统',
-                                    88: 'sanada',
+                                    88: 'senada',
                                 },
                                 custom: {
                                     1: 'black',
