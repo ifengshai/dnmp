@@ -2431,7 +2431,7 @@ class OrderData extends Backend
     public function wesee_old_order()
     {
         $site = 5;
-        $list = Db::connect('database.db_weseeoptical')->table('orders')->where(['id' => ['in', [4707 , 4706]]])->select();
+        $list = Db::connect('database.db_weseeoptical')->table('orders')->where(['id' => ['in', [4708]]])->select();
 
         $order_params = [];
         foreach ($list as $k => $v) {
@@ -2494,7 +2494,7 @@ class OrderData extends Backend
         $site = 5;
         $list = Db::connect('database.db_weseeoptical')
             ->table('orders_addresses')
-            ->where(['order_id' => ['in', [4707 , 4706]]])->where('type=1')
+            ->where(['order_id' => ['in', [4708]]])->where('type=1')
             ->select();
         $params = [];
         foreach ($list as $k => $v) {
@@ -2532,7 +2532,7 @@ class OrderData extends Backend
         $list = Db::connect('database.db_weseeoptical')
             ->table('orders_items')->alias('a')
             ->join(['orders_prescriptions' => 'b'], 'a.orders_prescriptions_id=b.id')
-            ->where(['order_id' => ['in', [4707 , 4706]]])->select();
+            ->where(['order_id' => ['in', [4708]]])->select();
         foreach ($list as $k => $v) {
             $options = [];
             //处方解析 不同站不同字段
