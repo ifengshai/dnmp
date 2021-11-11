@@ -2416,4 +2416,164 @@ class OrderData extends Backend
         }
         echo "ok";
     }
+
+    /**
+     * 批发站主表
+     *
+     * @Description
+     * @author wpl
+     * @since 2021/01/19 09:37:37 
+     *
+     * @param     [type] $site
+     *
+     * @return void
+     */
+    public function wesee_old_order()
+    {
+        $site = 5;
+        $list = Db::connect('database.db_weseeoptical')->table('orders')->where(['id' => ['in', [4707 , 4706]]])->select();
+
+        $order_params = [];
+        foreach ($list as $k => $v) {
+            $params = [];
+            $params['entity_id'] = $v['id'];
+            $params['site'] = $site;
+            $params['increment_id'] = $v['order_no'];
+            $params['status'] = $v['order_status'] ?: '';
+            $params['base_grand_total'] = $v['base_actual_amount_paid'] ?: 0;
+            $params['grand_total'] = $v['actual_amount_paid'] ?: 0;
+            $params['store_id'] = $v['source'];
+            $params['customer_email'] = $v['email'] ?? '';
+            $params['total_qty_ordered'] = $v['goods_quantity'];
+            $params['base_currency_code'] = $v['base_currency'];
+            $params['order_currency_code'] = $v['now_currency'];
+            $params['shipping_method'] = $v['freight_type'];
+            $params['shipping_title'] = $v['freight_description'];
+            $params['base_to_order_rate'] = $v['rate'];
+            $params['base_shipping_amount'] = $v['freight_price'];
+            $params['base_discount_amount'] = $v['base_discounts_price'];
+            $params['customer_id'] = $v['user_id'] ?: 0;
+            $params['payment_method'] = $v['payment_type'];
+            $params['created_at'] = strtotime($v['created_at']) + 28800;
+            $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+            $params['last_trans_id'] = $v['payment_order_no'];
+            if (isset($v['payment_time'])) {
+                $params['payment_time'] = strtotime($v['payment_time']) + 28800;
+            }
+
+            //插入订单主表
+            $order_id = $this->order->insertGetId($params);
+            //es同步订单数据，插入
+            $this->asyncOrder->runInsert($params, $order_id);
+            $order_params[$k]['site'] = $site;
+            $order_params[$k]['order_id'] = $order_id;
+            $order_params[$k]['entity_id'] = $v['id'];
+            $order_params[$k]['increment_id'] = $v['order_no'];
+
+            echo $v['entity_id']."\n";
+            usleep(10000);
+        }
+        //插入订单处理表
+        if ($order_params) {
+            $this->orderprocess->saveAll($order_params);
+        }
+        echo "ok";
+    }
+
+
+    /**
+     * 地址处理
+     *
+     * @Description
+     * @return void
+     * @since  2020/11/02 18:31:12
+     * @author wpl
+     */
+    public function wesee_order_address_data()
+    {
+        $site = 5;
+        $list = Db::connect('database.db_weseeoptical')
+            ->table('orders_addresses')
+            ->where(['order_id' => ['in', [4707 , 4706]]])->where('type=1')
+            ->select();
+        $params = [];
+        foreach ($list as $k => $v) {
+            $params = [];
+            if ($v['type'] == 1) {
+                $params['country_id'] = $v['country'];
+                $params['region'] = $v['region'];
+                $params['city'] = $v['city'];
+                $params['street'] = $v['street'];
+                $params['postcode'] = $v['postcode'];
+                $params['telephone'] = $v['telephone'];
+                $params['customer_firstname'] = $v['firstname'];
+                $params['customer_lastname'] = $v['lastname'];
+                $params['firstname'] = $v['firstname'];
+                $params['lastname'] = $v['lastname'];
+                $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update($params);
+            }
+        }
+        echo $site.'ok';
+    }
+
+
+    /**
+     * 地址处理
+     *
+     * @Description
+     * @return void
+     * @since  2020/11/02 18:31:12
+     * @author wpl
+     */
+    public function wesee_order_item_data()
+    {
+        $site = 5;
+        $list = Db::connect('database.db_weseeoptical')
+            ->table('orders_items')->alias('a')
+            ->join(['orders_prescriptions' => 'b'], 'a.orders_prescriptions_id=b.id')
+            ->where(['order_id' => ['in', [4707 , 4706]]])->select();
+        foreach ($list as $k => $v) {
+            $options = [];
+            //处方解析 不同站不同字段
+            $options = $this->wesee_prescription_analysis($v['prescription']);
+            $options['base_row_total'] = $v['original_total_price'];
+            $options['index_price'] = $v['lens_total_price'];
+            $options['base_original_price'] = round($v['base_goods_price'] * $v['goods_count'], 4);
+            $options['base_discount_amount'] = $v['base_goods_discounts_price'];
+            $options['single_base_original_price'] = $v['base_goods_price'];
+            $options['single_base_discount_amount'] = round($v['base_goods_discounts_price'] / $v['goods_count'], 4);
+            $options['prescription_type'] = $v['name'];
+            $options['item_id'] = $v['id'];
+            $options['site'] = $site;
+            $options['magento_order_id'] = $v['order_id'];
+            $options['sku'] = $this->getTrueSku($v['goods_sku']);
+            $options['qty'] = $v['goods_count'];
+            $options['product_id'] = $v['goods_id'];
+            $options['frame_regural_price'] = $v['goods_original_price'];
+            $options['frame_price'] = $v['goods_price'];
+            $options['frame_color'] = $v['goods_color'];
+            $options['goods_type'] = $v['goods_type'] ?? '';
+            $order_prescription_type = $options['order_prescription_type'];
+            unset($options['order_prescription_type']);
+            unset($options['is_prescription_abnormal']);
+            if ($options) {
+                $options_id = $this->orderitemoption->insertGetId($options);
+                $data = []; //子订单表数据
+                for ($i = 0; $i < $v['goods_count']; $i++) {
+                    $data[$i]['item_id'] = $v['id'];
+                    $data[$i]['magento_order_id'] = $v['order_id'];
+                    $data[$i]['site'] = $site;
+                    $data[$i]['option_id'] = $options_id;
+                    $data[$i]['sku'] = $options['sku'];
+                    $data[$i]['order_prescription_type'] = $order_prescription_type;
+                    $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
+                    $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
+                }
+                $this->orderitemprocess->insertAll($data);
+            }
+        }
+
+        echo $site.'ok';
+    }
 }

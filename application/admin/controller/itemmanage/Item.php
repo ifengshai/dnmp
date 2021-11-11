@@ -2497,15 +2497,16 @@ class Item extends Backend
             ->setCellValue("B1", "商品名称")
             ->setCellValue("C1", "原始SKU")
             ->setCellValue("D1", "商品SKU")
-            ->setCellValue("E1", "参考进价");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("F1", "商品分类")
-            ->setCellValue("G1", "SKU状态")
-            ->setCellValue("H1", "商品库存")
-            ->setCellValue("I1", "SKU启用状态")
-            ->setCellValue("J1", "是否新品");
-        $spreadsheet->setActiveSheetIndex(0)->setCellValue("K1", "创建人")
-            ->setCellValue("L1", "创建时间")
-            ->setCellValue("M1", "大货/现货");
+            ->setCellValue("E1", "打样成本")
+            ->setCellValue("F1", "采购单价");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("G1", "商品分类")
+            ->setCellValue("H1", "SKU状态")
+            ->setCellValue("I1", "商品库存")
+            ->setCellValue("J1", "SKU启用状态")
+            ->setCellValue("K1", "是否新品");
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("L1", "创建人")
+            ->setCellValue("M1", "创建时间")
+            ->setCellValue("N1", "大货/现货");
         $spreadsheet->setActiveSheetIndex(0)->setTitle('商品SKU数据');
 
         foreach ($list as $key => $value) {
@@ -2515,11 +2516,12 @@ class Item extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), $value['origin_sku']);
             $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), $value['sku']);
             $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), $value['price']);
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['purchase_price']);
             if ($value['category_id']) {
-                $value['category_name'] = $categoryArr[$v['category_id']];
-                $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), $value['category_name']);
+                $value['category_name'] = $categoryArr[$value['category_id']];
+                $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['category_name']);
             } else {
-                $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), '暂无分类');
+                $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), '暂无分类');
             }
             switch ($value['item_status']) {
                 case 1:
@@ -2538,20 +2540,20 @@ class Item extends Backend
                     $value['item_status'] = '取消';
                     break;
             }
-            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), $value['item_status']);
-            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['stock']);
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), $value['item_status']);
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), $value['stock']);
             if (1 == $value['is_open']) {
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), '启用');
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), '启用');
             } elseif (2 == $value['is_open']) {
-                $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), '禁用');
+                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), '禁用');
             }
             if (1 == $value['is_new']) {
-                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), '是');
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), '是');
             } else {
-                $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), '不是');
+                $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), '不是');
             }
-            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), $value['create_person']);
-            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['create_time']);
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['create_time']);
             if (1 == $value['is_spot']) {
                 $value['is_spot'] = '大货';
             } elseif (2 == $value['is_spot']) {
@@ -2559,7 +2561,7 @@ class Item extends Backend
             } else {
                 $value['is_spot'] = '-';
             }
-            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), $value['is_spot']);
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), $value['is_spot']);
         }
         //设置宽度
         $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(30);
@@ -2575,6 +2577,7 @@ class Item extends Backend
         $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(30);
         $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(30);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(30);
         //设置边框
         $border = [
             'borders' => [
