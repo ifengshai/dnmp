@@ -2248,7 +2248,7 @@ class OrderData extends Backend
      */
     public function process_order_data_temp()
     {
-        $this->zeelool_old_order(1);
+        $this->zeelool_old_order(2);
     }
 
     protected function zeelool_old_order($site)
@@ -2257,80 +2257,23 @@ class OrderData extends Backend
             $entity_id = [
             ];
             $list = Db::connect('database.db_weseeoptical')->table('orders')->where(['entity_id' => ['in', $entity_id]])->select();
-        }elseif($site == 1) {
+        }elseif($site == 2) {
         $entity_id = [
-            1234447,
-            1234448,
-            1234449,
-            1234450,
-            1234451,
-            1234452,
-            1234453,
-            1234454,
-            1234455,
-            1234456,
-            1234457,
-            1234458,
-            1234459,
-            1234460,
-            1234461,
-            1234462,
-            1234463,
-            1234464,
-            1234465,
-            1234466,
-            1234467,
-            1234468,
-            1234469,
-            1234470,
-            1234471,
-            1234472,
-            1234473,
-            1234474,
-            1234475,
-            1234476,
-            1234477,
-            1234478,
-            1234479,
-            1234480,
-            1234481,
-            1234482,
-            1234483,
-            1234484,
-            1234485,
-            1234486,
-            1234487,
-            1234488,
-            1234489,
-            1234490,
-            1234491,
-            1234492,
-            1234493,
-            1234494,
-            1234495,
-            1234496,
-            1234497,
-            1234498,
-            1234499,
-            1234500,
-            1234501,
-            1234502,
-            1234503,
-            1234504,
-            1234505,
-            1234506,
-            1234507,
-            1234508,
-            1234509,
-            1234510,
-            1234511,
-            1234512,
-            1234513,
-            1234514,
-            1234515,
-            1234516,
+            609970,
+            609971,
+            609972,
+            609973,
+            609974,
+            609975,
+            609976,
+            609977,
+            609978,
+            609979,
+            609980,
+            609981,
+            609982,
         ];
-            $list = Db::connect('database.db_zeelool_online')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
+            $list = Db::connect('database.db_voogueme_online')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
         }
 
 
@@ -2405,7 +2348,7 @@ class OrderData extends Backend
      */
     public function process_order_data_address_temp()
     {
-        $this->order_address_data_shell(1);
+        $this->order_address_data_shell(2);
     }
 
     public function order_address_data_shell($site)
@@ -2414,76 +2357,6 @@ class OrderData extends Backend
         if ($site == 1) {
             $entity_id = [
                 1234447,
-                1234448,
-                1234449,
-                1234450,
-                1234451,
-                1234452,
-                1234453,
-                1234454,
-                1234455,
-                1234456,
-                1234457,
-                1234458,
-                1234459,
-                1234460,
-                1234461,
-                1234462,
-                1234463,
-                1234464,
-                1234465,
-                1234466,
-                1234467,
-                1234468,
-                1234469,
-                1234470,
-                1234471,
-                1234472,
-                1234473,
-                1234474,
-                1234475,
-                1234476,
-                1234477,
-                1234478,
-                1234479,
-                1234480,
-                1234481,
-                1234482,
-                1234483,
-                1234484,
-                1234485,
-                1234486,
-                1234487,
-                1234488,
-                1234489,
-                1234490,
-                1234491,
-                1234492,
-                1234493,
-                1234494,
-                1234495,
-                1234496,
-                1234497,
-                1234498,
-                1234499,
-                1234500,
-                1234501,
-                1234502,
-                1234503,
-                1234504,
-                1234505,
-                1234506,
-                1234507,
-                1234508,
-                1234509,
-                1234510,
-                1234511,
-                1234512,
-                1234513,
-                1234514,
-                1234515,
-                1234516,
-
             ];
             $list = Db::connect('database.db_zeelool_online')
                 ->table('sales_flat_order_address')
@@ -2492,9 +2365,21 @@ class OrderData extends Backend
 
         } elseif ($site == 2) {
             $entity_id = [
-                601711
+                609970,
+                609971,
+                609972,
+                609973,
+                609974,
+                609975,
+                609976,
+                609977,
+                609978,
+                609979,
+                609980,
+                609981,
+                609982,
             ];
-            $list = Db::connect('database.db_voogueme')
+            $list = Db::connect('database.db_voogueme_online')
                 ->table('sales_flat_order_address')
                 ->where(['parent_id' => ['in', $entity_id]])
                 ->where(['address_type' => 'shipping'])->select();
@@ -2556,7 +2441,7 @@ class OrderData extends Backend
      */
     public function order_payment_data_shell()
     {
-        $this->order_payment_data(1);
+        $this->order_payment_data(2);
     }
 
     /**
@@ -2573,82 +2458,24 @@ class OrderData extends Backend
         $list = collection($list)->toArray();
         //$entity_id = array_column($list, 'entity_id');
         $entity_id = [
-            1234447,
-            1234448,
-            1234449,
-            1234450,
-            1234451,
-            1234452,
-            1234453,
-            1234454,
-            1234455,
-            1234456,
-            1234457,
-            1234458,
-            1234459,
-            1234460,
-            1234461,
-            1234462,
-            1234463,
-            1234464,
-            1234465,
-            1234466,
-            1234467,
-            1234468,
-            1234469,
-            1234470,
-            1234471,
-            1234472,
-            1234473,
-            1234474,
-            1234475,
-            1234476,
-            1234477,
-            1234478,
-            1234479,
-            1234480,
-            1234481,
-            1234482,
-            1234483,
-            1234484,
-            1234485,
-            1234486,
-            1234487,
-            1234488,
-            1234489,
-            1234490,
-            1234491,
-            1234492,
-            1234493,
-            1234494,
-            1234495,
-            1234496,
-            1234497,
-            1234498,
-            1234499,
-            1234500,
-            1234501,
-            1234502,
-            1234503,
-            1234504,
-            1234505,
-            1234506,
-            1234507,
-            1234508,
-            1234509,
-            1234510,
-            1234511,
-            1234512,
-            1234513,
-            1234514,
-            1234515,
-            1234516,
-
+            609970,
+            609971,
+            609972,
+            609973,
+            609974,
+            609975,
+            609976,
+            609977,
+            609978,
+            609979,
+            609980,
+            609981,
+            609982,
         ];
         if ($site == 1) {
             $res = Db::connect('database.db_zeelool_online')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
         } elseif ($site == 2) {
-            $res = Db::connect('database.db_voogueme')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
+            $res = Db::connect('database.db_voogueme_online')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
         } elseif ($site == 3) {
             $res = Db::connect('database.db_nihao')->table('sales_flat_order_payment')->where(['parent_id' => ['in', $entity_id]])->column('method,last_trans_id', 'parent_id');
         } elseif ($site == 4) {
@@ -2685,7 +2512,7 @@ class OrderData extends Backend
      */
     public function order_item_data_shell()
     {
-        $this->order_item_shell(1);
+        $this->order_item_shell(2);
     }
 
     /**
@@ -2706,74 +2533,6 @@ class OrderData extends Backend
             $entity_id = [
                 1234447,
                 1234448,
-                1234449,
-                1234450,
-                1234451,
-                1234452,
-                1234453,
-                1234454,
-                1234455,
-                1234456,
-                1234457,
-                1234458,
-                1234459,
-                1234460,
-                1234461,
-                1234462,
-                1234463,
-                1234464,
-                1234465,
-                1234466,
-                1234467,
-                1234468,
-                1234469,
-                1234470,
-                1234471,
-                1234472,
-                1234473,
-                1234474,
-                1234475,
-                1234476,
-                1234477,
-                1234478,
-                1234479,
-                1234480,
-                1234481,
-                1234482,
-                1234483,
-                1234484,
-                1234485,
-                1234486,
-                1234487,
-                1234488,
-                1234489,
-                1234490,
-                1234491,
-                1234492,
-                1234493,
-                1234494,
-                1234495,
-                1234496,
-                1234497,
-                1234498,
-                1234499,
-                1234500,
-                1234501,
-                1234502,
-                1234503,
-                1234504,
-                1234505,
-                1234506,
-                1234507,
-                1234508,
-                1234509,
-                1234510,
-                1234511,
-                1234512,
-                1234513,
-                1234514,
-                1234515,
-                1234516,
             ];
             $list = Db::connect('database.db_zeelool_online')
                 ->table('sales_flat_order_item')
@@ -2781,11 +2540,23 @@ class OrderData extends Backend
                 ->select();
 
         } elseif ($site == 2) {
-            return false;
             $entity_id = [
+                609970,
+                609971,
+                609972,
+                609973,
+                609974,
+                609975,
+                609976,
+                609977,
+                609978,
+                609979,
+                609980,
+                609981,
+                609982,
             ];
 
-            $list = Db::connect('database.db_voogueme')
+            $list = Db::connect('database.db_voogueme_online')
                 ->table('sales_flat_order_item')
                 ->where(['order_id' => ['in', $entity_id]])
                 ->select();
@@ -3060,85 +2831,30 @@ class OrderData extends Backend
     public function updateOrderItemProcess()
     {
         $entity_id = [
-            1234447,
-            1234448,
-            1234449,
-            1234450,
-            1234451,
-            1234452,
-            1234453,
-            1234454,
-            1234455,
-            1234456,
-            1234457,
-            1234458,
-            1234459,
-            1234460,
-            1234461,
-            1234462,
-            1234463,
-            1234464,
-            1234465,
-            1234466,
-            1234467,
-            1234468,
-            1234469,
-            1234470,
-            1234471,
-            1234472,
-            1234473,
-            1234474,
-            1234475,
-            1234476,
-            1234477,
-            1234478,
-            1234479,
-            1234480,
-            1234481,
-            1234482,
-            1234483,
-            1234484,
-            1234485,
-            1234486,
-            1234487,
-            1234488,
-            1234489,
-            1234490,
-            1234491,
-            1234492,
-            1234493,
-            1234494,
-            1234495,
-            1234496,
-            1234497,
-            1234498,
-            1234499,
-            1234500,
-            1234501,
-            1234502,
-            1234503,
-            1234504,
-            1234505,
-            1234506,
-            1234507,
-            1234508,
-            1234509,
-            1234510,
-            1234511,
-            1234512,
-            1234513,
-            1234514,
-            1234515,
-            1234516,
+            609970,
+            609971,
+            609972,
+            609973,
+            609974,
+            609975,
+            609976,
+            609977,
+            609978,
+            609979,
+            609980,
+            609981,
+            609982,
         ];
         $where['entity_id'] = ['in',$entity_id];
-        $where['site'] = 1;
+        $where['site'] = 2;
         $list = $this->order->where($where)->field('id,entity_id,increment_id')->select();
         foreach ($list as $val){
             $order_item = $this->orderitemprocess->where('magento_order_id',$val['entity_id'])->field('id,order_id,item_order_number')->select();
             if($order_item){
                 foreach ($order_item as $v){
-                    $this->orderitemprocess->where(['id'=>$v['id']])->update(['order_id'=>$val['id'],'item_order_number'=>$val['increment_id'].$v['item_order_number']]);
+                    echo $val['increment_id'].$v['item_order_number'];
+                    echo '<br>';
+                    //$this->orderitemprocess->where(['id'=>$v['id']])->update(['order_id'=>$val['id'],'item_order_number'=>$val['increment_id'].$v['item_order_number']]);
                 }
             }
         }
