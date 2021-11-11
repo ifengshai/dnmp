@@ -3052,4 +3052,97 @@ class OrderData extends Backend
         echo $site.'ok';
     }
 
+    /**
+     * 更新fa_order_item_process 表
+     * @author liushiwei
+     * @date   2021/11/11 14:47
+     */
+    public function updateOrderItemProcess()
+    {
+        $entity_id = [
+            1234447,
+            1234448,
+            1234449,
+            1234450,
+            1234451,
+            1234452,
+            1234453,
+            1234454,
+            1234455,
+            1234456,
+            1234457,
+            1234458,
+            1234459,
+            1234460,
+            1234461,
+            1234462,
+            1234463,
+            1234464,
+            1234465,
+            1234466,
+            1234467,
+            1234468,
+            1234469,
+            1234470,
+            1234471,
+            1234472,
+            1234473,
+            1234474,
+            1234475,
+            1234476,
+            1234477,
+            1234478,
+            1234479,
+            1234480,
+            1234481,
+            1234482,
+            1234483,
+            1234484,
+            1234485,
+            1234486,
+            1234487,
+            1234488,
+            1234489,
+            1234490,
+            1234491,
+            1234492,
+            1234493,
+            1234494,
+            1234495,
+            1234496,
+            1234497,
+            1234498,
+            1234499,
+            1234500,
+            1234501,
+            1234502,
+            1234503,
+            1234504,
+            1234505,
+            1234506,
+            1234507,
+            1234508,
+            1234509,
+            1234510,
+            1234511,
+            1234512,
+            1234513,
+            1234514,
+            1234515,
+            1234516,
+        ];
+        $where['entity_id'] = [in,$entity_id];
+        $where['site'] = 1;
+        $list = $this->order->where($where)->field('id,entity_id,increment_id')->select();
+        foreach ($list as $val){
+            $order_item = $this->orderitemprocess->where('magento_order_id',$val['entity_id'])->field('id,order_id,item_order_number')->select();
+            if($order_item){
+                foreach ($order_item as $v){
+                    $this->orderitemprocess->where(['id'=>$v['id']])->update(['order_id'=>$val['id'],'item_order_number'=>$val['increment_id'].$v['item_order_number']]);
+                }
+            }
+        }
+        echo 'ok';
+    }
+
 }
