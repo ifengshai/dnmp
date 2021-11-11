@@ -3131,7 +3131,7 @@ class OrderData extends Backend
             1234515,
             1234516,
         ];
-        $where['entity_id'] = [in,$entity_id];
+        $where['entity_id'] = ['in',$entity_id];
         $where['site'] = 1;
         $list = $this->order->where($where)->field('id,entity_id,increment_id')->select();
         foreach ($list as $val){
