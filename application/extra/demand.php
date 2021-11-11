@@ -25,7 +25,7 @@ return [
         '12' => 'Voogmechic',
         '15'=>'ZeeloolFr',
         '66'=>'网红管理系统',
-        '88'=>'sanada',
+        '88'=>'senada',
     ],
     //类型
     'siteType' => [
