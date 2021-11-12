@@ -503,7 +503,7 @@ class WorkOrderList extends Model
         if (!$data) {
             if ($siteType == 13 || $siteType == 14) {//第三方平台接口
                 $data = [];
-                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized', 'PhotochromicBlueLightBlocking' => 'PhotochromicBlueLightBlocking', 'Night vision' => 'Night vision','Wanxin Drive'=>'Wanxin Drive'];
+                $data['lens_list'] = ['Plastic lenses' => 'Plastic lenses', 'Standard Eyeglass Lenses' => 'Standard Eyeglass Lenses', 'Beyond UV Blue Blockers' => 'Beyond UV Blue Blockers', 'Photochromic Lenses' => 'Photochromic Lenses', 'Color Tint' => 'Color Tint', 'Mid-Index Mirrored lenses' => 'Mid-Index Mirrored lenses', 'Polarized' => 'Polarized', 'PhotochromicBlueLightBlocking' => 'PhotochromicBlueLightBlocking', 'Night vision' => 'Night vision','WanxinDrive'=>'WanxinDrive'];
                 $data['color_list'] = [];
                 $data['coating_list'] = [];
             } else if ($siteType == 3){
