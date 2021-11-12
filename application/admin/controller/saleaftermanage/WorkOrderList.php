@@ -1099,8 +1099,6 @@ class WorkOrderList extends Backend
                     $_stock_house->rollback();
                     $this->error($e->getMessage());
                 } catch (Exception $e) {
-                    echo $e->getMessage().'--'.$e->getTraceAsString();
-                    exit;
                     if (!empty($row)) {
                         $row->rollback();
                     }
