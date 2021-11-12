@@ -1459,758 +1459,756 @@ class WorkOrderList extends Backend
      */
     public function edit($ids = null)
     {
-        try {
-            //获取工单配置信息
-            $workOrderConfigValue = $this->workOrderConfigValue;
+        //获取工单配置信息
+        $workOrderConfigValue = $this->workOrderConfigValue;
 
-            //校验工单信息
-            $row = $this->model->get($ids);
-            !$row && $this->error(__('No Results were found'));
+        //校验工单信息
+        $row = $this->model->get($ids);
+        !$row && $this->error(__('No Results were found'));
 
-            //校验用户权限
-            $adminIds = $this->getDataLimitAdminIds();
-            is_array($adminIds) && !in_array($row[$this->dataLimitField], $adminIds) && $this->error(__('You have no permission'));
+        //校验用户权限
+        $adminIds = $this->getDataLimitAdminIds();
+        is_array($adminIds) && !in_array($row[$this->dataLimitField], $adminIds) && $this->error(__('You have no permission'));
 
-            //获取用户ID和所在权限组
-            $admin_id = session('admin.id');
-            $nickname = session('admin.nickname');
-            $_auth_group_access = new AuthGroupAccess();
-            $user_group_access = $_auth_group_access->where(['uid' => $admin_id])->column('group_id');
+        //获取用户ID和所在权限组
+        $admin_id = session('admin.id');
+        $nickname = session('admin.nickname');
+        $_auth_group_access = new AuthGroupAccess();
+        $user_group_access = $_auth_group_access->where(['uid' => $admin_id])->column('group_id');
 
-            if ($this->request->isPost()) {
-                $params = $this->request->post("row/a");
-                if ($params) {
-                    $params = $this->preExcludeFields($params);
-                    if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
-                        $params[$this->dataLimitField] = $this->auth->id;
-                    }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
+                    $params[$this->dataLimitField] = $this->auth->id;
+                }
 
-                    //是否采用模型验证
-                    if ($this->modelValidate) {
-                        $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
-                        $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name.'.edit' : $name) : $this->modelValidate;
-                        $this->model->validateFailException(true)->validate($validate);
-                    }
-                    $customer_return_order = trim($params['customer_return_order']);
-                    if (!empty($customer_return_order)) {
-                        $ismerach = preg_match('/^[a-zA-Z0-9]+$/u', $customer_return_order);
-                        !$ismerach && $this->error("客户寄回物流单号只能是数字或字母组合");
-                    }
-                    $platform_order = trim($params['platform_order']);//订单号
-                    $measure_choose_id = $params['measure_choose_id'] ? array_unique(array_filter($params['measure_choose_id'])) : [];//措施ID数组
-                    $work_type = $params['work_type'];//工单类型：1客服 2仓库
-                    $item_order_info = $params['item_order_info'];//子订单措施
-                    $params['order_sku'] = $params['order_sku'] ? implode(',', $params['order_sku']) : '';//sku列表
+                //是否采用模型验证
+                if ($this->modelValidate) {
+                    $name = str_replace("\\model\\", "\\validate\\", get_class($this->model));
+                    $validate = is_bool($this->modelValidate) ? ($this->modelSceneValidate ? $name . '.edit' : $name) : $this->modelValidate;
+                    $this->model->validateFailException(true)->validate($validate);
+                }
+                $customer_return_order = trim($params['customer_return_order']);
+                if(!empty($customer_return_order)){
+                    $ismerach = preg_match('/^[a-zA-Z0-9]+$/u',$customer_return_order);
+                    !$ismerach && $this->error("客户寄回物流单号只能是数字或字母组合");
+                }
+                $platform_order = trim($params['platform_order']);//订单号
+                $measure_choose_id = $params['measure_choose_id'] ? array_unique(array_filter($params['measure_choose_id'])) : [];//措施ID数组
+                $work_type = $params['work_type'];//工单类型：1客服 2仓库
+                $item_order_info = $params['item_order_info'];//子订单措施
+                $params['order_sku'] = $params['order_sku'] ? implode(',', $params['order_sku']) : '';//sku列表
 
-                    //校验问题类型、问题描述
-                    $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
-                    !$params['problem_type_id'] && $this->error("请选择问题类型");
-                    !$params['problem_description'] && $this->error("问题描述不能为空");
-                    !$platform_order && $this->error("订单号不能为空");
+                //校验问题类型、问题描述
+                $params['problem_type_id'] = $params['problem_type_id'] ?: $params['problem_id'];
+                !$params['problem_type_id'] && $this->error("请选择问题类型");
+                !$params['problem_description'] && $this->error("问题描述不能为空");
+                !$platform_order && $this->error("订单号不能为空");
 
-                    //指定问题类型校验sku下拉框是否勾选
-                    in_array($params['problem_type_id'], [8, 10, 11, 56, 13, 14, 15, 16, 18, 22, 59])
-                    && empty($params['order_sku'])
-                    && $this->error("请选择sku");
+                //指定问题类型校验sku下拉框是否勾选
+                in_array($params['problem_type_id'], [8, 10, 11, 56, 13, 14, 15, 16, 18, 22, 59])
+                && empty($params['order_sku'])
+                && $this->error("请选择sku");
 
-                    //校验工单类型
-                    if (1 == $work_type) {
-                        //校验工单措施
-                        empty($measure_choose_id) && empty($item_order_info) && $this->error("请选择实施措施");
+                //校验工单类型
+                if (1 == $work_type) {
+                    //校验工单措施
+                    empty($measure_choose_id) && empty($item_order_info) && $this->error("请选择实施措施");
 
-                        $params['problem_type_content'] = $workOrderConfigValue['customer_problem_type'][$params['problem_type_id']];
-                    } else {
-                        $all_after_user_id = array_filter($params['all_after_user_id']);
-                        empty($all_after_user_id) && $this->error("未找到对应承接人,请重新选择");
-                        $params['all_after_user_id'] = implode(',', $all_after_user_id);
-                        $params['problem_type_content'] = $workOrderConfigValue['warehouse_problem_type'][$params['problem_type_id']];
-                    }
+                    $params['problem_type_content'] = $workOrderConfigValue['customer_problem_type'][$params['problem_type_id']];
+                } else {
+                    $all_after_user_id = array_filter($params['all_after_user_id']);
+                    empty($all_after_user_id) && $this->error("未找到对应承接人,请重新选择");
+                    $params['all_after_user_id'] = implode(',', $all_after_user_id);
+                    $params['problem_type_content'] = $workOrderConfigValue['warehouse_problem_type'][$params['problem_type_id']];
+                }
 
-                    //主单和子单全部的措施id
-                    $all_choose_ids = [];
+                //主单和子单全部的措施id
+                $all_choose_ids = [];
 
-                    //检测主订单措施
-                    if (!empty($measure_choose_id)) {
-                        /**
-                         * 审核判断条件
-                         * 1、退款金额大于30 经理审核
-                         * 2、赠品数量大于1 经理审核
-                         * 3、补发数量大于1 经理审核
-                         * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
-                         * 5、运营客服组的优惠券都由客服经理审核
-                         */
+                //检测主订单措施
+                if (!empty($measure_choose_id)) {
+                    /**
+                     * 审核判断条件
+                     * 1、退款金额大于30 经理审核
+                     * 2、赠品数量大于1 经理审核
+                     * 3、补发数量大于1 经理审核
+                     * 4、优惠券等于100% 经理审核  50%主管审核 固定额度无需审核
+                     * 5、运营客服组的优惠券都由客服经理审核
+                     */
 
-                        $all_choose_ids = $measure_choose_id;
+                    $all_choose_ids = $measure_choose_id;
 
-                        //主单取消
-                        if (in_array(3, $measure_choose_id)) {
-                            $_new_order = new NewOrder();
-                            $orderList = $_new_order->field('id,stock_id')
-                                ->where('increment_id', $params['platform_order'])
-                                ->find();
-                            $order_id = $orderList->id;
-                            if ($order_id) {
-                                $order_item_where['order_id'] = $order_id;
-                                $_new_order_item_process = new NewOrderItemProcess();
-                                $order_item_list = $_new_order_item_process
-                                    ->where($order_item_where)
-                                    ->column('sku');
-                                /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-
-                                //查询仓库库区
-                                $area_id = Db::name('warehouse_area')->where(['stock_id' => $orderList->stock_id, 'type' => 2])->value('id');
-
-                                //配货完成时判断
-                                //拣货区盘点时不能操作
-                                //查询条形码库区库位
-                                $whe_sku['platform_sku'] = ['in', $order_item_list];
-                                //转换sku
-                                $item_platform_sku = new ItemPlatformSku();
-                                $true_sku = $item_platform_sku->where($whe_sku)->column('sku');
-                                $whe['sku'] = ['in', $true_sku];
-                                $whe['library_status'] = 1;
-                                $whe['stock_id'] = $orderList->stock_id;
-                                $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-                                if (!empty($barcodedata)) {
-                                    $count = $this->_inventory->alias('a')
-                                        ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
-                                        ->count();
-                                    if ($count > 0) {
-                                        return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
-                                    }
-                                }
-                                /****************************end*****************************************/
-                            }
-                        }
-
-                        //校验退款、vip退款
-                        if (array_intersect([2, 15], $measure_choose_id)) {
-                            !$params['refund_money'] && $this->error("退款金额不能为空");
-                            $params['is_refund'] = 1;
-                        } else {
-                            unset($params['refund_money']);
-                        }
-
-                        //校验赠品、补发库存
-                        if (array_intersect([6, 7], $measure_choose_id)) {
-                            $original_sku = [];
-
-                            //赠品
-                            if (in_array(6, $measure_choose_id)) {
-                                $gift_sku = $params['gift']['original_sku'];
-                                !$gift_sku && $this->error("赠品sku不能为空");
-
-                                $gift_number = $params['gift']['original_number'];
-                                !$gift_number && $this->error("赠品数量不能为空");
-
-                                foreach ($gift_sku as $key => $sku) {
-                                    $num = $key + 1;
-                                    !$sku && $this->error("第{$num}个赠品sku不能为空");
-                                    !$gift_number[$key] && $this->error("第{$num}个赠品数量必须大于0");
-
-                                    if (isset($original_sku[$sku])) {
-                                        $original_sku[$sku] += $gift_number[$key];
-                                    } else {
-                                        $original_sku[$sku] = $gift_number[$key];
-                                    }
-                                }
-                            }
-
-                            //补发
-                            if (in_array(7, $measure_choose_id)) {
-                                !$params['address']['shipping_type'] && $this->error("请选择Shipping Method");
-
-                                $replacement_sku = $params['replacement']['original_sku'];
-                                !$replacement_sku && $this->error("补发sku不能为空");
-
-                                $replacement_number = $params['replacement']['original_number'];
-                                !$replacement_number && $this->error("补发数量不能为空");
-
-                                foreach ($replacement_sku as $key => $sku) {
-                                    $num = $key + 1;
-                                    !$sku && $this->error("第{$num}个补发sku不能为空");
-                                    !$replacement_number[$key] && $this->error("第{$num}个补发数量必须大于0");
-
-                                    if (isset($original_sku[$sku])) {
-                                        $original_sku[$sku] += $replacement_number[$key];
-                                    } else {
-                                        $original_sku[$sku] = $replacement_number[$key];
-                                    }
-                                }
-                            }
-
-                            //校验库存
-                            if ($original_sku) {
-                                $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku), $platform_order);
-                                !$back_data['result'] && $this->error($back_data['msg']);
-                            }
-                        }
-
-                        //校验补价措施
-                        if (in_array(8, $measure_choose_id)) {
-                            !$params['replenish_money'] && $this->error("补差价金额不能为空");
-                        } else {
-                            unset($params['replenish_money']);
-                        }
-
-                        //校验优惠券措施
-                        if (in_array(9, $measure_choose_id)) {
-                            !$params['coupon_id'] && !$params['need_coupon_id'] && $this->error("请选择优惠券");
-
-                            //不需要审核的优惠券
-                            if ($params['coupon_id']) {
-                                $check_coupon = $workOrderConfigValue['check_coupon'];
-                            } else {
-                                //需要审核的优惠券
-                                $params['is_check'] = 1;
-                                $params['coupon_id'] = $params['need_coupon_id'];
-                                $check_coupon = $workOrderConfigValue['need_check_coupon'];
-
-                                //优惠券折扣
-                                $discount = $workOrderConfigValue['need_check_coupon'][$params['need_coupon_id']]['sum'];
-                                if (100 == $discount || (0 < $discount && in_array(131, $user_group_access))) {
-                                    //创建人上级经理
-                                    $params['assign_user_id'] = $workOrderConfigValue['customer_manager'];
-                                } elseif (50 == $discount) {
-                                    //创建人上级主管
-                                    $params['assign_user_id'] = $this->assign_user_id ?: $admin_id;
-                                }
-                            }
-                            foreach ($check_coupon as $v) {
-                                if ($v['id'] == $params['coupon_id']) {
-                                    $params['coupon_describe'] = $v['desc'];
-                                    break;
-                                }
-                            }
-                        }
-
-                        //判断是否选择积分措施
-                        if (in_array(10, $measure_choose_id)) {
-                            (!$params['integral'] || !is_numeric($params['integral']))
-                            && $this->error("积分必须是数字");
-                        } else {
-                            unset($params['integral']);
-                            unset($params['integral_describe']);
-                        }
-
-                        //判断是否选择退件措施
-                        if (in_array(11, $measure_choose_id)) {
-                            !$params['refund_logistics_num'] && $this->error("退回物流单号不能为空");
-                        } else {
-                            unset($params['refund_logistics_num']);
-                        }
-                    }
-
-                    //子单sku变动表
-                    $_work_order_change_sku = new WorkOrderChangeSku();
-
-                    //检测子订单措施
-                    if ($item_order_info) {
-
-                        $item_order_info = array_filter($item_order_info);
-                        //查询所有子单数量
-                        $_new_order_process = new NewOrderProcess();
-                        $order_id = $_new_order_process->where('increment_id', $platform_order)->value('order_id');
-                        $_new_order_item_process = new NewOrderItemProcess();
-                        $count_item_num = $_new_order_item_process->where('order_id', $order_id)->count();
-
+                    //主单取消
+                    if (in_array(3, $measure_choose_id)) {
                         $_new_order = new NewOrder();
-                        $stock_id = $_new_order->where('increment_id', $platform_order)
-                            ->value('stock_id');
-                        //查询仓库库区
-                        $area_id = Db::name('warehouse_area')->where(['stock_id' => $stock_id, 'type' => 2])->value('id');
+                        $orderList = $_new_order->field('id,stock_id')
+                            ->where('increment_id', $params['platform_order'])
+                            ->find();
+                        $order_id = $orderList->id;
+                        if ($order_id) {
+                            $order_item_where['order_id'] = $order_id;
+                            $_new_order_item_process = new NewOrderItemProcess();
+                            $order_item_list = $_new_order_item_process
+                                ->where($order_item_where)
+                                ->column('sku');
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
 
-                        1 > count($item_order_info) && $this->error("子订单号错误");
+                            //查询仓库库区
+                            $area_id = Db::name('warehouse_area')->where(['stock_id' => $orderList->stock_id, 'type' => 2])->value('id');
 
-                        foreach ($item_order_info as $key => &$item) {
-                            $item['item_choose'] = array_unique(array_filter($item['item_choose']));
-                            if ($count_item_num != count($item_order_info)) {
-                                empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                            //配货完成时判断
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $whe_sku['platform_sku'] = ['in', $order_item_list];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku = $item_platform_sku->where($whe_sku)->column('sku');
+                            $whe['sku'] = ['in', $true_sku];
+                            $whe['library_status'] = 1;
+                            $whe['stock_id'] = $orderList->stock_id;
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                            if (!empty($barcodedata)) {
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
+                                    ->count();
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此主单下的子订单SKU对应库位正在盘点,暂无法进行出入库操作'];
+                                }
                             }
-                            $all_choose_ids = array_unique(array_merge($all_choose_ids, $item['item_choose']));
+                            /****************************end*****************************************/
+                        }
+                    }
 
-                            //获取子单之前处理成功的措施类型
-                            $change_type = $_work_order_change_sku
-                                ->alias('a')
-                                ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
-                                ->where([
-                                    'a.item_order_number' => $key,
-                                    'b.operation_type'    => 1,
-                                ])
-                                ->order('a.id', 'desc')
-                                ->group('a.item_order_number')
-                                ->column('a.change_type');
+                    //校验退款、vip退款
+                    if (array_intersect([2, 15], $measure_choose_id)) {
+                        !$params['refund_money'] && $this->error("退款金额不能为空");
+                        $params['is_refund'] = 1;
+                    } else {
+                        unset($params['refund_money']);
+                    }
 
-                            //子单取消
-                            if (in_array(18, $item['item_choose'])) {
-                                //检测之前是否处理过子单措施
-                                array_intersect([1, 2, 3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
-                                /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-                                //拣货区盘点时不能操作
-                                //查询条形码库区库位
-                                $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
-                                //转换sku
-                                $item_platform_sku = new ItemPlatformSku();
-                                $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
-                                $whe['sku'] = $true_sku;
-                                $whe['library_status'] = 1;
-                                $whe['stock_id'] = $stock_id;
-                                $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-                                if (!empty($barcodedata)) {
-                                    $count = $this->_inventory->alias('a')
-                                        ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
-                                        ->count();
-                                    if ($count > 0) {
-                                        return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
-                                    }
+                    //校验赠品、补发库存
+                    if (array_intersect([6, 7], $measure_choose_id)) {
+                        $original_sku = [];
+
+                        //赠品
+                        if (in_array(6, $measure_choose_id)) {
+                            $gift_sku = $params['gift']['original_sku'];
+                            !$gift_sku && $this->error("赠品sku不能为空");
+
+                            $gift_number = $params['gift']['original_number'];
+                            !$gift_number && $this->error("赠品数量不能为空");
+
+                            foreach ($gift_sku as $key => $sku) {
+                                $num = $key + 1;
+                                !$sku && $this->error("第{$num}个赠品sku不能为空");
+                                !$gift_number[$key] && $this->error("第{$num}个赠品数量必须大于0");
+
+                                if (isset($original_sku[$sku])) {
+                                    $original_sku[$sku] += $gift_number[$key];
+                                } else {
+                                    $original_sku[$sku] = $gift_number[$key];
                                 }
-                                /****************************end*****************************************/
+                            }
+                        }
 
-                            } elseif (in_array(19, $item['item_choose']) && ($params['work_platform'] != 13)) {//更改镜框
-                                //检测之前是否处理过更改镜框措施
-                                in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
-                                /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-                                //拣货区盘点时不能操作
-                                //查询条形码库区库位
+                        //补发
+                        if (in_array(7, $measure_choose_id)) {
+                            !$params['address']['shipping_type'] && $this->error("请选择Shipping Method");
 
-                                $whe_sku['platform_sku'] = $item['change_frame']['original_sku'];
-                                //转换sku
-                                $item_platform_sku = new ItemPlatformSku();
-                                $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
-                                $whe['sku'] = $true_sku;
-                                $whe['library_status'] = 1;
-                                $whe['stock_id'] = $stock_id;
-                                $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-                                if (!empty($barcodedata)) {
-                                    $count = $this->_inventory->alias('a')
-                                        ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
-                                        ->count();
-                                    if ($count > 0) {
-                                        return ['result' => false, 'msg' => '此'.$item['cancel_order']['sku'].'对应库位正在盘点,暂无法进行出入库操作'];
-                                    }
+                            $replacement_sku = $params['replacement']['original_sku'];
+                            !$replacement_sku && $this->error("补发sku不能为空");
+
+                            $replacement_number = $params['replacement']['original_number'];
+                            !$replacement_number && $this->error("补发数量不能为空");
+
+                            foreach ($replacement_sku as $key => $sku) {
+                                $num = $key + 1;
+                                !$sku && $this->error("第{$num}个补发sku不能为空");
+                                !$replacement_number[$key] && $this->error("第{$num}个补发数量必须大于0");
+
+                                if (isset($original_sku[$sku])) {
+                                    $original_sku[$sku] += $replacement_number[$key];
+                                } else {
+                                    $original_sku[$sku] = $replacement_number[$key];
                                 }
-                                /****************************end*****************************************/
+                            }
+                        }
 
-                                /*****************限制如果有盘点单未结束不能操作配货完成*******************/
-                                //拣货区盘点时不能操作
-                                //查询条形码库区库位
-                                $whe_sku['platform_sku'] = $item['change_frame']['change_sku'];
-                                //转换sku
-                                $item_platform_sku = new ItemPlatformSku();
-                                $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
-                                $whe['sku'] = $true_sku;
-                                $whe['library_status'] = 1;
-                                $whe['stock_id'] = $stock_id;
-                                $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
-                                if (!empty($barcodedata)) {
-                                    $count = $this->_inventory->alias('a')
-                                        ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
-                                        ->count();
-                                    if ($count > 0) {
-                                        return ['result' => false, 'msg' => '此'.$item['change_frame']['change_sku'].'对应库位正在盘点,暂无法进行出入库操作'];
-                                    }
+                        //校验库存
+                        if ($original_sku) {
+                            $back_data = $this->skuIsStock(array_keys($original_sku), $params['work_platform'], array_values($original_sku), $platform_order);
+                            !$back_data['result'] && $this->error($back_data['msg']);
+                        }
+                    }
+
+                    //校验补价措施
+                    if (in_array(8, $measure_choose_id)) {
+                        !$params['replenish_money'] && $this->error("补差价金额不能为空");
+                    } else {
+                        unset($params['replenish_money']);
+                    }
+
+                    //校验优惠券措施
+                    if (in_array(9, $measure_choose_id)) {
+                        !$params['coupon_id'] && !$params['need_coupon_id'] && $this->error("请选择优惠券");
+
+                        //不需要审核的优惠券
+                        if ($params['coupon_id']) {
+                            $check_coupon = $workOrderConfigValue['check_coupon'];
+                        } else {
+                            //需要审核的优惠券
+                            $params['is_check'] = 1;
+                            $params['coupon_id'] = $params['need_coupon_id'];
+                            $check_coupon = $workOrderConfigValue['need_check_coupon'];
+
+                            //优惠券折扣
+                            $discount = $workOrderConfigValue['need_check_coupon'][$params['need_coupon_id']]['sum'];
+                            if (100 == $discount || (0 < $discount && in_array(131, $user_group_access))) {
+                                //创建人上级经理
+                                $params['assign_user_id'] = $workOrderConfigValue['customer_manager'];
+                            } elseif (50 == $discount) {
+                                //创建人上级主管
+                                $params['assign_user_id'] = $this->assign_user_id ?: $admin_id;
+                            }
+                        }
+                        foreach ($check_coupon as $v) {
+                            if ($v['id'] == $params['coupon_id']) {
+                                $params['coupon_describe'] = $v['desc'];
+                                break;
+                            }
+                        }
+                    }
+
+                    //判断是否选择积分措施
+                    if (in_array(10, $measure_choose_id)) {
+                        (!$params['integral'] || !is_numeric($params['integral']))
+                        && $this->error("积分必须是数字");
+                    } else {
+                        unset($params['integral']);
+                        unset($params['integral_describe']);
+                    }
+
+                    //判断是否选择退件措施
+                    if (in_array(11, $measure_choose_id)) {
+                        !$params['refund_logistics_num'] && $this->error("退回物流单号不能为空");
+                    } else {
+                        unset($params['refund_logistics_num']);
+                    }
+                }
+
+                //子单sku变动表
+                $_work_order_change_sku = new WorkOrderChangeSku();
+
+                //检测子订单措施
+                if ($item_order_info) {
+
+                    $item_order_info = array_filter($item_order_info);
+                    //查询所有子单数量
+                    $_new_order_process = new NewOrderProcess();
+                    $order_id = $_new_order_process->where('increment_id', $platform_order)->value('order_id');
+                    $_new_order_item_process = new NewOrderItemProcess();
+                    $count_item_num = $_new_order_item_process->where('order_id', $order_id)->count();
+
+                    $_new_order = new NewOrder();
+                    $stock_id = $_new_order->where('increment_id', $platform_order)
+                        ->value('stock_id');
+                    //查询仓库库区
+                    $area_id = Db::name('warehouse_area')->where(['stock_id' => $stock_id, 'type' => 2])->value('id');
+
+                    1 > count($item_order_info) && $this->error("子订单号错误");
+
+                    foreach ($item_order_info as $key => &$item) {
+                        $item['item_choose'] = array_unique(array_filter($item['item_choose']));
+                        if ($count_item_num != count($item_order_info)) {
+                            empty($item['item_choose']) && $this->error("请选择子订单：{$key} 的实施措施");
+                        }
+                        $all_choose_ids = array_unique(array_merge($all_choose_ids, $item['item_choose']));
+
+                        //获取子单之前处理成功的措施类型
+                        $change_type = $_work_order_change_sku
+                            ->alias('a')
+                            ->join(['fa_work_order_measure' => 'b'], 'a.measure_id=b.id')
+                            ->where([
+                                'a.item_order_number' => $key,
+                                'b.operation_type'    => 1,
+                            ])
+                            ->order('a.id', 'desc')
+                            ->group('a.item_order_number')
+                            ->column('a.change_type');
+
+                        //子单取消
+                        if (in_array(18, $item['item_choose'])) {
+                            //检测之前是否处理过子单措施
+                            array_intersect([1, 2, 3], $change_type) && $this->error("子订单：{$key} 措施已处理，不能取消");
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $whe_sku['platform_sku'] = $item['cancel_order']['sku'];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
+                            $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
+                            $whe['stock_id'] = $stock_id;
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                            if (!empty($barcodedata)) {
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
+                                    ->count();
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此' . $item['cancel_order']['sku'] . '对应库位正在盘点,暂无法进行出入库操作'];
                                 }
-                                /****************************end*****************************************/
+                            }
+                            /****************************end*****************************************/
+
+                        } elseif (in_array(19, $item['item_choose']) &&($params['work_platform'] !=13)) {//更改镜框
+                            //检测之前是否处理过更改镜框措施
+                            in_array(1, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+
+                            $whe_sku['platform_sku'] = $item['change_frame']['original_sku'];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
+                            $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
+                            $whe['stock_id'] = $stock_id;
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                            if (!empty($barcodedata)) {
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
+                                    ->count();
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此' . $item['cancel_order']['sku'] . '对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
+
+                            /*****************限制如果有盘点单未结束不能操作配货完成*******************/
+                            //拣货区盘点时不能操作
+                            //查询条形码库区库位
+                            $whe_sku['platform_sku'] = $item['change_frame']['change_sku'];
+                            //转换sku
+                            $item_platform_sku = new ItemPlatformSku();
+                            $true_sku = $item_platform_sku->where($whe_sku)->value('sku');
+                            $whe['sku'] = $true_sku;
+                            $whe['library_status'] = 1;
+                            $whe['stock_id'] = $stock_id;
+                            $barcodedata = $this->_product_bar_code_item->where($whe)->column('location_code');
+                            if (!empty($barcodedata)) {
+                                $count = $this->_inventory->alias('a')
+                                    ->join(['fa_inventory_item' => 'b'], 'a.id=b.inventory_id')->where(['a.is_del' => 1, 'a.check_status' => ['in', [0, 1]], 'library_name' => ['in', $barcodedata], 'area_id' => $area_id])
+                                    ->count();
+                                if ($count > 0) {
+                                    return ['result' => false, 'msg' => '此' . $item['change_frame']['change_sku'] . '对应库位正在盘点,暂无法进行出入库操作'];
+                                }
+                            }
+                            /****************************end*****************************************/
 
 
-                                //更改镜框校验库存
-                                !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
-                                $item['change_frame']['change_sku'] = trim($item['change_frame']['change_sku']);
-                                $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1], $platform_order);
+                            //更改镜框校验库存
+                            !$item['change_frame']['change_sku'] && $this->error("子订单：{$key} 的新sku不能为空");
+                            $item['change_frame']['change_sku'] = trim($item['change_frame']['change_sku']);
+                            $back_data = $this->skuIsStock([$item['change_frame']['change_sku']], $params['work_platform'], [1], $platform_order);
+                            !$back_data['result'] && $this->error($back_data['msg']);
+                        }elseif (in_array(27, $item['item_choose']) &&($params['work_platform'] ==13)) {//抖音工单寄回换框
+                            //判断存不存在更换的sku
+                            $plat_sku = $item['change_frame']['change_sku'];
+                            if(!$plat_sku){
+                                $this->error("没有选择更换的镜框，无法提交");
+                            }
+                            //如果不是保存草稿的话需要验证库存是否存在
+                            if($params['work_status']!=1){
+                                $back_data = $this->skuIsStock([$plat_sku], $params['work_platform'], [1], $platform_order);
                                 !$back_data['result'] && $this->error($back_data['msg']);
-                            } elseif (in_array(27, $item['item_choose']) && ($params['work_platform'] == 13)) {//抖音工单寄回换框
-                                //判断存不存在更换的sku
-                                $plat_sku = $item['change_frame']['change_sku'];
-                                if (!$plat_sku) {
-                                    $this->error("没有选择更换的镜框，无法提交");
-                                }
-                                //如果不是保存草稿的话需要验证库存是否存在
-                                if ($params['work_status'] != 1) {
-                                    $back_data = $this->skuIsStock([$plat_sku], $params['work_platform'], [1], $platform_order);
-                                    !$back_data['result'] && $this->error($back_data['msg']);
-                                }
-
                             }
-                            /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
-                                //检测之前是否处理过更改镜片措施
-                                in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
-                            }*/
+
                         }
-                        unset($item);
+                        /*elseif (in_array(20, $item['item_choose'])) {//更改镜片
+                            //检测之前是否处理过更改镜片措施
+                            in_array(2, $change_type) && $this->error("子订单：{$key} 措施已处理，不能重复创建");
+                        }*/
                     }
+                    unset($item);
+                }
 
-                    /**获取审核人 start*/
-                    $check_person_weight = $workOrderConfigValue['check_person_weight'];//审核人列表
-                    $check_group_weight = $workOrderConfigValue['check_group_weight'];//审核组列表
-                    $all_group = $workOrderConfigValue['group'];//所有的成员组
+                /**获取审核人 start*/
+                $check_person_weight = $workOrderConfigValue['check_person_weight'];//审核人列表
+                $check_group_weight = $workOrderConfigValue['check_group_weight'];//审核组列表
+                $all_group = $workOrderConfigValue['group'];//所有的成员组
 
-                    //核算审核组
-                    if (!empty($check_group_weight)) {
-                        foreach ($check_group_weight as $gv) {
-                            $all_person = [];
-                            //获取当前组下的所有成员
-                            $subordinate = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
-                            if ($subordinate) {
-                                array_push($subordinate, $gv['work_create_person_id']);
-                                foreach ($subordinate as $av) {
-                                    if (is_array($all_group[$av])) {
-                                        foreach ($all_group[$av] as $vk) {
-                                            $all_person[] = $vk;
-                                        }
-                                    }
-                                }
-                            } else {
-                                $all_person = $all_group[$gv['work_create_person_id']];
-                            }
-                            if (!empty($all_person)) {
-                                //如果符合创建组
-                                if (in_array($admin_id, array_unique($all_person))) {
-                                    if (!$this->weight_currency($gv, $all_choose_ids, $params)) {
-                                        $params['is_check'] = 1;
-                                        $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
-                                        break;
+                //核算审核组
+                if (!empty($check_group_weight)) {
+                    foreach ($check_group_weight as $gv) {
+                        $all_person = [];
+                        //获取当前组下的所有成员
+                        $subordinate = (new AuthGroup)->getAllNextGroup($gv['work_create_person_id']);
+                        if ($subordinate) {
+                            array_push($subordinate, $gv['work_create_person_id']);
+                            foreach ($subordinate as $av) {
+                                if (is_array($all_group[$av])) {
+                                    foreach ($all_group[$av] as $vk) {
+                                        $all_person[] = $vk;
                                     }
                                 }
                             }
+                        } else {
+                            $all_person = $all_group[$gv['work_create_person_id']];
                         }
-                    }
-
-                    //核算审核人
-                    if (!empty($check_person_weight)) {
-                        foreach ($check_person_weight as $wkv) {
-                            if ($admin_id == $wkv['work_create_person_id']) {
-                                if (!$this->weight_currency($wkv, $all_choose_ids, $params)) {
+                        if (!empty($all_person)) {
+                            //如果符合创建组
+                            if (in_array($admin_id, array_unique($all_person))) {
+                                if (!$this->weight_currency($gv, $all_choose_ids, $params)) {
                                     $params['is_check'] = 1;
-                                    $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
+                                    $params['assign_user_id'] = $all_group[$gv['check_group_id']][0];
                                     break;
                                 }
                             }
                         }
                     }
+                }
 
-                    //没有审核人则不需要审核
-                    if (!$params['assign_user_id']) {
-                        $params['is_check'] = 0;
-                    } else {
-                        $params['is_check'] = 0;
-                    }
-                    /**获取审核人 end*/
-
-                    //点击提交按钮
-                    if (2 == $params['work_status']) {
-                        //不需要审核或工单类型为仓库 工单状态默认为审核通过
-                        if (0 == $params['is_check'] || 2 == $params['work_type']) {
-                            $params['work_status'] = 3;
+                //核算审核人
+                if (!empty($check_person_weight)) {
+                    foreach ($check_person_weight as $wkv) {
+                        if ($admin_id == $wkv['work_create_person_id']) {
+                            if (!$this->weight_currency($wkv, $all_choose_ids, $params)) {
+                                $params['is_check'] = 1;
+                                $params['assign_user_id'] = $all_group[$wkv['check_group_id']][0];
+                                break;
+                            }
                         }
-                        $params['submit_time'] = date('Y-m-d H:i:s');
+                    }
+                }
+
+                //没有审核人则不需要审核
+                if (!$params['assign_user_id']) {
+                    $params['is_check'] = 0;
+                } else {
+                    $params['is_check'] = 0;
+                }
+                /**获取审核人 end*/
+
+                //点击提交按钮
+                if (2 == $params['work_status']) {
+                    //不需要审核或工单类型为仓库 工单状态默认为审核通过
+                    if (0 == $params['is_check'] || 2 == $params['work_type']) {
+                        $params['work_status'] = 3;
+                    }
+                    $params['submit_time'] = date('Y-m-d H:i:s');
+                }
+
+                //vip订单
+                if (100 == $params['order_type']) {
+                    $params['base_grand_total'] = $params['refund_money'];
+                    $params['grand_total'] = $params['refund_money'];
+                }
+                $params['recept_person_id'] = $params['recept_person_id'] ?: $admin_id;
+
+                //措施表
+                $_work_order_measure = new WorkOrderMeasure();
+
+                //承接人表
+                $_work_order_recept = new WorkOrderRecept();
+
+                //子单表
+                $_new_order_item_process = new NewOrderItemProcess();
+
+                //配货异常表
+                $_distribution_abnormal = new DistributionAbnormal();
+
+                //库位表
+                $_stock_house = new StockHouse();
+
+                $row->startTrans();
+                $_work_order_measure->startTrans();
+                $_work_order_recept->startTrans();
+                $_work_order_change_sku->startTrans();
+                $_stock_house->startTrans();
+                $_new_order_item_process->startTrans();
+                $_distribution_abnormal->startTrans();
+                try {
+                    //更新之前清除部分字段
+                    $update_data = [
+                        'replenish_money'        => '',
+                        'replenish_increment_id' => '',
+                        'coupon_id'              => 0,
+                        'coupon_describe'        => '',
+                        'coupon_str'             => '',
+                        'integral'               => '',
+                        'refund_logistics_num'   => '',
+                        'refund_money'           => '',
+                        'is_refund'              => 0,
+                        'replacement_order'      => '',
+                        'integral_describe'      => '',
+                    ];
+                    $update_res = $row->allowField(true)->save($update_data);
+                    if (false === $update_res) {
+                        throw new Exception('更新失败!!');
                     }
 
-                    //vip订单
-                    if (100 == $params['order_type']) {
-                        $params['base_grand_total'] = $params['refund_money'];
-                        $params['grand_total'] = $params['refund_money'];
-                    }
-                    $params['recept_person_id'] = $params['recept_person_id'] ?: $admin_id;
-
-                    //措施表
-                    $_work_order_measure = new WorkOrderMeasure();
-
-                    //承接人表
-                    $_work_order_recept = new WorkOrderRecept();
-
-                    //子单表
-                    $_new_order_item_process = new NewOrderItemProcess();
-
-                    //配货异常表
-                    $_distribution_abnormal = new DistributionAbnormal();
-
-                    //库位表
-                    $_stock_house = new StockHouse();
-
-                    $row->startTrans();
-                    $_work_order_measure->startTrans();
-                    $_work_order_recept->startTrans();
-                    $_work_order_change_sku->startTrans();
-                    $_stock_house->startTrans();
-                    $_new_order_item_process->startTrans();
-                    $_distribution_abnormal->startTrans();
-                    try {
-                        //更新之前清除部分字段
-                        $update_data = [
-                            'replenish_money'        => '',
-                            'replenish_increment_id' => '',
-                            'coupon_id'              => 0,
-                            'coupon_describe'        => '',
-                            'coupon_str'             => '',
-                            'integral'               => '',
-                            'refund_logistics_num'   => '',
-                            'refund_money'           => '',
-                            'is_refund'              => 0,
-                            'replacement_order'      => '',
-                            'integral_describe'      => '',
-                        ];
-                        $update_res = $row->allowField(true)->save($update_data);
-                        if (false === $update_res) {
-                            throw new Exception('更新失败!!');
+                    //仓库工单判断未处理异常，有则绑定异常
+                    if ($params['order_item_numbers'] || in_array(3, $measure_choose_id)) {
+                        //主单取消：绑定该订单下所有子单异常
+                        if (in_array(3, $measure_choose_id)) {
+                            $item_process_where['b.increment_id'] = $platform_order;
+                            $type = 16;
+                        } else {
+                            $item_process_where['a.item_order_number'] = ['in', $params['order_item_numbers']];
+                            $type = 17;
                         }
 
-                        //仓库工单判断未处理异常，有则绑定异常
-                        if ($params['order_item_numbers'] || in_array(3, $measure_choose_id)) {
-                            //主单取消：绑定该订单下所有子单异常
-                            if (in_array(3, $measure_choose_id)) {
-                                $item_process_where['b.increment_id'] = $platform_order;
-                                $type = 16;
-                            } else {
-                                $item_process_where['a.item_order_number'] = ['in', $params['order_item_numbers']];
-                                $type = 17;
-                            }
+                        //获取子单ID集
+                        $item_process_ids = $_new_order_item_process
+                            ->alias('a')
+                            ->join(['fa_order' => 'b'], 'a.order_id=b.id')
+                            ->where($item_process_where)
+                            ->column('a.id', 'a.item_order_number');
+                        $item_order_numbers = array_keys($item_process_ids);
 
-                            //获取子单ID集
-                            $item_process_ids = $_new_order_item_process
-                                ->alias('a')
-                                ->join(['fa_order' => 'b'], 'a.order_id=b.id')
-                                ->where($item_process_where)
-                                ->column('a.id', 'a.item_order_number');
-                            $item_order_numbers = array_keys($item_process_ids);
+                        //获取之前的子单列表
+                        $bound_item_order_numbers = $_work_order_change_sku->where(['work_id' => $row->id])->column('item_order_number');
+                        $remove_numbers = $bound_item_order_numbers ? array_diff($bound_item_order_numbers, $item_order_numbers) : [];
 
-                            //获取之前的子单列表
-                            $bound_item_order_numbers = $_work_order_change_sku->where(['work_id' => $row->id])->column('item_order_number');
-                            $remove_numbers = $bound_item_order_numbers ? array_diff($bound_item_order_numbers, $item_order_numbers) : [];
+                        //清除之前的子单异常、解绑子单库位、异常库位减1
+                        if ($remove_numbers) {
+                            foreach ($remove_numbers as $val) {
+                                //获取子单信息
+                                $item_process_info = $_new_order_item_process
+                                    ->field('id,abnormal_house_id')
+                                    ->where(['item_order_number' => $val])
+                                    ->find();
 
-                            //清除之前的子单异常、解绑子单库位、异常库位减1
-                            if ($remove_numbers) {
-                                foreach ($remove_numbers as $val) {
-                                    //获取子单信息
-                                    $item_process_info = $_new_order_item_process
-                                        ->field('id,abnormal_house_id')
-                                        ->where(['item_order_number' => $val])
-                                        ->find();
+                                //删除异常
+                                $check_abnormal = $_distribution_abnormal
+                                    ->field('type,id')
+                                    ->where(['work_id' => $row->id, 'item_process_id' => $item_process_info['id']])
+                                    ->find();
+                                if ($check_abnormal && in_array($check_abnormal['type'], [16, 17])) {
+                                    $_distribution_abnormal->where(['id' => $check_abnormal['id']])->delete();
 
-                                    //删除异常
-                                    $check_abnormal = $_distribution_abnormal
-                                        ->field('type,id')
-                                        ->where(['work_id' => $row->id, 'item_process_id' => $item_process_info['id']])
-                                        ->find();
-                                    if ($check_abnormal && in_array($check_abnormal['type'], [16, 17])) {
-                                        $_distribution_abnormal->where(['id' => $check_abnormal['id']])->delete();
-
-                                        //子订单解绑异常库位
-                                        $_new_order_item_process
-                                            ->where(['id' => $item_process_info['id']])
-                                            ->update(['abnormal_house_id' => 0]);
-
-                                        //异常库位占用数量-1
-                                        if ($item_process_info['abnormal_house_id']) {
-                                            $_stock_house
-                                                ->where(['id' => $item_process_info['abnormal_house_id']])
-                                                ->setDec('occupy', 1);
-                                        }
-
-                                        //配货日志
-                                        DistributionLog::record((object) session('admin'), $val, 10, "编辑工单，解绑异常库位");
-                                    }
-                                }
-                            }
-
-                            //获取绑定异常子单ID集
-                            $abnormal_binding_ids = $_distribution_abnormal
-                                ->where(['item_process_id' => ['in', $item_process_ids], 'status' => 1])
-                                ->column('item_process_id');
-
-                            //已经标记异常的子单，绑定异常数据
-                            if (!empty($abnormal_binding_ids)) {
-                                $_distribution_abnormal
-                                    ->allowField(true)
-                                    ->save(['work_id' => $row->id], ['item_process_id' => ['in', $abnormal_binding_ids], 'status' => 1]);
-
-                                //配货操作日志
-                                DistributionLog::record((object) session('admin'), $item_process_ids, 0, "编辑工单绑定异常");
-                                $need_sign_ids = array_diff($item_process_ids, $abnormal_binding_ids);
-                            } else {
-                                $need_sign_ids = $item_process_ids;
-                            }
-
-                            //未标记异常子单，则标记异常
-                            if (!empty($need_sign_ids)) {
-                                foreach ($need_sign_ids as $val) {
-                                    //获取异常库位号
-                                    $stock_house_info = $_stock_house
-                                        ->field('id,coding')
-                                        ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000]])
-                                        ->order('occupy', 'desc')
-                                        ->find();
-                                    if (empty($stock_house_info)) {
-                                        throw new Exception("异常暂存架没有空余库位！！");
-                                    }
-
-                                    //创建异常
-                                    $abnormal_data = [
-                                        'work_id'         => $row->id,
-                                        'item_process_id' => $val,
-                                        'type'            => $type,
-                                        'status'          => 1,
-                                        'create_time'     => time(),
-                                        'create_person'   => $nickname,
-                                    ];
-                                    $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
-
-                                    //子订单绑定异常库位号
+                                    //子订单解绑异常库位
                                     $_new_order_item_process
-                                        ->where(['id' => $val])
-                                        ->update(['abnormal_house_id' => $stock_house_info['id']]);
+                                        ->where(['id' => $item_process_info['id']])
+                                        ->update(['abnormal_house_id' => 0]);
 
-                                    //异常库位占用数量+1
-                                    $_stock_house
-                                        ->where(['id' => $stock_house_info['id']])
-                                        ->setInc('occupy', 1);
+                                    //异常库位占用数量-1
+                                    if ($item_process_info['abnormal_house_id']) {
+                                        $_stock_house
+                                            ->where(['id' => $item_process_info['abnormal_house_id']])
+                                            ->setDec('occupy', 1);
+                                    }
 
                                     //配货日志
-                                    DistributionLog::record((object) session('admin'), $val, 9, "编辑工单，异常暂存架{$stock_house_info['coding']}库位");
+                                    DistributionLog::record((object)session('admin'), $val, 10, "编辑工单，解绑异常库位");
                                 }
                             }
                         }
 
-                        //清除措施表、承接表、sku变动表
-                        $_work_order_measure->where(['work_id' => $row->id])->delete();
-                        $_work_order_recept->where(['work_id' => $row->id])->delete();
-                        $_work_order_change_sku->where(['work_id' => $row->id])->delete();
+                        //获取绑定异常子单ID集
+                        $abnormal_binding_ids = $_distribution_abnormal
+                            ->where(['item_process_id' => ['in', $item_process_ids], 'status' => 1])
+                            ->column('item_process_id');
 
-                        //更新工单
-                        $result = $row->allowField(true)->save($params);
-                        if (false === $result) {
-                            throw new Exception("编辑失败！！");
+                        //已经标记异常的子单，绑定异常数据
+                        if (!empty($abnormal_binding_ids)) {
+                            $_distribution_abnormal
+                                ->allowField(true)
+                                ->save(['work_id' => $row->id], ['item_process_id' => ['in', $abnormal_binding_ids], 'status' => 1]);
+
+                            //配货操作日志
+                            DistributionLog::record((object)session('admin'), $item_process_ids, 0, "编辑工单绑定异常");
+                            $need_sign_ids = array_diff($item_process_ids, $abnormal_binding_ids);
+                        } else {
+                            $need_sign_ids = $item_process_ids;
                         }
 
-                        //创建主订单措施、承接人数据
-                        if (!empty($measure_choose_id)) {
-                            foreach ($measure_choose_id as $v) {
-                                //根据措施读取承接组、承接人 默认是客服问题组配置,是否审核之后自动完成
-                                $appoint_ids = $params['order_recept']['appoint_ids'][$v];
-                                $appoint_users = $params['order_recept']['appoint_users'][$v];
-                                $appoint_group = $params['order_recept']['appoint_group'][$v];
-                                $auto_complete = $params['order_recept']['auto_complete'][$v];
-
-                                //插入措施、承接人数据
-                                $res = $this->handle_measure($row->id, $v, $appoint_ids, $appoint_users, $appoint_group, $auto_complete, $this->assign_user_id, $admin_id, $nickname, $params, '');
-                                if (!$res['result']) {
-                                    throw new Exception($res['msg']);
+                        //未标记异常子单，则标记异常
+                        if (!empty($need_sign_ids)) {
+                            foreach ($need_sign_ids as $val) {
+                                //获取异常库位号
+                                $stock_house_info = $_stock_house
+                                    ->field('id,coding')
+                                    ->where(['status' => 1, 'type' => 4, 'occupy' => ['<', 10000]])
+                                    ->order('occupy', 'desc')
+                                    ->find();
+                                if (empty($stock_house_info)) {
+                                    throw new Exception("异常暂存架没有空余库位！！");
                                 }
+
+                                //创建异常
+                                $abnormal_data = [
+                                    'work_id'         => $row->id,
+                                    'item_process_id' => $val,
+                                    'type'            => $type,
+                                    'status'          => 1,
+                                    'create_time'     => time(),
+                                    'create_person'   => $nickname,
+                                ];
+                                $_distribution_abnormal->allowField(true)->isUpdate(false)->data($abnormal_data)->save();
+
+                                //子订单绑定异常库位号
+                                $_new_order_item_process
+                                    ->where(['id' => $val])
+                                    ->update(['abnormal_house_id' => $stock_house_info['id']]);
+
+                                //异常库位占用数量+1
+                                $_stock_house
+                                    ->where(['id' => $stock_house_info['id']])
+                                    ->setInc('occupy', 1);
+
+                                //配货日志
+                                DistributionLog::record((object)session('admin'), $val, 9, "编辑工单，异常暂存架{$stock_house_info['coding']}库位");
                             }
                         }
+                    }
 
-                        //创建子订单措施、承接人数据
-                        if (!empty($item_order_info)) {
-                            foreach ($item_order_info as $key => $item) {
-                                if ($item['item_choose']) {
-                                    foreach ($item['item_choose'] as $v) {
-                                        //根据措施读取承接组、承接人 默认是客服问题组配置,是否审核之后自动完成
-                                        $appoint_ids = $item['appoint_ids'][$v];
-                                        $appoint_users = $item['appoint_users'][$v];
-                                        $appoint_group = $item['appoint_group'][$v];
-                                        $auto_complete = $item['auto_complete'][$v];
+                    //清除措施表、承接表、sku变动表
+                    $_work_order_measure->where(['work_id' => $row->id])->delete();
+                    $_work_order_recept->where(['work_id' => $row->id])->delete();
+                    $_work_order_change_sku->where(['work_id' => $row->id])->delete();
 
-                                        //插入措施、承接人数据
-                                        $res = $this->handle_measure($row->id, $v, $appoint_ids, $appoint_users, $appoint_group, $auto_complete, $this->assign_user_id, $admin_id, $nickname, $params, $key);
-                                        if (!$res['result']) {
-                                            throw new Exception($res['msg']);
-                                        }
+                    //更新工单
+                    $result = $row->allowField(true)->save($params);
+                    if (false === $result) {
+                        throw new Exception("编辑失败！！");
+                    }
+
+                    //创建主订单措施、承接人数据
+                    if (!empty($measure_choose_id)) {
+                        foreach ($measure_choose_id as $v) {
+                            //根据措施读取承接组、承接人 默认是客服问题组配置,是否审核之后自动完成
+                            $appoint_ids = $params['order_recept']['appoint_ids'][$v];
+                            $appoint_users = $params['order_recept']['appoint_users'][$v];
+                            $appoint_group = $params['order_recept']['appoint_group'][$v];
+                            $auto_complete = $params['order_recept']['auto_complete'][$v];
+
+                            //插入措施、承接人数据
+                            $res = $this->handle_measure($row->id, $v, $appoint_ids, $appoint_users, $appoint_group, $auto_complete, $this->assign_user_id, $admin_id, $nickname, $params, '');
+                            if (!$res['result']) {
+                                throw new Exception($res['msg']);
+                            }
+                        }
+                    }
+
+                    //创建子订单措施、承接人数据
+                    if (!empty($item_order_info)) {
+                        foreach ($item_order_info as $key => $item) {
+                            if ($item['item_choose']) {
+                                foreach ($item['item_choose'] as $v) {
+                                    //根据措施读取承接组、承接人 默认是客服问题组配置,是否审核之后自动完成
+                                    $appoint_ids = $item['appoint_ids'][$v];
+                                    $appoint_users = $item['appoint_users'][$v];
+                                    $appoint_group = $item['appoint_group'][$v];
+                                    $auto_complete = $item['auto_complete'][$v];
+
+                                    //插入措施、承接人数据
+                                    $res = $this->handle_measure($row->id, $v, $appoint_ids, $appoint_users, $appoint_group, $auto_complete, $this->assign_user_id, $admin_id, $nickname, $params, $key);
+                                    if (!$res['result']) {
+                                        throw new Exception($res['msg']);
                                     }
                                 }
                             }
                         }
-
-                        //非草稿状态进入审核阶段
-                        1 != $params['work_status'] && $this->model->checkWork($row->id);
-
-                        $row->commit();
-                        $_work_order_measure->commit();
-                        $_work_order_recept->commit();
-                        $_work_order_change_sku->commit();
-                        $_stock_house->commit();
-                        $_new_order_item_process->commit();
-                        $_distribution_abnormal->commit();
-                    } catch (ValidateException $e) {
-                        $row->rollback();
-                        $_work_order_measure->rollback();
-                        $_work_order_recept->rollback();
-                        $_work_order_change_sku->rollback();
-                        $_stock_house->rollback();
-                        $_new_order_item_process->rollback();
-                        $_distribution_abnormal->rollback();
-                        $this->error($e->getMessage());
-                    } catch (PDOException $e) {
-                        $row->rollback();
-                        $_work_order_measure->rollback();
-                        $_work_order_recept->rollback();
-                        $_work_order_change_sku->rollback();
-                        $_stock_house->rollback();
-                        $_new_order_item_process->rollback();
-                        $_distribution_abnormal->rollback();
-                        $this->error($e->getMessage());
-                    } catch (Exception $e) {
-                        $row->rollback();
-                        $_work_order_measure->rollback();
-                        $_work_order_recept->rollback();
-                        $_work_order_change_sku->rollback();
-                        $_stock_house->rollback();
-                        $_new_order_item_process->rollback();
-                        $_distribution_abnormal->rollback();
-                        $this->error($e->getMessage());
                     }
-                    $this->success();
+
+                    //非草稿状态进入审核阶段
+                    1 != $params['work_status'] && $this->model->checkWork($row->id);
+
+                    $row->commit();
+                    $_work_order_measure->commit();
+                    $_work_order_recept->commit();
+                    $_work_order_change_sku->commit();
+                    $_stock_house->commit();
+                    $_new_order_item_process->commit();
+                    $_distribution_abnormal->commit();
+                } catch (ValidateException $e) {
+                    $row->rollback();
+                    $_work_order_measure->rollback();
+                    $_work_order_recept->rollback();
+                    $_work_order_change_sku->rollback();
+                    $_stock_house->rollback();
+                    $_new_order_item_process->rollback();
+                    $_distribution_abnormal->rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    $row->rollback();
+                    $_work_order_measure->rollback();
+                    $_work_order_recept->rollback();
+                    $_work_order_change_sku->rollback();
+                    $_stock_house->rollback();
+                    $_new_order_item_process->rollback();
+                    $_distribution_abnormal->rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    $row->rollback();
+                    $_work_order_measure->rollback();
+                    $_work_order_recept->rollback();
+                    $_work_order_change_sku->rollback();
+                    $_stock_house->rollback();
+                    $_new_order_item_process->rollback();
+                    $_distribution_abnormal->rollback();
+                    //echo $e->getMessage().'--'.$e->getTraceAsString();
+                    $this->error($e->getTraceAsString());
+
                 }
-                $this->error(__('Parameter %s can not be empty', ''));
+                $this->success();
             }
-
-            //工单类型及状态
-            $this->view->assign('row', $row);
-            $this->assignconfig('work_type', $row->work_type);
-            $this->assignconfig('work_status', $row->work_status);
-            $this->assignconfig('create_user_id', $row->create_user_id);
-
-            //子订单措施及数据
-            $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
-            if (!empty($order_data['item_order_info'])) {
-                $this->assignconfig('item_order_info', $order_data['item_order_info']);
-                unset($order_data['item_order_info']);
-            }
-            $this->assignconfig('order_item', $order_data);
-            $this->view->assign('order_item', $order_data);
-
-            //把问题类型传递到js页面
-            $row->problem_type_id && $this->assignconfig('problem_type_id', $row->problem_type_id);
-
-            //工单措施对应的措施配置表ID数组
-            $measureList = WorkOrderMeasure::workMeasureList($row->id, 1);
-            !empty($measureList) && $this->assignconfig('measureList', $measureList);
-
-            //回复内容
-            $workOrderNote = WorkOrderNote::where('work_id', $ids)->select();
-            $this->view->assign('workOrderNote', $workOrderNote);
-
-            //工单问题类型
-            $problem_type = [];
-            if (1 == $row->work_type) {
-                $customer_problem_type = $workOrderConfigValue['customer_problem_type'];
-                $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
-                unset($customer_problem_classify['仓库问题']);
-
-                foreach ($customer_problem_classify as $key => $value) {
-                    $type = [];
-                    foreach ($value as $v) {
-                        $type[] = ['id' => $v, 'name' => $customer_problem_type[$v]];
-                    }
-                    $problem_type[] = ['name' => $key, 'type' => $type];
-                }
-            } else {
-                $problem_type = $workOrderConfigValue['warehouse_problem_type'];
-            }
-            $this->view->assign('problem_type', $problem_type);
-
-            return $this->view->fetch();
-        }catch ( \Exception $e){
-            echo $e->getMessage().'--'.$e->getTraceAsString();
+            $this->error(__('Parameter %s can not be empty', ''));
         }
+
+        //工单类型及状态
+        $this->view->assign('row', $row);
+        $this->assignconfig('work_type', $row->work_type);
+        $this->assignconfig('work_status', $row->work_status);
+        $this->assignconfig('create_user_id', $row->create_user_id);
+
+        //子订单措施及数据
+        $order_data = $this->model->getOrderItem($row->platform_order, $row->order_item_numbers, $row->work_type, $row);
+        if (!empty($order_data['item_order_info'])) {
+            $this->assignconfig('item_order_info', $order_data['item_order_info']);
+            unset($order_data['item_order_info']);
+        }
+        $this->assignconfig('order_item', $order_data);
+        $this->view->assign('order_item', $order_data);
+
+        //把问题类型传递到js页面
+        $row->problem_type_id && $this->assignconfig('problem_type_id', $row->problem_type_id);
+
+        //工单措施对应的措施配置表ID数组
+        $measureList = WorkOrderMeasure::workMeasureList($row->id, 1);
+        !empty($measureList) && $this->assignconfig('measureList', $measureList);
+
+        //回复内容
+        $workOrderNote = WorkOrderNote::where('work_id', $ids)->select();
+        $this->view->assign('workOrderNote', $workOrderNote);
+
+        //工单问题类型
+        $problem_type = [];
+        if (1 == $row->work_type) {
+            $customer_problem_type = $workOrderConfigValue['customer_problem_type'];
+            $customer_problem_classify = $workOrderConfigValue['customer_problem_classify'];
+            unset($customer_problem_classify['仓库问题']);
+
+            foreach ($customer_problem_classify as $key => $value) {
+                $type = [];
+                foreach ($value as $v) {
+                    $type[] = ['id' => $v, 'name' => $customer_problem_type[$v]];
+                }
+                $problem_type[] = ['name' => $key, 'type' => $type];
+            }
+        } else {
+            $problem_type = $workOrderConfigValue['warehouse_problem_type'];
+        }
+        $this->view->assign('problem_type', $problem_type);
+
+        return $this->view->fetch();
     }
 
     /**
