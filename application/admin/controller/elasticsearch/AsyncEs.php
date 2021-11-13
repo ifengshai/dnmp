@@ -287,7 +287,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
                 }, $value);
-                $mergeData = $value['created_at'] + 8 * 3600;
+                $mergeData = $value['created_at'];
                 $insertData = [
                     'id'               => $value['id'],
                     'site'             => $value['site'],
@@ -296,7 +296,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
                     'base_grand_total' => $value['base_grand_total'],
                     'update_time_day'  => date('Ymd', $value['updated_at'] + 8 * 3600),
                     'update_time_hour' => date('H', $value['updated_at'] + 8 * 3600),
-                    'update_time'      => $value['updated_at'] + 8 * 3600,
+                    'update_time'      => $value['updated_at'],
                     'create_time'      => $mergeData,
 
                 ];
@@ -388,6 +388,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
      */
     public function syncCart()
     {
+        echo date('Y-m-d H:i:s',1636736400);
         WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
             ->where('created_at', '>=', strtotime('2021-11-12 10:00:00'))
             ->chunk(10000, function ($carts) {
