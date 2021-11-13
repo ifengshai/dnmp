@@ -158,11 +158,11 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCartMagento()
     {
-        $site = 3;
+        $site = 2;
 
         if($site == 1) {
             $db = Db::connect('database.db_zeelool_online');
-        }elseif($site == 3){
+        }elseif($site == 2){
             $db = Db::connect('database.db_voogueme_online');
         }elseif($site == 10){
             $db = Db::connect('database.db_zeelool_de_online');
@@ -217,11 +217,11 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
      */
     public function asyncCustomerMagento()
     {
-        $site = 15;
+        $site = 2;
 
         if($site == 1) {
             $db = Db::connect('database.db_zeelool_online');
-        }elseif($site == 3){
+        }elseif($site == 2){
             $db = Db::connect('database.db_voogueme_online');
         }elseif($site == 10){
             $db = Db::connect('database.db_zeelool_de_online');
