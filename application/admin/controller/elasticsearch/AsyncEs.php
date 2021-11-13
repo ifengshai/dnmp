@@ -190,7 +190,8 @@ $params['customer_id'] = $value['customer_id'] ?: 0;
 $params['customer_email'] = $value['customer_email'] ?: '';
 $params['created_at'] = strtotime($value['created_at']) ? strtotime($value['created_at'])+8*3600: 0;
 $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['updated_at'])+8*3600: 0;
-                $id = Db::name('web_shopping_cart')->insertGetId([]);
+                $id = Db::name('web_shopping_cart')->insertGetId($params);
+                echo $id.PHP_EOL;
                 $mergeData = strtotime($value['created_at']);
                 $insertData = [
                     'entity_id'        => $value['entity_id'],
