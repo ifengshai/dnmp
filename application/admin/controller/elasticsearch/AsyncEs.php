@@ -189,7 +189,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCustomerMagento()
     {
-        $site = $_GET['site'] ?: 1;
+        $site =  input('type',3);
         echo $site. PHP_EOL;
         echo strtotime('2021-11-13 01:50:00');
         die;
