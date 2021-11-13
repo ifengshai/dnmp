@@ -389,7 +389,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
     public function syncCart()
     {
         WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
-            ->where('created_at', '>', strtotime('2021-09-01 00:00:00'))
+            ->where('created_at', '>=', strtotime('2021-11-12 10:00:00'))
             ->chunk(10000, function ($carts) {
                 array_map(function ($value) {
                     $value = array_map(function ($v) {
