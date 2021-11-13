@@ -208,7 +208,7 @@ class AsyncEs extends BaseElasticsearch
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
                 }, $value);
-                $id = Db::name('fa_web_users')->insertGetId(
+                $id = Db::name('web_users')->insertGetId(
                     [
                         'site' => $site,
                         'entity_id' => $value['entity_id'],
