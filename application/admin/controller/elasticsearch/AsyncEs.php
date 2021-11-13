@@ -189,7 +189,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCustomerMagento()
     {
-        $site = input('site',1);
+        $site = $_GET['site'] ?: 1;
         echo $site. PHP_EOL;
         echo strtotime('2021-11-13 01:50:00');
         die;
@@ -206,7 +206,7 @@ class AsyncEs extends BaseElasticsearch
             $db = Db::connect('database.db_zeelool_fr_online');
         }
         $i = 0;
-        $db->table('customer_entity')->chunk(10000, function ($users) use ($site, &$i) {
+        $db->table('customer_entity')->where("updated_at >= '2021-11-12 10:00:00' and updated_at <= '2021-11-13 08:15:00'")->chunk(10000, function ($users) use ($site, &$i) {
             $data = array_map(function ($value) use ($site, &$i) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
@@ -220,8 +220,8 @@ class AsyncEs extends BaseElasticsearch
                         'group_id'        => $value['group_id'],
                         'store_id'        => $value['store_id'],
                         'resouce'         => $value['resouce'] ?? 0,
-                        'created_time'    => strtotime($value['created_at']),
-                        'updated_time'    => strtotime($value['updated_at']),
+                        'created_time'    => strtotime($value['created_at'])+8*3600,
+                        'updated_time'    => strtotime($value['updated_at'])+8*3600,
                     ]
                 );
                 $mergeData = strtotime($value['created_at']);
