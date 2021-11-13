@@ -2154,7 +2154,9 @@ class WorkOrderList extends Backend
                     $_stock_house->rollback();
                     $_new_order_item_process->rollback();
                     $_distribution_abnormal->rollback();
-                    $this->error($e->getMessage());
+                    //echo $e->getMessage().'--'.$e->getTraceAsString();
+                    $this->error($e->getTraceAsString());
+
                 }
                 $this->success();
             }
