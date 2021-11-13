@@ -189,10 +189,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCustomerMagento()
     {
-        $site = $argv[1];
-        echo $site. PHP_EOL;
-        echo strtotime('2021-11-13 01:50:00');
-        die;
+        $site = 1;
 
         if($site == 1) {
             $db = Db::connect('database.db_zeelool_online');
@@ -224,6 +221,7 @@ class AsyncEs extends BaseElasticsearch
                         'updated_time'    => strtotime($value['updated_at'])+8*3600,
                     ]
                 );
+                echo $id . PHP_EOL;
                 $mergeData = strtotime($value['created_at']);
                 $insertData = [
                     'id'              => $id,
