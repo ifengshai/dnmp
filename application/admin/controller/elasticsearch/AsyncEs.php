@@ -160,7 +160,7 @@ class AsyncEs extends BaseElasticsearch
     {
         ini_set('memory_limit', '4096M');
         set_time_limit(0);
-        $site = 1;
+        $site = 2;
 
         if($site == 1) {
             $db = Db::connect('database.db_zeelool_online');
