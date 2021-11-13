@@ -189,16 +189,45 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCustomerMagento()
     {
+        $site = input('site',1);
+        echo $site. PHP_EOL;
+        echo strtotime('2021-11-13 01:50:00');
+        die;
+
+        if($site == 1) {
+            $db = Db::connect('database.db_zeelool_online');
+        }elseif($site == 3){
+            $db = Db::connect('database.db_voogueme_online');
+        }elseif($site == 10){
+            $db = Db::connect('database.db_zeelool_de_online');
+        }elseif($site == 11){
+            $db = Db::connect('database.db_zeelool_jp_online');
+        }elseif($site == 15){
+            $db = Db::connect('database.db_zeelool_fr_online');
+        }
         $i = 0;
-        Db::connect('database.db_zeelool_de')->table('customer_entity')->chunk(10000, function ($users) use (&$i) {
-            $data = array_map(function ($value) use (&$i) {
+        $db->table('customer_entity')->chunk(10000, function ($users) use ($site, &$i) {
+            $data = array_map(function ($value) use ($site, &$i) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
                 }, $value);
+                $id = Db::name('fa_web_users')->insertGetId(
+                    [
+                        'site' => $site,
+                        'entity_id' => $value['entity_id'],
+                        'email' => $value['email'],
+                        'is_vip' => $value['is_vip'] ?? 0,
+                        'group_id'        => $value['group_id'],
+                        'store_id'        => $value['store_id'],
+                        'resouce'         => $value['resouce'] ?? 0,
+                        'created_time'    => strtotime($value['created_at']),
+                        'updated_time'    => strtotime($value['updated_at']),
+                    ]
+                );
                 $mergeData = strtotime($value['created_at']);
                 $insertData = [
-                    'id'              => intval(10 . rand(1000000, 9999999)),
-                    'site'            => 10,
+                    'id'              => $id,
+                    'site'            => $site,
                     'email'           => $value['email'],
                     'update_time_day' => date('Ymd', strtotime($value['updated_at'])),
                     'update_time'     => strtotime($value['updated_at']),
