@@ -158,6 +158,8 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCartMagento()
     {
+        ini_set('memory_limit', '4096M');
+        set_time_limit(0);
         $site = 1;
 
         if($site == 1) {
