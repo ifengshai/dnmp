@@ -173,7 +173,7 @@ class AsyncEs extends BaseElasticsearch
         }elseif($site == 15){
             $db = Db::connect('database.db_zeelool_fr_online');
         }
-        $db->table('sales_flat_quote')->where("updated_at >= '2021-11-12 10:00:00' and updated_at <= '2021-11-13 08:15:00'")->chunk(10000, function ($carts) use ($site, &$i) {
+        $db->table('sales_flat_quote')->where("updated_at >= '2021-11-12 10:00:00' and updated_at <= '2021-11-13 01:15:00'")->chunk(10000, function ($carts) use ($site, &$i) {
             $data = array_map(function ($value) use ($site, $i) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
