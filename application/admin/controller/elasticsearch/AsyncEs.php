@@ -158,7 +158,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCartMagento()
     {
-        $site = 10;
+        $site = 3;
 
         if($site == 1) {
             $db = Db::connect('database.db_zeelool_online');
