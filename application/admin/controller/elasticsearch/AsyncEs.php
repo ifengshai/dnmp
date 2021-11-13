@@ -217,8 +217,8 @@ class AsyncEs extends BaseElasticsearch
                         'group_id'        => $value['group_id'],
                         'store_id'        => $value['store_id'],
                         'resouce'         => $value['resouce'] ?? 0,
-                        'created_time'    => strtotime($value['created_at'])+8*3600,
-                        'updated_time'    => strtotime($value['updated_at'])+8*3600,
+                        'created_at'    => strtotime($value['created_at'])+8*3600,
+                        'updated_at'    => strtotime($value['updated_at'])+8*3600,
                     ]
                 );
                 echo $id . PHP_EOL;
