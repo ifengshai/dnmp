@@ -158,12 +158,39 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCartMagento()
     {
-        $i = 0;
-        Db::connect('database.db_zeelool')->table('sales_flat_quote')->field('entity_id,is_active,base_grand_total,updated_at,created_at')->where('created_at', '<=', '2021-05-25 00:00:00')->chunk(10000, function ($carts) use (&$i) {
-            $data = array_map(function ($value) use ($i) {
+        $site = 15;
+
+        if($site == 1) {
+            $db = Db::connect('database.db_zeelool_online');
+        }elseif($site == 3){
+            $db = Db::connect('database.db_voogueme_online');
+        }elseif($site == 10){
+            $db = Db::connect('database.db_zeelool_de_online');
+        }elseif($site == 11){
+            $db = Db::connect('database.db_zeelool_jp_online');
+        }elseif($site == 15){
+            $db = Db::connect('database.db_zeelool_fr_online');
+        }
+        $db->table('sales_flat_quote')->where("updated_at >= '2021-11-12 10:00:00' and updated_at <= '2021-11-13 08:15:00'")->chunk(10000, function ($carts) use ($site, &$i) {
+            $data = array_map(function ($value) use ($site, $i) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
                 }, $value);
+                $params['entity_id'] = $value['entity_id'];
+$params['store_id'] = $value['store_id'] ?: 0;
+$params['is_active'] = $value['is_active'] ?: 0;
+$params['site'] = $site;
+$params['items_count'] = $value['items_count'] ?: 0;
+$params['items_qty'] = $value['items_qty'] ?: 0;
+$params['base_currency_code'] = $value['base_currency_code'] ?: 0;
+$params['quote_currency_code'] = $value['quote_currency_code'] ?: 0;
+$params['grand_total'] = $value['grand_total'] ?: 0;
+$params['base_grand_total'] = $value['base_grand_total'] ?: 0;
+$params['customer_id'] = $value['customer_id'] ?: 0;
+$params['customer_email'] = $value['customer_email'] ?: '';
+$params['created_at'] = strtotime($value['created_at']) ? strtotime($value['created_at'])+8*3600: 0;
+$params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['updated_at'])+8*3600: 0;
+                $id = Db::name('web_shopping_cart')->insertGetId([]);
                 $mergeData = strtotime($value['created_at']);
                 $insertData = [
                     'entity_id'        => $value['entity_id'],
