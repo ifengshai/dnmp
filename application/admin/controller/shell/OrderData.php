@@ -65,8 +65,8 @@ class OrderData extends Backend
         $this->orderitemprocess = new NewOrderItemProcess();
         $this->zeelool = new Zeelool();
         $this->voogueme = new Voogueme();
-        $this->nihao = new Nihao();
-        $this->meeloog = new Meeloog();
+//        $this->nihao = new Nihao();
+//        $this->meeloog = new Meeloog();
         $this->wesee = new Weseeoptical();
         $this->zeelool_es = new ZeeloolEs();
         $this->zeelool_de = new ZeeloolDe();
