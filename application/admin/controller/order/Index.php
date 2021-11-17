@@ -45,7 +45,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
         $this->zeelool = new \app\admin\model\order\order\Zeelool;
         $this->voogueme = new \app\admin\model\order\order\Voogueme;
         $this->weseeoptical = new \app\admin\model\order\order\Weseeoptical;
-        $this->meeloog = new \app\admin\model\order\order\Meeloog;
+//        $this->meeloog = new \app\admin\model\order\order\Meeloog;
         $this->rufoo = new \app\admin\model\order\order\Rufoo;
         $this->zeelool_es = new \app\admin\model\order\order\ZeeloolEs;
         $this->zeelool_de = new \app\admin\model\order\order\ZeeloolDe;
