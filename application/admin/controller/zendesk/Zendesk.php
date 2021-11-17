@@ -1869,7 +1869,7 @@ DOC;
     {
 
         set_time_limit(0);
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '1024M');
         $ids = input('ids');
 
         $map = [];
@@ -2057,10 +2057,12 @@ DOC;
                     break;
             }
             if($value['type'] == 3){
+                $whereEmail['email'] = $value['email'];
+                $whereEmail['site'] = $value['type'];
                 //查询该用户的组别
-                $group = $webModel->table('users')
-                    ->where('email', $value['email'])
-                    ->value('group');
+                $group = Db::name('web_users')
+                    ->where($whereEmail)
+                    ->value('group_id');
                 switch ($group) {
                     case 1:
                         $groupName = '普通';

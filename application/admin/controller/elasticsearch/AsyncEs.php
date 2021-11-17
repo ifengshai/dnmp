@@ -145,7 +145,7 @@ class AsyncEs extends BaseElasticsearch
 
                 return $this->formatDate($value, $mergeData);
             }, collection($newOrder)->toArray());
-            $this->esService->addMutilToEs('mojing_datacenterday', $data);
+            dump($this->esService->addMutilToEs('mojing_datacenterday', $data));
         });
 
     }
@@ -158,16 +158,46 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCartMagento()
     {
-        $i = 0;
-        Db::connect('database.db_zeelool')->table('sales_flat_quote')->field('entity_id,is_active,base_grand_total,updated_at,created_at')->where('created_at', '<=', '2021-05-25 00:00:00')->chunk(10000, function ($carts) use (&$i) {
-            $data = array_map(function ($value) use ($i) {
+        ini_set('memory_limit', '4096M');
+        set_time_limit(0);
+        $site = 2;
+
+        if($site == 1) {
+            $db = Db::connect('database.db_zeelool_online');
+        }elseif($site == 2){
+            $db = Db::connect('database.db_voogueme_online');
+        }elseif($site == 10){
+            $db = Db::connect('database.db_zeelool_de_online');
+        }elseif($site == 11){
+            $db = Db::connect('database.db_zeelool_jp_online');
+        }elseif($site == 15){
+            $db = Db::connect('database.db_zeelool_fr_online');
+        }
+        $db->table('sales_flat_quote')->where("updated_at >= '2021-11-12 10:00:00' and updated_at <= '2021-11-13 01:15:00'")->chunk(10000, function ($carts) use ($site, &$i) {
+            $data = array_map(function ($value) use ($site, $i) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
                 }, $value);
+                $params['entity_id'] = $value['entity_id'];
+$params['store_id'] = $value['store_id'] ?: 0;
+$params['is_active'] = $value['is_active'] ?: 0;
+$params['site'] = $site;
+$params['items_count'] = $value['items_count'] ?: 0;
+$params['items_qty'] = $value['items_qty'] ?: 0;
+$params['base_currency_code'] = $value['base_currency_code'] ?: 0;
+$params['quote_currency_code'] = $value['quote_currency_code'] ?: 0;
+$params['grand_total'] = $value['grand_total'] ?: 0;
+$params['base_grand_total'] = $value['base_grand_total'] ?: 0;
+$params['customer_id'] = $value['customer_id'] ?: 0;
+$params['customer_email'] = $value['customer_email'] ?: '';
+$params['created_at'] = strtotime($value['created_at']) ? strtotime($value['created_at'])+8*3600: 0;
+$params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['updated_at'])+8*3600: 0;
+                $id = Db::name('web_shopping_cart')->insertGetId($params);
+                echo $id.PHP_EOL;
                 $mergeData = strtotime($value['created_at']);
                 $insertData = [
                     'entity_id'        => $value['entity_id'],
-                    'site'             => 1,
+                    'site'             => $site,
                     'status'           => $value['is_active'],
                     'base_grand_total' => $value['base_grand_total'],
                     'update_time_day'  => date('Ymd', strtotime($value['updated_at'])),
@@ -189,16 +219,43 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncCustomerMagento()
     {
+        $site = 2;
+
+        if($site == 1) {
+            $db = Db::connect('database.db_zeelool_online');
+        }elseif($site == 2){
+            $db = Db::connect('database.db_voogueme_online');
+        }elseif($site == 10){
+            $db = Db::connect('database.db_zeelool_de_online');
+        }elseif($site == 11){
+            $db = Db::connect('database.db_zeelool_jp_online');
+        }elseif($site == 15){
+            $db = Db::connect('database.db_zeelool_fr_online');
+        }
         $i = 0;
-        Db::connect('database.db_zeelool_de')->table('customer_entity')->chunk(10000, function ($users) use (&$i) {
-            $data = array_map(function ($value) use (&$i) {
+        $db->table('customer_entity')->where("updated_at >= '2021-11-12 10:00:00' and updated_at <= '2021-11-13 08:15:00'")->chunk(10000, function ($users) use ($site, &$i) {
+            $data = array_map(function ($value) use ($site, &$i) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
                 }, $value);
+                $id = Db::name('web_users')->insertGetId(
+                    [
+                        'site' => $site,
+                        'entity_id' => $value['entity_id'],
+                        'email' => $value['email'],
+                        'is_vip' => $value['is_vip'] ?? 0,
+                        'group_id'        => $value['group_id'],
+                        'store_id'        => $value['store_id'],
+                        'resouce'         => $value['resouce'] ?? 0,
+                        'created_at'    => strtotime($value['created_at'])+8*3600,
+                        'updated_at'    => strtotime($value['updated_at'])+8*3600,
+                    ]
+                );
+                echo $id . PHP_EOL;
                 $mergeData = strtotime($value['created_at']);
                 $insertData = [
-                    'id'              => intval(10 . rand(1000000, 9999999)),
-                    'site'            => 10,
+                    'id'              => $id,
+                    'site'            => $site,
                     'email'           => $value['email'],
                     'update_time_day' => date('Ymd', strtotime($value['updated_at'])),
                     'update_time'     => strtotime($value['updated_at']),
@@ -230,7 +287,7 @@ class AsyncEs extends BaseElasticsearch
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
                 }, $value);
-                $mergeData = $value['created_at'] + 8 * 3600;
+                $mergeData = $value['created_at'];
                 $insertData = [
                     'id'               => $value['id'],
                     'site'             => $value['site'],
@@ -239,7 +296,7 @@ class AsyncEs extends BaseElasticsearch
                     'base_grand_total' => $value['base_grand_total'],
                     'update_time_day'  => date('Ymd', $value['updated_at'] + 8 * 3600),
                     'update_time_hour' => date('H', $value['updated_at'] + 8 * 3600),
-                    'update_time'      => $value['updated_at'] + 8 * 3600,
+                    'update_time'      => $value['updated_at'],
                     'create_time'      => $mergeData,
 
                 ];
@@ -331,8 +388,9 @@ class AsyncEs extends BaseElasticsearch
      */
     public function syncCart()
     {
+        //echo date('Y-m-d H:i:s',1636736400);
         WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
-            ->where('created_at', '>', strtotime('2021-09-01 00:00:00'))
+            ->where('updated_at', '>=',1636711200)
             ->chunk(10000, function ($carts) {
                 array_map(function ($value) {
                     $value = array_map(function ($v) {

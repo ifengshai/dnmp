@@ -54,6 +54,7 @@ class Logistics
     public function fire(Job $job, $data)
     {
         try {
+            tp_log('队列消费信息:' . $data, '17track');
             $isJobDone = $this->doTrackReturn($data);
             if ($isJobDone) {
                 //如果任务执行成功， 记得删除任务
@@ -79,8 +80,10 @@ class Logistics
         //妥投给magento接口
         if ($track_arr['event'] != 'TRACKING_STOPPED') {
             $order_node = Db::name('order_node')->field('site,order_id,order_number,shipment_type,shipment_data_type')->where('track_number', $track_arr['data']['number'])->find();
+            Log::write("输出订单号fa_shipment".$track_arr['data']['number']);
             if (empty($order_node)) {
                 $count = Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $track_arr['data']['number'])->where('is_del', 1)->count();
+                Log::write("输出订单号fa_shipment".$track_arr['data']['number']);
                 if ($count > 0) {
                     $courier_status = $track_arr['data']['track']['e'];
                     $shipment_last_msg = $track_arr['data']['track']['z0']['z'];
@@ -93,6 +96,8 @@ class Logistics
                         $signing_time = strtotime($track_arr['data']['track']['z0']['a']);
                         $params['shipment_signing_time'] = $signing_time;
                     }
+                    Log::write("输出订单号fa_shipment,执行数据参数为：".json_encode($params));
+
                     Db::connect('database.db_mojing_order')->table('fa_shipment')->where('shipment_num', $track_arr['data']['number'])
                         ->update($params);
                 }
