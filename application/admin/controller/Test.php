@@ -2,6 +2,7 @@
 
 namespace app\admin\controller;
 
+use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\common\controller\Backend;
 use app\Common\model\Auth;
 use GuzzleHttp\Client;
@@ -38,10 +39,6 @@ class Test extends Backend
         $this->ordernodedetail = new \app\admin\model\OrderNodeDetail();
         $this->ordernode = new \app\admin\model\OrderNode();
     }
-
-
-
-
 
 
 

@@ -7,6 +7,7 @@
 namespace app\admin\controller\shell;
 
 use app\admin\controller\elasticsearch\async\AsyncDatacenterDay;
+use app\admin\controller\elasticsearch\BaseElasticsearch;
 use app\admin\model\itemmanage\Item;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\OrderNode;
@@ -4490,6 +4491,285 @@ class TrackReg extends Backend
             usleep(10000);
         }
 
+    }
+    public function zeeloolde_day_data_temp()
+    {
+        $time = input('time');
+        $model = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $this->order = new \app\admin\model\order\order\ZeeloolDe();
+        $operate_model = Db::connect('database.db_zeelool_de');
+        $operate_model->table('customer_entity')->query("set time_zone='+8:00'");
+        $operate_model->table('oc_vip_order')->query("set time_zone='+8:00'");
+        $operate_model->table('sales_flat_quote')->query("set time_zone='+8:00'");
+        $operate_model->table('sales_flat_order')->query("set time_zone='+8:00'");
+
+        $date_time = $time;
+        //查询时间
+        $arr = [];
+        $arr['site'] = 10;
+        $arr['day_date'] = $date_time;
+        //注册用户数
+        $register_where = [];
+        $register_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['register_num'] = $operate_model->table('customer_entity')->where($register_where)->count();
+        //总的订单数
+        $order_where = [];
+        $order_where[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['sum_order_num'] = $operate_model->table('sales_flat_order')->where($order_where)->where('order_type',
+            1)->count();
+        //登录用户数
+        $customer_where = [];
+        $customer_where[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['login_user_num'] = $operate_model->table('customer_entity')->where($customer_where)->count();
+        //新增vip用户数
+        $vip_where = [];
+        $vip_where[] = ['exp', Db::raw("DATE_FORMAT(start_time, '%Y-%m-%d') = '" . $date_time . "'")];
+        $vip_where['order_status'] = 'Success';
+        $arr['vip_user_num'] = $operate_model->table('oc_vip_order')->where($vip_where)->count();
+        //支付成功的订单数
+        $order_where = [];
+        $order_where[] = ['exp', Db::raw("DATE_FORMAT(payment_time, '%Y-%m-%d') = '" . $date_time . "'")];
+        $order_where['status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered',
+                'delivery',
+            ],
+        ];
+        $arr['order_num'] = $this->order->where($order_where)->where('order_type', 1)->count();
+        //销售额
+        $arr['sales_total_money'] = $this->order->where($order_where)->where('order_type', 1)->sum('base_grand_total');
+        //邮费
+        $arr['shipping_total_money'] = $this->order->where($order_where)->where('order_type',
+            1)->sum('base_shipping_amount');
+        //客单价
+        $arr['order_unit_price'] = $arr['order_num'] == 0 ? 0 : round($arr['sales_total_money'] / $arr['order_num'], 2);
+        //中位数
+        $sales_total_money = $this->order->where($order_where)->where('order_type', 1)->column('base_grand_total');
+        $arr['order_total_midnum'] = $this->median($sales_total_money);
+        //标准差
+        $arr['order_total_standard'] = $this->getVariance($sales_total_money);
+        //补发订单数
+        $arr['replacement_order_num'] = $this->order->where($order_where)->where('order_type', 4)->count();
+        //补发销售额
+        $arr['replacement_order_total'] = $this->order->where($order_where)->where('order_type',
+            4)->sum('base_grand_total');
+        //网红订单数
+        $arr['online_celebrity_order_num'] = $this->order->where($order_where)->where('order_type', 3)->count();
+        //补发销售额
+        $arr['online_celebrity_order_total'] = $this->order->where($order_where)->where('order_type',
+            3)->sum('base_grand_total');
+        //新建购物车数量
+        $cart_where1 = [];
+        $cart_where1[] = ['exp', Db::raw("DATE_FORMAT(created_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['new_cart_num'] = $operate_model->table('sales_flat_quote')->where($cart_where1)->where('base_grand_total',
+            'gt', 0)->count();
+        //更新购物车数量
+        $cart_where2 = [];
+        $cart_where2[] = ['exp', Db::raw("DATE_FORMAT(updated_at, '%Y-%m-%d') = '" . $date_time . "'")];
+        $arr['update_cart_num'] = $operate_model->table('sales_flat_quote')->where($cart_where2)->where('base_grand_total',
+            'gt', 0)->count();
+        //新增购物车转化率
+        $arr['cart_rate'] = $arr['new_cart_num'] ? round($arr['order_num'] / $arr['new_cart_num'] * 100, 2) : 0;
+        //更新购物车转化率
+        $arr['update_cart_cart'] = $arr['update_cart_num'] ? round($arr['order_num'] / $arr['update_cart_num'] * 100,
+            2) : 0;
+        //当天创建的用户当天产生订单的转化率
+        $status_where['status'] = [
+            'in',
+            [
+                'free_processing',
+                'processing',
+                'complete',
+                'paypal_reversed',
+                'payment_review',
+                'paypal_canceled_reversal',
+                'delivered',
+                'delivery',
+            ],
+        ];
+        $status_where['order_type'] = 1;
+        //当天注册用户数
+        $register_userids = $operate_model->table('customer_entity')->where($cart_where1)->column('entity_id');
+        $register_num = count($register_userids);
+        //当天注册用户在当天下单的用户数
+        $order_user_count1 = 0;
+        foreach ($register_userids as $register_userid) {
+            //判断当前用户在当天是否下单
+            $order = $operate_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',
+                $register_userid)->value('entity_id');
+            if ($order) {
+                $order_user_count1++;
+            }
+        }
+        $arr['create_user_change_rate'] = $register_num ? round($order_user_count1 / $register_num * 100, 2) : 0;
+        //当天更新用户当天产生订单的转化率
+        $update_userids = $operate_model->table('customer_entity')->where($cart_where2)->column('entity_id');
+        $update_num = count($update_userids);
+        //当天活跃更新用户数在当天是否下单
+        $order_user_count2 = 0;
+        foreach ($update_userids as $update_userid) {
+            //判断活跃用户在当天下单的用户数
+            $order = $operate_model->table('sales_flat_order')->where($cart_where1)->where($status_where)->where('customer_id',
+                $update_userid)->value('entity_id');
+            if ($order) {
+                $order_user_count2++;
+            }
+        }
+        $arr['update_user_change_rate'] = $update_num ? round($order_user_count2 / $update_num * 100, 0) : 0;
+        //虚拟库存
+        $virtual_where['platform_type'] = 10;
+        $virtual_where['i.category_id'] = ['<>', 43];
+        $virtual_where['i.is_del'] = 1;
+        $virtual_where['i.is_open'] = 1;
+        $arr['virtual_stock'] = $model->alias('p')->join('fa_item i',
+            'p.sku=i.sku')->where($virtual_where)->sum('p.stock');
+        //在售，预售，下架
+        $item = new \app\admin\model\itemmanage\Item();
+        $site_where['platform_type'] = $arr['site'];
+        $skus = $item->getFrameSku();
+        $map_where['sku'] = ['in', $skus];
+        $webSkus = $model
+            ->where($map_where)
+            ->where($site_where)
+            ->select();
+        $onSalesNum = 0;  //在售
+        $SalesOutNum = 0;  //售罄
+        $downShelvesNum = 0;  //下架
+        $nowDate = date('Y-m-d H:i:s');
+        foreach ($webSkus as $value) {
+            if ($value['outer_sku_status'] == 1) {
+                //上架
+                if ($value['stock'] > 0) {
+                    //在售
+                    $onSalesNum++;
+                } else {
+                    if ($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']) {
+                        //开预售
+                        if ($value['presell_num'] > 0) {
+                            $onSalesNum++;
+                        } else {
+                            $SalesOutNum++;
+                        }
+                    } else {
+                        //未开预售
+                        $SalesOutNum++;
+                    }
+                }
+            } else {
+                //下架
+                $downShelvesNum++;
+            }
+        }
+        $arr['glass_in_sale_num'] = $onSalesNum;  //在售
+        $arr['glass_shelves_num'] = $downShelvesNum;  //下架
+        $arr['glass_presell_num'] = $SalesOutNum;  //售罄
+        $skus1 = $item->getOrnamentsSku();
+        $map_where1['sku'] = ['in', $skus1];
+        $webSkus1 = $model
+            ->where($map_where1)
+            ->where($site_where)
+            ->select();
+        $onSalesNum1 = 0;  //在售
+        $SalesOutNum1 = 0;  //售罄
+        $downShelvesNum1 = 0;  //下架
+        foreach ($webSkus1 as $value) {
+            if ($value['outer_sku_status'] == 1) {
+                //上架
+                if ($value['stock'] > 0) {
+                    //在售
+                    $onSalesNum1++;
+                } else {
+                    if ($value['presell_status'] == 1 && $nowDate >= $value['presell_start_time'] && $nowDate <= $value['presell_end_time']) {
+                        //开预售
+                        if ($value['presell_num'] > 0) {
+                            $onSalesNum1++;
+                        } else {
+                            $SalesOutNum1++;
+                        }
+                    } else {
+                        //未开预售
+                        $SalesOutNum1++;
+                    }
+                }
+            } else {
+                //下架
+                $downShelvesNum1++;
+            }
+        }
+        $arr['box_in_sale_num'] = $onSalesNum1;
+        $arr['box_shelves_num'] = $downShelvesNum1;
+        $arr['box_presell_num'] = $SalesOutNum1;
+        $datacenterDayId = Db::name('datacenter_day')->insertGetId($arr);
+        //同步es数据
+//        (new AsyncDatacenterDay())->runInsert($datacenterDayId);
+        echo $date_time . "\n";
+        echo date("Y-m-d H:i:s") . "\n";
+        usleep(100000);
+    }
+
+    public function getGaDataTemp()
+    {
+        $site = 10;
+        $timeStart = input('timeStart');
+        $timeEnd = input('timeEnd');
+        $date_time = $timeStart;
+        $date_time_behind = $timeEnd;
+        $lastData = Db::name('datacenter_day')
+            ->where('day_date', $date_time_behind)
+            ->where('site', $site)
+            ->field('new_cart_num,order_num')
+            ->find();
+        $data = Db::name('datacenter_day')->where([
+            'day_date' => $date_time,
+            'site'     => $site,
+        ])->field('order_num,new_cart_num,update_cart_num,active_user_num')->find();
+
+        //活跃用户数
+        $arr['active_user_num'] = $this->google_active_user($site, $date_time);
+        //会话
+        $arr['sessions'] = $this->google_session($site, $date_time);
+        //前天的ga会话数
+        $date_time_behind_sessions_z = $this->google_session($site, $date_time_behind);
+        //会话转化率
+        $arr['session_rate'] = $arr['sessions'] != 0 ? round($data['order_num'] / $arr['sessions'] * 100, 2) : 0;
+        //新增加购率
+        $arr['add_cart_rate'] = $arr['sessions'] ? round($data['new_cart_num'] / $arr['sessions'] * 100, 2) : 0;
+        //更新加购率
+        $arr['update_add_cart_rate'] = $arr['sessions'] ? round($data['update_cart_num'] / $arr['sessions'] * 100,
+            2) : 0;
+        $zeelool_data = new \app\admin\model\operatedatacenter\Zeelool();
+        //着陆页数据
+        $arr['landing_num'] = $zeelool_data->google_landing($site, $date_time);
+        //产品详情页
+        $arr['detail_num'] = $zeelool_data->google_target13($site, $date_time);
+        //加购
+        $arr['cart_num'] = $zeelool_data->google_target1($site, $date_time);
+        //交易次数
+        $arr['complete_num'] = $zeelool_data->google_target_end($site, $date_time);
+        Db::name('datacenter_day')->where(['day_date' => $date_time, 'site' => $site])->update($arr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time, 'site' => $site];
+        //(new AsyncDatacenterDay())->runUpdate($updateData);
+
+        //更新前天的会话数 防止ga数据误差
+        $lastArr['sessions'] = $date_time_behind_sessions_z;
+        $lastArr['add_cart_rate'] = $lastArr['sessions'] ? round(($lastData['new_cart_num'] / $lastArr['sessions']) * 100, 2) : 0;
+        $lastArr['session_rate'] = $lastArr['sessions'] ? round(($lastData['order_num'] / $lastArr['sessions']) * 100, 2) : 0;
+        Db::name('datacenter_day')->where([
+            'day_date' => $date_time_behind,
+            'site'     => $site,
+        ])->update($lastArr);
+        //同步es数据
+        $updateData = ['day_date' => $date_time_behind, 'site' => $site];
+        //(new AsyncDatacenterDay())->runUpdate($updateData);
+        usleep(100000);
     }
 }
 

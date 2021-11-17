@@ -1593,4 +1593,188 @@ class Test01 extends Backend
         }
         
     }
+
+    public function export_runwangtao_data()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
+        $where['library_status'] = 1;
+        $time = date("Y-m-d H:i:s");
+        $time3 = date("Y-m-d H:i:s", strtotime("-3 month"));
+        $time6 = date("Y-m-d H:i:s", strtotime("-6 month"));
+        $time9 = date("Y-m-d H:i:s", strtotime("-9 month"));
+        $time12 = date("Y-m-d H:i:s", strtotime("-12 month"));
+
+        //9-12个月
+        $data12 = $this->item
+            ->field('sku,in_stock_time,count(*) as stock')
+            ->where($where)
+            ->where('in_stock_time','between',[$time12,$time9])
+            ->where('in_stock_time is not null')
+            ->group('sku')
+            ->select();
+        //6-9
+        $data9 = $this->item
+            ->field('sku,in_stock_time,count(*) as stock')
+            ->where($where)
+            ->where('in_stock_time','between',[$time9,$time6])
+            ->where('in_stock_time is not null')
+            ->group('sku')
+            ->select();
+        //3-6
+        $data6 = $this->item
+            ->field('sku,in_stock_time,count(*) as stock')
+            ->where($where)
+            ->where('in_stock_time','between',[$time6,$time3])
+            ->where('in_stock_time is not null')
+            ->group('sku')
+            ->select();
+        //0-3
+        $data3 = $this->item
+            ->field('sku,in_stock_time,count(*) as stock')
+            ->where($where)
+            ->where('in_stock_time','between',[$time3,$time])
+            ->where('in_stock_time is not null')
+            ->group('sku')
+            ->select();
+
+        //12以上
+        $data13 = $this->item
+            ->field('sku,in_stock_time,count(*) as stock')
+            ->where($where)
+            ->where('in_stock_time','<',$time12)
+            ->where('in_stock_time is not null')
+            ->group('sku')
+            ->select();
+
+
+        $spreadsheet = new Spreadsheet();
+        $pIndex = 0;
+        if (!empty($data3)){
+            //从数据库查询需要的数据
+            $spreadsheet->setActiveSheetIndex(0);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "库存");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex(0)->setTitle('0-3个月');
+            $spreadsheet->setActiveSheetIndex(0);
+            $num = 0;
+            foreach ($data3 as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['stock']);
+                $num += 1;
+            }
+            $pIndex += 1;
+        }
+        if (!empty($data6)){
+            $spreadsheet->createSheet();
+            $spreadsheet->setActiveSheetIndex($pIndex);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "库存");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex($pIndex)->setTitle('3-6个月');
+            $spreadsheet->setActiveSheetIndex($pIndex);
+            $num = 0;
+            foreach ($data6 as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['stock']);
+                $num += 1;
+            }
+            $pIndex += 1;
+        }
+
+        if (!empty($data9)){
+            $spreadsheet->createSheet();
+            $spreadsheet->setActiveSheetIndex($pIndex);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "库存");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex($pIndex)->setTitle('6-9个月');
+            $spreadsheet->setActiveSheetIndex($pIndex);
+            $num = 0;
+            foreach ($data9 as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['stock']);
+                $num += 1;
+            }
+            $pIndex += 1;
+        }
+
+        if (!empty($data12)){
+            $spreadsheet->createSheet();
+            $spreadsheet->setActiveSheetIndex($pIndex);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "库存");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex($pIndex)->setTitle('9-12个月');
+            $spreadsheet->setActiveSheetIndex($pIndex);
+            $num = 0;
+            foreach ($data12 as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['stock']);
+                $num += 1;
+            }
+            $pIndex += 1;
+        }
+
+        if (!empty($data13)){
+            $spreadsheet->createSheet();
+            $spreadsheet->setActiveSheetIndex($pIndex);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "SKU");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "库存");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex($pIndex)->setTitle('12个月以上');
+            $spreadsheet->setActiveSheetIndex($pIndex);
+            $num = 0;
+            foreach ($data13 as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['stock']);
+                $num += 1;
+            }
+            $pIndex += 1;
+        }
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = '导出现在库SKU库存、库龄、数量数据';
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+    }
 }

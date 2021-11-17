@@ -26,6 +26,7 @@ return [
         '15'=>'ZeeloolFr',
         '16'=>'VooguemeUk',
         '66'=>'网红管理系统',
+        '88'=>'senada',
     ],
     //类型
     'siteType' => [

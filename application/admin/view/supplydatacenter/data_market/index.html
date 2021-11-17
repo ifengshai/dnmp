@@ -74,6 +74,11 @@
         font-size: 18px;
         color: rgb(127, 127, 127);
     }
+    .title5{
+        font-size: 18px;
+        height: 100px;
+        color: rgb(127, 127, 127);
+    }
     .rate_class{
         font-size: 12px;
         display: none;
@@ -254,7 +259,8 @@
                                 <img src="/wenhao.jpg" class="wenhao-class">
                             </span>
                             <span class="extend">
-                                <div class="title"><span style="float: left">待入库数量（个）</span><br/><span class="amount">{$stock_overview.wait_stock_num}</span></div>
+                                <div class="title5"><span style="float: left">理论待入库数量（个）</span><br/><span style="line-height: normal !important" class="amount">{$stock_overview.wait_stock_num}</span></div>
+                                    <div class="title5"><span style="float: left">实际待入库数量（个）</span><br/><span style="line-height: normal !important" class="amount">{$stock_overview.real_wait_stock_num}</span></div>
                             </span>
                         </div>
                     </div>

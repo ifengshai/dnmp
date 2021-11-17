@@ -20,7 +20,7 @@ class OrderDataDetailNew extends Backend
         $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
         $this->zeelool = new \app\admin\model\order\order\Zeelool();
         $this->voogueme = new \app\admin\model\order\order\Voogueme();
-        $this->nihao = new \app\admin\model\order\order\Nihao();
+        //$this->nihao = new \app\admin\model\order\order\Nihao();
         $this->zeeloolde = new \app\admin\model\order\order\ZeeloolDe();
         $this->zeelooljp = new \app\admin\model\order\order\ZeeloolJp();
         $this->zeeloolfr = new \app\admin\model\order\order\ZeeloolFr();
