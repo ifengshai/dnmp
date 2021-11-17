@@ -1101,7 +1101,6 @@ class WorkOrderList extends Model
             } catch (\Exception $e) {
                 $_work_order_measure->rollback();
                 $_work_order_change_sku->rollback();
-                echo $e->getMessage() . $e->getTraceAsString(); die();
                 exception($e->getMessage());
             }
         }
