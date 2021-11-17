@@ -71,9 +71,9 @@ class OcPrescriptionPic extends Backend
                 $WhereSql .= " and completion_time between '$completion_time[0]' and '$completion_time[1]' ";
             }
             if ($filter['site'] == 1) {
-                $model = Db::connect('database.db_zeelool_online');
+                $model = Db::connect('database.db_zeelool');
             } else {
-                $model = Db::connect('database.db_voogueme_online');
+                $model = Db::connect('database.db_voogueme');
             }
             $WhereOrder = '  ORDER BY  created_at desc';
             if ($filter['site']) {
