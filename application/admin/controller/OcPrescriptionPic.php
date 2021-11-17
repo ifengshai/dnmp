@@ -70,7 +70,7 @@ class OcPrescriptionPic extends Backend
                 $completion_time = explode(' - ', $filter['completion_time']);
                 $WhereSql .= " and completion_time between '$completion_time[0]' and '$completion_time[1]' ";
             }
-            $model = Db::connect('database.db_zeelool');
+            $model = Db::connect('database.db_zeelool_online');
             $WhereOrder = '  ORDER BY  created_at desc';
             if ($filter['site']) {
                 if ($filter['site'] == 1) {
@@ -142,7 +142,7 @@ class OcPrescriptionPic extends Backend
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
             if ($params['site'] == 1) {
-                $model = Db::connect('database.db_zeelool');
+                $model = Db::connect('database.db_zeelool_online');
             } else {
                 $model = Db::connect('database.db_voogueme');
             }
@@ -155,7 +155,7 @@ class OcPrescriptionPic extends Backend
         }
         $site = input('param.site');
         if ($site == 1) {
-            $model = Db::connect('database.db_zeelool');
+            $model = Db::connect('database.db_zeelool_online');
             $url = config('url.zeelool_url') . '/media';
         } else {
             $model = Db::connect('database.db_voogueme');
@@ -187,7 +187,7 @@ class OcPrescriptionPic extends Backend
             }
             foreach ($ids as $key => $item) {
                 if ($item[1] == 1) {
-                    $model = Db::connect('database.db_zeelool');
+                    $model = Db::connect('database.db_zeelool_online');
                 } else {
                     $model = Db::connect('database.db_voogueme');
                 }
@@ -215,7 +215,7 @@ class OcPrescriptionPic extends Backend
                 $completionTime = explode(' - ', $filter['completion_time']);
                 $WhereSql .= " and completion_time between '$completionTime[0]' and '$completionTime[1]' ";
             }
-            $model = Db::connect('database.db_zeelool');
+            $model = Db::connect('database.db_zeelool_online');
             $WhereOrder = '  ORDER BY  created_at desc';
             if ($filter['site']) {
                 if ($filter['site'] == 1) {

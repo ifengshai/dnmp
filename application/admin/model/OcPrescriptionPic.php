@@ -10,7 +10,7 @@ class OcPrescriptionPic extends Model
 
 
 
-    protected $connection = 'database.db_zeelool';
+    protected $connection = 'database.db_zeelool_online';
 
     // 表名
     protected $table = 'oc_prescription_pic';
