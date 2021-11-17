@@ -73,7 +73,7 @@ class OcPrescriptionPic extends Backend
             if ($filter['site'] == 1) {
                 $model = Db::connect('database.db_zeelool_online');
             } else {
-                $model = Db::connect('database.db_voogueme');
+                $model = Db::connect('database.db_voogueme_online');
             }
             $WhereOrder = '  ORDER BY  created_at desc';
             if ($filter['site']) {
