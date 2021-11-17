@@ -173,6 +173,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                                 13: 'Zeelool_cn',
                                 14: 'Alibaba',
                                 15: 'Zeelool_fr',
+                                16: 'Voogueme_uk',
                             },
                             operate: 'IN',
                             formatter: Table.api.formatter.status

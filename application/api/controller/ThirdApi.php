@@ -66,7 +66,7 @@ class ThirdApi extends Api
      */
     public function get_track()
     {
-        $order_shipment = Db::name('order_node')->where(['delivery_time' => ['>', '2021-07-13'], 'order_node' => ['>', 2]])->select();
+        $order_shipment = Db::name('order_node')->where(['delivery_time' => ['>', '2021-10-25'], 'order_node' => ['>=', 2]])->select();
         $order_shipment = collection($order_shipment)->toArray();
         $trackingConnector = new TrackingConnector($this->apiKey);
 
@@ -101,6 +101,7 @@ class ThirdApi extends Api
                 $add['shipment_data_type'] = $order_node_date['shipment_data_type'];
                 $add['track_number'] = $val['number'];
                 $this->total_track_data($val['track'], $add);
+                echo $val['number'] . ',';
             }
             usleep(100000);
             echo $k . "ok \n";

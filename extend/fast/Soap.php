@@ -113,6 +113,9 @@ class Soap
             case 15:
                 $url = config('url.api_zeelool_fr_url');
                 break;
+            case 16:
+                $url = config('url.api_voogueme_uk_url');
+                break;
             default:
                 return false;
                 break;

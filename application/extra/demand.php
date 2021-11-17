@@ -24,6 +24,7 @@ return [
         '11' => 'ZeeloolJp',
         '12' => 'Voogmechic',
         '15'=>'ZeeloolFr',
+        '16'=>'VooguemeUk',
         '66'=>'网红管理系统',
         '88'=>'senada',
     ],

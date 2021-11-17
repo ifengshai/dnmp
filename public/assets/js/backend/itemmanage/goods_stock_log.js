@@ -47,7 +47,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 12: 'Voogmechic',
                                 13: 'Zeelool_cn',
                                 14: 'Alibaba',
-                                15: 'Zeelool_fr'
+                                15: 'Zeelool_fr',
+                                16: 'Voogueme_uk',
                             },
                             custom: {
                                 0: 'scarlet',

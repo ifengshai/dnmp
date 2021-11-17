@@ -96,6 +96,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'zeelool_cn', title: __('z_cn虚拟仓库存'),operate: false,visible: false,sortable: true},
                         {field: 'alibaba', title: __('alibaba虚拟仓库存'),operate: false,visible: false,sortable: true},
                         {field: 'zeelool_fr', title: __('Fr虚拟仓库存'),operate: false,visible: false,sortable: true},
+                        {field: 'voogueme_uk', title: __('v_uk虚拟仓库存'),operate: false,visible: false,sortable: true},
                         {field: 'category', title: __('商品分类'),operate: false},
                         {
                             field: 'item_status', title: __('商品状态'),
@@ -164,7 +165,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             searchList: {
                                 1: 'zeelool', 2: 'voogueme', 3: 'meeloog', 4: 'vicmoo', 5: 'wesee',
                                 8: 'amazon', 9: 'zeelool_es', 10: 'zeelool_de', 11: 'zeelool_jp',
-                                12: 'voogmechic', 13: 'zeelool_cn', 14: 'alibaba', 15: 'zeelool_fr'
+                                12: 'voogmechic', 13: 'zeelool_cn', 14: 'alibaba', 15: 'zeelool_fr', 15: 'voogueme_uk'
                             },
                             formatter: Table.api.formatter.status
                         },
