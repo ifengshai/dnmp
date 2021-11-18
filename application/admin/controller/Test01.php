@@ -1939,7 +1939,7 @@ class Test01 extends Backend
             ],
             [
                 'age' => '总计',
-                'sku_num' => '',
+                'sku_num' => $count,
                 'sku_percent' => '100%',
                 'stock' => $stock,
                 'stock_percent' => '100%',

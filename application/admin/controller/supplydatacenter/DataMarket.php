@@ -559,7 +559,7 @@ class DataMarket extends Backend
     }
 
     //库龄概况
-    public function stock_age_overview()
+    public function stock_age_overview1()
     {
         $cache_data = Cache::get('Supplydatacenter_datamarket' . md5(serialize('stock_age_overview')));
         if ($cache_data) {
@@ -674,7 +674,7 @@ class DataMarket extends Backend
         return $arr;
     }
     //库龄概况
-    public function stock_age_overview1()
+    public function stock_age_overview()
     {
 
         $data = Db::name('stock_age_day_data')->where('date',date("Y-m-d", strtotime("-1 day")))->select();
@@ -723,7 +723,7 @@ class DataMarket extends Backend
             ),
             array(
                 'title' => '总计',
-                'count' => '',
+                'count' => $data['总计']['sku_num'],
                 'percent' => '100%',
                 'stock' => $data['总计']['stock'],
                 'stock_percent' => '100%',
