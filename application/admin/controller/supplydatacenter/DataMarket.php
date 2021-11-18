@@ -676,157 +676,60 @@ class DataMarket extends Backend
     //库龄概况
     public function stock_age_overview1()
     {
-        $cache_data = Cache::get('Supplydatacenter_datamarket1' . md5(serialize('stock_age_overview')));
-        if ($cache_data) {
-            return $cache_data;
-        }
-        $this->item = new \app\admin\model\warehouse\ProductBarCodeItem;
-        $where['library_status'] = 1;
-        $time = date("Y-m-d H:i:s");
-        $time3 = date("Y-m-d H:i:s", strtotime("-3 month"));
-        $time6 = date("Y-m-d H:i:s", strtotime("-6 month"));
-        $time9 = date("Y-m-d H:i:s", strtotime("-9 month"));
-        $time12 = date("Y-m-d H:i:s", strtotime("-12 month"));
 
-        //9-12个月
-        $data12 = $this->item
-            ->field('sku,in_stock_time,count(*) as stock')
-            ->where($where)
-            ->where('in_stock_time','between',[$time12,$time9])
-            ->where('in_stock_time is not null')
-            ->group('sku')
-            ->select();
-        //6-9
-        $data9 = $this->item
-            ->field('sku,in_stock_time,count(*) as stock')
-            ->where($where)
-            ->where('in_stock_time','between',[$time9,$time6])
-            ->where('in_stock_time is not null')
-            ->group('sku')
-            ->select();
-        //3-6
-        $data6 = $this->item
-            ->field('sku,in_stock_time,count(*) as stock')
-            ->where($where)
-            ->where('in_stock_time','between',[$time6,$time3])
-            ->where('in_stock_time is not null')
-            ->group('sku')
-            ->select();
-        //0-3
-        $data3 = $this->item
-            ->field('sku,in_stock_time,count(*) as stock')
-            ->where($where)
-            ->where('in_stock_time','between',[$time3,$time])
-            ->where('in_stock_time is not null')
-            ->group('sku')
-            ->select();
-
-        //12以上
-        $data13 = $this->item
-            ->field('sku,in_stock_time,count(*) as stock')
-            ->where($where)
-            ->where('in_stock_time','<',$time12)
-            ->where('in_stock_time is not null')
-            ->group('sku')
-            ->select();
-        //sku数量
-        $data1 = count($data3);
-        $data2 = count($data6);
-        $data3 = count($data9);
-        $data4 = count($data12);
-        $data5 = count($data13);
-        $count = $data1 + $data2 + $data3 + $data4 + $data5;
-        //库存
-        $stock1 = array_sum(array_column($data3, 'stock'));
-        $stock2 = array_sum(array_column($data6, 'stock'));
-        $stock3 = array_sum(array_column($data9, 'stock'));
-        $stock4 = array_sum(array_column($data12, 'stock'));
-        $stock5 = array_sum(array_column($data13, 'stock'));
-        $stock = $stock1 + $stock2 + $stock3 + $stock4 + $stock5;
-
-        $total = $this->item->alias('i')->join('fa_purchase_order_item oi',
-            'i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o',
-            'o.id=i.purchase_id')->where($where)->where('in_stock_time is not null')->value('SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price');
-
-        $sql5 = $this->item->where($where)->where('in_stock_time is not null')->field('distinct sku')->buildSql();
-        $arr_where = [];
-        $arr_where[] = ['exp', Db::raw("i.sku in " . $sql5)];
-
-        $sql6 = $this->item->alias('i')->join('fa_purchase_order_item oi',
-            'i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o',
-            'o.id=i.purchase_id')->field('TIMESTAMPDIFF( MONTH, min(in_stock_time), now()) AS total,SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price')->where($where)->where($arr_where)->where('in_stock_time is not null')->group('i.sku')->buildSql();
-
-        $total_info = $this->item->table([$sql6 => 't2'])->field('sum(IF( total>= 0 AND total< 4, price, 0 )) AS a,sum(IF( total>= 4 AND total< 7, price, 0 )) AS b,sum(IF( total>= 7 AND total< 10, price, 0 )) AS c,sum(IF( total>= 10 AND total< 13, price, 0 )) AS d')->select();
-        $total1 = round($total_info[0]['a'], 2);
-        $total2 = round($total_info[0]['b'], 2);
-        $total3 = round($total_info[0]['c'], 2);
-        $total4 = round($total_info[0]['d'], 2);
-
-        $total5 = round(($total - $total1 - $total2 - $total3 - $total4), 2);
-
-        $percent1 = $count ? round($data1 / $count * 100, 2) : 0;
-        $percent2 = $count ? round($data2 / $count * 100, 2) : 0;
-        $percent3 = $count ? round($data3 / $count * 100, 2) : 0;
-        $percent4 = $count ? round($data4 / $count * 100, 2) : 0;
-        $percent5 = $count ? round($data5 / $count * 100, 2) : 0;
-
-        $stock_percent1 = $stock ? round($stock1 / $stock * 100, 2) : 0;
-        $stock_percent2 = $stock ? round($stock2 / $stock * 100, 2) : 0;
-        $stock_percent3 = $stock ? round($stock3 / $stock * 100, 2) : 0;
-        $stock_percent4 = $stock ? round($stock4 / $stock * 100, 2) : 0;
-        $stock_percent5 = $stock ? round($stock5 / $stock * 100, 2) : 0;
+        $data = Db::name('stock_age_day_data')->where('date',date("Y-m-d", strtotime("-1 day")))->select();
+        $data = array_column($data,NULL,'age');
 
         $arr = array(
             array(
-                'title' => '0~3月',
-                'count' => $data1,
-                'percent' => $percent1,
-                'stock' => $stock1,
-                'stock_percent' => $stock_percent1,
-                'total' => $total1
+                'title' => $data['0~3月']['age'],
+                'count' => $data['0~3月']['sku_num'],
+                'percent' => $data['0~3月']['sku_percent'],
+                'stock' => $data['0~3月']['stock'],
+                'stock_percent' => $data['0~3月']['stock_percent'],
+                'total' => $data['0~3月']['money']
             ),
             array(
-                'title' => '4~6月',
-                'count' => $data2,
-                'percent' => $percent2,
-                'stock' => $stock2,
-                'stock_percent' => $stock_percent2,
-                'total' => $total2
+                'title' => $data['4~6月']['age'],
+                'count' => $data['4~6月']['sku_num'],
+                'percent' => $data['4~6月']['sku_percent'],
+                'stock' => $data['4~6月']['stock'],
+                'stock_percent' => $data['4~6月']['stock_percent'],
+                'total' => $data['4~6月']['money']
             ),
             array(
-                'title' => '7~9月',
-                'count' => $data3,
-                'percent' => $percent3,
-                'stock' => $stock3,
-                'stock_percent' => $stock_percent3,
-                'total' => $total3
+                'title' => $data['7~9月']['age'],
+                'count' => $data['7~9月']['sku_num'],
+                'percent' => $data['7~9月']['sku_percent'],
+                'stock' => $data['7~9月']['stock'],
+                'stock_percent' => $data['7~9月']['stock_percent'],
+                'total' => $data['7~9月']['money']
             ),
             array(
-                'title' => '10~12月',
-                'count' => $data4,
-                'percent' => $percent4,
-                'stock' => $stock4,
-                'stock_percent' => $stock_percent4,
-                'total' => $total4
+                'title' => $data['10~12月']['age'],
+                'count' => $data['10~12月']['sku_num'],
+                'percent' => $data['10~12月']['sku_percent'],
+                'stock' => $data['10~12月']['stock'],
+                'stock_percent' => $data['10~12月']['stock_percent'],
+                'total' => $data['10~12月']['money']
             ),
             array(
-                'title' => '12个月以上',
-                'count' => $data5,
-                'percent' => $percent5,
-                'stock' => $stock5,
-                'stock_percent' => $stock_percent5,
-                'total' => $total5
+                'title' => $data['12个月以上']['age'],
+                'count' => $data['12个月以上']['sku_num'],
+                'percent' => $data['12个月以上']['sku_percent'],
+                'stock' => $data['12个月以上']['stock'],
+                'stock_percent' => $data['12个月以上']['stock_percent'],
+                'total' => $data['12个月以上']['money']
             ),
             array(
                 'title' => '总计',
                 'count' => '',
                 'percent' => '100%',
-                'stock' => $stock,
+                'stock' => $data['总计']['stock'],
                 'stock_percent' => '100%',
-                'total' => $total
+                'total' => $data['总计']['money']
             ),
         );
-        Cache::set('Supplydatacenter_datamarket1' . md5(serialize('stock_age_overview')), $arr, 7200);
         return $arr;
     }
     //采购ajax
