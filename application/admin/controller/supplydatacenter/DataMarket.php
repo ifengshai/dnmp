@@ -723,7 +723,7 @@ class DataMarket extends Backend
             ),
             array(
                 'title' => '总计',
-                'count' => '',
+                'count' => $data['总计']['sku_num'],
                 'percent' => '100%',
                 'stock' => $data['总计']['stock'],
                 'stock_percent' => '100%',
