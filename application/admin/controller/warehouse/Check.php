@@ -429,11 +429,15 @@ class Check extends Backend
     /**
      * 上传
      */
-    public function uploads()
+    public function uploads($ids = null)
     {
-
+        $row = $this->check_item->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            $row->allowField(true)->save($params);
             $this->success('', '', $params);
         }
         $img_url = $this->request->get('img_url');
