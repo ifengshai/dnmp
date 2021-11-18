@@ -1171,6 +1171,9 @@ class Outstock extends Backend
                 case PlatformType::ZEELOOL_FR:
                     $outLabel = 15;
                     break;
+                case 'voogueme_uk':
+                    $outLabel = 16;
+                    break;
                 default:
                     $this->error(__('请检查表格中调出仓的名称'));
             };
