@@ -190,6 +190,7 @@ class Voogueme extends Model
 
         $all_lens_price = 0;
         //求销售额、运费、毛利润
+        Db::connect('database.db_voogueme')->name('sales_flat_order')->query("set time_zone='+8:00'");
         $base_grand_total_result = Db::connect('database.db_voogueme')->table('sales_flat_order o')->where($whereFrame)
             ->field('sum(o.base_grand_total) base_grand_total,sum(o.shipping_amount) shipping_amount')->select();
         //销售额
