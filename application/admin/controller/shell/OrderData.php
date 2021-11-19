@@ -231,7 +231,7 @@ class OrderData extends Backend
                                     $params['customer_id'] = $v['customer_id'] ?: 0;
                                     $params['quote_id'] = $v['quote_id'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
-                                    $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    $params['updated_at'] = $v['updated_at'] ? (strtotime($v['updated_at']) + 28800) : time();
                                     $params['coupon_code'] = $v['coupon_code'];
                                     $params['coupon_rule_name'] = $v['coupon_rule_name'];
                                     if (isset($v['payment_time'])) {
@@ -309,7 +309,7 @@ class OrderData extends Backend
                                     $params['customer_id'] = $v['user_id'] ?: 0;
                                     $params['payment_method'] = $v['payment_type'];
                                     $params['created_at'] = strtotime($v['created_at']) + 28800;
-                                    $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    $params['updated_at'] = $v['updated_at'] ? (strtotime($v['updated_at']) + 28800) : time();
                                     $params['last_trans_id'] = $v['payment_order_no'];
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
@@ -377,7 +377,7 @@ class OrderData extends Backend
                                     $params['payment_method'] = $v['payment_type'];
                                     $params['base_shipping_amount'] = $v['freight_price'];
                                     $params['base_discount_amount'] = $v['base_discounts_price'];
-                                    $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    $params['updated_at'] = $v['updated_at'] ? (strtotime($v['updated_at']) + 28800) : time();
                                     $params['last_trans_id'] = $v['payment_order_no'];
                                     if (isset($v['payment_time'])) {
                                         $params['payment_time'] = strtotime($v['payment_time']) + 28800;
@@ -413,7 +413,7 @@ class OrderData extends Backend
                                         $params['customer_lastname'] = $v['lastname'];
                                         $params['firstname'] = $v['firstname'];
                                         $params['lastname'] = $v['lastname'];
-                                        $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                        $params['updated_at'] = $v['updated_at'] ? (strtotime($v['updated_at']) + 28800) : time();
                                         $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update($params);
                                         //es同步订单数据，插入
                                         $this->asyncOrder->runUpdate($v['order_id'], $site);
@@ -449,7 +449,7 @@ class OrderData extends Backend
                                     $params['mw_rewardpoint'] = $v['mw_rewardpoint'];
                                     $params['mw_rewardpoint_discount'] = $v['mw_rewardpoint_discount'];
                                     $params['base_shipping_amount'] = $v['base_shipping_amount'];
-                                    $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                    $params['updated_at'] = $v['updated_at'] ? (strtotime($v['updated_at']) + 28800) : time();
                                     $params['quote_id'] = $v['quote_id'];
                                     $params['base_discount_amount'] = $v['base_discount_amount'];
                                     $params['customer_id'] = $v['customer_id'] ?: 0;
@@ -483,7 +483,7 @@ class OrderData extends Backend
                                         $params['telephone'] = $v['telephone'];
                                         $params['firstname'] = $v['firstname'];
                                         $params['lastname'] = $v['lastname'];
-                                        $params['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                        $params['updated_at'] = $v['updated_at'] ? (strtotime($v['updated_at']) + 28800) : time();
                                         $this->order->where(['entity_id' => $v['parent_id'], 'site' => $site])->update($params);
                                         //es同步订单数据，插入
                                         $this->asyncOrder->runUpdate($v['parent_id'], $site);
@@ -569,7 +569,7 @@ class OrderData extends Backend
                                             $data[$i]['sku'] = $options['sku'];
                                             $data[$i]['order_prescription_type'] = $order_prescription_type;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
-                                            $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                            $data[$i]['updated_at'] = $v['updated_at'] ? (strtotime($v['updated_at']) + 28800) : time();
                                         }
                                         $this->orderitemprocess->insertAll($data);
 
@@ -680,7 +680,7 @@ class OrderData extends Backend
                                             $data[$i]['order_prescription_type'] = $order_prescription_type ?: 0;
                                             $data[$i]['is_prescription_abnormal'] = $is_prescription_abnormal;
                                             $data[$i]['created_at'] = strtotime($v['created_at']) + 28800;
-                                            $data[$i]['updated_at'] = strtotime($v['updated_at']) + 28800;
+                                            $data[$i]['updated_at'] = $v['updated_at'] ? (strtotime($v['updated_at']) + 28800) : time();
                                         }
 
                                         $this->orderitemprocess->insertAll($data);
