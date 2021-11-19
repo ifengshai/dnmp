@@ -559,7 +559,7 @@ class DataMarket extends Backend
     }
 
     //库龄概况
-    public function stock_age_overview()
+    public function stock_age_overview1()
     {
         $cache_data = Cache::get('Supplydatacenter_datamarket' . md5(serialize('stock_age_overview')));
         if ($cache_data) {
@@ -673,7 +673,65 @@ class DataMarket extends Backend
         Cache::set('Supplydatacenter_datamarket' . md5(serialize('stock_age_overview')), $arr, 7200);
         return $arr;
     }
+    //库龄概况
+    public function stock_age_overview()
+    {
 
+        $data = Db::name('stock_age_day_data')->where('date',date("Y-m-d", strtotime("-1 day")))->select();
+        $data = array_column($data,NULL,'age');
+
+        $arr = array(
+            array(
+                'title' => $data['0~3月']['age'],
+                'count' => $data['0~3月']['sku_num'],
+                'percent' => $data['0~3月']['sku_percent'],
+                'stock' => $data['0~3月']['stock'],
+                'stock_percent' => $data['0~3月']['stock_percent'],
+                'total' => $data['0~3月']['money']
+            ),
+            array(
+                'title' => $data['4~6月']['age'],
+                'count' => $data['4~6月']['sku_num'],
+                'percent' => $data['4~6月']['sku_percent'],
+                'stock' => $data['4~6月']['stock'],
+                'stock_percent' => $data['4~6月']['stock_percent'],
+                'total' => $data['4~6月']['money']
+            ),
+            array(
+                'title' => $data['7~9月']['age'],
+                'count' => $data['7~9月']['sku_num'],
+                'percent' => $data['7~9月']['sku_percent'],
+                'stock' => $data['7~9月']['stock'],
+                'stock_percent' => $data['7~9月']['stock_percent'],
+                'total' => $data['7~9月']['money']
+            ),
+            array(
+                'title' => $data['10~12月']['age'],
+                'count' => $data['10~12月']['sku_num'],
+                'percent' => $data['10~12月']['sku_percent'],
+                'stock' => $data['10~12月']['stock'],
+                'stock_percent' => $data['10~12月']['stock_percent'],
+                'total' => $data['10~12月']['money']
+            ),
+            array(
+                'title' => $data['12个月以上']['age'],
+                'count' => $data['12个月以上']['sku_num'],
+                'percent' => $data['12个月以上']['sku_percent'],
+                'stock' => $data['12个月以上']['stock'],
+                'stock_percent' => $data['12个月以上']['stock_percent'],
+                'total' => $data['12个月以上']['money']
+            ),
+            array(
+                'title' => '总计',
+                'count' => $data['总计']['sku_num'],
+                'percent' => '100',
+                'stock' => $data['总计']['stock'],
+                'stock_percent' => '100',
+                'total' => $data['总计']['money']
+            ),
+        );
+        return $arr;
+    }
     //采购ajax
     public function purchase_data()
     {

@@ -303,8 +303,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
             $(document).on('click', '.pluploads', function () {
                 var _this = $(this);
                 var url = _this.parent().parent().parent().find('.unqualified_images').val();
+                var ids = $(this).parent().parent().parent().find('.item_id').val();
+                console.log(ids);
                 Fast.api.open(
-                    'warehouse/check/uploads?img_url=' + url, '上传文件', {
+                    'warehouse/check/uploads?ids='+ids+'img_url=' + url, '上传文件', {
                     callback: function (data) {
                         _this.parent().parent().parent().find('.unqualified_images').val(data.unqualified_images);
                     }
@@ -591,7 +593,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jqui', 'bootstrap-se
                                         supplier_sku = '';
                                     }
 
-                                    shtml += ' <input  class="form-control"  name="row[replenish_id]" type="hidden" value="' + data.replenish_id + '"><tr> <input  class="form-control error_type" name="error_type[]" type="hidden"><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
+                                    shtml += ' <input  class="form-control"  name="row[replenish_id]" type="hidden"  value="' + data.replenish_id + '"><tr> <input  class="form-control error_type" name="error_type[]" type="hidden"><td><input id="c-purchase_remark" class="form-control sku" name="sku[]" readonly type="text" value="' + sku + '"></td>'
                                     shtml += ' <input id="c-purchase_remark" class="form-control" name="purchase_id[]" readonly type="hidden" value="' + data.id + '">'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control" name="supplier_sku[]" readonly type="text" value="' + supplier_sku + '"></td>'
                                     shtml += ' <td><input id="c-purchase_remark" class="form-control purchase_num" name="purchase_num[]" readonly type="text" redeonly value="' + data.item[i].purchase_num + '"></td>'

@@ -429,14 +429,21 @@ class Check extends Backend
     /**
      * 上传
      */
-    public function uploads()
+    public function uploads($ids = null)
     {
-
+        $img_url = $this->request->get('img_url');
+        $row = $this->check_item->get($ids);
+        if(!empty($row['unqualified_images'])){
+            $img_url = $row['unqualified_images'];
+        }
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
         if ($this->request->isPost()) {
             $params = $this->request->post("row/a");
+            $row->allowField(true)->save($params);
             $this->success('', '', $params);
         }
-        $img_url = $this->request->get('img_url');
         $this->assign('img_url', $img_url);
         return $this->view->fetch();
     }
