@@ -44,7 +44,7 @@ class PlatformType
     const ALIBABA_PLAT = 14;
     //zeelool_fr
     const ZEELOOL_FR_PLAT = 15;
-
+    const VOOGUEME_UK = 16;
     //zeelool
     const ZEELOOL = 'zeelool';
     //voogueme
