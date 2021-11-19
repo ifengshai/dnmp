@@ -493,6 +493,9 @@ class NewProductReplenishOrder extends Backend
                         case PlatformType::ZEELOOL_FR_PLAT:
                             $websiteType[$sk] = 'Zeelool_fr';
                             break;
+                        case PlatformType::VOOGUEME_UK:
+                            $websiteType[$sk] = 'Voogueme_uk';
+                            break;
                     }
                 }
 
