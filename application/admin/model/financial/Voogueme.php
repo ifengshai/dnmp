@@ -171,6 +171,7 @@ class Voogueme extends Model
         $whereFrame['o.status'] = ['in',['complete','free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'delivered']];
         $whereFrame['o.payment_time'] = ['between',[$start_time,$end_time]];
         $whereFrame['o.order_type'] = 1;
+        Db::connect('database.db_voogueme')->name('sales_flat_order_item')->query("set time_zone='+8:00'");
         $all_frame_result = Db::connect('database.db_voogueme')->table('sales_flat_order_item m')->join('sales_flat_order o', 'm.order_id=o.entity_id', 'left')
             ->where($whereFrame)->field('m.sku,round(sum(m.qty_ordered),0) counter')->group('m.sku')->select();
         //镜架成本
