@@ -38,6 +38,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                         // { field: 'sku', title: __('SKU'), operate: 'like', visible: false },
                         { field: 'created_at', title: __('创建时间'), operate: 'RANGE', addclass: 'datetimerange', visible: false },
                         { field: 'created_at', title: __('创建时间'), sortable: true, operate: false },
+                        { field: 'complete_time', title: __('发货时间'), sortable: true, operate: false },
                         {
                             field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, buttons: [
                                 {

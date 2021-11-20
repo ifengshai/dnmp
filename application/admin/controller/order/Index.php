@@ -54,6 +54,7 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
 
         $this->order = new \app\admin\model\order\order\NewOrder();
         $this->orderitemoption = new \app\admin\model\order\order\NewOrderItemOption();
+        $this->orderprocess = new \app\admin\model\order\order\NewOrderProcess();
     }
 
     /**
@@ -108,6 +109,12 @@ class Index extends Backend  /*这里继承的是app\common\controller\Backend*/
                     $v['label'] = 0;
                 }
                 $v['created_at'] = date('Y-m-d H:i:s', $v['created_at']);
+                $complete_time = $this->orderprocess->where(['site'=>$v['site'],'order_id'=>$v['id']])->value('complete_time');
+                if($complete_time){
+                    $v['complete_time'] = date('Y-m-d H:i:s', $complete_time);
+                }else{
+                    $v['complete_time'] = '-';
+                }
             }
             unset($v);
 
