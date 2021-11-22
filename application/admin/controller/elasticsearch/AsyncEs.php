@@ -635,7 +635,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
      */
     public function asyncUpdateTrack()
     {
-        (new OrderNode)->where("updated_at >='2021-11-22 07:00:00'")->chunk(10000, function ($track) {
+        (new OrderNode)->where("update_time >='2021-11-22 07:00:00'")->chunk(10000, function ($track) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
