@@ -1721,7 +1721,7 @@ class NewProduct extends Backend
             //判断sku材质是否为板材
             if (in_array($v['sku'], $skus)) {
                 //判断板材补货量小于50 为不满足起订量
-                if ($v['replenish_num'] < 50) {
+                if (($v['replenish_num'] < 50) && ($v['website_type'])!=13) {
                     $data[$k]['sku'] = $v['sku'];
                     //各个站的sku统计的数量
                     $data[$k]['z_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 1, 'type' => 1])->value('replenish_num') ?: 0;
@@ -1737,7 +1737,7 @@ class NewProduct extends Backend
                 }
             } else {
                 $spu = substr($v['sku'], 0, strrpos($v['sku'], '-'));
-                if ($spus[$spu] < 300) {
+                if (($spus[$spu] < 300) && ($v['website_type']!=13)) {
                     $data[$k]['sku'] = $v['sku'];
                     $data[$k]['z_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 1, 'type' => 1])->value('replenish_num') ?: 0;
                     $data[$k]['v_sku_num'] = $this->mapping->where(['is_show' => 1, 'sku' => $v['sku'], 'website_type' => 2, 'type' => 1])->value('replenish_num') ?: 0;
