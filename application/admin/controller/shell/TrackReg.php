@@ -858,7 +858,7 @@ class TrackReg extends Backend
             //是新品 不补货
             if ($allSkuIsNew[$k] == 1 && $v < 20) {
                 foreach ($sku_list1 as $ks => $vs) {
-                    if ($vs['sku'] == $k) {
+                    if (($vs['sku'] == $k) && ($vs['website_type']!=13)) {
                         $this->model->where('id', $vs['id'])->setField('is_filter', 2);
                     }
                 }
