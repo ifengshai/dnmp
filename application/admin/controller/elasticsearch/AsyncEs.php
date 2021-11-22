@@ -388,9 +388,10 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
      */
     public function syncCart()
     {
-        //echo date('Y-m-d H:i:s',1636736400);
+        echo strtotime('2021-11-22 07:57:00'). PHP_EOL;
+        echo date('Y-m-d H:i:s',1636736400);die;
         WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
-            ->where('updated_at', '>=',1636711200)
+            ->where('updated_at', '>=',1637566920)
             ->chunk(10000, function ($carts) {
                 array_map(function ($value) {
                     $value = array_map(function ($v) {
@@ -482,7 +483,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
      */
     public function asyncCustomer()
     {
-        WebUsers::chunk(10000, function ($carts) {
+        WebUsers::where('updated_at', '>=',1637566920)->chunk(10000, function ($carts) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
@@ -492,8 +493,8 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
                     'id'              => $value['id'],
                     'site'            => $value['site'],
                     'email'           => $value['email'],
-                    'update_time_day' => date('Ymd', $value['updated_at'] + 8 * 3600),
-                    'update_time'     => $value['updated_at'] + 8 * 3600,
+                    'update_time_day' => date('Ymd', $value['updated_at']),
+                    'update_time'     => $value['updated_at'],
                     'create_time'     => $mergeData,
                     'is_vip'          => $value['is_vip'] ?? 0,
                     'group_id'        => $value['group_id'],
@@ -516,7 +517,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
      */
     public function asyncTrack()
     {
-        (new OrderNode)->chunk(10000, function ($track) {
+        (new OrderNode)->where('updated_at', '>=','2021-11-22 07:00:00')->chunk(10000, function ($track) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
