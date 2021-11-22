@@ -31,13 +31,11 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncOrder()
     {
-        Debug::remark('begin');
-        NewOrder::where('created_at', '>', strtotime('2021-09-01 00:00:00'))->chunk(3000, function ($newOrder) {
+        NewOrder::where('created_at', '>', '1637566920')->chunk(3000, function ($newOrder) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
                 }, $value);
-
                 //nihao站的终端转换
                 if ($value['site'] == 3 && $value['store_id'] == 2) {
                     $value['store_id'] = 4;
@@ -60,14 +58,11 @@ class AsyncEs extends BaseElasticsearch
                         $value['shipping_method_type'] = 3;
                     }
                 }
+                $value['payment_time'] = $value['payment_time'] < 0 ? $value['created_at'] : $value['payment_time'];
                 $mergeData = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] : $value['created_at'];
-                $value['payment_time'] = $mergeData + 8 * 3600;
-                $value['created_at'] = $value['created_at'] + 8 * 3600;
-                $value['updated_at'] = $value['updated_at'] + 8 * 3600;
-                $value['payment_time'] = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] + 8 * 3600 : $value['created_at'];
                 //删除无用字段
-                foreach ($value as $key => $val) {
-                    if (!in_array($key, ['id', 'site', 'customer_id', 'increment_id', 'quote_id', 'status', 'store_id', 'base_grand_total', 'total_qty_ordered', 'order_type', 'order_prescription_type', 'shipping_method', 'shipping_title', 'shipping_method_type', 'country_id', 'region', 'region_id', 'payment_method', 'mw_rewardpoint_discount', 'mw_rewardpoint', 'base_shipping_amount', 'payment_time'])) {
+                foreach($value as $key => $val) {
+                    if(!in_array($key,['id','site','increment_id','quote_id','status','store_id','base_grand_total','total_qty_ordered','order_type','order_prescription_type','shipping_method','shipping_title','shipping_method_type','country_id','region','region_id','payment_method','mw_rewardpoint_discount','mw_rewardpoint','base_shipping_amount','payment_time'])){
                         unset($value[$key]);
                     }
                 }
@@ -77,8 +72,6 @@ class AsyncEs extends BaseElasticsearch
             }, collection($newOrder)->toArray());
             $this->esService->addMutilToEs('mojing_order', $data);
         }, 'id', 'desc');
-        Debug::remark('end');
-        echo Debug::getRangeTime('begin', 'end') . 's';
     }
 
     public function asyncOrderDeFr()
@@ -282,7 +275,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
      */
     public function asyncCart()
     {
-        WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,updated_at,created_at')->chunk(10000, function ($carts) {
+        WebShoppingCart::where('created_at', '>', '1637566920')->field('id,site,entity_id,is_active,base_grand_total,updated_at,updated_at,created_at')->chunk(10000, function ($carts) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
@@ -294,8 +287,8 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
                     'entity_id'        => $value['entity_id'],
                     'status'           => $value['is_active'],
                     'base_grand_total' => $value['base_grand_total'],
-                    'update_time_day'  => date('Ymd', $value['updated_at'] + 8 * 3600),
-                    'update_time_hour' => date('H', $value['updated_at'] + 8 * 3600),
+                    'update_time_day'  => date('Ymd', $value['updated_at']),
+                    'update_time_hour' => date('H', $value['updated_at']),
                     'update_time'      => $value['updated_at'],
                     'create_time'      => $mergeData,
 
@@ -388,12 +381,12 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
      */
     public function syncCart()
     {
-        echo strtotime('2021-11-22 07:57:00'). PHP_EOL;
-        echo date('Y-m-d H:i:s',1636736400);die;
+//        echo strtotime('2021-11-22 07:57:00'). PHP_EOL;
+//        echo date('Y-m-d H:i:s',1636736400);die;
         WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
             ->where('updated_at', '>=',1637566920)
             ->chunk(10000, function ($carts) {
-                array_map(function ($value) {
+                $data = array_map(function ($value) {
                     $value = array_map(function ($v) {
                         return $v === null ? 0 : $v;
                     }, $value);
@@ -410,11 +403,13 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
                         'create_time' => $mergeData,
                     ];
 
-                    $data = $this->formatDate($insertData, $mergeData);
-                    $this->updateEsById('mojing_cart', $data);
+                    //$this->formatDate($insertData, $mergeData);
+                    //$this->updateEsById('mojing_cart', $data);
 
                     echo $value['id'].PHP_EOL;
+                    return$this->formatDate($insertData, $mergeData);
                 }, collection($carts)->toArray());
+                print_r($this->esService->addMutilToEs('mojing_cart', $data));
             }, 'id', 'desc');
     }
 
@@ -488,7 +483,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
                 }, $value);
-                $mergeData = $value['created_at'] + 8 * 3600;
+                $mergeData = $value['created_at'];
                 $insertData = [
                     'id'              => $value['id'],
                     'site'            => $value['site'],
@@ -640,7 +635,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
      */
     public function asyncUpdateTrack()
     {
-        (new OrderNode)->where("delivery_time>='2021-07-30' and delivery_time<='2021-08-31'")->chunk(10000, function ($track) {
+        (new OrderNode)->where("updated_at >='2021-11-22 07:00:00'")->chunk(10000, function ($track) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
