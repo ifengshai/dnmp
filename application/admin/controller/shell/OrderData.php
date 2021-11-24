@@ -595,12 +595,14 @@ class OrderData extends Backend
                                     //处方解析 不同站不同字段
                                     if ($site == 5) {
 
+                                        dump(isset($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']));
                                         if (!isset($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription'])) {
                                             $weseeOptions = DB::connect('database.db_weseeoptical')->table('orders_prescriptions')->where('id', $v['orders_prescriptions_id'])->find();
                                             $orders_prescriptions_params[$v['orders_prescriptions_id']] = [
                                                 'prescription' => $weseeOptions['prescription'],
                                                 'name'         => $weseeOptions['name'],
                                             ];
+                                            dump($orders_prescriptions_params);
                                             unset($weseeOptions);
                                         }
                                         $options = $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
