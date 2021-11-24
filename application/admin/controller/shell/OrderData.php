@@ -512,6 +512,14 @@ class OrderData extends Backend
                                     $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 5) {
+                                        if (!isset($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription'])) {
+                                            $weseeOptions = DB::connect('database.db_weseeoptical')->table('orders_prescriptions')->where('id', $v['orders_prescriptions_id'])->find();
+                                            $orders_prescriptions_params[$v['orders_prescriptions_id']] = [
+                                                'prescription' => $weseeOptions['prescription'],
+                                                'name'         => $weseeOptions['name'],
+                                            ];
+                                            unset($weseeOptions);
+                                        }
                                         $options = $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                         $options['base_row_total'] = $v['original_total_price'];
                                         $options['index_price'] = $v['lens_total_price'];
@@ -594,7 +602,6 @@ class OrderData extends Backend
                                     $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 5) {
-
                                         if (!isset($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription'])) {
                                             $weseeOptions = DB::connect('database.db_weseeoptical')->table('orders_prescriptions')->where('id', $v['orders_prescriptions_id'])->find();
                                             $orders_prescriptions_params[$v['orders_prescriptions_id']] = [
