@@ -2765,6 +2765,7 @@ class WorkOrderList extends Backend
             $order = new \app\admin\model\order\order\NewOrder();
             $order_currency_code = $order->where(['increment_id' => $row->platform_order])->value('order_currency_code');
             $url = config('url.' . $domain_list[$row->work_platform]) . 'price-difference?customer_email=' . $row->email . '&origin_order_number=' . $row->platform_order . '&order_amount=' . $row->replenish_money . '&sign=' . $row->id . '&order_currency_code=' . $order_currency_code;
+            $url = str_replace(' ', '', $url);
             if ($row->work_platform == 13 || $row->work_platform == 14) {
                 $url = '';
             }
