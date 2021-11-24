@@ -58,14 +58,14 @@ class OrderData extends Backend
         $this->orderitemoption = new NewOrderItemOption();
         $this->orderprocess = new NewOrderProcess();
         $this->orderitemprocess = new NewOrderItemProcess();
-        $this->zeelool = new Zeelool();
-        $this->voogueme = new Voogueme();
-//        $this->nihao = new Nihao();
-//        $this->meeloog = new Meeloog();
-        $this->wesee = new Weseeoptical();
-        $this->zeelool_es = new ZeeloolEs();
-        $this->zeelool_de = new ZeeloolDe();
-        $this->zeelool_jp = new ZeeloolJp();
+//        $this->zeelool = new Zeelool();
+//        $this->voogueme = new Voogueme();
+////        $this->nihao = new Nihao();
+////        $this->meeloog = new Meeloog();
+//        $this->wesee = new Weseeoptical();
+//        $this->zeelool_es = new ZeeloolEs();
+//        $this->zeelool_de = new ZeeloolDe();
+//        $this->zeelool_jp = new ZeeloolJp();
         $this->asyncOrder = new AsyncOrder();
         $this->topicName = Env::get('topic.orderTopicName');
         $this->topicIp = Env::get('topic.topicIp');
@@ -596,7 +596,7 @@ class OrderData extends Backend
                                     if ($site == 5) {
 
                                         if (!isset($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription'])) {
-                                            $weseeOptions = $this->wesee->table('orders_prescriptions')->where('id', $v['orders_prescriptions_id'])->find();
+                                            $weseeOptions = DB::connect('database.db_weseeoptical')->table('orders_prescriptions')->where('id', $v['orders_prescriptions_id'])->find();
                                             $orders_prescriptions_params[$v['orders_prescriptions_id']] = [
                                                 'prescription' => $weseeOptions['prescription'],
                                                 'name'         => $weseeOptions['name'],
