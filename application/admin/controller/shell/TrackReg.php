@@ -12,6 +12,7 @@ use app\admin\model\itemmanage\Item;
 use app\admin\model\order\order\NewOrder;
 use app\admin\model\OrderNode;
 use app\admin\model\OrderNodeDetail;
+use app\admin\model\warehouse\ProductBarCodeItem;
 use app\admin\model\web\WebShoppingCart;
 use app\common\controller\Backend;
 use app\enum\Site;
@@ -19,6 +20,9 @@ use fast\Excel;
 use GuzzleHttp\Client;
 use think\Db;
 use SchGroup\SeventeenTrack\Connectors\TrackingConnector;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\ModelNotFoundException;
+use think\exception\DbException;
 use think\Hook;
 use app\admin\model\purchase\SupplierSku;
 use think\Queue;
@@ -4770,6 +4774,179 @@ class TrackReg extends Backend
         $updateData = ['day_date' => $date_time_behind, 'site' => $site];
         //(new AsyncDatacenterDay())->runUpdate($updateData);
         usleep(100000);
+    }
+
+    /**
+     * 跑库龄概况
+     *
+     * @return void
+     * @throws DataNotFoundException
+     * @throws ModelNotFoundException
+     * @throws DbException
+     * @author jianghaohui
+     * @date   2021/11/18 13:37:29
+     */
+    public function stock_age_overview()
+    {
+        $this->item = new ProductBarCodeItem();
+        $where['library_status'] = 1;
+        $time = date("Y-m-d H:i:s");
+        $time3 = date("Y-m-d H:i:s", strtotime("-3 month"));
+        $time6 = date("Y-m-d H:i:s", strtotime("-6 month"));
+        $time9 = date("Y-m-d H:i:s", strtotime("-9 month"));
+        $time12 = date("Y-m-d H:i:s", strtotime("-12 month"));
+
+        //9-12个月
+        $data12 = $this->item
+            ->field('sku,in_stock_time,count(*) as stock')
+            ->where($where)
+            ->where('in_stock_time','between',[$time12,$time9])
+            ->where('in_stock_time is not null')
+            ->group('sku')
+            ->select();
+        //6-9
+        $data9 = $this->item
+            ->field('sku,in_stock_time,count(*) as stock')
+            ->where($where)
+            ->where('in_stock_time','between',[$time9,$time6])
+            ->where('in_stock_time is not null')
+            ->group('sku')
+            ->select();
+        //3-6
+        $data6 = $this->item
+            ->field('sku,in_stock_time,count(*) as stock')
+            ->where($where)
+            ->where('in_stock_time','between',[$time6,$time3])
+            ->where('in_stock_time is not null')
+            ->group('sku')
+            ->select();
+        //0-3
+        $data33 = $this->item
+            ->field('sku,in_stock_time,count(*) as stock')
+            ->where($where)
+            ->where('in_stock_time','between',[$time3,$time])
+            ->where('in_stock_time is not null')
+            ->group('sku')
+            ->select();
+
+        //12以上
+        $data13 = $this->item
+            ->field('sku,in_stock_time,count(*) as stock')
+            ->where($where)
+            ->where('in_stock_time','<',$time12)
+            ->where('in_stock_time is not null')
+            ->group('sku')
+            ->select();
+        //sku数量
+        $data1 = count($data33);
+        $data2 = count($data6);
+        $data3 = count($data9);
+        $data4 = count($data12);
+        $data5 = count($data13);
+        $count = $data1 + $data2 + $data3 + $data4 + $data5;
+        //库存
+        $stock1 = array_sum(array_column($data33, 'stock'));
+        $stock2 = array_sum(array_column($data6, 'stock'));
+        $stock3 = array_sum(array_column($data9, 'stock'));
+        $stock4 = array_sum(array_column($data12, 'stock'));
+        $stock5 = array_sum(array_column($data13, 'stock'));
+        $stock = $stock1 + $stock2 + $stock3 + $stock4 + $stock5;
+
+        $total = $this->item->alias('i')->join('fa_purchase_order_item oi',
+            'i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o',
+            'o.id=i.purchase_id')->where($where)->where('in_stock_time is not null')->value('SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price');
+
+        $sql5 = $this->item->where($where)->where('in_stock_time is not null')->field('distinct sku')->buildSql();
+        $arr_where = [];
+        $arr_where[] = ['exp', Db::raw("i.sku in " . $sql5)];
+
+        $sql6 = $this->item->alias('i')->join('fa_purchase_order_item oi',
+            'i.purchase_id=oi.purchase_id and i.sku=oi.sku')->join('fa_purchase_order o',
+            'o.id=i.purchase_id')->field('TIMESTAMPDIFF( MONTH, min(in_stock_time), now()) AS total,SUM(IF(actual_purchase_price,actual_purchase_price,o.purchase_total/purchase_num)) price')->where($where)->where($arr_where)->where('in_stock_time is not null')->group('i.sku')->buildSql();
+
+        $total_info = $this->item->table([$sql6 => 't2'])->field('sum(IF( total>= 0 AND total< 4, price, 0 )) AS a,sum(IF( total>= 4 AND total< 7, price, 0 )) AS b,sum(IF( total>= 7 AND total< 10, price, 0 )) AS c,sum(IF( total>= 10 AND total< 13, price, 0 )) AS d')->select();
+        $total1 = round($total_info[0]['a'], 2);
+        $total2 = round($total_info[0]['b'], 2);
+        $total3 = round($total_info[0]['c'], 2);
+        $total4 = round($total_info[0]['d'], 2);
+
+        $total5 = round(($total - $total1 - $total2 - $total3 - $total4), 2);
+
+        $percent1 = $count ? round($data1 / $count * 100, 2) : 0;
+        $percent2 = $count ? round($data2 / $count * 100, 2) : 0;
+        $percent3 = $count ? round($data3 / $count * 100, 2) : 0;
+        $percent4 = $count ? round($data4 / $count * 100, 2) : 0;
+        $percent5 = $count ? round($data5 / $count * 100, 2) : 0;
+
+        $stock_percent1 = $stock ? round($stock1 / $stock * 100, 2) : 0;
+        $stock_percent2 = $stock ? round($stock2 / $stock * 100, 2) : 0;
+        $stock_percent3 = $stock ? round($stock3 / $stock * 100, 2) : 0;
+        $stock_percent4 = $stock ? round($stock4 / $stock * 100, 2) : 0;
+        $stock_percent5 = $stock ? round($stock5 / $stock * 100, 2) : 0;
+
+        $arr = [
+            [
+                'age' => '0~3月',
+                'sku_num' => $data1,
+                'sku_percent' => $percent1,
+                'stock' => $stock1,
+                'stock_percent' => $stock_percent1,
+                'date' => date("Y-m-d", strtotime("-1 day")),
+                'money' => $total1
+            ],
+            [
+                'age' => '4~6月',
+                'sku_num' => $data2,
+                'sku_percent' => $percent2,
+                'stock' => $stock2,
+                'stock_percent' => $stock_percent2,
+                'date' => date("Y-m-d", strtotime("-1 day")),
+                'money' => $total2
+            ],
+            [
+                'age' => '7~9月',
+                'sku_num' => $data3,
+                'sku_percent' => $percent3,
+                'stock' => $stock3,
+                'stock_percent' => $stock_percent3,
+                'date' => date("Y-m-d", strtotime("-1 day")),
+                'money' => $total3
+            ],
+            [
+                'age' => '10~12月',
+                'sku_num' => $data4,
+                'sku_percent' => $percent4,
+                'stock' => $stock4,
+                'stock_percent' => $stock_percent4,
+                'date' => date("Y-m-d", strtotime("-1 day")),
+                'money' => $total4
+            ],
+            [
+                'age' => '12个月以上',
+                'sku_num' => $data5,
+                'sku_percent' => $percent5,
+                'stock' => $stock5,
+                'stock_percent' => $stock_percent5,
+                'date' => date("Y-m-d", strtotime("-1 day")),
+                'money' => $total5
+            ],
+            [
+                'age' => '总计',
+                'sku_num' => $count,
+                'sku_percent' => '100%',
+                'stock' => $stock,
+                'stock_percent' => '100%',
+                'date' => date("Y-m-d", strtotime("-1 day")),
+                'money' => round($total, 2),
+            ]
+        ];
+        $res = Db::name('stock_age_day_data')->insertAll($arr);
+        if ($res){
+            echo 'ok';
+        }else{
+            echo 'failed';
+        }
+
     }
 }
 
