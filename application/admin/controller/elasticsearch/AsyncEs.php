@@ -539,7 +539,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
 
                 return $this->formatDate($insertData, $mergeData);
             }, collection($track)->toArray());
-            $this->esService->addMutilToEs('mojing_track', $data);
+            $this->esService->updateMutilToEs('mojing_track', $data);
         }, 'id', 'desc');
 
     }
