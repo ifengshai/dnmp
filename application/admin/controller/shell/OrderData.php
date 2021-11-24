@@ -8,12 +8,11 @@ namespace app\admin\controller\shell;
 
 use app\admin\controller\elasticsearch\async\AsyncOrder;
 use app\admin\model\itemmanage\ItemPlatformSku;
+use app\admin\model\lens\LensPrice;
 use app\admin\model\order\order\NewOrder;
-use app\admin\model\order\order\Meeloog;
 use app\admin\model\order\order\NewOrderItemOption;
 use app\admin\model\order\order\NewOrderItemProcess;
 use app\admin\model\order\order\NewOrderProcess;
-use app\admin\model\order\order\Nihao;
 use app\admin\model\order\order\Voogueme;
 use app\admin\model\order\order\WaveOrder;
 use app\admin\model\order\order\Weseeoptical;
@@ -21,18 +20,14 @@ use app\admin\model\order\order\Zeelool;
 use app\admin\model\order\order\ZeeloolDe;
 use app\admin\model\order\order\ZeeloolEs;
 use app\admin\model\order\order\ZeeloolJp;
-use app\admin\model\order\OrderItemOption;
 use app\admin\model\warehouse\StockSku;
 use app\common\controller\Backend;
 use app\enum\Site;
 use think\Db;
-use app\admin\model\lens\LensPrice;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use think\Env;
 use think\exception\DbException;
-use think\Log;
-use think\Model;
 
 class OrderData extends Backend
 {
@@ -63,14 +58,14 @@ class OrderData extends Backend
         $this->orderitemoption = new NewOrderItemOption();
         $this->orderprocess = new NewOrderProcess();
         $this->orderitemprocess = new NewOrderItemProcess();
-        $this->zeelool = new Zeelool();
-        $this->voogueme = new Voogueme();
-//        $this->nihao = new Nihao();
-//        $this->meeloog = new Meeloog();
-        $this->wesee = new Weseeoptical();
-        $this->zeelool_es = new ZeeloolEs();
-        $this->zeelool_de = new ZeeloolDe();
-        $this->zeelool_jp = new ZeeloolJp();
+//        $this->zeelool = new Zeelool();
+//        $this->voogueme = new Voogueme();
+////        $this->nihao = new Nihao();
+////        $this->meeloog = new Meeloog();
+//        $this->wesee = new Weseeoptical();
+//        $this->zeelool_es = new ZeeloolEs();
+//        $this->zeelool_de = new ZeeloolDe();
+//        $this->zeelool_jp = new ZeeloolJp();
         $this->asyncOrder = new AsyncOrder();
         $this->topicName = Env::get('topic.orderTopicName');
         $this->topicIp = Env::get('topic.topicIp');
@@ -157,7 +152,7 @@ class OrderData extends Backend
                         //拆解对象为数组，并根据业务需求处理数据
                         $payload = json_decode($message->payload, true);
                         //对该条message进行处理，比如用户数据同步， 记录日志
-                        echo $payload['database'].'-'.$payload['type'].'-'.$payload['table'];
+                        echo $payload['database'] . '-' . $payload['type'] . '-' . $payload['table'];
 
                         if ($payload) {
                             //根据库名判断站点
@@ -599,6 +594,15 @@ class OrderData extends Backend
                                     $options = [];
                                     //处方解析 不同站不同字段
                                     if ($site == 5) {
+
+                                        if (!isset($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription'])) {
+                                            $weseeOptions = DB::connect('database.db_weseeoptical')->table('orders_prescriptions')->where('id', $v['orders_prescriptions_id'])->find();
+                                            $orders_prescriptions_params[$v['orders_prescriptions_id']] = [
+                                                'prescription' => $weseeOptions['prescription'],
+                                                'name'         => $weseeOptions['name'],
+                                            ];
+                                            unset($weseeOptions);
+                                        }
                                         $options = $this->wesee_prescription_analysis($orders_prescriptions_params[$v['orders_prescriptions_id']]['prescription']);
                                         $options['prescription_type'] = $orders_prescriptions_params[$v['orders_prescriptions_id']]['name'];
                                         $options['is_print_logo'] = $this->set_wesee_is_print_logo($v['order_id']);
@@ -687,15 +691,15 @@ class OrderData extends Backend
 
                                         // z、v、m、zeelool-es、zeelool-de、zeelool-jp、zeelool-fr 送到丹阳
                                         //if (in_array($site, [1, 2, 5, 8, 9, 10, 11,14, 15, 13])) {
-                                            //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                            if ($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3) {
-                                                $order_lens_type[$site][$v['order_id']] = 3;
-                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
-                                            } else {
-                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                            }
-                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                       // }
+                                        //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
+                                        if ($order_prescription_type == 3 || $order_lens_type[$site][$v['order_id']] == 3) {
+                                            $order_lens_type[$site][$v['order_id']] = 3;
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                                        } else {
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                        }
+                                        $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                        // }
                                     }
                                 }
 
@@ -751,15 +755,15 @@ class OrderData extends Backend
                                         ]);
 
                                         // z、v、m、zeelool-es、zeelool-de、zeelool-jp、zeelool-fr 送到丹阳
-                                       // if (in_array($site, [1, 2, 5, 8, 9, 10, 11,14, 15, 13])) {
-                                            //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
-                                            if ($order_prescription_type == 3) {
-                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
-                                            } else {
-                                                $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                            }
-                                            $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
-                                      //  }
+                                        // if (in_array($site, [1, 2, 5, 8, 9, 10, 11,14, 15, 13])) {
+                                        //判断如果子订单处方是否为定制片 子订单有定制片则主单为定制
+                                        if ($order_prescription_type == 3) {
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['is_custom_lens' => 1, 'stock_id' => 2]);
+                                        } else {
+                                            $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                        }
+                                        $this->orderitemprocess->where(['magento_order_id' => $v['order_id'], 'site' => $site])->update(['stock_id' => 2]);
+                                        //  }
                                     }
                                 }
                             }
@@ -870,6 +874,173 @@ class OrderData extends Backend
     }
 
     /**
+     *
+     * @param array $params
+     *
+     * @return array
+     * @throws DataNotFoundException
+     * @throws ModelNotFoundException
+     * @throws DbException
+     * @author wpl
+     * @date   2021/5/19 10:18
+     */
+    public function set_processing_type(array $params = []): array
+    {
+        $arr = [];
+//        //判断处方是否异常
+//        $list = $this->is_prescription_abnormal($params);
+//        $arr = array_merge($arr, $list);
+        $arr['is_prescription_abnormal'] = 0;
+        $arr['order_prescription_type'] = 0;
+
+        //斜视值大于1 默认为定制片
+        if (($params['prismcheck'] == 'on') && ($params['od_pv'] > 0 || $params['os_pv'] > 0 || $params['od_pv_r'] > 0 || $params['os_pv_r'] > 0)) {
+            $arr['order_prescription_type'] = 3;
+
+            return $arr;
+        }
+//        if ($params['od_pv'] >= 1 || $params['os_pv'] >= 1 || $params['od_pv_r'] >= 1 || $params['os_pv_r'] >= 1) {
+//            $arr['order_prescription_type'] = 3;
+//
+//            return $arr;
+//        }
+
+        //仅镜框
+        if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
+            $arr['order_prescription_type'] = 1;
+        } else {
+            $od_sph = (float)urldecode($params['od_sph']);
+            $os_sph = (float)urldecode($params['os_sph']);
+            $od_cyl = (float)urldecode($params['od_cyl']);
+            $os_cyl = (float)urldecode($params['os_cyl']);
+            //判断是否为现片，其余为定制
+            $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
+            $tempArr = [];
+            foreach ($lensData as $v) {
+
+                if (!$v['sph_start']) {
+                    $v['sph_start'] = $v['sph_end'];
+                }
+
+                if (!$v['cyl_start']) {
+                    $v['cyl_start'] = $v['cyl_end'];
+                }
+
+                $v['sph_start'] = (float)$v['sph_start'];
+                $v['sph_end'] = (float)$v['sph_end'];
+                $v['cyl_start'] = (float)$v['cyl_start'];
+                $v['cyl_end'] = (float)$v['cyl_end'];
+
+                if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
+                    $tempArr['od'] = 1;
+                }
+                if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
+                    $tempArr['os'] = 1;
+                }
+            }
+
+            if ($tempArr['od'] == 1 && $tempArr['os'] == 1) {
+                $arr['order_prescription_type'] = 2;
+            }
+        }
+
+        //默认如果不是仅镜架 或定制片 则为现货处方镜
+        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 2) {
+            $arr['order_prescription_type'] = 3;
+        }
+
+        return $arr;
+    }
+
+    /**
+     * 是否加印logo
+     *
+     * @param $orderId
+     *
+     * @return int
+     * @throws \think\Exception
+     * @author baochenghuan
+     * @date   2021/10/27 14:46
+     */
+    public function set_wesee_is_print_logo($orderId)
+    {
+        return Db::connect('database.db_weseeoptical')
+            ->table('orders')
+            ->where(['id' => $orderId])
+            ->value('is_print_logo') ?: 0;
+    }
+
+    /**
+     * Nihao 处方解析逻辑
+     *
+     * @Description
+     * @author wpl
+     * @since 2020/10/28 10:16:53 
+     *
+     * @param $data
+     *
+     * @return array
+     */
+    protected function nihao_prescription_analysis($data): array
+    {
+        $options_params = json_decode($data, true);
+
+        //镜片类型
+        $options['index_type'] = $options_params['lens_type'] ?: '';
+        //镜片名称
+        $options['index_name'] = $options_params['lens_data_name'] ?: '';
+
+        //镜片颜色
+        $options['index_color'] = $options_params['lens_color'];
+        $options['index_id'] = $options_params['lens_id'];
+        $options['web_lens_name'] = $options_params['lens_data_name'] . ' ' . $options_params['lens_type'];
+        $options['web_lens_name'] = isset($options_params['tint_color']) ? $options['web_lens_name'] . '-' . $options_params['tint_color'] : $options['web_lens_name'];
+
+        //处方类型
+        $options['prescription_type'] = $options_params['prescription_type'] ?: '';
+        //镀膜名称
+        $options['coating_name'] = $options_params['coating_name'] ?: '';
+        $options['coating_id'] = $options_params['coating_id'] ?: '';
+        //镜片编码
+        $options['lens_number'] = $options_params['lens_number'] ?: '';
+        //光度参数
+        $options['od_sph'] = $options_params['od_sph'] ?: '';;
+        $options['os_sph'] = $options_params['os_sph'] ?: '';;
+        $options['od_cyl'] = $options_params['od_cyl'] ?: '';;
+        $options['os_cyl'] = $options_params['os_cyl'] ?: '';;
+        $options['od_axis'] = $options_params['od_axis'];
+        $options['os_axis'] = $options_params['os_axis'];
+        $options['pd_l'] = $options_params['pd_l'];
+        $options['pd_r'] = $options_params['pd_r'];
+        $options['pd'] = $options_params['pd'];
+        $options['pdcheck'] = $options_params['pd_check'] == 2 ? 'on' : '';
+        $options['prismcheck'] = $options_params['prism_check'] == 2 ? 'on' : '';
+        $options['os_add'] = $options_params['os_add'];
+        $options['od_add'] = $options_params['od_add'];
+        $options['od_pv'] = $options_params['od_pv'];
+        $options['os_pv'] = $options_params['os_pv'];
+        $options['od_pv_r'] = $options_params['od_pv_r'];
+        $options['os_pv_r'] = $options_params['os_pv_r'];
+        $options['od_bd'] = $options_params['od_bd'];
+        $options['os_bd'] = $options_params['os_bd'];
+        $options['od_bd_r'] = $options_params['od_bd_r'];
+        $options['os_bd_r'] = $options_params['os_bd_r'];
+
+        /**
+         * 判断定制现片逻辑
+         * 1、渐进镜 Progressive
+         * 2、偏光镜 镜片类型包含Polarized
+         * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
+         * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
+         */
+
+        //判断加工类型
+        $result = $this->set_processing_type($options);
+
+        return array_merge($options, $result);
+    }
+
+    /**
      * 批发站 匹配到s，r结尾的sku
      *
      * @param $sku
@@ -884,7 +1055,7 @@ class OrderData extends Backend
             $first = rtrim($temp_arr[0], 'S');
             $first = rtrim($first, 'R');
             $second = $temp_arr[1];
-            $sku = $first.'-'.$second;
+            $sku = $first . '-' . $second;
         }
 
         return $sku;
@@ -1078,76 +1249,6 @@ class OrderData extends Backend
         $arr = array_merge($arr, $result);
 
         return $arr;
-    }
-
-    /**
-     * Nihao 处方解析逻辑
-     *
-     * @Description
-     * @author wpl
-     * @since 2020/10/28 10:16:53 
-     *
-     * @param $data
-     *
-     * @return array
-     */
-    protected function nihao_prescription_analysis($data): array
-    {
-        $options_params = json_decode($data, true);
-
-        //镜片类型
-        $options['index_type'] = $options_params['lens_type'] ?: '';
-        //镜片名称
-        $options['index_name'] = $options_params['lens_data_name'] ?: '';
-
-        //镜片颜色
-        $options['index_color'] = $options_params['lens_color'];
-        $options['index_id'] = $options_params['lens_id'];
-        $options['web_lens_name'] = $options_params['lens_data_name'].' '.$options_params['lens_type'];
-        $options['web_lens_name'] = isset($options_params['tint_color']) ? $options['web_lens_name'].'-'.$options_params['tint_color'] : $options['web_lens_name'];
-
-        //处方类型
-        $options['prescription_type'] = $options_params['prescription_type'] ?: '';
-        //镀膜名称
-        $options['coating_name'] = $options_params['coating_name'] ?: '';
-        $options['coating_id'] = $options_params['coating_id'] ?: '';
-        //镜片编码
-        $options['lens_number'] = $options_params['lens_number'] ?: '';
-        //光度参数
-        $options['od_sph'] = $options_params['od_sph'] ?: '';;
-        $options['os_sph'] = $options_params['os_sph'] ?: '';;
-        $options['od_cyl'] = $options_params['od_cyl'] ?: '';;
-        $options['os_cyl'] = $options_params['os_cyl'] ?: '';;
-        $options['od_axis'] = $options_params['od_axis'];
-        $options['os_axis'] = $options_params['os_axis'];
-        $options['pd_l'] = $options_params['pd_l'];
-        $options['pd_r'] = $options_params['pd_r'];
-        $options['pd'] = $options_params['pd'];
-        $options['pdcheck'] = $options_params['pd_check'] == 2 ? 'on' : '';
-        $options['prismcheck'] = $options_params['prism_check'] == 2 ? 'on' : '';
-        $options['os_add'] = $options_params['os_add'];
-        $options['od_add'] = $options_params['od_add'];
-        $options['od_pv'] = $options_params['od_pv'];
-        $options['os_pv'] = $options_params['os_pv'];
-        $options['od_pv_r'] = $options_params['od_pv_r'];
-        $options['os_pv_r'] = $options_params['os_pv_r'];
-        $options['od_bd'] = $options_params['od_bd'];
-        $options['os_bd'] = $options_params['os_bd'];
-        $options['od_bd_r'] = $options_params['od_bd_r'];
-        $options['os_bd_r'] = $options_params['os_bd_r'];
-
-        /**
-         * 判断定制现片逻辑
-         * 1、渐进镜 Progressive
-         * 2、偏光镜 镜片类型包含Polarized
-         * 3、染色镜 镜片类型包含Lens with Color Tint 或 Tinted 或 Color Tint
-         * 4、当cyl<=-4或cyl>=4 或 sph < -8或 sph>8
-         */
-
-        //判断加工类型
-        $result = $this->set_processing_type($options);
-
-        return array_merge($options, $result);
     }
 
     /**
@@ -1517,7 +1618,6 @@ class OrderData extends Backend
         return $arr;
     }
 
-
     /**
      * 饰品站 处方解析逻辑
      *
@@ -1652,148 +1752,6 @@ class OrderData extends Backend
     }
 
     /**
-     *
-     * @param  array  $params
-     *
-     * @return array
-     * @throws DataNotFoundException
-     * @throws ModelNotFoundException
-     * @throws DbException
-     * @author wpl
-     * @date   2021/5/19 10:18
-     */
-    public function set_processing_type(array $params = []): array
-    {
-        $arr = [];
-//        //判断处方是否异常
-//        $list = $this->is_prescription_abnormal($params);
-//        $arr = array_merge($arr, $list);
-        $arr['is_prescription_abnormal'] = 0;
-        $arr['order_prescription_type'] = 0;
-
-        //斜视值大于1 默认为定制片
-        if (($params['prismcheck'] == 'on') && ($params['od_pv'] > 0 || $params['os_pv'] > 0 || $params['od_pv_r'] > 0 || $params['os_pv_r'] > 0)) {
-            $arr['order_prescription_type'] = 3;
-
-            return $arr;
-        }
-//        if ($params['od_pv'] >= 1 || $params['os_pv'] >= 1 || $params['od_pv_r'] >= 1 || $params['os_pv_r'] >= 1) {
-//            $arr['order_prescription_type'] = 3;
-//
-//            return $arr;
-//        }
-
-        //仅镜框
-        if ($params['lens_number'] == '10000000' || !$params['lens_number']) {
-            $arr['order_prescription_type'] = 1;
-        } else {
-            $od_sph = (float) urldecode($params['od_sph']);
-            $os_sph = (float) urldecode($params['os_sph']);
-            $od_cyl = (float) urldecode($params['od_cyl']);
-            $os_cyl = (float) urldecode($params['os_cyl']);
-            //判断是否为现片，其余为定制
-            $lensData = LensPrice::where(['lens_number' => $params['lens_number'], 'type' => 1])->select();
-            $tempArr = [];
-            foreach ($lensData as $v) {
-
-                if (!$v['sph_start']) {
-                    $v['sph_start'] = $v['sph_end'];
-                }
-
-                if (!$v['cyl_start']) {
-                    $v['cyl_start'] = $v['cyl_end'];
-                }
-
-                $v['sph_start'] = (float) $v['sph_start'];
-                $v['sph_end'] = (float) $v['sph_end'];
-                $v['cyl_start'] = (float) $v['cyl_start'];
-                $v['cyl_end'] = (float) $v['cyl_end'];
-
-                if ($od_sph >= $v['sph_start'] && $od_sph <= $v['sph_end'] && $od_cyl >= $v['cyl_start'] && $od_cyl <= $v['cyl_end']) {
-                    $tempArr['od'] = 1;
-                }
-                if ($os_sph >= $v['sph_start'] && $os_sph <= $v['sph_end'] && $os_cyl >= $v['cyl_start'] && $os_cyl <= $v['cyl_end']) {
-                    $tempArr['os'] = 1;
-                }
-            }
-
-            if ($tempArr['od'] == 1 && $tempArr['os'] == 1) {
-                $arr['order_prescription_type'] = 2;
-            }
-        }
-
-        //默认如果不是仅镜架 或定制片 则为现货处方镜
-        if ($arr['order_prescription_type'] != 1 && $arr['order_prescription_type'] != 2) {
-            $arr['order_prescription_type'] = 3;
-        }
-
-        return $arr;
-    }
-
-    /**
-     * 判断处方是否异常
-     *
-     * @param  array  $params
-     *
-     * @author wpl
-     * @date   2021/4/23 9:31
-     */
-    protected function is_prescription_abnormal(array $params = []): array
-    {
-        $list = [];
-        $od_sph = (float) urldecode($params['od_sph']);
-        $os_sph = (float) urldecode($params['os_sph']);
-        $od_cyl = (float) urldecode($params['od_cyl']);
-        $os_cyl = (float) urldecode($params['os_cyl']);
-        //截取镜片编码第一位
-        $str = substr($params['lens_number'], 0, 1);
-
-        /**
-         * 判断处方是否异常规则
-         * 1、SPH值或CYL值的“+”“_”号不一致
-         * 2、左右的SPH或CYL 绝对值相差超过3
-         * 3、有SPH或CYL无PD
-         * 4、有PD无SPH及CYL
-         */
-        if (($od_sph < 0 && $os_sph > 0) || ($od_sph > 0 && $os_sph < 0)) {
-            $list['is_prescription_abnormal'] = 1;
-        }
-
-        if ($od_sph == 0 && ($os_sph > 0 || $os_sph < 0)) {
-            $list['is_prescription_abnormal'] = 1;
-        }
-
-        if ($os_sph == 0 && ($od_sph > 0 || $od_sph < 0)) {
-            $list['is_prescription_abnormal'] = 1;
-        }
-
-        if (($os_cyl < 0 && $od_cyl > 0) || ($os_cyl > 0 && $od_cyl < 0)) {
-            $list['is_prescription_abnormal'] = 1;
-        }
-
-        //绝对值相差超过3
-        $odDifference = abs($od_sph) - abs($os_sph);
-        $osDifference = abs($od_cyl) - abs($os_cyl);
-        if (abs($odDifference) > 3 || abs($osDifference) > 3) {
-            $list['is_prescription_abnormal'] = 1;
-        }
-
-        //有PD无SPH和CYL
-        if (($params['pdcheck'] == 'on' || $params['pd'] > 0) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl && $str == '2')) {
-            $list['is_prescription_abnormal'] = 1;
-        }
-
-        //有SPH或CYL无PD
-        if (($params['pdcheck'] != 'on' && $params['pd'] <= 0) && ($od_sph || $os_sph || $od_cyl || $os_cyl) && $str == '3') {
-            $list['is_prescription_abnormal'] = 1;
-        }
-
-        $list['is_prescription_abnormal'] = $list['is_prescription_abnormal'] == 1 ?: 0;
-
-        return $list;
-    }
-
-    /**
      * 批量生成子订单表子单号
      *
      * @Description
@@ -1815,12 +1773,12 @@ class OrderData extends Backend
                 $item_params[$key]['id'] = $val['id'];
                 $str = '';
                 if ($key < 9) {
-                    $str = '0'.($key + 1);
+                    $str = '0' . ($key + 1);
                 } else {
                     $str = $key + 1;
                 }
 
-                $item_params[$key]['item_order_number'] = $res->increment_id.'-'.$str;
+                $item_params[$key]['item_order_number'] = $res->increment_id . '-' . $str;
                 $item_params[$key]['order_id'] = $res->id ?: 0;
             }
             //更新数据
@@ -1828,7 +1786,7 @@ class OrderData extends Backend
                 $this->orderitemprocess->saveAll($item_params);
             }
 
-            echo $v['id']."\n";
+            echo $v['id'] . "\n";
             usleep(10000);
         }
 
@@ -1854,7 +1812,7 @@ class OrderData extends Backend
             $order_id = $this->order->where(['entity_id' => $v['magento_order_id'], 'site' => $v['site']])->value('id');
             $params[$k]['id'] = $v['id'];
             $params[$k]['order_id'] = $order_id ?: 0;
-            echo $v['id']."\n";
+            echo $v['id'] . "\n";
         }
         //更新数据
         if ($params) {
@@ -1952,7 +1910,7 @@ class OrderData extends Backend
 
             if (!$id) {
                 $params = [];
-                $params['wave_order_number'] = 'BC'.date('YmdHis').rand(100, 999).rand(100, 999);
+                $params['wave_order_number'] = 'BC' . date('YmdHis') . rand(100, 999) . rand(100, 999);
                 $params['type'] = $type;
                 $params['wave_time_type'] = $wave_time_type;
                 $params['stock_id'] = $stockId;
@@ -2024,7 +1982,7 @@ class OrderData extends Backend
             $data['order_prescription_type'] = $type;
             $data['updated_at'] = time();
             $order->where('id', $value['id'])->update($data);
-            echo $value['id'].' is ok'."\n";
+            echo $value['id'] . ' is ok' . "\n";
             usleep(100000);
         }
     }
@@ -2223,22 +2181,6 @@ class OrderData extends Backend
     }
 
     /**
-     * 是否加印logo
-     *
-     * @param $orderId
-     * @return int
-     * @throws \think\Exception
-     * @author baochenghuan
-     * @date   2021/10/27 14:46
-     */
-    public function set_wesee_is_print_logo($orderId)
-    {
-        return Db::connect('database.db_weseeoptical')
-            ->table('orders')
-            ->where(['id' => $orderId])
-            ->value('is_print_logo') ?: 0;
-    }
-    /**
      * 处理漏单数据  - 01
      *
      * @Description
@@ -2257,16 +2199,16 @@ class OrderData extends Backend
             $entity_id = [
             ];
             $list = Db::connect('database.db_weseeoptical')->table('orders')->where(['entity_id' => ['in', $entity_id]])->select();
-        }elseif($site == 1) {
-        $entity_id = [
-            1236654,
-            1236655,
-            1236656,
-            1236657,
-            1236658,
-            1236659,
-            1236660,
-        ];
+        } elseif ($site == 1) {
+            $entity_id = [
+                1236654,
+                1236655,
+                1236656,
+                1236657,
+                1236658,
+                1236659,
+                1236660,
+            ];
             $list = Db::connect('database.db_zeelool_online')->table('sales_flat_order')->where(['entity_id' => ['in', $entity_id]])->select();
         }
 
@@ -2322,7 +2264,7 @@ class OrderData extends Backend
             $order_params[$k]['order_id'] = $order_id;
             $order_params[$k]['entity_id'] = $v['entity_id'];
             $order_params[$k]['increment_id'] = $v['increment_id'];
-            echo $v['increment_id']."\n";
+            echo $v['increment_id'] . "\n";
             usleep(10000);
         }
         //插入订单处理表
@@ -2431,6 +2373,7 @@ class OrderData extends Backend
             }
         }
     }
+
     /**
      * 处理漏单 订单支付临时表 - 03
      *
@@ -2454,7 +2397,7 @@ class OrderData extends Backend
      */
     protected function order_payment_data($site)
     {
-        $list = $this->order->where('last_trans_id is null and site = '.$site)->limit(4000)->select();
+        $list = $this->order->where('last_trans_id is null and site = ' . $site)->limit(4000)->select();
         $list = collection($list)->toArray();
         //$entity_id = array_column($list, 'entity_id');
         $entity_id = [
@@ -2493,9 +2436,10 @@ class OrderData extends Backend
                 $params[$k]['payment_method'] = $res[$v['entity_id']]['method'];
             }
             $this->order->saveAll($params);
-            echo $site.'ok';
+            echo $site . 'ok';
         }
     }
+
     /**
      * 处理漏单 临时处理订单子表数据 - 04
      *
@@ -2511,6 +2455,7 @@ class OrderData extends Backend
 
     /**
      * 处理漏单 临时处理订单字表数据 -04
+     *
      * @param $site
      *
      * @throws DataNotFoundException
@@ -2594,7 +2539,7 @@ class OrderData extends Backend
 
 
         foreach ($list as $k => $v) {
-            $count = $this->orderitemprocess->where('site='.$site.' and item_id='.$v['item_id'])->count();
+            $count = $this->orderitemprocess->where('site=' . $site . ' and item_id=' . $v['item_id'])->count();
             if ($count > 0) {
                 continue;
             }
@@ -2652,15 +2597,11 @@ class OrderData extends Backend
                 }
                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update(['updated_at' => time() + 28800]);
             }
-            echo $v['item_id']."\n";
+            echo $v['item_id'] . "\n";
             usleep(10000);
         }
         echo "ok";
     }
-
-
-
-
 
     /**
      * 批发站主表
@@ -2715,7 +2656,7 @@ class OrderData extends Backend
             $order_params[$k]['entity_id'] = $v['id'];
             $order_params[$k]['increment_id'] = $v['order_no'];
 
-            echo $v['entity_id']."\n";
+            echo $v['entity_id'] . "\n";
             usleep(10000);
         }
         //插入订单处理表
@@ -2724,7 +2665,6 @@ class OrderData extends Backend
         }
         echo "ok";
     }
-
 
     /**
      * 新版批发站地址处理
@@ -2759,9 +2699,8 @@ class OrderData extends Backend
                 $this->order->where(['entity_id' => $v['order_id'], 'site' => $site])->update($params);
             }
         }
-        echo $site.'ok';
+        echo $site . 'ok';
     }
-
 
     /**
      * 新版批发站处方解析
@@ -2819,7 +2758,7 @@ class OrderData extends Backend
             }
         }
 
-        echo $site.'ok';
+        echo $site . 'ok';
     }
 
     /**
@@ -2838,19 +2777,20 @@ class OrderData extends Backend
             1236659,
             1236660,
         ];
-        $where['entity_id'] = ['in',$entity_id];
+        $where['entity_id'] = ['in', $entity_id];
         $where['site'] = 1;
         $list = $this->order->where($where)->field('id,entity_id,increment_id')->select();
-        foreach ($list as $val){
-            $order_item = $this->orderitemprocess->where(['magento_order_id'=>$val['entity_id'],'site'=>1])->field('id,order_id,item_order_number')->select();
-            if($order_item){
-                foreach ($order_item as $v){
-                    $this->orderitemprocess->where(['id'=>$v['id']])->update(['order_id'=>$val['id'],'item_order_number'=>$val['increment_id'].$v['item_order_number']]);
+        foreach ($list as $val) {
+            $order_item = $this->orderitemprocess->where(['magento_order_id' => $val['entity_id'], 'site' => 1])->field('id,order_id,item_order_number')->select();
+            if ($order_item) {
+                foreach ($order_item as $v) {
+                    $this->orderitemprocess->where(['id' => $v['id']])->update(['order_id' => $val['id'], 'item_order_number' => $val['increment_id'] . $v['item_order_number']]);
                 }
             }
         }
         echo 'ok';
     }
+
     public function updateOrderItemProcessTwo()
     {
         $entity_id = [
@@ -2925,19 +2865,82 @@ class OrderData extends Backend
             1234515,
             1234516,
         ];
-        $where['entity_id'] = ['in',$entity_id];
+        $where['entity_id'] = ['in', $entity_id];
         $where['site'] = 1;
         $list = $this->order->where($where)->field('id,entity_id,increment_id')->select();
-        foreach ($list as $val){
-            $order_item = $this->orderitemprocess->where(['magento_order_id'=>$val['entity_id'],'site'=>1])->field('id,order_id,item_order_number')->select();
-            if($order_item){
-                foreach ($order_item as $v){
-                    $arr = explode('-',$v['item_order_number']);
-                    $this->orderitemprocess->where(['id'=>$v['id']])->update(['item_order_number'=>$val['increment_id'].'-'.$arr[1]]);
+        foreach ($list as $val) {
+            $order_item = $this->orderitemprocess->where(['magento_order_id' => $val['entity_id'], 'site' => 1])->field('id,order_id,item_order_number')->select();
+            if ($order_item) {
+                foreach ($order_item as $v) {
+                    $arr = explode('-', $v['item_order_number']);
+                    $this->orderitemprocess->where(['id' => $v['id']])->update(['item_order_number' => $val['increment_id'] . '-' . $arr[1]]);
                 }
             }
         }
         echo 'ok';
+    }
+
+    /**
+     * 判断处方是否异常
+     *
+     * @param array $params
+     *
+     * @author wpl
+     * @date   2021/4/23 9:31
+     */
+    protected function is_prescription_abnormal(array $params = []): array
+    {
+        $list = [];
+        $od_sph = (float)urldecode($params['od_sph']);
+        $os_sph = (float)urldecode($params['os_sph']);
+        $od_cyl = (float)urldecode($params['od_cyl']);
+        $os_cyl = (float)urldecode($params['os_cyl']);
+        //截取镜片编码第一位
+        $str = substr($params['lens_number'], 0, 1);
+
+        /**
+         * 判断处方是否异常规则
+         * 1、SPH值或CYL值的“+”“_”号不一致
+         * 2、左右的SPH或CYL 绝对值相差超过3
+         * 3、有SPH或CYL无PD
+         * 4、有PD无SPH及CYL
+         */
+        if (($od_sph < 0 && $os_sph > 0) || ($od_sph > 0 && $os_sph < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        if ($od_sph == 0 && ($os_sph > 0 || $os_sph < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        if ($os_sph == 0 && ($od_sph > 0 || $od_sph < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        if (($os_cyl < 0 && $od_cyl > 0) || ($os_cyl > 0 && $od_cyl < 0)) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        //绝对值相差超过3
+        $odDifference = abs($od_sph) - abs($os_sph);
+        $osDifference = abs($od_cyl) - abs($os_cyl);
+        if (abs($odDifference) > 3 || abs($osDifference) > 3) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        //有PD无SPH和CYL
+        if (($params['pdcheck'] == 'on' || $params['pd'] > 0) && (!$od_sph && !$os_sph && !$od_cyl && !$os_cyl && $str == '2')) {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        //有SPH或CYL无PD
+        if (($params['pdcheck'] != 'on' && $params['pd'] <= 0) && ($od_sph || $os_sph || $od_cyl || $os_cyl) && $str == '3') {
+            $list['is_prescription_abnormal'] = 1;
+        }
+
+        $list['is_prescription_abnormal'] = $list['is_prescription_abnormal'] == 1 ?: 0;
+
+        return $list;
     }
 
 }

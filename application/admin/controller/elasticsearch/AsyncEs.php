@@ -539,7 +539,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
 
                 return $this->formatDate($insertData, $mergeData);
             }, collection($track)->toArray());
-            $this->esService->addMutilToEs('mojing_track', $data);
+            $this->esService->updateMutilToEs('mojing_track', $data);
         }, 'id', 'desc');
 
     }
@@ -635,7 +635,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
      */
     public function asyncUpdateTrack()
     {
-        (new OrderNode)->where("update_time >='2021-11-22 07:00:00'")->chunk(10000, function ($track) {
+        (new OrderNode)->where("update_time >='2021-10-25 07:00:00'")->chunk(10000, function ($track) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
@@ -661,7 +661,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
 
                 return $this->formatDate($insertData, $mergeData);
             }, collection($track)->toArray());
-            print_r($this->esService->addMutilToEs('mojing_track', $data));
+            print_r($this->esService->updateMutilToEs('mojing_track', $data));
         }, 'id', 'desc');
 
     }
