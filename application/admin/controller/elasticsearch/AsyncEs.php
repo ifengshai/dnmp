@@ -409,7 +409,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
                     echo $value['id'].PHP_EOL;
                     return$this->formatDate($insertData, $mergeData);
                 }, collection($carts)->toArray());
-                print_r($this->esService->addMutilToEs('mojing_cart', $data));
+                print_r($this->esService->updateMutilToEs('mojing_cart', $data));
             }, 'id', 'desc');
     }
 
