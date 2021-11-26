@@ -314,6 +314,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'bootstrap-table-jump
                             title: __('是否有工单'),
                             searchList: {
                                 1: __('是'),
+                                2: __('否'),
                             },
                             visible: false
                         },
