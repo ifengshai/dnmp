@@ -402,6 +402,8 @@ class Distribution extends Backend
             if ($filter['has_work_order']) {
                 if ($filter['has_work_order'] == 1) {
                     $map['b.increment_id'] = ['in', $platformOrder];
+                }else if ($filter['has_work_order'] == 2) {
+                    $map['b.increment_id'] = ['not in', $platformOrder];
                 }
                 unset($filter['has_work_order']);
             }
