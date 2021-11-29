@@ -384,7 +384,7 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
 //        echo strtotime('2021-11-22 07:57:00'). PHP_EOL;
 //        echo date('Y-m-d H:i:s',1636736400);die;
         WebShoppingCart::field('id,site,entity_id,is_active,base_grand_total,updated_at,created_at')
-            ->where('updated_at', '>=',1637566920)
+            ->where('updated_at', '>=',1637812800)
             ->chunk(10000, function ($carts) {
                 $data = array_map(function ($value) {
                     $value = array_map(function ($v) {
@@ -407,9 +407,9 @@ $params['updated_at'] = strtotime($value['updated_at']) ? strtotime($value['upda
                     //$this->updateEsById('mojing_cart', $data);
 
                     echo $value['id'].PHP_EOL;
-                    return$this->formatDate($insertData, $mergeData);
+                    return $this->formatDate($insertData, $mergeData);
                 }, collection($carts)->toArray());
-                print_r($this->esService->addMutilToEs('mojing_cart', $data));
+                print_r($this->esService->updateMutilToEs('mojing_cart', $data));
             }, 'id', 'desc');
     }
 
