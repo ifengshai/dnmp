@@ -2949,7 +2949,7 @@ class WorkOrderList extends Model
             //清除库位 合单完成
             $_new_order_process
                 ->where(['order_id' => $order_id])
-                ->update(['combine_status' => 1, 'combine_time' => time(), 'store_house_id' => 0]);
+                ->update(['combine_status' => 1, 'combine_time' => time()]);
             if ($store_house_id) {
                 //释放合单库位占用数量
                 $_stock_house->where(['id' => $store_house_id])->update(['occupy' => 0, 'order_id' => 0, 'fictitious_occupy_time' => null]);
