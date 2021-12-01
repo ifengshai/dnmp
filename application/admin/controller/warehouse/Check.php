@@ -872,7 +872,7 @@ class Check extends Backend
         $headList = [
             '质检单号','质检单类型','采购单号','采购创建人','供应商','采购备注',
             '质检备注','SKU','供应商SKU','是否新品','是否大货','是否首次定做',
-            '单价','采购数量','到货数量','合格数量','不合格数量','创建人','创建时间'
+            '单价','采购数量','到货数量','合格数量','不合格数量','创建人','创建时间','工厂类型'
         ];
         $fileName = '质检单数据' . date("YmdHis", time());;
         $count = $this->model->alias('check')
@@ -899,7 +899,7 @@ class Check extends Backend
                 ->join(['fa_purchase_order_item' => 'c'], 'b.purchase_id=c.purchase_id and c.sku=b.sku')
                 ->field('check.check_order_number,check.type, purchaseorder.purchase_number, purchaseorder.create_person as person, supplier.supplier_name,
                    purchaseorder.purchase_remark,b.remark, b.sku, b.supplier_sku,purchaseorder.is_new_product,purchaseorder.type as ptype,
-                   purchaseorder.customized_procurement,c.purchase_price,b.purchase_num,b.arrivals_num,b.quantity_num,b.unqualified_num,check.create_person,check.createtime')
+                   purchaseorder.customized_procurement,c.purchase_price,b.purchase_num,b.arrivals_num,b.quantity_num,b.unqualified_num,check.create_person,check.createtime,supplier.supplier_type_pattern')
                 ->where($where)
                 ->where($map)
                 ->page($i+1,5000)
@@ -910,6 +910,7 @@ class Check extends Backend
                $list[$key]['type'] =  $value['type'] == 1 ? '采购质检' : '退货质检';
                $list[$key]['is_new_product'] =  $value['is_new_product'] == 1 ? '是' : '否';
                $list[$key]['ptype'] =  $value['ptype'] == 2 ? '是' : '否';
+               $list[$key]['supplier_type_pattern'] =  $value['supplier_type_pattern'] == 1 ? '工厂' : '贸易';
                $list[$key]['customized_procurement'] =  $value['customized_procurement'] == 1 ? '是' : '否';
             }
             if ($i > 0) {
