@@ -191,7 +191,7 @@
                             <td class="lens-wrap-td">
                                 <ul class="lens-wrap">
                                     <li style="display:block;">
-                                        {if $orderInfoList.site == 1}
+                                        {if $orderInfoList.site <= 2}
                                             <span class="name">{$itemInfoList.index_type}</span>
                                             <span class="price">{:round($itemInfoList.index_type_price,2)}</span>
                                         {/if}
