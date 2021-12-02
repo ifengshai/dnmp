@@ -1365,29 +1365,12 @@ class Notice extends Controller
         //通过接口获取休息人员名单
         $ding = new \app\api\controller\Ding;
         $restuser_arr = $ding->getRestList($userlist_str, $time);
+        Db::name('zendesk_admin')->where(['is_work'=>2])->update(['is_work'=>1]);
         //如果有休息的人员则更新状态为休息人员
         if(count($restuser_arr)>0){
             $where['admin_id'] = ['in',$restuser_arr];
             Db::name('zendesk_admin')->where($where)->update(['is_work'=>2]);
         }
-        echo 'ok';
-    }
-    public function update_customer_workings()
-    {
-        $agents = Db::name('zendesk_admin')
-            ->alias('z')->join(['fa_admin' => 'a'],'z.admin_id=a.id')
-            ->field('z.*,a.userid')
-            ->where('a.status', '<>', 'hidden')
-            ->select();
-        $userlist_arr = array_filter(array_column($agents, 'userid'));
-        $userlist_str = implode(',', $userlist_arr);
-        $time = strtotime(date('Y-m-d 0:0:0'));
-        //通过接口获取休息人员名单
-        $ding = new \app\api\controller\Ding;
-        $restuser_arr = $ding->getRestList($userlist_str, $time);
-        echo $time;
-        echo '<br>';
-        var_dump($restuser_arr);
         echo 'ok';
     }
 }
