@@ -1394,9 +1394,9 @@ class Process extends Backend
     public function insertMissTicket()
     {
         $tickets = [
-            265584,265585,265586,265587,265589,265590,26559,265592,265593,265594,265595,265596,265597,265599,265600,265602
+            265591
         ];
-        $ticketsM = [36311];
+        $ticketsM = [];
         foreach ($tickets as $ticket) {
             (new Notice(request(), ['type' => 2, 'id' => $ticket]))->create();
             echo $ticket . 'ok' . "\n";
