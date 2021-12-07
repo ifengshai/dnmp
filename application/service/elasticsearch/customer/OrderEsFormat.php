@@ -153,8 +153,7 @@ class OrderEsFormat extends BaseEsFormatData
         $allLoginNum = $data['allLoginNum']['value'];
         //总回话数
         $allSessions = $data['allSessions']['value'];
-        //客单价
-        $allAvgPrice = round($data['allAvgPrice']['value'],2);
+
         //销售各
         $allSalesTotalMoney = $data['allSalesTotalMoney']['value'];
         //ga加购数
@@ -170,6 +169,9 @@ class OrderEsFormat extends BaseEsFormatData
         $allAddToCartRate = $this->getDecimal($allNewCartNum,$allSessions);
         //回话转化率
         $allSessionRate = $this->getDecimal($allOrderNum,$allSessions);
+
+        //客单价
+        $allAvgPrice = bcdiv($allSalesTotalMoney,$allOrderNum,2);
 
         $daySaleBuckets = $data['daySale']['buckets'];
         $daySaleData = array_combine(array_column($daySaleBuckets, 'key'), $daySaleBuckets);
