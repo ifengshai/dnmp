@@ -813,14 +813,20 @@ EOF;
             if (empty($area_id)) {
                 $this->error('库区编码错误，请检查！！');
             }
-            $is_exist_coding = $this->model->where('coding', $v[2])->where('area_id', $area_id)->where('stock_id', $v[7])->find();
-            if (!empty($is_exist_coding)) {
-                $this->error('当前库区已存在此库位编码，请检查！！');
-            }
+//            $is_exist_coding = $this->model->where('coding', $v[2])->where('area_id', $area_id)->where('stock_id', $v[7])->find();
+//            if (!empty($is_exist_coding)) {
+//                $this->error('当前库区已存在此库位编码，请检查！！');
+//            }
         }
         foreach ($data as $k => $v) {
             $area_id = Db::name('warehouse_area')->where('coding', $v[1])->where('stock_id', $v[7])->value('id');
-            $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3], 'picking_sort' => $v[6], 'stock_id' => $v[7]]);
+            $is_exist_coding = $this->model->where('coding', $v[2])->where('area_id', $area_id)->where('stock_id', $v[7])->find();
+            if(!empty($is_exist_coding)){
+                $result = $this->model->where('coding', $v[2])->where('area_id', $area_id)->where('stock_id', $v[7])->save([ 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0],'volume' => $v[3], 'picking_sort' => $v[6]]);
+            }else{
+                $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3], 'picking_sort' => $v[6], 'stock_id' => $v[7]]);
+            }
+
         }
         if ($result) {
             $this->success('导入成功！！');
