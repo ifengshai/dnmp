@@ -822,7 +822,7 @@ EOF;
             $area_id = Db::name('warehouse_area')->where('coding', $v[1])->where('stock_id', $v[7])->value('id');
             $is_exist_coding = $this->model->where('coding', $v[2])->where('area_id', $area_id)->where('stock_id', $v[7])->find();
             if(!empty($is_exist_coding)){
-                $result = $this->model->where('coding', $v[2])->where('area_id', $area_id)->where('stock_id', $v[7])->save([ 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0],'volume' => $v[3], 'picking_sort' => $v[6]]);
+                $result = $this->model->where('coding', $v[2])->where('area_id', $area_id)->where('stock_id', $v[7])->update([ 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0],'volume' => $v[3], 'picking_sort' => $v[6]]);
             }else{
                 $result = $this->model->insert(['coding' => $v[2], 'library_name' => $v[4], 'remark' => $v[5], 'createtime' => date('y-m-d h:i:s', time()), 'create_person' => $this->auth->username, 'shelf_number' => $v[0], 'area_id' => $area_id, 'volume' => $v[3], 'picking_sort' => $v[6], 'stock_id' => $v[7]]);
             }
