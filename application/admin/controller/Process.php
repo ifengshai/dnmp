@@ -1391,6 +1391,23 @@ class Process extends Backend
     }
 
 
+    public function insertMissTicket()
+    {
+        $tickets = [
+            265584,265585,265586,265587,265589,265590,26559,265592,265593,265594,265595,265596,265597,265599,265600,265602
+        ];
+        $ticketsM = [36311];
+        foreach ($tickets as $ticket) {
+            (new Notice(request(), ['type' => 2, 'id' => $ticket]))->create();
+            echo $ticket . 'ok' . "\n";
+        }
+        foreach ($ticketsM as $ticket) {
+            (new Notice(request(), ['type' => 3, 'id' => $ticket]))->create();
+            echo $ticket . 'ok' . "\n";
+        }
+    }
+
+
     public function test()
     {
         $type = 2;
