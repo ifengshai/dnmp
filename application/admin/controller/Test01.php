@@ -1971,7 +1971,7 @@ class Test01 extends Backend
             ->join(['fa_purchase_order_item' => 'e'], 'e.purchase_id = d.id')
             ->where('a.check_time', '>=','2021-10-01 00:00:00')
             ->where('a.check_time', '<=','2021-10-31 23:59:59')
-            ->field('a.check_time,b.sku,d.supplier_id,b.in_stock_num,e.purchase_price,e.actual_purchase_price,a.warehouse_id')
+            ->field('a.check_time,a.in_stock_number,b.sku,d.supplier_id,b.in_stock_num,e.purchase_price,e.actual_purchase_price,a.warehouse_id')
             ->select();
         foreach ($instockArr as $k => $v) {
             if ($v['supplier_id']){
@@ -1998,6 +1998,7 @@ class Test01 extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("E1", "sku");
             $spreadsheet->getActiveSheet()->setCellValue("F1", "数量（个）");
             $spreadsheet->getActiveSheet()->setCellValue("G1", "金额");
+            $spreadsheet->getActiveSheet()->setCellValue("H1", "金额");
             //设置宽度
             $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
@@ -2006,6 +2007,7 @@ class Test01 extends Backend
             $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(22);
             $spreadsheet->setActiveSheetIndex(0)->setTitle('数据');
             $spreadsheet->setActiveSheetIndex(0);
             $num = 0;
@@ -2013,10 +2015,11 @@ class Test01 extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['check_time']);
                 $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['warehouse_name']);
                 $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['suppplier_name']);
-                $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['name']);
+                $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['sku_name']);
                 $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['sku']);
                 $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['in_stock_num']);
                 $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['total']);
+                $spreadsheet->getActiveSheet()->setCellValue('H' . ($num * 1 + 2), $v['in_stock_number']);
                 $num += 1;
             }
         }
