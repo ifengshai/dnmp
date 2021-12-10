@@ -31,7 +31,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncOrder()
     {
-        NewOrder::where('created_at', '>', '1639129737')->chunk(3000, function ($newOrder) {
+        NewOrder::where('created_at', '>', '1638676800')->chunk(3000, function ($newOrder) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
