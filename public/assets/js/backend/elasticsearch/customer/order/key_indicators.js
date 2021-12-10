@@ -299,12 +299,12 @@ function order_data_view() {
             $('#tablerate_nofree_order_total').text(nofreeallShippingAmount.toFixed(2))
         }
         if(ship_type[4]) {
-            var advance_free = ship_type[2];
+            var advance_free = ship_type[4];
             $('#advance_free_order_num').text(advance_free.doc_count);
             $('#advance_free_rate').text(advance_free.rate);
         }
         if(ship_type[5]) {
-            var advance_nofree = ship_type[3];
+            var advance_nofree = ship_type[5];
             $('#advance_nofree_order_num').text(advance_nofree.doc_count);
             $('#advance_nofree_rate').text(advance_nofree.rate);
             var nofreeallShippingAmount = advance_nofree.allShippingAmount.value;
