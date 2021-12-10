@@ -2723,7 +2723,7 @@ class OrderData extends Backend
         $list = Db::connect('database.db_weseeoptical')
             ->table('orders_items')->alias('a')
             ->join(['orders_prescriptions' => 'b'], 'a.orders_prescriptions_id=b.id')
-            ->where(['a.id' => ['in', [56709]]])->select();
+            ->where(['a.id' => ['in', [57523]]])->select();
         foreach ($list as $k => $v) {
             $options = [];
             //处方解析 不同站不同字段
