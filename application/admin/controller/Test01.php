@@ -2027,8 +2027,8 @@ class Test01 extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['in_stock_num']);
                 $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['total']);
                 $spreadsheet->getActiveSheet()->setCellValue('H' . ($num * 1 + 2), $v['in_stock_number']);
-                $spreadsheet->getActiveSheet()->setCellValue('I' . ($num * 1 + 2), $v['in_stock_number']);
-                $spreadsheet->getActiveSheet()->setCellValue('J' . ($num * 1 + 2), $v['in_stock_number']);
+                $spreadsheet->getActiveSheet()->setCellValue('I' . ($num * 1 + 2), $v['purchase_number']);
+                $spreadsheet->getActiveSheet()->setCellValue('J' . ($num * 1 + 2), $v['1688_number']);
                 $num += 1;
             }
         }
