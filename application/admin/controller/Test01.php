@@ -1959,9 +1959,13 @@ class Test01 extends Backend
 
     public function export_caiwu_data()
     {
+        $month = input('month');
         set_time_limit(0);
         ini_set('memory_limit', '2048M');
         $item = new Item();
+        $startTime = $month.'-01 00:00:00';
+        $endTime = $month.'-31 23:59:59';
+        $writeDownWhere['a.check_time'] = ['between',[$startTime,$endTime]];
 
         $instockArr = Db::name('in_stock')
             ->alias('a')
@@ -1969,9 +1973,8 @@ class Test01 extends Backend
             ->join(['fa_check_order' => 'c'], 'a.check_id=c.id')
             ->join(['fa_purchase_order' => 'd'], 'c.purchase_id=d.id')
             ->join(['fa_purchase_order_item' => 'e'], 'e.purchase_id = d.id')
-            ->where('a.check_time', '>=','2021-10-01 00:00:00')
-            ->where('a.check_time', '<=','2021-10-31 23:59:59')
-            ->field('a.check_time,a.in_stock_number,b.sku,d.supplier_id,b.in_stock_num,e.purchase_price,e.actual_purchase_price,a.warehouse_id')
+            ->where($writeDownWhere)
+            ->field('a.check_time,a.in_stock_number,b.sku,d.supplier_id,b.in_stock_num,e.purchase_price,e.actual_purchase_price,a.warehouse_id,d.purchase_number,d.1688_number')
             ->select();
         foreach ($instockArr as $k => $v) {
             if ($v['supplier_id']){
@@ -1998,7 +2001,9 @@ class Test01 extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("E1", "sku");
             $spreadsheet->getActiveSheet()->setCellValue("F1", "数量（个）");
             $spreadsheet->getActiveSheet()->setCellValue("G1", "金额");
-            $spreadsheet->getActiveSheet()->setCellValue("H1", "金额");
+            $spreadsheet->getActiveSheet()->setCellValue("H1", "入库单号");
+            $spreadsheet->getActiveSheet()->setCellValue("I1", "采购单号");
+            $spreadsheet->getActiveSheet()->setCellValue("J1", "1688单号");
             //设置宽度
             $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
@@ -2008,6 +2013,8 @@ class Test01 extends Backend
             $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(22);
             $spreadsheet->setActiveSheetIndex(0)->setTitle('数据');
             $spreadsheet->setActiveSheetIndex(0);
             $num = 0;
@@ -2020,6 +2027,8 @@ class Test01 extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['in_stock_num']);
                 $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['total']);
                 $spreadsheet->getActiveSheet()->setCellValue('H' . ($num * 1 + 2), $v['in_stock_number']);
+                $spreadsheet->getActiveSheet()->setCellValue('I' . ($num * 1 + 2), $v['purchase_number']);
+                $spreadsheet->getActiveSheet()->setCellValue('J' . ($num * 1 + 2), $v['1688_number']);
                 $num += 1;
             }
         }
@@ -2039,7 +2048,7 @@ class Test01 extends Backend
         $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         $spreadsheet->setActiveSheetIndex(0);
         $format = 'xlsx';
-        $savename = '财务数据导出';
+        $savename = '财务数据'.$month;
         if ($format == 'xls') {
             //输出Excel03版本
             header('Content-Type:application/vnd.ms-excel');
