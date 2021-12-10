@@ -31,7 +31,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncOrder()
     {
-        NewOrder::where('created_at', '>', '1637566920')->chunk(3000, function ($newOrder) {
+        NewOrder::where('created_at', '>', '1639129737')->chunk(3000, function ($newOrder) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
@@ -56,6 +56,14 @@ class AsyncEs extends BaseElasticsearch
                     }
                     if ($value['base_shipping_amount'] > 0) {
                         $value['shipping_method_type'] = 3;
+                    }
+                }
+                if (in_array($value['shipping_method'], ['advanced'])) {
+                    if ($value['base_shipping_amount'] == 0) {
+                        $value['shipping_method_type'] = 4;
+                    }
+                    if ($value['base_shipping_amount'] > 0) {
+                        $value['shipping_method_type'] = 5;
                     }
                 }
                 $value['payment_time'] = $value['payment_time'] < 0 ? $value['created_at'] : $value['payment_time'];
