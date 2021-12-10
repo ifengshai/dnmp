@@ -268,6 +268,11 @@ function order_data_view() {
         $('#tablerate_nofree_order_num').text('');
         $('#tablerate_nofree_rate').text('');
         $('#tablerate_nofree_order_total').text('')
+        $('#advance_free_order_num').text('');
+        $('#advance_free_rate').text('');
+        $('#advance_nofree_order_num').text('');
+        $('#advance_nofree_rate').text('');
+        $('#advance_nofree_order_total').text('')
         //订单运费数据统计
         if(ship_type[0]) {
             var flatrate_free = ship_type[0];
@@ -292,6 +297,18 @@ function order_data_view() {
             $('#tablerate_nofree_rate').text(tablerate_nofree.rate);
             var nofreeallShippingAmount = tablerate_nofree.allShippingAmount.value;
             $('#tablerate_nofree_order_total').text(nofreeallShippingAmount.toFixed(2))
+        }
+        if(ship_type[4]) {
+            var advance_free = ship_type[2];
+            $('#advance_free_order_num').text(advance_free.doc_count);
+            $('#advance_free_rate').text(advance_free.rate);
+        }
+        if(ship_type[5]) {
+            var advance_nofree = ship_type[3];
+            $('#advance_nofree_order_num').text(advance_nofree.doc_count);
+            $('#advance_nofree_rate').text(advance_nofree.rate);
+            var nofreeallShippingAmount = advance_nofree.allShippingAmount.value;
+            $('#advance_nofree_order_total').text(nofreeallShippingAmount.toFixed(2))
         }
 
 
