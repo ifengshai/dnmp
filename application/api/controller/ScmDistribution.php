@@ -846,7 +846,7 @@ class ScmDistribution extends Scm
                 $true_sku = $this->_item_platform_sku->where('platform_sku', $item_option_info['sku'])->where('platform_type',$item_process_info['site'])->value('sku');
 
                 if (!$true_sku){
-                    $this->error('sku不存在，sku：'.$item_option_info['sku'].'站点id：'.$item_process_info['site'], [], 405);
+                    $this->error('sku不存在，sku：'.$item_option_info['sku'].'站点id：'.$item_process_info['site'].$this->_item_platform_sku->getLastSql(), [], 405);
                 }
                 //获取配货占用库存
                 $item_before = $this->_item
