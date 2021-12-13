@@ -37,4 +37,17 @@ ENV COMPOSER_HOME=/tmp/composer
 RUN apk --no-cache add shadow && usermod -u 1000 www-data && groupmod -g 1000 www-data
 
 
+
+RUN apk update
+RUN apk --no-cache add git
+RUN apk --no-cache add nodejs
+RUN apk --no-cache add npm
+RUN apk --no-cache add openssh
+# Copy over private key, and set permissions
+COPY .ssh /root/.ssh
+RUN chmod 700 /root/.ssh/id_rsa
+RUN chown -R root:root /root/.ssh
+
+# Create known_hosts
+RUN touch /root/.ssh/known_hosts
 WORKDIR /www

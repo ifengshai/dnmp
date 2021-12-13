@@ -4,7 +4,7 @@ services:
     build:
       context: ./services/nginx
       args:
-        NGINX_VERSION: ${NGINX_VERSION}
+        NGINX_VERSION: nginx:${NGINX_VERSION}
         CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
         NGINX_INSTALL_APPS: ${NGINX_INSTALL_APPS}
     container_name: nginx
@@ -25,59 +25,81 @@ services:
     networks:
       - default
 
-  php:
+#  php:
+#    build:
+#      context: ./services/php
+#      args:
+#        PHP_VERSION: php:${PHP_VERSION}-fpm-alpine
+#        CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
+#        PHP_EXTENSIONS: ${PHP_EXTENSIONS}
+#        TZ: "$TZ"
+#    container_name: php
+#    expose:
+#      - 9501
+#    extra_hosts:
+#      - "www.site1.com:172.17.0.1"
+#    volumes:
+#      - ${SOURCE_DIR}:/www/:rw
+#      - ${PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
+#      - ${PHP_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
+#      - ${PHP_LOG_DIR}:/var/log/php
+#      - ${DATA_DIR}/composer:/tmp/composer
+#    restart: always
+#    cap_add:
+#      - SYS_PTRACE
+#    networks:
+#      - default
+#
+
+#  php_supervisor:
+#      build:
+#        context: .
+#        dockerfile: ./services/phpsupervisor/Dockerfile
+#        args:
+#          PHP_VERSION: php:${SUPERVISOR_PHP_VERSION}-alpine
+#          CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
+#          PHP_EXTENSIONS: ${SUPERVISOR_PHP_EXTENSIONS}
+#          TZ: "$TZ"
+#      container_name: supervisor
+#      ports:
+#        - "5200:5200"
+#        - "${SUPERVISOR_HOST_PORT_C}:9001"
+#      extra_hosts:
+#        - "www.site1.com:172.17.0.1"
+#      volumes:
+#        - ${SUPERVISOR_LOG}:/var/log/supervisor
+#        - ${SUPERVISOR_CONFIG}:/etc/supervisor/conf.d
+#        - ${SOURCE_DIR}:/www/:rw
+#        - ${SUPERVISOR_PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
+#        - ${SUPERVISOR_PHP_LOG_DIR}:/var/log/phpsupervisor
+#        - ${DATA_DIR}/composer:/tmp/composer
+#      restart: always
+#      cap_add:
+#        - SYS_PTRACE
+#      networks:
+#        - default
+  php80:
     build:
-      context: ./services/php
+      context: ./services/php80
       args:
-        PHP_VERSION: php:${PHP_VERSION}-fpm-alpine
+        PHP_VERSION: php:${PHP80_VERSION}-fpm-alpine3.13
         CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
-        PHP_EXTENSIONS: ${PHP_EXTENSIONS}
+        PHP_EXTENSIONS: ${PHP80_EXTENSIONS}
         TZ: "$TZ"
-    container_name: php
+    container_name: php80
     expose:
       - 9501
-    extra_hosts:
-      - "www.site1.com:172.17.0.1"
     volumes:
       - ${SOURCE_DIR}:/www/:rw
-      - ${PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
-      - ${PHP_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
-      - ${PHP_LOG_DIR}:/var/log/php
+      - ${PHP80_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
+      - ${PHP80_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
+      - ${PHP80_LOG_DIR}:/var/log/php
       - ${DATA_DIR}/composer:/tmp/composer
     restart: always
     cap_add:
       - SYS_PTRACE
     networks:
       - default
-
-
-  php_supervisor:
-      build:
-        context: .
-        dockerfile: ./services/phpsupervisor/Dockerfile
-        args:
-          PHP_VERSION: php:${SUPERVISOR_PHP_VERSION}-alpine
-          CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
-          PHP_EXTENSIONS: ${SUPERVISOR_PHP_EXTENSIONS}
-          TZ: "$TZ"
-      container_name: supervisor
-      ports:
-        - "5200:5200"
-        - "${SUPERVISOR_HOST_PORT_C}:9001"
-      extra_hosts:
-        - "www.site1.com:172.17.0.1"
-      volumes:
-        - ${SUPERVISOR_LOG}:/var/log/supervisor
-        - ${SUPERVISOR_CONFIG}:/etc/supervisor/conf.d
-        - ${SOURCE_DIR}:/www/:rw
-        - ${SUPERVISOR_PHP_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
-        - ${SUPERVISOR_PHP_LOG_DIR}:/var/log/phpsupervisor
-        - ${DATA_DIR}/composer:/tmp/composer
-      restart: always
-      cap_add:
-        - SYS_PTRACE
-      networks:
-        - default
 
 #  php56:
 #    build:
@@ -319,7 +341,7 @@ services:
   xwiki:
     image: "xwiki:lts-mysql-tomcat"
     container_name: xwiki-mysql-tomcat-web
-    restart: always
+    #restart: always
     depends_on:
       - xwiki_mysqldb
     ports:
@@ -335,7 +357,7 @@ services:
   xwiki_mysqldb:
     image: "mysql:5.7"
     container_name: xwiki-mysql-db
-    restart: always
+    #restart: always
     #ports:#不对外开放端口
       #- "3308:3306"
     volumes:
