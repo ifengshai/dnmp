@@ -843,7 +843,7 @@ class ScmDistribution extends Scm
                     ->save(['item_order_number' => $item_order_number]);
 
                 //获取true_sku
-                $true_sku = $this->_item_platform_sku->getTrueSku($item_option_info['sku'], $item_process_info['site']);
+                $true_sku = $this->_item_platform_sku->where('platform_sku', $item_option_info['sku'])->where('platform_type',$item_process_info['site'])->value('sku');
 
                 //获取配货占用库存
                 $item_before = $this->_item
