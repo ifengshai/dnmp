@@ -31,7 +31,7 @@ class AsyncEs extends BaseElasticsearch
      */
     public function asyncOrder()
     {
-        NewOrder::where('created_at', '>', '1637566920')->chunk(3000, function ($newOrder) {
+        NewOrder::where('created_at', '>', '1638676800')->chunk(3000, function ($newOrder) {
             $data = array_map(function ($value) {
                 $value = array_map(function ($v) {
                     return $v === null ? 0 : $v;
@@ -58,6 +58,14 @@ class AsyncEs extends BaseElasticsearch
                         $value['shipping_method_type'] = 3;
                     }
                 }
+                if (in_array($value['shipping_method'], ['advanced'])) {
+                    if ($value['base_shipping_amount'] == 0) {
+                        $value['shipping_method_type'] = 4;
+                    }
+                    if ($value['base_shipping_amount'] > 0) {
+                        $value['shipping_method_type'] = 5;
+                    }
+                }
                 $value['payment_time'] = $value['payment_time'] < 0 ? $value['created_at'] : $value['payment_time'];
                 $mergeData = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] : $value['created_at'];
                 //删除无用字段
@@ -70,7 +78,7 @@ class AsyncEs extends BaseElasticsearch
 
                 return $this->formatDate($value, $mergeData);
             }, collection($newOrder)->toArray());
-            $this->esService->addMutilToEs('mojing_order', $data);
+            print_r($this->esService->updateMutilToEs('mojing_order', $data));
         }, 'id', 'desc');
     }
 

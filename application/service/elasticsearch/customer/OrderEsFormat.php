@@ -86,6 +86,8 @@ class OrderEsFormat extends BaseEsFormatData
         //1.平邮
         //2.商业快递免邮
         //3. 商业快递
+        //4.  advance免邮
+        //5. advance
         $shipType = $data['shipType']['buckets'];
         $shipTypeData = array_combine(array_column($shipType, 'key'), $shipType);
         foreach ($shipTypeData as $key => $val) {

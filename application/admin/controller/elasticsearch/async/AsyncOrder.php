@@ -76,6 +76,14 @@ class AsyncOrder extends BaseElasticsearch
                 $value['shipping_method_type'] = 3;
             }
         }
+        if (in_array($value['shipping_method'], ['advanced'])) {
+            if ($value['base_shipping_amount'] == 0) {
+                $value['shipping_method_type'] = 4;
+            }
+            if ($value['base_shipping_amount'] > 0) {
+                $value['shipping_method_type'] = 5;
+            }
+        }
         $value['payment_time'] = $value['payment_time'] < 0 ? $value['created_at'] : $value['payment_time'];
         $mergeData = $value['payment_time'] >= $value['created_at'] ? $value['payment_time'] : $value['created_at'];
         //删除无用字段
