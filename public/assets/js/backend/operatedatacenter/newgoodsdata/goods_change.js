@@ -37,6 +37,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'echartsobj'], functi
                             formatter: Table.api.formatter.status},
                         {field: 'glass_num', title: __('销售副数'),operate: false},
                         {field: 'sku_row_total', title: __('实际支付的销售额'),operate: false},
+                        {field: 'discount_money', title: __('优惠金额'),operate: false},
                         {field: 'single_price', title: __('副单价'),operate: false},
                         {field: 'stock', title: __('虚拟库存'),operate: false},
                     ]
