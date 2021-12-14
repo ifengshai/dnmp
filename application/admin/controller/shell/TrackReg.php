@@ -3674,6 +3674,7 @@ class TrackReg extends Backend
             }
             $skuArr[$value['sku']]['sku_grand_total'] += $value['base_row_total'] - $value['mw_rewardpoint_discount'] / $value['total_qty_ordered'] - $value['base_discount_amount'];
             $skuArr[$value['sku']]['sku_row_total'] += $value['base_row_total'];
+            $skuArr[$value['sku']]['base_discount_amount'] += $value['base_discount_amount'];
         }
         foreach ($list as $k => $v) {
             if (!empty($skuArr[$v['platform_sku']]['order_num'])) {
@@ -3693,8 +3694,11 @@ class TrackReg extends Backend
             $frame_money = $skuArr[$v['platform_sku']]['sku_row_total'];
             //眼镜的实际销售额
             $frame_money = $frame_money ? round($frame_money, 2) : 0;
+            //眼镜的优惠金额
+            $discount_money = $skuArr[$v['platform_sku']]['base_discount_amount'] ? $skuArr[$v['platform_sku']]['base_discount_amount'] : 0;
             $list[$k]['sku_grand_total'] = $frame_money_price;
             $list[$k]['sku_row_total'] = $frame_money;
+            $list[$k]['discount_money'] = $discount_money;
             Db::name('datacenter_sku_day')->update($list[$k]);
             echo $list[$k]['id'] . "\n";
             echo '<br>';
