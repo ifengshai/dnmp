@@ -2100,11 +2100,13 @@ class Test01 extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("B1", "商品分类");
             $spreadsheet->getActiveSheet()->setCellValue("C1", "在库数量");
             $spreadsheet->getActiveSheet()->setCellValue("D1", "成本价/采购价");
+            $spreadsheet->getActiveSheet()->setCellValue("E1", "采购单号");
             //设置宽度
             $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(22);
             $spreadsheet->setActiveSheetIndex(0)->setTitle('数据');
             $spreadsheet->setActiveSheetIndex(0);
             $num = 0;
@@ -2113,6 +2115,7 @@ class Test01 extends Backend
                 $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['category_name']);
                 $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['count']);
                 $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['price']);
+                $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['purchase_number']);
                 $num += 1;
             }
         }
