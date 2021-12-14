@@ -2065,4 +2065,88 @@ class Test01 extends Backend
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
     }
+    public function export_warehouse_data()
+    {
+        $stock_id = input('stock_id');
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $item = new Item();
+
+        $arr = Db::name('product_barcode_item')
+            ->where('library_status',1)
+            ->where('sku','<>','')
+            ->where('purchase_id','<>','')
+            ->where('stock_id',$stock_id)
+            ->field('sku,purchase_id,count(*) as count')
+            ->group('sku,purchase_id')
+            ->select();
+        //查询商品分类
+        $this->category = new \app\admin\model\itemmanage\ItemCategory;
+        $category = $this->category->where('is_del', 1)->column('name', 'id');
+        foreach ($arr as $k => $v) {
+            $v['category_id'] =$item->where('sku',$v['sku'])->value('category_id');
+            $arr[$k]['category_name'] = $category[$v['category_id']];
+            $purchase = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_id'])->find();
+            $arr[$k]['purchase_number'] = $purchase['purchase_number'];
+            $arr[$k]['price'] = $purchase['actual_purchase_price'] ? $purchase['actual_purchase_price']:$purchase['purchase_price'];
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $pIndex = 0;
+        if (!empty($instockArr)){
+            //从数据库查询需要的数据
+            $spreadsheet->setActiveSheetIndex(0);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "sku");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "商品分类");
+            $spreadsheet->getActiveSheet()->setCellValue("C1", "在库数量");
+            $spreadsheet->getActiveSheet()->setCellValue("D1", "成本价/采购价");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex(0)->setTitle('数据');
+            $spreadsheet->setActiveSheetIndex(0);
+            $num = 0;
+            foreach ($instockArr as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['category_name']);
+                $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['count']);
+                $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['price']);
+                $num += 1;
+            }
+        }
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = '仓库数据';
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+    }
 }
