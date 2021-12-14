@@ -2100,7 +2100,7 @@ class Test01 extends Backend
             $spreadsheet->getActiveSheet()->setCellValue("B1", "商品分类");
             $spreadsheet->getActiveSheet()->setCellValue("C1", "在库数量");
             $spreadsheet->getActiveSheet()->setCellValue("D1", "成本价/采购价");
-            $spreadsheet->getActiveSheet()->setCellValue("E1", "成本价/采购价");
+            $spreadsheet->getActiveSheet()->setCellValue("E1", "采购单号");
             //设置宽度
             $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
             $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
