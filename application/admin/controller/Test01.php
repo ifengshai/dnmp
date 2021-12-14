@@ -2093,7 +2093,7 @@ class Test01 extends Backend
 
         $spreadsheet = new Spreadsheet();
         $pIndex = 0;
-        if (!empty($instockArr)){
+        if (!empty($arr)){
             //从数据库查询需要的数据
             $spreadsheet->setActiveSheetIndex(0);
             $spreadsheet->getActiveSheet()->setCellValue("A1", "sku");
@@ -2108,7 +2108,7 @@ class Test01 extends Backend
             $spreadsheet->setActiveSheetIndex(0)->setTitle('数据');
             $spreadsheet->setActiveSheetIndex(0);
             $num = 0;
-            foreach ($instockArr as $k=>$v){
+            foreach ($arr as $k=>$v){
                 $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
                 $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['category_name']);
                 $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['count']);
