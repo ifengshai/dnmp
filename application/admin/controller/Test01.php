@@ -2088,7 +2088,7 @@ class Test01 extends Backend
             $arr[$k]['category_name'] = $category[$v['category_id']];
             $purchase = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_id'])->find();
             $arr[$k]['purchase_number'] = $purchase['purchase_order_number'];
-            $arr[$k]['price'] = $purchase['actual_purchase_price'] ? $purchase['actual_purchase_price']:$purchase['purchase_price'];
+            $arr[$k]['price'] = $purchase['actual_purchase_price'] > 0 ? $purchase['actual_purchase_price'] : $purchase['purchase_price'];
         }
 
         $spreadsheet = new Spreadsheet();
