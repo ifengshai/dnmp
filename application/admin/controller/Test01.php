@@ -1959,12 +1959,13 @@ class Test01 extends Backend
 
     public function export_caiwu_data()
     {
-        $month = input('month');
+        $startTime = input('start').' 00:00:00';
+        $endTime = input('end').' 23:59:59';
         set_time_limit(0);
         ini_set('memory_limit', '2048M');
         $item = new Item();
-        $startTime = $month.'-01 00:00:00';
-        $endTime = $month.'-31 23:59:59';
+//        $startTime = $month.'-01 00:00:00';
+//        $endTime = $month.'-31 23:59:59';
         $writeDownWhere['a.check_time'] = ['between',[$startTime,$endTime]];
 
         $instockArr = Db::name('in_stock')
@@ -2049,6 +2050,184 @@ class Test01 extends Backend
         $spreadsheet->setActiveSheetIndex(0);
         $format = 'xlsx';
         $savename = '财务数据'.$month;
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+    }
+    public function export_warehouse_data()
+    {
+        $stock_id = input('stock_id');
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $item = new Item();
+
+        $arr = Db::name('product_barcode_item')
+            ->where('library_status',1)
+            ->where('sku','<>','')
+            ->where('purchase_id','<>','')
+            ->where('stock_id',$stock_id)
+            ->field('sku,purchase_id,count(*) as count')
+            ->group('sku,purchase_id')
+            ->select();
+        //查询商品分类
+        $this->category = new \app\admin\model\itemmanage\ItemCategory;
+        $category = $this->category->where('is_del', 1)->column('name', 'id');
+        foreach ($arr as $k => $v) {
+            $v['category_id'] =$item->where('sku',$v['sku'])->value('category_id');
+            $arr[$k]['category_name'] = $category[$v['category_id']];
+            $purchase = Db::name('purchase_order_item')->where('purchase_id',$v['purchase_id'])->find();
+            $arr[$k]['purchase_number'] = $purchase['purchase_order_number'];
+            $arr[$k]['price'] = $purchase['actual_purchase_price'] > 0 ? $purchase['actual_purchase_price'] : $purchase['purchase_price'];
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $pIndex = 0;
+        if (!empty($arr)){
+            //从数据库查询需要的数据
+            $spreadsheet->setActiveSheetIndex(0);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "sku");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "商品分类");
+            $spreadsheet->getActiveSheet()->setCellValue("C1", "在库数量");
+            $spreadsheet->getActiveSheet()->setCellValue("D1", "成本价/采购价");
+            $spreadsheet->getActiveSheet()->setCellValue("E1", "采购单号");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex(0)->setTitle('数据');
+            $spreadsheet->setActiveSheetIndex(0);
+            $num = 0;
+            foreach ($arr as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['category_name']);
+                $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['count']);
+                $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['price']);
+                $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['purchase_number']);
+                $num += 1;
+            }
+        }
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = '仓库数据';
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+    }
+    public function export_supplier_data()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+
+        $instockArr = Db::name('supplier')
+            ->field('id,supplier_name,supplier_type_pattern,recipient_name,bank_account,opening_bank,remark,supplier_type,period')
+            ->select();
+
+        $spreadsheet = new Spreadsheet();
+        $pIndex = 0;
+        if (!empty($instockArr)){
+            //从数据库查询需要的数据
+            $spreadsheet->setActiveSheetIndex(0);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "ID");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "供应商名称");
+            $spreadsheet->getActiveSheet()->setCellValue("C1", "供应商类型");
+            $spreadsheet->getActiveSheet()->setCellValue("D1", "收款人名称");
+            $spreadsheet->getActiveSheet()->setCellValue("E1", "账号");
+            $spreadsheet->getActiveSheet()->setCellValue("F1", "开户行");
+            $spreadsheet->getActiveSheet()->setCellValue("G1", "供应商备注");
+            $spreadsheet->getActiveSheet()->setCellValue("H1", "主营类目");
+            $spreadsheet->getActiveSheet()->setCellValue("I1", "账期");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex(0)->setTitle('数据');
+            $spreadsheet->setActiveSheetIndex(0);
+            $num = 0;
+            foreach ($instockArr as $k=>$v){
+                if ($v['supplier_type'] == 1){
+                    $name = '镜片';
+                }else if ($v['supplier_type'] == 2){
+                    $name = '镜架';
+                }else if ($v['supplier_type'] == 3){
+                    $name = '眼镜盒';
+                }else{
+                    $name = '镜布';
+                }
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['id']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['supplier_name']);
+                $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['supplier_type_pattern'] == 1 ? '工厂':'贸易');
+                $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['recipient_name']);
+                $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['bank_account']);
+                $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['opening_bank']);
+                $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['remark']);
+                $spreadsheet->getActiveSheet()->setCellValue('H' . ($num * 1 + 2), $name);
+                $spreadsheet->getActiveSheet()->setCellValue('I' . ($num * 1 + 2), $v['period']);
+                $num += 1;
+            }
+        }
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = '财务数据';
         if ($format == 'xls') {
             //输出Excel03版本
             header('Content-Type:application/vnd.ms-excel');

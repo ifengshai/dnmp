@@ -81,7 +81,7 @@ class GoodsChange extends Backend
                 ->where($where)
                 ->where($map)
                 ->group('platform_sku')
-                ->field('platform_sku,sku,sum(cart_num) as cart_num,sum(update_cart_num) as update_cart_num,sum(pay_lens_num) as pay_lens_num,day_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total')
+                ->field('platform_sku,sku,sum(cart_num) as cart_num,sum(update_cart_num) as update_cart_num,sum(pay_lens_num) as pay_lens_num,day_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(discount_money) as discount_money')
                 ->order('id', 'desc')
                 ->limit($offset, $limit)
                 ->select();
@@ -91,7 +91,7 @@ class GoodsChange extends Backend
                     ->where(['sku' => $v['sku'], 'platform_type' => $order_platform])
                     ->field('stock,outer_sku_status,presell_status,presell_start_time,presell_end_time,presell_num')
                     ->find();
-                $list[$k]['single_price'] = $v['glass_num'] != 0 ? round($v['sku_row_total'] / $v['glass_num'], 2) : 0;
+                $list[$k]['single_price'] = $v['glass_num'] != 0 ? round(($v['sku_row_total'] - $v['discount_money'])/ $v['glass_num'], 2) : 0;
                 //订单金额
                 $orderIds = $this->order
                     ->alias('o')
@@ -194,7 +194,7 @@ class GoodsChange extends Backend
             $list = Db::name('datacenter_sku_day')
                 ->where($map)
                 ->group('platform_sku')
-                ->field('platform_sku,sku,sum(cart_num) as cart_num,sum(update_cart_num) as update_cart_num,sum(pay_lens_num) as pay_lens_num,day_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total')
+                ->field('platform_sku,sku,sum(cart_num) as cart_num,sum(update_cart_num) as update_cart_num,sum(pay_lens_num) as pay_lens_num,day_stock,sum(sales_num) as sales_num,sum(order_num) as order_num,sum(glass_num) as glass_num,sum(sku_row_total) as sku_row_total,sum(discount_money) as discount_money')
                 ->order('id', 'desc')
                 ->limit($start,$pre_count)
                 ->select();
@@ -250,7 +250,7 @@ class GoodsChange extends Backend
                 $tmpRow['status'] = $status;
                 $tmpRow['glass_num'] =$v['glass_num'];//销售副数
                 $tmpRow['sku_row_total'] =$v['sku_row_total'];//实际支付的销售额
-                $tmpRow['single_price'] = $v['glass_num'] ? round($v['sku_row_total'] / $v['glass_num'], 2) : 0;//副单价
+                $tmpRow['single_price'] = $v['glass_num'] ? round(($v['sku_row_total']-$v['discount_money']) / $v['glass_num'], 2) : 0;//副单价
                 $tmpRow['stock'] = $skuStockInfo['stock'];//虚拟库存
                 $rows = array();
                 foreach ( $tmpRow as $export_obj){
