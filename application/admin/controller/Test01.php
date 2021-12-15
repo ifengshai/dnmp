@@ -1959,12 +1959,13 @@ class Test01 extends Backend
 
     public function export_caiwu_data()
     {
-        $month = input('month');
+        $startTime = input('start').' 00:00:00';
+        $endTime = input('end').' 23:59:59';
         set_time_limit(0);
         ini_set('memory_limit', '2048M');
         $item = new Item();
-        $startTime = $month.'-01 00:00:00';
-        $endTime = $month.'-31 23:59:59';
+//        $startTime = $month.'-01 00:00:00';
+//        $endTime = $month.'-31 23:59:59';
         $writeDownWhere['a.check_time'] = ['between',[$startTime,$endTime]];
 
         $instockArr = Db::name('in_stock')
