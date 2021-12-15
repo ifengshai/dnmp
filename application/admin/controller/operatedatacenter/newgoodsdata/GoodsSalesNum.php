@@ -135,7 +135,7 @@ class GoodsSalesNum extends Backend
         //查询对应平台权限
         $magentoplatformarr = $this->magentoplatform->getAuthSite();
         foreach ($magentoplatformarr as $key => $val) {
-            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee','zeelool_de','zeelool_jp','zeelool_fr'])) {
+            if (!in_array($val['name'], ['zeelool', 'voogueme', 'meeloog','wesee','zeelool_de','zeelool_jp','zeelool_fr','zeelool_cn'])) {
                 unset($magentoplatformarr[$key]);
             }
         }
