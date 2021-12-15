@@ -30,7 +30,7 @@ class Inventory extends Backend
      * @var \app\admin\model\warehouse\Inventory
      */
     protected $model = null;
-
+    protected $noNeedRight = ['batch_export_xls_new'];
 
     public function _initialize()
     {
