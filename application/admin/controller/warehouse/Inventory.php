@@ -30,7 +30,7 @@ class Inventory extends Backend
      * @var \app\admin\model\warehouse\Inventory
      */
     protected $model = null;
-
+    protected $noNeedRight = ['batch_export_xls_new'];
 
     public function _initialize()
     {
@@ -1109,6 +1109,152 @@ class Inventory extends Backend
         $writer->save('php://output');
     }
 
+    /**
+     * 导出盘点明细
+     *
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     * @author liushiwei
+     * @date   2021/12/15 15:40
+     */
+    public function batch_export_xls_new()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '4096M');
+        $ids = input('ids');
+        $addWhere = '1=1';
+        if ($ids) {
+            $addWhere .= " AND l.id IN ({$ids})";
+        }
+        [$where] = $this->buildparams();
+
+        //查询SKU库存
+        $inventory = new \app\admin\model\warehouse\Inventory();
+        $list = $inventory->where($where)->where($addWhere)->alias('l')->join('fa_inventory_item m','l.id=m.inventory_id')->field('l.number,l.status,l.check_status,l.create_person,m.*')->select();
+        $list = collection($list)->toArray();
+        //从数据库查询需要的数据
+        $spreadsheet = new Spreadsheet();
+
+        //常规方式：利用setCellValue()填充数据
+        $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", "盘点单号")
+            ->setCellValue("B1", "创建人")
+            ->setCellValue("C1", "盘点单状态")
+            ->setCellValue("D1", "盘点单审核状态")
+            ->setCellValue("E1", "盘点sku")
+            ->setCellValue("F1", "盘点总库存")
+            ->setCellValue("G1", "盘点实时库存")
+            ->setCellValue("H1", "盘点可用库存")
+            ->setCellValue("I1", "盘点配货占用库存")
+            ->setCellValue("J1", "盘点数量")
+            ->setCellValue("K1", "误差数量")
+            ->setCellValue("L1", "库区")
+            ->setCellValue("M1", "库位编码")
+            ->setCellValue("N1", "备注");
+        foreach ($list as $key => $value) {
+            switch ($value['status']){
+                case 1:
+                    $value['status'] = '盘点中';
+                    break;
+                case 2:
+                    $value['status'] = '已完成';
+                    break;
+                default:
+                    $value['status'] = '待盘点';
+                    break;
+            }
+            switch ($value['check_status']){
+                case 1:
+                    $value['check_status'] = '待审核';
+                    break;
+                case 2:
+                    $value['check_status'] = '已审核';
+                    break;
+                case 3:
+                    $value['check_status'] = '已拒绝';
+                    break;
+                case 4:
+                    $value['check_status'] = '已取消';
+                    break;
+                default:
+                    $value['check_status'] = '未提交';
+                    break;
+            }
+            $spreadsheet->getActiveSheet()->setCellValue("A" . ($key * 1 + 2), $value['number']);
+            $spreadsheet->getActiveSheet()->setCellValue("B" . ($key * 1 + 2), $value['create_person']);
+            $spreadsheet->getActiveSheet()->setCellValue("C" . ($key * 1 + 2), ($value['status']));
+            $spreadsheet->getActiveSheet()->setCellValue("D" . ($key * 1 + 2), ($value['check_status']));
+            $spreadsheet->getActiveSheet()->setCellValue("E" . ($key * 1 + 2), ($value['sku']));
+            $spreadsheet->getActiveSheet()->setCellValue("F" . ($key * 1 + 2), ($value['real_time_qty']+$value['distribution_occupy_stock']));
+            $spreadsheet->getActiveSheet()->setCellValue("G" . ($key * 1 + 2), ($value['real_time_qty']));
+            $spreadsheet->getActiveSheet()->setCellValue("H" . ($key * 1 + 2), ($value['available_stock']));
+            $spreadsheet->getActiveSheet()->setCellValue("I" . ($key * 1 + 2), ($value['distribution_occupy_stock']));
+            $spreadsheet->getActiveSheet()->setCellValue("J" . ($key * 1 + 2), ($value['inventory_qty']));
+            $spreadsheet->getActiveSheet()->setCellValue("K" . ($key * 1 + 2), ($value['error_qty']));
+            $spreadsheet->getActiveSheet()->setCellValue("L" . ($key * 1 + 2), ($value['warehouse_name']));
+            $spreadsheet->getActiveSheet()->setCellValue("M" . ($key * 1 + 2), ($value['library_name']));
+            $spreadsheet->getActiveSheet()->setCellValue("N" . ($key * 1 + 2), ($value['remark']));
+
+
+        }
+
+        //设置宽度
+        $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('H')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('I')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('K')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('L')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('M')->setWidth(20);
+        $spreadsheet->getActiveSheet()->getColumnDimension('N')->setWidth(20);
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color' => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+
+
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+
+        $spreadsheet->getActiveSheet()->getStyle('A1:D' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $format = 'xls';
+        $savename = '盘点数据' . date("YmdHis", time());;
+
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+
+        $writer->save('php://output');
+    }
     /**
      * 批量导入
      */

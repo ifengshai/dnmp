@@ -217,9 +217,19 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form', 'editable', 'bootstra
                     }
                 );
 
-            })
-
-
+            });
+            //导出盘点明细
+            $('.btn-batch-export-xls').click(function () {
+                var ids = Table.api.selectedids(table);
+                var params = '';
+                if (ids.length > 0) {
+                    params = 'ids=' + ids;
+                } else {
+                    layer.alert('请选择需要导出的盘点单');
+                    return false;
+                }
+                window.open(Config.moduleurl + '/warehouse/inventory/batch_export_xls_new?' + params, '_blank');
+            });
             //审核通过
             $(document).on('click', '.btn-open', function () {
                 var ids = Table.api.selectedids(table);
