@@ -2244,4 +2244,186 @@ class Test01 extends Backend
         $writer = new $class($spreadsheet);
         $writer->save('php://output');
     }
+    public function export_z_data()
+    {
+        set_time_limit(0);
+        ini_set('memory_limit', '2048M');
+        $this->item = new \app\admin\model\itemmanage\Item;
+        $this->itemPlatformSku = new \app\admin\model\itemmanage\ItemPlatformSku();
+        $params['site'] = 1;
+        $start = strtotime('2021-11-14 00:00:00');
+        $end = strtotime('2021-12-13 23:59:59');
+        $map['payment_time'] = ['between', [$start, $end]];
+
+        //列表
+        $result = [];
+        //查询对应平台销量
+        $info = $this->getOrderSalesNum($params['site'],$map);
+        $list = $info['data'];
+        //查询对应平台商品SKU
+        $skus = $this->itemPlatformSku->getWebSkuAll($params['site']);
+        $productInfo = $this->item->getSkuInfo();
+        $list = $list ?? [];
+        $i = 0;
+        $nowDate = date('Y-m-d H:i:s');
+        foreach ($list as $k => $v) {
+            $result[$i]['platformsku'] = $k;
+            $result[$i]['sku'] = $skus[trim($k)]['sku'];
+            //上架时间
+            $shelvesTime = Db::name('sku_shelves_time')
+                ->where(['site'=>$params['site'],'platform_sku'=>$k])
+                ->value('shelves_time');
+            $result[$i]['shelves_date'] = date('Y-m-d H:i:s',$shelvesTime);
+            $result[$i]['type_name'] = $productInfo[$skus[trim($k)]['sku']]['type_name'];
+            $result[$i]['available_stock'] = $skus[trim($k)]['stock'];  //虚拟仓库存
+            $result[$i]['sales_num'] = $v;
+
+            //在线状态（实时）
+            $stockInfo = $this->itemPlatformSku
+                ->where(['platform_type'=>$params['site'],'platform_sku'=>$k])
+                ->field('stock,outer_sku_status,presell_status,presell_start_time,presell_end_time,presell_num')
+                ->find();
+            if($stockInfo['outer_sku_status'] == 1){
+                if($stockInfo['stock'] > 0){
+                    $result[$i]['online_status'] = '在线';  //在线
+                }else{
+                    if($stockInfo['presell_status'] == 1 && $nowDate >= $stockInfo['presell_start_time'] && $nowDate <= $stockInfo['presell_end_time']){
+                        if($stockInfo['presell_num'] > 0){
+                            $result[$i]['online_status'] = '在线';  //在线
+                        }else{
+                            $result[$i]['online_status'] = '售罄';  //售罄
+                        }
+                    }else{
+                        $result[$i]['online_status'] = '售罄';  //售罄
+                    }
+                }
+            }else{
+                $result[$i]['online_status'] = '下架';  //下架
+            }
+            $i++;
+        }
+        $spreadsheet = new Spreadsheet();
+        $pIndex = 0;
+        if (!empty($result)){
+            //从数据库查询需要的数据
+            $spreadsheet->setActiveSheetIndex(0);
+            $spreadsheet->getActiveSheet()->setCellValue("A1", "平台sku");
+            $spreadsheet->getActiveSheet()->setCellValue("B1", "sku");
+            $spreadsheet->getActiveSheet()->setCellValue("C1", "上架时间");
+            $spreadsheet->getActiveSheet()->setCellValue("D1", "分类");
+            $spreadsheet->getActiveSheet()->setCellValue("E1", "虚拟仓库存");
+            $spreadsheet->getActiveSheet()->setCellValue("F1", "销量");
+            $spreadsheet->getActiveSheet()->setCellValue("G1", "在售状态（实时）");
+            //设置宽度
+            $spreadsheet->getActiveSheet()->getColumnDimension('A')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('B')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('C')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('D')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('E')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('F')->setWidth(22);
+            $spreadsheet->getActiveSheet()->getColumnDimension('G')->setWidth(22);
+            $spreadsheet->setActiveSheetIndex(0)->setTitle('数据');
+            $spreadsheet->setActiveSheetIndex(0);
+            $num = 0;
+            foreach ($result as $k=>$v){
+                $spreadsheet->getActiveSheet()->setCellValue('A' . ($num * 1 + 2), $v['platformsku']);
+                $spreadsheet->getActiveSheet()->setCellValue('B' . ($num * 1 + 2), $v['sku']);
+                $spreadsheet->getActiveSheet()->setCellValue('C' . ($num * 1 + 2), $v['shelves_date']);
+                $spreadsheet->getActiveSheet()->setCellValue('D' . ($num * 1 + 2), $v['type_name']);
+                $spreadsheet->getActiveSheet()->setCellValue('E' . ($num * 1 + 2), $v['available_stock']);
+                $spreadsheet->getActiveSheet()->setCellValue('F' . ($num * 1 + 2), $v['sales_num']);
+                $spreadsheet->getActiveSheet()->setCellValue('G' . ($num * 1 + 2), $v['online_status']);
+                $num += 1;
+            }
+        }
+
+        //设置边框
+        $border = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, // 设置border样式
+                    'color'       => ['argb' => 'FF000000'], // 设置border颜色
+                ],
+            ],
+        ];
+        $spreadsheet->getDefaultStyle()->getFont()->setName('微软雅黑')->setSize(12);
+        $setBorder = 'A1:' . $spreadsheet->getActiveSheet()->getHighestColumn() . $spreadsheet->getActiveSheet()->getHighestRow();
+        $spreadsheet->getActiveSheet()->getStyle($setBorder)->applyFromArray($border);
+        $spreadsheet->getActiveSheet()->getStyle('A1:Q' . $spreadsheet->getActiveSheet()->getHighestRow())->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $spreadsheet->setActiveSheetIndex(0);
+        $format = 'xlsx';
+        $savename = 'SKU销售数据zeelool';
+        if ($format == 'xls') {
+            //输出Excel03版本
+            header('Content-Type:application/vnd.ms-excel');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xls";
+        } elseif ($format == 'xlsx') {
+            //输出07Excel版本
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $class = "\PhpOffice\PhpSpreadsheet\Writer\Xlsx";
+        }
+        //输出名称
+        header('Content-Disposition: attachment;filename="' . $savename . '.' . $format . '"');
+        //禁止缓存
+        header('Cache-Control: max-age=0');
+        $writer = new $class($spreadsheet);
+        $writer->save('php://output');
+    }
+
+    //新的信息都从mojing_base获取
+    public function getOrderSalesNum($site,$timeWhere,$pages=[],$sku = '')
+    {
+        if($sku){
+            $map['p.sku'] = $sku;
+        }else{
+            $map['p.sku'] = ['not like', '%Price%'];
+        }
+        $map['o.site'] = $site;
+        $map['o.status'] = ['in', ['free_processing', 'processing', 'paypal_reversed', 'paypal_canceled_reversal', 'complete', 'delivered','delivery','shipped']];
+        if($pages['limit']){
+            if(isset($pages['offset'])){
+                $res['data'] = $this->order
+                    ->alias('o')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id and o.site=p.site')
+                    ->where($map)
+                    ->where($timeWhere)
+                    ->group('sku')
+                    ->order('num desc')
+                    ->limit($pages['offset'],$pages['limit'])
+                    ->column('sum(p.qty) as num', 'p.sku');
+                $res['count'] = $this->order
+                    ->alias('o')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id and o.site=p.site')
+                    ->where($map)
+                    ->where($timeWhere)
+                    ->count('distinct sku');
+            }else{
+                $res['data'] = $this->order
+                    ->alias('o')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id and o.site=p.site')
+                    ->where($map)
+                    ->where($timeWhere)
+                    ->group('sku')
+                    ->order('num desc')
+                    ->limit($pages['limit'])
+                    ->column('sum(p.qty) as num', 'p.sku');
+                $res['count'] = $this->order
+                    ->alias('o')
+                    ->join('fa_order_item_option p','o.entity_id=p.magento_order_id and o.site=p.site')
+                    ->where($map)
+                    ->where($timeWhere)
+                    ->count('distinct sku');
+            }
+        }else{
+            $res['data'] = $this->order
+                ->alias('o')
+                ->join('fa_order_item_option p','o.entity_id=p.magento_order_id and o.site=p.site')
+                ->where($map)
+                ->where($timeWhere)
+                ->group('sku')
+                ->order('num desc')
+                ->column('sum(p.qty) as num', 'p.sku');
+        }
+        return $res;
+    }
 }
