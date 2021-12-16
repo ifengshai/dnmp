@@ -13,6 +13,7 @@ use app\admin\model\warehouse\WarehouseTransferOrder;
 use app\admin\model\warehouse\WarehouseTransferOrderItem;
 use app\admin\model\warehouse\WarehouseTransferOrderItemCode;
 use think\Db;
+use think\Debug;
 use think\Exception;
 use think\exception\PDOException;
 use think\exception\ValidateException;
@@ -340,6 +341,7 @@ class ScmWarehouse extends Scm
      */
     public function out_stock_add()
     {
+        Debug::remark('begin');
         $outStockId = $this->request->request('out_stock_id');
         if ($outStockId) {
             $info = $this->_out_stock
@@ -404,6 +406,8 @@ class ScmWarehouse extends Scm
             ->field('id,name')
             ->where('is_del', 1)
             ->select();
+        Debug::remark('end');
+        Log::error('scmWarehouse'.Debug::getRangeTime('begin','end').'s');
 
         //站点列表
         $siteList = [
