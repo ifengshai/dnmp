@@ -358,8 +358,9 @@ services:
     image: "mysql:5.7"
     container_name: xwiki-mysql-db
     #restart: always
-    #ports:#不对外开放端口
-      #- "3308:3306"
+    #不对外开放端口
+    ports:
+      - "3308:3308"
     volumes:
       - ./services/xwiki/xwiki_mysql.cnf:/etc/mysql/conf.d/xwiki.cnf
       - ./services/xwiki/xwiki_mysql_init.sql:/docker-entrypoint-initdb.d/init.sql
