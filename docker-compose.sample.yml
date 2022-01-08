@@ -43,7 +43,7 @@ services:
       - ${PHP80_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
       - ${PHP80_LOG_DIR}:/var/log/php
       - ${DATA_DIR}/composer:/tmp/composer
-    #restart: always
+    restart: always
     cap_add:
       - SYS_PTRACE
     networks:
@@ -98,19 +98,19 @@ services:
 
 ##########PHP各版本end
 
-  mysql:
-    image: mysql:${MYSQL_VERSION}
-    container_name: mysql
+  mysql80:
+    image: mysql:${MYSQL80_VERSION}
+    container_name: mysql80
     ports:
-      - "${MYSQL_HOST_PORT}:3306"
+      - "${MYSQL80_HOST_PORT}:3306"
     volumes:
-      - ${MYSQL_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:ro
-      - ${DATA_DIR}/mysql:/var/lib/mysql/:rw
+      - ${MYSQL80_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:ro
+      - ${DATA_DIR}/mysql80:/var/lib/mysql/:rw
     restart: always
     networks:
       - default
     environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL80_ROOT_PASSWORD}"
       TZ: "$TZ"
 
 #  redis:
@@ -221,7 +221,7 @@ services:
   xwiki:
     image: "xwiki:lts-mysql-tomcat"
     container_name: xwiki-mysql-tomcat-web
-    #restart: always
+    restart: always
     depends_on:
       - xwiki_mysqldb
     ports:
@@ -237,10 +237,9 @@ services:
   xwiki_mysqldb:
     image: "mysql:5.7"
     container_name: xwiki-mysql-db
-    #restart: always
-    #不对外开放端口
-    ports:
-      - "3308:3308"
+    restart: always
+    #ports:#不对外开放端口
+      #- "3308:3306"
     volumes:
       - ./services/xwiki/xwiki_mysql.cnf:/etc/mysql/conf.d/xwiki.cnf
       - ./services/xwiki/xwiki_mysql_init.sql:/docker-entrypoint-initdb.d/init.sql
