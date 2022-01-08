@@ -6,31 +6,16 @@ ARG PHP_EXTENSIONS
 ARG CONTAINER_PACKAGE_URL
 
 
-RUN sed -i "s/dl-cdn.alpinelinux.org/${CONTAINER_PACKAGE_URL}/g" /etc/apk/repositories
+RUN if [ $CONTAINER_PACKAGE_URL ] ; then sed -i "s/dl-cdn.alpinelinux.org/${CONTAINER_PACKAGE_URL}/g" /etc/apk/repositories ; fi
 
 
-
-RUN apk update \
-	&& apk upgrade \
-	&& apk add supervisor \
-	&& rm -rf /var/cache/apk/*
-
-# Define mountable directories.
-VOLUME ["/etc/supervisor/conf.d", "/var/log/supervisor/"]
-
-# Define working directory.
-WORKDIR /etc/supervisor/conf.d
-
-CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/conf.d/supervisord.conf"]
-
-
-COPY ./services/php/extensions /tmp/extensions
+COPY ./extensions /tmp/extensions
 WORKDIR /tmp/extensions
 RUN chmod +x install.sh \
     && sh install.sh \
     && rm -rf /tmp/extensions
 
-ADD ./services/php/extensions/install-php-extensions  /usr/local/bin/
+ADD ./extensions/install-php-extensions  /usr/local/bin/
 
 RUN chmod uga+x /usr/local/bin/install-php-extensions
 
@@ -53,4 +38,17 @@ ENV COMPOSER_HOME=/tmp/composer
 RUN apk --no-cache add shadow && usermod -u 1000 www-data && groupmod -g 1000 www-data
 
 
+
+RUN apk update
+RUN apk --no-cache add git
+RUN apk --no-cache add nodejs
+RUN apk --no-cache add npm
+RUN apk --no-cache add openssh
+# Copy over private key, and set permissions
+COPY .ssh /root/.ssh
+RUN chown -R root:root /root/.ssh
+RUN chmod 0600 /root/.ssh/id_rsa
+
+# Create known_hosts
+RUN touch /root/.ssh/known_hosts
 WORKDIR /www
