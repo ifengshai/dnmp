@@ -150,9 +150,9 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL57_ROOT_PASSWORD}"
       TZ: "$TZ"
-  redis:
+  redis50:
     image: redis:${REDIS50_VERSION}
-    container_name: redis
+    container_name: redis50
     ports:
       - "${REDIS50_HOST_PORT}:6379"
     volumes:
