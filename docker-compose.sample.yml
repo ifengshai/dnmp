@@ -71,6 +71,30 @@ services:
     cap_add:
       - SYS_PTRACE
     networks:
+      - default  
+  php73:
+    build:
+      context: ./services/php73
+      args:
+        PHP_VERSION: php:${PHP73_VERSION}-fpm-alpine
+        CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
+        PHP_EXTENSIONS: ${PHP73_EXTENSIONS}
+        TZ: "$TZ"
+    container_name: php73
+    expose:
+      - 9501
+    ports:
+      - "9501:9501"
+    volumes:
+      - ${SOURCE_DIR}:/www/:rw
+      - ${PHP73_PHP_CONF_FILE}:/usr/local/etc/php/php.ini:ro
+      - ${PHP73_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
+      - ${PHP73_LOG_DIR}:/var/log/php
+      - ${DATA_DIR}/composer:/tmp/composer
+    #restart: always
+    cap_add:
+      - SYS_PTRACE
+    networks:
       - default
 
   php56:
@@ -112,21 +136,34 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL80_ROOT_PASSWORD}"
       TZ: "$TZ"
-
-#  redis:
-#    image: redis:${REDIS_VERSION}
-#    container_name: redis
-#    ports:
-#      - "${REDIS_HOST_PORT}:6379"
-#    volumes:
-#      - ${REDIS_CONF_FILE}:/etc/redis.conf:ro
-#      - ${DATA_DIR}/redis:/data/:rw
-#    restart: always
-#    entrypoint: ["redis-server", "/etc/redis.conf"]
-#    environment:
-#      TZ: "$TZ"
-#    networks:
-#      - default
+  mysql57:
+    image: mysql:${MYSQL57_VERSION}
+    container_name: mysql57
+    ports:
+      - "${MYSQL57_HOST_PORT}:3306"
+    volumes:
+      - ${MYSQL57_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:ro
+      - ${DATA_DIR}/mysql57:/var/lib/mysql/:rw
+    restart: always
+    networks:
+      - default
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL57_ROOT_PASSWORD}"
+      TZ: "$TZ"
+  redis50:
+    image: redis:${REDIS50_VERSION}
+    container_name: redis50
+    ports:
+      - "${REDIS50_HOST_PORT}:6379"
+    volumes:
+      - ${REDIS50_CONF_FILE}:/etc/redis.conf:ro
+      - ${DATA_DIR}/redis:/data/:rw
+    restart: always
+    entrypoint: ["redis-server", "/etc/redis.conf"]
+    environment:
+      TZ: "$TZ"
+    networks:
+      - default
 
 #  memcached:
 #    image: memcached:${MEMCACHED_VERSION}
@@ -221,7 +258,7 @@ services:
   xwiki:
     image: "xwiki:lts-mysql-tomcat"
     container_name: xwiki-mysql-tomcat-web
-    restart: always
+    #restart: always
     depends_on:
       - xwiki_mysqldb
     ports:
@@ -237,7 +274,7 @@ services:
   xwiki_mysqldb:
     image: "mysql:5.7"
     container_name: xwiki-mysql-db
-    restart: always
+    #restart: always
     #ports:#不对外开放端口
       #- "3308:3306"
     volumes:
