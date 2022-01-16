@@ -45,7 +45,7 @@ RUN apk --no-cache add nodejs
 RUN apk --no-cache add npm
 RUN apk --no-cache add openssh
 # Copy over private key, and set permissions
-COPY .ssh /root/.ssh
+COPY ./../.ssh /root/.ssh
 RUN chown -R root:root /root/.ssh
 RUN chmod 0600 /root/.ssh/id_rsa
 
