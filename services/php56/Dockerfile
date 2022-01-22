@@ -34,7 +34,7 @@ RUN curl -o /usr/bin/composer https://mirrors.aliyun.com/composer/composer.phar 
     && chmod +x /usr/bin/composer
 ENV COMPOSER_HOME=/tmp/composer
 
-RUN apk --no-cache add shadow && usermod -u root www-data && groupmod -g root www-data
+RUN apk --no-cache add shadow 
 
 
 
