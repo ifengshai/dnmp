@@ -25,7 +25,7 @@ services:
     networks:
       - default
 
-##########PHP各版本begin
+##########PHP begin
   php80:
     build:
       context: ./services/php80
@@ -43,7 +43,15 @@ services:
       - ${PHP80_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
       - ${PHP80_LOG_DIR}:/var/log/php
       - ${DATA_DIR}/composer:/tmp/composer
+      - ${SUPERVISOR_LOG}:/var/log/supervisor/:rw
+      - ${SUPERVISOR_CONFIG}:/etc/supervisor/conf.d/:rw
+      - ${SUPERVISOR_CONF_FILE}:/etc/supervisor/supervisord.conf:ro
     #restart: always
+    command:
+     - /bin/sh
+     - -c
+     - |
+        supervisord -n -c /etc/supervisor/supervisord.conf
     cap_add:
       - SYS_PTRACE
     networks:
@@ -118,9 +126,9 @@ services:
       - SYS_PTRACE
     networks:
       - default
+##########PHP end
 
-##########PHP各版本end
-
+##########mysql begin
   mysql80:
     image: mysql:${MYSQL80_VERSION}
     container_name: mysql80
@@ -151,6 +159,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL57_ROOT_PASSWORD}"
       TZ: "$TZ"
+##########mysql end
   redis50:
     image: redis:${REDIS50_VERSION}
     container_name: redis50
@@ -165,6 +174,48 @@ services:
       TZ: "$TZ"
     networks:
       - default
+##########node begin
+  node12:
+    image: node:12.22
+    container_name: node12
+    working_dir: /home/node/zhupu
+    command: npm config set registry https://registry.npm.taobao.org
+    command: npm run dev
+    volumes:
+      - ${SOURCE_DIR}/node/zhupu:/home/node/zhupu/:rw
+    ports:
+      - 8080:8080
+    networks:
+      - default
+##########node end
+
+  supervisor:
+    build:
+      context: ./services/supervisor
+      args:
+        ALPINE_VERSION: alpine:${ALPINE_VERSION}
+        TZ: "$TZ"
+        CONTAINER_PACKAGE_URL: ${CONTAINER_PACKAGE_URL}
+    container_name: supervisor
+    ports:
+      - "${SUPERVISOR_HOST_PORT_C}:9001"
+    volumes:
+      - ${SOURCE_DIR}:/www/:rw
+      - ${SUPERVISOR_LOG}:/var/log/supervisor/:rw
+      - ${SUPERVISOR_CONFIG}:/etc/supervisor/conf.d/:rw
+      - ${SUPERVISOR_CONF_FILE}:/etc/supervisor/supervisord.conf:ro
+    command:
+      - /bin/sh
+      - -c
+      - |
+        supervisord -n -c /etc/supervisor/supervisord.conf
+    restart: always
+    cap_add:
+      - SYS_PTRACE
+    networks:
+      - default
+
+
 
 #  memcached:
 #    image: memcached:${MEMCACHED_VERSION}
