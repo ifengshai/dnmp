@@ -180,6 +180,8 @@ services:
     container_name: node12
     working_dir: /home/node/zhupu
     command: npm config set registry https://registry.npm.taobao.org
+    command: npm install vue@next
+    command: npm install -g @vue/cli
     command: npm run dev
     volumes:
       - ${SOURCE_DIR}/node/zhupu:/home/node/zhupu/:rw
