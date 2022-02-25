@@ -22,7 +22,7 @@ services:
       - ${NGINX_LOG_DIR}:/var/log/nginx/:rw
     environment:
       TZ: "$TZ"
-    restart: always
+    #restart: always
     networks:
       - default
 
@@ -143,7 +143,7 @@ services:
     volumes:
       - ${MYSQL80_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:ro
       - ${DATA_DIR}/mysql80:/var/lib/mysql/:rw
-    restart: always
+    #restart: always
     networks:
       - default
     environment:
