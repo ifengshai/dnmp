@@ -22,7 +22,7 @@ services:
       - ${NGINX_LOG_DIR}:/var/log/nginx/:rw
     environment:
       TZ: "$TZ"
-    #restart: always
+    restart: always
     networks:
       - default
 
@@ -52,7 +52,12 @@ services:
      - /bin/sh
      - -c
      - |
-        supervisord -n -c /etc/supervisor/supervisord.conf
+        php-fpm -R
+#    command:
+#     - /bin/sh
+#     - -c
+#     - |
+#        supervisord -n -c /etc/supervisor/supervisord.conf
     cap_add:
       - SYS_PTRACE
     networks:
@@ -79,6 +84,11 @@ services:
       - ${PHP74_LOG_DIR}:/var/log/php
       - ${DATA_DIR}/composer:/tmp/composer
     #restart: always
+    command:
+     - /bin/sh
+     - -c
+     - |
+        php-fpm -R
     cap_add:
       - SYS_PTRACE
     networks:
@@ -104,6 +114,11 @@ services:
       - ${DATA_DIR}/composer:/tmp/composer
       - ${SSH_DIR}:/root/.ssh:rw
     #restart: always
+    command:
+     - /bin/sh
+     - -c
+     - |
+        php-fpm -R
     cap_add:
       - SYS_PTRACE
     networks:
@@ -128,6 +143,11 @@ services:
       - ${PHP56_LOG_DIR}:/var/log/php
       - ${DATA_DIR}/composer:/tmp/composer
     #restart: always
+    command:
+     - /bin/sh
+     - -c
+     - |
+        php-fpm -R
     cap_add:
       - SYS_PTRACE
     networks:
