@@ -142,7 +142,7 @@ services:
       - ${PHP56_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
       - ${PHP56_LOG_DIR}:/var/log/php
       - ${DATA_DIR}/composer:/tmp/composer
-    restart: always
+    #restart: always
     command:
      - /bin/sh
      - -c
@@ -163,7 +163,7 @@ services:
     volumes:
       - ${MYSQL80_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:ro
       - ${DATA_DIR}/mysql80:/var/lib/mysql/:rw
-    #restart: always
+    restart: always
     networks:
       - default
     environment:
@@ -273,7 +273,7 @@ services:
 #    networks:
 #      - default
 
-
+### mongodb ##################################
 #  mongodb:
 #    image: mongo:${MONGODB_VERSION}
 #    container_name: mongodb
@@ -291,6 +291,7 @@ services:
 #    command:
 #       --auth
 
+### elasticsearch71 ##################################
 #  elasticsearch:
 #    build:
 #      context: ./services/elasticsearch
@@ -311,6 +312,7 @@ services:
 #      - "${ELASTICSEARCH_HOST_PORT_C}:9200"
 #      - "${ELASTICSEARCH_HOST_PORT_S}:9300"
 
+### kibana71 ##################################
 #  kibana:
 #    image: kibana:${KIBANA_VERSION}
 #    container_name: kibana
@@ -340,39 +342,39 @@ services:
 
 
 
-  xwiki:
-    image: "xwiki:lts-mysql-tomcat"
-    container_name: xwiki-mysql-tomcat-web
-    #restart: always
-    depends_on:
-      - xwiki_mysqldb
-    ports:
-      - "8080:8080"
-    environment:
-      - DB_USER=xwiki
-      - DB_PASSWORD=xwiki
-      - DB_HOST=xwiki-mysql-db
-    volumes:
-      - ${DATA_DIR}/xwiki/xwiki_data/xwiki:/usr/local/xwiki
-    networks:
-      - bridge
-  xwiki_mysqldb:
-    image: "mysql:5.7"
-    container_name: xwiki-mysql-db
-    #restart: always
-    #ports:#不对外开放端口
-      #- "3308:3306"
-    volumes:
-      - ./services/xwiki/xwiki_mysql.cnf:/etc/mysql/conf.d/xwiki.cnf
-      - ./services/xwiki/xwiki_mysql_init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ${DATA_DIR}/xwiki/xwiki_data/xwiki_mysql:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=xwiki
-      - MYSQL_USER=xwiki
-      - MYSQL_PASSWORD=xwiki
-      - MYSQL_DATABASE=xwiki
-    networks:
-      - bridge
+#  xwiki:
+#    image: "xwiki:lts-mysql-tomcat"
+#    container_name: xwiki-mysql-tomcat-web
+#    #restart: always
+#    depends_on:
+#      - xwiki_mysqldb
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      - DB_USER=xwiki
+#      - DB_PASSWORD=xwiki
+#      - DB_HOST=xwiki-mysql-db
+#    volumes:
+#      - ${DATA_DIR}/xwiki/xwiki_data/xwiki:/usr/local/xwiki
+#    networks:
+#      - bridge
+#  xwiki_mysqldb:
+#    image: "mysql:5.7"
+#    container_name: xwiki-mysql-db
+#    #restart: always
+#    #ports:#不对外开放端口
+#      #- "3308:3306"
+#    volumes:
+#      - ./services/xwiki/xwiki_mysql.cnf:/etc/mysql/conf.d/xwiki.cnf
+#      - ./services/xwiki/xwiki_mysql_init.sql:/docker-entrypoint-initdb.d/init.sql
+#      - ${DATA_DIR}/xwiki/xwiki_data/xwiki_mysql:/var/lib/mysql
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=xwiki
+#      - MYSQL_USER=xwiki
+#      - MYSQL_PASSWORD=xwiki
+#      - MYSQL_DATABASE=xwiki
+#    networks:
+#      - bridge
 
 #  confluence:
 #    image: atlassian/confluence:latest
