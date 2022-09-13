@@ -112,7 +112,6 @@ services:
       - ${PHP73_FPM_CONF_FILE}:/usr/local/etc/php-fpm.d/www.conf:rw
       - ${PHP73_LOG_DIR}:/var/log/php
       - ${DATA_DIR}/composer:/tmp/composer
-      - ${SSH_DIR}:/root/.ssh:rw
     #restart: always
     command:
      - /bin/sh
