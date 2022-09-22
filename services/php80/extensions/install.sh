@@ -69,6 +69,78 @@ installExtensionFromTgz()
     docker-php-ext-enable ${extensionName} $2
 }
 
+#if [[ -z "${EXTENSIONS##*,amqp,*}" ]]; then
+#    echo "---------- Install amqp ----------"
+#    apk add --no-cache -U autoconf
+#    apk add --no-cache -U gcc
+#    apk add --no-cache -U linux-headers
+#    apk add --no-cache -U libc-dev
+#
+#    apk add --no-cache --update --virtual .phpize-deps-configure $PHPIZE_DEPS \
+#    && apk add rabbitmq-c-dev \
+#    && printf '\n' | pecl install amqp \
+#    && docker-php-ext-enable amqp \
+#    && apk del .phpize-deps-configure
+#    
+#fi
+if [[ -z "${EXTENSIONS##*,amqp,*}" ]]; then
+    echo "---------- Install amqp ----------"
+    apk add --no-cache -U autoconf
+    apk add --no-cache -U gcc
+    apk add --no-cache -U linux-headers
+    apk add --no-cache -U libc-dev
+
+    apk add --no-cache --update --virtual .phpize-deps-configure $PHPIZE_DEPS 
+    apk add rabbitmq-c-dev 
+    installExtensionFromTgz amqp-1.11.0
+    apk del .phpize-deps-configure
+fi
+
+if [[ -z "${EXTENSIONS##*,xdebug,*}" ]]; then
+    echo "---------- Install xdebug ----------"
+    installExtensionFromTgz xdebug-3.1.5
+fi
+
+if [[ -z "${EXTENSIONS##*,redis,*}" ]]; then 
+    echo "---------- Install redis ----------"
+    installExtensionFromTgz redis-5.3.7
+fi
+
+if [[ -z "${EXTENSIONS##*,memcached,*}" ]]; then
+    echo "---------- Install memcached ----------"
+    apk add --no-cache libmemcached-dev zlib-dev
+    installExtensionFromTgz memcached-3.2.0
+fi
+
+if [[ -z "${EXTENSIONS##*,rdkafka,*}" ]]; then
+    echo "---------- Install rdkafka ----------"
+    isPhpVersionGreaterOrEqual 8 0
+
+    if [[ "$?" = "1" ]]; then
+        apk add librdkafka-dev
+        installExtensionFromTgz rdkafka-6.0.3
+    else
+        echo "---------- PHP Version>= 8.0----------"
+    fi
+fi
+
+if [[ -z "${EXTENSIONS##*,mongodb,*}" ]]; then
+    echo "---------- Install mongodb ----------"
+        installExtensionFromTgz mongodb-1.14.1
+fi
+
+if [[ -z "${EXTENSIONS##*,zookeeper,*}" ]]; then
+    echo "---------- Install zookeeper ----------"
+    isPhpVersionGreaterOrEqual 8 0
+
+    if [[ "$?" = "1" ]]; then
+        apk add re2c
+        apk add libzookeeper-dev --repository http://${CONTAINER_PACKAGE_URL}/alpine/edge/testing/
+        installExtensionFromTgz zookeeper-1.0.0
+    else
+        echo "---------- PHP Version>= 8.0----------"
+    fi
+fi
 
 if [[ -z "${EXTENSIONS##*,pdo_mysql,*}" ]]; then
     echo "---------- Install pdo_mysql ----------"
@@ -511,41 +583,16 @@ if [[ -z "${EXTENSIONS##*,sodium,*}" ]]; then
 	fi
 fi
 
-if [[ -z "${EXTENSIONS##*,amqp,*}" ]]; then
-    echo "---------- Install amqp ----------"
-    apk add --no-cache rabbitmq-c-dev
-    docker-php-ext-enable amqp
-fi
-
-if [[ -z "${EXTENSIONS##*,redis,*}" ]]; then
-    echo "---------- Install redis ----------"
-    pecl install redis
-    docker-php-ext-enable redis
-fi
-
 if [[ -z "${EXTENSIONS##*,apcu,*}" ]]; then
     echo "---------- Install apcu ----------"
     pecl install apcu
     docker-php-ext-enable apcu
 fi
 
-if [[ -z "${EXTENSIONS##*,memcached,*}" ]]; then
-    echo "---------- Install memcached ----------"
-    apk add --no-cache libmemcached-dev zlib-dev
-    pecl install memcached
-    docker-php-ext-enable memcached
-fi
-
 if [[ -z "${EXTENSIONS##*,memcache,*}" ]]; then
     echo "---------- Install memcache ----------"
     pecl install memcache
     docker-php-ext-enable memcache
-fi
-
-if [[ -z "${EXTENSIONS##*,xdebug,*}" ]]; then
-    echo "---------- Install xdebug ----------"
-    pecl install xdebug
-    docker-php-ext-enable xdebug
 fi
 
 if [[ -z "${EXTENSIONS##*,event,*}" ]]; then
@@ -560,12 +607,6 @@ if [[ -z "${EXTENSIONS##*,event,*}" ]]; then
 
     echo "---------- Install event again ----------"
     installExtensionFromTgz event-3.0.5  "--ini-name event.ini"
-fi
-
-if [[ -z "${EXTENSIONS##*,mongodb,*}" ]]; then
-    echo "---------- Install mongodb ----------"
-    pecl install mongodb
-    docker-php-ext-enable mongodb
 fi
 
 if [[ -z "${EXTENSIONS##*,yaf,*}" ]]; then
@@ -608,33 +649,6 @@ if [[ -z "${EXTENSIONS##*,xlswriter,*}" ]]; then
     if [[ "$?" = "1" ]]; then
         printf "\n" | pecl install xlswriter
         docker-php-ext-enable xlswriter
-    else
-        echo "---------- PHP Version>= 8.0----------"
-    fi
-fi
-
-if [[ -z "${EXTENSIONS##*,rdkafka,*}" ]]; then
-    echo "---------- Install rdkafka ----------"
-    isPhpVersionGreaterOrEqual 8 0
-
-    if [[ "$?" = "1" ]]; then
-        apk add librdkafka-dev
-        printf "\n" | pecl install rdkafka
-        docker-php-ext-enable rdkafka
-    else
-        echo "---------- PHP Version>= 8.0----------"
-    fi
-fi
-
-if [[ -z "${EXTENSIONS##*,zookeeper,*}" ]]; then
-    echo "---------- Install zookeeper ----------"
-    isPhpVersionGreaterOrEqual 8 0
-
-    if [[ "$?" = "1" ]]; then
-        apk add re2c
-        apk add libzookeeper-dev --repository http://${CONTAINER_PACKAGE_URL}/alpine/edge/testing/
-        printf "\n" | pecl install zookeeper
-        docker-php-ext-enable zookeeper
     else
         echo "---------- PHP Version>= 8.0----------"
     fi
