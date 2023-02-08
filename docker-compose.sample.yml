@@ -186,6 +186,29 @@ services:
       MYSQL_ROOT_PASSWORD: "${MYSQL57_ROOT_PASSWORD}"
       TZ: "$TZ"
 
+### waline（第三方评论系统） ##################################
+#执行sql：https://github.com/walinejs/waline/blob/main/assets/waline.sql
+#参考文档：https://waline.js.org/
+  waline:
+    image: 'lizheming/waline'
+    container_name: waline
+    restart: always
+    ports:
+     - '8360:8360'
+    environment:
+     MYSQL_DB: "waline"
+     MYSQL_USER: 'root'
+     MYSQL_PASSWORD: "${MYSQL80_ROOT_PASSWORD}"
+     MYSQL_HOST: 'mysql80'
+     MYSQL_PORT: "${MYSQL80_HOST_PORT}"
+     IPQPS: "30"  #ip发言频率
+     SMTP_SERVICE: "QQ" #qq邮件通知
+     SMTP_USER: "173748596@qq.com"
+     SMTP_PASS: "pxiavxiaxdrkbgda"
+     SMTP_SECURE: "SMTP"
+     SITE_NAME: "fengsha.space"
+     SITE_URL: "http://fengsha.space"
+     AUTHOR_EMAIL: "ifengshai@foxmail.com"
 ### redis50 ##################################
   redis50:
     image: redis:${REDIS50_VERSION}
