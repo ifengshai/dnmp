@@ -247,7 +247,7 @@ services:
     container_name: node19
     working_dir: /home/node/blog
     command: npm config set registry https://registry.npm.taobao.org
-    command: npm run docs:dev
+    command: npm run dev
     volumes:
       - ${SOURCE_DIR}/node:/home/node/:rw
     ports:
