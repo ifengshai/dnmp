@@ -129,6 +129,11 @@ if [[ -z "${EXTENSIONS##*,mongodb,*}" ]]; then
         installExtensionFromTgz mongodb-1.14.1
 fi
 
+if [[ -z "${EXTENSIONS##*,grpc,*}" ]]; then
+    echo "---------- Install grpc ----------"
+        installExtensionFromTgz grpc-1.54.0
+fi
+
 if [[ -z "${EXTENSIONS##*,zookeeper,*}" ]]; then
     echo "---------- Install zookeeper ----------"
     isPhpVersionGreaterOrEqual 8 0
