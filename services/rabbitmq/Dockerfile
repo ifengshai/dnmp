@@ -6,6 +6,11 @@ ARG RABBITMQ_PLUGINS
 
 ENV PLUGINS=",${RABBITMQ_PLUGINS},"
 
+RUN apt-get update \
+&& apt-get install -y wget \
+&& wget https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/3.9.0/rabbitmq_delayed_message_exchange-3.9.0.ez -P /plugins/ \
+&& rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+
 RUN if [ -z "${PLUGINS##*,rabbitmq_amqp1_0,*}" ]; then \
         printf "y\n"| rabbitmq-plugins enable rabbitmq_amqp1_0; \
     fi \
@@ -76,8 +81,4 @@ RUN if [ -z "${PLUGINS##*,rabbitmq_amqp1_0,*}" ]; then \
     && \
     if [ -z "${PLUGINS##*,rabbitmq_web_mqtt_examples,*}" ]; then \
         printf "y\n" | rabbitmq-plugins enable rabbitmq_web_mqtt_examples; \
-    fi \
-    && \
-    if [ -z "${PLUGINS##*,rabbitmq_delayed_message_exchange,*}" ]; then \
-        printf "y\n" | rabbitmq-plugins enable rabbitmq_delayed_message_exchange; \
-    fi 
+    fi
