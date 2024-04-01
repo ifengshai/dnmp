@@ -20,6 +20,8 @@ log-bin=mysql-bin # 开启 binlog
 binlog-format=ROW # 选择 ROW 模式
 server_id=1 # 配置 MySQL replaction 需要定义，不要和 go-mysql-transfer 的 slave_id 重复
 
+event_scheduler=ON #开启事件调度器
+
 slow_query_log
 long_query_time         = 3
 slow-query-log-file     = /var/lib/mysql/mysql.slow.log
